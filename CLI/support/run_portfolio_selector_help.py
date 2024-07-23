@@ -24,9 +24,11 @@ def call_solver_solve_instance_within_cutoff(
         cutoff_time: int,
         performance_data: PerformanceDataFrame = None) -> bool:
     """Call the Sparkle portfolio selector to solve a single instance with a cutoff."""
-    _, _, cpu_time_penalised, _, status, raw_result_path = (
-        srs.run_solver_on_instance_and_process_results(solver, instance_path,
-                                                       custom_cutoff=cutoff_time))
+    _, _, cpu_time_penalised, _, status, raw_result_path =\
+        srs.run_solver_on_instance_and_process_results(solver,
+                                                       instance_path,
+                                                       cutoff_time,
+                                                       gv.get_seed())
     flag_solved = False
     if status == "SUCCESS" or status == "SAT" or status == "UNSAT":
         flag_solved = True

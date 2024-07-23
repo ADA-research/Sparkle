@@ -13,8 +13,8 @@ from sparkle.tools.runsolver_parsing import handle_timeouts
 
 
 def run_solver_on_instance_and_process_results(
-        solver: Solver, instance_path: str | list[str], seed_str: str = None,
-        custom_cutoff: int = None) -> tuple[float, float, float, list[float], str, str]:
+        solver: Solver, instance_path: str | list[str], custom_cutoff: int,
+        seed: int) -> tuple[float, float, float, list[float], str, str]:
     """Prepare and run a given the solver and instance, and process output."""
     # Prepare paths
     if isinstance(instance_path, list):
@@ -27,18 +27,13 @@ def run_solver_on_instance_and_process_results(
                        f"{tg.get_time_pid_random_string()}.rawres")
     runsolver_values_path = raw_result_path.replace(".rawres", ".val")
 
-    # Run
-    if custom_cutoff is None:
-        custom_cutoff = gv.settings.get_general_target_cutoff_time()
-    if seed_str is None:
-        seed_str = str(gv.get_seed())
     # Prepare runsolver call
     runsolver_values_log = f"{runsolver_values_path}"
     runsolver_watch_data_path = runsolver_values_log.replace("val", "log")
     raw_result_path_option = f"{raw_result_path}"
     solver_output = solver.run(
         instance_path,
-        configuration={"seed": seed_str,
+        configuration={"seed": str(seed),
                        "cutoff_time": custom_cutoff,
                        "specifics": ""},
         runsolver_configuration=["--timestamp", "--use-pty",
