@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Sparkle command to load a Sparkle platform from a .zip file."""
-
 import sys
 import argparse
+from pathlib import Path
 
 from CLI.help import snapshot_help
 from CLI.help import sparkle_logging as sl
@@ -25,4 +25,4 @@ if __name__ == "__main__":
     parser = parser_function()
     # Process command line arguments
     args = parser.parse_args()
-    snapshot_help.load_snapshot(args.snapshot_file_path)
+    snapshot_help.load_snapshot(Path(args.snapshot_file_path))

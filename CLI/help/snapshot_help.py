@@ -22,14 +22,12 @@ def detect_current_sparkle_platform_exists(check_all_dirs: bool) -> bool:
     """
     if check_all_dirs:
         return all([x.exists() for x in gv.working_dirs])
-    else:
-        return any([x.exists() for x in gv.working_dirs])
+    return any([x.exists() for x in gv.working_dirs])
 
 
 def save_current_sparkle_platform() -> None:
     """Store the current Sparkle platform in a .zip file."""
-    suffix = get_time_pid_random_string()
-    snapshot_filename = f"{gv.snapshot_dir}/My_Snapshot_{suffix}"
+    snapshot_filename = gv.snapshot_dir / f"My_Snapshot_{get_time_pid_random_string()}"
     for working_dir in gv.working_dirs:
         if working_dir.exists():
             shutil.make_archive(snapshot_filename, "zip", working_dir)
@@ -50,56 +48,38 @@ def remove_current_sparkle_platform() -> None:
     print("Existing Sparkle platform cleaned!")
 
 
-def extract_sparkle_snapshot(my_snapshot_filename: str) -> None:
+def extract_sparkle_snapshot(snapshot_file: Path) -> None:
     """Restore a Sparkle platform from a snapshot.
 
     Args:
-      my_snapshot_filename: File path to the file where the current Sparkle
+      snapshot_filename: File path to the file where the current Sparkle
         platform should be stored.
     """
-    tmp_directory = f"tmp_directory_{get_time_pid_random_string()}"
-
-    Path(gv.sparkle_tmp_path).mkdir(exist_ok=True)
-
-    with zipfile.ZipFile(my_snapshot_filename, "r") as zip_ref:
+    tmp_directory = Path(f"tmp_directory_{get_time_pid_random_string()}")
+    gv.sparkle_tmp_path.mkdir(exist_ok=True)
+    with zipfile.ZipFile(snapshot_file, "r") as zip_ref:
         zip_ref.extractall(tmp_directory)
     shutil.copytree(tmp_directory, "./", dirs_exist_ok=True)
-    shutil.rmtree(Path(tmp_directory))
+    shutil.rmtree(tmp_directory)
 
 
-def load_snapshot(snapshot_file_path: str) -> None:
+def load_snapshot(snapshot_file: Path) -> None:
     """Load a Sparkle platform from a snapshot.
 
     Args:
         snapshot_file_path: File path to the file where the Sparkle
             platform is stored.
     """
-    if not Path(snapshot_file_path).exists():
-        print(f"ERROR: Snapshot file {snapshot_file_path} does not exist!")
+    if not snapshot_file.exists():
+        print(f"ERROR: Snapshot file {snapshot_file} does not exist!")
         sys.exit(-1)
-    if not snapshot_file_path.endswith(".zip"):
-        print(f"ERROR: File {snapshot_file_path} is not a .zip file!")
+    if not snapshot_file.endswith(".zip"):
+        print(f"ERROR: File {snapshot_file} is not a .zip file!")
         sys.exit(-1)
     print("Cleaning existing Sparkle platform ...")
     remove_current_sparkle_platform()
     print("Existing Sparkle platform cleaned!")
 
-    print(f"Loading snapshot file {snapshot_file_path} ...")
-    extract_sparkle_snapshot(snapshot_file_path)
-    print(f"Snapshot file {snapshot_file_path} loaded successfully!")
-
-
-def remove_snapshot(snapshot_file_path: str) -> None:
-    """Remove a snapshot from a Sparkle platform.
-
-    Args:
-        snapshot_file_path: File path to the file where the Sparkle
-            platform is stored.
-    """
-    if not Path(snapshot_file_path).exists():
-        print(f"Snapshot file {snapshot_file_path} does not exist!")
-        sys.exit(-1)
-
-    print(f"Removing snapshot file {snapshot_file_path} ...")
-    shutil.rmtree(snapshot_file_path)
-    print(f"Snapshot file {snapshot_file_path} removed!")
+    print(f"Loading snapshot file {snapshot_file} ...")
+    extract_sparkle_snapshot(snapshot_file)
+    print(f"Snapshot file {snapshot_file} loaded successfully!")
