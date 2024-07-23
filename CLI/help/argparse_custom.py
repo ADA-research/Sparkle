@@ -24,7 +24,7 @@ class SetByUser(argparse.Action):
         setattr(namespace, self.dest + "_nondefault", True)
 
 
-# taken from https://stackoverflow.com/a/60750535
+# Taken from https://stackoverflow.com/a/60750535
 class EnumAction(argparse.Action):
     """Argparse action for handling Enums."""
     def __init__(self: EnumAction, **kwargs: str) -> None:
