@@ -35,11 +35,6 @@ class CommandName(str, Enum):
     RUN_PARALLEL_PORTFOLIO = "run_parallel_portfolio"
     VALIDATION = "validation"
 
-    @staticmethod
-    def from_str(command_name: str) -> CommandName:
-        """Convert a given str to a CommandName."""
-        return CommandName(command_name)
-
 
 # NOTE: This dependency list contains all possible direct dependencies, including
 # optional dependencies, and 'either or' dependencies
