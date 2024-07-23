@@ -73,7 +73,7 @@ def load_snapshot(snapshot_file: Path) -> None:
     if not snapshot_file.exists():
         print(f"ERROR: Snapshot file {snapshot_file} does not exist!")
         sys.exit(-1)
-    if not snapshot_file.endswith(".zip"):
+    if not snapshot_file.suffix == ".zip":
         print(f"ERROR: File {snapshot_file} is not a .zip file!")
         sys.exit(-1)
     print("Cleaning existing Sparkle platform ...")
