@@ -201,7 +201,7 @@ if __name__ == "__main__":
 
     if args.verifier is not None:
         gv.settings.set_general_solution_verifier(
-            SolutionVerifier.from_str(args.verifier), SettingState.CMD_LINE)
+            SolutionVerifier(args.verifier.lower()), SettingState.CMD_LINE)
 
     if args.target_cutoff_time is not None:
         gv.settings.set_general_target_cutoff_time(

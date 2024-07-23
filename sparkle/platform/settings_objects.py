@@ -21,18 +21,8 @@ from sparkle.platform.cli_types import VerbosityLevel
 class SolutionVerifier(Enum):
     """Possible solution verifiers."""
 
-    NONE = 0
-    SAT = 1
-
-    @staticmethod
-    def from_str(verifier: str) -> SolutionVerifier:
-        """Return a given str as SolutionVerifier."""
-        if verifier == "NONE":
-            verifier = SolutionVerifier.NONE
-        elif verifier == "SAT":
-            verifier = SolutionVerifier.SAT
-
-        return verifier
+    NONE = "none"
+    SAT = "sat"
 
 
 class SettingState(Enum):
@@ -167,7 +157,7 @@ class Settings:
             option_names = ("solution_verifier",)
             for option in option_names:
                 if file_settings.has_option(section, option):
-                    value = SolutionVerifier.from_str(file_settings.get(section, option))
+                    value = SolutionVerifier(file_settings.get(section, option).lower())
                     self.set_general_solution_verifier(value, state)
                     file_settings.remove_option(section, option)
 
@@ -543,7 +533,7 @@ class Settings:
         """Return the solution verifier to use."""
         if self.__general_solution_verifier_set == SettingState.NOT_SET:
             self.set_general_solution_verifier()
-        return SolutionVerifier.from_str(self.__settings["general"]["solution_verifier"])
+        return SolutionVerifier(self.__settings["general"]["solution_verifier"].lower())
 
     def set_general_target_cutoff_time(
             self: Settings, value: int = DEFAULT_general_target_cutoff_time,

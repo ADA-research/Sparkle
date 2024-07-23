@@ -55,16 +55,16 @@ def run_solver_on_instance_and_process_results(
                         solver_output["status"],
                         custom_cutoff,
                         gv.settings.get_penalised_time(custom_cutoff))
-    status = verify(instance, raw_result_path, solver.directory, status)
+    status = verify(instance, raw_result_path, solver, status)
     return (solver_output["cpu_time"], solver_output["wc_time"],
             cpu_time_penalised, solver_output["quality"], status, raw_result_path)
 
 
-def verify(instance_path: str, raw_result_path: str, solver_path: str, status: str)\
+def verify(instance: Path, raw_result: Path, solver: Solver, status: str)\
         -> str:
     """Run a solution verifier on the solution and update the status if needed."""
     verifier = gv.settings.get_general_solution_verifier()
     # Use verifier if one is given and the solver did not time out
     if verifier == SolutionVerifier.SAT and status != "TIMEOUT" and status != "UNKNOWN":
-        return sh.sat_verify(instance_path, raw_result_path, solver_path)
+        return sh.sat_verify(instance, raw_result, solver)
     return status
