@@ -39,12 +39,8 @@ def remove_current_sparkle_platform() -> None:
     """Remove the current Sparkle platform."""
     print("Cleaning existing Sparkle platform ...")
     sfh.remove_temporary_files()
-
     for working_dir in gv.working_dirs:
         shutil.rmtree(working_dir, ignore_errors=True)
-
-    ablation_scenario_dir = gv.ablation_dir / "scenarios"
-    shutil.rmtree(ablation_scenario_dir, ignore_errors=True)
     print("Existing Sparkle platform cleaned!")
 
 
