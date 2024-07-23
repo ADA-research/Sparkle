@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Import utils
-. CLI/test/utils.sh
+. tests/CLI/utils.sh
 
 # Execute this script from the Sparkle directory
 
@@ -15,7 +15,7 @@
 #SBATCH --nodes=1
 
 # Settings
-sparkle_test_settings_path="CLI/test/test_files/Settings/sparkle_settings.ini"
+sparkle_test_settings_path="tests/CLI/test_files/Settings/sparkle_settings.ini"
 slurm_true="slurm"
 slurm_available=$(detect_slurm)
 
@@ -29,8 +29,8 @@ instances_src_path_test="${examples_path}${instances_path_test}"
 solver_src_path="${examples_path}${solver_path}"
 
 config_scenario_path="Output/Configuration/Raw_Data/SMAC2/scenarios/"
-config_test_data="CLI/test/test_files/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN"
-latest_ini="CLI/test/test_files/Output/latest_scenario.ini"
+config_test_data="tests/CLI/test_files/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN"
+latest_ini="tests/CLI/test_files/Output/latest_scenario.ini"
 latest_ini_target="Output/"
 
 CLI/initialise.py > /dev/null

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Import utils
-. CLI/test/utils.sh
+. tests/CLI/utils.sh
 
 # Execute this script from the Sparkle directory
 
@@ -19,7 +19,7 @@ CLI/initialise.py > /dev/null
 
 # Copy configuration results and other files to simulate the configuration command
 config_scenario_path="Output/Configuration/Raw_Data/SMAC2/scenarios/"
-config_test_data="CLI/test/test_files/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN"
+config_test_data="tests/CLI/test_files/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN"
 
 mkdir -p $config_scenario_path # Make sure directory exists
 cp -r $config_test_data $config_scenario_path
@@ -31,12 +31,12 @@ slurm_available=$(detect_slurm)
 # Copy scenario
 scenario_path="Output/latest_scenario.ini"
 scenario_tmp="Output/latest_scenario.tmp"
-scenario_test="CLI/test/test_files/Output/latest_scenario.ini"
+scenario_test="tests/CLI/test_files/Output/latest_scenario.ini"
 mv $scenario_path $scenario_tmp 2> /dev/null # Save user scenario
 cp $scenario_test $scenario_path # Activate test scenario
 
 # Settings
-sparkle_test_settings_path="CLI/test/test_files/Settings/sparkle_settings.ini"
+sparkle_test_settings_path="tests/CLI/test_files/Settings/sparkle_settings.ini"
 
 # Instance and solver paths
 instances_path_train="Examples/Resources/Instances/PTN"

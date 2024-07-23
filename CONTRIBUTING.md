@@ -71,7 +71,7 @@ The coding style consistency is a work in progress, and existing code may not ad
 
 ### Testing
 1. Make sure the unit tests pass by running `pytest`.
-2. Make sure the integration tests (see `CLI/test/`) relevant for the commands affected by the changes pass by running them. Optionally run all of them with `CLI/test/all.sh`.
+2. Make sure the integration tests (see `tests/CLI/`) relevant for the commands affected by the changes pass by running them. Optionally run all of them with `tests/CLI/all.sh`.
 3. Make sure the examples relevant to the changes execute correctly (see the `.sh` files in `Examples/`).
 
 ## Release protocol
@@ -81,7 +81,7 @@ When releasing a new version (including bugfix versions) of Sparkle to the `main
 1. Freshly install the conda environment. Remove the old one with `conda env remove -n sparkle` and create it again with `conda env create -f environment.yml`
 2. Make sure the code style rules pass by running `flake8` (make sure the `sparkle` conda environment is installed and active).
 3. Make sure the unit tests pass by running `pytest` (make sure the `sparkle` conda environment is installed and active).
-4. Make sure the integration tests pass by running `CLI/test/all.sh` (make sure the `sparkle` conda environment is installed and active).
+4. Make sure the integration tests pass by running `tests/CLI/all.sh` (make sure the `sparkle` conda environment is installed and active).
 5. Make sure the examples in `Examples/` execute correctly (all `.sh` files).
 6. Only if all checks were passed successfully, move on to the steps for release. Otherwise, first fix what is failing and then re-do all the checks.
 
@@ -116,5 +116,5 @@ pytest is installed with the base requirements of Sparkle and is run automatical
 ### Integration tests
 
 In addition to the unit tests, Sparkle also has a series of integration tests verifying that the commands run without errors.
-These tests are in `CLI/test/*`. In general these have been designed to run on a Slurm cluster, however some have been made available to run locally on Linux/MacOS. It is imperative that it functions on Slurm, and ideally has the same behaviour locally/without Slurm.
+These tests are in `tests/CLI/*`. In general these have been designed to run on a Slurm cluster, however some have been made available to run locally on Linux/MacOS. It is imperative that it functions on Slurm, and ideally has the same behaviour locally/without Slurm.
 

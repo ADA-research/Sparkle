@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Import utils
-. CLI/test/utils.sh
+. tests/CLI/utils.sh
 
 # Execute this script from the Sparkle directory
 
@@ -18,7 +18,7 @@ slurm_true="slurm"
 slurm_available=$(detect_slurm)
 
 # Settings
-sparkle_test_settings_path="CLI/test/test_files/Settings/sparkle_settings.ini"
+sparkle_test_settings_path="tests/CLI/test_files/Settings/sparkle_settings.ini"
 
 # Prepare for test
 examples_path="Examples/Resources/"

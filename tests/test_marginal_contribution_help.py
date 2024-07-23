@@ -22,7 +22,7 @@ class TestMarginalContribution(TestCase):
     def test_compute_perfect_selector_marginal_contribution(self: TestCase) -> None:
         """Test for method compute_perfect_selector_marginal_contribution."""
         performance_data = PerformanceDataFrame(
-            Path("CLI/test/test_files/Performance_Data/"
+            Path("tests/CLI/test_files/Performance_Data/"
                  "test_construct_sparkle_portfolio_selector.csv"))
         result = [("Solvers/CSCCSat", 1.7980089765503102, 33117.589),
                   ("Solvers/MiniSAT", 0.0, 18419.034293999997)]
@@ -38,11 +38,11 @@ class TestMarginalContribution(TestCase):
     def test_compute_actual_selector_performance(
             self: TestCase, patch_perf_for_instance: MagicMock) -> None:
         """Test for method compute_actual_selector_performance."""
-        pth = "CLI/test/test_files/Sparkle_Portfolio_Selector/"\
+        pth = "tests/CLI/test_files/Sparkle_Portfolio_Selector/"\
               "sparkle_portfolio_selector"
-        perf_path = Path("CLI/test/test_files/Performance_Data/"
+        perf_path = Path("tests/CLI/test_files/Performance_Data/"
                          "test_construct_sparkle_portfolio_selector.csv")
-        feature_csv_path = Path("CLI/test/test_files/Feature_Data/"
+        feature_csv_path = Path("tests/CLI/test_files/Feature_Data/"
                                 "test_construct_sparkle_portfolio_selector.csv")
 
         result = 526.805294

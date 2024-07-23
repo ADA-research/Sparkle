@@ -14,21 +14,21 @@
 
 ## Data
 feature_data_path="Feature_Data/sparkle_feature_data.csv"
-feature_data_tmp="CLI/test/test_files/Feature_Data/sparkle_feature_data.csv.tmp"
-feature_data_test="CLI/test/test_files/Feature_Data/test_construct_sparkle_portfolio_selector.csv"
+feature_data_tmp="tests/CLI/test_files/Feature_Data/sparkle_feature_data.csv.tmp"
+feature_data_test="tests/CLI/test_files/Feature_Data/test_construct_sparkle_portfolio_selector.csv"
 
 performance_data_path="Performance_Data/sparkle_performance_data.csv"
-performance_data_tmp="CLI/test/test_files/Performance_Data/sparkle_performance_data.csv.tmp"
-performance_data_test="CLI/test/test_files/Performance_Data/test_construct_sparkle_portfolio_selector.csv"
+performance_data_tmp="tests/CLI/test_files/Performance_Data/sparkle_performance_data.csv.tmp"
+performance_data_test="tests/CLI/test_files/Performance_Data/test_construct_sparkle_portfolio_selector.csv"
 
 selector_path="Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
-selector_tmp="CLI/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector.tmp"
-selector_test="CLI/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
+selector_tmp="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector.tmp"
+selector_test="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
 
 test_results_dir="Test_Cases/PTN2/"
 test_results_path="Test_Cases/PTN2/sparkle_performance_data.csv"
 test_results_tmp="Test_Cases/PTN2/sparkle_performance_data.tmp"
-test_results_test="CLI/test/test_files/Test_Cases/"
+test_results_test="tests/CLI/test_files/Test_Cases/"
 
 # Save user data if any
 mv $feature_data_path $feature_data_tmp 2> /dev/null
@@ -44,7 +44,7 @@ extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revis
 solverA_path="Examples/Resources/Solvers/CSCCSat/"
 solverB_path="Examples/Resources/Solvers/MiniSAT/"
 
-sparkle_test_settings_path="CLI/test/test_files/Settings/sparkle_settings.ini"
+sparkle_test_settings_path="tests/CLI/test_files/Settings/sparkle_settings.ini"
 
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_path > /dev/null

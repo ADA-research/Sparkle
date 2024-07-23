@@ -13,12 +13,12 @@
 
 ## Data
 feature_data_path="Feature_Data/sparkle_feature_data.csv"
-feature_data_tmp="CLI/test/test_files/Feature_Data/sparkle_feature_data.csv.tmp"
-feature_data_test="CLI/test/test_files/Feature_Data/test_construct_sparkle_portfolio_selector.csv"
+feature_data_tmp="tests/CLI/test_files/Feature_Data/sparkle_feature_data.csv.tmp"
+feature_data_test="tests/CLI/test_files/Feature_Data/test_construct_sparkle_portfolio_selector.csv"
 
 performance_data_path="Performance_Data/sparkle_performance_data.csv"
-performance_data_tmp="CLI/test/test_files/Performance_Data/sparkle_performance_data.csv.tmp"
-performance_data_test="CLI/test/test_files/Performance_Data/test_construct_sparkle_portfolio_selector.csv"
+performance_data_tmp="tests/CLI/test_files/Performance_Data/sparkle_performance_data.csv.tmp"
+performance_data_test="tests/CLI/test_files/Performance_Data/test_construct_sparkle_portfolio_selector.csv"
 
 # Save user data if any
 mv $feature_data_path $feature_data_tmp 2> /dev/null

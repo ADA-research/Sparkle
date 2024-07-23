@@ -12,7 +12,7 @@
 #SBATCH --nodes=1
 
 # Initialise
-snapshot_file="CLI/test/test_files/test_snapshot.zip"
+snapshot_file="tests/CLI/test_files/test_snapshot.zip"
 output_true="Snapshot file $snapshot_file loaded successfully!"
 output=$(CLI/load_snapshot.py $snapshot_file | tail -1)
 

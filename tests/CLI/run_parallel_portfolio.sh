@@ -3,7 +3,7 @@
 # Execute this script from the Sparkle directory
 
 # Import utils
-. CLI/test/utils.sh
+. tests/CLI/utils.sh
 
 #SBATCH --job-name=test/run_parallel_portfolio.sh
 #SBATCH --output=Tmp/run_parallel_portfolio.sh.txt
@@ -22,7 +22,7 @@ solverA_path="Examples/Resources/Solvers/CSCCSat/"
 solverB_path="Examples/Resources/Solvers/MiniSAT/"
 solverC_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
 
-sparkle_test_settings_path="CLI/test/test_files/Settings/sparkle_settings.ini"
+sparkle_test_settings_path="tests/CLI/test_files/Settings/sparkle_settings.ini"
 slurm_true="slurm"
 slurm_available=$(detect_slurm)
 

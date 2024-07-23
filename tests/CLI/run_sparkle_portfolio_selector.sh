@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Import utils
-. CLI/test/utils.sh
+. tests/CLI/utils.sh
 
 # Execute this script from the Sparkle directory
 
@@ -17,8 +17,8 @@
 
 ## Data
 selector_path="Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
-selector_tmp="CLI/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector.tmp"
-selector_test="CLI/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
+selector_tmp="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector.tmp"
+selector_test="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
 
 # Save user data if any
 mv $selector_path $selector_tmp 2> /dev/null
@@ -31,7 +31,7 @@ extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revis
 solverA_path="Examples/Resources/Solvers/CSCCSat/"
 solverB_path="Examples/Resources/Solvers/MiniSAT/"
 
-sparkle_test_settings_path="CLI/test/test_files/Settings/sparkle_settings.ini"
+sparkle_test_settings_path="tests/CLI/test_files/Settings/sparkle_settings.ini"
 slurm_true="slurm"
 slurm_available=$(detect_slurm)
 
