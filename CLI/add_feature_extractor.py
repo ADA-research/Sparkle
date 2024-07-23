@@ -46,8 +46,7 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
 
-    check_for_initialise(sys.argv,
-                         ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_FEATURE_EXTRACTOR])
+    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_FEATURE_EXTRACTOR])
 
     extractor_source = Path(args.extractor_path)
     if not extractor_source.exists():

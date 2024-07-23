@@ -63,8 +63,7 @@ if __name__ == "__main__":
             args.run_on.value, SettingState.CMD_LINE)
     run_on = settings.get_run_on()
 
-    check_for_initialise(sys.argv,
-                         ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_INSTANCES])
+    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_INSTANCES])
 
     if not instances_source.exists():
         print(f'Instance set path "{instances_source}" does not exist!')
