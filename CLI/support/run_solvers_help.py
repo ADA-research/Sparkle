@@ -21,16 +21,12 @@ def run_solver_on_instance_and_process_results(
         instance_name = Path(instance_path[0]).name
     else:
         instance_name = Path(instance_path).name
-    raw_result_path = (f"{gv.sparkle_tmp_path}/"
-                       f"{solver.name}_"
-                       f"{instance_name}_"
-                       f"{tg.get_time_pid_random_string()}.rawres")
-    runsolver_values_path = raw_result_path.replace(".rawres", ".val")
 
     # Prepare runsolver call
-    runsolver_values_log = f"{runsolver_values_path}"
-    runsolver_watch_data_path = runsolver_values_log.replace("val", "log")
-    raw_result_path_option = f"{raw_result_path}"
+    raw_result_path = solver.raw_output_directory /\
+        f"{solver.name}_{instance_name}_{tg.get_time_pid_random_string()}.rawres"
+    runsolver_watch_data_path = raw_result_path.with_suffix(".log")
+    runsolver_values_path = raw_result_path.with_suffix(".val")
     solver_output = solver.run(
         instance_path,
         configuration={"seed": str(seed),
@@ -39,8 +35,8 @@ def run_solver_on_instance_and_process_results(
         runsolver_configuration=["--timestamp", "--use-pty",
                                  "--cpu-limit", str(custom_cutoff),
                                  "-w", runsolver_watch_data_path,
-                                 "-v", runsolver_values_log,
-                                 "-o", raw_result_path_option],
+                                 "-v", runsolver_values_path,
+                                 "-o", raw_result_path],
         cwd=Path.cwd())
 
     cpu_time_penalised, status =\

@@ -88,11 +88,10 @@ def initialise_sparkle(download_examples: bool = False) -> None:
             print("WARNING: Runsolver executable doesn't exist and cannot find makefile."
                   f" Please verify the contents of the directory: {gv.runsolver_dir}")
         else:
-            compile_runsolver = subprocess.run(["make"],
-                                               cwd=gv.runsolver_dir,
-                                               capture_output=True)
+            compile_runsolver =\
+                subprocess.run(["make"], cwd=gv.runsolver_dir, capture_output=True)
             if compile_runsolver.returncode != 0:
-                print("WARNING: Compilation of Runsolver failed with the folowing msg:"
+                print("WARNING: Compilation of Runsolver failed with the following msg:"
                       f"[{compile_runsolver.returncode}] {compile_runsolver.stderr}")
             else:
                 print("Runsolver compiled successfully!")
@@ -119,4 +118,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     global settings
     gv.settings = Settings()
-    initialise_sparkle(download_examples=args.download_examples)
+    download = False if args.download_examples is None else args.download_examples
+    initialise_sparkle(download_examples=download)
