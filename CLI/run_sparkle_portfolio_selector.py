@@ -5,6 +5,8 @@ import sys
 import argparse
 from pathlib import Path, PurePath
 
+from runrunner import Runner
+
 from CLI.help import global_variables as gv
 from CLI.support import run_portfolio_selector_help as srpsh
 from CLI.help import sparkle_logging as sl
@@ -99,9 +101,14 @@ if __name__ == "__main__":
         test_performance_data = PerformanceDataFrame(
             test_case_path / "sparkle_performance_data.csv",
             objectives=gv.settings.get_general_sparkle_objectives())
-        srpsh.run_portfolio_selector_on_instances(
+        run = srpsh.run_portfolio_selector_on_instances(
             instance_set.instance_paths, test_performance_data, selector_path,
             run_on=run_on)
+        if run_on == Runner.LOCAL:
+            run.wait()
+            print("Running Sparkle portfolio selector done!")
+        else:
+            print("Sparkle portfolio selector is running ...")
     # Single instance
     elif instance_set.size == 1:
         instance = instance_set.instance_paths[0]

@@ -13,14 +13,25 @@ from sparkle.tools.runsolver_parsing import handle_timeouts
 
 
 def run_solver_on_instance_and_process_results(
-        solver: Solver, instance_path: str | list[str], custom_cutoff: int,
+        solver: Solver, instance: Path | list[Path], custom_cutoff: int,
         seed: int) -> tuple[float, float, float, list[float], str, str]:
-    """Prepare and run a given the solver and instance, and process output."""
+    """Prepare and run a given the solver and instance, and process output.
+
+    Args:
+        solver: The solver to run on the instance
+        instance: The path(s) to the instance file(s)
+        custom_cutoff: The cutoff time for the solver
+        seed: The seed for the solver
+
+    Returns:
+        tuple of the form:
+            (cpu_time, wc_time, runtime, cpu_times, status, raw_result_path)
+    """
     # Prepare paths
-    if isinstance(instance_path, list):
-        instance_name = Path(instance_path[0]).name
+    if isinstance(instance, list):
+        instance_name = instance[0].name
     else:
-        instance_name = Path(instance_path).name
+        instance_name = instance.name
 
     # Prepare runsolver call
     raw_result_path = solver.raw_output_directory /\
@@ -28,8 +39,8 @@ def run_solver_on_instance_and_process_results(
     runsolver_watch_data_path = raw_result_path.with_suffix(".log")
     runsolver_values_path = raw_result_path.with_suffix(".val")
     solver_output = solver.run(
-        instance_path,
-        configuration={"seed": str(seed),
+        instance,
+        configuration={"seed": seed,
                        "cutoff_time": custom_cutoff,
                        "specifics": ""},
         runsolver_configuration=["--timestamp", "--use-pty",
@@ -44,7 +55,7 @@ def run_solver_on_instance_and_process_results(
                         solver_output["status"],
                         custom_cutoff,
                         gv.settings.get_penalised_time(custom_cutoff))
-    status = verify(instance_path, raw_result_path, solver.directory, status)
+    status = verify(instance, raw_result_path, solver.directory, status)
     return (solver_output["cpu_time"], solver_output["wc_time"],
             cpu_time_penalised, solver_output["quality"], status, raw_result_path)
 

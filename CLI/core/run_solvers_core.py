@@ -40,12 +40,10 @@ if __name__ == "__main__":
     instance_path = Path(args.instance)
     instance_name = instance_path.name
     instance_key = instance_path
-    has_instance_set = False
     if not instance_path.exists():
         # If its an instance name (Multi-file instance), retrieve path list
         instance_set = InstanceSet(instance_path.parent)
         instance_path = instance_set.get_path_by_name(instance_name)
-        has_instance_set = True
         instance_key = instance_name
 
     solver = Solver(Path(args.solver))

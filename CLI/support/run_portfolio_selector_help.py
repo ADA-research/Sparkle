@@ -6,7 +6,7 @@ from filelock import FileLock, Timeout
 from pathlib import Path
 
 import runrunner as rrr
-from runrunner.base import Runner
+from runrunner.base import Runner, Run
 
 from sparkle.platform import file_help as sfh
 from sparkle.solver import Extractor, Solver
@@ -20,13 +20,23 @@ from CLI.help.command_help import CommandName
 # Only called in call_sparkle_portfolio_selector_solve_instance
 def call_solver_solve_instance_within_cutoff(
         solver: Solver,
-        instance_path: str,
+        instance: Path,
         cutoff_time: int,
         performance_data: PerformanceDataFrame = None) -> bool:
-    """Call the Sparkle portfolio selector to solve a single instance with a cutoff."""
+    """Call the Sparkle portfolio selector to solve a single instance with a cutoff.
+
+    Args:
+        solver: The solver to run on the instance
+        instance: The path to the instance
+        cutoff_time: The cutoff time for the solver
+        performance_data: The dataframe to store the results in
+
+    Returns:
+        Whether the instance was solved by the solver
+    """
     _, _, cpu_time_penalised, _, status, raw_result_path =\
         srs.run_solver_on_instance_and_process_results(solver,
-                                                       instance_path,
+                                                       instance,
                                                        cutoff_time,
                                                        gv.get_seed())
     flag_solved = False
@@ -35,13 +45,12 @@ def call_solver_solve_instance_within_cutoff(
 
     if performance_data is not None:
         solver_name = "Sparkle_Portfolio_Selector"
-        print(f"Trying to write: {cpu_time_penalised}, {solver_name}, {instance_path}")
+        print(f"Trying to write: {cpu_time_penalised}, {solver_name}, {instance}")
         try:
             # Creating a seperate locked file for writing
             lock = FileLock(f"{performance_data.csv_filepath}.lock")
             with lock.acquire(timeout=60):
-                performance_data.set_value(cpu_time_penalised, solver_name,
-                                           Path(instance_path).name)
+                performance_data.set_value(cpu_time_penalised, solver_name, instance)
                 performance_data.save_csv()
             lock.release()
         except Timeout:
@@ -116,7 +125,7 @@ def run_portfolio_selector_on_instances(
         instances: list[Path],
         performance_data: PerformanceDataFrame,
         portfolio_selector: Path,
-        run_on: Runner = Runner.SLURM) -> None:
+        run_on: Runner = Runner.SLURM) -> Run:
     """Call the Sparkle portfolio selector to solve all instances in a directory.
 
     Args:
@@ -124,6 +133,9 @@ def run_portfolio_selector_on_instances(
         performance_data: The dataframe to store the results in.
         portfolio_selector: Path to the selector.
         run_on: Whether to run with Slurm or Local.
+
+    Returns:
+        RunRunner Run object regarding the selector call.
     """
     for instance_path in instances:
         performance_data.add_instance(instance_path.name)
@@ -150,8 +162,4 @@ def run_portfolio_selector_on_instances(
         sbatch_options=gv.settings.get_slurm_extra_options(as_args=True),
         srun_options=["-N1", "-n1", "--exclusive"])
 
-    if run_on == Runner.LOCAL:
-        run.wait()
-        print("Running Sparkle portfolio selector done!")
-    else:
-        print("Sparkle portfolio selector is running ...")
+    return run
