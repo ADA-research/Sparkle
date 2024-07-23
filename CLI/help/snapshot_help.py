@@ -52,8 +52,7 @@ def extract_sparkle_snapshot(snapshot_file: Path) -> None:
     """Restore a Sparkle platform from a snapshot.
 
     Args:
-      snapshot_filename: File path to the file where the current Sparkle
-        platform should be stored.
+      snapshot_file: Path to the where the current Sparkle platform should be stored.
     """
     tmp_directory = Path(f"tmp_directory_{get_time_pid_random_string()}")
     gv.sparkle_tmp_path.mkdir(exist_ok=True)
@@ -67,8 +66,7 @@ def load_snapshot(snapshot_file: Path) -> None:
     """Load a Sparkle platform from a snapshot.
 
     Args:
-        snapshot_file_path: File path to the file where the Sparkle
-            platform is stored.
+        snapshot_file: File path to the file where the Sparkle platform is stored.
     """
     if not snapshot_file.exists():
         print(f"ERROR: Snapshot file {snapshot_file} does not exist!")

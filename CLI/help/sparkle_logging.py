@@ -114,12 +114,10 @@ def log_command(argv: list[str]) -> None:
 
     # If the log file does not exist yet, write the header
     log_path = gv.sparkle_global_log_path
-    if not Path(log_path).is_file():
+    if not log_path.is_file():
         log_header = ("     Timestamp                              Command            "
                       "                 Output details\n")
-        with Path(str(log_path)).open("a") as log_file:
-            log_file.write(log_header)
+        log_str = log_header + log_str
 
     # Write to log file
-    with Path(str(log_path)).open("a") as log_file:
-        log_file.write(log_str)
+    log_path.open("a").write(log_str)
