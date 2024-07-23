@@ -212,8 +212,7 @@ if __name__ == "__main__":
             args.run_on.value, SettingState.CMD_LINE)
     run_on = gv.settings.get_run_on()
 
-    check_for_initialise(sys.argv,
-                         sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_SOLVERS])
+    check_for_initialise(sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_SOLVERS])
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))

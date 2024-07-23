@@ -61,8 +61,7 @@ if __name__ == "__main__":
             args.run_on.value, SettingState.CMD_LINE)
     run_on = gv.settings.get_run_on()
 
-    check_for_initialise(sys.argv,
-                         ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_CONFIGURED_SOLVER])
+    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_CONFIGURED_SOLVER])
 
     if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file

@@ -89,8 +89,7 @@ if __name__ == "__main__":
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.instance_dir, InstanceSet)
 
-    check_for_initialise(sys.argv,
-                         ch.COMMAND_DEPENDENCIES[ch.CommandName.GENERATE_REPORT])
+    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.GENERATE_REPORT])
 
     # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "settings_file"):

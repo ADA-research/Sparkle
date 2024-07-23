@@ -180,8 +180,7 @@ if __name__ == "__main__":
             origin=SettingState.CMD_LINE)
 
     # Check if Solver and instance sets were resolved
-    check_for_initialise(sys.argv,
-                         ch.COMMAND_DEPENDENCIES[ch.CommandName.CONFIGURE_SOLVER])
+    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.CONFIGURE_SOLVER])
 
     feature_data_df = None
     if use_features:

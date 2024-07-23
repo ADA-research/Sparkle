@@ -107,7 +107,6 @@ if __name__ == "__main__":
     flag_recompute_marg_cont = args.recompute_marginal_contribution
 
     check_for_initialise(
-        sys.argv,
         ch.COMMAND_DEPENDENCIES[ch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR]
     )
 

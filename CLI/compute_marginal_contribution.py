@@ -49,7 +49,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     check_for_initialise(
-        sys.argv,
         ch.COMMAND_DEPENDENCIES[ch.CommandName.COMPUTE_MARGINAL_CONTRIBUTION]
     )
 

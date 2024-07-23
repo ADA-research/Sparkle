@@ -135,8 +135,7 @@ if __name__ == "__main__":
             args.run_on.value, SettingState.CMD_LINE)
     run_on = gv.settings.get_run_on()
 
-    check_for_initialise(sys.argv,
-                         COMMAND_DEPENDENCIES[CommandName.COMPUTE_FEATURES])
+    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.COMPUTE_FEATURES])
 
     if ac.set_by_user(args, "settings_file"):
         gv.settings.read_settings_ini(

@@ -25,7 +25,7 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-def check_for_initialise(argv: list[str], requirements: list[CommandName] = None)\
+def check_for_initialise(requirements: list[CommandName] = None)\
         -> None:
     """Function to check if initialize command was executed and execute it otherwise.
 
@@ -46,7 +46,7 @@ def check_for_initialise(argv: list[str], requirements: list[CommandName] = None
                 print(f"""The commands {", ".join(requirements)} \
                       have to be executed before executing this command.""")
         print("-----------------------------------------------")
-        initialise_sparkle(argv)
+        initialise_sparkle()
 
 
 def initialise_sparkle(download_examples: bool = False) -> None:

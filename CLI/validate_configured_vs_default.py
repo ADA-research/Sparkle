@@ -74,7 +74,6 @@ if __name__ == "__main__":
     run_on = gv.settings.get_run_on()
 
     check_for_initialise(
-        sys.argv,
         ch.COMMAND_DEPENDENCIES[ch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT]
     )
     if args.configurator is not None:

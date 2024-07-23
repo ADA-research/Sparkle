@@ -37,8 +37,7 @@ if __name__ == "__main__":
                                       gv.solver_nickname_mapping,
                                       gv.solver_dir)
 
-    check_for_initialise(sys.argv,
-                         ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_SOLVER])
+    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_SOLVER])
     if solver_path is None:
         print(f'Could not resolve Solver path/name "{solver_path}"!')
         sys.exit(-1)

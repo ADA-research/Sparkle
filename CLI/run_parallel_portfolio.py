@@ -239,7 +239,6 @@ if __name__ == "__main__":
         solvers = [Solver(p) for p in gv.solver_dir.iterdir() if p.is_dir()]
 
     check_for_initialise(
-        sys.argv,
         sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_PARALLEL_PORTFOLIO]
     )
 

@@ -40,7 +40,6 @@ if __name__ == "__main__":
         gv.extractor_dir)
 
     check_for_initialise(
-        sys.argv,
         ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_FEATURE_EXTRACTOR]
     )
 

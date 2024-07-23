@@ -59,7 +59,6 @@ if __name__ == "__main__":
         gv.instance_dir, InstanceSet)
 
     check_for_initialise(
-        sys.argv,
         ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR]
     )
 

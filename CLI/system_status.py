@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     global settings
     gv.settings = Settings()
-    check_for_initialise(sys.argv, [])
+    check_for_initialise()
 
     print("Reporting current system status of Sparkle ...")
     sssh.print_sparkle_list([s for s in gv.solver_dir.iterdir()], "Solver", args.verbose)
