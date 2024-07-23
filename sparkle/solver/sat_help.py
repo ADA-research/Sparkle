@@ -2,8 +2,6 @@
 from pathlib import Path
 import subprocess
 
-import sparkle.tools.general as tg
-from sparkle.platform import file_help as sfh
 from sparkle.solver import Solver
 
 sat_verifier_path = Path("sparkle/Components/Sparkle-SAT-verifier/SAT")
@@ -43,17 +41,17 @@ def sat_get_verify_string(sat_output: str) -> str:
 
 
 def sat_judge_correctness_raw_result(instance: Path, raw_result: Path) -> str:
-    """Run a SAT verifier to determine correctness of a result."""
-    tmp_verify_result_path = Path(
-        f"Tmp/SAT_{raw_result.name}_"
-        f"{tg.get_time_pid_random_string()}.vryres")
-    # TODO: Log output file
+    """Run a SAT verifier to determine correctness of a result.
+
+    Args:
+        instance: path to the instance
+        raw_result: path to the result to verify
+
+    Returns:
+        The status of the solver on the instance
+    """
     print("Run SAT verifier")
-    sat_verify = subprocess.run([sat_verifier_path, instance, raw_result])
+    sat_verify = subprocess.run([sat_verifier_path, instance, raw_result],
+                                capture_output=True)
     print("SAT verifier done")
-
-    ret = sat_get_verify_string(sat_verify.stdout.decode())
-
-    # TODO: Log output file removal
-    sfh.rmfiles(tmp_verify_result_path)
-    return ret
+    return sat_get_verify_string(sat_verify.stdout.decode())
