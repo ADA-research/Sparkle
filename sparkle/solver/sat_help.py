@@ -27,7 +27,7 @@ def sat_get_verify_string(sat_output: str) -> str:
     Four statuses are possible: "SAT", "UNSAT", "WRONG", "UNKNOWN"
     """
     lines = [line.strip() for line in sat_output.splitlines()]
-    for index, line in enumerate(sat_output.splitlines()):
+    for index, line in enumerate(lines):
         if line == "Solution verified.":
             if lines[index + 2] == "11":
                 return "SAT"
