@@ -55,16 +55,16 @@ def call_solver_solve_instance_within_cutoff(
 
 
 # Only called in portfolio_core and run_sparkle_portfolio_selector
-def portfolio_selector_solve_instance(instance: Path,
-                                      performance_data_csv: Path = None) -> None:
+def portfolio_selector_solve_instance(
+        instance: Path,
+        performance_data: PerformanceDataFrame = None) -> None:
     """Call the Sparkle portfolio selector to solve a single instance.
 
     Args:
         instance: Path to the instance to run on
-        performance_data_csv: path to the performance data
+        performance_data: path to the performance data
     """
-    print("Running portfolio selector on solving instance "
-          f"{instance} ...")
+    print(f"Running portfolio selector on solving instance {instance} ...")
 
     cutoff_extractor = gv.settings.get_general_extractor_cutoff_time()
     print(f"Computing features of instance {instance} ...")
@@ -96,8 +96,6 @@ def portfolio_selector_solve_instance(instance: Path,
         # Selector Failed to produce prediction
         sys.exit(-1)
     print("Predicting done!")
-    performance_data =\
-        PerformanceDataFrame(performance_data_csv) if performance_data_csv else None
     for solver, cutoff_time in predict_schedule:
         solver = Solver(Path(solver))
         print(f"Calling solver {solver.name} with time budget {cutoff_time} ...")

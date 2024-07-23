@@ -7,6 +7,7 @@ from pathlib import Path
 from CLI.help import global_variables as gv
 from sparkle.platform.settings_objects import Settings
 from CLI.support import run_portfolio_selector_help as srpsh
+from sparkle.structures import PerformanceDataFrame
 
 
 if __name__ == "__main__":
@@ -26,7 +27,6 @@ if __name__ == "__main__":
     # Turn multiple instance files into a space separated string
     # NOTE: Not sure if this is actually supported
     instance_path = " ".join(args.instance)
-
+    performance_data = PerformanceDataFrame(Path(args.performance_data_csv))
     # Run portfolio selector
-    srpsh.portfolio_selector_solve_instance(instance_path,
-                                            Path(args.performance_data_csv))
+    srpsh.portfolio_selector_solve_instance(instance_path, performance_data)
