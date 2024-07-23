@@ -40,10 +40,10 @@ if __name__ == "__main__":
                             "Extractor", args.verbose)
     sssh.print_sparkle_list([i for i in gv.instance_dir.iterdir()],
                             "Instance", args.verbose)
-    sssh.print_list_remaining_feature_computation_job(
+    sssh.print_feature_computation_jobs(
         gv.feature_data_csv_path, args.verbose
     )
-    sssh.print_list_remaining_performance_computation_job(
+    sssh.print_performance_computation_jobs(
         gv.performance_data_csv_path, args.verbose
     )
 

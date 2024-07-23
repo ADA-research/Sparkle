@@ -25,8 +25,8 @@ def print_sparkle_list(objects: list[str], type: str, details: bool = False) -> 
     print()
 
 
-def print_list_remaining_feature_computation_job(feature_data_csv: Path,
-                                                 verbose: bool = False) -> None:
+def print_feature_computation_jobs(feature_data_csv: Path,
+                                   verbose: bool = False) -> None:
     """Print a list of remaining feature computation jobs.
 
     Args:
@@ -50,8 +50,8 @@ def print_list_remaining_feature_computation_job(feature_data_csv: Path,
     print()
 
 
-def print_list_remaining_performance_computation_job(performance_data_csv_path: Path,
-                                                     verbose: bool = False) -> None:
+def print_performance_computation_jobs(performance_data_csv_path: Path,
+                                       verbose: bool = False) -> None:
     """Print a list of remaining performance computation jobs.
 
     Args:
