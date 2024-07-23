@@ -18,11 +18,11 @@ from CLI.help.command_help import CommandName
 
 
 # Only called in call_sparkle_portfolio_selector_solve_instance
-def call_solver_solve_instance_within_cutoff(solver: Solver,
-                                             instance_path: str,
-                                             cutoff_time: int,
-                                             performance_data_csv: str = None)\
-        -> bool:
+def call_solver_solve_instance_within_cutoff(
+        solver: Solver,
+        instance_path: str,
+        cutoff_time: int,
+        performance_data: PerformanceDataFrame = None) -> bool:
     """Call the Sparkle portfolio selector to solve a single instance with a cutoff."""
     _, _, cpu_time_penalised, _, status, raw_result_path = (
         srs.run_solver_on_instance_and_process_results(solver, instance_path,
@@ -31,21 +31,19 @@ def call_solver_solve_instance_within_cutoff(solver: Solver,
     if status == "SUCCESS" or status == "SAT" or status == "UNSAT":
         flag_solved = True
 
-    if performance_data_csv is not None:
-        performance_data_csv_path = Path(performance_data_csv)
+    if performance_data is not None:
         solver_name = "Sparkle_Portfolio_Selector"
         print(f"Trying to write: {cpu_time_penalised}, {solver_name}, {instance_path}")
         try:
             # Creating a seperate locked file for writing
-            lock = FileLock(f"{performance_data_csv}.lock")
+            lock = FileLock(f"{performance_data.csv_filepath}.lock")
             with lock.acquire(timeout=60):
-                performance_dataframe = PerformanceDataFrame(performance_data_csv_path)
-                performance_dataframe.set_value(cpu_time_penalised, solver_name,
-                                                Path(instance_path).name)
-                performance_dataframe.save_csv()
+                performance_data.set_value(cpu_time_penalised, solver_name,
+                                           Path(instance_path).name)
+                performance_data.save_csv()
             lock.release()
         except Timeout:
-            print(f"ERROR: Cannot acquire File Lock on {performance_data_csv}.")
+            print(f"ERROR: Cannot acquire File Lock on {performance_data}.")
     else:
         if flag_solved:
             print(f"Instance solved by solver {solver.name}")
@@ -57,31 +55,19 @@ def call_solver_solve_instance_within_cutoff(solver: Solver,
 
 
 # Only called in portfolio_core and run_sparkle_portfolio_selector
-def call_sparkle_portfolio_selector_solve_instance(
-        instance_path: Path,
-        performance_data_csv_path: str = None) -> None:
+def portfolio_selector_solve_instance(instance: Path,
+                                      performance_data_csv: Path = None) -> None:
     """Call the Sparkle portfolio selector to solve a single instance.
 
     Args:
-        instance_path: Path to the instance to run on
-        performance_data_csv_path: path to the performance data
+        instance: Path to the instance to run on
+        performance_data_csv: path to the performance data
     """
-    # Create instance strings to accommodate multi-file instances
-    if isinstance(instance_path, Path):
-        instance_path = str(instance_path)
-    instance_path_list = instance_path.split()
-    instance_file_list = []
-
-    for instance in instance_path_list:
-        instance_file_list.append(Path(instance).name)
-
-    instance_files_str = " ".join(instance_file_list)
-
-    print("Running Sparkle portfolio selector on solving instance "
-          f"{instance_files_str} ...")
+    print("Running portfolio selector on solving instance "
+          f"{instance} ...")
 
     cutoff_extractor = gv.settings.get_general_extractor_cutoff_time()
-    print(f"Sparkle computing features of instance {instance_files_str} ...")
+    print(f"Computing features of instance {instance} ...")
     feature_vector = []
     extractor_paths = [p for p in gv.extractor_dir.iterdir()]
     if len(extractor_paths) == 0:
@@ -93,14 +79,14 @@ def call_sparkle_portfolio_selector_solve_instance(
                               gv.sparkle_tmp_path)
         # We create a watch log to filter out runsolver output
         runsolver_watch_path =\
-            gv.sparkle_tmp_path / f"{extractor_path.name}_{instance_path}.wlog"
-        features = extractor.run(instance_path_list,
+            gv.sparkle_tmp_path / f"{extractor_path.name}_{instance}.wlog"
+        features = extractor.run(instance,
                                  runsolver_args=["--cpu-limit", str(cutoff_extractor),
                                                  "-w", runsolver_watch_path])
         for _, _, value in features:
             feature_vector.append(value)
         runsolver_watch_path.unlink(missing_ok=True)
-    print(f"Sparkle computing features of instance {instance_files_str} done!")
+    print(f"Sparkle computing features of instance {instance} done!")
 
     print("Sparkle portfolio selector predicting ...")
     selector = gv.settings.get_general_sparkle_selector()
@@ -110,12 +96,13 @@ def call_sparkle_portfolio_selector_solve_instance(
         # Selector Failed to produce prediction
         sys.exit(-1)
     print("Predicting done!")
-
+    performance_data =\
+        PerformanceDataFrame(performance_data_csv) if performance_data_csv else None
     for solver, cutoff_time in predict_schedule:
         solver = Solver(Path(solver))
         print(f"Calling solver {solver.name} with time budget {cutoff_time} ...")
         flag_solved = call_solver_solve_instance_within_cutoff(
-            solver, instance_path, cutoff_time, performance_data_csv_path)
+            solver, instance, cutoff_time, performance_data)
         print(f"Calling solver {solver.name} done!")
 
         if flag_solved:

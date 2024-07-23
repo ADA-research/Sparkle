@@ -50,7 +50,7 @@ if __name__ == "__main__":
     # We are not interested in the runsolver log, but create the file to filter it
     # from the extractor call output
     runsolver_watch_path =\
-        gv.sparkle_tmp_path / f"{instance_path.name}_{extractor_path.name}.wlog"
+        gv.sparkle_tmp_path / f"{instance_name}_{extractor_path.name}.wlog"
     features = extractor.run(instance_list,
                              feature_group=args.feature_group,
                              runsolver_args=["--cpu-limit", cutoff_extractor,

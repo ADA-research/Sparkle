@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 """Execute Sparkle portfolio, only for internal calls from Sparkle."""
 import argparse
+from pathlib import Path
 
 from CLI.help import global_variables as gv
 from sparkle.platform.settings_objects import Settings
@@ -27,5 +28,5 @@ if __name__ == "__main__":
     instance_path = " ".join(args.instance)
 
     # Run portfolio selector
-    srpsh.call_sparkle_portfolio_selector_solve_instance(instance_path,
-                                                         args.performance_data_csv)
+    srpsh.portfolio_selector_solve_instance(instance_path,
+                                            Path(args.performance_data_csv))

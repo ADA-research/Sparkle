@@ -105,8 +105,10 @@ if __name__ == "__main__":
             run_on=run_on)
     # Single instance
     elif instance_set.size == 1:
-        srpsh.call_sparkle_portfolio_selector_solve_instance(
-            instance_set.instance_paths[0])
+        instance = instance_set.instance_paths[0]
+        if instance_set.multi_file:
+            instance_set._instance_names[0]
+        srpsh.portfolio_selector_solve_instance(instance)
         print("Running Sparkle portfolio selector done!")
     else:
         print("Input instance or instance directory error!")
