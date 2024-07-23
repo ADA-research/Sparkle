@@ -14,7 +14,7 @@ from sparkle.tools.runsolver_parsing import handle_timeouts
 
 def run_solver_on_instance_and_process_results(
         solver: Solver, instance: Path | list[Path], custom_cutoff: int,
-        seed: int) -> tuple[float, float, float, list[float], str, str]:
+        seed: int) -> tuple[float, float, float, list[float], str, Path]:
     """Prepare and run a given the solver and instance, and process output.
 
     Args:

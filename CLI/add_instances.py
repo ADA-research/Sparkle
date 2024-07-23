@@ -103,8 +103,8 @@ if __name__ == "__main__":
 
     print(f"\nAdding instance set {instance_set.name} done!")
 
-    if Path(gv.sparkle_algorithm_selector_path).exists():
-        sfh.rmfiles(gv.sparkle_algorithm_selector_path)
+    if gv.sparkle_algorithm_selector_path.exists():
+        gv.sparkle_algorithm_selector_path.unlink()
         print("Removing Sparkle portfolio selector "
               f"{gv.sparkle_algorithm_selector_path} done!")
 

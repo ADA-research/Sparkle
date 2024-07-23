@@ -44,21 +44,6 @@ def add_remove_platform_item(item: any,
         file_target.open("w").write(str(target))
 
 
-def rmfiles(files: list[Path]) -> None:
-    """Remove one or more files.
-
-    Args:
-      files: List of path object representing the file.
-    """
-    if not isinstance(files, list):
-        files = [files]
-
-    for file in files:
-        if isinstance(file, str):
-            file = Path(file)
-        file.unlink(missing_ok=True)
-
-
 def create_temporary_directories() -> None:
     """Create directories for temporary files."""
     tmp_path = Path("Tmp/")

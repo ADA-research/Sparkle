@@ -9,7 +9,7 @@ from pathlib import Path
 from collections import Counter
 import subprocess
 
-from sparkle.platform import file_help as sfh, tex_help as stex
+from sparkle.platform import tex_help as stex
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from CLI.support import compute_marginal_contribution_help as scmch
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
@@ -470,7 +470,7 @@ def generate_comparison_plot(points: list,
         raise Exception("Cannot plot negative and zero values on a log scales")
 
     output_data_file = f"{figure_filename}.dat"
-    output_gnuplot_script = f"{figure_filename}.plt"
+    output_gnuplot_script = output_dir / f"{figure_filename}.plt"
     output_eps_file = f"{figure_filename}.eps"
 
     # Create data file
@@ -479,7 +479,7 @@ def generate_comparison_plot(points: list,
             fout.write(" ".join([str(c) for c in point]) + "\n")
 
     # Generate plot script
-    with (output_dir / output_gnuplot_script).open("w") as fout:
+    with output_gnuplot_script.open("w") as fout:
         fout.write(f"set xlabel '{xlabel}'\n"
                    f"set ylabel '{ylabel}'\n"
                    f"set title '{title}'\n"
@@ -519,9 +519,9 @@ def generate_comparison_plot(points: list,
                    "set style line 1 pt 2 ps 1.5 lc rgb 'royalblue' \n"
                    f"plot '{output_data_file}' ls 1\n")
 
-    generate_gnuplot(output_gnuplot_script, output_dir)
+    generate_gnuplot(output_gnuplot_script.name, output_dir)
     generate_pdf(output_eps_file, output_dir)
-    sfh.rmfiles(output_gnuplot_script)
+    output_gnuplot_script.unlink(missing_ok=True)
 
 
 def generate_report_selection(target_path: Path,

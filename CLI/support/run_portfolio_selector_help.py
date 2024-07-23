@@ -8,7 +8,6 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner, Run
 
-from sparkle.platform import file_help as sfh
 from sparkle.solver import Extractor, Solver
 from CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
@@ -61,7 +60,7 @@ def call_solver_solve_instance_within_cutoff(
         else:
             print(f"Solver {solver.name} failed to solve the instance with status "
                   f"{status}")
-    sfh.rmfiles(raw_result_path)
+    raw_result_path.unlink(missing_ok=True)
     return flag_solved
 
 
