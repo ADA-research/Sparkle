@@ -3,16 +3,14 @@
 
 import argparse
 import sys
-import shutil
 from pathlib import PurePath
 
 from runrunner.base import Runner
 
-from CLI.support import ablation_help as sah
-import global_variables as gv
-import sparkle_logging as sl
-from sparkle.platform import settings_help
-from sparkle.platform.settings_help import SettingState, Settings
+from sparkle.solver.ablation import AblationScenario
+from CLI.help import global_variables as gv
+from CLI.help import sparkle_logging as sl
+from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from CLI.help import argparse_custom as ac
@@ -34,8 +32,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstanceSetTrainAblationArgument.kwargs)
     parser.add_argument(*ac.InstanceSetTestAblationArgument.names,
                         **ac.InstanceSetTestAblationArgument.kwargs)
-    parser.add_argument(*ac.AblationSettingsHelpArgument.names,
-                        **ac.AblationSettingsHelpArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureArgument.names,
                         **ac.PerformanceMeasureArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeAblationArgument.names,
@@ -57,7 +53,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     sl.log_command(sys.argv)
 
@@ -66,10 +62,6 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-
-    if args.ablation_settings_help:
-        sah.print_ablation_help()
-        sys.exit()
 
     solver_path = resolve_object_name(args.solver,
                                       gv.solver_nickname_mapping, gv.solver_dir)
@@ -88,8 +80,7 @@ if __name__ == "__main__":
             args.run_on.value, SettingState.CMD_LINE)
     run_on = gv.settings.get_run_on()
 
-    check_for_initialise(sys.argv,
-                         ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_ABLATION])
+    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_ABLATION])
 
     if ac.set_by_user(args, "settings_file"):
         # Do first, so other command line options can override settings from the file
@@ -138,33 +129,18 @@ if __name__ == "__main__":
     else:
         print("Configuration exists!")
 
-    # REMOVE SCENARIO
-    ablation_scenario_dir = sah.get_ablation_scenario_directory(
-        solver, instance_set_train, instance_set_test)
-    if sah.check_for_ablation(solver, instance_set_train,
-                              instance_set_test):
-        print("Warning: found existing ablation scenario for this combination. "
-              "This will be removed.")
-        shutil.rmtree(gv.ablation_dir / ablation_scenario_dir)
-
-    # Prepare ablation scenario directory
-    ablation_scenario_dir = sah.prepare_ablation_scenario(
-        solver, instance_set_train, instance_set_test)
+    ablation_scenario = AblationScenario(
+        solver, instance_set_train, instance_set_test, gv.ablation_output_general,
+        gv.ablation_exec, override_dirs=True)
 
     # Instances
-    sah.create_instance_file(instance_set_train, ablation_scenario_dir, test=False)
-    if instance_set_test_name is not None:
-        sah.create_instance_file(instance_set_test, ablation_scenario_dir, test=True)
-    else:
-        # TODO: check if needed
-        sah.create_instance_file(instance_set_train, ablation_scenario_dir, test=True)
+    ablation_scenario.create_instance_file()
+    ablation_scenario.create_instance_file(test=True)
 
     # Configurations
-    sah.create_configuration_file(
-        solver, instance_set_train, instance_set_test
-    )
+    ablation_scenario.create_configuration_file()
     print("Submiting ablation run...")
-    runs = sah.submit_ablation(ablation_scenario_dir, instance_set_test, run_on=run_on)
+    runs = ablation_scenario.submit_ablation(run_on=run_on)
 
     if run_on == Runner.LOCAL:
         print("Ablation analysis finished!")

@@ -7,10 +7,9 @@ from pathlib import PurePath
 
 from runrunner.base import Runner
 
-import global_variables as gv
-import sparkle_logging as sl
-from sparkle.platform import settings_help
-from sparkle.platform.settings_help import SettingState, Settings
+from CLI.help import global_variables as gv
+from CLI.help import sparkle_logging as sl
+from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help import run_solver_help as srcsh
 from sparkle.instance import InstanceSet
 from CLI.help import command_help as ch
@@ -37,7 +36,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -62,8 +61,7 @@ if __name__ == "__main__":
             args.run_on.value, SettingState.CMD_LINE)
     run_on = gv.settings.get_run_on()
 
-    check_for_initialise(sys.argv,
-                         ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_CONFIGURED_SOLVER])
+    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_CONFIGURED_SOLVER])
 
     if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file
@@ -86,7 +84,9 @@ if __name__ == "__main__":
         sys.exit(-1)
     # Get optimised configuration
     configurator = gv.settings.get_general_sparkle_configurator()
-    _, config_str = configurator.get_optimal_configuration(solver, train_set)
+    objective = gv.settings.get_general_sparkle_objectives()[0]
+    _, config_str = configurator.get_optimal_configuration(
+        solver, train_set, performance=objective.PerformanceMeasure)
 
     # Call the configured solver
     run = srcsh.call_solver(instance_set,

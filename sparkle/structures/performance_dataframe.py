@@ -18,6 +18,8 @@ from sparkle.types.objective import SparkleObjective
 class PerformanceDataFrame():
     """Class to manage performance data and common operations on them."""
     missing_value = math.nan
+    missing_objective = "DEFAULT:UNKNOWN"
+    multi_dim_names = ["Objective", "Instance", "Run"]
 
     def __init__(self: PerformanceDataFrame,
                  csv_filepath: Path,
@@ -26,7 +28,7 @@ class PerformanceDataFrame():
                  instances: list[str] = [],
                  n_runs: int = 1,
                  init_df: bool = True) -> None:
-        """Initialise a SparklePerformanceDataCSV object.
+        """Initialise a PerformanceDataFrame.
 
         Consists of:
             - Columns representing the Solvers
@@ -47,19 +49,6 @@ class PerformanceDataFrame():
                 heavy IO loads.
         """
         self.csv_filepath = csv_filepath
-        # Sanity check, remove later
-        if not isinstance(self.csv_filepath, Path):
-            self.csv_filepath = Path(self.csv_filepath)
-        self.multi_dim_names = ["Objective", "Instance", "Run"]
-        # Objectives is a ``static'' dimension
-        if objectives is None:
-            # Set default objective names if the user does not specify any
-            self.objective_names = ["DEFAULT:UNKNOWN"]
-        else:
-            self.objective_names =\
-                [o.name if isinstance(o, SparkleObjective) else o
-                 for o in objectives]
-        self.multi_objective = len(self.objective_names) > 1
         # Runs is a ``static'' dimension
         self.n_runs = n_runs
         self.run_ids = list(range(1, self.n_runs + 1))  # We count runs from 1
@@ -67,37 +56,51 @@ class PerformanceDataFrame():
             if self.csv_filepath.exists():
                 self.dataframe = pd.read_csv(csv_filepath)
                 has_rows = len(self.dataframe.index) > 0
-                if self.multi_dim_names[0] not in self.dataframe.columns or not has_rows:
+                if (PerformanceDataFrame.multi_dim_names[0] not in self.dataframe.columns
+                        or not has_rows):
                     # No objective present, force into column
-                    self.dataframe[self.multi_dim_names[0]] = self.objective_names[0]
-                else:
-                    # Objectives are present, extract names
-                    self.objective_names =\
-                        self.dataframe[self.multi_dim_names[0]].unique().tolist()
-                if self.multi_dim_names[2] not in self.dataframe.columns or not has_rows:
+                    if objectives is None:
+                        self.dataframe[PerformanceDataFrame.multi_dim_names[0]] =\
+                            PerformanceDataFrame.missing_objective
+                    else:  # Constructor is provided with the objectives
+                        objectives = [o.name if isinstance(o, SparkleObjective) else o
+                                      for o in objectives]
+                        self.dataframe[PerformanceDataFrame.multi_dim_names[0]] =\
+                            objectives
+                if (PerformanceDataFrame.multi_dim_names[2] not in self.dataframe.columns
+                        or not has_rows):
                     # No runs column present, force into column
                     self.n_runs = 1
-                    self.dataframe[self.multi_dim_names[2]] = self.n_runs
+                    self.dataframe[PerformanceDataFrame.multi_dim_names[2]] = self.n_runs
                     self.run_ids = [self.n_runs]
                 else:
                     # Runs are present, determine run ids
-                    self.run_ids =\
-                        self.dataframe[self.multi_dim_names[2]].unique().tolist()
-                if self.multi_dim_names[1] not in self.dataframe.columns:
+                    run_label = PerformanceDataFrame.multi_dim_names[2]
+                    self.run_ids = self.dataframe[run_label].unique().tolist()
+                if PerformanceDataFrame.multi_dim_names[1] not in self.dataframe.columns:
                     # Instances are listed as rows, force into column
                     self.dataframe = self.dataframe.reset_index().rename(
-                        columns={"index": self.multi_dim_names[1]})
+                        columns={"index": PerformanceDataFrame.multi_dim_names[1]})
                 # Now we can cast the columns into multi dim
-                self.dataframe = self.dataframe.set_index(self.multi_dim_names)
+                self.dataframe = self.dataframe.set_index(
+                    PerformanceDataFrame.multi_dim_names)
             else:
                 # Initialize empty DataFrame
+                if objectives is None:
+                    objective_names = [PerformanceDataFrame.missing_objective]
+                else:
+                    objective_names =\
+                        [o.name if isinstance(o, SparkleObjective) else o
+                         for o in objectives]
                 midx = pd.MultiIndex.from_product(
-                    [self.objective_names, instances, self.run_ids],
-                    names=self.multi_dim_names)
+                    [objective_names, instances, self.run_ids],
+                    names=PerformanceDataFrame.multi_dim_names)
                 self.dataframe = pd.DataFrame(PerformanceDataFrame.missing_value,
                                               index=midx,
                                               columns=solvers)
                 self.save_csv()
+            # Sort the index to optimize lookup speed
+            self.dataframe = self.dataframe.sort_index()
 
     def verify_objective(self: PerformanceDataFrame,
                          objective: str) -> str:
@@ -115,7 +118,10 @@ class PerformanceDataFrame():
             if self.multi_objective:
                 print("Error: MO Performance Data, but objective not specified.")
                 sys.exit(-1)
-            return self.objective_names[0]
+            elif self.num_objectives == 1:
+                return self.objective_names[0]
+            else:
+                return PerformanceDataFrame.missing_objective
         return objective
 
     def verify_run_id(self: PerformanceDataFrame,
@@ -182,7 +188,7 @@ class PerformanceDataFrame():
             instances = self.dataframe.index.levels[1].to_list() + [instance_name]
             midx = pd.MultiIndex.from_product(
                 [self.objective_names, instances, self.run_ids],
-                names=self.multi_dim_names)
+                names=PerformanceDataFrame.multi_dim_names)
             self.dataframe = pd.DataFrame(initial_value, index=midx, columns=solvers)
         else:
             if instance_name in self.dataframe.index.levels[1]:
@@ -193,7 +199,7 @@ class PerformanceDataFrame():
             levels = [self.dataframe.index.levels[0].tolist(),
                       [instance_name],
                       self.dataframe.index.levels[2].tolist()]
-            emidx = pd.MultiIndex(levels, names=self.multi_dim_names)
+            emidx = pd.MultiIndex(levels, names=PerformanceDataFrame.multi_dim_names)
             # Create the missing column values
             edf = pd.DataFrame(PerformanceDataFrame.missing_value,
                                index=emidx,
@@ -269,14 +275,26 @@ class PerformanceDataFrame():
         return self.dataframe.columns.size
 
     @property
-    def instances(self: PerformanceDataFrame) -> list[str]:
-        """Return the instances as a Pandas Index object."""
-        return self.dataframe.index.levels[1].tolist()
+    def multi_objective(self: PerformanceDataFrame) -> bool:
+        """Return whether the dataframe represent MO or not."""
+        return self.num_objectives > 1
 
     @property
     def solvers(self: PerformanceDataFrame) -> list[str]:
         """Return the solver present as a list of strings."""
         return self.dataframe.columns.tolist()
+
+    @property
+    def objective_names(self: PerformanceDataFrame) -> list[str]:
+        """Return the objective names as a list of strings."""
+        if self.num_objectives == 0:
+            return [PerformanceDataFrame.missing_objective]
+        return self.dataframe.index.levels[0].tolist()
+
+    @property
+    def instances(self: PerformanceDataFrame) -> list[str]:
+        """Return the instances as a Pandas Index object."""
+        return self.dataframe.index.levels[1].tolist()
 
     def penalise(self: PerformanceDataFrame,
                  threshold: float,
@@ -363,92 +381,114 @@ class PerformanceDataFrame():
             agg_runs = self.dataframe.loc[(objective), :].groupby(level=0).run_agg()
             return best(agg_runs, axis=1).to_list()
 
-    def calc_portfolio_vbs_instance(
+    def best_performance_instance(
             self: PerformanceDataFrame,
             instance: str,
             minimise: bool,
             objective: str = None,
-            capvalue: float = None,
-            penalty: float = None,
+            exclude_solvers: list[str] = [],
             run_aggregator: Callable = mean) -> float:
-        """Return the VBS performance for a specific instance.
+        """Return the best performance for a specific instance.
 
         Args:
-            instance: For which instance we shall calculate the VBS
+            instance: The instance in question
             minimise: Whether we should minimise or maximise the score
-            objective: The objective for which we calculate the VBS
+            objective: The objective for which we calculate the best performance
             capvalue: The minimum/maximum scoring value the VBS is allowed to have
             run_aggregator: How we aggregate multiple runs for an instance-solver
                 combination. Only relevant for multi-runs.
+            exclude_solvers: List of solvers to exclude in the calculation.
 
         Returns:
             The virtual best solver performance for this instance.
         """
         objective = self.verify_objective(objective)
-        if capvalue is None:
-            capvalue = sys.float_info.max
-            if not minimise:
-                capvalue = capvalue * -1
-        if penalty is None:
-            penalty = sys.float_info.max
-            if not minimise:
-                penalty = penalty * -1
-        virtual_best_score = None
-        for solver in self.dataframe.columns:
+        best_score = None
+        compare = operator.lt if minimise else operator.gt
+        for solver in self.solvers:
+            if solver in exclude_solvers:
+                continue
             if isinstance(instance, str):
                 runs = self.dataframe.loc[(objective, instance), solver]
-                if minimise:
-                    runs[runs > capvalue] = penalty
-                else:
-                    runs[runs < capvalue] = penalty
                 score_solver = run_aggregator(runs)
             else:
                 score_solver = float(self.dataframe.loc[instance, solver])
-            if virtual_best_score is None or\
-                    minimise and virtual_best_score > score_solver or\
-                    not minimise and virtual_best_score < score_solver:
-                virtual_best_score = score_solver
+            if best_score is None or compare(score_solver, best_score):
+                best_score = score_solver
 
-        # Shouldn't this throw an error?
-        if virtual_best_score is None and len(self.dataframe.columns) == 0:
-            print("WARNING: PerformanceDataFrame could not calculate VBS "
-                  f"instance {instance}")
-            virtual_best_score = 0
+        if best_score is None:
+            print("WARNING: PerformanceDataFrame could not calculate best performance "
+                  f"for instance {instance}.")
+            return PerformanceDataFrame.missing_value
 
-        return virtual_best_score
+        return best_score
 
-    def calc_virtual_best_performance_of_portfolio(
+    def best_performance(
             self: PerformanceDataFrame,
             aggregation_function: Callable[[list[float]], float],
             minimise: bool,
-            capvalue_list: list[float],
-            penalty_list: list[float],
+            exclude_solvers: list[str] = [],
             objective: str = None) -> float:
-        """Return the overall VBS performance of the portfolio.
+        """Return the overall best performance of the portfolio.
 
         Args:
             aggregation_function: The method of combining all VBS scores together
             minimise: Whether the scores are minimised or not
             capvalue_list: List of capvalue per instance
+            penalty_list: List of penalty per instance
+            exclude_solvers: List of solvers to exclude in the calculation.
+                Defaults to none.
 
         Returns:
-            The combined virtual best performance of the portfolio over all instances.
+            The aggregated best performance of the portfolio over all instances.
         """
         objective = self.verify_objective(objective)
-        virtual_best = []
-        capvalue = None
-        penalty = None
-        for idx, instance in enumerate(self.dataframe.index):
-            if capvalue_list is not None:
-                capvalue = capvalue_list[idx]
-            if penalty_list is not None:
-                penalty = penalty_list[idx]
-            virtual_best_score = (
-                self.calc_portfolio_vbs_instance(
-                    instance, minimise, objective, capvalue, penalty))
-            virtual_best.append(virtual_best_score)
+        instance_best = []
+        for instance in self.instances:
+            best_score = self.best_performance_instance(
+                instance, minimise, objective, exclude_solvers)
+            instance_best.append(best_score)
 
-        return aggregation_function(virtual_best)
+        return aggregation_function(instance_best)
+
+    def marginal_contribution(self: PerformanceDataFrame,
+                              aggregation_function: Callable[[list[float]], float],
+                              minimise: bool,
+                              pre_selection: list[str] = None,
+                              objective: str = None,
+                              ) -> list[float]:
+        """Return the marginal contribution of the solvers on the instances.
+
+        Args:
+            aggregation_function: Function for combining scores over instances together.
+            minimise: Whether we should minimise or maximise the score of the objective.
+            capvalue_list: List of capvalue per instance
+            penalty_list: List of penalty per instance
+            objective: The objective for which we calculate the marginal contribution.
+
+        Returns:
+            The marginal contribution of each solver.
+        """
+        output = []
+        objective = self.verify_objective(objective)
+        best_performance = self.best_performance(
+            aggregation_function, minimise, objective=objective)
+        for solver in self.solvers:
+            # By calculating the best performance excluding this Solver,
+            # we can determine its relative impact on the portfolio.
+            missing_solver_best = self.best_performance(
+                aggregation_function,
+                minimise,
+                exclude_solvers=[solver],
+                objective=objective)
+            # Now we need to see how much the portfolio's best performance
+            # decreases without this solver.
+            marginal_contribution = missing_solver_best / best_performance
+            if missing_solver_best == best_performance:
+                # No change, no contribution
+                marginal_contribution = 0.0
+            output.append((solver, marginal_contribution, missing_solver_best))
+        return output
 
     def get_dict_vbs_penalty_time_on_each_instance(
             self: PerformanceDataFrame,
@@ -523,11 +563,12 @@ class PerformanceDataFrame():
 
         Args:
             csv_filepath: The new filepath to use for saving the object to.
-                Warning: If None, the original path is used and could lead to dataloss!
+                Warning: If the original path is used, it could lead to dataloss!
         """
         csv_filepath = self.csv_filepath if csv_filepath is None else csv_filepath
-        pd_copy = PerformanceDataFrame(csv_filepath, init_df=False)
+        pd_copy = PerformanceDataFrame(self.csv_filepath, init_df=False)
         pd_copy.dataframe = self.dataframe.copy()
+        pd_copy.csv_filepath = csv_filepath
         return pd_copy
 
     def to_autofolio(self: PerformanceDataFrame) -> Path:

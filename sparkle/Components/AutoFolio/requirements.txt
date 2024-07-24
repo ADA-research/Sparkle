@@ -1,0 +1,13 @@
+Cython
+numpy
+scipy
+scikit-learn>=0.20.0
+matplotlib
+pandas
+xgboost
+ConfigSpace
+pyrfr
+smac>=2.0.0
+liac-arff
+tabpfn
+ensemble-tabpfn

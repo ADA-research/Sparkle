@@ -9,10 +9,9 @@ from pathlib import Path
 from collections import Counter
 import subprocess
 
-from sparkle.platform import file_help as sfh, tex_help as stex
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.platform import tex_help as stex
+from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from CLI.support import compute_marginal_contribution_help as scmch
-import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 
 
@@ -82,7 +81,7 @@ def solver_rank_list_latex(rank_list: list[tuple[str, float]]) -> str:
         str.
     """
     return "".join(f"\\item \\textbf{ {Path(solver).name} }, marginal contribution: "
-                   f"{value}\n" for solver, value in rank_list)
+                   f"{value}\n" for solver, value, _ in rank_list)
 
 
 def get_par_ranking_list(performance_data: PerformanceDataFrame,
@@ -139,7 +138,7 @@ def get_dict_sbs_penalty_time_on_each_instance(
 def get_actual_portfolio_selector_performance_per_instance(
         performance_data: PerformanceDataFrame,
         actual_portfolio_selector_path: Path,
-        feature_data_path: Path,
+        feature_data: FeatureDataFrame,
         capvalue: int,
         penalised_time: int) -> dict[str, int]:
     """Creates a dictionary with the portfolio selector performance on each instance.
@@ -148,14 +147,14 @@ def get_actual_portfolio_selector_performance_per_instance(
         A dict that maps instance name str to their penalised performance int.
     """
     objective = SparkleObjective(performance_data.objective_names[0])
-    minimise = (
-        objective.PerformanceMeasure != PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION)
+    minimise =\
+        objective.PerformanceMeasure != PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION
 
     actual_selector_penalty = {}
     for instance in performance_data.instances:
         used_time_for_this_instance, flag_successfully_solving = \
             scmch.compute_actual_performance_for_instance(
-                actual_portfolio_selector_path, instance, feature_data_path,
+                actual_portfolio_selector_path, instance, feature_data,
                 performance_data, minimise, objective.PerformanceMeasure, capvalue)
 
         if flag_successfully_solving:
@@ -252,7 +251,7 @@ def selection_report_variables(
         bibliograpghy_path: Path,
         extractor_path: Path,
         actual_portfolio_selector_path: Path,
-        feature_data_path: Path,
+        feature_data: FeatureDataFrame,
         extractor_cutoff: int,
         cutoff: int,
         penalty: int,
@@ -270,7 +269,7 @@ def selection_report_variables(
     """
     objective = SparkleObjective(train_data.objective_names[0])
     actual_performance_dict = get_actual_portfolio_selector_performance_per_instance(
-        train_data, actual_portfolio_selector_path, feature_data_path, cutoff, penalty)
+        train_data, actual_portfolio_selector_path, feature_data, cutoff, penalty)
     latex_dict = {"bibliographypath": str(bibliograpghy_path.absolute()),
                   "numSolvers": str(train_data.num_solvers),
                   "solverList": get_solver_list_latex(train_data.solvers)}
@@ -281,8 +280,9 @@ def selection_report_variables(
     latex_dict["instanceClassList"] = get_instance_set_count_list(train_data.instances)
     latex_dict["featureComputationCutoffTime"] = str(extractor_cutoff)
     latex_dict["performanceComputationCutoffTime"] = str(cutoff)
-    rank_list_perfect = scmch.compute_perfect_selector_marginal_contribution()
-    rank_list_actual = scmch.compute_actual_selector_marginal_contribution()
+    rank_list_perfect = scmch.compute_perfect_selector_marginal_contribution(train_data)
+    rank_list_actual = scmch.compute_actual_selector_marginal_contribution(
+        train_data, feature_data, performance_cutoff=cutoff)
     latex_dict["solverPerfectRankingList"] = solver_rank_list_latex(rank_list_perfect)
     latex_dict["solverActualRankingList"] = solver_rank_list_latex(rank_list_actual)
     latex_dict["PARRankingList"] = get_par_ranking_list(train_data, objective)
@@ -375,7 +375,7 @@ def generate_pdf(eps_file: str,
                  output_dir: Path = None) -> None:
     """Generate PDF using epstopdf."""
     # Some systems are missing epstopdf so a copy is included
-    epsbackup = Path(os.path.abspath(Path.cwd())) / "Components/epstopdf.pl"
+    epsbackup = Path(os.path.abspath(Path.cwd())) / "sparkle/Components/epstopdf.pl"
     epstopdf = which("epstopdf") or epsbackup
     subprocess_epstopdf = subprocess.run([epstopdf, eps_file],
                                          capture_output=True,
@@ -470,7 +470,7 @@ def generate_comparison_plot(points: list,
         raise Exception("Cannot plot negative and zero values on a log scales")
 
     output_data_file = f"{figure_filename}.dat"
-    output_gnuplot_script = f"{figure_filename}.plt"
+    output_gnuplot_script = output_dir / f"{figure_filename}.plt"
     output_eps_file = f"{figure_filename}.eps"
 
     # Create data file
@@ -479,7 +479,7 @@ def generate_comparison_plot(points: list,
             fout.write(" ".join([str(c) for c in point]) + "\n")
 
     # Generate plot script
-    with (output_dir / output_gnuplot_script).open("w") as fout:
+    with output_gnuplot_script.open("w") as fout:
         fout.write(f"set xlabel '{xlabel}'\n"
                    f"set ylabel '{ylabel}'\n"
                    f"set title '{title}'\n"
@@ -519,9 +519,9 @@ def generate_comparison_plot(points: list,
                    "set style line 1 pt 2 ps 1.5 lc rgb 'royalblue' \n"
                    f"plot '{output_data_file}' ls 1\n")
 
-    generate_gnuplot(output_gnuplot_script, output_dir)
+    generate_gnuplot(output_gnuplot_script.name, output_dir)
     generate_pdf(output_eps_file, output_dir)
-    sfh.rmfiles(output_gnuplot_script)
+    output_gnuplot_script.unlink(missing_ok=True)
 
 
 def generate_report_selection(target_path: Path,
@@ -530,7 +530,7 @@ def generate_report_selection(target_path: Path,
                               bibliography_path: Path,
                               extractor_path: Path,
                               selector_path: Path,
-                              feature_data_path: Path,
+                              feature_data: FeatureDataFrame,
                               train_data: PerformanceDataFrame,
                               extractor_cutoff: int,
                               cutoff: int,
@@ -545,8 +545,8 @@ def generate_report_selection(target_path: Path,
         bibliography_path: Path to the bib file.
         extractor_path: Path to the extractor used
         selector_path: Path to the selector
-        feature_data_path: Path to the feature data created by extractor
-        train_data: The input data for the selector
+        feature_data: Feature data created by extractor
+        train_data: The performance input data for the selector
         extractor_cutoff: The maximum time for the selector to run
         cutoff: The cutoff per solver
         penalty: The penalty for solvers TIMEOUT
@@ -562,7 +562,7 @@ def generate_report_selection(target_path: Path,
                                                         bibliography_path,
                                                         extractor_path,
                                                         selector_path,
-                                                        feature_data_path,
+                                                        feature_data,
                                                         extractor_cutoff,
                                                         cutoff,
                                                         penalty,
@@ -573,4 +573,3 @@ def generate_report_selection(target_path: Path,
                     target_path,
                     latex_report_filename,
                     dict_variable_to_value)
-    sl.add_output(str(target_path), "Sparkle portfolio selector report")

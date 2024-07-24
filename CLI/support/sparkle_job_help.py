@@ -7,31 +7,12 @@ from pathlib import Path
 import time
 import json
 
-from runrunner import SlurmRun
+from runrunner.slurm import SlurmRun
 from runrunner.base import Status
 from tabulate import tabulate
 
-from CLI.help.command_help import CommandName
-from CLI.help.command_help import COMMAND_DEPENDENCIES
-import global_variables as gv
+from CLI.help import global_variables as gv
 from sparkle.platform.cli_types import VerbosityLevel, TEXT
-
-
-# Wait until all dependencies of the command to run are completed
-def wait_for_dependencies(command_to_run: CommandName) -> None:
-    """Wait for all dependencies of a given command to finish executing.
-
-    Args:
-      command_to_run: Command name.
-    """
-    dependencies = COMMAND_DEPENDENCIES[command_to_run]
-    dependent_job_ids = []
-
-    for dependency in dependencies:
-        dependent_job_ids.extend(get_job_ids_for_command(dependency))
-
-    for job_id in dependent_job_ids:
-        wait_for_job(job_id)
 
 
 def wait_for_job(job: str | SlurmRun) -> None:
@@ -143,14 +124,16 @@ def wait_for_all_jobs() -> None:
         # Collect dependencies and partitions for each job
         jobs = get_dependencies(jobs)
         # Order in which to display the jobs
-        priority = {Status.COMPLETED: 0, Status.RUNNING: 1, Status.WAITING: 2}
+        status_order = {Status.COMPLETED: 0, Status.RUNNING: 1, Status.WAITING: 2}
         while len(running_jobs) > 0:
             # Information to be printed to the table
-            information = [["RunId", "Name", "Status", "Dependencies", "Finished Jobs"]]
+            information = [["RunId", "Name", "Partition", "Status",
+                            "Dependencies", "Finished Jobs", "Run Time"]]
             running_jobs = [run for run in running_jobs
                             if run.status == Status.WAITING
                             or run.status == Status.RUNNING]
-            sorted_jobs = sorted(jobs, key=lambda job: priority[job.status])
+            sorted_jobs = sorted(
+                jobs, key=lambda job: (status_order.get(job.status, 4), job.run_id))
             for job in sorted_jobs:
                 # Count number of jobs that have finished
                 finished_jobs_count = sum(1 for status in job.all_status
@@ -164,10 +147,12 @@ def wait_for_all_jobs() -> None:
                 information.append(
                     [job.run_id,
                      job.name,
+                     job.partition,
                      status_text,
                      "None" if len(job.dependencies) == 0
                         else ", ".join(job.dependencies),
-                     f"{finished_jobs_count}/{len(job.all_status)}"])
+                     f"{finished_jobs_count}/{len(job.all_status)}",
+                     job.runtime])
             # Print the table
             table = tabulate(information, headers="firstrow", tablefmt="grid")
             print(table)
@@ -178,32 +163,3 @@ def wait_for_all_jobs() -> None:
             clear_console_lines(lines)
 
     print("All jobs done!")
-
-
-def get_active_jobs() -> list[dict[str, str, str]]:
-    """Get active jobs from file and return them as list of [job_id, command, status].
-
-    Returns:
-      List of dictionaries with string keys and dict values.
-    """
-    jobs = get_running_jobs()
-    return [{"job_id": j.run_id, "command": j.name, "status": j.status} for j in jobs]
-
-
-def get_job_ids_for_command(command: CommandName) -> list[str]:
-    """Return the IDs of active jobs for a given command.
-
-    Args:
-      command: Command name.
-
-    Returns:
-      List of job IDs (in string format).
-    """
-    jobs_list = get_active_jobs()
-    job_ids = []
-
-    for job in jobs_list:
-        if job["command"] == command.name:
-            job_ids.append(job["job_id"])
-
-    return job_ids

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: UTF-8 -*-
 """File to handle a solver and its directories."""
 
 from __future__ import annotations
@@ -8,7 +6,7 @@ import shlex
 import ast
 from pathlib import Path
 import subprocess
-from tools import runsolver_parsing
+from sparkle.tools import runsolver_parsing
 import pcsparser
 from sparkle.types import SparkleCallable
 
@@ -85,6 +83,14 @@ class Solver(SparkleCallable):
         except SyntaxError:
             pass
         return False
+
+    def get_pcs(self: Solver) -> dict[str, tuple[str, str, str]]:
+        """Get the parameter content of the PCS file."""
+        if not (pcs_file := self.get_pcs_file()):
+            return None
+        parser = pcsparser.PCSParser()
+        parser.load(str(pcs_file), convention="smac")
+        return [p for p in parser.pcs.params if p["type"] == "parameter"]
 
     def build_cmd(self: Solver, instance: str | list[str], configuration: dict = None,
                   runsolver_configuration: list[str] = None) -> list[str]:

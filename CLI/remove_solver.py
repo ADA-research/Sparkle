@@ -7,9 +7,9 @@ import shutil
 from pathlib import Path
 
 from sparkle.platform import file_help as sfh
-import global_variables as gv
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
-import sparkle_logging as sl
+from CLI.help import global_variables as gv
+from sparkle.structures import PerformanceDataFrame
+from CLI.help import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
@@ -37,8 +37,7 @@ if __name__ == "__main__":
                                       gv.solver_nickname_mapping,
                                       gv.solver_dir)
 
-    check_for_initialise(sys.argv,
-                         ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_SOLVER])
+    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_SOLVER])
     if solver_path is None:
         print(f'Could not resolve Solver path/name "{solver_path}"!')
         sys.exit(-1)

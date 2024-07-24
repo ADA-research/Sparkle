@@ -12,7 +12,7 @@ import fcntl
 import glob
 
 import runrunner as rrr
-from runrunner import Runner
+from runrunner import Runner, Run
 
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
@@ -25,7 +25,7 @@ from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 
 class SMAC2(Configurator):
     """Class for SMAC2 (Java) configurator."""
-    configurator_path = Path("Components/smac-v2.10.03-master-778/")
+    configurator_path = Path("sparkle/Components/smac-v2.10.03-master-778/")
     target_algorithm = "smac_target_algorithm.py"
 
     def __init__(self: SMAC2,
@@ -56,7 +56,7 @@ class SMAC2(Configurator):
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
                   num_parallel_jobs: int = None,
-                  run_on: Runner = Runner.SLURM) -> list[rrr.SlurmRun | rrr.LocalRun]:
+                  run_on: Runner = Runner.SLURM) -> list[Run]:
         """Start configuration job.
 
         Args:
@@ -138,6 +138,7 @@ class SMAC2(Configurator):
         for config in configurations:
             values = [float(row[column]) for row in results if row[1] == config]
             config_scores.append(aggregate_config(values))
+
         # Now determine which is the best based on the perf measure
         if performance is None:
             performance = self.objectives[0].PerformanceMeasure
@@ -157,6 +158,7 @@ class SMAC2(Configurator):
         for i, score in enumerate(config_scores):
             if comparison(score, current_optimal):
                 min_index, current_optimal = i, score
+
         # Return the optimal configuration dictionary as commandline args
         config_str = configurations[min_index].strip(" ")
         if config_str.startswith("{"):

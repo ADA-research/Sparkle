@@ -16,19 +16,18 @@ from runrunner.base import Runner
 from runrunner.slurm import Status
 
 from CLI.help.reporting_scenario import Scenario
-import sparkle_logging as sl
-from sparkle.platform import settings_help
-from sparkle.types.objective import PerformanceMeasure
-import global_variables as gv
-from sparkle.platform.settings_help import SettingState, Settings
-from sparkle.solver import Solver
-from sparkle.instance import InstanceSet
+from CLI.help import sparkle_logging as sl
+from CLI.help import global_variables as gv
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
 from CLI.help.command_help import CommandName
-from tools.runsolver_parsing import get_runtime, get_status
 from CLI.help.nicknames import resolve_object_name
+from sparkle.types.objective import PerformanceMeasure
+from sparkle.platform.settings_objects import Settings, SettingState
+from sparkle.solver import Solver
+from sparkle.instance import InstanceSet
+from sparkle.tools.runsolver_parsing import get_runtime, get_status
 
 
 def run_parallel_portfolio(instances_set: InstanceSet,
@@ -216,7 +215,7 @@ def parser_function() -> argparse.ArgumentParser:
 
 if __name__ == "__main__":
     # Initialise settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -240,7 +239,6 @@ if __name__ == "__main__":
         solvers = [Solver(p) for p in gv.solver_dir.iterdir() if p.is_dir()]
 
     check_for_initialise(
-        sys.argv,
         sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_PARALLEL_PORTFOLIO]
     )
 

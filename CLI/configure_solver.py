@@ -8,14 +8,12 @@ import os
 from pathlib import Path
 from pandas import DataFrame
 
-from runrunner.base import Runner
+from runrunner.base import Runner, Run
 import runrunner as rrr
 
-import global_variables as gv
-import sparkle_logging as sl
-from sparkle.platform import settings_help
-from CLI.support import ablation_help as sah
-from sparkle.platform.settings_help import SettingState
+from CLI.help import global_variables as gv
+from CLI.help import sparkle_logging as sl
+from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help.reporting_scenario import Scenario
 from sparkle.structures import FeatureDataFrame
 from CLI.help import command_help as ch
@@ -102,16 +100,16 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
 def run_after(solver: Path,
               train_set: InstanceSet,
               test_set: InstanceSet,
-              dependency: list[rrr.SlurmRun | rrr.LocalRun],
+              dependency: list[Run],
               command: CommandName,
-              run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
+              run_on: Runner = Runner.SLURM) -> Run:
     """Add a command to run after configuration to RunRunner queue.
 
     Args:
       solver: Path (object) to solver.
       train_set: Instances used for training.
       test_set: Instances used for testing.
-      dependency: String of job dependencies.
+      dependency: List of job dependencies.
       command: The command to run. Currently supported: Validation and Ablation.
       run_on: Whether the job is executed on Slurm or locally.
 
@@ -146,7 +144,7 @@ def run_after(solver: Path,
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -182,8 +180,7 @@ if __name__ == "__main__":
             origin=SettingState.CMD_LINE)
 
     # Check if Solver and instance sets were resolved
-    check_for_initialise(sys.argv,
-                         ch.COMMAND_DEPENDENCIES[ch.CommandName.CONFIGURE_SOLVER])
+    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.CONFIGURE_SOLVER])
 
     feature_data_df = None
     if use_features:
@@ -214,8 +211,6 @@ if __name__ == "__main__":
 
         for index, column in enumerate(feature_data_df):
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
-
-    sah.clean_ablation_scenarios(solver, instance_set_train)
 
     number_of_runs = gv.settings.get_config_number_of_runs()
     solver_calls = gv.settings.get_config_solver_calls()

@@ -9,17 +9,17 @@ from pathlib import Path
 
 import runrunner as rrr
 
-from sparkle.platform import file_help as sfh, settings_help
-import global_variables as gv
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.platform import file_help as sfh
+from CLI.help import global_variables as gv
+from sparkle.structures import PerformanceDataFrame
 from CLI.run_solvers import running_solvers_performance_data
 from sparkle.solver import Solver
-import sparkle_logging as sl
+from CLI.help import sparkle_logging as sl
 from CLI.help.command_help import CommandName
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc
-from sparkle.platform.settings_help import SettingState
+from sparkle.platform.settings_objects import Settings, SettingState
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -48,7 +48,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -61,8 +61,7 @@ if __name__ == "__main__":
     solver_source = Path(args.solver_path)
     deterministic = args.deterministic
 
-    check_for_initialise(sys.argv,
-                         ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_SOLVER])
+    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_SOLVER])
 
     if not solver_source.exists():
         print(f'Solver path "{solver_source}" does not exist!')
@@ -126,8 +125,8 @@ if __name__ == "__main__":
 
     print(f"Adding solver {solver_source.name} done!")
 
-    if Path(gv.sparkle_algorithm_selector_path).exists():
-        sfh.rmfiles(gv.sparkle_algorithm_selector_path)
+    if gv.sparkle_algorithm_selector_path.exists():
+        gv.sparkle_algorithm_selector_path.unlink()
         print("Removing Sparkle portfolio selector "
               f"{gv.sparkle_algorithm_selector_path} done!")
 

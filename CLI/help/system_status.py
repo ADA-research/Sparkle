@@ -3,8 +3,7 @@
 """Helper functions to inform about Sparkle's system status."""
 from pathlib import Path
 
-from sparkle.structures import FeatureDataFrame
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 
 
 def print_sparkle_list(objects: list[str], type: str, details: bool = False) -> None:
@@ -26,19 +25,19 @@ def print_sparkle_list(objects: list[str], type: str, details: bool = False) -> 
     print()
 
 
-def print_list_remaining_feature_computation_job(feature_data_csv_path: Path,
-                                                 verbose: bool = False) -> None:
+def print_feature_computation_jobs(feature_data_csv: Path,
+                                   verbose: bool = False) -> None:
     """Print a list of remaining feature computation jobs.
 
     Args:
-        feature_data_csv_path: Path to the feature data csv
+        feature_data_csv: Path to the feature data csv
         verbose: Indicating, if output should be verbose
     """
-    if not feature_data_csv_path.exists():
+    if not feature_data_csv.exists():
         print("\nNo feature data found, cannot determine remaining jobs.")
 
-    feature_data_csv = FeatureDataFrame(feature_data_csv_path)
-    jobs = feature_data_csv.remaining_jobs()
+    feature_data = FeatureDataFrame(feature_data_csv)
+    jobs = feature_data.remaining_jobs()
 
     print(f"\nCurrently Sparkle has {len(jobs)} remaining feature computation "
           "jobs that need to be performed before creating an algorithm selector"
@@ -51,8 +50,8 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path: Path,
     print()
 
 
-def print_list_remaining_performance_computation_job(performance_data_csv_path: Path,
-                                                     verbose: bool = False) -> None:
+def print_performance_computation_jobs(performance_data_csv_path: Path,
+                                       verbose: bool = False) -> None:
     """Print a list of remaining performance computation jobs.
 
     Args:

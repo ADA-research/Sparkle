@@ -5,16 +5,14 @@ import sys
 import argparse
 from pathlib import Path, PurePath
 
-from CLI.help.status_info import GenerateReportStatusInfo
-import global_variables as gv
+from CLI.help import global_variables as gv
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.platform import \
     generate_report_for_configuration as sgrfch
-from sparkle.platform import tex_help as th
-import sparkle_logging as sl
+import CLI.help.sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.types.objective import PerformanceMeasure
-from sparkle.platform.settings_help import SettingState, Settings
+from sparkle.platform.settings_objects import SettingState, Settings
 from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from sparkle.platform import \
@@ -153,11 +151,13 @@ if __name__ == "__main__":
                 test_case_path / "sparkle_performance_data.csv")
             test_data.penalise(gv.settings.get_general_target_cutoff_time(),
                                gv.settings.get_penalised_time())
-        
+
         settings_dict = {}
         settings_dict["performance_measure"] = performance_measure
-        settings_dict["general_extractor_cutoff_time"] = gv.settings.get_general_extractor_cutoff_time()
-        settings_dict["target_cutoff_time"] = gv.settings.get_general_target_cutoff_time()
+        settings_dict["general_extractor_cutoff_time"] = \
+            gv.settings.get_general_extractor_cutoff_time()
+        settings_dict["target_cutoff_time"] = \
+            gv.settings.get_general_target_cutoff_time()
         settings_dict["penalised_time"] = gv.settings.get_penalised_time()
         report["settings"] = settings_dict
         sgfs.generate_report_selection(gv.selection_output_analysis,
@@ -229,12 +229,12 @@ if __name__ == "__main__":
 
         # Collect scenario settings
         settings_dict = {}
-        number_of_runs =  gv.settings.get_config_number_of_runs()
+        number_of_runs = gv.settings.get_config_number_of_runs()
         solver_calls = gv.settings.get_config_solver_calls()
         cpu_time = gv.settings.get_config_cpu_time()
         wallclock_time = gv.settings.get_config_wallclock_time()
         if number_of_runs is not None:
-            settings_dict["number_of_runs"] =  number_of_runs
+            settings_dict["number_of_runs"] = number_of_runs
         if solver_calls is not None:
             settings_dict["solver_calls"] = solver_calls
         if cpu_time is not None:
@@ -250,13 +250,14 @@ if __name__ == "__main__":
         report["scenario"] = settings_dict
 
         # Set up configurator scenario
-        # Warning: This code can't be removed, the object is cached and then used in sgrfch
+        # Warning: Code can't be removed, the object is cached and then used in sgrfch
         configurator = gv.settings.get_general_sparkle_configurator()
         sparkle_objective =\
             gv.settings.get_general_sparkle_objectives()[0]
         configurator.scenario = ConfigurationScenario(
             solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
-            wallclock_time, settings_dict["cutoff_time"], settings_dict["cutoff_length"], sparkle_objective)
+            wallclock_time, settings_dict["cutoff_time"], settings_dict["cutoff_length"],
+            sparkle_objective)
         configurator.scenario._set_paths(configurator.output_path)
 
         # Get training results
@@ -264,23 +265,26 @@ if __name__ == "__main__":
         _, opt_config = configurator.get_optimal_configuration(
             solver, instance_set_train, objective.PerformanceMeasure)
         penalty_multiplier = gv.settings.get_general_penalty_multiplier()
-        
-        training_dict = sgrfch.get_validation_dict(solver, instance_set_train, opt_config, validator, 
-                                   settings_dict["cutoff_time"], penalty_multiplier, 
-                                   objective)
+
+        training_dict = sgrfch.get_validation_dict(solver, instance_set_train,
+                                                   opt_config, validator,
+                                                   settings_dict["cutoff_time"],
+                                                   penalty_multiplier, objective)
 
         report["best_config"] = opt_config
         report["training"] = training_dict
-        
+
         # Get test results
         if flag_instance_set_test:
-            result_dict = sgrfch.get_validation_dict(solver, instance_set_test, opt_config, validator, 
-                                   settings_dict["cutoff_time"], penalty_multiplier, 
-                                   objective)
+            result_dict = sgrfch.get_validation_dict(solver, instance_set_test,
+                                                     opt_config, validator,
+                                                     settings_dict["cutoff_time"],
+                                                     penalty_multiplier, objective)
             report["test"] = result_dict
 
             if sgrfch.get_ablation_bool(solver, instance_set_train, instance_set_test):
-                res_ablation = sah.read_ablation_table(solver, instance_set_train, instance_set_test)
+                res_ablation = sah.read_ablation_table(solver, instance_set_train,
+                                                       instance_set_test)
                 ablation_list = []
                 # Skip first entry (header)
                 for res in res_ablation[1:]:

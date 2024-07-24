@@ -6,14 +6,15 @@ from __future__ import annotations
 from pathlib import Path
 
 import runrunner as rrr
-from runrunner.base import Runner
+from runrunner.base import Runner, Run
+from runrunner.slurm import SlurmRun
 
-import global_variables as gv
-import tools.general as tg
+from CLI.help import global_variables as gv
 from CLI.help.command_help import CommandName
+import sparkle.tools.general as tg
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
-from tools.runsolver_parsing import get_solver_output
+from sparkle.tools.runsolver_parsing import get_solver_output
 
 
 def call_solver(
@@ -23,8 +24,8 @@ def call_solver(
         seed: int | list[int] = None,
         outdir: Path = None,
         commandname: CommandName = CommandName.RUN_SOLVERS,
-        dependency: rrr.SlurmRun | list[rrr.SlurmRun] = None,
-        run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
+        dependency: SlurmRun | list[SlurmRun] = None,
+        run_on: Runner = Runner.SLURM) -> Run:
     """Run a solver on all given instances.
 
     Args:

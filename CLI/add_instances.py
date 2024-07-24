@@ -6,18 +6,17 @@ import argparse
 from pathlib import Path
 import shutil
 
-import global_variables as gv
-from sparkle.platform import file_help as sfh, settings_help
+from CLI.help import global_variables as gv
+from sparkle.platform import file_help as sfh
+from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.instance import InstanceSet
-from sparkle.structures.feature_dataframe import FeatureDataFrame
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from CLI.compute_features import compute_features
 from CLI.run_solvers import running_solvers_performance_data
-import sparkle_logging as sl
+from CLI.help import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc
-from sparkle.platform.settings_help import SettingState
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -46,7 +45,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -60,12 +59,11 @@ if __name__ == "__main__":
     instances_target = gv.instance_dir / instances_source.name
 
     if args.run_on is not None:
-        gv.settings.set_run_on(
+        settings.set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings.get_run_on()
+    run_on = settings.get_run_on()
 
-    check_for_initialise(sys.argv,
-                         ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_INSTANCES])
+    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_INSTANCES])
 
     if not instances_source.exists():
         print(f'Instance set path "{instances_source}" does not exist!')
@@ -95,7 +93,7 @@ if __name__ == "__main__":
     # When adding instances, an empty performance DF has no objectives yet
     performance_data = PerformanceDataFrame(
         gv.performance_data_csv_path,
-        objectives=gv.settings.get_general_sparkle_objectives())
+        objectives=settings.get_general_sparkle_objectives())
     for instance_path in instance_set.get_instance_paths:
         # Construct a name path due to multi-file instances
         feature_data.add_instance(str(instance_path))
@@ -105,8 +103,8 @@ if __name__ == "__main__":
 
     print(f"\nAdding instance set {instance_set.name} done!")
 
-    if Path(gv.sparkle_algorithm_selector_path).exists():
-        sfh.rmfiles(gv.sparkle_algorithm_selector_path)
+    if gv.sparkle_algorithm_selector_path.exists():
+        gv.sparkle_algorithm_selector_path.unlink()
         print("Removing Sparkle portfolio selector "
               f"{gv.sparkle_algorithm_selector_path} done!")
 
@@ -115,11 +113,11 @@ if __name__ == "__main__":
         compute_features(Path(gv.feature_data_csv_path), False)
 
     if args.run_solver_now:
-        num_job_in_parallel = gv.settings.get_number_of_jobs_in_parallel()
+        num_job_in_parallel = settings.get_number_of_jobs_in_parallel()
         running_solvers_performance_data(gv.performance_data_csv_path,
                                          num_job_in_parallel,
                                          rerun=False, run_on=run_on)
         print("Running solvers...")
 
     # Write used settings to file
-    gv.settings.write_used_settings()
+    settings.write_used_settings()

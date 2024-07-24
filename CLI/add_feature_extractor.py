@@ -6,11 +6,11 @@ import shutil
 import argparse
 from pathlib import Path
 
-from sparkle.platform import file_help as sfh, settings_help
-import global_variables as gv
+from sparkle.platform import file_help as sfh, settings_objects
+from CLI.help import global_variables as gv
 from sparkle.structures import FeatureDataFrame
 from CLI.compute_features import compute_features
-import sparkle_logging as sl
+from CLI.help import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc
@@ -36,7 +36,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = settings_objects.Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -46,8 +46,7 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
 
-    check_for_initialise(sys.argv,
-                         ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_FEATURE_EXTRACTOR])
+    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_FEATURE_EXTRACTOR])
 
     extractor_source = Path(args.extractor_path)
     if not extractor_source.exists():
@@ -81,8 +80,8 @@ if __name__ == "__main__":
 
     print(f"Adding feature extractor {extractor_target_path.name} done!")
 
-    if Path(gv.sparkle_algorithm_selector_path).exists():
-        sfh.rmfiles(Path(gv.sparkle_algorithm_selector_path))
+    if gv.sparkle_algorithm_selector_path.exists():
+        gv.sparkle_algorithm_selector_path.unlink()
         print("Removing Sparkle portfolio selector "
               f"{gv.sparkle_algorithm_selector_path} done!")
 

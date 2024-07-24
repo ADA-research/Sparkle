@@ -1,7 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: UTF-8 -*-
 """Helper types for command line interface."""
-
 from enum import Enum
 from typing import Type
 

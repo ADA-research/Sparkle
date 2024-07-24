@@ -1,116 +1,83 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for the execution of a portfolio selector."""
-import subprocess
 import sys
-import fcntl
 from filelock import FileLock, Timeout
 from pathlib import Path
-import ast
 
 import runrunner as rrr
-from runrunner.base import Runner
+from runrunner.base import Runner, Run
 
-from sparkle.platform import file_help as sfh
 from sparkle.solver import Extractor, Solver
-import global_variables as gv
-import tools.general as tg
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from CLI.help import global_variables as gv
+from sparkle.structures import PerformanceDataFrame
 from CLI.support import run_solvers_help as srs
 
 from CLI.help.command_help import CommandName
 
 
-# Called in call_sparkle_portfolio_selector_solve_instance
-# Called in compute_marginal_contribution_help
-def get_list_predict_schedule_from_file(predict_schedule_result_path: str) -> list:
-    """Return the predicted algorithm schedule as a list."""
-    prefix_string = "Selected Schedule [(algorithm, budget)]: "
-    predict_schedule = ""
-    with Path(predict_schedule_result_path).open("r+") as fin:
-        fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-        predict_schedule_lines = fin.readlines()
-        for line in predict_schedule_lines:
-            if line.strip().startswith(prefix_string):
-                predict_schedule = line.strip()
-                break
-    if predict_schedule == "":
-        print("ERROR: Failed to get schedule from algorithm portfolio. Stopping "
-              "execution!\n"
-              f"Schedule file appears to be empty: {predict_schedule_result_path}\n"
-              f"Selector error output path: {gv.sparkle_err_path}")
-        sys.exit(-1)
-
-    predict_schedule_string = predict_schedule[len(prefix_string):]
-    # eval insecure, so use ast.literal_eval instead
-    return ast.literal_eval(predict_schedule_string)
-
-
 # Only called in call_sparkle_portfolio_selector_solve_instance
-def call_solver_solve_instance_within_cutoff(solver: Solver,
-                                             instance_path: str,
-                                             cutoff_time: int,
-                                             performance_data_csv: str = None)\
-        -> bool:
-    """Call the Sparkle portfolio selector to solve a single instance with a cutoff."""
-    _, _, cpu_time_penalised, _, status, raw_result_path = (
-        srs.run_solver_on_instance_and_process_results(solver, instance_path,
-                                                       custom_cutoff=cutoff_time))
+def call_solver_solve_instance_within_cutoff(
+        solver: Solver,
+        instance: Path,
+        cutoff_time: int,
+        performance_data: PerformanceDataFrame = None) -> bool:
+    """Call the Sparkle portfolio selector to solve a single instance with a cutoff.
+
+    Args:
+        solver: The solver to run on the instance
+        instance: The path to the instance
+        cutoff_time: The cutoff time for the solver
+        performance_data: The dataframe to store the results in
+
+    Returns:
+        Whether the instance was solved by the solver
+    """
+    _, _, cpu_time_penalised, _, status, raw_result_path =\
+        srs.run_solver_on_instance_and_process_results(solver,
+                                                       instance,
+                                                       cutoff_time,
+                                                       gv.get_seed())
     flag_solved = False
     if status == "SUCCESS" or status == "SAT" or status == "UNSAT":
         flag_solved = True
 
-    if performance_data_csv is not None:
-        performance_data_csv_path = Path(performance_data_csv)
+    if performance_data is not None:
         solver_name = "Sparkle_Portfolio_Selector"
-        print(f"Trying to write: {cpu_time_penalised}, {solver_name}, {instance_path}")
+        print(f"Trying to write: {cpu_time_penalised}, {solver_name}, {instance}")
         try:
             # Creating a seperate locked file for writing
-            lock = FileLock(f"{performance_data_csv}.lock")
+            lock = FileLock(f"{performance_data.csv_filepath}.lock")
             with lock.acquire(timeout=60):
-                performance_dataframe = PerformanceDataFrame(performance_data_csv_path)
-                performance_dataframe.set_value(cpu_time_penalised, solver_name,
-                                                Path(instance_path).name)
-                performance_dataframe.save_csv()
+                performance_data.set_value(cpu_time_penalised, solver_name, instance)
+                performance_data.save_csv()
             lock.release()
         except Timeout:
-            print(f"ERROR: Cannot acquire File Lock on {performance_data_csv}.")
+            print(f"ERROR: Cannot acquire File Lock on {performance_data}.")
     else:
         if flag_solved:
             print(f"Instance solved by solver {solver.name}")
         else:
             print(f"Solver {solver.name} failed to solve the instance with status "
                   f"{status}")
-    sfh.rmfiles(raw_result_path)
+    raw_result_path.unlink(missing_ok=True)
     return flag_solved
 
 
 # Only called in portfolio_core and run_sparkle_portfolio_selector
-def call_sparkle_portfolio_selector_solve_instance(
-        instance_path: Path,
-        performance_data_csv_path: str = None) -> None:
+def portfolio_selector_solve_instance(
+        instance: Path,
+        performance_data: PerformanceDataFrame = None) -> None:
     """Call the Sparkle portfolio selector to solve a single instance.
 
     Args:
-        instance_path: Path to the instance to run on
-        performance_data_csv_path: path to the performance data
+        instance: Path to the instance to run on
+        performance_data: path to the performance data
     """
-    # Create instance strings to accommodate multi-file instances
-    if isinstance(instance_path, Path):
-        instance_path = str(instance_path)
-    instance_path_list = instance_path.split()
-    instance_file_list = []
-
-    for instance in instance_path_list:
-        instance_file_list.append(Path(instance).name)
-
-    instance_files_str = " ".join(instance_file_list)
-
-    print("Running Sparkle portfolio selector on solving instance "
-          f"{instance_files_str} ...")
+    print(f"Running portfolio selector on solving instance {instance} ...")
 
     cutoff_extractor = gv.settings.get_general_extractor_cutoff_time()
-    print(f"Sparkle computing features of instance {instance_files_str} ...")
+    print(f"Computing features of instance {instance} ...")
     feature_vector = []
     extractor_paths = [p for p in gv.extractor_dir.iterdir()]
     if len(extractor_paths) == 0:
@@ -122,44 +89,28 @@ def call_sparkle_portfolio_selector_solve_instance(
                               gv.sparkle_tmp_path)
         # We create a watch log to filter out runsolver output
         runsolver_watch_path =\
-            gv.sparkle_tmp_path / f"{extractor_path.name}_{instance_path}.wlog"
-        features = extractor.run(instance_path_list,
+            gv.sparkle_tmp_path / f"{extractor_path.name}_{instance}.wlog"
+        features = extractor.run(instance,
                                  runsolver_args=["--cpu-limit", str(cutoff_extractor),
                                                  "-w", runsolver_watch_path])
         for _, _, value in features:
             feature_vector.append(value)
         runsolver_watch_path.unlink(missing_ok=True)
-    print(f"Sparkle computing features of instance {instance_files_str} done!")
-
-    predict_schedule_result_path = Path(
-        f"Tmp/predict_schedule_{tg.get_time_pid_random_string()}.predres")
+    print(f"Sparkle computing features of instance {instance} done!")
 
     print("Sparkle portfolio selector predicting ...")
-    cmd_list = [gv.python_executable, gv.autofolio_exec_path, "--load",
-                gv.sparkle_algorithm_selector_path, "--feature_vec",
-                " ".join(map(str, feature_vector))]
-    process = subprocess.run(cmd_list,
-                             stdout=predict_schedule_result_path.open("w+"),
-                             stderr=gv.sparkle_err_path.open("w+"))
+    selector = gv.settings.get_general_sparkle_selector()
+    predict_schedule = selector.run(gv.sparkle_algorithm_selector_path, feature_vector)
 
-    if process.returncode != 0:
-        # AutoFolio Error: "TypeError: Argument 'placement' has incorrect type"
-        print(f"Error getting predict schedule! See {gv.sparkle_err_path} for output.")
-        sys.exit(process.returncode)
+    if predict_schedule is None:
+        # Selector Failed to produce prediction
+        sys.exit(-1)
     print("Predicting done!")
-
-    print(predict_schedule_result_path.open("r").read())
-    list_predict_schedule = get_list_predict_schedule_from_file(
-        predict_schedule_result_path)
-    sfh.rmfiles([predict_schedule_result_path, gv.sparkle_err_path])
-
-    for pred in list_predict_schedule:
-        solver = Solver(Path(pred[0]))
-        cutoff_time = pred[1]
-        print(f"Calling solver {solver.name} with "
-              f"time budget {cutoff_time} for solving ...")
+    for solver, cutoff_time in predict_schedule:
+        solver = Solver(Path(solver))
+        print(f"Calling solver {solver.name} with time budget {cutoff_time} ...")
         flag_solved = call_solver_solve_instance_within_cutoff(
-            solver, instance_path, cutoff_time, performance_data_csv_path)
+            solver, instance, cutoff_time, performance_data)
         print(f"Calling solver {solver.name} done!")
 
         if flag_solved:
@@ -173,7 +124,7 @@ def run_portfolio_selector_on_instances(
         instances: list[Path],
         performance_data: PerformanceDataFrame,
         portfolio_selector: Path,
-        run_on: Runner = Runner.SLURM) -> None:
+        run_on: Runner = Runner.SLURM) -> Run:
     """Call the Sparkle portfolio selector to solve all instances in a directory.
 
     Args:
@@ -181,6 +132,9 @@ def run_portfolio_selector_on_instances(
         performance_data: The dataframe to store the results in.
         portfolio_selector: Path to the selector.
         run_on: Whether to run with Slurm or Local.
+
+    Returns:
+        RunRunner Run object regarding the selector call.
     """
     for instance_path in instances:
         performance_data.add_instance(instance_path.name)
@@ -207,8 +161,4 @@ def run_portfolio_selector_on_instances(
         sbatch_options=gv.settings.get_slurm_extra_options(as_args=True),
         srun_options=["-N1", "-n1", "--exclusive"])
 
-    if run_on == Runner.LOCAL:
-        run.wait()
-        print("Running Sparkle portfolio selector done!")
-    else:
-        print("Sparkle portfolio selector is running ...")
+    return run

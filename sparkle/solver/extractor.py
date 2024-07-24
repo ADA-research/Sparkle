@@ -5,7 +5,7 @@ import ast
 import subprocess
 from sparkle.types import SparkleCallable
 from sparkle.structures import FeatureDataFrame
-from tools.runsolver_parsing import get_status
+from sparkle.tools.runsolver_parsing import get_status
 
 
 class Extractor(SparkleCallable):
