@@ -33,10 +33,10 @@ config_test_data="tests/CLI/test_files/Output/Configuration/Raw_Data/SMAC2/scena
 validation_train_data="tests/CLI/test_files/Output/Validation/PbO-CCSAT-Generic_PTN/"
 validation_test_data="tests/CLI/test_files/Output/Validation/PbO-CCSAT-Generic_PTN2/"
 
-CLI/initialise.py > /dev/null
-CLI/add_instances.py $instances_src_path_train > /dev/null
-CLI/add_instances.py $instances_src_path_test > /dev/null
-CLI/add_solver.py $solver_src_path > /dev/null
+sparkle/CLI/initialise.py > /dev/null
+sparkle/CLI/add_instances.py $instances_src_path_train > /dev/null
+sparkle/CLI/add_instances.py $instances_src_path_test > /dev/null
+sparkle/CLI/add_solver.py $solver_src_path > /dev/null
 
 # Copy scenario to simulate configuration
 mv $scenario_path $scenario_tmp 2> /dev/null # Save user data (if any)
@@ -51,7 +51,7 @@ cp -r $validation_test_data $validation_scenario_path
 
 # Test generate report for configuration with both train and test sets
 output_true="Report is placed at:"
-output=$(CLI/generate_report.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test --settings-file $sparkle_test_settings_path | tail -1)
+output=$(sparkle/CLI/generate_report.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true* ]];
 then
@@ -62,7 +62,7 @@ else
 fi
 
 # Test generate report for configuration with just training set
-output=$(CLI/generate_report.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path | tail -1)
+output=$(sparkle/CLI/generate_report.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true* ]];
 then

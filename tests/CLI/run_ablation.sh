@@ -39,10 +39,10 @@ config_test_data="tests/CLI/test_files/Output/Configuration/Raw_Data/SMAC2/scena
 validation_train_data="tests/CLI/test_files/Output/Validation/PbO-CCSAT-Generic_PTN/"
 validation_test_data="tests/CLI/test_files/Output/Validation/PbO-CCSAT-Generic_PTN2/"
 
-CLI/initialise.py > /dev/null
-CLI/add_instances.py $instances_src_path_train > /dev/null
-CLI/add_instances.py $instances_src_path_test > /dev/null
-CLI/add_solver.py $solver_src_path > /dev/null
+sparkle/CLI/initialise.py > /dev/null
+sparkle/CLI/add_instances.py $instances_src_path_train > /dev/null
+sparkle/CLI/add_instances.py $instances_src_path_test > /dev/null
+sparkle/CLI/add_solver.py $solver_src_path > /dev/null
 
 # Copy configuration results and other files to simulate the configuration command
 # Prepare configuration scenario output files
@@ -53,7 +53,7 @@ cp -r $validation_train_data $validation_scenario_path
 cp -r $validation_test_data $validation_scenario_path
 
 # Configure solver
-output=$(CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path --ablation --run-on $slurm_available | tail -1)
+output=$(sparkle/CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path --ablation --run-on $slurm_available | tail -1)
 output_true="Running configuration. Waiting for Slurm job(s) with id(s): "
 if ! [[ $slurm_available =~ "${slurm_true}" ]];
 then
@@ -86,7 +86,7 @@ cp -r $validation_train_data $validation_scenario_path
 cp -r $validation_test_data $validation_scenario_path
 
 # Run ablation on train set
-output=$(CLI/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(sparkle/CLI/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 output_true="Ablation analysis "
 
 if [[ $output =~ "${output_true}" ]];
@@ -108,7 +108,7 @@ fi
 
 
 # Run ablation on test set
-output=$(CLI/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(sparkle/CLI/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then

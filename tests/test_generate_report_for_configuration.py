@@ -7,7 +7,7 @@ from pytest_mock import MockFixture
 
 from sparkle.solver.ablation import AblationScenario
 from sparkle.platform import generate_report_for_configuration as sgrch
-from CLI.help import global_variables as gv
+from sparkle.CLI.help import global_variables as gv
 from sparkle.platform.settings_objects import Settings
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.validator import Validator

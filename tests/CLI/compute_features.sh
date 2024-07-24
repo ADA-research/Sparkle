@@ -22,13 +22,13 @@ slurm_available=$(detect_slurm)
 instances_path="Examples/Resources/Instances/PTN"
 extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle"
 
-CLI/initialise.py > /dev/null
-CLI/add_instances.py $instances_path > /dev/null
-CLI/add_feature_extractor.py $extractor_path > /dev/null
+sparkle/CLI/initialise.py > /dev/null
+sparkle/CLI/add_instances.py $instances_path > /dev/null
+sparkle/CLI/add_feature_extractor.py $extractor_path > /dev/null
 
 
 output_true="[RunRunner] Submitted a run to Slurm "
-output=$(CLI/compute_features.py --settings-file $sparkle_test_settings_path --run-on slurm | tail -1)
+output=$(sparkle/CLI/compute_features.py --settings-file $sparkle_test_settings_path --run-on slurm | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
@@ -50,7 +50,7 @@ fi
 
 # TODO: Run the compute features locally
 output_true="Computing features done!"
-output=$(CLI/compute_features.py --settings-file $sparkle_test_settings_path --run-on local | tail -1)
+output=$(sparkle/CLI/compute_features.py --settings-file $sparkle_test_settings_path --run-on local | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then

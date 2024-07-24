@@ -19,7 +19,7 @@ dependencies:
     - certifi==2024.2.2
     - click==8.1.7
     - cloudpickle==3.0.0
-    - ConfigSpace==0.7.1
+    - ConfigSpace==1.1.1
     - dask==2024.3.1
     - distributed==2024.3.1
     - filelock==3.15.1

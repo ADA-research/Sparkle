@@ -18,7 +18,7 @@ per-file-ignores = __init__.py:F401
                  = setup.py   :E501
                  = tests/*    :S101 
                  = test/*     :S101
-                 = CLI/run_parallel_portfolio.py            :FS001
+                 = sparkle/CLI/run_parallel_portfolio.py            :FS001
                  = sparkle/configurator/implementations/__init__.py :S307
 
 docstring-convention=google

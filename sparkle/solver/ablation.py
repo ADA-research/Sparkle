@@ -10,10 +10,10 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner, Run
 
-from CLI.help import global_variables as gv
+from sparkle.CLI.help import global_variables as gv
 
 from sparkle.configurator.implementations import SMAC2
-from CLI.help.command_help import CommandName
+from sparkle.CLI.help.command_help import CommandName
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 

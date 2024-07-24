@@ -16,7 +16,7 @@ from runrunner import Runner, Run
 
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
-from CLI.help.command_help import CommandName
+from sparkle.CLI.help.command_help import CommandName
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
 from sparkle.instance import InstanceSet

@@ -11,7 +11,7 @@ import subprocess
 
 from sparkle.platform import tex_help as stex
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from CLI.support import compute_marginal_contribution_help as scmch
+from sparkle.CLI.support import compute_marginal_contribution_help as scmch
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 
 

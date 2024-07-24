@@ -37,11 +37,11 @@ solverA_path="Examples/Resources/Solvers/CSCCSat/"
 solverB_path="Examples/Resources/Solvers/MiniSAT/"
 sparkle_settings_path="tests/CLI/test_files/Settings/sparkle_settings.ini"
 
-CLI/initialise.py > /dev/null
-CLI/add_instances.py $instances_path > /dev/null
-CLI/add_feature_extractor.py $extractor_path > /dev/null
-CLI/add_solver.py $solverA_path > /dev/null
-CLI/add_solver.py $solverB_path > /dev/null
+sparkle/CLI/initialise.py > /dev/null
+sparkle/CLI/add_instances.py $instances_path > /dev/null
+sparkle/CLI/add_feature_extractor.py $extractor_path > /dev/null
+sparkle/CLI/add_solver.py $solverA_path > /dev/null
+sparkle/CLI/add_solver.py $solverB_path > /dev/null
 
 # Activate test data to simulate the compute_features, run_solvers and construct_sparkle_portfolio_selector commands
 cp $feature_data_test $feature_data_path
@@ -50,7 +50,7 @@ cp $selector_test $selector_path
 
 # Generate report
 output_true="Report generated ..."
-output=$(CLI/generate_report.py --selection --settings-file $sparkle_settings_path | tail -1)
+output=$(sparkle/CLI/generate_report.py --selection --settings-file $sparkle_settings_path | tail -1)
 
 if [[ $output == $output_true ]];
 then

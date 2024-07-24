@@ -11,7 +11,7 @@ def main() -> None:
         print("Usage: sparkle <command>")
         sys.exit(1)
     command = sys.argv[1]
-    commandfile = Path(f"./CLI/{command}.py")
+    commandfile = Path(f"./sparkle/CLI/{command}.py")
     if commandfile.is_file():
         os.system(f"{commandfile} {' '.join(sys.argv[2:])}")
     else:

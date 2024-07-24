@@ -14,7 +14,7 @@
 
 # Cleanup temporary files
 output_true="Temporary files cleaned!"
-output=$(CLI/cleanup_temporary_files.py | tail -1)
+output=$(sparkle/CLI/cleanup_temporary_files.py | tail -1)
 
 if [[ $output == $output_true ]];
 then

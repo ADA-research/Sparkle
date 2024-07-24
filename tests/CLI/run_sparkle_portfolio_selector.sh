@@ -35,18 +35,18 @@ sparkle_test_settings_path="tests/CLI/test_files/Settings/sparkle_settings.ini"
 slurm_true="slurm"
 slurm_available=$(detect_slurm)
 
-CLI/initialise.py > /dev/null
-CLI/add_instances.py $instances_path > /dev/null
-CLI/add_feature_extractor.py $extractor_path > /dev/null
-CLI/add_solver.py $solverA_path > /dev/null
-CLI/add_solver.py $solverB_path > /dev/null
+sparkle/CLI/initialise.py > /dev/null
+sparkle/CLI/add_instances.py $instances_path > /dev/null
+sparkle/CLI/add_feature_extractor.py $extractor_path > /dev/null
+sparkle/CLI/add_solver.py $solverA_path > /dev/null
+sparkle/CLI/add_solver.py $solverB_path > /dev/null
 
 # Activate test data to simulate the compute_features, run_solvers and construct_sparkle_portfolio_selector commands
 cp $selector_test $selector_path
 
 # Run portfolio selector on a single instance
 output_true="Running Sparkle portfolio selector done!"
-output=$(CLI/run_sparkle_portfolio_selector.py $instance_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available| tail -1)
+output=$(sparkle/CLI/run_sparkle_portfolio_selector.py $instance_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available| tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -61,7 +61,7 @@ if [[ $slurm_available == $slurm_true ]];
 then
 	output_true="Sparkle portfolio selector is running ..."
 fi
-output=$(CLI/run_sparkle_portfolio_selector.py $instances_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available| tail -1)
+output=$(sparkle/CLI/run_sparkle_portfolio_selector.py $instances_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available| tail -1)
 
 if [[ $output == $output_true ]];
 then

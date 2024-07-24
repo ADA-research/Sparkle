@@ -46,11 +46,11 @@ solverB_path="Examples/Resources/Solvers/MiniSAT/"
 
 sparkle_test_settings_path="tests/CLI/test_files/Settings/sparkle_settings.ini"
 
-CLI/initialise.py > /dev/null
-CLI/add_instances.py $instances_path > /dev/null
-CLI/add_feature_extractor.py $extractor_path > /dev/null
-CLI/add_solver.py $solverA_path > /dev/null
-CLI/add_solver.py $solverB_path > /dev/null
+sparkle/CLI/initialise.py > /dev/null
+sparkle/CLI/add_instances.py $instances_path > /dev/null
+sparkle/CLI/add_feature_extractor.py $extractor_path > /dev/null
+sparkle/CLI/add_solver.py $solverA_path > /dev/null
+sparkle/CLI/add_solver.py $solverB_path > /dev/null
 
 # Activate test data to simulate the compute_features, run_solvers, construct_sparkle_portfolio_selector and run_sparkle_portfolio_selector commands
 cp $feature_data_test $feature_data_path
@@ -60,7 +60,7 @@ cp -r $test_results_test ./
 
 # Run generate report for tetst
 output_true="Report for test generated ..."
-output=$(CLI/generate_report.py --test-case-directory $test_results_dir --settings-file $sparkle_test_settings_path | tail -1)
+output=$(sparkle/CLI/generate_report.py --test-case-directory $test_results_dir --settings-file $sparkle_test_settings_path | tail -1)
 # --settings-file $sparkle_test_settings_path
 
 if [[ $output == $output_true ]];
