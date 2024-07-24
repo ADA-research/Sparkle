@@ -159,6 +159,6 @@ def run_portfolio_selector_on_instances(
         name=CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR,
         base_dir=gv.sparkle_tmp_path,
         sbatch_options=gv.settings.get_slurm_extra_options(as_args=True),
-        srun_options=["-N1", "-n1", "--exclusive"])
+        srun_options=["-N1", "-n1"])
 
     return run
