@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 import sys
+from typing import Any
 import shlex
 import ast
 from pathlib import Path
 import subprocess
 from sparkle.tools import runsolver_parsing
 import pcsparser
-from sparkle.types import SparkleCallable
+from sparkle.types import SparkleCallable, SolverStatus
 
 
 class Solver(SparkleCallable):
@@ -155,16 +156,11 @@ class Solver(SparkleCallable):
                   f"The used command was: {solver_cmd}\n The error yielded was: \n"
                   f"\t-stdout: '{process.stdout.decode()}'\n"
                   f"\t-stderr: '{process.stderr.decode()}'\n")
-            return {"status": "ERROR", }
+            return {"status": SolverStatus.ERROR, }
 
-        # Resolving solver output
-        if runsolver_configuration is not None:
-            return runsolver_parsing.get_solver_output(runsolver_configuration,
-                                                       process.stdout.decode(),
-                                                       cwd)
-
-        # Ran without runsolver, can read solver output directly
-        return ast.literal_eval(process.stdout.decode())
+        return Solver.parse_solver_output(process.stdout.decode(),
+                                          runsolver_configuration,
+                                          cwd)
 
     @staticmethod
     def config_str_to_dict(config_str: str) -> dict[str, str]:
@@ -181,3 +177,30 @@ class Solver(SparkleCallable):
             value = config_list[index + 1].strip('"').strip("'")
             config_dict[config_list[index]] = value
         return config_dict
+
+    @staticmethod
+    def parse_solver_output(solver_output: str,
+                            runsolver_configuration: list[str] = None,
+                            cwd: Path = None) -> dict[str, Any]:
+        """Parse the output of the solver.
+
+        Args:
+            solver_output: The output of the solver run which needs to be parsed
+            runsolver_configuration: The runsolver configuration to wrap the solver
+                with. If runsolver was not used this should be None.
+            cwd: Path where to execute. Defaults to self.raw_output_directory.
+
+        Returns:
+            Dictionary representing the parsed solver output
+        """
+        if runsolver_configuration is not None:
+            parsed_output = runsolver_parsing.get_solver_output(runsolver_configuration,
+                                                                solver_output,
+                                                                cwd)
+        else:
+            parsed_output = ast.literal_eval(solver_output)
+
+        # cast status attribute from str to Enum
+        parsed_output["status"] = SolverStatus(parsed_output["status"])
+
+        return parsed_output
