@@ -8,18 +8,20 @@ Notable changes to Sparkle will be documented in this file.
 - The use of --parallel arguments is now deprecrated and all related functionality is now controlled by the settings file general number of jobs parallel setting. [SPRK-275]
 - The slurm_settings are now handled by the general sparkle settings, where the user can add any unknown options to the Slurm settings
 - Components are now part of the sparkle library directory, to ensure existence after pip install.
-- The wait command has had a major revision, now aimed to encapsulate all information presented by squeue. Can be turned off to work as in previous version by turning verbosity to quiet.
+- The wait command has had a major revision, now aimed to encapsulate all information presented by squeue. Can be turned off to work as in previous version by turning verbosity to quiet in settings.
 - Extractors now have a preliminary object representation.
 - SparkleFeatureDataCSV has been replaced with FeatureDataFrame.
 - FeatureDataFrame and PerformanceDataFrame are now sorted after initialisation (once) to avoid slow look up by pandas.DataFrame.loc.
 - Marginal Contribution computation (Virtual Best) now mostly done by PerformanceDataFrame. Cap values no longer part of computation and most be done beforehand.
 - Ablation scenarios are now stored in the Output/Ablation directory, and the validation is stored in a subdirectory of the scenario.
+- Feature extractors can now define feature groups and can be parallelised per feature group.
+- Solver return status are now defined as an Enum instead of strings.
 
 ### Added
 - Object representation for Instance Sets. Can deal with Multi-file instances, and single instances are considered a set of one.
-- Documentation website has a new design and GitHub pages has been added instead of Read the Docs, and will soon replace Read the Docs.
+- Documentation website has a new design and GitHub pages has been added instead of Read the Docs, and will soon replace Read the Docs. Can already be seen on Github pages.
 - The run-on argument is now also available as a general setting, which will be overriden if the CLI argument is also given.
-- SATZilla2024 has been added to the Examples.
+- SATZilla2024 has been added to the Example feature extractors.
 
 ### Fixed
 - Bug fix regarding the retrieval of the best configuration from SMAC2.

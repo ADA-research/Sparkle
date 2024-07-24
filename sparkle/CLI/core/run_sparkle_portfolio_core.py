@@ -29,4 +29,4 @@ if __name__ == "__main__":
     instance_path = " ".join(args.instance)
     performance_data = PerformanceDataFrame(Path(args.performance_data_csv))
     # Run portfolio selector
-    srpsh.portfolio_selector_solve_instance(instance_path, performance_data)
+    srpsh.portfolio_selector_solve_instance(Path(instance_path), performance_data)
