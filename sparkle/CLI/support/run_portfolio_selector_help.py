@@ -33,7 +33,7 @@ def call_solver_solve_instance_within_cutoff(
     Returns:
         Whether the instance was solved by the solver
     """
-    _, _, cpu_time_penalised, _, status, raw_result_path =\
+    _, _, cpu_time_penal, _, status, raw_result_path =\
         srs.run_solver_on_instance_and_process_results(solver,
                                                        instance,
                                                        cutoff_time,
@@ -44,12 +44,14 @@ def call_solver_solve_instance_within_cutoff(
 
     if performance_data is not None:
         solver_name = "Sparkle_Portfolio_Selector"
-        print(f"Trying to write: {cpu_time_penalised}, {solver_name}, {instance}")
+        print(f"Trying to write: {cpu_time_penal}, {solver_name}, {instance}")
         try:
             # Creating a seperate locked file for writing
             lock = FileLock(f"{performance_data.csv_filepath}.lock")
             with lock.acquire(timeout=60):
-                performance_data.set_value(cpu_time_penalised, solver_name, instance)
+                # Reload the dataframe to latest version
+                performance_data = PerformanceDataFrame(performance_data.csv_filepath)
+                performance_data.set_value(cpu_time_penal, solver_name, str(instance))
                 performance_data.save_csv()
             lock.release()
         except Timeout:
@@ -137,9 +139,9 @@ def run_portfolio_selector_on_instances(
         RunRunner Run object regarding the selector call.
     """
     for instance_path in instances:
-        performance_data.add_instance(instance_path.name)
+        performance_data.add_instance(str(instance_path))
 
-    performance_data.add_solver(portfolio_selector.parent)
+    performance_data.add_solver(str(portfolio_selector.parent))
 
     performance_data.save_csv()
 
