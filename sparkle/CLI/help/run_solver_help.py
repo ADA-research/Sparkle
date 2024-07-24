@@ -21,7 +21,7 @@ def call_solver(
         instance_set: InstanceSet,
         solver: Solver,
         config: str | Path = None,
-        seed: int | list[int] = None,
+        seed: int | list[int] = 42,
         outdir: Path = None,
         commandname: CommandName = CommandName.RUN_SOLVERS,
         dependency: SlurmRun | list[SlurmRun] = None,

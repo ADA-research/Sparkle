@@ -55,7 +55,7 @@ if __name__ == "__main__":
         srs.run_solver_on_instance_and_process_results(solver,
                                                        instance_path,
                                                        cutoff,
-                                                       args.seed)
+                                                       args.seed if args.seed else 42)
 
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
         measurement = quality[0]  # TODO: Handle the multi-objective case
