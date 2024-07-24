@@ -10,6 +10,7 @@ from sparkle.solver import Solver
 from sparkle.solver import sat_help as sh
 import sparkle.tools.general as tg
 from sparkle.tools.runsolver_parsing import handle_timeouts
+from sparkle.types import SolverStatus
 
 
 def run_solver_on_instance_and_process_results(
@@ -65,6 +66,7 @@ def verify(instance: Path, raw_result: Path, solver: Solver, status: str)\
     """Run a solution verifier on the solution and update the status if needed."""
     verifier = gv.settings.get_general_solution_verifier()
     # Use verifier if one is given and the solver did not time out
-    if verifier == SolutionVerifier.SAT and status != "TIMEOUT" and status != "UNKNOWN":
+    if verifier == SolutionVerifier.SAT and status != SolverStatus.TIMEOUT \
+            and status != SolverStatus.UNKNOWN:
         return sh.sat_verify(instance, raw_result, solver)
     return status

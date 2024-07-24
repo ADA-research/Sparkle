@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-#Sparkle SMAC wrapper VRP_heuristic_Jan_MkII_Sparkle
+# Sparkle SMAC wrapper VRP_heuristic_Jan_MkII_Sparkle
 
 import time
 import sys
@@ -15,7 +15,7 @@ args = parse_commandline_dict(sys.argv[1:])
 solver_dir = Path(args["solver_dir"])
 instance = args["instance"]
 specifics = args["specifics"]
-cutoff_time = int(args["cutoff_time"])+1
+cutoff_time = int(args["cutoff_time"]) + 1
 # run_length = args["run_length"]
 seed = args["seed"]
 
@@ -34,7 +34,8 @@ for key in args:
         params.extend(["-" + str(key), str(args[key])])
 
 solver_binary = "VRP_SISRs"
-solver_exec = f"{solver_dir / solver_binary}" if solver_dir != Path(".") else "./" + solver_binary
+solver_exec = f"{solver_dir / solver_binary}" if solver_dir != Path(".") else "./" \
+    + solver_binary
 solver_cmd = [solver_exec,
               "-inst", str(instance),
               "-seed", str(seed)]
@@ -48,8 +49,8 @@ solver_call = subprocess.run(solver_cmd + params,
 output_str = solver_call.stdout.decode()
 output_list = output_str.splitlines()
 
-quality=1000000000000
-status = r'SUCCESS'#always ok, code checks per iteration whether cutoff time is exceeded
+quality = 1000000000000
+status = r'SUCCESS'  # always ok, code checks per iteration if cutoff time is exceeded
 
 if len(output_list) > 0:
     quality = output_list[-1].strip()
@@ -68,7 +69,7 @@ if specifics == 'rawres':
         outfile.write(str(solver_cmd + params) + "\n" + output_str)
 
 outdir = {"status": status,
-		  "quality": quality,
+          "quality": quality,
           "solver_call": solver_cmd + params}
 
 print(outdir)
