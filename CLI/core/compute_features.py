@@ -5,7 +5,7 @@ import argparse
 from pathlib import Path
 from filelock import FileLock
 
-import global_variables as gv
+from CLI.help import global_variables as gv
 from sparkle.structures import FeatureDataFrame
 from sparkle.instance import InstanceSet
 from sparkle.solver import Extractor
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     # We are not interested in the runsolver log, but create the file to filter it
     # from the extractor call output
     runsolver_watch_path =\
-        gv.sparkle_tmp_path / f"{instance_path.name}_{extractor_path.name}.wlog"
+        gv.sparkle_tmp_path / f"{instance_name}_{extractor_path.name}.wlog"
     features = extractor.run(instance_list,
                              feature_group=args.feature_group,
                              runsolver_args=["--cpu-limit", cutoff_extractor,

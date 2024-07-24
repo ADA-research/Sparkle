@@ -18,11 +18,6 @@ class Scenario(str, Enum):
     CONFIGURATION = "CONFIGURATION"
     PARALLEL_PORTFOLIO = "PARALLEL_PORTFOLIO"
 
-    @staticmethod
-    def from_str(scenario: str) -> Scenario:
-        """Return a Scenario for a given str."""
-        return Scenario(scenario)
-
 
 class ReportingScenario:
     """Class to manage scenarios executed with Sparkle."""
@@ -87,7 +82,7 @@ class ReportingScenario:
             option_names = ("scenario",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
-                    value = Scenario.from_str(file_scenario.get(section, option))
+                    value = Scenario(file_scenario.get(section, option))
                     self.set_latest_scenario(value)
                     file_scenario.remove_option(section, option)
 
@@ -151,11 +146,11 @@ class ReportingScenario:
             for section in sections:
                 for option in file_scenario[section]:
                     print(f'Unrecognised section - option combination:"{section} '
-                          f'{option}" in file {str(file_path)} ignored')
+                          f'{option}" in file {file_path} ignored')
 
         # Print error if unable to read the scenario file
         else:
-            print(f"WARNING: Failed to read latest scenario from {str(file_path)} The "
+            print(f"WARNING: Failed to read latest scenario from {file_path} The "
                   "file may have been empty, or is in another format than INI. Default "
                   "values will be used.")
 
@@ -229,7 +224,7 @@ class ReportingScenario:
 
     def get_latest_scenario(self: ReportingScenario) -> Scenario:
         """Return the latest Scenario that was executed."""
-        return Scenario.from_str(self.__scenario["latest"]["scenario"])
+        return Scenario(self.__scenario["latest"]["scenario"])
 
     # Selection settings ###
 

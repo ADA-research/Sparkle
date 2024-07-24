@@ -5,11 +5,11 @@ import sys
 import argparse
 
 from CLI.initialise import check_for_initialise
-import global_variables as gv
+from CLI.help import global_variables as gv
 from CLI.help import system_status as sssh
-import sparkle_logging as sl
+from CLI.help import sparkle_logging as sl
 from CLI.help import argparse_custom as ac
-from sparkle.platform import settings_help
+from sparkle.platform.settings_objects import Settings
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -31,8 +31,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     global settings
-    gv.settings = settings_help.Settings()
-    check_for_initialise(sys.argv, [])
+    gv.settings = Settings()
+    check_for_initialise()
 
     print("Reporting current system status of Sparkle ...")
     sssh.print_sparkle_list([s for s in gv.solver_dir.iterdir()], "Solver", args.verbose)
@@ -40,10 +40,10 @@ if __name__ == "__main__":
                             "Extractor", args.verbose)
     sssh.print_sparkle_list([i for i in gv.instance_dir.iterdir()],
                             "Instance", args.verbose)
-    sssh.print_list_remaining_feature_computation_job(
+    sssh.print_feature_computation_jobs(
         gv.feature_data_csv_path, args.verbose
     )
-    sssh.print_list_remaining_performance_computation_job(
+    sssh.print_performance_computation_jobs(
         gv.performance_data_csv_path, args.verbose
     )
 

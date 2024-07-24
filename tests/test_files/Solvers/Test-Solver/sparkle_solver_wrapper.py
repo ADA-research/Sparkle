@@ -4,8 +4,9 @@ import sys
 import ast
 import subprocess
 from pathlib import Path
-from tools.general import get_time_pid_random_string
 from sparkle.types import SolverStatus
+from sparkle.tools.general import get_time_pid_random_string
+
 
 # Convert the argument of the target_algorithm script to dictionary
 args = ast.literal_eval(sys.argv[1])
@@ -13,7 +14,7 @@ args = ast.literal_eval(sys.argv[1])
 # Extract and delete data that needs specific formatting
 instance = args["instance"]
 specifics = args["specifics"]
-cutoff_time = int(args["cutoff_time"])+1
+cutoff_time = int(args["cutoff_time"]) + 1
 # run_length = args["run_length"]
 seed = args["seed"]
 
@@ -31,7 +32,8 @@ tmp_directory.mkdir(exist_ok=True)
 
 instance_name = Path(instance).name
 solver_name = Path(solver_binary).name
-runsolver_watch_data_path = tmp_directory / (solver_name + "_" + instance_name + "_" + get_time_pid_random_string() + ".log")
+runsolver_watch_data_path = tmp_directory / (solver_name + "_" + instance_name + "_"
+                                             + get_time_pid_random_string() + ".log")
 
 runsolver_call = [runsolver_binary,
                   "-w", str(runsolver_watch_data_path),

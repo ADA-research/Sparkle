@@ -6,8 +6,8 @@ import time
 import sys
 import subprocess
 from pathlib import Path
-from tools.slurm_parsing import parse_commandline_dict
 from sparkle.types import SolverStatus
+from sparkle.tools.slurm_parsing import parse_commandline_dict
 
 # Convert the arguments to a dictionary
 args = parse_commandline_dict(sys.argv[1:])
@@ -61,12 +61,15 @@ for line in output_str.splitlines():
     words = line.strip().split()
     if len(words) <= 0:
         continue
-    if status != SolverStatus.SUCCESS and len(words) == 18 and words[1] == 'We' and words[2] == 'recommend':
+    if status != SolverStatus.SUCCESS and len(words) == 18 and words[1] == 'We' and \
+       words[2] == 'recommend':
         # First output line is normal, probably no crash
-        # If no actual solution is found, we probably reach the cutoff time before finding a solution
+        # If no actual solution is found, we probably reach the cutoff time before
+        # finding a solution
         status = SolverStatus.TIMEOUT
-    words[1].replace('.','',1).isdigit()
-    if len(words) == 4 and words[1].replace('.','',1).isdigit() and words[2].replace('.','',1).isdigit() and words[3].replace('.','',1).isdigit():
+    words[1].replace('.', '', 1).isdigit()
+    if len(words) == 4 and words[1].replace('.', '', 1).isdigit() and words[2]\
+       .replace('.', '', 1).isdigit() and words[3].replace('.', '', 1).isdigit():
         temp_solution_quality = int(words[2])
         if temp_solution_quality < solution_quality:
             solution_quality = temp_solution_quality

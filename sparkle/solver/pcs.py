@@ -1,29 +1,6 @@
 """Methods to deal with Parameter Configuration Space files."""
-
 from pathlib import Path
 from sparkle.solver import Solver
-
-import sparkle_logging as sl
-
-
-def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
-    """Return the name of the PCS file in a solver directory.
-
-    If not found, return an empty str.
-
-    Args:
-        solver_directory: Directory of solver
-
-    Returns:
-        Returns string containing the name of pcs file if found
-    """
-    for file_path in Path(solver_directory).iterdir():
-        file_extension = "".join(file_path.suffixes)
-
-        if file_extension == ".pcs":
-            return file_path.name
-
-    return ""
 
 
 def write_configuration_pcs(solver: Solver, config_str: str, tmp_path: Path) -> None:
@@ -47,8 +24,7 @@ def write_configuration_pcs(solver: Solver, config_str: str, tmp_path: Path) -> 
             optimised_configuration_list[i + 1].strip(" '"))
 
     # Read existing PCS file and create output content
-    pcs_file = solver.directory / get_pcs_file_from_solver_directory(
-        solver.directory)
+    pcs_file = solver.get_pcs_file()
     pcs_file_out = []
 
     with pcs_file.open("r") as infile:
@@ -91,7 +67,3 @@ def write_configuration_pcs(solver: Solver, config_str: str, tmp_path: Path) -> 
     with latest_configuration_pcs_path.open("w") as outfile:
         for element in pcs_file_out:
             outfile.write(str(element))
-    # Log output
-    sl.add_output(str(latest_configuration_pcs_path), "PCS file with configured "
-                  "algorithm parameters of the most recent configuration process "
-                  "as default values")

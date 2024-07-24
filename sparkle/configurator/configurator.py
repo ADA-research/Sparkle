@@ -6,8 +6,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from pathlib import Path
 
-import runrunner as rrr
-from runrunner import Runner
+from runrunner import Runner, Run
 
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver import Solver
@@ -59,7 +58,7 @@ class Configurator:
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
                   num_parallel_jobs: int = None,
-                  run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
+                  run_on: Runner = Runner.SLURM) -> Run:
         """Start configuration job.
 
         Args:

@@ -3,7 +3,6 @@
 """Helper functions for parallel portfolio report generation."""
 from pathlib import Path
 
-import sparkle_logging as sl
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 from sparkle.instance import InstanceSet
@@ -403,4 +402,3 @@ def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
                          target_path,
                          "Sparkle_Report_Parallel_Portfolio",
                          dict_variable_to_value)
-    sl.add_output(str(target_path), "Sparkle parallel portfolio report")

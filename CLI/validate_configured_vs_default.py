@@ -5,10 +5,10 @@ import sys
 import argparse
 from pathlib import PurePath
 
-import global_variables as gv
+from CLI.help import global_variables as gv
 from sparkle.solver import pcs
-import sparkle_logging as sl
-from sparkle.platform.settings_help import SettingState, Settings
+from CLI.help import sparkle_logging as sl
+from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from sparkle.configurator.configurator import Configurator
@@ -16,7 +16,6 @@ from sparkle.solver.validator import Validator
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from CLI.help import command_help as ch
-from sparkle.platform import settings_help
 from CLI.initialise import check_for_initialise
 from CLI.help.nicknames import resolve_object_name
 
@@ -49,7 +48,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -75,7 +74,6 @@ if __name__ == "__main__":
     run_on = gv.settings.get_run_on()
 
     check_for_initialise(
-        sys.argv,
         ch.COMMAND_DEPENDENCIES[ch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT]
     )
     if args.configurator is not None:
@@ -110,8 +108,7 @@ if __name__ == "__main__":
     _, opt_config_str = configurator.get_optimal_configuration(
         solver, instance_set_train, objective.PerformanceMeasure)
 
-    pcs.write_configuration_pcs(solver, opt_config_str,
-                                gv.sparkle_tmp_path)
+    pcs.write_configuration_pcs(solver, opt_config_str, gv.sparkle_tmp_path)
 
     validator = Validator(gv.validation_output_general)
     all_validation_instances = [instance_set_train]

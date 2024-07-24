@@ -4,11 +4,8 @@ Reference_Lists/*
 Solvers/*
 Extractors/*
 Instances/*
-Configuration_Reports/*
 Feature_Data/*
 Performance_Data/*
-LOG/*
-TMP/*
 Sparkle_Portfolio_Selector/*
 Sparkle_Parallel_Portfolio/*
 Tmp/*
@@ -18,18 +15,10 @@ Snapshots/*
 Test_Cases/*
 Settings/latest.ini
 tests/test_files/tmp
-Components/smac-v2.10.03-master-778/log*.txt
-Components/smac-v2.10.03-master-778/results/*
-Components/smac-v2.10.03-master-778/tmp/*
-Components/smac-v2.10.03-master-778/scenarios/instances/*
-Components/smac-v2.10.03-master-778/scenarios/instances_test/*
-Components/smac-v2.10.03-master-778/scenarios/*/
-Components/smac-v2.10.03-master-778/scenarios/*.txt
-Components/smac-v2.10.03-master-778/*sbatch.sh
-Components/ablationAnalysis-0.9.4/scenarios
-Components/runsolver/src/*.o
-Components/runsolver/src/runsolver.d
-Components/runsolver/src/runsolver
+sparkle/Components/ablationAnalysis-0.9.4/scenarios
+sparkle/Components/runsolver/src/*.o
+sparkle/Components/runsolver/src/runsolver.d
+sparkle/Components/runsolver/src/runsolver
 
 Examples/Resources/CCAG/Solvers/TCA/src/
 Examples/Resources/CCAG/Solvers/FastCA/src/
@@ -48,15 +37,6 @@ Documentation/source/_generated/
 # Exclude intermediate files generated when compiling latex
 *.eps
 *.bbl
-Components/Sparkle-latex-generator/Sparkle_Report.pdf
-Components/Sparkle-latex-generator/Sparkle_Report.tex
-Components/Sparkle-latex-generator/data_portfolio_selector_sparkle_vs_sbs_filename.dat
-Components/Sparkle-latex-generator/data_portfolio_selector_sparkle_vs_vbs_filename.dat
-Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_sbs.dat
-Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_vbs.dat
-Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_sbs.pdf
-Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_vbs.pdf
-Components/Sparkle-latex-generator/Sparkle_Report_for_Test.*
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
@@ -71,14 +51,6 @@ Components/Sparkle-latex-generator/Sparkle_Report_for_Test.*
 *.cb
 *.cb2
 .*.lb
-Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report.pdf
-Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report.bbl
-Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report.tex
-Components/Sparkle-latex-generator-for-parallel-portfolio/data_parallel_portfolio_sparkle_vs_sbs_filename.dat
-Components/Sparkle-latex-generator-for-parallel-portfolio/data_parallel_portfolio_sparkle_vs_sbs.dat
-Components/Sparkle-latex-generator-for-parallel-portfolio/figure_parallel_portfolio_sparkle_vs_sbs.pdf
-Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report_for_Test.*
-Components/Sparkle-latex-generator-for-parallel-portfolio/*.plt
 
 ## Intermediate documents:
 *.dvi

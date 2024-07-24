@@ -3,15 +3,14 @@
 from __future__ import annotations
 import pandas
 from unittest import TestCase
-from unittest.mock import Mock, patch
 from pathlib import Path
 
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
-from sparkle.platform import settings_help
-import global_variables as gv
+from sparkle.structures import PerformanceDataFrame
+from sparkle.platform.settings_objects import Settings
+from CLI.help import global_variables as gv
 
 global settings
-gv.settings = settings_help.Settings()
+gv.settings = Settings()
 
 
 class TestPerformanceData(TestCase):
@@ -21,11 +20,11 @@ class TestPerformanceData(TestCase):
         """Create csv objects from files for the tests."""
         self.csv_example_path =\
             Path("tests/test_files/performance/example-runtime-performance.csv")
-        self.pd = PerformanceDataFrame(str(self.csv_example_path))
+        self.pd = PerformanceDataFrame(self.csv_example_path)
         self.csv_example_with_nan_path =\
             Path("tests/test_files/performance/"
                  "example-runtime-performance-with-empty.csv")
-        self.pd_nan = PerformanceDataFrame(str(self.csv_example_with_nan_path))
+        self.pd_nan = PerformanceDataFrame(self.csv_example_with_nan_path)
 
     def test_get_job_list(self: TestPerformanceData) -> None:
         """Test job list method, without and with recompute bool."""
@@ -78,41 +77,31 @@ class TestPerformanceData(TestCase):
         result = self.pd_nan.get_best_performance_per_instance()
         assert result == min_perf
 
-    @patch("global_variables."
-           "settings.get_general_penalty_multiplier")
-    def test_calc_portfolio_vbs_instance(self: TestPerformanceData,
-                                         mock_penalty: Mock)\
+    def test_calc_best_performance_instance(self: TestPerformanceData)\
             -> None:
-        """Test calculating virtual best score on instance."""
-        vbs_instance_min = [30.0, 5.0, 3.0, 8.0, 41.0]
-        vbs_instance_max = [64.0, 87.0, 87.0, 96.0, 86.0]
-        mock_penalty.return_value = 10
+        """Test calculating best score on instance."""
+        bp_instance_min = [30.0, 5.0, 3.0, 8.0, 41.0]
+        bp_instance_max = [64.0, 87.0, 87.0, 96.0, 86.0]
         for idx, instance in enumerate(self.pd.dataframe.index):
-            result = self.pd.calc_portfolio_vbs_instance(
-                instance=instance, minimise=True, capvalue=None
-            )
-            assert result == vbs_instance_min[idx]
+            result = self.pd.best_performance_instance(
+                instance=instance, minimise=True)
+            assert result == bp_instance_min[idx]
 
-            result = self.pd.calc_portfolio_vbs_instance(
-                instance=instance, minimise=False, capvalue=None
-            )
-            assert result == vbs_instance_max[idx]
+            result = self.pd.best_performance_instance(
+                instance=instance, minimise=False)
+            assert result == bp_instance_max[idx]
 
-    def test_calc_virtual_best_performance_of_portfolio(self: TestPerformanceData)\
+    def test_calc_best_performance(self: TestPerformanceData)\
             -> None:
         """Test calculating vbs on the entire portfolio."""
         vbs_portfolio = 87.0
-        result = self.pd.calc_virtual_best_performance_of_portfolio(
-            aggregation_function=sum, minimise=True,
-            capvalue_list=None, penalty_list=None
-        )
+        result = self.pd.best_performance(
+            aggregation_function=sum, minimise=True)
         assert result == vbs_portfolio
 
         vbs_portfolio = 420.0
-        result = self.pd.calc_virtual_best_performance_of_portfolio(
-            aggregation_function=sum, minimise=False,
-            capvalue_list=None, penalty_list=None
-        )
+        result = self.pd.best_performance(
+            aggregation_function=sum, minimise=False)
         assert result == vbs_portfolio
 
     def test_get_dict_vbs_penalty_time_on_each_instance(self: TestPerformanceData)\

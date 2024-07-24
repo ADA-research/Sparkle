@@ -7,14 +7,12 @@ import argparse
 from pathlib import PurePath, Path
 
 import runrunner as rrr
-from runrunner.base import Runner
+from runrunner.base import Runner, Run
 
-import global_variables as gv
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
-import sparkle_logging as sl
-from sparkle.platform import settings_help
-from sparkle.platform.settings_help import SolutionVerifier
-from sparkle.platform.settings_help import SettingState, Settings
+from CLI.help import global_variables as gv
+from sparkle.structures import PerformanceDataFrame
+from CLI.help import sparkle_logging as sl
+from sparkle.platform.settings_objects import Settings, SettingState, SolutionVerifier
 from CLI.help.command_help import CommandName
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
@@ -47,7 +45,7 @@ def running_solvers_performance_data(
         performance_data_csv_path: Path,
         num_job_in_parallel: int,
         rerun: bool = False,
-        run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
+        run_on: Runner = Runner.SLURM) -> Run:
     """Run the solvers for the performance data.
 
     Parameters
@@ -181,7 +179,7 @@ def run_solvers_on_instances(
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -203,7 +201,7 @@ if __name__ == "__main__":
 
     if args.verifier is not None:
         gv.settings.set_general_solution_verifier(
-            SolutionVerifier.from_str(args.verifier), SettingState.CMD_LINE)
+            SolutionVerifier(args.verifier.lower()), SettingState.CMD_LINE)
 
     if args.target_cutoff_time is not None:
         gv.settings.set_general_target_cutoff_time(
@@ -214,8 +212,7 @@ if __name__ == "__main__":
             args.run_on.value, SettingState.CMD_LINE)
     run_on = gv.settings.get_run_on()
 
-    check_for_initialise(sys.argv,
-                         sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_SOLVERS])
+    check_for_initialise(sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_SOLVERS])
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))

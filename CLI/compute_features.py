@@ -6,13 +6,12 @@ import argparse
 from pathlib import Path
 
 import runrunner as rrr
-from runrunner.base import Runner, Status
+from runrunner.base import Runner, Status, Run
 
 from sparkle.solver import Extractor
-import global_variables as gv
-import sparkle_logging as sl
-from sparkle.platform import settings_help
-from sparkle.platform.settings_help import SettingState
+from CLI.help import global_variables as gv
+from CLI.help import sparkle_logging as sl
+from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help import argparse_custom as ac
 from CLI.help.command_help import COMMAND_DEPENDENCIES, CommandName
 from CLI.initialise import check_for_initialise
@@ -22,8 +21,6 @@ from sparkle.structures import FeatureDataFrame
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    gv.settings = settings_help.Settings()
-
     parser = argparse.ArgumentParser()
     parser.add_argument(*apc.RecomputeFeaturesArgument.names,
                         **apc.RecomputeFeaturesArgument.kwargs)
@@ -38,7 +35,7 @@ def parser_function() -> argparse.ArgumentParser:
 def compute_features(
         feature_data_csv_path: Path,
         recompute: bool,
-        run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
+        run_on: Runner = Runner.SLURM) -> Run:
     """Compute features for all instance and feature extractor combinations.
 
     A RunRunner run is submitted for the computation of the features.
@@ -122,7 +119,7 @@ def compute_features(
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -138,8 +135,7 @@ if __name__ == "__main__":
             args.run_on.value, SettingState.CMD_LINE)
     run_on = gv.settings.get_run_on()
 
-    check_for_initialise(sys.argv,
-                         COMMAND_DEPENDENCIES[CommandName.COMPUTE_FEATURES])
+    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.COMPUTE_FEATURES])
 
     if ac.set_by_user(args, "settings_file"):
         gv.settings.read_settings_ini(

@@ -6,14 +6,13 @@ import sys
 from pathlib import Path
 import csv
 import ast
-from runrunner import Runner
-from runrunner import SlurmRun, LocalRun
+from runrunner import Runner, Run
 
 from CLI.help.command_help import CommandName
+from CLI.help import run_solver_help as rcsh
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
-from CLI.help import run_solver_help as rcsh
-from tools.runsolver_parsing import get_solver_output, get_solver_args
+from sparkle.tools.runsolver_parsing import get_solver_output, get_solver_args
 
 
 class Validator():
@@ -27,8 +26,8 @@ class Validator():
                  configurations: list[str] | str | Path,
                  instance_sets: list[InstanceSet],
                  subdir: Path = None,
-                 dependency: list[SlurmRun | LocalRun] | SlurmRun | LocalRun = None,
-                 run_on: Runner = Runner.SLURM) -> list[SlurmRun | LocalRun]:
+                 dependency: list[Run] | Run = None,
+                 run_on: Runner = Runner.SLURM) -> list[Run]:
         """Validate a list of solvers (with configurations) on a set of instances.
 
         Args:

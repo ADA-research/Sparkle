@@ -5,8 +5,8 @@ import time
 import sys
 import subprocess
 from pathlib import Path
-from tools.slurm_parsing import parse_commandline_dict
 from sparkle.types import SolverStatus
+from sparkle.tools.slurm_parsing import parse_commandline_dict
 
 # Convert the argument of the target_algorithm script to dictionary
 args = parse_commandline_dict(sys.argv[1:])
@@ -25,7 +25,8 @@ del args["specifics"]
 del args["run_length"]
 
 solver_name = "PbO-CCSAT"
-solver_exec = f"{solver_dir / solver_name}" if solver_dir != Path(".") else "./" + solver_name
+solver_exec = f"{solver_dir / solver_name}" if solver_dir != Path(".") else "./" + \
+    solver_name
 solver_cmd = [solver_exec,
               "-inst", str(instance),
               "-seed", str(seed)]
@@ -68,8 +69,9 @@ for line in output_str.splitlines():
 
 if specifics == 'rawres':
     tmp_directory = Path("tmp/")
-    rawres_file_name = Path(f"{solver_name}_{instance.name}_"\
-                       f"{time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))}.rawres_solver")
+    cur_time_str = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))
+    rawres_file_name = Path(f"{solver_name}_{instance.name}_" + cur_time_str
+                            + ".rawres_solver")
     if Path.cwd().name != tmp_directory.name:
         tmp_directory.mkdir(exist_ok=True)
         raw_result_path = tmp_directory / rawres_file_name

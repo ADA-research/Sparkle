@@ -8,11 +8,9 @@ from typing import Any
 
 from runrunner.base import Runner
 
-from sparkle.platform.settings_help import SettingState
+from sparkle.platform.settings_objects import SettingState, Settings, SolutionVerifier
 from sparkle.types.objective import PerformanceMeasure
-from sparkle.platform.settings_help import SolutionVerifier
 from CLI.help.command_help import CommandName
-from sparkle.platform.settings_help import Settings
 
 
 class SetByUser(argparse.Action):
@@ -26,7 +24,7 @@ class SetByUser(argparse.Action):
         setattr(namespace, self.dest + "_nondefault", True)
 
 
-# taken from https://stackoverflow.com/a/60750535
+# Taken from https://stackoverflow.com/a/60750535
 class EnumAction(argparse.Action):
     """Argparse action for handling Enums."""
     def __init__(self: EnumAction, **kwargs: str) -> None:
@@ -91,14 +89,6 @@ AblationArgument = ArgumentContainer(names=["--ablation"],
                                              "action": "store_true",
                                              "help": "run ablation after configuration"})
 
-AblationSettingsHelpArgument = \
-    ArgumentContainer(names=["--ablation-settings-help"],
-                      kwargs={"required": False,
-                              "dest": "ablation_settings_help",
-                              "action": "store_true",
-                              "help": "Prints a list of setting that can be used for "
-                                      "the ablation analysis"})
-
 ActualArgument = ArgumentContainer(names=["--actual"],
                                    kwargs={"action": "store_true",
                                            "help": "compute the marginal contribution "
@@ -140,6 +130,12 @@ DeterministicArgument =\
     ArgumentContainer(names=["--deterministic"],
                       kwargs={"action": "store_true",
                               "help": "Flag indicating the solver is deterministic"})
+
+DownloadExamplesArgument =\
+    ArgumentContainer(names=["--download-examples"],
+                      kwargs={"action": argparse.BooleanOptionalAction,
+                              "default": False,
+                              "help": "Download the Examples into the directory."})
 
 ExtractorPathArgument = ArgumentContainer(names=["extractor_path"],
                                           kwargs={"metavar": "extractor-path",
