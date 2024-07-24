@@ -2,7 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.8.3] - 2024/??/??
+## [0.8.3] - 2024/07/24
 
 ### Changed
 - The use of --parallel arguments is now deprecrated and all related functionality is now controlled by the settings file general number of jobs parallel setting. [SPRK-275]
