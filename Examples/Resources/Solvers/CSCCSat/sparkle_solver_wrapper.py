@@ -7,7 +7,6 @@ import sys
 import subprocess
 from pathlib import Path
 from sparkle.types import SolverStatus
-
 from sparkle.tools.slurm_parsing import parse_commandline_dict
 
 # Convert the argument of the target_algorithm script to dictionary

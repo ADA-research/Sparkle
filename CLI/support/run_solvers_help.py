@@ -66,8 +66,6 @@ def verify(instance: Path, raw_result: Path, solver: Solver, status: str)\
     """Run a solution verifier on the solution and update the status if needed."""
     verifier = gv.settings.get_general_solution_verifier()
     # Use verifier if one is given and the solver did not time out
-    if verifier == SolutionVerifier.SAT and status != "TIMEOUT" and status != "UNKNOWN":
-        return sh.sat_verify(instance, raw_result, solver)
     if verifier == SolutionVerifier.SAT and status != SolverStatus.TIMEOUT \
             and status != SolverStatus.UNKNOWN:
         return sh.sat_verify(instance, raw_result, solver)
