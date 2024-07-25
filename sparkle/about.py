@@ -1,7 +1,7 @@
 """Helper module for information about Sparkle."""
 
 name = "Sparkle"
-version = "0.8.2"
+version = "0.8.3"
 description = "Platform for evaluating empirical algorithms/solvers"
 licence = "MIT"
 authors = ["Koen van der Blom",

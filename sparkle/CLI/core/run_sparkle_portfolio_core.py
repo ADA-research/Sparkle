@@ -14,7 +14,6 @@ if __name__ == "__main__":
     # Initialise settings
     global settings
     gv.settings = Settings()
-
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--instance", required=True, type=str, nargs="+",
