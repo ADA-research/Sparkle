@@ -1,23 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-#Sparkle SMAC wrapper VRP_heuristic_Jan_MkII_Sparkle
+# Sparkle SMAC wrapper VRP_heuristic_Jan_MkII_Sparkle
 
-import os
-import time
-import random
 import sys
 import ast
 import subprocess
 from pathlib import Path
+from sparkle.tools.general import get_time_pid_random_string
 
-def get_time_pid_random_string():
-	my_time_str = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))
-	my_pid = os.getpid()
-	my_pid_str = str(my_pid)
-	my_random = random.randint(1, sys.maxsize)
-	my_random_str = str(my_random)
-	my_time_pid_random_str = my_time_str + '_' + my_pid_str + '_' + my_random_str
-	return my_time_pid_random_str
 
 # Convert the argument of the target_algorithm script to dictionary
 args = ast.literal_eval(sys.argv[1])
@@ -25,7 +15,7 @@ args = ast.literal_eval(sys.argv[1])
 # Extract and delete data that needs specific formatting
 instance = args["instance"]
 specifics = args["specifics"]
-cutoff_time = int(args["cutoff_time"])+1
+cutoff_time = int(args["cutoff_time"]) + 1
 # run_length = args["run_length"]
 seed = args["seed"]
 
@@ -43,7 +33,8 @@ tmp_directory.mkdir(exist_ok=True)
 
 instance_name = Path(instance).name
 solver_name = Path(solver_binary).name
-runsolver_watch_data_path = tmp_directory / (solver_name + "_" + instance_name + "_" + get_time_pid_random_string() + ".log")
+runsolver_watch_data_path = tmp_directory / (solver_name + "_" + instance_name + "_"
+                                             + get_time_pid_random_string() + ".log")
 
 runsolver_call = [runsolver_binary,
                   "-w", str(runsolver_watch_data_path),
@@ -65,14 +56,14 @@ output_list = solver_call.stdout.decode().splitlines()
 
 Path(runsolver_watch_data_path).unlink(missing_ok=True)
 
-quality=1000000000000
-status = r'SUCCESS'  # Always ok, code checks per iteration whether cutoff time is exceeded
+quality = 1000000000000
+status = r'SUCCESS'  # Always ok, code checks per iteration if cutoff time is exceeded
 
 for line in output_list:
-	quality = line.strip()
+    quality = line.strip()
 
 outdir = {"status": status,
-		  "quality": quality,
+          "quality": quality,
           "solver_call": runsolver_call + params,
           "raw_output": output_list}
 

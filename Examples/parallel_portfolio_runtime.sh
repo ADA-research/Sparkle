@@ -17,14 +17,14 @@ sparkle add_instances Examples/Resources/Instances/PTN/
 #### Add solvers
 
 # Add a solver without running the solver yet
-# The path used should be the full path to the solver directory and should contain the solver executable and the `sparkle_smac_wrapper` wrapper
+# The path used should be the full path to the solver directory and should contain the solver executable and the `sparkle_solver_wrapper` wrapper
 
 # If needed solvers can also include additional files or scripts in their directory, but try to keep additional files to a minimum as it speeds up copying.
 # Use the --solver-variations option to set the default number of solver variations of a solver which will be used when a portfolio is constructed. E.g. '--solver-variations 5'
 
-sparkle add_solver --deterministic 0 Examples/Resources/Solvers/CSCCSat/
-sparkle add_solver --deterministic 0 Examples/Resources/Solvers/MiniSAT/
-sparkle add_solver --deterministic 0 Examples/Resources/Solvers/PbO-CCSAT-Generic/
+sparkle add_solver Examples/Resources/Solvers/CSCCSat/
+sparkle add_solver Examples/Resources/Solvers/MiniSAT/
+sparkle add_solver Examples/Resources/Solvers/PbO-CCSAT-Generic/
 
 #### Run the portfolio 
 
@@ -35,10 +35,10 @@ sparkle add_solver --deterministic 0 Examples/Resources/Solvers/PbO-CCSAT-Generi
 # The --solvers option must be followed by a space sepearted list of Solver paths/names. If none are specified,
 # the know list of solvers for Sparkle will be used. 
 
-# The --instance-paths option must be followed by a space separated list of paths to an instance or an instance set.
-# For example --instance-paths Instances/Instance_Set_Name/Single_Instance Instances/Other_Instance_Set_Name
+# The --instance-path option must be a path to a single instance file or an instance set directory.
+# For example --instance-path Instances/Instance_Set_Name/Single_Instance
 
-sparkle run_parallel_portfolio --instance-paths Instances/PTN/ --portfolio-name runtime_experiment
+sparkle run_parallel_portfolio --instance-path Instances/PTN/ --portfolio-name runtime_experiment
 
 #### Generate the report
 

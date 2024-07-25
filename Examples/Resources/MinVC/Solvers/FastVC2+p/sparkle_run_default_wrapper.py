@@ -6,6 +6,7 @@ import argparse
 # Problem specific imports
 import fcntl
 import sys
+from sparkle.types import SolverStatus
 
 
 # Print a command line call for the target algorithm with a given instance file
@@ -27,7 +28,7 @@ def print_output(terminal_output_file):
     fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
 
     solution_quality = sys.maxsize
-    status = 'UNKNOWN'
+    status = SolverStatus.UNKNOWN
     lines = infile.readlines()
 
     for line in lines:
@@ -35,20 +36,20 @@ def print_output(terminal_output_file):
         if len(words) <= 0:
             continue
         if len(words) >=4 and words[1] == 'c' and words[2] == 'Arguments' and words[3] == 'Error!':
-            status = 'CRASHED'
+            status = SolverStatus.CRASHED
             break
         if len(words) >=4 and words[1] == 'c' and words[2] == 'vertex_cover:':
             temp_solution_quality = int(words[3])
             if solution_quality < 0 or temp_solution_quality < solution_quality:
                 solution_quality = temp_solution_quality
-                status = 'SUCCESS'
+                status = SolverStatus.SUCCESS
 
     infile.close()
 
     # [required for quality objective] Print keyword 'quality' followed by a space and the solution quality
     print('quality ' + str(solution_quality))
     # [optional] Print keyword 'status' followed by a space and the run status
-    print('status ' + status)
+    print('status ' + status.value)
 
 
 ### No editing needed for your own wrapper below this line ###

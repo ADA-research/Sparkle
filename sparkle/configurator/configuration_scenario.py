@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Class to handle all activities around configuration scenarios."""
-
-
 from __future__ import annotations
 import shutil
 from pathlib import Path
@@ -10,12 +8,13 @@ from pathlib import Path
 import pandas as pd
 
 from sparkle.types.objective import SparkleObjective, PerformanceMeasure
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
+from sparkle.instance import InstanceSet
 
 
 class ConfigurationScenario:
     """Class to handle all activities around configuration scenarios."""
-    def __init__(self: ConfigurationScenario, solver: Solver, instance_directory: Path,
+    def __init__(self: ConfigurationScenario, solver: Solver, instance_set: InstanceSet,
                  number_of_runs: int = None, solver_calls: int = None,
                  cpu_time: int = None, wallclock_time: int = None,
                  cutoff_time: int = None, cutoff_length: int = None,
@@ -26,7 +25,7 @@ class ConfigurationScenario:
 
         Args:
             solver: Solver that should be configured.
-            instance_directory: Original directory of instances.
+            instance_set: Instances object for the scenario.
             number_of_runs: The number of configurator runs to perform
                 for configuring the solver.
             solver_calls: The number of times the solver is called for each
@@ -46,8 +45,8 @@ class ConfigurationScenario:
                 Defaults to None.
         """
         self.solver = solver
-        self.instance_directory = instance_directory
-        self.name = f"{self.solver.name}_{self.instance_directory.name}"
+        self.instance_set = instance_set
+        self.name = f"{self.solver.name}_{self.instance_set.name}"
 
         self.number_of_runs = number_of_runs
         self.solver_calls = solver_calls
@@ -76,7 +75,6 @@ class ConfigurationScenario:
             parent_directory: Directory in which the scenario should be created.
         """
         self._set_paths(parent_directory)
-
         self._prepare_scenario_directory()
         self._prepare_result_directory()
         self._prepare_instances()
@@ -92,7 +90,7 @@ class ConfigurationScenario:
         self.directory = self.parent_directory / "scenarios" / self.name
         self.result_directory = self.directory / "results"
         self.instance_file_path = self.directory /\
-            f"{self.instance_directory.name}_train.txt"
+            f"{self.instance_set.name}_train.txt"
         self.outdir_train = self.directory / "outdir_train_configuration"
         self.tmp = self.directory / "tmp"
         self.validation = self.directory / "validation"
@@ -118,7 +116,7 @@ class ConfigurationScenario:
             file.write(f"algo = {self.configurator_target.absolute()} "
                        f"{self.solver.directory.absolute()}\n"
                        f"execdir = {self.tmp.absolute()}/\n"
-                       f"deterministic = {self.solver.is_deterministic()}\n"
+                       f"deterministic = {1 if self.solver.deterministic else 0}\n"
                        f"run_obj = {self._get_performance_measure()}\n"
                        f"cutoffTime = {self.cutoff_time}\n"
                        f"cutoff_length = {self.cutoff_length}\n"
@@ -139,12 +137,9 @@ class ConfigurationScenario:
 
     def _prepare_instances(self: ConfigurationScenario) -> None:
         """Create instance list file."""
-        source_instance_list = (
-            [f for f in self.instance_directory.rglob("*") if f.is_file()])
-
         self.instance_file_path.parent.mkdir(exist_ok=True, parents=True)
         with self.instance_file_path.open("w+") as file:
-            for instance_path in source_instance_list:
+            for instance_path in self.instance_set.instance_paths:
                 file.write(f"{instance_path.absolute()}\n")
 
     def _get_performance_measure(self: ConfigurationScenario) -> str:
@@ -168,7 +163,7 @@ class ConfigurationScenario:
     def _create_feature_file(self: ConfigurationScenario) -> None:
         """Create CSV file from feature data."""
         self.feature_file_path = Path(self.directory
-                                      / f"{self.instance_directory.name}_features.csv")
+                                      / f"{self.instance_set.name}_features.csv")
         self.feature_data.to_csv(self.directory
                                  / self.feature_file_path, index_label="INSTANCE_NAME")
 
@@ -181,7 +176,7 @@ class ConfigurationScenario:
         """
         result = []
         configurator_solver_path = configurator_path / "scenarios"\
-            / f"{self.solver.name}_{self.instance_directory.name}"
+            / f"{self.solver.name}_{self.instance_set.name}"
 
         for index in range(self.number_of_runs):
             dir = configurator_solver_path / str(index)

@@ -16,9 +16,9 @@ Add solvers (here for the constrained covering array generation (CCAG) problem) 
 
 Each solver directory should contain the solver executable and a wrapper
 
-`sparkle add_solver --deterministic 0 Examples/Resources/CCAG/Solvers/TCA/`
+`sparkle add_solver Examples/Resources/CCAG/Solvers/TCA/`
 
-`sparkle add_solver --deterministic 0 Examples/Resources/CCAG/Solvers/FastCA/`
+`sparkle add_solver Examples/Resources/CCAG/Solvers/FastCA/`
 
 ## Add feature extractor
 
@@ -28,13 +28,13 @@ Similarly, add a feature extractor, without immediately running it on the instan
 
 ## Compute features
 
-Compute features for all the instances; add the `--parallel` option to run in parallel
+Compute features for all the instances
 
 `sparkle compute_features`
 
 ## Run the solvers
 
-Run the solvers on all instances; add the `--parallel` option to run in parallel. For the CCAG (Constrained Covering Array Generation) problem we measure the absolute quality performance by setting the `--performance-measure` option, to avoid needing this for every command it can also be set in `Settings/sparkle_settings.ini`.
+Run the solvers on all instances. For the CCAG (Constrained Covering Array Generation) problem we measure the absolute quality performance by setting the `--performance-measure` option, to avoid needing this for every command it can also be set in `Settings/sparkle_settings.ini`.
 
 `sparkle run_solvers --performance-measure QUALITY_ABSOLUTE`
 

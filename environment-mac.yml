@@ -15,7 +15,7 @@ dependencies:
     - numpy
     - pandas
     - git+https://github.com/jeroenrook/pcsparser.git
-    - RunRunner==0.1.3
+    - RunRunner==0.1.4
     # Testing
     - pytest
     - pytest-mock==3.10.0

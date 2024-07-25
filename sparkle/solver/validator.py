@@ -6,13 +6,13 @@ import sys
 from pathlib import Path
 import csv
 import ast
-from runrunner import Runner
-from runrunner import SlurmRun, LocalRun
+from runrunner import Runner, Run
 
-from CLI.help.command_help import CommandName
-from sparkle.solver.solver import Solver
-from CLI.support import run_configured_solver_help as rcsh
-from tools.runsolver_parsing import get_solver_output, get_solver_args
+from sparkle.CLI.help.command_help import CommandName
+from sparkle.CLI.help import run_solver_help as rcsh
+from sparkle.solver import Solver
+from sparkle.instance import InstanceSet
+from sparkle.tools.runsolver_parsing import get_solver_output, get_solver_args
 
 
 class Validator():
@@ -24,10 +24,10 @@ class Validator():
     def validate(self: Validator,
                  solvers: list[Path] | list[Solver] | Solver | Path,
                  configurations: list[str] | str | Path,
-                 instance_sets: list[Path],
+                 instance_sets: list[InstanceSet],
                  subdir: Path = None,
-                 dependency: list[SlurmRun | LocalRun] | SlurmRun | LocalRun = None,
-                 run_on: Runner = Runner.SLURM) -> list[SlurmRun | LocalRun]:
+                 dependency: list[Run] | Run = None,
+                 run_on: Runner = Runner.SLURM) -> list[Run]:
         """Validate a list of solvers (with configurations) on a set of instances.
 
         Args:
@@ -53,33 +53,33 @@ class Validator():
         if not isinstance(solvers, list) or len(configurations) != len(solvers):
             print("Error: Number of solvers and configurations does not match!")
             sys.exit(-1)
+        # Ensure we have the object representation of solvers
+        solvers = [Solver(s) if isinstance(s, Path) else s for s in solvers]
         jobs = []
-        for index, (solver_path, config) in enumerate(zip(solvers, configurations)):
+        for index, (solver, config) in enumerate(zip(solvers, configurations)):
             # run a configured solver
             if config is None:
                 config = ""
 
             for instance_set in instance_sets:
-                instance_path_list = list(p.absolute() for p in instance_set.iterdir())
-                solver = Solver.get_solver_by_name(solver_path.name)
                 if subdir is None:
                     out_path = self.out_dir / f"{solver.name}_{instance_set.name}"
                 else:
                     out_path = self.out_dir / subdir
-                run = rcsh.call_solver_parallel(instance_path_list,
-                                                solver,
-                                                config,
-                                                seed=index if use_seed else None,
-                                                outdir=out_path,
-                                                commandname=CommandName.VALIDATION,
-                                                dependency=dependency,
-                                                run_on=run_on)
+                run = rcsh.call_solver(instance_set,
+                                       solver,
+                                       config=config,
+                                       seed=index if use_seed else None,
+                                       outdir=out_path,
+                                       commandname=CommandName.VALIDATION,
+                                       dependency=dependency,
+                                       run_on=run_on)
                 jobs.append(run)
         return jobs
 
     def retrieve_raw_results(self: Validator,
                              solver: Solver,
-                             instance_set: list[str] | str | Path,
+                             instance_sets: InstanceSet | list[InstanceSet],
                              subdir: Path = None,
                              log_dir: Path = None) -> None:
         """Checks the raw results of a given solver for a specific instance_set.
@@ -89,15 +89,13 @@ class Validator():
 
         Args:
             solver: The solver for which to check the raw result path
-            instance_set: The set of instances for which to retrieve the results
+            instance_sets: The set of instances for which to retrieve the results
             subdir: Subdir where the CSV is to be placed, passed to the append method.
             log_dir: The directory to search for log files. If none, defaults to
                 the log directory of the Solver.
         """
-        if isinstance(instance_set, str):
-            instance_set_names = [instance_set]
-        elif isinstance(instance_set, Path):
-            instance_set_names = [p.name for p in Path(instance_set).iterdir()]
+        if isinstance(instance_sets, InstanceSet):
+            instance_sets = [instance_sets]
         if log_dir is None:
             log_dir = solver.raw_output_directory
         for res in log_dir.iterdir():
@@ -105,7 +103,7 @@ class Validator():
                 continue
             solver_args = get_solver_args(res.with_suffix(".log"))
             solver_args = ast.literal_eval(solver_args.strip())
-            instance_name = Path(solver_args["instance"]).name
+            instance_path = Path(solver_args["instance"])
             # Remove default args
             if "config_path" in solver_args:
                 # The actual solver configuration can be found elsewhere
@@ -121,33 +119,34 @@ class Validator():
                     if def_arg in solver_args:
                         del solver_args[def_arg]
             solver_args = str(solver_args).replace('"', "'")
-            if instance_name in instance_set_names:
-                out_dict = get_solver_output(
-                    ["-o", res.name, "-v", res.with_suffix(".val").name],
-                    "", log_dir)
-                self.append_entry_to_csv(solver.name,
-                                         solver_args,
-                                         Path(instance_set).name,
-                                         instance_name,
-                                         out_dict["status"],
-                                         out_dict["quality"],
-                                         out_dict["runtime"],
-                                         subdir=subdir)
-                res.unlink()
-                res.with_suffix(".val").unlink(missing_ok=True)
-                res.with_suffix(".log").unlink(missing_ok=True)
+            for instance_set in instance_sets:
+                if instance_path.name in instance_set._instance_names:
+                    out_dict = get_solver_output(
+                        ["-o", res.name, "-v", res.with_suffix(".val").name],
+                        "", log_dir)
+                    self.append_entry_to_csv(solver.name,
+                                             solver_args,
+                                             instance_set,
+                                             instance_path.name,
+                                             out_dict["status"],
+                                             out_dict["quality"],
+                                             out_dict["runtime"],
+                                             subdir=subdir)
+                    res.unlink()
+                    res.with_suffix(".val").unlink(missing_ok=True)
+                    res.with_suffix(".log").unlink(missing_ok=True)
 
     def get_validation_results(self: Validator,
-                               solver: Solver | str,
-                               instance_set: Path | str,
+                               solver: Solver,
+                               instance_set: InstanceSet,
                                source_dir: Path = None,
                                subdir: Path = None,
                                config: str = None) -> list[list[str]]:
         """Query the results of the validation of solver on instance_set.
 
         Args:
-            solver: Path to the validated solver
-            instance_set: Instance set path/name
+            solver: Solver object
+            instance_set: Instance set
             source_dir: Path where to look for any unprocessed output.
                 By default, look in the solver's tmp dir.
             subdir: Path where to place the .csv file subdir. By default will be
@@ -157,16 +156,13 @@ class Validator():
         Returns
             A list of row lists with string values
         """
-        instance_set_name = Path(instance_set).name
-        if isinstance(solver, str):
-            solver = Solver.get_solver_by_name(solver)
         if source_dir is None:
-            source_dir = self.out_dir / f"{solver.name}_{instance_set_name}"
+            source_dir = self.out_dir / f"{solver.name}_{instance_set.name}"
         if any(x.suffix == ".rawres" for x in source_dir.iterdir()):
             self.retrieve_raw_results(
                 solver, instance_set, subdir=subdir, log_dir=source_dir)
         if subdir is None:
-            subdir = Path(f"{solver.name}_{instance_set_name}")
+            subdir = Path(f"{solver.name}_{instance_set.name}")
         csv_file = self.out_dir / subdir / "validation.csv"
         # We skip the header when returning results
         csv_data = [line for line in csv.reader(csv_file.open("r"))][1:]
@@ -181,7 +177,7 @@ class Validator():
     def append_entry_to_csv(self: Validator,
                             solver: str,
                             config_str: str,
-                            instance_set: str,
+                            instance_set: InstanceSet,
                             instance: str,
                             status: str,
                             quality: str,
@@ -189,7 +185,7 @@ class Validator():
                             subdir: Path = None) -> None:
         """Append a validation result as a row to a CSV file."""
         if subdir is None:
-            subdir = Path(f"{solver}_{instance_set}")
+            subdir = Path(f"{solver}_{instance_set.name}")
         out_dir = self.out_dir / subdir
         if not out_dir.exists():
             out_dir.mkdir(parents=True)
@@ -201,5 +197,5 @@ class Validator():
                                           "Instance", "Status", "Quality", "Runtime"))
         with csv_file.open("a") as out:
             writer = csv.writer(out)
-            writer.writerow((solver, config_str, instance_set, instance, status,
+            writer.writerow((solver, config_str, instance_set.name, instance, status,
                              quality, runtime))

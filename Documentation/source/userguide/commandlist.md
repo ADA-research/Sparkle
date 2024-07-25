@@ -6,8 +6,6 @@
 - {ref}`cmd-compute-features`
 - {ref}`cmd-compute-marginal-contribution`
 - {ref}`cmd-configure-solver`
-- {ref}`cmd-construct-sparkle-parallel-portfolio`
-- {ref}`cmd-construct-sparkle-portfolio-selector`
 - {ref}`cmd-generate-report`
 - {ref}`cmd-initialise`
 - {ref}`cmd-load-snapshot`

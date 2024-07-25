@@ -1,0 +1,10 @@
+Banking1,Banking1.model,Banking1.constraints
+CommProtocol,CommProtocol.model,CommProtocol.constraints
+Healthcare1,Healthcare1.model,Healthcare1.constraints
+Healthcare3,Healthcare3.model,Healthcare3.constraints
+Insurance,Insurance.model,Insurance.constraints
+ProcessorComm1,ProcessorComm1.model,ProcessorComm1.constraints
+Storage1,Storage1.model,Storage1.constraints
+Storage3,Storage3.model,Storage3.constraints
+Storage5,Storage5.model,Storage5.constraints
+SystemMgmt,SystemMgmt.model,SystemMgmt.constraints

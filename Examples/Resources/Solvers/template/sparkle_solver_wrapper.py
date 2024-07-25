@@ -4,13 +4,13 @@
 
 import time
 import sys
-import ast
 import subprocess
 from pathlib import Path
+from sparkle.types import SolverStatus
+from sparkle.tools.slurm_parsing import parse_commandline_dict
 
-# Convert the argument of the target_algorithm script to dictionary
-# use the join of the argsv to prevent errors with spaces in the string
-args = ast.literal_eval(" ".join(sys.argv[1:]))
+# Convert the arguments to a dictionary
+args = parse_commandline_dict(sys.argv[1:])
 
 # Extract and delete data that needs specific formatting
 solver_dir = Path(args["solver_dir"])
@@ -25,7 +25,7 @@ del args["seed"]
 del args["specifics"]
 del args["run_length"]
 
-solver_name = "PbO-CCSAT"
+solver_name = "EXAMPLE_SOLVER"
 if solver_dir != Path("."):
     solver_exec = f"{solver_dir / solver_name}"
 else:
@@ -49,14 +49,14 @@ except Exception as ex:
 # Convert Solver output to dictionary for configurator target algorithm script
 output_str = solver_call.stdout.decode()
 
-status = r"CRASHED"
+status = SolverStatus.CRASHED
 for line in output_str.splitlines():
     line = line.strip()
     if (line == r"s SATISFIABLE") or (line == r"s UNSATISFIABLE"):
-        status = r"SUCCESS"
+        status = SolverStatus.SUCCESS
         break
     elif line == r"s UNKNOWN":
-        status = r"TIMEOUT"
+        status = SolverStatus.TIMEOUT
         break
 
 if specifics == "rawres":
@@ -71,7 +71,7 @@ if specifics == "rawres":
     with raw_result_path.open("w") as outfile:
         outfile.write(output_str)
 
-outdir = {"status": status,
+outdir = {"status": status.value,
           "quality": 0,
           "solver_call": solver_cmd + params}
 

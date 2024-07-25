@@ -89,7 +89,7 @@ Configuring an algorithm has the following minimal requirements for the
 algorithm (for an example of a solver directory see {numref}`dir-solvers`):
 
 - A working solver executable
-- An algorithm wrapper called `sprakle_smac_wrapper.py`
+- An algorithm wrapper called `sparkle_solver_wrapper.py`
 - A PCS (parameter configuration space) file
 
 Further, training and testing instance sets are needed (for an example
@@ -107,7 +107,7 @@ See the {doc}`example </examples/configuration>` page for a walk-through on how 
 ### Creating a wrapper for your algorithm
 
 A template for the wrapper that connects your algorithm with Sparkle is
-available at `Examples/Resources/Solvers/template/sparkle_smac_wrapper.py`. Within
+available at `Examples/Resources/Solvers/template/sparkle_solver_wrapper.py`. Within
 this template a number of `TODO`s are indicated where you are likely
 to need to make changes for your specific algorithm. You can also
 compare the different example solvers to get an idea for what kind of
@@ -136,7 +136,7 @@ following minimal requirements (for an example of a solver directory see
 {numref}`dir-solvers-selection`):
 
 - A working solver executable
-- An algorithm wrapper called `sparkle_run_default_wrapper.py`
+- An algorithm wrapper called `sparkle_solver_wrapper.py`
 
 Further, training and testing instance sets are needed (for an example
 of an instances directory see {numref}`dir-instances`). For
@@ -154,7 +154,7 @@ See the {doc}`example </examples/selection>` page for a walk-through on how to p
 
 A template for the wrapper that connects your algorithm with Sparkle is
 available at
-`Examples/Resources/Solvers/template/sparkle_run_default_wrapper.py`.
+`Examples/Resources/Solvers/template/sparkle_solver_wrapper.py`.
 Within this template a number of `TODO`s are indicated where you are
 likely to need to make changes for your specific algorithm. You can also
 compare the different example solvers to get an idea for what kind of
@@ -164,11 +164,10 @@ changes are needed.
 
 ## Executing commands
 
-Executing commands in Sparkle is as simple as running them in the top
-directory of Sparkle, for example:
+Executing commands in Sparkle is as simple as running them terminal for example:
 
 ```
-CLI/initialise.py
+sparkle initialise
 ```
 
 Do note that when running on a cluster additional arguments may be
@@ -176,7 +175,7 @@ needed, for instance under the Slurm workload manager the above command would ch
 something like:
 
 ```
-srun -N1 -n1 -c1 CLI/initialise.py
+srun -N1 -n1 -c1 sparkle/CLI/initialise.py
 ```
 
 In the `Examples/` directory a number of common command sequences are
@@ -232,12 +231,12 @@ A solver directory should look something like this:
 Solver/
   Example_Solver/
     solver
-    sparkle_smac_wrapper.py
+    sparkle_solver_wrapper.py
     parameters.pcs
 ```
 
 Here `solver` is a binary executable of the solver that is to be
-configured. The `sprakle_smac_wrapper.py` is a wrapper that Sparkle
+configured. The `sparkle_solver_wrapper.py` is a wrapper that Sparkle
 should call to run the solver with specific settings, and then returns a
 result for the configurator. In `parameters.pcs` the configurable
 parameters are described in the PCS format. Finally, when importing your
@@ -254,11 +253,11 @@ A solver directory should look something like this:
 Solver/
   Example_Solver/
     solver
-    sparkle_run_default_wrapper.py
+    sparkle_solver_wrapper.py
 ```
 
 Here `solver` is a binary executable of a solver that is to be
-included in a portfolio selector. The `sprakle_run_default_wrapper.py`
+included in a portfolio selector. The `sparkle_solver_wrapper.py`
 is a wrapper that Sparkle should call to run the solver on a specific
 instance.
 
@@ -311,44 +310,35 @@ For each type of task run by Sparkle, the `related files` differ. The aim is alw
 
 ## Wrappers
 
-### `sparkle_run_default_wrapper.py`
+### `sparkle_solver_wrapper.py`
 
-The `sparkle_run_default_wrapper.py` has two functions that need to be
-implemented for each algorithm:
-
-- `print_command(instance_file, seed_str: str, cutoff_time_str: str)`
-- `print_output(terminal_output_file: str)`
-
-`print_command(...)` should print a command line call that Sparkle can
-use to run the algorithm on a given instance file. Ideally, for
-reproducibility purposes, the seed provided by Sparkle should also be
-passed to the algorithm. If the algorithm requires this, the cutoff time
-can also be passed to the algorithm. However, in this case the cutoff
-time should be made very large. For instance by multiplying by ten with:
-`cutoff_time_str = str(int(cutoff_time_str) * 10)`. This is necessary
-to ensure Sparkle stops the algorithm after the cutoff time, rather than
-the algorithm itself. By doing this it is ensured runtime measurements
-are always done by Sparkle, and thus consistent between algorithms that
-might measure time differently.
-
-`print_output(...)` should process the algorithm output. If the
-performance measure is `RUNTIME`, this function only needs to output
-the algorithm status. For all `QUALITY` performance measures both the
-algorithm status and the solution quality have to be given. Sparkle
-internally measures `RUNTIME`, while it can be overwritten by the user
-if desired, for consistent runtime measurements between solvers this is
-not recommended. The output should be printed and formatted as in the
-example below.
+The `sparkle_solver_wrapper.py` uses a commandline dictionary to receive it inputs. This can be easily parsed using a Sparkle tool: `from sparkle.tools.slurm_parsing import parse_commandline_dict`.
+The dictionary should always have the following values:
 
 ```
-quality 8734
-status SUCCESS
+solver_dir: str
+instance: str,
+cutoff_time: int,
+seed: int
+specifics: str
+run_length: str
+```
+
+Note that all the Paths are handed as str and should be converted in the wrapper. The solver_dir specifies the Path to the executable directory of your algorithm. This can be empty, e.g. the cwd contains your executable. The instance is the path to the instance we are going to run on. Cutoff time is the maximum amount of time your algorithm is allowed to run. Seed is the seed for this run. Specifics and run_length are depricated and should not be used.
+
+A solver wrapper should always return a dictionary by printing it, containing the following values:
+
+```
+status: str
+quality: int,
+solver_call: str
 ```
 
 Status can hold the following values `{SUCCESS, TIMEOUT, CRASHED}`. If
-the status is not known, reporting `SUCCESS` will allow Sparkle to
-continue, but may mean that Sparkle does not know when the algorithm
+the status is not known, reporting `SUCCESS` will allow Sparkle to continue, but may mean that Sparkle does not know when the algorithm
 crashed, and continues with faulty results.
+The quality may be irrelevant for your purpose and can thus be set to some default value.
+The solver_call is only used for logging purposes, to allow for easy inspection of the solver wrapper's subprocess.
 
 ## Commands
 
@@ -657,12 +647,8 @@ as follows:
 
 ### Slurm (focused on Grace)
 
-Slurm settings can be specified in the
-`Settings/sparkle_slurm_settings.txt` file. Currently these settings
-are inserted *as is* in any `srun` or `sbatch` calls done by
-Sparkle. This means that any options exclusive to one or the other
-currently should not be used (see
-{numref}`slurm-disallowed`).
+Slurm settings can be specified in the `Settings/settings.ini` file. Any Slurm Setting not internally recognised by Sparkle will be added to the `sbatch` or `srun` calls.
+Currently these settings are inserted *as is* in any Slurm calls done by Sparkle. This means that any options exclusive to one or the other currently should not be used (see {numref}`slurm-disallowed`).
 
 To overwrite the default settings specific to the cluster Grace in Leiden, you should set the option "--partition" with a valid value on your cluster.
 Also, you might have to adapt "--mem-per-cpu" to your system.
@@ -674,7 +660,7 @@ included. Most other options for these commands should also be safe to
 use (given they are valid), but have not been explicitly tested. Note
 that any options related to commands other than `srun` and `sbatch`
 should not be used with Sparkle, and should not be included in
-`Settings/sparkle_slurm_settings.txt`.
+`Settings/settings.ini`s Slurm section.
 
 - `-–partition / -p`
 - `-–exclude`
@@ -702,7 +688,7 @@ of your call to a Sparkle command. Take for instance the following
 command:
 
 ```
-srun -N1 -n1 -p graceTST CLI/configure_solver.py --solver Solvers/PbO-CCSAT-Generic --instances-train Instances/PTN/
+srun -N1 -n1 -p graceTST sparkle/CLI/configure_solver.py --solver Solvers/PbO-CCSAT-Generic --instances-train Instances/PTN/
 ```
 
 This call restricts itself to the `graceTST` partition (the

@@ -10,12 +10,12 @@ from unittest.mock import Mock
 from pathlib import Path
 
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
-from sparkle.solver.solver import Solver
-from sparkle.platform import settings_help
-import global_variables as gv
+from sparkle.solver import Solver
+from sparkle.instance import InstanceSet
+from sparkle.platform.settings_objects import Settings
 
 global settings
-gv.settings = settings_help.Settings()
+settings = Settings()
 
 
 class TestConfigurationScenario(TestCase):
@@ -25,7 +25,8 @@ class TestConfigurationScenario(TestCase):
         self.solver_path = Path("tests", "test_files", "Solvers", "Test-Solver")
         self.solver = Solver(self.solver_path)
 
-        self.instance_directory = Path("tests/test_files/Instances/Test-Instance-Set")
+        self.instance_set = InstanceSet(
+            Path("tests/test_files/Instances/Test-Instance-Set"))
         self.run_number = 2
 
         self.parent_directory = Path("tests/test_files/test_configurator")
@@ -38,11 +39,11 @@ class TestConfigurationScenario(TestCase):
         self.cutoff_time = 60
         self.cutoff_length = "max"
         self.sparkle_objective =\
-            gv.settings.get_general_sparkle_objectives()[0]
-        self.configurator = gv.settings.get_general_sparkle_configurator()
+            settings.get_general_sparkle_objectives()[0]
+        self.configurator = settings.get_general_sparkle_configurator()
         self.scenario = ConfigurationScenario(
             solver=self.solver,
-            instance_directory=self.instance_directory,
+            instance_set=self.instance_set,
             number_of_runs=self.run_number,
             wallclock_time=self.wallclock_time,
             cutoff_time=self.cutoff_time,
@@ -58,17 +59,15 @@ class TestConfigurationScenario(TestCase):
     def test_configuration_scenario_init(self: TestConfigurationScenario) -> None:
         """Test if all variables that are set in the init are correct."""
         self.assertEqual(self.scenario.solver, self.solver)
-        self.assertEqual(self.scenario.instance_directory,
-                         self.instance_directory)
+        self.assertEqual(self.scenario.instance_set.directory,
+                         self.instance_set.directory)
         self.assertFalse(self.scenario.use_features)
         self.assertEqual(self.scenario.feature_data, None)
         self.assertEqual(self.scenario.name,
-                         f"{self.solver.name}_{self.instance_directory.name}")
+                         f"{self.solver.name}_{self.instance_set.name}")
 
-    @patch.object(Solver, "is_deterministic")
     def test_configuration_scenario_check_scenario_directory(
-        self: TestConfigurationScenario,
-        mock_deterministic: Mock
+        self: TestConfigurationScenario
     ) -> None:
         """Test if create_scenario() correctly creates the scenario directory."""
         self.scenario.create_scenario(self.parent_directory)
@@ -79,32 +78,25 @@ class TestConfigurationScenario(TestCase):
                          True)
         self.assertTrue((self.scenario.directory / "tmp").is_dir())
 
-    @patch.object(Solver, "is_deterministic")
     def test_configuration_scenario_check_result_directory(
         self: TestConfigurationScenario,
-        mock_deterministic: Mock
     ) -> None:
         """Test if create_scenario() creates the result directory."""
         self.scenario.create_scenario(self.parent_directory)
 
         self.assertTrue(self.scenario.result_directory.is_dir())
 
-    @patch.object(Solver, "is_deterministic")
     def test_configuration_scenario_check_instance_directory(
-        self: TestConfigurationScenario,
-        mock_deterministic: Mock
+        self: TestConfigurationScenario
     ) -> None:
         """Test if create_scenario() creates the instance directory."""
         self.scenario.create_scenario(self.parent_directory)
+        self.assertTrue(self.scenario.instance_set.directory.is_dir())
 
-        self.assertTrue(self.scenario.instance_directory.is_dir())
-
-    @patch.object(Solver, "is_deterministic")
     @patch("pathlib.Path.absolute")
     def test_configuration_scenario_check_scenario_file(
         self: TestConfigurationScenario,
-        mock_abs_path: Mock,
-        mock_deterministic: Mock
+        mock_abs_path: Mock
     ) -> None:
         """Test if create_scenario() correctly creates the scenario file."""
         inst_list_path = Path("tests/test_files/test_configurator/scenarios/instances/"
@@ -116,7 +108,6 @@ class TestConfigurationScenario(TestCase):
                                      inst_list_path,
                                      Path(),
                                      Path()]
-        mock_deterministic.return_value = "0"
         self.scenario.create_scenario(self.parent_directory)
 
         reference_scenario_file = Path("tests", "test_files", "reference_files",

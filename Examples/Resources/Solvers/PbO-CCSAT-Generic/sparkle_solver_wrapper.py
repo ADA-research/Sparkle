@@ -5,7 +5,8 @@ import time
 import sys
 import subprocess
 from pathlib import Path
-from tools.slurm_parsing import parse_commandline_dict
+from sparkle.types import SolverStatus
+from sparkle.tools.slurm_parsing import parse_commandline_dict
 
 # Convert the argument of the target_algorithm script to dictionary
 args = parse_commandline_dict(sys.argv[1:])
@@ -24,7 +25,8 @@ del args["specifics"]
 del args["run_length"]
 
 solver_name = "PbO-CCSAT"
-solver_exec = f"{solver_dir / solver_name}" if solver_dir != Path(".") else "./" + solver_name
+solver_exec = f"{solver_dir / solver_name}" if solver_dir != Path(".") else "./" + \
+    solver_name
 solver_cmd = [solver_exec,
               "-inst", str(instance),
               "-seed", str(seed)]
@@ -35,8 +37,8 @@ if "config_path" in args:
     # The arguments were not directly given and must be parsed from a file
     config_str = Path(args["config_path"]).open("r").readlines()[seed]
     # Extract the args without any quotes
-    config_split = [arg.strip().replace("'", "").replace('"', "")
-                    for arg in config_str.split("-") if arg.strip() != ""]
+    config_split = [arg.strip().replace("'", "").replace('"', "").strip("-")
+                    for arg in config_str.split(" -") if arg.strip() != ""]
     for arg in config_split:
         varname, value = arg.strip("'").strip('"').split(" ", maxsplit=1)
         params.extend([f"-{varname}", value])
@@ -55,20 +57,21 @@ except Exception as ex:
 # Convert Solver output to dictionary for configurator target algorithm script
 output_str = solver_call.stdout.decode()
 
-status = r'CRASHED'
+status = SolverStatus.CRASHED
 for line in output_str.splitlines():
     line = line.strip()
     if (line == r's SATISFIABLE') or (line == r's UNSATISFIABLE'):
-        status = r'SUCCESS'
+        status = SolverStatus.SUCCESS
         break
     elif line == r's UNKNOWN':
-        status = r'TIMEOUT'
+        status = SolverStatus.TIMEOUT
         break
 
 if specifics == 'rawres':
     tmp_directory = Path("tmp/")
-    rawres_file_name = Path(f"{solver_name}_{instance.name}_"\
-                       f"{time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))}.rawres_solver")
+    cur_time_str = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))
+    rawres_file_name = Path(f"{solver_name}_{instance.name}_" + cur_time_str
+                            + ".rawres_solver")
     if Path.cwd().name != tmp_directory.name:
         tmp_directory.mkdir(exist_ok=True)
         raw_result_path = tmp_directory / rawres_file_name
@@ -78,7 +81,7 @@ if specifics == 'rawres':
     with raw_result_path.open('w') as outfile:
         outfile.write(str(solver_cmd + params) + "\n" + output_str)
 
-outdir = {"status": status,
+outdir = {"status": status.value,
           "quality": 0,
           "solver_call": solver_cmd + params}
 

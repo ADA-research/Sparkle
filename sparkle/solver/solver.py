@@ -1,48 +1,56 @@
-#!/usr/bin/env python3
-# -*- coding: UTF-8 -*-
 """File to handle a solver and its directories."""
-
 
 from __future__ import annotations
 import sys
-import fcntl
+from typing import Any
 import shlex
 import ast
 from pathlib import Path
 import subprocess
-from tools import runsolver_parsing
+from sparkle.tools import runsolver_parsing
 import pcsparser
+from sparkle.types import SparkleCallable, SolverStatus
 
 
-class Solver:
+class Solver(SparkleCallable):
     """Class to handle a solver and its directories."""
-    solver_dir = Path("Solvers/")
-    solver_list_path = Path("Reference_Lists/") / "sparkle_solver_list.txt"
+    meta_data = "solver_meta.txt"
+    wrapper = "sparkle_solver_wrapper.py"
 
     def __init__(self: Solver,
-                 solver_directory: Path,
+                 directory: Path,
                  raw_output_directory: Path = None,
-                 runsolver_exec: Path = None) -> None:
+                 runsolver_exec: Path = None,
+                 deterministic: bool = None) -> None:
         """Initialize solver.
 
         Args:
-            solver_directory: Directory of the solver.
+            directory: Directory of the solver.
             raw_output_directory: Directory where solver will write its raw output.
-                Defaults to solver_directory / tmp
+                Defaults to directory / tmp
             runsolver_exec: Path to the runsolver executable.
-                By default, runsolver in solver_directory.
+                By default, runsolver in directory.
+            deterministic: Bool indicating determinism of the algorithm.
+                Defaults to False.
         """
-        self.directory = solver_directory
-        self.name = solver_directory.name
-        self.raw_output_directory = raw_output_directory
+        super().__init__(directory, runsolver_exec, raw_output_directory)
+        self.deterministic = deterministic
+        self.meta_data_file = self.directory / Solver.meta_data
+
         if self.raw_output_directory is None:
             self.raw_output_directory = self.directory / "tmp"
             self.raw_output_directory.mkdir(exist_ok=True)
-        self.runsolver_exec = runsolver_exec
         if self.runsolver_exec is None:
             self.runsolver_exec = self.directory / "runsolver"
-        # Can not extract from gv due to circular imports
-        self.solver_wrapper = "sparkle_solver_wrapper.py"
+        if not self.meta_data_file.exists():
+            self.meta_data_file = None
+        if self.deterministic is None:
+            if self.meta_data_file is not None:
+                # Read the parameter from file
+                meta_dict = ast.literal_eval(self.meta_data_file.open().read())
+                self.deterministic = meta_dict["deterministic"]
+            else:
+                self.deterministic = False
 
     def _get_pcs_file(self: Solver) -> Path | bool:
         """Get path of the parameter file.
@@ -50,39 +58,20 @@ class Solver:
         Returns:
             Path to the parameter file or False if the parameter file does not exist.
         """
-        file_count = 0
-        file_name = ""
-        for file_path in self.directory.iterdir():
-            file_extension = "".join(file_path.suffixes)
-
-            if file_extension == ".pcs":
-                file_name = file_path.name
-                file_count += 1
-
-        if file_count != 1:
+        pcs_files = [p for p in self.directory.iterdir() if p.suffix == ".pcs"]
+        if len(pcs_files) != 1:
+            # We only consider one PCS file per solver
             return False
-
-        return self.directory / file_name
-
-    def check_pcs_file_exists(self: Solver) -> bool:
-        """Check if the parameter file exists.
-
-        Returns:
-            Boolean if there is one pcs file in the solver directory.
-        """
-        return isinstance(self._get_pcs_file(), Path)
+        return pcs_files[0]
 
     def get_pcs_file(self: Solver) -> Path:
         """Get path of the parameter file.
 
         Returns:
-            Path to the parameter file.
+            Path to the parameter file. None if it can not be resolved.
         """
         if not (file_path := self._get_pcs_file()):
-            print("None or multiple .pcs files found. Solver "
-                  "is not valid for configuration.")
-            sys.exit(-1)
-
+            return None
         return file_path
 
     def read_pcs_file(self: Solver) -> bool:
@@ -96,26 +85,16 @@ class Solver:
             pass
         return False
 
-    # TODO: This information should be stored in the solver as an attribute too.
-    # That will allow us to at least skip this method.
-    def is_deterministic(self: Solver) -> str:
-        """Return a string indicating whether a given solver is deterministic or not.
+    def get_pcs(self: Solver) -> dict[str, tuple[str, str, str]]:
+        """Get the parameter content of the PCS file."""
+        if not (pcs_file := self.get_pcs_file()):
+            return None
+        parser = pcsparser.PCSParser()
+        parser.load(str(pcs_file), convention="smac")
+        return [p for p in parser.pcs.params if p["type"] == "parameter"]
 
-        Returns:
-            A string containing 0 or 1 indicating whether solver is deterministic.
-        """
-        deterministic = ""
-        target_solver_path = "Solvers/" + self.name
-        for solver in Solver.get_solver_list():
-            solver_line = solver.strip().split()
-            if (solver_line[0] == target_solver_path):
-                deterministic = solver_line[1]
-                break
-
-        return deterministic
-
-    def build_solver_cmd(self: Solver, instance: str, configuration: dict = None,
-                         runsolver_configuration: list[str] = None) -> list[str]:
+    def build_cmd(self: Solver, instance: str | list[str], configuration: dict = None,
+                  runsolver_configuration: list[str] = None) -> list[str]:
         """Build the solver call on an instance with a configuration."""
         if isinstance(configuration, str):
             configuration = Solver.config_str_to_dict(configuration)
@@ -142,40 +121,46 @@ class Solver:
                                        runsolver_configuration]
             # We wrap the solver call in the runsolver executable, by placing it in front
             solver_cmd += [str(self.runsolver_exec.absolute())] + runsolver_configuration
-        solver_cmd += [str((self.directory / self.solver_wrapper).absolute()),
+        solver_cmd += [str((self.directory / Solver.wrapper).absolute()),
                        str(configuration)]
         return solver_cmd
 
-    def run_solver(self: Solver, instance: str, configuration: dict = None,
-                   runsolver_configuration: list[str] = None) -> dict[str, str]:
+    def run(self: Solver, instance: str | list[str],
+            configuration: dict = None,
+            runsolver_configuration: list[str] = None,
+            cwd: Path = None) -> dict[str, str]:
         """Run the solver on an instance with a certain configuration.
 
         Args:
-            instance:
-            configuration:
-            runsolver_configuration:
+            instance: The instance to run the solver on, list in case of multi-file
+            configuration: The solver configuration to use. Can be empty.
+            runsolver_configuration: The runsolver configuration to wrap the solver
+                with. If None (default), runsolver will not be used.
+            cwd: Path where to execute. Defaults to self.raw_output_directory.
 
         Returns:
             Solver output dict possibly with runsolver values.
         """
-        solver_cmd = self.build_solver_cmd(instance,
-                                           configuration,
-                                           runsolver_configuration)
+        if cwd is None:
+            cwd = self.raw_output_directory
+        solver_cmd = self.build_cmd(instance,
+                                    configuration,
+                                    runsolver_configuration)
         process = subprocess.run(solver_cmd,
-                                 cwd=self.raw_output_directory,
+                                 cwd=cwd,
                                  capture_output=True)
+
+        # Subprocess resulted in error
         if process.returncode != 0:
             print(f"WARNING: Solver {self.name} execution seems to have failed!\n"
-                  f"The used command was: {solver_cmd}", flush=True)
-            return {"status": "ERROR", }
-        # Resolving solver output
-        if runsolver_configuration is not None:
-            return runsolver_parsing.get_solver_output(runsolver_configuration,
-                                                       process.stdout.decode(),
-                                                       self.raw_output_directory)
+                  f"The used command was: {solver_cmd}\n The error yielded was: \n"
+                  f"\t-stdout: '{process.stdout.decode()}'\n"
+                  f"\t-stderr: '{process.stderr.decode()}'\n")
+            return {"status": SolverStatus.ERROR, }
 
-        # Ran without runsolver, can read solver output directly
-        return ast.literal_eval(process.stdout.decode())
+        return Solver.parse_solver_output(process.stdout.decode(),
+                                          runsolver_configuration,
+                                          cwd)
 
     @staticmethod
     def config_str_to_dict(config_str: str) -> dict[str, str]:
@@ -194,26 +179,28 @@ class Solver:
         return config_dict
 
     @staticmethod
-    def get_solver_by_name(name: str) -> Solver:
-        """Attempt to resolve the solver object by name.
+    def parse_solver_output(solver_output: str,
+                            runsolver_configuration: list[str] = None,
+                            cwd: Path = None) -> dict[str, Any]:
+        """Parse the output of the solver.
 
         Args:
-            name: The name of the solver
+            solver_output: The output of the solver run which needs to be parsed
+            runsolver_configuration: The runsolver configuration to wrap the solver
+                with. If runsolver was not used this should be None.
+            cwd: Path where to execute. Defaults to self.raw_output_directory.
 
         Returns:
-            A Solver object if found, None otherwise
+            Dictionary representing the parsed solver output
         """
-        if isinstance(name, Path):
-            name = name.name
-        if (Solver.solver_dir / name).exists():
-            return Solver(Solver.solver_dir / name)
-        return None
+        if runsolver_configuration is not None:
+            parsed_output = runsolver_parsing.get_solver_output(runsolver_configuration,
+                                                                solver_output,
+                                                                cwd)
+        else:
+            parsed_output = ast.literal_eval(solver_output)
 
-    @staticmethod
-    def get_solver_list() -> list[str]:
-        """Get solver list from file."""
-        if Solver.solver_list_path.exists():
-            with Solver.solver_list_path.open("r+") as fo:
-                fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-                return ast.literal_eval(fo.read())
-        return []
+        # cast status attribute from str to Enum
+        parsed_output["status"] = SolverStatus(parsed_output["status"])
+
+        return parsed_output
