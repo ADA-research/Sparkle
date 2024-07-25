@@ -3,7 +3,7 @@
 
 import fcntl
 import ast
-from pathlib import Path
+from pathlib import Path, PurePath
 
 from sparkle.CLI.help.reporting_scenario import ReportingScenario
 
@@ -52,6 +52,9 @@ sparkle_marginal_contribution_actual_path =\
 
 sparkle_latex_dir = Path("sparkle/Components/Sparkle-latex-source")
 sparkle_report_bibliography_path = sparkle_latex_dir / "SparkleReport.bib"
+
+# Default settings
+default_settings_path = PurePath("sparkle/Components/sparkle_settings.ini")
 
 # Directories for CLI commands
 configuration_output_general = output_dir / "Configuration"

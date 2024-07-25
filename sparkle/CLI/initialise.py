@@ -9,7 +9,6 @@ from pathlib import Path
 from sparkle.platform import file_help as sfh
 from sparkle.CLI.help.command_help import CommandName
 from sparkle.CLI.help.argparse_custom import DownloadExamplesArgument
-from sparkle.CLI.help import snapshot_help as srh
 from sparkle.CLI.help import snapshot_help as snh
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
@@ -34,7 +33,8 @@ def check_for_initialise(requirements: list[CommandName] = None)\
         requirements: The requirements that have to be executed before the calling
             function.
     """
-    if not srh.detect_current_sparkle_platform_exists(check_all_dirs=True):
+
+    if not snh.detect_current_sparkle_platform_exists(check_all_dirs=True):
         print("-----------------------------------------------")
         print("No Sparkle platform found; "
               + "The platform will now be initialized automatically")
@@ -69,6 +69,14 @@ def initialise_sparkle(download_examples: bool = False) -> None:
     for working_dir in gv.working_dirs:
         working_dir.mkdir(exist_ok=True)
     (gv.ablation_dir / "scenarios/").mkdir(exist_ok=True)
+
+    # Check if Settings file exists, otherwise initialise a default one
+    if not Path(Settings.DEFAULT_settings_path).exists():
+        print("Settings file does not exist, initializing default settings ...")
+        gv.settings = Settings(gv.default_settings_path)
+        gv.settings.write_settings_ini(Path(Settings.DEFAULT_settings_path))
+    elif not hasattr(gv, "settings"):
+        gv.settings = Settings()
 
     # Initialise the FeatureDataFrame
     FeatureDataFrame(gv.feature_data_csv_path)
@@ -116,7 +124,5 @@ if __name__ == "__main__":
     parser = parser_function()
     # Process command line arguments
     args = parser.parse_args()
-    global settings
-    gv.settings = Settings()
     download = False if args.download_examples is None else args.download_examples
     initialise_sparkle(download_examples=download)
