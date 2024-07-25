@@ -6,6 +6,8 @@ from sparkle.solver import Solver
 
 sat_verifier_path = Path("sparkle/Components/Sparkle-SAT-verifier/SAT")
 
+sat_verifier_path = Path("Components/Sparkle-SAT-verifier/SAT")
+
 
 def sat_verify(instance: Path, raw_result: Path, solver: Solver) -> str:
     """Run a SAT verifier and return its status."""
