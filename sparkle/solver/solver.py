@@ -64,7 +64,7 @@ class Solver(SparkleCallable):
             return False
         return pcs_files[0]
 
-    def get_pcs_file(self: Solver) -> Path | bool:
+    def get_pcs_file(self: Solver) -> Path:
         """Get path of the parameter file.
 
         Returns:
