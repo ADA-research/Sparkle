@@ -33,6 +33,7 @@ def check_for_initialise(requirements: list[CommandName] = None)\
         requirements: The requirements that have to be executed before the calling
             function.
     """
+
     if not snh.detect_current_sparkle_platform_exists(check_all_dirs=True):
         print("-----------------------------------------------")
         print("No Sparkle platform found; "
