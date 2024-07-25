@@ -124,7 +124,7 @@ class Settings:
         """Read the settings from an INI file."""
         # Read file
         file_settings = configparser.ConfigParser()
-        file_settings.read(str(file_path))
+        file_settings.read(file_path)
 
         # Set internal settings based on data read from FILE if they were read
         # successfully
