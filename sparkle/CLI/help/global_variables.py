@@ -6,6 +6,7 @@ import ast
 from pathlib import Path, PurePath
 
 from sparkle.CLI.help.reporting_scenario import ReportingScenario
+# from sparkle.platform.settings_objects import Settings
 
 
 # TODO: Handle different seed requirements; for the moment this is a dummy function
@@ -23,6 +24,17 @@ def latest_scenario() -> ReportingScenario:
     if __latest_scenario is None:
         __latest_scenario = ReportingScenario()
     return __latest_scenario
+
+
+# __settings = None
+
+
+# def settings() -> Settings:
+#    """Function to get the global settings object."""
+#    global __settings
+#    if __settings is None:
+#        __settings = Settings()
+#    return __settings
 
 
 output_dir = Path("Output")

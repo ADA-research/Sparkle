@@ -54,7 +54,7 @@ class Settings:
     DEFAULT_components = lib_prefix / "Components"
 
     # Runsolver component
-    DEFAULT_runsolver_dir = lib_prefix / "runsolver" / "src"
+    DEFAULT_runsolver_dir = DEFAULT_components / "runsolver" / "src"
     DEFAULT_runsolver_exec = DEFAULT_runsolver_dir / "runsolver"
 
     # Ablation component
@@ -83,9 +83,13 @@ class Settings:
     DEFAULT_performance_data = cwd_prefix / "Performance_Data"
 
     # Collection of all working dirs for platform
-    DEFAULT_working_dirs = [DEFAULT_solver_dir, DEFAULT_instance_dir,
-                            DEFAULT_feature_data, DEFAULT_performance_data,
-                            DEFAULT_extractor_dir, DEFAULT_selection_output]
+    DEFAULT_working_dirs = [
+        DEFAULT_output, DEFAULT_configuration_output,
+        DEFAULT_selection_output, DEFAULT_tmp_output,
+        DEFAULT_solver_dir, DEFAULT_instance_dir,
+        DEFAULT_feature_data, DEFAULT_performance_data,
+        DEFAULT_extractor_dir, DEFAULT_selection_output
+    ]
 
     # Old default file paths from GV which should be turned into variables
     DEFAULT_algorithm_selector_path =\
