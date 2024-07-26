@@ -79,7 +79,8 @@ class Settings:
     DEFAULT_selection_output_raw = DEFAULT_selection_output / rawdata_dir
 
     # Collection of all working dirs for platform
-    DEFAULT_working_dirs = [DEFAULT_solver_dir, DEFAULT_selection_output]
+    DEFAULT_working_dirs = [DEFAULT_solver_dir, DEFAULT_instance_dir,
+                            DEFAULT_extractor_dir, DEFAULT_selection_output]
 
     # Old default paths from GV which should be turned into variables
     DEFAULT_algorithm_selector_path =\

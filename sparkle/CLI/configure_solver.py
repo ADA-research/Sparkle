@@ -165,13 +165,13 @@ if __name__ == "__main__":
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.instance_dir, InstanceSet)
+        gv.settings.DEFAULT_instance_dir, InstanceSet)
     instance_set_test = args.instance_set_test
     if instance_set_test is not None:
         instance_set_test = resolve_object_name(
             args.instance_set_test,
             gv.file_storage_data_mapping[gv.instances_nickname_path],
-            gv.instance_dir, InstanceSet)
+            gv.settings.DEFAULT_instance_dir, InstanceSet)
     use_features = args.use_features
     run_on = gv.settings.get_run_on()
     if args.configurator is not None:

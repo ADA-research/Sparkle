@@ -267,7 +267,7 @@ if __name__ == "__main__":
     instance_set = resolve_object_name(
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.instance_dir,
+        gv.settings.DEFAULT_instances_dir,
         InstanceSet)
     print(f"Running on {instance_set.size} instance(s)...")
 

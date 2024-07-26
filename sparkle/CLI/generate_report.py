@@ -83,11 +83,11 @@ if __name__ == "__main__":
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.instance_dir, InstanceSet)
+        gv.settings.DEFAULT_instance_dir, InstanceSet)
     instance_set_test = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.instance_dir, InstanceSet)
+        gv.settings.DEFAULT_instance_dir, InstanceSet)
 
     check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.GENERATE_REPORT])
 

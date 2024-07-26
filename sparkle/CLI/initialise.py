@@ -65,7 +65,7 @@ def initialise_sparkle(download_examples: bool = False) -> None:
         print("Current Sparkle platform recorded!")
 
     sfh.create_temporary_directories()
-    for working_dir in gv.working_dirs:
+    for working_dir in gv.settings.DEFAULT_working_dirs:
         working_dir.mkdir(exist_ok=True)
 
     # Check if Settings file exists, otherwise initialise a default one

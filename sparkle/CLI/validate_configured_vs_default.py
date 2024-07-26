@@ -64,11 +64,11 @@ if __name__ == "__main__":
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.instance_dir, InstanceSet)
+        gv.settings.DEFAULT_instances_dir, InstanceSet)
     instance_set_test = resolve_object_name(
         args.instance_set_test,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.instance_dir, InstanceSet)
+        gv.settings.DEFAULT_instances_dir, InstanceSet)
 
     if args.run_on is not None:
         gv.settings.set_run_on(

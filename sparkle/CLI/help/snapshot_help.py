@@ -21,14 +21,14 @@ def detect_current_sparkle_platform_exists(check_all_dirs: bool) -> bool:
       Boolean value indicating whether a Sparkle platform is active or not.
     """
     if check_all_dirs:
-        return all([x.exists() for x in gv.working_dirs])
-    return any([x.exists() for x in gv.working_dirs])
+        return all([x.exists() for x in gv.settings.DEFAULT_working_dirs])
+    return any([x.exists() for x in gv.settings.DEFAULT_working_dirs])
 
 
 def save_current_sparkle_platform() -> None:
     """Store the current Sparkle platform in a .zip file."""
     snapshot_filename = gv.snapshot_dir / f"My_Snapshot_{get_time_pid_random_string()}"
-    for working_dir in gv.working_dirs:
+    for working_dir in gv.settings.DEFAULT_working_dirs:
         if working_dir.exists():
             shutil.make_archive(snapshot_filename, "zip", working_dir)
 
@@ -39,7 +39,7 @@ def remove_current_sparkle_platform() -> None:
     """Remove the current Sparkle platform."""
     print("Cleaning existing Sparkle platform ...")
     sfh.remove_temporary_files()
-    for working_dir in gv.working_dirs:
+    for working_dir in gv.settings.DEFAULT_working_dirs:
         shutil.rmtree(working_dir, ignore_errors=True)
     print("Existing Sparkle platform cleaned!")
 

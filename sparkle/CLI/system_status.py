@@ -39,7 +39,7 @@ if __name__ == "__main__":
                             "Solver", args.verbose)
     sssh.print_sparkle_list([e for e in gv.extractor_dir.iterdir()],
                             "Extractor", args.verbose)
-    sssh.print_sparkle_list([i for i in gv.instance_dir.iterdir()],
+    sssh.print_sparkle_list([i for i in gv.settings.DEFAULT_instances_dir.iterdir()],
                             "Instance", args.verbose)
     sssh.print_feature_computation_jobs(
         gv.feature_data_csv_path, args.verbose

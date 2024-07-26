@@ -34,7 +34,7 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     instances_path = resolve_object_name(args.instances_path,
-                                         target_dir=gv.instance_dir)
+                                         target_dir=gv.settings.DEFAULT_instances_dir)
 
     check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_INSTANCES])
 

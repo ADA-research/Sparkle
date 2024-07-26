@@ -58,7 +58,7 @@ if __name__ == "__main__":
     instance_set = resolve_object_name(
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.instance_dir, InstanceSet)
+        gv.settings.DEFAULT_instances_dir, InstanceSet)
 
     check_for_initialise(
         ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR]

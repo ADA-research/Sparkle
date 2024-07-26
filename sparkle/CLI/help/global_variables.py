@@ -14,19 +14,22 @@ def get_seed() -> int:
     return 1
 
 
-_latest_scenario = None
+__latest_scenario = None
 
 
 def latest_scenario() -> ReportingScenario:
     """Function to get the global latest scenario object."""
-    global _latest_scenario
-    if _latest_scenario is None:
-        _latest_scenario = ReportingScenario()
-    return _latest_scenario
+    global __latest_scenario
+    if __latest_scenario is None:
+        __latest_scenario = ReportingScenario()
+    return __latest_scenario
 
+
+__settings = None
+
+# Add (property?) method for settings?
 
 output_dir = Path("Output")
-instance_dir = Path("Instances")
 extractor_dir = Path("Extractors")
 snapshot_dir = Path("Snapshots")
 feature_data_dir = Path("Feature_Data")
@@ -73,7 +76,7 @@ extractor_nickname_list_path = reference_list_dir / "sparkle_extractor_nickname_
 solver_nickname_list_path = reference_list_dir / "sparkle_solver_nickname_list.txt"
 instances_nickname_path = reference_list_dir / "sparkle_instance_nickname_list.txt"
 
-working_dirs = [instance_dir, output_dir, extractor_dir,
+working_dirs = [output_dir, extractor_dir,
                 feature_data_dir, performance_data_dir, reference_list_dir]
 
 file_storage_data_mapping = {solver_nickname_list_path: {},

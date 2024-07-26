@@ -56,7 +56,7 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     instances_source = Path(args.instances_path)
-    instances_target = gv.instance_dir / instances_source.name
+    instances_target = gv.settings.DEFAULT_instance_dir / instances_source.name
 
     if args.run_on is not None:
         settings.set_run_on(
