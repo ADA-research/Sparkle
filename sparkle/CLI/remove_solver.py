@@ -60,8 +60,9 @@ if __name__ == "__main__":
             gv.file_storage_data_mapping[gv.solver_nickname_list_path],
             remove=True)
 
-    if gv.performance_data_csv_path.exists():
-        performance_data = PerformanceDataFrame(gv.performance_data_csv_path)
+    if gv.settings.DEFAULT_performance_data_path.exists():
+        performance_data = PerformanceDataFrame(
+            gv.settings.DEFAULT_performance_data_path)
         if solver_path.name in performance_data.dataframe.columns:
             performance_data.remove_solver(solver_path.name)
         performance_data.save_csv()

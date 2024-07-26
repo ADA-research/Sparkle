@@ -135,8 +135,8 @@ if __name__ == "__main__":
             sys.exit(-1)
 
         print("Generating report for selection...")
-        train_data = PerformanceDataFrame(gv.performance_data_csv_path)
-        feature_data = FeatureDataFrame(gv.feature_data_csv_path)
+        train_data = PerformanceDataFrame(gv.settings.DEFAULT_performance_data_path)
+        feature_data = FeatureDataFrame(gv.settings.DEFAULT_feature_data_path)
         train_data.penalise(gv.settings.get_general_target_cutoff_time(),
                             gv.settings.get_penalised_time())
         test_data = None

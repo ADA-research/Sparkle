@@ -56,7 +56,7 @@ if __name__ == "__main__":
     nickname_str = args.nickname
 
     # Start add feature extractor
-    extractor_target_path = gv.extractor_dir / extractor_source.name
+    extractor_target_path = gv.settings.DEFAULT_extractor_dir / extractor_source.name
 
     if extractor_target_path.exists():
         print(f"Feature extractor {extractor_source.name} already exists! "
@@ -74,7 +74,7 @@ if __name__ == "__main__":
 
     # Get the extractor features groups and names from the wrapper
     extractor = Extractor(extractor_target_path)
-    feature_dataframe = FeatureDataFrame(gv.feature_data_csv_path)
+    feature_dataframe = FeatureDataFrame(gv.settings.DEFAULT_feature_data_path)
     feature_dataframe.add_extractor(str(extractor_target_path), extractor.features)
     feature_dataframe.save_csv()
 
@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
     if args.run_extractor_now:
         print("Start computing features ...")
-        compute_features(gv.feature_data_csv_path, False)
+        compute_features(gv.settings.DEFAULT_feature_data_path, False)
 
     # Write used settings to file
     gv.settings.write_used_settings()

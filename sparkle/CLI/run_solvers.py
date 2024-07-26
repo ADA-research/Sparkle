@@ -133,11 +133,11 @@ def run_solvers_on_instances(
         If True, the selector will be constructed and a report will be produced.
     """
     if recompute:
-        PerformanceDataFrame(gv.performance_data_csv_path).clean_csv()
+        PerformanceDataFrame(gv.settings.DEFAULT_performance_data_path).clean_csv()
     num_job_in_parallel = gv.settings.get_number_of_jobs_in_parallel()
 
     runs = [running_solvers_performance_data(
-        performance_data_csv_path=gv.performance_data_csv_path,
+        performance_data_csv_path=gv.settings.DEFAULT_performance_data_path,
         num_job_in_parallel=num_job_in_parallel,
         rerun=recompute,
         run_on=run_on)]

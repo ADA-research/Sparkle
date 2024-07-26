@@ -150,7 +150,7 @@ if __name__ == "__main__":
 
     # Start compute features
     print("Start computing features ...")
-    compute_features(gv.feature_data_csv_path, args.recompute, run_on=run_on)
+    compute_features(gv.settings.DEFAULT_feature_data_path, args.recompute, run_on)
 
     # Write used settings to file
     gv.settings.write_used_settings()

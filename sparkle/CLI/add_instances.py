@@ -89,10 +89,10 @@ if __name__ == "__main__":
     instance_set = InstanceSet(instances_target)
 
     # Add the instances to the Feature Data / Performance Data
-    feature_data = FeatureDataFrame(gv.feature_data_csv_path)
+    feature_data = FeatureDataFrame(gv.settings.DEFAULT_feature_data_path)
     # When adding instances, an empty performance DF has no objectives yet
     performance_data = PerformanceDataFrame(
-        gv.performance_data_csv_path,
+        gv.settings.DEFAULT_performance_data_path,
         objectives=settings.get_general_sparkle_objectives())
     for instance_path in instance_set.get_instance_paths:
         # Construct a name path due to multi-file instances
@@ -110,11 +110,11 @@ if __name__ == "__main__":
 
     if args.run_extractor_now:
         print("Start computing features ...")
-        compute_features(Path(gv.feature_data_csv_path), False)
+        compute_features(gv.settings.DEFAULT_feature_data_path, False)
 
     if args.run_solver_now:
         num_job_in_parallel = settings.get_number_of_jobs_in_parallel()
-        running_solvers_performance_data(gv.performance_data_csv_path,
+        running_solvers_performance_data(gv.settings.DEFAULT_performance_data_path,
                                          num_job_in_parallel,
                                          rerun=False, run_on=run_on)
         print("Running solvers...")

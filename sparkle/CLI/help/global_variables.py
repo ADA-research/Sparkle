@@ -25,10 +25,6 @@ def latest_scenario() -> ReportingScenario:
     return __latest_scenario
 
 
-__settings = None
-
-# Add (property?) method for settings?
-
 output_dir = Path("Output")
 feature_data_dir = Path("Feature_Data")
 performance_data_dir = Path("Performance_Data")
@@ -64,9 +60,6 @@ parallel_portfolio_output_analysis =\
     parallel_portfolio_output_general / analysis_dir_name
 selection_output_analysis = selection_output_general / analysis_dir_name
 
-feature_data_csv_path = feature_data_dir / "sparkle_feature_data.csv"
-performance_data_csv_path = performance_data_dir / "sparkle_performance_data.csv"
-
 reference_list_dir = Path("Reference_Lists")
 # NOTE: These data structures seem to be only written to / removed from but not read/used
 # NOTE: This could be a bug though, should test before removing stuff!
@@ -74,8 +67,7 @@ extractor_nickname_list_path = reference_list_dir / "sparkle_extractor_nickname_
 solver_nickname_list_path = reference_list_dir / "sparkle_solver_nickname_list.txt"
 instances_nickname_path = reference_list_dir / "sparkle_instance_nickname_list.txt"
 
-working_dirs = [output_dir,
-                feature_data_dir, performance_data_dir, reference_list_dir]
+working_dirs = [output_dir, reference_list_dir]
 
 file_storage_data_mapping = {solver_nickname_list_path: {},
                              instances_nickname_path: {},

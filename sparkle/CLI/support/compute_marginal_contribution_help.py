@@ -275,8 +275,8 @@ def compute_marginal_contribution(
             should be recalculated.
         selector_timeout: The cuttoff time to configure the algorithm selector.
     """
-    performance_data = PerformanceDataFrame(gv.performance_data_csv_path)
-    feature_data = FeatureDataFrame(gv.feature_data_csv_path)
+    performance_data = PerformanceDataFrame(gv.settings.DEFAULT_performance_data_path)
+    feature_data = FeatureDataFrame(gv.settings.DEFAULT_feature_data_path)
     performance_measure =\
         gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     aggregation_function = gv.settings.get_general_metric_aggregation_function()

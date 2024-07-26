@@ -118,7 +118,7 @@ if __name__ == "__main__":
     runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
 
     performance_data = PerformanceDataFrame(
-        gv.performance_data_csv_path,
+        gv.settings.DEFAULT_performance_data_path,
         objectives=gv.settings.get_general_sparkle_objectives())
     performance_data.add_solver(solver_directory)
     performance_data.save_csv()
@@ -137,7 +137,7 @@ if __name__ == "__main__":
     if args.run_solver_now:
         num_job_in_parallel = gv.settings.get_number_of_jobs_in_parallel()
         dependency_run_list = [running_solvers_performance_data(
-            gv.performance_data_csv_path, num_job_in_parallel,
+            gv.settings.DEFAULT_performance_data_path, num_job_in_parallel,
             rerun=False, run_on=run_on
         )]
 

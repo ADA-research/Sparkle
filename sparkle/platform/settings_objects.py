@@ -78,15 +78,24 @@ class Settings:
     DEFAULT_configuration_output_raw = DEFAULT_configuration_output / rawdata_dir
     DEFAULT_selection_output_raw = DEFAULT_selection_output / rawdata_dir
 
+    # Old default output dirs which should be part of something else
+    DEFAULT_feature_data = cwd_prefix / "Feature_Data"
+    DEFAULT_performance_data = cwd_prefix / "Performance_Data"
+
     # Collection of all working dirs for platform
     DEFAULT_working_dirs = [DEFAULT_solver_dir, DEFAULT_instance_dir,
+                            DEFAULT_feature_data, DEFAULT_performance_data,
                             DEFAULT_extractor_dir, DEFAULT_selection_output]
 
-    # Old default paths from GV which should be turned into variables
+    # Old default file paths from GV which should be turned into variables
     DEFAULT_algorithm_selector_path =\
         DEFAULT_selection_output / "sparkle_portfolio_selector"
     DEFAULT_marginal_contribution_actual_path =\
         DEFAULT_selection_output / "marginal_contribution_actual.txt"
+    DEFAULT_feature_data_path =\
+        DEFAULT_feature_data / "sparkle_feature_data.csv"
+    DEFAULT_performance_data_path =\
+        DEFAULT_performance_data / "sparkle_performance_data.csv"
 
     # Constant default values
     DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")

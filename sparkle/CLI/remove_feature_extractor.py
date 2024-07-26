@@ -59,8 +59,8 @@ if __name__ == "__main__":
                 remove=True)
             break
 
-    if gv.feature_data_csv_path.exists():
-        feature_data = FeatureDataFrame(gv.feature_data_csv_path)
+    if gv.settings.DEFAULT_feature_data_path.exists():
+        feature_data = FeatureDataFrame(gv.settings.DEFAULT_feature_data_path)
         feature_data.remove_extractor(str(extractor_path))
         feature_data.save_csv()
     shutil.rmtree(extractor_path)

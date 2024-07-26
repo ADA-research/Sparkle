@@ -77,13 +77,13 @@ def initialise_sparkle(download_examples: bool = False) -> None:
         gv.settings = Settings()
 
     # Initialise the FeatureDataFrame
-    FeatureDataFrame(gv.feature_data_csv_path)
+    FeatureDataFrame(gv.settings.DEFAULT_feature_data_path)
 
     # Initialise the Performance DF with the static dimensions
     # TODO: We have many sparkle settings values regarding ``number of runs''
     # E.g. configurator, parallel portfolio, and here too. Should we unify this more, or
     # just make another setting that does this specifically for performance data?
-    PerformanceDataFrame(gv.performance_data_csv_path,
+    PerformanceDataFrame(gv.settings.DEFAULT_performance_data_path,
                          objectives=gv.settings.get_general_sparkle_objectives(),
                          n_runs=1)
 

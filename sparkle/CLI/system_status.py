@@ -42,10 +42,10 @@ if __name__ == "__main__":
     sssh.print_sparkle_list([i for i in gv.settings.DEFAULT_instances_dir.iterdir()],
                             "Instance", args.verbose)
     sssh.print_feature_computation_jobs(
-        gv.feature_data_csv_path, args.verbose
+        gv.settings.DEFAULT_feature_data_path, args.verbose
     )
     sssh.print_performance_computation_jobs(
-        gv.performance_data_csv_path, args.verbose
+        gv.settings.DEFAULT_performance_data_path, args.verbose
     )
 
     # scan configurator log files for warnings

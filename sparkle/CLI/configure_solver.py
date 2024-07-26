@@ -184,7 +184,7 @@ if __name__ == "__main__":
 
     feature_data_df = None
     if use_features:
-        feature_data = FeatureDataFrame(gv.feature_data_csv_path)
+        feature_data = FeatureDataFrame(gv.settings.DEFAULT_feature_data_path)
 
         data_dict = {}
         feature_data_df = feature_data.dataframe

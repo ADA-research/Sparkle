@@ -118,7 +118,7 @@ if __name__ == "__main__":
     print("Start constructing Sparkle portfolio selector ...")
 
     flag_judge_exist_remaining_jobs = judge_exist_remaining_jobs(
-        gv.feature_data_csv_path, gv.performance_data_csv_path)
+        gv.settings.DEFAULT_feature_data_path, gv.settings.DEFAULT_performance_data_path)
 
     if flag_judge_exist_remaining_jobs:
         print("There remain unperformed feature computation jobs or performance "
@@ -128,8 +128,8 @@ if __name__ == "__main__":
         print("Sparkle portfolio selector is not successfully constructed!")
         sys.exit(-1)
 
-    performance_data = PerformanceDataFrame(gv.performance_data_csv_path)
-    feature_data = FeatureDataFrame(gv.feature_data_csv_path)
+    performance_data = PerformanceDataFrame(gv.settings.DEFAULT_performance_data_path)
+    feature_data = FeatureDataFrame(gv.settings.DEFAULT_feature_data_path)
 
     selector_path = gv.settings.DEFAULT_algorithm_selector_path
     if selector_path.exists() and not flag_recompute_portfolio:
