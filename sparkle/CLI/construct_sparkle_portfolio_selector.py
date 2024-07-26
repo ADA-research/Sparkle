@@ -131,7 +131,7 @@ if __name__ == "__main__":
     performance_data = PerformanceDataFrame(gv.performance_data_csv_path)
     feature_data = FeatureDataFrame(gv.feature_data_csv_path)
 
-    selector_path = gv.sparkle_algorithm_selector_path
+    selector_path = gv.settings.DEFAULT_algorithm_selector_path
     if selector_path.exists() and not flag_recompute_portfolio:
         print("Portfolio selector already exists. Set the recompute flag to re-create.")
     else:
@@ -143,10 +143,10 @@ if __name__ == "__main__":
         )
         print("Sparkle portfolio selector constructed!")
 
-    print(f"Sparkle portfolio selector located at {gv.sparkle_algorithm_selector_path}")
+    print(f"Sparkle portfolio selector located at {selector_path}")
 
     # Update latest scenario
-    gv.latest_scenario().set_selection_portfolio_path(gv.sparkle_algorithm_selector_path)
+    gv.latest_scenario().set_selection_portfolio_path(selector_path)
     gv.latest_scenario().set_latest_scenario(Scenario.SELECTION)
     # Set to default to overwrite possible old path
     gv.latest_scenario().set_selection_test_case_directory()

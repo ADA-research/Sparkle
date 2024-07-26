@@ -64,7 +64,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     solver_path = resolve_object_name(args.solver,
-                                      gv.solver_nickname_mapping, gv.solver_dir)
+                                      gv.solver_nickname_mapping,
+                                      gv.settings.DEFAULT_solver_dir)
     solver = Solver(solver_path)
     instance_set_train = resolve_object_name(
         args.instance_set_train,
@@ -131,7 +132,8 @@ if __name__ == "__main__":
 
     ablation_scenario = AblationScenario(
         solver, instance_set_train, instance_set_test, gv.ablation_output_general,
-        gv.ablation_exec, override_dirs=True)
+        gv.settings.DEFAULT_ablation_exec, gv.settings.DEFAULT_ablation_validation_exec,
+        override_dirs=True)
 
     # Instances
     ablation_scenario.create_instance_file()

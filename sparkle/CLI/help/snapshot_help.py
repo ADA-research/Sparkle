@@ -51,7 +51,7 @@ def extract_sparkle_snapshot(snapshot_file: Path) -> None:
       snapshot_file: Path to the where the current Sparkle platform should be stored.
     """
     tmp_directory = Path(f"tmp_directory_{get_time_pid_random_string()}")
-    gv.sparkle_tmp_path.mkdir(exist_ok=True)
+    gv.settings.DEFAULT_tmp_output.mkdir(exist_ok=True)
     with zipfile.ZipFile(snapshot_file, "r") as zip_ref:
         zip_ref.extractall(tmp_directory)
     shutil.copytree(tmp_directory, "./", dirs_exist_ok=True)

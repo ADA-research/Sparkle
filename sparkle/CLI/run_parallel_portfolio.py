@@ -92,7 +92,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         name=CommandName.RUN_PARALLEL_PORTFOLIO,
         parallel_jobs=parallel_jobs,
         path=".",
-        base_dir=gv.sparkle_tmp_path,
+        base_dir=gv.settings.DEFAULT_tmp_output,
         srun_options=["-N1", "-n1"] + sbatch_options,
         sbatch_options=sbatch_options
     )
@@ -226,7 +226,8 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     if args.solvers is not None:
-        solver_paths = [resolve_object_name("".join(s), target_dir=gv.solver_dir)
+        solver_paths = [resolve_object_name("".join(s),
+                                            target_dir=gv.settings.DEFAULT_solver_dir)
                         for s in args.solvers]
         if None in solver_paths:
             print("Some solvers not recognised! Check solver names:")
@@ -236,7 +237,8 @@ if __name__ == "__main__":
             sys.exit(-1)
         solvers = [Solver(p) for p in solver_paths]
     else:
-        solvers = [Solver(p) for p in gv.solver_dir.iterdir() if p.is_dir()]
+        solvers = [Solver(p) for p in
+                   gv.settings.DEFAULT_solver_dir.iterdir() if p.is_dir()]
 
     check_for_initialise(
         sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_PARALLEL_PORTFOLIO]

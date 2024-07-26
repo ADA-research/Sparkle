@@ -131,7 +131,7 @@ def run_after(solver: Path,
         cmd=command_line,
         name=command,
         dependencies=dependency,
-        base_dir=gv.sparkle_tmp_path,
+        base_dir=gv.settings.DEFAULT_tmp_output,
         srun_options=["-N1", "-n1"],
         sbatch_options=gv.settings.get_slurm_extra_options(as_args=True))
 
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     solver = resolve_object_name(
         args.solver,
         gv.file_storage_data_mapping[gv.solver_nickname_list_path],
-        gv.solver_dir, class_name=Solver)
+        gv.settings.DEFAULT_solver_dir, class_name=Solver)
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],

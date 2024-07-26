@@ -87,11 +87,11 @@ def portfolio_selector_solve_instance(
         sys.exit(-1)
     for extractor_path in extractor_paths:
         extractor = Extractor(Path(extractor_path),
-                              gv.runsolver_path,
-                              gv.sparkle_tmp_path)
+                              gv.settings.DEFAULT_runsolver_exec,
+                              gv.settings.DEFAULT_tmp_output)
         # We create a watch log to filter out runsolver output
-        runsolver_watch_path =\
-            gv.sparkle_tmp_path / f"{extractor_path.name}_{instance}.wlog"
+        runsolver_watch_path = gv.settings.DEFAULT_tmp_output /\
+            f"{extractor_path.name}_{instance}.wlog"
         features = extractor.run(instance,
                                  runsolver_args=["--cpu-limit", str(cutoff_extractor),
                                                  "-w", runsolver_watch_path])
@@ -102,7 +102,8 @@ def portfolio_selector_solve_instance(
 
     print("Sparkle portfolio selector predicting ...")
     selector = gv.settings.get_general_sparkle_selector()
-    predict_schedule = selector.run(gv.sparkle_algorithm_selector_path, feature_vector)
+    predict_schedule = selector.run(gv.settings.DEFAULT_algorithm_selector_path,
+                                    feature_vector)
 
     if predict_schedule is None:
         # Selector Failed to produce prediction
@@ -159,7 +160,7 @@ def run_portfolio_selector_on_instances(
         runner=run_on,
         cmd=cmd_list,
         name=CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR,
-        base_dir=gv.sparkle_tmp_path,
+        base_dir=gv.settings.DEFAULT_tmp_output,
         sbatch_options=gv.settings.get_slurm_extra_options(as_args=True),
         srun_options=["-N1", "-n1"])
 

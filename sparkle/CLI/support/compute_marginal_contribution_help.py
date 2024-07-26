@@ -161,7 +161,7 @@ def compute_actual_selector_marginal_contribution(
       A list of 2-tuples where every 2-tuple is of the form
         (solver name, marginal contribution, best_performance).
     """
-    actual_margi_cont_path = gv.sparkle_marginal_contribution_actual_path
+    actual_margi_cont_path = gv.settings.DEFAULT_marginal_contribution_actual_path
     # If the marginal contribution already exists in file, read it and return
     if not flag_recompute and actual_margi_cont_path.is_file():
         print("Marginal contribution for the actual selector already computed, reading "
@@ -173,7 +173,7 @@ def compute_actual_selector_marginal_contribution(
     # Compute performance of actual selector
     # NOTE: Should we recompute for all solvers?
     print("Computing actual performance for portfolio selector with all solvers ...")
-    actual_portfolio_selector_path = gv.sparkle_algorithm_selector_path
+    actual_portfolio_selector_path = gv.settings.DEFAULT_algorithm_selector_path
     construct_sparkle_portfolio_selector(actual_portfolio_selector_path,
                                          performance_data,
                                          feature_data,
@@ -208,8 +208,8 @@ def compute_actual_selector_marginal_contribution(
         tmp_performance_df.remove_solver(solver)
         # 3. create the actual selector path
         tmp_actual_portfolio_selector = (
-            gv.sparkle_algorithm_selector_dir / f"without_{solver_name}"
-            / f"{gv.sparkle_algorithm_selector_name}")
+            gv.settings.DEFAULT_selection_output / f"without_{solver_name}"
+            / "sparkle_portfolio_selector")
 
         if tmp_actual_portfolio_selector.exists():
             tmp_actual_portfolio_selector.unlink()

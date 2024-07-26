@@ -98,7 +98,7 @@ def compute_features(
         cmd=cmd_list,
         name=CommandName.COMPUTE_FEATURES,
         parallel_jobs=parallel_jobs,
-        base_dir=gv.sparkle_tmp_path,
+        base_dir=gv.settings.DEFAULT_tmp_output,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
 

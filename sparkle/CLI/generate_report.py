@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
     solver = resolve_object_name(args.solver,
                                  gv.solver_nickname_mapping,
-                                 gv.solver_dir, Solver)
+                                 gv.settings.DEFAULT_solver_dir, Solver)
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
@@ -128,7 +128,7 @@ if __name__ == "__main__":
                   " QUALITY_ABSOLUTE performance measure! (functionality coming soon)")
             sys.exit(-1)
 
-        if not Path(gv.sparkle_algorithm_selector_path).is_file():
+        if not gv.settings.DEFAULT_algorithm_selector_path.is_file():
             print("Before generating a Sparkle report, please first construct the "
                   "Sparkle portfolio selector!")
             print("Not generating a Sparkle report, stopping execution!")
@@ -147,7 +147,7 @@ if __name__ == "__main__":
                 test_case_path / "sparkle_performance_data.csv")
             test_data.penalise(gv.settings.get_general_target_cutoff_time(),
                                gv.settings.get_penalised_time())
-        actual_portfolio_selector_path = gv.sparkle_algorithm_selector_path
+        actual_portfolio_selector_path = gv.settings.DEFAULT_algorithm_selector_path
         sgfs.generate_report_selection(gv.selection_output_analysis,
                                        gv.sparkle_latex_dir,
                                        "template-Sparkle-for-selection.tex",

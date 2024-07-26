@@ -25,30 +25,17 @@ def latest_scenario() -> ReportingScenario:
     return _latest_scenario
 
 
-sparkle_tmp_path = Path("Tmp")
-
-sparkle_algorithm_selector_dir = Path("Sparkle_Portfolio_Selector")
-
-sparkle_algorithm_selector_name = "sparkle_portfolio_selector"
-
-sparkle_algorithm_selector_path =\
-    sparkle_algorithm_selector_dir / sparkle_algorithm_selector_name
-
 output_dir = Path("Output")
 instance_dir = Path("Instances")
-solver_dir = Path("Solvers")
 extractor_dir = Path("Extractors")
+snapshot_dir = Path("Snapshots")
 feature_data_dir = Path("Feature_Data")
 performance_data_dir = Path("Performance_Data")
-snapshot_dir = Path("Snapshots")
 
 # Log that keeps track of which commands were executed and where output details can be
 # found
 sparkle_global_log_dir = Path("Log")
 sparkle_global_log_path = output_dir / "sparkle.log"
-
-sparkle_marginal_contribution_actual_path =\
-    sparkle_algorithm_selector_dir / "marginal_contribution_actual.txt"
 
 sparkle_latex_dir = Path("sparkle/Components/Sparkle-latex-source")
 sparkle_report_bibliography_path = sparkle_latex_dir / "SparkleReport.bib"
@@ -76,15 +63,6 @@ parallel_portfolio_output_analysis =\
     parallel_portfolio_output_general / analysis_dir_name
 selection_output_analysis = selection_output_general / analysis_dir_name
 
-runsolver_dir = Path("sparkle/Components/runsolver/src/")
-runsolver_path = runsolver_dir / "runsolver"
-
-sparkle_solver_wrapper = "sparkle_solver_wrapper.py"
-sparkle_extractor_wrapper = "sparkle_extractor_wrapper.py"
-
-ablation_dir = Path("sparkle/Components/ablationAnalysis-0.9.4/")
-ablation_exec = ablation_dir / "ablationAnalysis"
-
 feature_data_csv_path = feature_data_dir / "sparkle_feature_data.csv"
 performance_data_csv_path = performance_data_dir / "sparkle_performance_data.csv"
 
@@ -95,9 +73,8 @@ extractor_nickname_list_path = reference_list_dir / "sparkle_extractor_nickname_
 solver_nickname_list_path = reference_list_dir / "sparkle_solver_nickname_list.txt"
 instances_nickname_path = reference_list_dir / "sparkle_instance_nickname_list.txt"
 
-working_dirs = [instance_dir, output_dir, solver_dir, extractor_dir,
-                feature_data_dir, performance_data_dir, reference_list_dir,
-                sparkle_algorithm_selector_dir]
+working_dirs = [instance_dir, output_dir, extractor_dir,
+                feature_data_dir, performance_data_dir, reference_list_dir]
 
 file_storage_data_mapping = {solver_nickname_list_path: {},
                              instances_nickname_path: {},

@@ -100,7 +100,7 @@ def call_solver(
         cmd=cmd_list,
         name=commandname,
         parallel_jobs=num_jobs,
-        base_dir=gv.sparkle_tmp_path,
+        base_dir=gv.settings.DEFAULT_tmp_output,
         path=outdir,
         dependencies=dependency,
         sbatch_options=sbatch_options,

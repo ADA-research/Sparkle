@@ -33,7 +33,6 @@ def check_for_initialise(requirements: list[CommandName] = None)\
         requirements: The requirements that have to be executed before the calling
             function.
     """
-
     if not snh.detect_current_sparkle_platform_exists(check_all_dirs=True):
         print("-----------------------------------------------")
         print("No Sparkle platform found; "
@@ -68,7 +67,6 @@ def initialise_sparkle(download_examples: bool = False) -> None:
     sfh.create_temporary_directories()
     for working_dir in gv.working_dirs:
         working_dir.mkdir(exist_ok=True)
-    (gv.ablation_dir / "scenarios/").mkdir(exist_ok=True)
 
     # Check if Settings file exists, otherwise initialise a default one
     if not Path(Settings.DEFAULT_settings_path).exists():
@@ -90,14 +88,17 @@ def initialise_sparkle(download_examples: bool = False) -> None:
                          n_runs=1)
 
     # Check that Runsolver is compiled, otherwise, compile
-    if not gv.runsolver_path.exists():
+    if not gv.settings.DEFAULT_runsolver_exec.exists():
         print("Runsolver does not exist, trying to compile...")
-        if not (gv.runsolver_dir / "Makefile").exists():
+        if not (gv.settings.DEFAULT_runsolver_dir / "Makefile").exists():
             print("WARNING: Runsolver executable doesn't exist and cannot find makefile."
-                  f" Please verify the contents of the directory: {gv.runsolver_dir}")
+                  " Please verify the contents of the directory: "
+                  f"{gv.settings.DEFAULT_runsolver_dir}")
         else:
             compile_runsolver =\
-                subprocess.run(["make"], cwd=gv.runsolver_dir, capture_output=True)
+                subprocess.run(["make"],
+                               cwd=gv.settings.DEFAULT_runsolver_dir,
+                               capture_output=True)
             if compile_runsolver.returncode != 0:
                 print("WARNING: Compilation of Runsolver failed with the following msg:"
                       f"[{compile_runsolver.returncode}] {compile_runsolver.stderr}")

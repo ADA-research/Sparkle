@@ -26,9 +26,21 @@ class AblationScenario:
                  test_set: InstanceSet,
                  output_dir: Path,
                  ablation_executable: Path = None,
+                 ablation_validation_executable: Path = None,
                  override_dirs: bool = False) -> None:
-        """Initialize ablation scenario."""
+        """Initialize ablation scenario.
+
+        Args:
+            solver: Solver object
+            train_set: The training instance
+            test_set: The test instance
+            output_dir: The output directory
+            ablation_executable: (Only for execution) The ablation executable
+            ablation_validation_executable: (Only for execution) The validation exec
+            override_dirs: Whether to clean the scenario directory if it already exists
+        """
         self.ablation_exec = ablation_executable
+        self.ablation_validation_exec = ablation_validation_executable
         self.solver = solver
         self.train_set = train_set
         self.test_set = test_set
@@ -189,7 +201,7 @@ class AblationScenario:
             runner=run_on,
             cmd=cmd,
             name=CommandName.RUN_ABLATION,
-            base_dir=gv.sparkle_tmp_path,
+            base_dir=gv.settings.DEFAULT_tmp_output,
             path=self.scenario_dir,
             sbatch_options=sbatch_options,
             srun_options=srun_options)
@@ -203,8 +215,8 @@ class AblationScenario:
         if self.test_set is not None:
             # Validation dir should have a copy of all needed files, except for the
             # output of the ablation run, which is stored in ablation-run[seed].txt
-            validation_exec = self.ablation_exec.parent / "ablationValidation"
-            cmd = f"{validation_exec.absolute()} --optionFile ablation_config.txt "\
+            cmd = f"{self.ablation_validation_exec.absolute()} "\
+                  "--optionFile ablation_config.txt "\
                   "--ablationLogFile ../log/ablation-run1234.txt"
 
             run_ablation_validation = rrr.add_to_queue(
@@ -212,7 +224,7 @@ class AblationScenario:
                 cmd=cmd,
                 name=CommandName.RUN_ABLATION_VALIDATION,
                 path=self.validation_dir,
-                base_dir=gv.sparkle_tmp_path,
+                base_dir=gv.settings.DEFAULT_tmp_output,
                 dependencies=run_ablation,
                 sbatch_options=sbatch_options,
                 srun_options=srun_options)

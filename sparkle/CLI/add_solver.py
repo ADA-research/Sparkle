@@ -88,14 +88,14 @@ if __name__ == "__main__":
             else:
                 print("WARNING: Can not read the provided pcs file format.")
 
-        configurator_wrapper_path = solver_source / gv.sparkle_solver_wrapper
+        configurator_wrapper_path = solver_source / Solver.wrapper
         if not (configurator_wrapper_path.is_file()
                 and os.access(configurator_wrapper_path, os.X_OK)):
             print(f"WARNING: Solver {solver_source.name} does not have a solver wrapper "
                   f"(Missing file {gv.sparkle_solver_wrapper}) or is not executable. ")
 
     # Start add solver
-    solver_directory = gv.solver_dir / solver_source.name
+    solver_directory = gv.settings.DEFAULT_solver_dir / solver_source.name
     if not solver_directory.exists():
         solver_directory.mkdir(parents=True, exist_ok=True)
     else:
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         fout.write(str({"deterministic": deterministic}))
 
     # Add RunSolver executable to the solver
-    runsolver_path = gv.runsolver_path
+    runsolver_path = gv.settings.DEFAULT_runsolver_exec
     if runsolver_path.name in [file.name for file in solver_directory.iterdir()]:
         print("Warning! RunSolver executable detected in Solver "
               f"{solver_source.name}. This will be replaced with "
@@ -125,10 +125,10 @@ if __name__ == "__main__":
 
     print(f"Adding solver {solver_source.name} done!")
 
-    if gv.sparkle_algorithm_selector_path.exists():
-        gv.sparkle_algorithm_selector_path.unlink()
+    if gv.settings.DEFAULT_algorithm_selector_path.exists():
+        gv.settings.DEFAULT_algorithm_selector_path.unlink()
         print("Removing Sparkle portfolio selector "
-              f"{gv.sparkle_algorithm_selector_path} done!")
+              f"{gv.settings.DEFAULT_algorithm_selector_path} done!")
 
     if nickname is not None:
         sfh.add_remove_platform_item(solver_directory,
@@ -147,7 +147,7 @@ if __name__ == "__main__":
             cmd="sparkle/CLI/construct_sparkle_portfolio_selector.py",
             name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
             dependencies=dependency_run_list,
-            base_dir=gv.sparkle_tmp_path,
+            base_dir=gv.settings.DEFAULT_tmp_output,
             sbatch_options=sbatch_options,
             srun_options=srun_options)
 
@@ -157,7 +157,7 @@ if __name__ == "__main__":
             cmd="sparkle/CLI/generate_report.py",
             name=CommandName.GENERATE_REPORT,
             dependencies=dependency_run_list,
-            base_dir=gv.sparkle_tmp_path,
+            base_dir=gv.settings.DEFAULT_tmp_output,
             sbatch_options=sbatch_options,
             srun_options=srun_options)
 

@@ -35,11 +35,57 @@ class SettingState(Enum):
 
 class Settings:
     """Read, write, set, and get settings."""
+    # CWD Prefix
+    cwd_prefix = Path.cwd()
 
-    # Settings path names and default
-    __settings_file = Path("sparkle_settings.ini")
+    # Library prefix
+    lib_prefix = Path(__file__).parent.parent.resolve()
+
+    # Default directory names
+    rawdata_dir = Path("Raw_Data")
+    analysis_dir = Path("Analysis")
     __settings_dir = Path("Settings")
-    DEFAULT_settings_path = PurePath(__settings_dir / __settings_file)
+    __settings_file = Path("sparkle_settings.ini")
+
+    # Default settings path
+    DEFAULT_settings_path = PurePath(cwd_prefix / __settings_dir / __settings_file)
+
+    # Default library pathing
+    DEFAULT_components = lib_prefix / "Components"
+
+    # Runsolver component
+    DEFAULT_runsolver_dir = lib_prefix / "runsolver" / "src"
+    DEFAULT_runsolver_exec = DEFAULT_runsolver_dir / "runsolver"
+
+    # Ablation component
+    DEFAULT_ablation_dir = DEFAULT_components / "ablationAnalysis-0.9.4"
+    DEFAULT_ablation_exec = DEFAULT_ablation_dir / "ablationAnalysis"
+    DEFAULT_ablation_validation_exec = DEFAULT_ablation_dir / "ablationValidation"
+
+    # Default input directory pathing
+    DEFAULT_solver_dir = cwd_prefix / "Solvers"
+    DEFAULT_instance_dir = cwd_prefix / "Instances"
+    DEFAULT_extractor_dir = cwd_prefix / "Extractors"
+    DEFAULT_snapshot_dir = cwd_prefix / "Snapshots"
+
+    # Default output directory pathing
+    DEFAULT_tmp_output = cwd_prefix / "Tmp"
+    DEFAULT_output = cwd_prefix / "Output"
+    DEFAULT_configuration_output = DEFAULT_output / "Configuration"
+    DEFAULT_selection_output = DEFAULT_output / "Selection"
+
+    # Default output subdirs
+    DEFAULT_configuration_output_raw = DEFAULT_configuration_output / rawdata_dir
+    DEFAULT_selection_output_raw = DEFAULT_selection_output / rawdata_dir
+
+    # Collection of all working dirs for platform
+    DEFAULT_working_dirs = [DEFAULT_solver_dir, DEFAULT_selection_output]
+
+    # Old default paths from GV which should be turned into variables
+    DEFAULT_algorithm_selector_path =\
+        DEFAULT_selection_output / "sparkle_portfolio_selector"
+    DEFAULT_marginal_contribution_actual_path =\
+        DEFAULT_selection_output / "marginal_contribution_actual.txt"
 
     # Constant default values
     DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")
@@ -68,14 +114,6 @@ class Settings:
 
     DEFAULT_parallel_portfolio_check_interval = 4
     DEFAULT_parallel_portfolio_num_seeds_per_solver = 1
-
-    # Default Pathing
-    DEFAULT_output = Path("Output")
-    DEFAULT_tmp_output = Path("Tmp")
-    DEFAULT_configuration_output = DEFAULT_output / "Configuration"
-    DEFAULT_selection_output = DEFAULT_output / "Selection"
-    DEFAULT_configuration_output_raw = DEFAULT_configuration_output / "Raw_Data"
-    DEFAULT_selection_output_raw = DEFAULT_selection_output / "Raw_Data"
 
     def __init__(self: Settings, file_path: PurePath = None) -> None:
         """Initialise a settings object."""

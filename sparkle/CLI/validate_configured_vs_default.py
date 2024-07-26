@@ -58,7 +58,9 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     solver = resolve_object_name(args.solver,
-                                 gv.solver_nickname_mapping, gv.solver_dir, Solver)
+                                 gv.solver_nickname_mapping,
+                                 gv.settings.DEFAULT_solver_dir,
+                                 Solver)
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
@@ -108,7 +110,7 @@ if __name__ == "__main__":
     _, opt_config_str = configurator.get_optimal_configuration(
         solver, instance_set_train, objective.PerformanceMeasure)
 
-    pcs.write_configuration_pcs(solver, opt_config_str, gv.sparkle_tmp_path)
+    pcs.write_configuration_pcs(solver, opt_config_str, gv.settings.DEFAULT_tmp_output)
 
     validator = Validator(gv.validation_output_general)
     all_validation_instances = [instance_set_train]

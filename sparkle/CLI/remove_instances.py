@@ -4,7 +4,6 @@
 import sys
 import argparse
 import shutil
-from pathlib import Path
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.platform import file_help as sfh
@@ -69,9 +68,9 @@ if __name__ == "__main__":
     # Remove the directory and all its files
     shutil.rmtree(instances_path)
 
-    if Path(gv.sparkle_algorithm_selector_path).exists():
-        shutil.rmtree(gv.sparkle_algorithm_selector_path)
+    if gv.settings.DEFAULT_algorithm_selector_path.exists():
+        shutil.rmtree(gv.settings.DEFAULT_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
-              f"{gv.sparkle_algorithm_selector_path} done!")
+              f"{gv.settings.DEFAULT_algorithm_selector_path} done!")
 
     print(f"Removing instances in directory {instances_path} done!")
