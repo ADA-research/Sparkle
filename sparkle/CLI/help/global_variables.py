@@ -26,13 +26,6 @@ def latest_scenario() -> ReportingScenario:
 
 
 output_dir = Path("Output")
-feature_data_dir = Path("Feature_Data")
-performance_data_dir = Path("Performance_Data")
-
-# Log that keeps track of which commands were executed and where output details can be
-# found
-sparkle_global_log_dir = Path("Log")
-sparkle_global_log_path = output_dir / "sparkle.log"
 
 sparkle_latex_dir = Path("sparkle/Components/Sparkle-latex-source")
 sparkle_report_bibliography_path = sparkle_latex_dir / "SparkleReport.bib"
