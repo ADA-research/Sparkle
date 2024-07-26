@@ -45,7 +45,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    settings = Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -59,9 +59,9 @@ if __name__ == "__main__":
     instances_target = gv.settings.DEFAULT_instance_dir / instances_source.name
 
     if args.run_on is not None:
-        settings.set_run_on(
+        gv.settings.set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
-    run_on = settings.get_run_on()
+    run_on = gv.settings.get_run_on()
 
     check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_INSTANCES])
 
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     # When adding instances, an empty performance DF has no objectives yet
     performance_data = PerformanceDataFrame(
         gv.settings.DEFAULT_performance_data_path,
-        objectives=settings.get_general_sparkle_objectives())
+        objectives=gv.settings.get_general_sparkle_objectives())
     for instance_path in instance_set.get_instance_paths:
         # Construct a name path due to multi-file instances
         feature_data.add_instance(str(instance_path))
@@ -113,11 +113,11 @@ if __name__ == "__main__":
         compute_features(gv.settings.DEFAULT_feature_data_path, False)
 
     if args.run_solver_now:
-        num_job_in_parallel = settings.get_number_of_jobs_in_parallel()
+        num_job_in_parallel = gv.settings.get_number_of_jobs_in_parallel()
         running_solvers_performance_data(gv.settings.DEFAULT_performance_data_path,
                                          num_job_in_parallel,
                                          rerun=False, run_on=run_on)
         print("Running solvers...")
 
     # Write used settings to file
-    settings.write_used_settings()
+    gv.settings.write_used_settings()
