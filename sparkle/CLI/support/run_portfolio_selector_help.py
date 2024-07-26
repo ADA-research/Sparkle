@@ -81,7 +81,7 @@ def portfolio_selector_solve_instance(
     cutoff_extractor = gv.settings.get_general_extractor_cutoff_time()
     print(f"Computing features of instance {instance} ...")
     feature_vector = []
-    extractor_paths = [p for p in gv.extractor_dir.iterdir()]
+    extractor_paths = [p for p in gv.settings.DEFAULT_extractor_dir.iterdir()]
     if len(extractor_paths) == 0:
         print("ERROR: No feature extractor added to Sparkle.")
         sys.exit(-1)

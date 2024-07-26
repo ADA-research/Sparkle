@@ -30,7 +30,6 @@ __settings = None
 # Add (property?) method for settings?
 
 output_dir = Path("Output")
-extractor_dir = Path("Extractors")
 snapshot_dir = Path("Snapshots")
 feature_data_dir = Path("Feature_Data")
 performance_data_dir = Path("Performance_Data")
@@ -76,7 +75,7 @@ extractor_nickname_list_path = reference_list_dir / "sparkle_extractor_nickname_
 solver_nickname_list_path = reference_list_dir / "sparkle_solver_nickname_list.txt"
 instances_nickname_path = reference_list_dir / "sparkle_instance_nickname_list.txt"
 
-working_dirs = [output_dir, extractor_dir,
+working_dirs = [output_dir,
                 feature_data_dir, performance_data_dir, reference_list_dir]
 
 file_storage_data_mapping = {solver_nickname_list_path: {},

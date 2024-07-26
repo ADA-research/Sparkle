@@ -37,7 +37,7 @@ if __name__ == "__main__":
     print("Reporting current system status of Sparkle ...")
     sssh.print_sparkle_list([s for s in gv.settings.DEFAULT_solver_dir.iterdir()],
                             "Solver", args.verbose)
-    sssh.print_sparkle_list([e for e in gv.extractor_dir.iterdir()],
+    sssh.print_sparkle_list([e for e in gv.settings.DEFAULT_extractor_dir.iterdir()],
                             "Extractor", args.verbose)
     sssh.print_sparkle_list([i for i in gv.settings.DEFAULT_instances_dir.iterdir()],
                             "Instance", args.verbose)

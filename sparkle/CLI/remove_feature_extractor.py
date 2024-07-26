@@ -37,7 +37,7 @@ if __name__ == "__main__":
     extractor_path = resolve_object_name(
         args.extractor_path,
         extractor_nicknames,
-        gv.extractor_dir)
+        gv.settings.DEFAULT_extractor_dir)
 
     check_for_initialise(
         ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_FEATURE_EXTRACTOR]
