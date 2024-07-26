@@ -21,7 +21,7 @@ performance_data_path="Performance_Data/sparkle_performance_data.csv"
 performance_data_tmp="tests/CLI/test_files/Performance_Data/sparkle_performance_data.csv.tmp"
 performance_data_test="tests/CLI/test_files/Performance_Data/test_construct_sparkle_portfolio_selector.csv"
 
-selector_path="Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
+selector_path="Output/Selector/sparkle_portfolio_selector"
 selector_tmp="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector.tmp"
 selector_test="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
 
