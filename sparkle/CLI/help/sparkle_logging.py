@@ -53,12 +53,12 @@ def _update_caller_file_path(timestamp: str) -> None:
     global caller_out_dir
     caller_out_dir = Path(caller_dir)
     global caller_log_path
-    caller_log_path = PurePath(gv.output_dir / caller_out_dir
+    caller_log_path = PurePath(gv.settings.DEFAULT_output / caller_out_dir
                                / caller_file)
     global caller_log_dir
     log_dir_name = Path("Log")
     caller_log_dir = (
-        gv.output_dir / log_dir_name / caller_out_dir)
+        gv.settings.DEFAULT_output / log_dir_name / caller_out_dir)
 
     # Create needed directories if they don't exist
     caller_dir = Path(caller_log_path).parents[0]
@@ -110,14 +110,10 @@ def log_command(argv: list[str]) -> None:
     args = " ".join(argv[0:])
     log_str = timestamp + "   " + args + "   " + str(output_file) + "\n"
 
-    # Make sure directory exists
-    gv.output_dir.mkdir(parents=True, exist_ok=True)
-
     # If the log file does not exist yet, write the header
     log_path = gv.settings.DEFAULT_output / "sparkle.log"
     if not log_path.is_file():
-        log_header = ("     Timestamp                              Command            "
-                      "                 Output details\n")
+        log_header = "\t Timestamp\t\t\t\t\t\t\t  Command\t\t\t\t\t\t\t Output details\n"
         log_str = log_header + log_str
 
     # Write to log file
