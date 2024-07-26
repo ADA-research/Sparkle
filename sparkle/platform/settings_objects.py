@@ -36,7 +36,7 @@ class SettingState(Enum):
 class Settings:
     """Read, write, set, and get settings."""
     # CWD Prefix
-    cwd_prefix = Path.cwd()
+    cwd_prefix = Path()  # Empty for now
 
     # Library prefix
     lib_prefix = Path(__file__).parent.parent.resolve()
@@ -62,6 +62,13 @@ class Settings:
     DEFAULT_ablation_exec = DEFAULT_ablation_dir / "ablationAnalysis"
     DEFAULT_ablation_validation_exec = DEFAULT_ablation_dir / "ablationValidation"
 
+    # Autofolio component
+    DEFAULT_general_sparkle_selector = DEFAULT_components / "AutoFolio/scripts/autofolio"
+
+    # Report component
+    DEFAULT_latex_source = DEFAULT_components / "Sparkle-latex-source"
+    DEFAULT_latex_bib = DEFAULT_latex_source / "SparkleReport.bib"
+
     # Default input directory pathing
     DEFAULT_solver_dir = cwd_prefix / "Solvers"
     DEFAULT_instance_dir = cwd_prefix / "Instances"
@@ -77,7 +84,9 @@ class Settings:
 
     # Default output subdirs
     DEFAULT_configuration_output_raw = DEFAULT_configuration_output / rawdata_dir
+    DEFAULT_configuration_output_analysis = DEFAULT_configuration_output / analysis_dir
     DEFAULT_selection_output_raw = DEFAULT_selection_output / rawdata_dir
+    DEFAULT_selection_output_analysis = DEFAULT_selection_output / analysis_dir
 
     # Old default output dirs which should be part of something else
     DEFAULT_feature_data = cwd_prefix / "Feature_Data"
@@ -106,8 +115,6 @@ class Settings:
     # Constant default values
     DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")
     DEFAULT_general_sparkle_configurator = cim.SMAC2.__name__
-    DEFAULT_general_sparkle_selector =\
-        Path("sparkle/Components/AutoFolio/scripts/autofolio")
     DEFAULT_general_solution_verifier = SolutionVerifier.NONE
     DEFAULT_general_target_cutoff_time = 60
     DEFAULT_general_penalty_multiplier = 10

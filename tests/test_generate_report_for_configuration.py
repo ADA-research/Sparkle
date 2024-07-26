@@ -635,7 +635,7 @@ def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:
     value_dict = {
         "key-1": "value-1",
         "key-2": "value-2",
-        "bibliographypath": str(gv.sparkle_report_bibliography_path.absolute())
+        "bibliographypath": ""
     }
 
     mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."

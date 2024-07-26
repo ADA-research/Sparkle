@@ -102,10 +102,10 @@ def clear_console_lines(lines: int) -> None:
 def wait_for_all_jobs(path: Path) -> None:
     """Wait for all active jobs to finish executing."""
     jobs = get_running_jobs(path)
-    verbosity_setting = gv.settings.get_general_verbosity()
+    verbosity_setting = gv.settings().get_general_verbosity()
     running_jobs = jobs
     # Interval at which to refresh the table
-    check_interval = gv.settings.get_general_check_interval()
+    check_interval = gv.settings().get_general_check_interval()
     # If verbosity is quiet there is no need for further information
     if verbosity_setting == VerbosityLevel.QUIET:
         prev_jobs = len(running_jobs) + 1

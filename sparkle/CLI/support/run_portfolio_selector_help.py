@@ -78,19 +78,19 @@ def portfolio_selector_solve_instance(
     """
     print(f"Running portfolio selector on solving instance {instance} ...")
 
-    cutoff_extractor = gv.settings.get_general_extractor_cutoff_time()
+    cutoff_extractor = gv.settings().get_general_extractor_cutoff_time()
     print(f"Computing features of instance {instance} ...")
     feature_vector = []
-    extractor_paths = [p for p in gv.settings.DEFAULT_extractor_dir.iterdir()]
+    extractor_paths = [p for p in gv.settings().DEFAULT_extractor_dir.iterdir()]
     if len(extractor_paths) == 0:
         print("ERROR: No feature extractor added to Sparkle.")
         sys.exit(-1)
     for extractor_path in extractor_paths:
         extractor = Extractor(Path(extractor_path),
-                              gv.settings.DEFAULT_runsolver_exec,
-                              gv.settings.DEFAULT_tmp_output)
+                              gv.settings().DEFAULT_runsolver_exec,
+                              gv.settings().DEFAULT_tmp_output)
         # We create a watch log to filter out runsolver output
-        runsolver_watch_path = gv.settings.DEFAULT_tmp_output /\
+        runsolver_watch_path = gv.settings().DEFAULT_tmp_output /\
             f"{extractor_path.name}_{instance}.wlog"
         features = extractor.run(instance,
                                  runsolver_args=["--cpu-limit", str(cutoff_extractor),
@@ -101,8 +101,8 @@ def portfolio_selector_solve_instance(
     print(f"Sparkle computing features of instance {instance} done!")
 
     print("Sparkle portfolio selector predicting ...")
-    selector = gv.settings.get_general_sparkle_selector()
-    predict_schedule = selector.run(gv.settings.DEFAULT_algorithm_selector_path,
+    selector = gv.settings().get_general_sparkle_selector()
+    predict_schedule = selector.run(gv.settings().DEFAULT_algorithm_selector_path,
                                     feature_vector)
 
     if predict_schedule is None:
@@ -160,8 +160,8 @@ def run_portfolio_selector_on_instances(
         runner=run_on,
         cmd=cmd_list,
         name=CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR,
-        base_dir=gv.settings.DEFAULT_tmp_output,
-        sbatch_options=gv.settings.get_slurm_extra_options(as_args=True),
+        base_dir=gv.settings().DEFAULT_tmp_output,
+        sbatch_options=gv.settings().get_slurm_extra_options(as_args=True),
         srun_options=["-N1", "-n1"])
 
     return run

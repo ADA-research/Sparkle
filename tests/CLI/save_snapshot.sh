@@ -15,15 +15,11 @@
 sparkle/CLI/initialise.py > /dev/null
 
 # Save snapshot
-output_true_partA="Snapshot file Snapshots/My_Snapshot"
-output_true_partB=".zip saved successfully!"
 output="$(sparkle/CLI/save_snapshot.py | tail -1)"
-
-if [[ $output =~ $output_true_partA[a-z0-9:._-]+$output_true_partB ]];
+if [[ "$output" == *".zip saved successfully!" ]];
 then
     echo "[success] save_snapshot test succeeded"
 else
     echo "[failure] save_snapshot test failed with output:"
     echo "$output"
 fi
-

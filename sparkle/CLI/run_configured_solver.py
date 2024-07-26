@@ -33,10 +33,6 @@ def parser_function() -> argparse.ArgumentParser:
 
 
 if __name__ == "__main__":
-    # Initialise settings
-    global settings
-    gv.settings = Settings()
-
     # Log command call
     sl.log_command(sys.argv)
 
@@ -50,29 +46,29 @@ if __name__ == "__main__":
     instance_set = resolve_object_name(
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings.DEFAULT_instance_dir, InstanceSet)
+        gv.settings().DEFAULT_instance_dir, InstanceSet)
     if instance_set is None:
         print(f"Could not resolve instance (set): {args.instance_path}! Exiting...")
         sys.exit(-1)
 
     if args.run_on is not None:
-        gv.settings.set_run_on(
+        gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings.get_run_on()
+    run_on = gv.settings().get_run_on()
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_CONFIGURED_SOLVER])
 
     if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file
-        gv.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
+        gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
     if args.performance_measure is not None:
-        gv.settings.set_general_sparkle_objectives(
+        gv.settings().set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
-    Settings.check_settings_changes(gv.settings, prev_settings)
+    Settings.check_settings_changes(gv.settings(), prev_settings)
 
     # Get the name of the configured solver and the training set
     solver = gv.latest_scenario().get_config_solver()
@@ -82,8 +78,8 @@ if __name__ == "__main__":
         print("ERROR: No configured solver found! Stopping execution.")
         sys.exit(-1)
     # Get optimised configuration
-    configurator = gv.settings.get_general_sparkle_configurator()
-    objective = gv.settings.get_general_sparkle_objectives()[0]
+    configurator = gv.settings().get_general_sparkle_configurator()
+    objective = gv.settings().get_general_sparkle_objectives()[0]
     _, config_str = configurator.get_optimal_configuration(
         solver, train_set, performance=objective.PerformanceMeasure)
 
@@ -102,4 +98,4 @@ if __name__ == "__main__":
         print("Running configured solver done!")
 
     # Write used settings to file
-    gv.settings.write_used_settings()
+    gv.settings().write_used_settings()

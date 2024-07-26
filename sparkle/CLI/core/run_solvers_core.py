@@ -7,7 +7,6 @@ from pathlib import Path
 
 from sparkle.CLI.help import global_variables as gv
 import sparkle.tools.general as tg
-from sparkle.platform.settings_objects import Settings
 from sparkle.CLI.support import run_solvers_help as srs
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
@@ -16,11 +15,7 @@ from sparkle.structures import PerformanceDataFrame
 
 
 if __name__ == "__main__":
-    # Initialise settings
-    global settings
-    file_path_latest = Path("Settings/latest.ini")
-    gv.settings = Settings(file_path_latest)
-    perf_measure = gv.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure
+    perf_measure = gv.settings().DEFAULT_general_sparkle_objective.PerformanceMeasure
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--performance-data", required=True, type=Path,
@@ -50,7 +45,7 @@ if __name__ == "__main__":
     performance_measure = PerformanceMeasure.from_str(args.performance_measure)
     key_str = f"{solver.name}_{instance_name}_{tg.get_time_pid_random_string()}"
     raw_result_path = f"Tmp/{key_str}.rawres"
-    cutoff = gv.settings.get_general_target_cutoff_time()
+    cutoff = gv.settings().get_general_target_cutoff_time()
     cpu_time, wc_time, cpu_time_penalised, quality, status, raw_result_path =\
         srs.run_solver_on_instance_and_process_results(solver,
                                                        instance_path,

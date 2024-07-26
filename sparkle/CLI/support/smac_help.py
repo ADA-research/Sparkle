@@ -12,7 +12,7 @@ def get_smac_run_obj() -> str:
         A string that represents the run objective set in the settings.
     """
     # Get smac_run_obj from general settings
-    smac_run_obj = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    smac_run_obj = gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
 
     # Convert to SMAC format
     if smac_run_obj == PerformanceMeasure.RUNTIME:

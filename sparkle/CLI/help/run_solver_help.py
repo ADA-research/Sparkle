@@ -43,7 +43,7 @@ def call_solver(
     Returns:
         str: The Slurm job id str, SlurmJob if RunRunner Slurm or empty string if local
     """
-    custom_cutoff = gv.settings.get_general_target_cutoff_time()
+    custom_cutoff = gv.settings().get_general_target_cutoff_time()
     cmd_list = []
     runsolver_args_list = []
     solver_params_list = []
@@ -85,7 +85,7 @@ def call_solver(
                                       solver_params, runsolver_args)
         cmd_list.append(" ".join(solver_cmd))
 
-    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
+    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     srun_options = ["-N1", "-n1"] + sbatch_options
     # Make sure the executable dir exists
     if outdir is None:
@@ -98,7 +98,7 @@ def call_solver(
         runner=run_on,
         cmd=cmd_list,
         name=commandname,
-        base_dir=gv.settings.DEFAULT_tmp_output,
+        base_dir=gv.settings().DEFAULT_tmp_output,
         path=outdir,
         dependencies=dependency,
         sbatch_options=sbatch_options,

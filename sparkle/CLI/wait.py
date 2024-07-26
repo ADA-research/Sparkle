@@ -8,7 +8,6 @@ from sparkle.CLI.help import sparkle_logging as sl
 from sparkle.CLI.support import sparkle_job_help as sjh
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help import global_variables as gv
-from sparkle.platform.settings_objects import Settings
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -25,10 +24,6 @@ def parser_function() -> argparse.ArgumentParser:
 
 
 if __name__ == "__main__":
-    # Initialise settings
-    global settings
-    gv.settings = Settings()
-
     # Log command call
     sl.log_command(sys.argv)
 
@@ -39,6 +34,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.job_id is not None:
-        sjh.wait_for_job(args.job_id, path=gv.settings.DEFAULT_tmp_output)
+        sjh.wait_for_job(args.job_id, path=gv.settings().DEFAULT_tmp_output)
     else:
-        sjh.wait_for_all_jobs(path=gv.settings.DEFAULT_tmp_output)
+        sjh.wait_for_all_jobs(path=gv.settings().DEFAULT_tmp_output)

@@ -74,8 +74,9 @@ class AblationScenario:
             None
         """
         ablation_scenario_dir = self.scenario_dir
-        perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-        configurator = gv.settings.get_general_sparkle_configurator()
+        perf_measure =\
+            gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
+        configurator = gv.settings().get_general_sparkle_configurator()
         _, opt_config_str = configurator.get_optimal_configuration(
             self.solver, self.train_set, performance=perf_measure)
 
@@ -97,11 +98,11 @@ class AblationScenario:
 
         smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
         objective_str = "MEAN10" if smac_run_obj == "RUNTIME" else "MEAN"
-        smac_each_run_cutoff_length = gv.settings.get_configurator_target_cutoff_length()
-        smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
-        concurrent_clis = gv.settings.get_slurm_max_parallel_runs_per_node()
-        ablation_racing = gv.settings.get_ablation_racing_flag()
-        configurator = gv.settings.get_general_sparkle_configurator()
+        run_cutoff_time = gv.settings().get_general_target_cutoff_time()
+        run_cutoff_length = gv.settings().get_configurator_target_cutoff_length()
+        concurrent_clis = gv.settings().get_slurm_max_parallel_runs_per_node()
+        ablation_racing = gv.settings().get_ablation_racing_flag()
+        configurator = gv.settings().get_general_sparkle_configurator()
         pcs_file_path = f"{self.solver.get_pcs_file().absolute()}"  # Get Solver PCS
 
         # Create config file
@@ -113,8 +114,8 @@ class AblationScenario:
                   f"deterministic = {1 if self.solver.deterministic else 0}\n"
                   f"run_obj = {smac_run_obj}\n"
                   f"overall_obj = {objective_str}\n"
-                  f"cutoffTime = {smac_each_run_cutoff_time}\n"
-                  f"cutoff_length = {smac_each_run_cutoff_length}\n"
+                  f"cutoffTime = {run_cutoff_time}\n"
+                  f"cutoff_length = {run_cutoff_length}\n"
                   f"cli-cores = {concurrent_clis}\n"
                   f"useRacing = {ablation_racing}\n"
                   "seed = 1234\n"
@@ -191,17 +192,17 @@ class AblationScenario:
             A  list of Run objects. Empty when running locally.
         """
         # 1. submit the ablation to the runrunner queue
-        clis = gv.settings.get_slurm_max_parallel_runs_per_node()
+        clis = gv.settings().get_slurm_max_parallel_runs_per_node()
         cmd = f"{self.ablation_exec.absolute()} --optionFile ablation_config.txt"
         srun_options = ["-N1", "-n1", f"-c{clis}"]
         sbatch_options = [f"--cpus-per-task={clis}"] +\
-            gv.settings.get_slurm_extra_options(as_args=True)
+            gv.settings().get_slurm_extra_options(as_args=True)
 
         run_ablation = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
             name=CommandName.RUN_ABLATION,
-            base_dir=gv.settings.DEFAULT_tmp_output,
+            base_dir=gv.settings().DEFAULT_tmp_output,
             path=self.scenario_dir,
             sbatch_options=sbatch_options,
             srun_options=srun_options)
@@ -224,7 +225,7 @@ class AblationScenario:
                 cmd=cmd,
                 name=CommandName.RUN_ABLATION_VALIDATION,
                 path=self.validation_dir,
-                base_dir=gv.settings.DEFAULT_tmp_output,
+                base_dir=gv.settings().DEFAULT_tmp_output,
                 dependencies=run_ablation,
                 sbatch_options=sbatch_options,
                 srun_options=srun_options)

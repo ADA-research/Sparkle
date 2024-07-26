@@ -34,13 +34,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
     solver_path = resolve_object_name(args.solver,
                                       gv.solver_nickname_mapping,
-                                      gv.settings.DEFAULT_solver_dir)
+                                      gv.settings().DEFAULT_solver_dir)
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.REMOVE_SOLVER])
     if solver_path is None:
         print(f'Could not resolve Solver path/name "{solver_path}"!')
         sys.exit(-1)
-    if not solver_path.parent == gv.settings.DEFAULT_solver_dir:
+    if not solver_path.parent == gv.settings().DEFAULT_solver_dir:
         # Allow user to only specify solvers in Sparkle solver dir
         print("Specified Solver is not is platform directory! Exiting.")
         sys.exit(-1)
@@ -60,18 +60,18 @@ if __name__ == "__main__":
             gv.file_storage_data_mapping[gv.solver_nickname_list_path],
             remove=True)
 
-    if gv.settings.DEFAULT_performance_data_path.exists():
+    if gv.settings().DEFAULT_performance_data_path.exists():
         performance_data = PerformanceDataFrame(
-            gv.settings.DEFAULT_performance_data_path)
+            gv.settings().DEFAULT_performance_data_path)
         if solver_path.name in performance_data.dataframe.columns:
             performance_data.remove_solver(solver_path.name)
         performance_data.save_csv()
 
     shutil.rmtree(solver_path)
 
-    if gv.settings.DEFAULT_algorithm_selector_path.exists():
-        shutil.rmtree(gv.settings.DEFAULT_algorithm_selector_path)
+    if gv.settings().DEFAULT_algorithm_selector_path.exists():
+        shutil.rmtree(gv.settings().DEFAULT_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
-              f"{gv.settings.DEFAULT_algorithm_selector_path} done!")
+              f"{gv.settings().DEFAULT_algorithm_selector_path} done!")
 
     print(f"Removing solver {solver_path.name} done!")

@@ -15,7 +15,7 @@ def get_seed() -> int:
     return 1
 
 
-__latest_scenario = None
+__latest_scenario: ReportingScenario = None
 
 
 def latest_scenario() -> ReportingScenario:
@@ -26,10 +26,10 @@ def latest_scenario() -> ReportingScenario:
     return __latest_scenario
 
 
-__settings = None
+__settings: Settings = None
 
 
-def test_settings() -> Settings:
+def settings() -> Settings:
     """Function to get the global settings object."""
     global __settings
     if __settings is None:
@@ -38,9 +38,6 @@ def test_settings() -> Settings:
 
 
 output_dir = Path("Output")
-
-sparkle_latex_dir = Path("sparkle/Components/Sparkle-latex-source")
-sparkle_report_bibliography_path = sparkle_latex_dir / "SparkleReport.bib"
 
 # Default settings
 default_settings_path = PurePath("sparkle/Components/sparkle_settings.ini")

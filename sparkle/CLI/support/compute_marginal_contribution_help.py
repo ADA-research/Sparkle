@@ -58,9 +58,9 @@ def compute_actual_selector_performance(
     Returns:
       The selector performance as a single floating point number.
     """
-    penalty_factor = gv.settings.get_general_penalty_multiplier()
+    penalty_factor = gv.settings().get_general_penalty_multiplier()
     performances = []
-    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    perf_measure = gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
     for instance in performance_data.instances:
         # We get the performance for an instance by infering the model predicition
         # for the instance.
@@ -102,7 +102,7 @@ def compute_actual_performance_for_instance(
       did not exceed capvalue
     """
     # Get the prediction of the selector over the solvers
-    selector = gv.settings.get_general_sparkle_selector()
+    selector = gv.settings().get_general_sparkle_selector()
     feature_vector = feature_data.get_instance(instance)
     predict_schedule = selector.run(actual_portfolio_selector, feature_vector)
     compare = operator.lt if minimise else operator.gt
@@ -161,7 +161,7 @@ def compute_actual_selector_marginal_contribution(
       A list of 2-tuples where every 2-tuple is of the form
         (solver name, marginal contribution, best_performance).
     """
-    actual_margi_cont_path = gv.settings.DEFAULT_marginal_contribution_actual_path
+    actual_margi_cont_path = gv.settings().DEFAULT_marginal_contribution_actual_path
     # If the marginal contribution already exists in file, read it and return
     if not flag_recompute and actual_margi_cont_path.is_file():
         print("Marginal contribution for the actual selector already computed, reading "
@@ -173,7 +173,7 @@ def compute_actual_selector_marginal_contribution(
     # Compute performance of actual selector
     # NOTE: Should we recompute for all solvers?
     print("Computing actual performance for portfolio selector with all solvers ...")
-    actual_portfolio_selector_path = gv.settings.DEFAULT_algorithm_selector_path
+    actual_portfolio_selector_path = gv.settings().DEFAULT_algorithm_selector_path
     construct_sparkle_portfolio_selector(actual_portfolio_selector_path,
                                          performance_data,
                                          feature_data,
@@ -208,7 +208,7 @@ def compute_actual_selector_marginal_contribution(
         tmp_performance_df.remove_solver(solver)
         # 3. create the actual selector path
         tmp_actual_portfolio_selector = (
-            gv.settings.DEFAULT_selection_output / f"without_{solver_name}"
+            gv.settings().DEFAULT_selection_output / f"without_{solver_name}"
             / "sparkle_portfolio_selector")
 
         if tmp_actual_portfolio_selector.exists():
@@ -275,19 +275,19 @@ def compute_marginal_contribution(
             should be recalculated.
         selector_timeout: The cuttoff time to configure the algorithm selector.
     """
-    performance_data = PerformanceDataFrame(gv.settings.DEFAULT_performance_data_path)
-    feature_data = FeatureDataFrame(gv.settings.DEFAULT_feature_data_path)
+    performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
+    feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
     performance_measure =\
-        gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    aggregation_function = gv.settings.get_general_metric_aggregation_function()
-    capvalue = gv.settings.get_general_cap_value()
+        gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
+    aggregation_function = gv.settings().get_general_metric_aggregation_function()
+    capvalue = gv.settings().get_general_cap_value()
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
         minimise = False
     elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
         minimise = True
     else:
         # assume runtime optimization
-        capvalue = gv.settings.get_general_target_cutoff_time()
+        capvalue = gv.settings().get_general_target_cutoff_time()
         minimise = True
 
     if not (flag_compute_perfect | flag_compute_actual):

@@ -34,7 +34,7 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     instances_path = resolve_object_name(args.instances_path,
-                                         target_dir=gv.settings.DEFAULT_instance_dir)
+                                         target_dir=gv.settings().DEFAULT_instance_dir)
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.REMOVE_INSTANCES])
 
@@ -47,8 +47,8 @@ if __name__ == "__main__":
     print(f"Start removing all instances in directory {instances_path} ...")
     instance_set = InstanceSet(instances_path)
     # Remove from feature data and performance data
-    feature_data = FeatureDataFrame(gv.settings.DEFAULT_feature_data_path)
-    performance_data = PerformanceDataFrame(gv.settings.DEFAULT_performance_data_path)
+    feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
+    performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     for instance in instance_set.get_instance_paths:
         feature_data.remove_instance(str(instance))
         performance_data.remove_instance(str(instance))
@@ -68,9 +68,9 @@ if __name__ == "__main__":
     # Remove the directory and all its files
     shutil.rmtree(instances_path)
 
-    if gv.settings.DEFAULT_algorithm_selector_path.exists():
-        shutil.rmtree(gv.settings.DEFAULT_algorithm_selector_path)
+    if gv.settings().DEFAULT_algorithm_selector_path.exists():
+        shutil.rmtree(gv.settings().DEFAULT_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
-              f"{gv.settings.DEFAULT_algorithm_selector_path} done!")
+              f"{gv.settings().DEFAULT_algorithm_selector_path} done!")
 
     print(f"Removing instances in directory {instances_path} done!")

@@ -59,12 +59,10 @@ def initialise_sparkle(download_examples: bool = False) -> None:
     # Check if Settings file exists, otherwise initialise a default one
     if not Path(Settings.DEFAULT_settings_path).exists():
         print("Settings file does not exist, initializing default settings ...")
-        gv.settings = Settings(gv.default_settings_path)
-        gv.settings.write_settings_ini(Path(Settings.DEFAULT_settings_path))
-    elif not hasattr(gv, "settings"):
-        gv.settings = Settings()
+        gv.__settings = Settings(gv.default_settings_path)
+        gv.settings().write_settings_ini(Path(Settings.DEFAULT_settings_path))
 
-    gv.settings.DEFAULT_snapshot_dir.mkdir(exist_ok=True)
+    gv.settings().DEFAULT_snapshot_dir.mkdir(exist_ok=True)
     if snh.detect_current_sparkle_platform_exists(check_all_dirs=False):
         snh.save_current_sparkle_platform()
         snh.remove_current_sparkle_platform()
@@ -73,31 +71,31 @@ def initialise_sparkle(download_examples: bool = False) -> None:
         print("Current Sparkle platform recorded!")
 
     sfh.create_temporary_directories()
-    for working_dir in gv.settings.DEFAULT_working_dirs:
+    for working_dir in gv.settings().DEFAULT_working_dirs:
         working_dir.mkdir(exist_ok=True)
 
     # Initialise the FeatureDataFrame
-    FeatureDataFrame(gv.settings.DEFAULT_feature_data_path)
+    FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
 
     # Initialise the Performance DF with the static dimensions
     # TODO: We have many sparkle settings values regarding ``number of runs''
     # E.g. configurator, parallel portfolio, and here too. Should we unify this more, or
     # just make another setting that does this specifically for performance data?
-    PerformanceDataFrame(gv.settings.DEFAULT_performance_data_path,
-                         objectives=gv.settings.get_general_sparkle_objectives(),
+    PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path,
+                         objectives=gv.settings().get_general_sparkle_objectives(),
                          n_runs=1)
 
     # Check that Runsolver is compiled, otherwise, compile
-    if not gv.settings.DEFAULT_runsolver_exec.exists():
+    if not gv.settings().DEFAULT_runsolver_exec.exists():
         print("Runsolver does not exist, trying to compile...")
-        if not (gv.settings.DEFAULT_runsolver_dir / "Makefile").exists():
+        if not (gv.settings().DEFAULT_runsolver_dir / "Makefile").exists():
             print("WARNING: Runsolver executable doesn't exist and cannot find makefile."
                   " Please verify the contents of the directory: "
-                  f"{gv.settings.DEFAULT_runsolver_dir}")
+                  f"{gv.settings().DEFAULT_runsolver_dir}")
         else:
             compile_runsolver =\
                 subprocess.run(["make"],
-                               cwd=gv.settings.DEFAULT_runsolver_dir,
+                               cwd=gv.settings().DEFAULT_runsolver_dir,
                                capture_output=True)
             if compile_runsolver.returncode != 0:
                 print("WARNING: Compilation of Runsolver failed with the following msg:"

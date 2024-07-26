@@ -37,10 +37,6 @@ def parser_function() -> argparse.ArgumentParser:
 
 
 if __name__ == "__main__":
-    # Initialise settings
-    global settings
-    gv.settings = Settings()
-
     # Log command call
     sl.log_command(sys.argv)
 
@@ -51,33 +47,33 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.run_on is not None:
-        gv.settings.set_run_on(
+        gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings.get_run_on()
+    run_on = gv.settings().get_run_on()
 
     instance_set = resolve_object_name(
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings.DEFAULT_instance_dir, InstanceSet)
+        gv.settings().DEFAULT_instance_dir, InstanceSet)
 
     check_for_initialise(
         COMMAND_DEPENDENCIES[CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR]
     )
 
     if ac.set_by_user(args, "settings_file"):
-        gv.settings.read_settings_ini(
+        gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "performance_measure"):
-        gv.settings.set_general_sparkle_objectives(
+        gv.settings().set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
-    Settings.check_settings_changes(gv.settings, prev_settings)
+    Settings.check_settings_changes(gv.settings(), prev_settings)
 
-    if gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure\
+    if gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure\
             == PerformanceMeasure.QUALITY_ABSOLUTE:
         print("ERROR: The run_sparkle_portfolio_selector command is not yet implemented"
               " for the QUALITY_ABSOLUTE performance measure!")
@@ -100,7 +96,7 @@ if __name__ == "__main__":
         gv.latest_scenario().write_scenario_ini()
         test_performance_data = PerformanceDataFrame(
             test_case_path / "sparkle_performance_data.csv",
-            objectives=gv.settings.get_general_sparkle_objectives())
+            objectives=gv.settings().get_general_sparkle_objectives())
         run = srpsh.run_portfolio_selector_on_instances(
             instance_set.instance_paths, test_performance_data, selector_path,
             run_on=run_on)
@@ -120,4 +116,4 @@ if __name__ == "__main__":
         print("Input instance or instance directory error!")
 
     # Write used settings to file
-    gv.settings.write_used_settings()
+    gv.settings().write_used_settings()

@@ -4,16 +4,11 @@
 import argparse
 from pathlib import Path
 
-from sparkle.CLI.help import global_variables as gv
-from sparkle.platform.settings_objects import Settings
 from sparkle.CLI.support import run_portfolio_selector_help as srpsh
 from sparkle.structures import PerformanceDataFrame
 
 
 if __name__ == "__main__":
-    # Initialise settings
-    global settings
-    gv.settings = Settings()
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--instance", required=True, type=str, nargs="+",
