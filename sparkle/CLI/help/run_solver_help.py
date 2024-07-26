@@ -43,7 +43,6 @@ def call_solver(
     Returns:
         str: The Slurm job id str, SlurmJob if RunRunner Slurm or empty string if local
     """
-    num_jobs = instance_set.size
     custom_cutoff = gv.settings.get_general_target_cutoff_time()
     cmd_list = []
     runsolver_args_list = []
@@ -99,7 +98,6 @@ def call_solver(
         runner=run_on,
         cmd=cmd_list,
         name=commandname,
-        parallel_jobs=num_jobs,
         base_dir=gv.settings.DEFAULT_tmp_output,
         path=outdir,
         dependencies=dependency,

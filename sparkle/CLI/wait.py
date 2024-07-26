@@ -39,6 +39,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.job_id is not None:
-        sjh.wait_for_job(args.job_id)
+        sjh.wait_for_job(args.job_id, path=gv.settings.DEFAULT_tmp_output)
     else:
-        sjh.wait_for_all_jobs()
+        sjh.wait_for_all_jobs(path=gv.settings.DEFAULT_tmp_output)

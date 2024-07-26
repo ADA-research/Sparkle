@@ -29,8 +29,9 @@ def detect_current_sparkle_platform_exists(check_all_dirs: bool) -> bool:
 
 def save_current_sparkle_platform() -> None:
     """Store the current Sparkle platform in a .zip file."""
+    time_stamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
     snapshot_filename = gv.settings.DEFAULT_snapshot_dir /\
-        f"Snapshot_{os.getlogin()}_{time.localtime(time.time())}"
+        f"Snapshot_{os.getlogin()}_{time_stamp}"
     for working_dir in gv.settings.DEFAULT_working_dirs:
         if working_dir.exists():
             shutil.make_archive(snapshot_filename, "zip", working_dir)

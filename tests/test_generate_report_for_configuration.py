@@ -30,7 +30,7 @@ configurator.scenario =\
 configurator.scenario._set_paths(configurator_path)
 ablation_scenario = AblationScenario(
     solver, Path(train_instance), Path(test_instance), Path(""))
-validator = Validator(Path())
+validator = Validator()
 test_objective_runtime = SparkleObjective("RUNTIME:PAR10")
 test_objective_quality = SparkleObjective("QUALITY_ABSOLUTE:ACCURACY")
 test_objective_err = SparkleObjective("ERR:ERR")

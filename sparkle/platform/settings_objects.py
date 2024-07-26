@@ -73,6 +73,7 @@ class Settings:
     DEFAULT_output = cwd_prefix / "Output"
     DEFAULT_configuration_output = DEFAULT_output / "Configuration"
     DEFAULT_selection_output = DEFAULT_output / "Selection"
+    DEFAULT_validation_output = DEFAULT_output / "Validation"
 
     # Default output subdirs
     DEFAULT_configuration_output_raw = DEFAULT_configuration_output / rawdata_dir
@@ -85,10 +86,11 @@ class Settings:
     # Collection of all working dirs for platform
     DEFAULT_working_dirs = [
         DEFAULT_output, DEFAULT_configuration_output,
-        DEFAULT_selection_output, DEFAULT_tmp_output,
+        DEFAULT_selection_output, DEFAULT_validation_output,
+        DEFAULT_tmp_output,
         DEFAULT_solver_dir, DEFAULT_instance_dir,
         DEFAULT_feature_data, DEFAULT_performance_data,
-        DEFAULT_extractor_dir, DEFAULT_selection_output
+        DEFAULT_extractor_dir,
     ]
 
     # Old default file paths from GV which should be turned into variables

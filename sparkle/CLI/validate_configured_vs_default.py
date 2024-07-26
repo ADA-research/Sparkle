@@ -109,15 +109,19 @@ if __name__ == "__main__":
     # Record optimised configuration
     _, opt_config_str = configurator.get_optimal_configuration(
         solver, instance_set_train, objective.PerformanceMeasure)
+    opt_config = Solver.config_str_to_dict(opt_config_str)
 
     pcs.write_configuration_pcs(solver, opt_config_str, gv.settings.DEFAULT_tmp_output)
 
-    validator = Validator(gv.validation_output_general)
+    validator = Validator(gv.validation_output_general, gv.settings.DEFAULT_tmp_output)
     all_validation_instances = [instance_set_train]
     if instance_set_test is not None:
         all_validation_instances.append(instance_set_test)
-    validator.validate(solvers=[solver] * 2, configurations=[None, opt_config_str],
-                       instance_sets=all_validation_instances)
+    validator.validate(solvers=[solver] * 2,
+                       configurations=[None, opt_config],
+                       instance_sets=all_validation_instances,
+                       cut_off=gv.settings.get_general_target_cutoff_time(),
+                       sbatch_options=gv.settings.get_slurm_extra_options(as_args=True))
 
     # Update latest scenario
     gv.latest_scenario().set_config_solver(solver)

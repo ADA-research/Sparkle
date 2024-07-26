@@ -15,26 +15,26 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.platform.cli_types import VerbosityLevel, TEXT
 
 
-def wait_for_job(job: str | SlurmRun) -> None:
+def wait_for_job(job: str | SlurmRun, path: Path) -> None:
     """Wait for a given Slurm job to finish executing.
 
     Args:
       job: String job identifier.
+      path: The Path where to look for the stored jobs.
     """
     if isinstance(job, str):
-        job = find_run(job)
+        job = find_run(job, path)
     job.wait()
 
     print(f"Job with ID {job.run_id} done!", flush=True)
 
 
-def find_run(job_id: str, path: Path = gv.settings.DEFAULT_tmp_output)\
-        -> SlurmRun:
+def find_run(job_id: str, path: Path) -> SlurmRun:
     """Retrieve a specific RunRunner Slurm run using the job_id.
 
     Args:
         job_id: String identifier of the job
-        path: The Path where to look for the stored jobs. Sparkle's Tmp path by default.
+        path: The Path where to look for the stored jobs.
 
     Returns:
         The SlurmRun with the matching run_id, None if no match.
@@ -45,8 +45,7 @@ def find_run(job_id: str, path: Path = gv.settings.DEFAULT_tmp_output)\
     return None
 
 
-def get_runs_from_file(path: Path = gv.settings.DEFAULT_tmp_output)\
-        -> list[SlurmRun]:
+def get_runs_from_file(path: Path) -> list[SlurmRun]:
     """Retrieve all run objects from file storage.
 
     Args:
@@ -72,9 +71,9 @@ def get_runs_from_file(path: Path = gv.settings.DEFAULT_tmp_output)\
     return runs
 
 
-def get_running_jobs() -> list[SlurmRun]:
+def get_running_jobs(path: Path) -> list[SlurmRun]:
     """Returns all waiting or running jobs."""
-    return [run for run in get_runs_from_file()
+    return [run for run in get_runs_from_file(path)
             if run.status == Status.WAITING or run.status == Status.RUNNING]
 
 
@@ -100,9 +99,9 @@ def clear_console_lines(lines: int) -> None:
     print("\033[J", end="")
 
 
-def wait_for_all_jobs() -> None:
+def wait_for_all_jobs(path: Path) -> None:
     """Wait for all active jobs to finish executing."""
-    jobs = get_running_jobs()
+    jobs = get_running_jobs(path)
     verbosity_setting = gv.settings.get_general_verbosity()
     running_jobs = jobs
     # Interval at which to refresh the table
