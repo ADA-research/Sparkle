@@ -56,7 +56,7 @@ def initialise_sparkle(download_examples: bool = False) -> None:
             WARNING: May take a some time to complete due to the large amount of data.
     """
     print("Start initialising Sparkle platform ...")
-    gv.snapshot_dir.mkdir(exist_ok=True)
+    gv.settings.DEFAULT_snapshot_dir.mkdir(exist_ok=True)
     if snh.detect_current_sparkle_platform_exists(check_all_dirs=False):
         snh.save_current_sparkle_platform()
         snh.remove_current_sparkle_platform()

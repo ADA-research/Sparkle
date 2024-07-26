@@ -30,7 +30,6 @@ __settings = None
 # Add (property?) method for settings?
 
 output_dir = Path("Output")
-snapshot_dir = Path("Snapshots")
 feature_data_dir = Path("Feature_Data")
 performance_data_dir = Path("Performance_Data")
 
