@@ -56,6 +56,14 @@ def initialise_sparkle(download_examples: bool = False) -> None:
             WARNING: May take a some time to complete due to the large amount of data.
     """
     print("Start initialising Sparkle platform ...")
+    # Check if Settings file exists, otherwise initialise a default one
+    if not Path(Settings.DEFAULT_settings_path).exists():
+        print("Settings file does not exist, initializing default settings ...")
+        gv.settings = Settings(gv.default_settings_path)
+        gv.settings.write_settings_ini(Path(Settings.DEFAULT_settings_path))
+    elif not hasattr(gv, "settings"):
+        gv.settings = Settings()
+
     gv.settings.DEFAULT_snapshot_dir.mkdir(exist_ok=True)
     if snh.detect_current_sparkle_platform_exists(check_all_dirs=False):
         snh.save_current_sparkle_platform()
@@ -67,14 +75,6 @@ def initialise_sparkle(download_examples: bool = False) -> None:
     sfh.create_temporary_directories()
     for working_dir in gv.settings.DEFAULT_working_dirs:
         working_dir.mkdir(exist_ok=True)
-
-    # Check if Settings file exists, otherwise initialise a default one
-    if not Path(Settings.DEFAULT_settings_path).exists():
-        print("Settings file does not exist, initializing default settings ...")
-        gv.settings = Settings(gv.default_settings_path)
-        gv.settings.write_settings_ini(Path(Settings.DEFAULT_settings_path))
-    elif not hasattr(gv, "settings"):
-        gv.settings = Settings()
 
     # Initialise the FeatureDataFrame
     FeatureDataFrame(gv.settings.DEFAULT_feature_data_path)

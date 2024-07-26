@@ -51,7 +51,7 @@ if __name__ == "__main__":
     instance_set = resolve_object_name(
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings.DEFAULT_instances_dir, InstanceSet)
+        gv.settings.DEFAULT_instance_dir, InstanceSet)
     if instance_set is None:
         print(f"Could not resolve instance (set): {args.instance_path}! Exiting...")
         sys.exit(-1)

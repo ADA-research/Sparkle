@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 """Sparkle command to show information about Sparkle."""
-
-import sys
-from sparkle.CLI.help import sparkle_logging as sl
 import argparse
 import sparkle
 
@@ -18,9 +15,6 @@ def parser_function() -> argparse.ArgumentParser:
 
 
 if __name__ == "__main__":
-    # Log command call
-    sl.log_command(sys.argv)
-
     print("\n".join([
         f"Sparkle ({sparkle.about.description})",
         f"Version: {sparkle.about.version}",

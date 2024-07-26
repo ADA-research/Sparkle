@@ -22,6 +22,8 @@ def parser_function() -> argparse.ArgumentParser:
 
 if __name__ == "__main__":
     # Log command call
+    global settings
+    gv.settings = Settings()
     sl.log_command(sys.argv)
 
     # Define command line arguments
@@ -30,8 +32,6 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
 
-    global settings
-    gv.settings = Settings()
     check_for_initialise()
 
     print("Reporting current system status of Sparkle ...")
@@ -39,7 +39,7 @@ if __name__ == "__main__":
                             "Solver", args.verbose)
     sssh.print_sparkle_list([e for e in gv.settings.DEFAULT_extractor_dir.iterdir()],
                             "Extractor", args.verbose)
-    sssh.print_sparkle_list([i for i in gv.settings.DEFAULT_instances_dir.iterdir()],
+    sssh.print_sparkle_list([i for i in gv.settings.DEFAULT_instance_dir.iterdir()],
                             "Instance", args.verbose)
     sssh.print_feature_computation_jobs(
         gv.settings.DEFAULT_feature_data_path, args.verbose
