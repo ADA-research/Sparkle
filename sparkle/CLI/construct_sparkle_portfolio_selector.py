@@ -11,7 +11,7 @@ from sparkle.CLI.help import sparkle_logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.reporting_scenario import Scenario
-from sparkle.CLI.help import command_help as ch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.types.objective import PerformanceMeasure
 
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     flag_recompute_marg_cont = args.recompute_marginal_contribution
 
     check_for_initialise(
-        ch.COMMAND_DEPENDENCIES[ch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR]
+        COMMAND_DEPENDENCIES[CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR]
     )
 
     if ac.set_by_user(args, "performance_measure"):

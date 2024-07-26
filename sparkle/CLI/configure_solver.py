@@ -16,12 +16,11 @@ from sparkle.CLI.help import sparkle_logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.structures import FeatureDataFrame
-from sparkle.CLI.help import command_help as ch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.solver import Solver
-from sparkle.CLI.help.command_help import CommandName
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.instance import InstanceSet
@@ -180,7 +179,7 @@ if __name__ == "__main__":
             origin=SettingState.CMD_LINE)
 
     # Check if Solver and instance sets were resolved
-    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.CONFIGURE_SOLVER])
+    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.CONFIGURE_SOLVER])
 
     feature_data_df = None
     if use_features:

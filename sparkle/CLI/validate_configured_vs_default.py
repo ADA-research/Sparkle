@@ -5,6 +5,8 @@ import sys
 import argparse
 from pathlib import PurePath
 
+from runrunner.base import Runner
+
 from sparkle.CLI.help import global_variables as gv
 from sparkle.solver import pcs
 from sparkle.CLI.help import sparkle_logging as sl
@@ -15,7 +17,7 @@ from sparkle.configurator.configurator import Configurator
 from sparkle.solver.validator import Validator
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
-from sparkle.CLI.help import command_help as ch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
 
@@ -76,7 +78,7 @@ if __name__ == "__main__":
     run_on = gv.settings.get_run_on()
 
     check_for_initialise(
-        ch.COMMAND_DEPENDENCIES[ch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT]
+        COMMAND_DEPENDENCIES[CommandName.VALIDATE_CONFIGURED_VS_DEFAULT]
     )
     if args.configurator is not None:
         gv.settings.set_general_sparkle_configurator(
@@ -117,11 +119,16 @@ if __name__ == "__main__":
     all_validation_instances = [instance_set_train]
     if instance_set_test is not None:
         all_validation_instances.append(instance_set_test)
-    validator.validate(solvers=[solver] * 2,
-                       configurations=[None, opt_config],
-                       instance_sets=all_validation_instances,
-                       cut_off=gv.settings.get_general_target_cutoff_time(),
-                       sbatch_options=gv.settings.get_slurm_extra_options(as_args=True))
+    validation = validator.validate(
+        solvers=[solver] * 2,
+        configurations=[None, opt_config],
+        instance_sets=all_validation_instances,
+        cut_off=gv.settings.get_general_target_cutoff_time(),
+        sbatch_options=gv.settings.get_slurm_extra_options(as_args=True),
+        run_on=run_on)
+
+    if run_on == Runner.LOCAL:
+        validation.wait()
 
     # Update latest scenario
     gv.latest_scenario().set_config_solver(solver)

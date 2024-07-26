@@ -13,7 +13,7 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
 from sparkle.CLI.support import run_solvers_help as srs
 
-from sparkle.CLI.help.command_help import CommandName
+from sparkle.platform import CommandName
 
 
 # Only called in call_sparkle_portfolio_selector_solve_instance

@@ -10,7 +10,7 @@ from runrunner.base import Runner, Run
 from runrunner.slurm import SlurmRun
 
 from sparkle.CLI.help import global_variables as gv
-from sparkle.CLI.help.command_help import CommandName
+from sparkle.platform import CommandName
 import sparkle.tools.general as tg
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet

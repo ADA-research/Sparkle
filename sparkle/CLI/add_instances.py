@@ -14,7 +14,7 @@ from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from sparkle.CLI.compute_features import compute_features
 from sparkle.CLI.run_solvers import running_solvers_performance_data
 from sparkle.CLI.help import sparkle_logging as sl
-from sparkle.CLI.help import command_help as ch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as apc
 
@@ -63,7 +63,7 @@ if __name__ == "__main__":
             args.run_on.value, SettingState.CMD_LINE)
     run_on = gv.settings.get_run_on()
 
-    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_INSTANCES])
+    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.ADD_INSTANCES])
 
     if not instances_source.exists():
         print(f'Instance set path "{instances_source}" does not exist!')

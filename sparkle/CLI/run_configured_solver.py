@@ -12,11 +12,10 @@ from sparkle.CLI.help import sparkle_logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import run_solver_help as srcsh
 from sparkle.instance import InstanceSet
-from sparkle.CLI.help import command_help as ch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
-from sparkle.CLI.help.command_help import CommandName
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -61,7 +60,7 @@ if __name__ == "__main__":
             args.run_on.value, SettingState.CMD_LINE)
     run_on = gv.settings.get_run_on()
 
-    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_CONFIGURED_SOLVER])
+    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_CONFIGURED_SOLVER])
 
     if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file

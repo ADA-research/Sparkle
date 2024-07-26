@@ -9,7 +9,7 @@ from sparkle.CLI.support import compute_marginal_contribution_help as scmch
 from sparkle.CLI.help import sparkle_logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.help import command_help as ch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as apc
 
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     check_for_initialise(
-        ch.COMMAND_DEPENDENCIES[ch.CommandName.COMPUTE_MARGINAL_CONTRIBUTION]
+        COMMAND_DEPENDENCIES[CommandName.COMPUTE_MARGINAL_CONTRIBUTION]
     )
 
     print("[Deprecated] command, functionality is called automatically by other commands"

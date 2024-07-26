@@ -10,7 +10,7 @@ from sparkle.platform import file_help as sfh
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from sparkle.instance import InstanceSet
 from sparkle.CLI.help import sparkle_logging as sl
-from sparkle.CLI.help import command_help as ch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     instances_path = resolve_object_name(args.instances_path,
                                          target_dir=gv.settings.DEFAULT_instance_dir)
 
-    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_INSTANCES])
+    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.REMOVE_INSTANCES])
 
     if instances_path is None or not instances_path.exists() or not\
             instances_path.is_dir():

@@ -14,7 +14,7 @@ from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.structures import PerformanceDataFrame
-from sparkle.CLI.help import command_help as ch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
@@ -61,7 +61,7 @@ if __name__ == "__main__":
         gv.settings.DEFAULT_instance_dir, InstanceSet)
 
     check_for_initialise(
-        ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR]
+        COMMAND_DEPENDENCIES[CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR]
     )
 
     if ac.set_by_user(args, "settings_file"):

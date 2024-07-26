@@ -10,7 +10,7 @@ from runrunner.base import Runner
 
 from sparkle.platform.settings_objects import SettingState, Settings, SolutionVerifier
 from sparkle.types.objective import PerformanceMeasure
-from sparkle.CLI.help.command_help import CommandName
+from sparkle.platform import CommandName
 
 
 class SetByUser(argparse.Action):

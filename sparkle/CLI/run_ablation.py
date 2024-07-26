@@ -14,7 +14,7 @@ from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.help import command_help as ch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
 
@@ -81,7 +81,7 @@ if __name__ == "__main__":
             args.run_on.value, SettingState.CMD_LINE)
     run_on = gv.settings.get_run_on()
 
-    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_ABLATION])
+    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_ABLATION])
 
     if ac.set_by_user(args, "settings_file"):
         # Do first, so other command line options can override settings from the file

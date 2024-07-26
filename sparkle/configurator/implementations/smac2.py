@@ -16,7 +16,7 @@ from runrunner import Runner, Run
 
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
-from sparkle.CLI.help.command_help import CommandName
+from sparkle.platform import CommandName
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
 from sparkle.instance import InstanceSet
@@ -112,6 +112,7 @@ class SMAC2(Configurator):
                 sbatch_options=sbatch_options,
                 run_on=run_on)
             runs.append(validate_run)
+
         if run_on == Runner.LOCAL:
             for run in runs:
                 run.wait()

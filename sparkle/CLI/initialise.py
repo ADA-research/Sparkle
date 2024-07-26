@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 
 from sparkle.platform import file_help as sfh
-from sparkle.CLI.help.command_help import CommandName
+from sparkle.platform import CommandName
 from sparkle.CLI.help.argparse_custom import DownloadExamplesArgument
 from sparkle.CLI.help import snapshot_help as snh
 from sparkle.platform.settings_objects import Settings

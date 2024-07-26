@@ -18,10 +18,9 @@ from runrunner.slurm import Status
 from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.CLI.help import sparkle_logging as sl
 from sparkle.CLI.help import global_variables as gv
-from sparkle.CLI.help import command_help as sch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.help.command_help import CommandName
 from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_objects import Settings, SettingState
@@ -240,9 +239,7 @@ if __name__ == "__main__":
         solvers = [Solver(p) for p in
                    gv.settings.DEFAULT_solver_dir.iterdir() if p.is_dir()]
 
-    check_for_initialise(
-        sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_PARALLEL_PORTFOLIO]
-    )
+    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_PARALLEL_PORTFOLIO])
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))

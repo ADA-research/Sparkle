@@ -23,7 +23,7 @@ from sparkle.instance import InstanceSet
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 
-from sparkle.CLI.help import command_help as ch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
 
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings.DEFAULT_instance_dir, InstanceSet)
 
-    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.GENERATE_REPORT])
+    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.GENERATE_REPORT])
 
     # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "settings_file"):

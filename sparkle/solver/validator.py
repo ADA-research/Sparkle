@@ -9,7 +9,7 @@ import ast
 import runrunner as rrr
 from runrunner import Runner, Run
 
-from sparkle.CLI.help.command_help import CommandName
+from sparkle.platform import CommandName
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.tools.runsolver_parsing import get_solver_output, get_solver_args

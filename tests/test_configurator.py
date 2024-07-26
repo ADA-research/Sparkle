@@ -9,8 +9,7 @@ from pathlib import Path
 
 import runrunner as rrr
 
-from sparkle.CLI.help.command_help import CommandName
-
+from sparkle.platform import CommandName
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.configurator.configuration_scenario import ConfigurationScenario

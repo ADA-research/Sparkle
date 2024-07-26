@@ -13,7 +13,7 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import sparkle_logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.help.command_help import COMMAND_DEPENDENCIES, CommandName
+from sparkle.platform import COMMAND_DEPENDENCIES, CommandName
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as apc
 from sparkle.structures import FeatureDataFrame
