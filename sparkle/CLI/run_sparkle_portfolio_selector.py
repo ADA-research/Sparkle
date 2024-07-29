@@ -78,8 +78,7 @@ if __name__ == "__main__":
         print("ERROR: The run_sparkle_portfolio_selector command is not yet implemented"
               " for the QUALITY_ABSOLUTE performance measure!")
         sys.exit(-1)
-    selector_path = Path("Sparkle_Portfolio_Selector",
-                         "sparkle_portfolio_selector")
+    selector_path = gv.settings().DEFAULT_selection_output / "sparkle_portfolio_selector"
     if not selector_path.exists() or not selector_path.is_file():
         print("ERROR: The portfolio selector could not be found. Please make sure to "
               "first construct a portfolio selector.")

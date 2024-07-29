@@ -61,10 +61,11 @@ if __name__ == "__main__":
     # Now that we have our result, we write it to the FeatureDataCSV with a FileLock
     lock = FileLock(f"{feature_data_csv_path}.lock")
     if features is not None:
+        print(f"Writing features to CSV: {instance_name}, {extractor_path.name}")
         with lock.acquire(timeout=60):
             feature_data = FeatureDataFrame(feature_data_csv_path)
             for feature_group, feature_name, value in features:
-                feature_data.set_value(str(instance_name), str(extractor_path),
+                feature_data.set_value(str(instance_name), extractor_path.name,
                                        feature_group, feature_name, float(value))
             feature_data.save_csv()
         lock.release()
