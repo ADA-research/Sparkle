@@ -111,7 +111,8 @@ if __name__ == "__main__":
 
     pcs.write_configuration_pcs(solver, opt_config_str, gv.settings().DEFAULT_tmp_output)
 
-    validator = Validator(gv.validation_output_general, gv.settings().DEFAULT_tmp_output)
+    validator = Validator(gv.settings().DEFAULT_validation_output,
+                          gv.settings().DEFAULT_tmp_output)
     all_validation_instances = [instance_set_train]
     if instance_set_test is not None:
         all_validation_instances.append(instance_set_test)

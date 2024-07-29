@@ -37,44 +37,21 @@ def settings() -> Settings:
     return __settings
 
 
-output_dir = Path("Output")
-
 # Default settings
 default_settings_path = PurePath("sparkle/Components/sparkle_settings.ini")
 
-# Directories for CLI commands
-configuration_output_general = output_dir / "Configuration"
-parallel_portfolio_output_general = output_dir / "Parallel_Portfolio"
-selection_output_general = output_dir / "Selection"
-validation_output_general = output_dir / "Validation"
-ablation_output_general = output_dir / "Ablation"
-
-# Raw output
-rawdata_dir_name = Path("Raw_Data")
-configuration_output_raw = configuration_output_general / rawdata_dir_name
-parallel_portfolio_output_raw = parallel_portfolio_output_general / rawdata_dir_name
-selection_output_raw = selection_output_general / rawdata_dir_name
-
-# Analysis directories
-analysis_dir_name = Path("Analysis")
-configuration_output_analysis = configuration_output_general / analysis_dir_name
-parallel_portfolio_output_analysis =\
-    parallel_portfolio_output_general / analysis_dir_name
-selection_output_analysis = selection_output_general / analysis_dir_name
 
 reference_list_dir = Path("Reference_Lists")
+reference_list_dir.mkdir(exist_ok=True)
 # NOTE: These data structures seem to be only written to / removed from but not read/used
 # NOTE: This could be a bug though, should test before removing stuff!
 extractor_nickname_list_path = reference_list_dir / "sparkle_extractor_nickname_list.txt"
 solver_nickname_list_path = reference_list_dir / "sparkle_solver_nickname_list.txt"
 instances_nickname_path = reference_list_dir / "sparkle_instance_nickname_list.txt"
 
-working_dirs = [output_dir, reference_list_dir]
-
 file_storage_data_mapping = {solver_nickname_list_path: {},
                              instances_nickname_path: {},
-                             extractor_nickname_list_path: {}
-                             }
+                             extractor_nickname_list_path: {}}
 
 for data_path in file_storage_data_mapping.keys():
     if data_path.exists():

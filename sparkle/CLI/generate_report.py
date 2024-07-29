@@ -165,7 +165,7 @@ if __name__ == "__main__":
         # Reporting for parallel portfolio
         sgrfpph.generate_report_parallel_portfolio(
             parallel_portfolio_path,
-            gv.parallel_portfolio_output_analysis,
+            gv.settings().DEFAULT_parallel_portfolio_output_analysis,
             gv.settings().DEFAULT_latex_source,
             gv.settings().DEFAULT_latex_bib,
             gv.settings().get_general_sparkle_objectives()[0],
@@ -192,7 +192,7 @@ if __name__ == "__main__":
         # Generate a report depending on which instance sets are provided
         if flag_instance_set_train or flag_instance_set_test:
             # Check if there are result to generate a report from
-            validator = Validator(gv.validation_output_general)
+            validator = Validator(gv.settings().DEFAULT_validation_output)
             train_res = validator.get_validation_results(
                 solver, instance_set_train)
             if instance_set_test is not None:
@@ -227,13 +227,13 @@ if __name__ == "__main__":
         if args.flag_ablation:
             ablation_scenario = AblationScenario(
                 solver, instance_set_train, instance_set_test,
-                gv.ablation_output_general)
+                gv.settings().DEFAULT_ablation_output)
         sgrfch.generate_report_for_configuration(
             solver,
             gv.settings().get_general_sparkle_configurator(),
-            Validator(gv.validation_output_general),
+            Validator(gv.settings().DEFAULT_validation_output),
             gv.settings().DEFAULT_extractor_dir,
-            gv.configuration_output_analysis,
+            gv.settings().DEFAULT_configuration_output_analysis,
             gv.settings().DEFAULT_latex_source,
             gv.settings().DEFAULT_latex_bib,
             instance_set_train,

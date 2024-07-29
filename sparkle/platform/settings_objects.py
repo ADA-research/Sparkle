@@ -81,12 +81,18 @@ class Settings:
     DEFAULT_configuration_output = DEFAULT_output / "Configuration"
     DEFAULT_selection_output = DEFAULT_output / "Selection"
     DEFAULT_validation_output = DEFAULT_output / "Validation"
+    DEFAULT_parallel_portfolio_output = DEFAULT_output / "Parallel_Portfolio"
+    DEFAULT_ablation_output = DEFAULT_output / "Ablation"
 
     # Default output subdirs
     DEFAULT_configuration_output_raw = DEFAULT_configuration_output / rawdata_dir
     DEFAULT_configuration_output_analysis = DEFAULT_configuration_output / analysis_dir
     DEFAULT_selection_output_raw = DEFAULT_selection_output / rawdata_dir
     DEFAULT_selection_output_analysis = DEFAULT_selection_output / analysis_dir
+    DEFAULT_parallel_portfolio_output_raw =\
+        DEFAULT_parallel_portfolio_output / rawdata_dir
+    DEFAULT_parallel_portfolio_output_analysis =\
+        DEFAULT_parallel_portfolio_output / analysis_dir
 
     # Old default output dirs which should be part of something else
     DEFAULT_feature_data = cwd_prefix / "Feature_Data"

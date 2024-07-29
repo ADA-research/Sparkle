@@ -127,7 +127,8 @@ if __name__ == "__main__":
         print("Configuration exists!")
 
     ablation_scenario = AblationScenario(
-        solver, instance_set_train, instance_set_test, gv.ablation_output_general,
+        solver, instance_set_train, instance_set_test,
+        gv.settings().DEFAULT_ablation_output,
         gv.settings().DEFAULT_ablation_exec,
         gv.settings().DEFAULT_ablation_validation_exec, override_dirs=True)
 
