@@ -82,7 +82,7 @@ def initialise_sparkle(download_examples: bool = False) -> None:
     # Check if Settings file exists, otherwise initialise a default one
     if not Path(Settings.DEFAULT_settings_path).exists():
         print("Settings file does not exist, initializing default settings ...")
-        gv.__settings = Settings(gv.default_settings_path)
+        gv.__settings = Settings(Settings.DEFAULT_example_settings_path)
         gv.settings().write_settings_ini(Path(Settings.DEFAULT_settings_path))
 
     gv.settings().DEFAULT_snapshot_dir.mkdir(exist_ok=True)
@@ -135,8 +135,14 @@ def initialise_sparkle(download_examples: bool = False) -> None:
         # Download Sparkle examples from Github
         # NOTE: Needs to be thoroughly tested after Pip install is working
         print("Downloading examples ...")
-        fs = fsspec.filesystem("github", org="ADA-research", repo="Sparkle")
-        fs.get(fs.ls("Examples/"), Path("Examples").as_posix(), recursive=True)
+        try:
+            fs = fsspec.filesystem("github", org="ADA-research", repo="Sparkle")
+            fs.get(fs.ls("Examples/"), "Examples/", recursive=True)
+        except Exception:
+            print("ERROR: Could not download examples from Github. Please run the "
+                  "following in the terminal:\n"
+                  '"curl https://codeload.github.com/ADA-research/Sparkle/tar.gz/main | '
+                  'tar -xz --strip=1 Sparkle-main/Examples"')
 
     print("New Sparkle platform initialised!")
 

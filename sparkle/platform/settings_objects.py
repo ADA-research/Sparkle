@@ -53,6 +53,9 @@ class Settings:
     # Default library pathing
     DEFAULT_components = lib_prefix / "Components"
 
+    # Example settings path
+    DEFAULT_example_settings_path = PurePath(DEFAULT_components / "sparkle_settings.ini")
+
     # Runsolver component
     DEFAULT_runsolver_dir = DEFAULT_components / "runsolver" / "src"
     DEFAULT_runsolver_exec = DEFAULT_runsolver_dir / "runsolver"
