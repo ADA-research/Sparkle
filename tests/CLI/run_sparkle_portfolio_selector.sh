@@ -16,7 +16,7 @@
 #SBATCH --cpus-per-task=1
 
 ## Data
-selector_path="Output/Selector/sparkle_portfolio_selector"
+selector_path="Output/Selection/sparkle_portfolio_selector"
 selector_tmp="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector.tmp"
 selector_test="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
 
