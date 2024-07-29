@@ -25,10 +25,10 @@ selector_path="Output/Selector/sparkle_portfolio_selector"
 selector_tmp="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector.tmp"
 selector_test="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
 
-test_results_dir="Test_Cases/PTN2/"
-test_results_path="Test_Cases/PTN2/sparkle_performance_data.csv"
-test_results_tmp="Test_Cases/PTN2/sparkle_performance_data.tmp"
-test_results_test="tests/CLI/test_files/Test_Cases/"
+test_results_dir="Output/Selector/Test_Cases/PTN2/"
+test_results_path="Output/Selector/Test_Cases/PTN2/sparkle_performance_data.csv"
+test_results_tmp="Output/Selector/Test_Cases/PTN2/sparkle_performance_data.tmp"
+test_results_test="tests/CLI/test_files/Selector/Test_Cases/"
 
 # Save user data if any
 mv $feature_data_path $feature_data_tmp 2> /dev/null

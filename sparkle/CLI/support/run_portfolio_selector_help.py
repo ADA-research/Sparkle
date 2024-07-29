@@ -43,7 +43,7 @@ def call_solver_solve_instance_within_cutoff(
         flag_solved = True
 
     if performance_data is not None:
-        solver_name = "Sparkle_Portfolio_Selector"
+        solver_name = "sparkle_portfolio_selector"
         print(f"Trying to write: {cpu_time_penal}, {solver_name}, {instance}")
         try:
             # Creating a seperate locked file for writing
@@ -142,7 +142,7 @@ def run_portfolio_selector_on_instances(
     for instance_path in instances:
         performance_data.add_instance(str(instance_path))
 
-    performance_data.add_solver(str(portfolio_selector.parent))
+    performance_data.add_solver(portfolio_selector.name)
 
     performance_data.save_csv()
 

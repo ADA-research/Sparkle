@@ -3,7 +3,7 @@
 
 import sys
 import argparse
-from pathlib import Path, PurePath
+from pathlib import PurePath
 
 from runrunner import Runner
 
@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     # Multipe
     if instance_set.size > 1:
-        test_case_path = Path("Test_Cases") / instance_set.name
+        test_case_path = gv.settings().DEFAULT_selection_output_test / instance_set.name
         test_case_path.mkdir(parents=True, exist_ok=True)
         # Update latest scenario
         gv.latest_scenario().set_selection_test_case_directory(test_case_path)
