@@ -16,7 +16,7 @@ from runrunner import Runner, Run
 
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
-from sparkle.CLI.help.command_help import CommandName
+from sparkle.platform import CommandName
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
 from sparkle.instance import InstanceSet
@@ -42,7 +42,7 @@ class SMAC2(Configurator):
         output_path = output_path / SMAC2.__name__
         output_path.mkdir(parents=True, exist_ok=True)
         return super().__init__(
-            validator=Validator(out_dir=output_path),
+            validator=Validator(out_dir=output_path, tmp_out_dir=base_dir),
             output_path=output_path,
             executable_path=SMAC2.configurator_path / "smac",
             configurator_target=SMAC2.configurator_path / SMAC2.target_algorithm,
@@ -102,14 +102,17 @@ class SMAC2(Configurator):
 
         if validate_after:
             self.validator.out_dir = output_csv.parent
-            validate_runs = self.validator.validate(
+            validate_run = self.validator.validate(
                 [scenario.solver] * self.scenario.number_of_runs,
                 output_csv.absolute(),
                 [scenario.instance_set],
+                scenario.cutoff_time,
                 subdir=Path(),
                 dependency=configuration_run,
+                sbatch_options=sbatch_options,
                 run_on=run_on)
-            runs += validate_runs
+            runs.append(validate_run)
+
         if run_on == Runner.LOCAL:
             for run in runs:
                 run.wait()

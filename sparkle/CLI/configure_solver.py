@@ -13,15 +13,14 @@ import runrunner as rrr
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import sparkle_logging as sl
-from sparkle.platform.settings_objects import Settings, SettingState
+from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.structures import FeatureDataFrame
-from sparkle.CLI.help import command_help as ch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.solver import Solver
-from sparkle.CLI.help.command_help import CommandName
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.instance import InstanceSet
@@ -73,27 +72,27 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
         args: Arguments object created by ArgumentParser.
     """
     if args.settings_file is not None:
-        gv.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
+        gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
     if args.performance_measure is not None:
-        gv.settings.set_general_sparkle_objectives(
+        gv.settings().set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE)
     if args.target_cutoff_time is not None:
-        gv.settings.set_general_target_cutoff_time(
+        gv.settings().set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
     if args.wallclock_time is not None:
-        gv.settings.set_config_wallclock_time(
+        gv.settings().set_config_wallclock_time(
             args.wallclock_time, SettingState.CMD_LINE)
     if args.cpu_time is not None:
-        gv.settings.set_config_cpu_time(
+        gv.settings().set_config_cpu_time(
             args.cpu_time, SettingState.CMD_LINE)
     if args.solver_calls is not None:
-        gv.settings.set_config_solver_calls(
+        gv.settings().set_config_solver_calls(
             args.solver_calls, SettingState.CMD_LINE)
     if args.number_of_runs is not None:
-        gv.settings.set_config_number_of_runs(
+        gv.settings().set_config_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE)
     if args.run_on is not None:
-        gv.settings.set_run_on(
+        gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
 
 
@@ -131,9 +130,9 @@ def run_after(solver: Path,
         cmd=command_line,
         name=command,
         dependencies=dependency,
-        base_dir=gv.sparkle_tmp_path,
+        base_dir=gv.settings().DEFAULT_tmp_output,
         srun_options=["-N1", "-n1"],
-        sbatch_options=gv.settings.get_slurm_extra_options(as_args=True))
+        sbatch_options=gv.settings().get_slurm_extra_options(as_args=True))
 
     if run_on == Runner.LOCAL:
         print("Waiting for the local calculations to finish.")
@@ -142,10 +141,6 @@ def run_after(solver: Path,
 
 
 if __name__ == "__main__":
-    # Initialise settings
-    global settings
-    gv.settings = Settings()
-
     # Log command call
     sl.log_command(sys.argv)
 
@@ -161,30 +156,30 @@ if __name__ == "__main__":
     solver = resolve_object_name(
         args.solver,
         gv.file_storage_data_mapping[gv.solver_nickname_list_path],
-        gv.solver_dir, class_name=Solver)
+        gv.settings().DEFAULT_solver_dir, class_name=Solver)
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.instance_dir, InstanceSet)
+        gv.settings().DEFAULT_instance_dir, InstanceSet)
     instance_set_test = args.instance_set_test
     if instance_set_test is not None:
         instance_set_test = resolve_object_name(
             args.instance_set_test,
             gv.file_storage_data_mapping[gv.instances_nickname_path],
-            gv.instance_dir, InstanceSet)
+            gv.settings().DEFAULT_instance_dir, InstanceSet)
     use_features = args.use_features
-    run_on = gv.settings.get_run_on()
+    run_on = gv.settings().get_run_on()
     if args.configurator is not None:
-        gv.settings.set_general_sparkle_configurator(
+        gv.settings().set_general_sparkle_configurator(
             value=getattr(Configurator, args.configurator),
             origin=SettingState.CMD_LINE)
 
     # Check if Solver and instance sets were resolved
-    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.CONFIGURE_SOLVER])
+    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.CONFIGURE_SOLVER])
 
     feature_data_df = None
     if use_features:
-        feature_data = FeatureDataFrame(gv.feature_data_csv_path)
+        feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
 
         data_dict = {}
         feature_data_df = feature_data.dataframe
@@ -212,25 +207,25 @@ if __name__ == "__main__":
         for index, column in enumerate(feature_data_df):
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
 
-    number_of_runs = gv.settings.get_config_number_of_runs()
-    solver_calls = gv.settings.get_config_solver_calls()
-    cpu_time = gv.settings.get_config_cpu_time()
-    wallclock_time = gv.settings.get_config_wallclock_time()
-    cutoff_time = gv.settings.get_general_target_cutoff_time()
-    cutoff_length = gv.settings.get_configurator_target_cutoff_length()
+    number_of_runs = gv.settings().get_config_number_of_runs()
+    solver_calls = gv.settings().get_config_solver_calls()
+    cpu_time = gv.settings().get_config_cpu_time()
+    wallclock_time = gv.settings().get_config_wallclock_time()
+    cutoff_time = gv.settings().get_general_target_cutoff_time()
+    cutoff_length = gv.settings().get_configurator_target_cutoff_length()
     sparkle_objective =\
-        gv.settings.get_general_sparkle_objectives()[0]
-    configurator = gv.settings.get_general_sparkle_configurator()
+        gv.settings().get_general_sparkle_objectives()[0]
+    configurator = gv.settings().get_general_sparkle_configurator()
     config_scenario = ConfigurationScenario(
         solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
         wallclock_time, cutoff_time, cutoff_length, sparkle_objective, use_features,
         configurator.configurator_target, feature_data_df)
 
-    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
+    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     dependency_job_list = configurator.configure(
         scenario=config_scenario,
         sbatch_options=sbatch_options,
-        num_parallel_jobs=gv.settings.get_number_of_jobs_in_parallel(),
+        num_parallel_jobs=gv.settings().get_number_of_jobs_in_parallel(),
         run_on=run_on)
 
     # Update latest scenario
@@ -267,6 +262,6 @@ if __name__ == "__main__":
         print("Running configuration finished!")
 
     # Write used settings to file
-    gv.settings.write_used_settings()
+    gv.settings().write_used_settings()
     # Write used scenario to file
     gv.latest_scenario().write_scenario_ini()

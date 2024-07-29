@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sparkle CLi pass through."""
+"""Sparkle CLI pass through."""
 import sys
 import os
 from pathlib import Path
@@ -10,14 +10,13 @@ def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: sparkle <command>")
         sys.exit(1)
+    module_path = Path(__file__).parent.resolve()
     command = sys.argv[1]
-    commandfile = Path(f"./sparkle/CLI/{command}.py")
-    if commandfile.is_file():
-        os.system(f"{commandfile} {' '.join(sys.argv[2:])}")
+    command_file = module_path / "CLI" / f"{command}.py"
+    if command_file.is_file():
+        os.system(f"{command_file} {' '.join(sys.argv[2:])}")
     else:
         print(f"Does not understand command {command}")
-
-    return
 
 
 if __name__ == "__main__":

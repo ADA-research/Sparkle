@@ -10,7 +10,7 @@ from runrunner.base import Runner, Run
 from runrunner.slurm import SlurmRun
 
 from sparkle.CLI.help import global_variables as gv
-from sparkle.CLI.help.command_help import CommandName
+from sparkle.platform import CommandName
 import sparkle.tools.general as tg
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
@@ -41,10 +41,9 @@ def call_solver(
         run_on: Whether the command is run with Slurm or not.
 
     Returns:
-        str: The Slurm job id str, SlurmJob if RunRunner Slurm or empty string if local
+        The Runrunner Run object regarding the call.
     """
-    num_jobs = instance_set.size
-    custom_cutoff = gv.settings.get_general_target_cutoff_time()
+    custom_cutoff = gv.settings().get_general_target_cutoff_time()
     cmd_list = []
     runsolver_args_list = []
     solver_params_list = []
@@ -86,7 +85,7 @@ def call_solver(
                                       solver_params, runsolver_args)
         cmd_list.append(" ".join(solver_cmd))
 
-    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
+    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     srun_options = ["-N1", "-n1"] + sbatch_options
     # Make sure the executable dir exists
     if outdir is None:
@@ -99,8 +98,7 @@ def call_solver(
         runner=run_on,
         cmd=cmd_list,
         name=commandname,
-        parallel_jobs=num_jobs,
-        base_dir=gv.sparkle_tmp_path,
+        base_dir=gv.settings().DEFAULT_tmp_output,
         path=outdir,
         dependencies=dependency,
         sbatch_options=sbatch_options,

@@ -84,7 +84,7 @@ tests/CLI/run_parallel_portfolio.sh
 tests/CLI/generate_report_selection.sh
 
 # Test generate report (selection) for test set
-tests/CLI/generate_report_for_test.sh
+tests/CLI/generate_report_for_selection_test.sh
 
 # Test generate report for configuration
 tests/CLI/generate_report_for_configuration.sh

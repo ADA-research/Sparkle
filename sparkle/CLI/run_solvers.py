@@ -13,8 +13,7 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
 from sparkle.CLI.help import sparkle_logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState, SolutionVerifier
-from sparkle.CLI.help.command_help import CommandName
-from sparkle.CLI.help import command_help as sch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 
@@ -73,7 +72,7 @@ def running_solvers_performance_data(
     jobs = performance_dataframe.get_job_list(rerun=rerun)
     num_jobs = len(jobs)
 
-    cutoff_time_str = str(gv.settings.get_general_target_cutoff_time())
+    cutoff_time_str = str(gv.settings().get_general_target_cutoff_time())
 
     print(f"Cutoff time for each solver run: {cutoff_time_str} seconds")
     print(f"Total number of jobs to run: {num_jobs}")
@@ -87,9 +86,9 @@ def running_solvers_performance_data(
     elif run_on == Runner.SLURM:
         print("Running the solvers through Slurm")
 
-    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
+    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     srun_options = ["-N1", "-n1"] + sbatch_options
-    perf_m = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    perf_m = gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
     cmd_list = ["sparkle/CLI/core/run_solvers_core.py "
                 f"--performance-data {performance_data_csv_path} "
                 f"--instance {inst_p} --solver {solver_p} "
@@ -100,7 +99,7 @@ def running_solvers_performance_data(
         cmd=cmd_list,
         parallel_jobs=num_job_in_parallel,
         name=CommandName.RUN_SOLVERS,
-        base_dir=gv.sparkle_tmp_path,
+        base_dir=gv.settings().DEFAULT_tmp_output,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
 
@@ -133,11 +132,11 @@ def run_solvers_on_instances(
         If True, the selector will be constructed and a report will be produced.
     """
     if recompute:
-        PerformanceDataFrame(gv.performance_data_csv_path).clean_csv()
-    num_job_in_parallel = gv.settings.get_number_of_jobs_in_parallel()
+        PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path).clean_csv()
+    num_job_in_parallel = gv.settings().get_number_of_jobs_in_parallel()
 
     runs = [running_solvers_performance_data(
-        performance_data_csv_path=gv.performance_data_csv_path,
+        performance_data_csv_path=gv.settings().DEFAULT_performance_data_path,
         num_job_in_parallel=num_job_in_parallel,
         rerun=recompute,
         run_on=run_on)]
@@ -147,14 +146,14 @@ def run_solvers_on_instances(
         print("Running solvers done!")
         return
 
-    sbatch_user_options = gv.settings.get_slurm_extra_options(as_args=True)
+    sbatch_user_options = gv.settings().get_slurm_extra_options(as_args=True)
     if also_construct_selector_and_report:
         runs.append(rrr.add_to_queue(
             runner=run_on,
             cmd="sparkle/CLI/construct_sparkle_portfolio_selector.py",
             name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
             dependencies=runs[-1],
-            base_dir=gv.sparkle_tmp_path,
+            base_dir=gv.settings().DEFAULT_tmp_output,
             sbatch_options=sbatch_user_options))
 
         runs.append(rrr.add_to_queue(
@@ -162,7 +161,7 @@ def run_solvers_on_instances(
             cmd="sparkle/CLI/generate_report.py",
             name=CommandName.GENERATE_REPORT,
             dependencies=runs[-1],
-            base_dir=gv.sparkle_tmp_path,
+            base_dir=gv.settings().DEFAULT_tmp_output,
             sbatch_options=sbatch_user_options))
 
     if run_on == Runner.LOCAL:
@@ -177,10 +176,6 @@ def run_solvers_on_instances(
 
 
 if __name__ == "__main__":
-    # Initialise settings
-    global settings
-    gv.settings = Settings()
-
     # Log command call
     sl.log_command(sys.argv)
 
@@ -192,36 +187,36 @@ if __name__ == "__main__":
 
     if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file
-        gv.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
+        gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
 
     if args.performance_measure is not None:
-        gv.settings.set_general_sparkle_objectives(
+        gv.settings().set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
 
     if args.verifier is not None:
-        gv.settings.set_general_solution_verifier(
+        gv.settings().set_general_solution_verifier(
             SolutionVerifier(args.verifier.lower()), SettingState.CMD_LINE)
 
     if args.target_cutoff_time is not None:
-        gv.settings.set_general_target_cutoff_time(
+        gv.settings().set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
 
     if args.run_on is not None:
-        gv.settings.set_run_on(
+        gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings.get_run_on()
+    run_on = gv.settings().get_run_on()
 
-    check_for_initialise(sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_SOLVERS])
+    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_SOLVERS])
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
-    Settings.check_settings_changes(gv.settings, prev_settings)
+    Settings.check_settings_changes(gv.settings(), prev_settings)
 
     print("Start running solvers ...")
 
     # Write settings to file before starting, since they are used in callback scripts
-    gv.settings.write_used_settings()
+    gv.settings().write_used_settings()
 
     run_solvers_on_instances(
         recompute=args.recompute,

@@ -18,10 +18,9 @@ from runrunner.slurm import Status
 from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.CLI.help import sparkle_logging as sl
 from sparkle.CLI.help import global_variables as gv
-from sparkle.CLI.help import command_help as sch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.help.command_help import CommandName
 from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_objects import Settings, SettingState
@@ -43,9 +42,9 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         run_on: Currently only supports Slurm.
     """
     num_solvers, num_instances = len(solvers), len(instances_set.instance_paths)
-    seeds_per_solver = gv.settings.get_parallel_portfolio_number_of_seeds_per_solver()
+    seeds_per_solver = gv.settings().get_parallel_portfolio_number_of_seeds_per_solver()
     num_jobs = num_solvers * num_instances * seeds_per_solver
-    parallel_jobs = min(gv.settings.get_number_of_jobs_in_parallel(), num_jobs)
+    parallel_jobs = min(gv.settings().get_number_of_jobs_in_parallel(), num_jobs)
     if parallel_jobs > num_jobs:
         print("WARNING: Not all jobs will be started at the same time due to the "
               "limitation of number of Slurm jobs that can be run in parallel. Check"
@@ -53,7 +52,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
     print(f"Sparkle parallel portfolio is running {seeds_per_solver} seed(s) per solver "
           f"on {num_solvers} solvers for {num_instances} instances ...")
     cmd_list, runsolver_logs = [], []
-    cutoff = gv.settings.get_general_target_cutoff_time()
+    cutoff = gv.settings().get_general_target_cutoff_time()
     log_timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
     log_path = portfolio_path / "run-status-path"
     log_path.mkdir()
@@ -85,18 +84,18 @@ def run_parallel_portfolio(instances_set: InstanceSet,
                                    raw_result_path])
 
     # Jobs are added in to the runrunner object in the same order they are provided
-    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
+    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
         name=CommandName.RUN_PARALLEL_PORTFOLIO,
         parallel_jobs=parallel_jobs,
         path=".",
-        base_dir=gv.sparkle_tmp_path,
+        base_dir=gv.settings().DEFAULT_tmp_output,
         srun_options=["-N1", "-n1"] + sbatch_options,
         sbatch_options=sbatch_options
     )
-    check_interval = gv.settings.get_parallel_portfolio_check_interval()
+    check_interval = gv.settings().get_parallel_portfolio_check_interval()
     instances_done = [False] * num_instances
     # We record the 'best' of all seed results per solver-instance
     job_output_dict = {instance_name: {solver.name: {"killed": False,
@@ -214,9 +213,6 @@ def parser_function() -> argparse.ArgumentParser:
 
 
 if __name__ == "__main__":
-    # Initialise settings
-    gv.settings = Settings()
-
     # Log command call
     sl.log_command(sys.argv)
 
@@ -226,7 +222,8 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     if args.solvers is not None:
-        solver_paths = [resolve_object_name("".join(s), target_dir=gv.solver_dir)
+        solver_paths = [resolve_object_name("".join(s),
+                                            target_dir=gv.settings().DEFAULT_solver_dir)
                         for s in args.solvers]
         if None in solver_paths:
             print("Some solvers not recognised! Check solver names:")
@@ -236,26 +233,25 @@ if __name__ == "__main__":
             sys.exit(-1)
         solvers = [Solver(p) for p in solver_paths]
     else:
-        solvers = [Solver(p) for p in gv.solver_dir.iterdir() if p.is_dir()]
+        solvers = [Solver(p) for p in
+                   gv.settings().DEFAULT_solver_dir.iterdir() if p.is_dir()]
 
-    check_for_initialise(
-        sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_PARALLEL_PORTFOLIO]
-    )
+    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_PARALLEL_PORTFOLIO])
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
-    Settings.check_settings_changes(gv.settings, prev_settings)
+    Settings.check_settings_changes(gv.settings(), prev_settings)
 
     # Do first, so other command line options can override settings from the file
     if args.settings_file is not None:
-        gv.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
+        gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
 
     portfolio_path = args.portfolio_name
 
     if args.run_on is not None:
-        gv.settings.set_run_on(
+        gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings.get_run_on()
+    run_on = gv.settings().get_run_on()
 
     if run_on == Runner.LOCAL:
         print("Parallel Portfolio is not fully supported yet for Local runs. Exiting.")
@@ -265,18 +261,18 @@ if __name__ == "__main__":
     instance_set = resolve_object_name(
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.instance_dir,
+        gv.settings().DEFAULT_instance_dir,
         InstanceSet)
     print(f"Running on {instance_set.size} instance(s)...")
 
     if args.cutoff_time is not None:
-        gv.settings.set_general_target_cutoff_time(args.cutoff_time,
-                                                   SettingState.CMD_LINE)
+        gv.settings().set_general_target_cutoff_time(args.cutoff_time,
+                                                     SettingState.CMD_LINE)
 
     if args.performance_measure is not None:
-        gv.settings.set_general_sparkle_objectives(
+        gv.settings().set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE)
-    if gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure\
+    if gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure\
             is not PerformanceMeasure.RUNTIME:
         print("ERROR: Parallel Portfolio is currently only relevant for "
               f"{PerformanceMeasure.RUNTIME} measurement. In all other cases, "
@@ -284,11 +280,13 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     if args.portfolio_name is not None:  # Use a nickname
-        portfolio_path = gv.parallel_portfolio_output_raw / args.portfolio_name
+        portfolio_path = gv.settings().DEFAULT_parallel_portfolio_output_raw /\
+            args.portfolio_name
     else:  # Generate a timestamped nickname
         timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.gmtime(time.time()))
         randintstamp = int(random.getrandbits(32))
-        portfolio_path = gv.parallel_portfolio_output_raw / f"{timestamp}_{randintstamp}"
+        portfolio_path = gv.settings().DEFAULT_parallel_portfolio_output_raw /\
+            f"{timestamp}_{randintstamp}"
     if portfolio_path.exists():
         print(f"[WARNING] Portfolio path {portfolio_path} already exists! "
               "Overwrite? [y/n] ", end="")
@@ -306,5 +304,5 @@ if __name__ == "__main__":
     # Write used scenario to file
     gv.latest_scenario().write_scenario_ini()
     # Write used settings to file
-    gv.settings.write_used_settings()
+    gv.settings().write_used_settings()
     print("Running Sparkle parallel portfolio is done!")

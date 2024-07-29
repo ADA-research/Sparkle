@@ -13,7 +13,7 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
 from sparkle.CLI.support import run_solvers_help as srs
 
-from sparkle.CLI.help.command_help import CommandName
+from sparkle.platform import CommandName
 
 
 # Only called in call_sparkle_portfolio_selector_solve_instance
@@ -43,7 +43,7 @@ def call_solver_solve_instance_within_cutoff(
         flag_solved = True
 
     if performance_data is not None:
-        solver_name = "Sparkle_Portfolio_Selector"
+        solver_name = "sparkle_portfolio_selector"
         print(f"Trying to write: {cpu_time_penal}, {solver_name}, {instance}")
         try:
             # Creating a seperate locked file for writing
@@ -78,20 +78,20 @@ def portfolio_selector_solve_instance(
     """
     print(f"Running portfolio selector on solving instance {instance} ...")
 
-    cutoff_extractor = gv.settings.get_general_extractor_cutoff_time()
+    cutoff_extractor = gv.settings().get_general_extractor_cutoff_time()
     print(f"Computing features of instance {instance} ...")
     feature_vector = []
-    extractor_paths = [p for p in gv.extractor_dir.iterdir()]
+    extractor_paths = [p for p in gv.settings().DEFAULT_extractor_dir.iterdir()]
     if len(extractor_paths) == 0:
         print("ERROR: No feature extractor added to Sparkle.")
         sys.exit(-1)
     for extractor_path in extractor_paths:
         extractor = Extractor(Path(extractor_path),
-                              gv.runsolver_path,
-                              gv.sparkle_tmp_path)
+                              gv.settings().DEFAULT_runsolver_exec,
+                              gv.settings().DEFAULT_tmp_output)
         # We create a watch log to filter out runsolver output
-        runsolver_watch_path =\
-            gv.sparkle_tmp_path / f"{extractor_path.name}_{instance}.wlog"
+        runsolver_watch_path = gv.settings().DEFAULT_tmp_output /\
+            f"{extractor_path.name}_{instance}.wlog"
         features = extractor.run(instance,
                                  runsolver_args=["--cpu-limit", str(cutoff_extractor),
                                                  "-w", runsolver_watch_path])
@@ -101,8 +101,9 @@ def portfolio_selector_solve_instance(
     print(f"Sparkle computing features of instance {instance} done!")
 
     print("Sparkle portfolio selector predicting ...")
-    selector = gv.settings.get_general_sparkle_selector()
-    predict_schedule = selector.run(gv.sparkle_algorithm_selector_path, feature_vector)
+    selector = gv.settings().get_general_sparkle_selector()
+    predict_schedule = selector.run(gv.settings().DEFAULT_algorithm_selector_path,
+                                    feature_vector)
 
     if predict_schedule is None:
         # Selector Failed to produce prediction
@@ -141,7 +142,7 @@ def run_portfolio_selector_on_instances(
     for instance_path in instances:
         performance_data.add_instance(str(instance_path))
 
-    performance_data.add_solver(str(portfolio_selector.parent))
+    performance_data.add_solver(portfolio_selector.name)
 
     performance_data.save_csv()
 
@@ -159,8 +160,8 @@ def run_portfolio_selector_on_instances(
         runner=run_on,
         cmd=cmd_list,
         name=CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR,
-        base_dir=gv.sparkle_tmp_path,
-        sbatch_options=gv.settings.get_slurm_extra_options(as_args=True),
+        base_dir=gv.settings().DEFAULT_tmp_output,
+        sbatch_options=gv.settings().get_slurm_extra_options(as_args=True),
         srun_options=["-N1", "-n1"])
 
     return run

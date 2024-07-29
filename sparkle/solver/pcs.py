@@ -9,10 +9,9 @@ def write_configuration_pcs(solver: Solver, config_str: str, tmp_path: Path) -> 
     Args:
         solver: Solver object
         config_str: Configuration to write
-        tmp_path: Path to leave the latest configuration pcs
+        tmp_path: Path to place the latest configuration pcs
     """
     # Read optimised configuration and convert to dict
-
     optimised_configuration_list = config_str.split()
 
     # Create dictionary
