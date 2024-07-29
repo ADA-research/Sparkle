@@ -46,8 +46,6 @@ def extract_sparkle_snapshot(snapshot_file: Path) -> None:
     gv.settings().DEFAULT_tmp_output.mkdir(exist_ok=True)
     with zipfile.ZipFile(snapshot_file, "r") as zip_ref:
         zip_ref.extractall(tmp_directory)
-    print(tmp_directory)
-    input()
     shutil.copytree(tmp_directory, "./", dirs_exist_ok=True)
     shutil.rmtree(tmp_directory)
 
