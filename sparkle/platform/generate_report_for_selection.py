@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for selection report generation."""
-import os
 import sys
 import numpy as np
 from shutil import which
@@ -375,7 +374,7 @@ def generate_pdf(eps_file: str,
                  output_dir: Path = None) -> None:
     """Generate PDF using epstopdf."""
     # Some systems are missing epstopdf so a copy is included
-    epsbackup = Path(os.path.abspath(Path.cwd())) / "sparkle/Components/epstopdf.pl"
+    epsbackup = Path(__file__).parent.parent.resolve() / "Components/epstopdf.pl"
     epstopdf = which("epstopdf") or epsbackup
     subprocess_epstopdf = subprocess.run([epstopdf, eps_file],
                                          capture_output=True,
