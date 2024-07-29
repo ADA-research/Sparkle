@@ -280,7 +280,8 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     if args.portfolio_name is not None:  # Use a nickname
-        portfolio_path = gv.parallel_portfolio_output_raw / args.portfolio_name
+        portfolio_path = gv.settings().DEFAULT_parallel_portfolio_output_raw /\
+            args.portfolio_name
     else:  # Generate a timestamped nickname
         timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.gmtime(time.time()))
         randintstamp = int(random.getrandbits(32))

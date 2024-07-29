@@ -41,7 +41,7 @@ def call_solver(
         run_on: Whether the command is run with Slurm or not.
 
     Returns:
-        str: The Slurm job id str, SlurmJob if RunRunner Slurm or empty string if local
+        The Runrunner Run object regarding the call.
     """
     custom_cutoff = gv.settings().get_general_target_cutoff_time()
     cmd_list = []

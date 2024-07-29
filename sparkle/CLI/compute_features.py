@@ -66,17 +66,18 @@ def compute_features(
     cmd_list = []
     extractors = {}
     # We create a job for each instance/extractor combination
-    for instance_path, extractor_path, feature_group in jobs:
+    for instance_path, extractor_name, feature_group in jobs:
+        extractor_path = gv.settings().DEFAULT_extractor_dir / extractor_name
         cmd = ("sparkle/CLI/core/compute_features.py "
                f"--instance {instance_path} "
                f"--extractor {extractor_path} "
                f"--feature-csv {feature_data_csv_path} "
                f"--cutoff {cutoff}")
-        if extractor_path in extractors:
-            extractor = extractors[extractor_path]
+        if extractor_name in extractors:
+            extractor = extractors[extractor_name]
         else:
-            extractor = Extractor(Path(extractor_path))
-            extractors[extractor_path] = extractor
+            extractor = Extractor(extractor_path)
+            extractors[extractor_name] = extractor
         if extractor.groupwise_computation:
             # Extractor job can be parallelised, thus creating i * e * g jobs
             cmd_list.append(cmd + f" --feature-group {feature_group}")
