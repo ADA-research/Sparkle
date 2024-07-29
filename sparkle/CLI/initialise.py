@@ -4,6 +4,7 @@ import fsspec
 import subprocess
 import argparse
 import shutil
+import os
 from pathlib import Path
 
 from sparkle.platform import file_help as sfh
@@ -24,6 +25,23 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
+def detect_sparkle_platform_exists() -> Path:
+    """Return whether a Sparkle platform is currently active.
+
+    The default working directories are checked for existence, for each directory in the
+    CWD. If any of the parents of the CWD yield true, this path is returned
+
+    Returns:
+      Path to the Sparkle platform if it exists, None otherwise.
+    """
+    cwd = Path.cwd()
+    while str(cwd) != cwd.root:
+        if all([(cwd / wd).exists() for wd in gv.settings().DEFAULT_working_dirs]):
+            return cwd
+        cwd = cwd.parent
+    return None
+
+
 def check_for_initialise(requirements: list[CommandName] = None)\
         -> None:
     """Function to check if initialize command was executed and execute it otherwise.
@@ -33,7 +51,8 @@ def check_for_initialise(requirements: list[CommandName] = None)\
         requirements: The requirements that have to be executed before the calling
             function.
     """
-    if not snh.detect_current_sparkle_platform_exists(check_all_dirs=True):
+    platform_path = detect_sparkle_platform_exists()
+    if platform_path is None:
         print("-----------------------------------------------")
         print("No Sparkle platform found; "
               + "The platform will now be initialized automatically")
@@ -46,6 +65,10 @@ def check_for_initialise(requirements: list[CommandName] = None)\
                       have to be executed before executing this command.""")
         print("-----------------------------------------------")
         initialise_sparkle()
+    elif platform_path != Path.cwd():
+        print(f"[WARNING] Sparkle platform found in {platform_path} instead of "
+              f"{Path.cwd()}. Switching to CWD to {platform_path}")
+        os.chdir(platform_path)
 
 
 def initialise_sparkle(download_examples: bool = False) -> None:
@@ -63,7 +86,7 @@ def initialise_sparkle(download_examples: bool = False) -> None:
         gv.settings().write_settings_ini(Path(Settings.DEFAULT_settings_path))
 
     gv.settings().DEFAULT_snapshot_dir.mkdir(exist_ok=True)
-    if snh.detect_current_sparkle_platform_exists(check_all_dirs=False):
+    if detect_sparkle_platform_exists(check_all_dirs=False):
         snh.save_current_sparkle_platform()
         snh.remove_current_sparkle_platform()
 

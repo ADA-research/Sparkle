@@ -13,20 +13,6 @@ from sparkle.tools.general import get_time_pid_random_string
 from sparkle.platform import file_help as sfh
 
 
-def detect_current_sparkle_platform_exists(check_all_dirs: bool) -> bool:
-    """Return whether a Sparkle platform is currently active.
-
-    Args:
-        check_all_dirs: variable indicating, if all the directories for a sparkle
-            platform should be checked or if just finding one directory is fine
-    Returns:
-      Boolean value indicating whether a Sparkle platform is active or not.
-    """
-    if check_all_dirs:
-        return all([x.exists() for x in gv.settings().DEFAULT_working_dirs])
-    return any([x.exists() for x in gv.settings().DEFAULT_working_dirs])
-
-
 def save_current_sparkle_platform() -> None:
     """Store the current Sparkle platform in a .zip file."""
     time_stamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
