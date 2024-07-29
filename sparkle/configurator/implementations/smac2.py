@@ -25,7 +25,8 @@ from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 
 class SMAC2(Configurator):
     """Class for SMAC2 (Java) configurator."""
-    configurator_path = Path("sparkle/Components/smac-v2.10.03-master-778/")
+    configurator_path = Path(__file__).parent.parent.parent.resolve() /\
+        "Components/smac-v2.10.03-master-778"
     target_algorithm = "smac_target_algorithm.py"
 
     def __init__(self: SMAC2,
@@ -94,7 +95,6 @@ class SMAC2(Configurator):
             name=CommandName.CONFIGURE_SOLVER,
             base_dir=self.base_dir,
             output_path=output,
-            path=SMAC2.configurator_path,
             parallel_jobs=parallel_jobs,
             sbatch_options=sbatch_options,
             srun_options=["-N1", "-n1"])
