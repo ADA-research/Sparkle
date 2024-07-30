@@ -84,8 +84,7 @@ class TestConfigurator():
                                                     output_path=expected_outputs,
                                                     parallel_jobs=2,
                                                     sbatch_options=[],
-                                                    srun_options=["-N1", "-n1"],
-                                                    path=SMAC2.configurator_path
+                                                    srun_options=["-N1", "-n1"]
                                                     )
         assert runs == [None]
 
