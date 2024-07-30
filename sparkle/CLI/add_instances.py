@@ -80,7 +80,7 @@ if __name__ == "__main__":
     for instance_path_source in instance_set.all_paths:
         print(f"Copying {instance_path_source} to {instances_target}...", end="\r")
         shutil.copy(instance_path_source, instances_target)
-    print("Copying done!")
+    print("\nCopying done!")
     # Refresh the instance set as the target instance set
     instance_set = InstanceSet(instances_target)
 

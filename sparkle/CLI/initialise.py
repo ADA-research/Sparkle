@@ -25,18 +25,21 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-def detect_sparkle_platform_exists() -> Path:
+def detect_sparkle_platform_exists(check: callable = all) -> Path:
     """Return whether a Sparkle platform is currently active.
 
     The default working directories are checked for existence, for each directory in the
     CWD. If any of the parents of the CWD yield true, this path is returned
+
+    Args:
+        check: Method to check if the working directory exists. Defaults to all.
 
     Returns:
       Path to the Sparkle platform if it exists, None otherwise.
     """
     cwd = Path.cwd()
     while str(cwd) != cwd.root:
-        if all([(cwd / wd).exists() for wd in gv.settings().DEFAULT_working_dirs]):
+        if check([(cwd / wd).exists() for wd in gv.settings().DEFAULT_working_dirs]):
             return cwd
         cwd = cwd.parent
     return None
@@ -86,7 +89,7 @@ def initialise_sparkle(download_examples: bool = False) -> None:
         gv.settings().write_settings_ini(Path(Settings.DEFAULT_settings_path))
 
     gv.settings().DEFAULT_snapshot_dir.mkdir(exist_ok=True)
-    if detect_sparkle_platform_exists():
+    if detect_sparkle_platform_exists(check=any):
         snh.save_current_sparkle_platform()
         snh.remove_current_sparkle_platform()
 
