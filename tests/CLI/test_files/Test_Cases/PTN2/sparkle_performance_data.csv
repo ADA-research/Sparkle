@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:tests/CLI/test_files/Selector/Test_Cases/sparkle_performance_data.csv
 Instance,sparkle_portfolio_selector
-========
-Instance,Sparkle_Portfolio_Selector
->>>>>>>> b4a6ece2e94acc027435b9199c64863c5eb51e47:tests/CLI/test_files/Test_Cases/PTN2/sparkle_performance_data.csv
 Examples/Resources/Instances/PTN2/Ptn-7824-b04.cnf,510.0
 Examples/Resources/Instances/PTN2/Ptn-7824-b12.cnf,510.0
 Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf,0.571199
