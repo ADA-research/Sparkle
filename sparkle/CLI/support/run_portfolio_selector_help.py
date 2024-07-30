@@ -152,8 +152,8 @@ def run_portfolio_selector_on_instances(
     #    a dependency on run object of 1
     # 3. Run the solver and place the results in the performance dataframe w dependency
     #    (Difficult, which solver is determined by 2)
-
-    cmd_list = ["python sparkle/CLI/core/run_sparkle_portfolio_core.py "
+    run_core = Path(__file__).parent.resolve() / "core" / "run_sparkle_portfolio_core.py"
+    cmd_list = [f"python {run_core} "
                 f"--performance-data-csv {performance_data.csv_filepath} "
                 f"--instance {instance_path}" for instance_path in instances]
     run = rrr.add_to_queue(

@@ -65,10 +65,11 @@ def compute_features(
     cutoff = gv.settings().get_general_extractor_cutoff_time()
     cmd_list = []
     extractors = {}
+    features_core = Path(__file__).parent.resolve() / "core" / "compute_features.py"
     # We create a job for each instance/extractor combination
     for instance_path, extractor_name, feature_group in jobs:
         extractor_path = gv.settings().DEFAULT_extractor_dir / extractor_name
-        cmd = ("sparkle/CLI/core/compute_features.py "
+        cmd = (f"{features_core} "
                f"--instance {instance_path} "
                f"--extractor {extractor_path} "
                f"--feature-csv {feature_data_csv_path} "
