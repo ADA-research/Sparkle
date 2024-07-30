@@ -39,7 +39,6 @@ sparkle/CLI/add_instances.py $instances_src_path_test > /dev/null
 sparkle/CLI/add_solver.py $solver_src_path > /dev/null
 
 # Copy scenario to simulate configuration
-mv $scenario_path $scenario_tmp 2> /dev/null # Save user data (if any)
 cp $scenario_test $scenario_path
 
 # Prepare configuration scenario output files
@@ -75,7 +74,3 @@ fi
 # Remove copied data
 rm -rf $config_scenario_path
 rm -rf $validation_scenario_path
-
-# Restore original data if any
-# OR true to get success exit code even when no user data was stored in the tmp file
-mv $scenario_tmp $scenario_path 2> /dev/null || true

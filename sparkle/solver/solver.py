@@ -93,7 +93,9 @@ class Solver(SparkleCallable):
         parser.load(str(pcs_file), convention="smac")
         return [p for p in parser.pcs.params if p["type"] == "parameter"]
 
-    def build_cmd(self: Solver, instance: str | list[str], configuration: dict = None,
+    def build_cmd(self: Solver,
+                  instance: str | list[str] = None,
+                  configuration: dict = None,
                   runsolver_configuration: list[str] = None) -> list[str]:
         """Build the solver call on an instance with a configuration."""
         if isinstance(configuration, str):

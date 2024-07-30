@@ -8,10 +8,10 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.CLI.support import compute_marginal_contribution_help as scmch
 from sparkle.CLI.help import sparkle_logging as sl
-from sparkle.platform.settings_objects import Settings, SettingState
+from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.reporting_scenario import Scenario
-from sparkle.CLI.help import command_help as ch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.types.objective import PerformanceMeasure
 
@@ -58,13 +58,13 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
         selector_timeout: The cuttoff time to configure the algorithm selector. If None
             uses the default selector configuration. Defaults to None.
     """
-    cutoff_time = gv.settings.get_general_target_cutoff_time()
+    cutoff_time = gv.settings().get_general_target_cutoff_time()
 
     # Selector (AutoFolio) cannot handle cutoff time less than 2, adjust if needed
     cutoff_time = max(cutoff_time, 2)
 
     # Determine the objective function
-    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    perf_measure = gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
     if perf_measure == PerformanceMeasure.RUNTIME:
         objective_function = "runtime"
     elif perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or\
@@ -81,7 +81,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
         print("Imputing all missing values...")
         feature_data.impute_missing_values()
 
-    selector = gv.settings.get_general_sparkle_selector()
+    selector = gv.settings().get_general_sparkle_selector()
     selector_path = selector.construct(selector_path,
                                        performance_data,
                                        feature_data,
@@ -91,10 +91,6 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
 
 
 if __name__ == "__main__":
-    # Initialise settings
-    global settings
-    gv.settings = Settings()
-
     # Log command call
     sl.log_command(sys.argv)
 
@@ -107,18 +103,19 @@ if __name__ == "__main__":
     flag_recompute_marg_cont = args.recompute_marginal_contribution
 
     check_for_initialise(
-        ch.COMMAND_DEPENDENCIES[ch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR]
+        COMMAND_DEPENDENCIES[CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR]
     )
 
     if ac.set_by_user(args, "performance_measure"):
-        gv.settings.set_general_sparkle_objectives(
+        gv.settings().set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
 
     print("Start constructing Sparkle portfolio selector ...")
 
     flag_judge_exist_remaining_jobs = judge_exist_remaining_jobs(
-        gv.feature_data_csv_path, gv.performance_data_csv_path)
+        gv.settings().DEFAULT_feature_data_path,
+        gv.settings().DEFAULT_performance_data_path)
 
     if flag_judge_exist_remaining_jobs:
         print("There remain unperformed feature computation jobs or performance "
@@ -128,10 +125,10 @@ if __name__ == "__main__":
         print("Sparkle portfolio selector is not successfully constructed!")
         sys.exit(-1)
 
-    performance_data = PerformanceDataFrame(gv.performance_data_csv_path)
-    feature_data = FeatureDataFrame(gv.feature_data_csv_path)
+    performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
+    feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
 
-    selector_path = gv.sparkle_algorithm_selector_path
+    selector_path = gv.settings().DEFAULT_algorithm_selector_path
     if selector_path.exists() and not flag_recompute_portfolio:
         print("Portfolio selector already exists. Set the recompute flag to re-create.")
     else:
@@ -143,10 +140,10 @@ if __name__ == "__main__":
         )
         print("Sparkle portfolio selector constructed!")
 
-    print(f"Sparkle portfolio selector located at {gv.sparkle_algorithm_selector_path}")
+    print(f"Sparkle portfolio selector located at {selector_path}")
 
     # Update latest scenario
-    gv.latest_scenario().set_selection_portfolio_path(gv.sparkle_algorithm_selector_path)
+    gv.latest_scenario().set_selection_portfolio_path(selector_path)
     gv.latest_scenario().set_latest_scenario(Scenario.SELECTION)
     # Set to default to overwrite possible old path
     gv.latest_scenario().set_selection_test_case_directory()
@@ -159,6 +156,6 @@ if __name__ == "__main__":
                                         selector_timeout=args.selector_timeout)
 
     # Write used settings to file
-    gv.settings.write_used_settings()
+    gv.settings().write_used_settings()
     # Write used scenario to file
     gv.latest_scenario().write_scenario_ini()

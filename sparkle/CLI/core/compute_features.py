@@ -46,11 +46,13 @@ if __name__ == "__main__":
     else:
         instance_list = [instance_path]
 
-    extractor = Extractor(extractor_path, gv.runsolver_path, gv.sparkle_tmp_path)
+    extractor = Extractor(extractor_path,
+                          gv.settings().DEFAULT_runsolver_exec,
+                          gv.settings().DEFAULT_tmp_output)
     # We are not interested in the runsolver log, but create the file to filter it
     # from the extractor call output
-    runsolver_watch_path =\
-        gv.sparkle_tmp_path / f"{instance_name}_{extractor_path.name}.wlog"
+    runsolver_watch_path = gv.settings().DEFAULT_tmp_output /\
+        f"{instance_name}_{extractor_path.name}.wlog"
     features = extractor.run(instance_list,
                              feature_group=args.feature_group,
                              runsolver_args=["--cpu-limit", cutoff_extractor,
@@ -59,10 +61,11 @@ if __name__ == "__main__":
     # Now that we have our result, we write it to the FeatureDataCSV with a FileLock
     lock = FileLock(f"{feature_data_csv_path}.lock")
     if features is not None:
+        print(f"Writing features to CSV: {instance_name}, {extractor_path.name}")
         with lock.acquire(timeout=60):
             feature_data = FeatureDataFrame(feature_data_csv_path)
             for feature_group, feature_name, value in features:
-                feature_data.set_value(str(instance_name), str(extractor_path),
+                feature_data.set_value(str(instance_name), extractor_path.name,
                                        feature_group, feature_name, float(value))
             feature_data.save_csv()
         lock.release()

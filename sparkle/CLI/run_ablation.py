@@ -14,7 +14,7 @@ from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.help import command_help as ch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
 
@@ -51,10 +51,6 @@ def parser_function() -> argparse.ArgumentParser:
 
 
 if __name__ == "__main__":
-    # Initialise settings
-    global settings
-    gv.settings = Settings()
-
     sl.log_command(sys.argv)
 
     # Define command line arguments
@@ -64,56 +60,57 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     solver_path = resolve_object_name(args.solver,
-                                      gv.solver_nickname_mapping, gv.solver_dir)
+                                      gv.solver_nickname_mapping,
+                                      gv.settings().DEFAULT_solver_dir)
     solver = Solver(solver_path)
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.instance_dir, InstanceSet)
+        gv.settings().DEFAULT_instance_dir, InstanceSet)
     instance_set_test = resolve_object_name(
         args.instance_set_test,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.instance_dir, InstanceSet)
+        gv.settings().DEFAULT_instance_dir, InstanceSet)
 
     if args.run_on is not None:
-        gv.settings.set_run_on(
+        gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings.get_run_on()
+    run_on = gv.settings().get_run_on()
 
-    check_for_initialise(ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_ABLATION])
+    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_ABLATION])
 
     if ac.set_by_user(args, "settings_file"):
         # Do first, so other command line options can override settings from the file
-        gv.settings.read_settings_ini(
+        gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "performance_measure"):
-        gv.settings.set_general_sparkle_objectives(
+        gv.settings().set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "target_cutoff_time"):
-        gv.settings.set_general_target_cutoff_time(
+        gv.settings().set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "wallclock_time"):
-        gv.settings.set_config_wallclock_time(
+        gv.settings().set_config_wallclock_time(
             args.wallclock_time, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "number_of_runs"):
-        gv.settings.set_config_number_of_runs(
+        gv.settings().set_config_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "racing"):
-        gv.settings.set_ablation_racing_flag(
+        gv.settings().set_ablation_racing_flag(
             args.number_of_runs, SettingState.CMD_LINE
         )
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
-    Settings.check_settings_changes(gv.settings, prev_settings)
+    Settings.check_settings_changes(gv.settings(), prev_settings)
 
     instance_set_train_name = instance_set_train.name
-    configurator = gv.settings.get_general_sparkle_configurator()
+    configurator = gv.settings().get_general_sparkle_configurator()
     configurator.set_scenario_dirs(solver, instance_set_train)
     if instance_set_test is not None:
         instance_set_test_name = instance_set_test.name
@@ -130,8 +127,10 @@ if __name__ == "__main__":
         print("Configuration exists!")
 
     ablation_scenario = AblationScenario(
-        solver, instance_set_train, instance_set_test, gv.ablation_output_general,
-        gv.ablation_exec, override_dirs=True)
+        solver, instance_set_train, instance_set_test,
+        gv.settings().DEFAULT_ablation_output,
+        gv.settings().DEFAULT_ablation_exec,
+        gv.settings().DEFAULT_ablation_validation_exec, override_dirs=True)
 
     # Instances
     ablation_scenario.create_instance_file()

@@ -4,16 +4,16 @@
 import sys
 import argparse
 import shutil
-from pathlib import Path
 
 from sparkle.platform import file_help as sfh
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import FeatureDataFrame
 from sparkle.CLI.help import sparkle_logging as sl
-from sparkle.CLI.help import command_help as ch
+from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
+from sparkle.solver import Extractor
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -34,23 +34,22 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     extractor_nicknames = gv.file_storage_data_mapping[gv.extractor_nickname_list_path]
-    extractor_path = resolve_object_name(
+    extractor = resolve_object_name(
         args.extractor_path,
         extractor_nicknames,
-        gv.extractor_dir)
+        gv.settings().DEFAULT_extractor_dir,
+        class_name=Extractor)
 
-    check_for_initialise(
-        ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_FEATURE_EXTRACTOR]
-    )
+    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.REMOVE_FEATURE_EXTRACTOR])
 
-    if not Path(extractor_path).exists():
-        print(f'Feature extractor path "{extractor_path}" does not exist!')
+    if extractor is None:
+        print(f'Feature extractor path "{args.extractor_path}" does not exist!')
         sys.exit(-1)
 
-    print(f"Starting removing feature extractor {Path(extractor_path).name} ...")
+    print(f"Starting removing feature extractor {extractor.name} ...")
 
     for key in extractor_nicknames:
-        if extractor_nicknames == extractor_path:
+        if extractor_nicknames == extractor.directory:
             sfh.add_remove_platform_item(
                 None,
                 gv.extractor_nickname_list_path,
@@ -59,15 +58,15 @@ if __name__ == "__main__":
                 remove=True)
             break
 
-    if gv.feature_data_csv_path.exists():
-        feature_data = FeatureDataFrame(gv.feature_data_csv_path)
-        feature_data.remove_extractor(str(extractor_path))
+    if gv.settings().DEFAULT_feature_data_path.exists():
+        feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
+        feature_data.remove_extractor(extractor.name)
         feature_data.save_csv()
-    shutil.rmtree(extractor_path)
+    shutil.rmtree(extractor.directory)
 
-    if Path(gv.sparkle_algorithm_selector_path).exists():
-        shutil.rmtree(gv.sparkle_algorithm_selector_path)
+    if gv.settings().DEFAULT_algorithm_selector_path.exists():
+        shutil.rmtree(gv.settings().DEFAULT_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
-              f"{gv.sparkle_algorithm_selector_path} done!")
+              f"{gv.settings().DEFAULT_algorithm_selector_path} done!")
 
-    print(f"Removing feature extractor {Path(extractor_path).name} done!")
+    print(f"Removing feature extractor {extractor.name} done!")

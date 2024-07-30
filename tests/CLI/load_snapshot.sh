@@ -23,4 +23,3 @@ else
 	echo "[failure] load_snapshot test failed with output:"
 	echo $output
 fi
-

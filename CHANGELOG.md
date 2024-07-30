@@ -2,6 +2,15 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.8.4] - 2024/07/30
+
+### Changed
+- Sparkle's CLI and file I/O file structure is now completely directory independent, allowing users to initialise a platform in any directory and run the commands. This also allows Sparkle to be pip installed completely independently, except for the Conda environment creation.
+- Sparkle commands now support spaces instead of underscores to, allowing users to run ``sparkle add instances`` instead of ``sparkle add_instances``, for a more natural way of typing.
+
+### Added
+- Examples can be downloaded when initialising sparkle with the ``--download-examples`` argument for the ``sparkle initialise`` command.
+
 ## [0.8.3] - 2024/07/24
 
 ### Changed

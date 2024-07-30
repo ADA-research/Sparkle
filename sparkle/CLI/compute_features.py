@@ -11,9 +11,9 @@ from runrunner.base import Runner, Status, Run
 from sparkle.solver import Extractor
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import sparkle_logging as sl
-from sparkle.platform.settings_objects import Settings, SettingState
+from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.help.command_help import COMMAND_DEPENDENCIES, CommandName
+from sparkle.platform import COMMAND_DEPENDENCIES, CommandName
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as apc
 from sparkle.structures import FeatureDataFrame
@@ -62,21 +62,23 @@ def compute_features(
         print("No feature computation jobs to run; stopping execution! To recompute "
               "feature values use the --recompute flag.")
         sys.exit()
-    cutoff = gv.settings.get_general_extractor_cutoff_time()
+    cutoff = gv.settings().get_general_extractor_cutoff_time()
     cmd_list = []
     extractors = {}
+    features_core = Path(__file__).parent.resolve() / "core" / "compute_features.py"
     # We create a job for each instance/extractor combination
-    for instance_path, extractor_path, feature_group in jobs:
-        cmd = ("sparkle/CLI/core/compute_features.py "
+    for instance_path, extractor_name, feature_group in jobs:
+        extractor_path = gv.settings().DEFAULT_extractor_dir / extractor_name
+        cmd = (f"{features_core} "
                f"--instance {instance_path} "
                f"--extractor {extractor_path} "
                f"--feature-csv {feature_data_csv_path} "
                f"--cutoff {cutoff}")
-        if extractor_path in extractors:
-            extractor = extractors[extractor_path]
+        if extractor_name in extractors:
+            extractor = extractors[extractor_name]
         else:
-            extractor = Extractor(Path(extractor_path))
-            extractors[extractor_path] = extractor
+            extractor = Extractor(extractor_path)
+            extractors[extractor_name] = extractor
         if extractor.groupwise_computation:
             # Extractor job can be parallelised, thus creating i * e * g jobs
             cmd_list.append(cmd + f" --feature-group {feature_group}")
@@ -90,15 +92,15 @@ def compute_features(
         print("Running the solvers through Slurm")
 
     # Generate the sbatch script
-    parallel_jobs = min(len(cmd_list), gv.settings.get_number_of_jobs_in_parallel())
-    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
+    parallel_jobs = min(len(cmd_list), gv.settings().get_number_of_jobs_in_parallel())
+    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     srun_options = ["-N1", "-n1"] + sbatch_options
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
         name=CommandName.COMPUTE_FEATURES,
         parallel_jobs=parallel_jobs,
-        base_dir=gv.sparkle_tmp_path,
+        base_dir=gv.settings().DEFAULT_tmp_output,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
 
@@ -117,10 +119,6 @@ def compute_features(
 
 
 if __name__ == "__main__":
-    # Initialise settings
-    global settings
-    gv.settings = Settings()
-
     # Log command call
     sl.log_command(sys.argv)
 
@@ -131,26 +129,26 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.run_on is not None:
-        gv.settings.set_run_on(
+        gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings.get_run_on()
+    run_on = gv.settings().get_run_on()
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.COMPUTE_FEATURES])
 
     if ac.set_by_user(args, "settings_file"):
-        gv.settings.read_settings_ini(
+        gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
 
     # Check if there are any feature extractors registered
-    if not any([p.is_dir() for p in gv.extractor_dir.iterdir()]):
+    if not any([p.is_dir() for p in gv.settings().DEFAULT_extractor_dir.iterdir()]):
         print("No feature extractors present! Add feature extractors to Sparkle "
               "by using the add_feature_extractor command.")
         sys.exit()
 
     # Start compute features
     print("Start computing features ...")
-    compute_features(gv.feature_data_csv_path, args.recompute, run_on=run_on)
+    compute_features(gv.settings().DEFAULT_feature_data_path, args.recompute, run_on)
 
     # Write used settings to file
-    gv.settings.write_used_settings()
+    gv.settings().write_used_settings()
