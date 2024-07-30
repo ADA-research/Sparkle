@@ -3,7 +3,7 @@
 
 import fcntl
 import ast
-from pathlib import Path, PurePath
+from pathlib import Path
 
 from sparkle.CLI.help.reporting_scenario import ReportingScenario
 from sparkle.platform.settings_objects import Settings
@@ -35,10 +35,6 @@ def settings() -> Settings:
     if __settings is None:
         __settings = Settings()
     return __settings
-
-
-# Default settings
-default_settings_path = PurePath("sparkle/Components/sparkle_settings.ini")
 
 
 reference_list_dir = Path("Reference_Lists")
