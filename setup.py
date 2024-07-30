@@ -17,12 +17,17 @@ setup(name="SparkleAI",
       long_description_content_type="text/markdown",
       packages=find_packages(exclude=["tests"]),
       install_requires=[
-          "numpy==2.0.1",
+          "numpy>=1.26.4",
           "pandas==2.2.2",
           "filelock==3.15.1",
           "tabulate==0.9.0",
           "RunRunner==0.1.4",
           "pcsparser @ git+https://git@github.com/jeroenrook/pcsparser.git",
+          # Autofolio packages
+          "xgboost==2.0.3",
+          "scikit-learn==1.3.2",
+          "liac-arff==2.5.0",
+          "smac==2.0.2"
       ],
       include_package_data=True,
       entry_points={"console_scripts": ["sparkle=sparkle.CLI.cli:main"], },)
