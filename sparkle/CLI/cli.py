@@ -21,6 +21,8 @@ def main() -> None:
         if command_file.is_file():
             break
     if command_file.is_file():
+        if not os.access(command_file, os.X_OK):  # Pip installation changes exec rights
+            command_file.chmod(0o755)
         os.system(f"{command_file} {' '.join(args)}")
     else:
         print(f"Does not understand command {command}")
