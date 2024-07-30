@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Command to initialise a Sparkle platform."""
-import fsspec
 import subprocess
 import argparse
 import shutil
@@ -138,14 +137,16 @@ def initialise_sparkle(download_examples: bool = False) -> None:
         # Download Sparkle examples from Github
         # NOTE: Needs to be thoroughly tested after Pip install is working
         print("Downloading examples ...")
-        try:
-            fs = fsspec.filesystem("github", org="ADA-research", repo="Sparkle")
-            fs.get(fs.ls("Examples/"), "Examples/", recursive=True)
-        except Exception:
-            print("ERROR: Could not download examples from Github. Please run the "
-                  "following in the terminal:\n"
-                  '"curl https://codeload.github.com/ADA-research/Sparkle/tar.gz/main | '
-                  'tar -xz --strip=1 Sparkle-main/Examples"')
+        curl = subprocess.Popen(
+            ["curl", "https://codeload.github.com/ADA-research/Sparkle/tar.gz/main"],
+            stdout=subprocess.PIPE)
+        outpath = Path("outfile.tar.gz")
+        with curl.stdout, outpath.open("wb") as outfile:
+            tar = subprocess.Popen(["tar", "-xz", "--strip=1", "Sparkle-main/Examples"],
+                                   stdin=curl.stdout, stdout=outfile)
+        curl.wait()  # Wait for the download to complete
+        tar.wait()  # Wait for the extraction to complete
+        outpath.unlink(missing_ok=True)
 
     print("New Sparkle platform initialised!")
 
