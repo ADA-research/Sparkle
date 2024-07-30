@@ -27,7 +27,7 @@ setup(name="SparkleAI",
           "xgboost==2.0.3",
           "scikit-learn==1.3.2",
           "liac-arff==2.5.0",
-          "smac==2.0.2"
+          "smac==2.2.0"
       ],
       include_package_data=True,
       entry_points={"console_scripts": ["sparkle=sparkle.CLI.cli:main"], },)
