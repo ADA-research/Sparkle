@@ -2,9 +2,9 @@
 
 # Execute this script from the Sparkle directory
 
-#SBATCH --job-name=test/generate_report_for_test.sh
-#SBATCH --output=Tmp/generate_report_for_test.sh.txt
-#SBATCH --error=Tmp/generate_report_for_test.sh.err
+#SBATCH --job-name=test/generate_report_for_selection_test.sh
+#SBATCH --output=Tmp/generate_report_for_selection_test.sh.txt
+#SBATCH --error=Tmp/generate_report_for_selection_test.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=
@@ -65,9 +65,9 @@ output=$(sparkle/CLI/generate_report.py --test-case-directory $test_results_dir 
 
 if [[ $output == $output_true ]];
 then
-	echo "[success] generate_report_for_test test succeeded"
+	echo "[success] generate_report_for_selection_test test succeeded"
 else
-	echo "[failure] generate_report_for_test test failed with output:"
+	echo "[failure] generate_report_for_selection_test test failed with output:"
 	echo $output
 fi
 
