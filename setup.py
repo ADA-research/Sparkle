@@ -16,5 +16,13 @@ setup(name="SparkleAI",
       long_description=open("README.MD", "r").read() if os.path.exists("README.MD") else "",
       long_description_content_type="text/markdown",
       packages=find_packages(exclude=["tests"]),
+      install_requires=[
+          "numpy==2.0.1",
+          "pandas==2.2.2",
+          "filelock==3.15.1",
+          "tabulate==0.9.0",
+          "RunRunner==0.1.4",
+          "git+https://github.com/jeroenrook/pcsparser.git",
+      ],
       include_package_data=True,
       entry_points={"console_scripts": ["sparkle=sparkle.CLI.cli:main"], },)
