@@ -1,4 +1,4 @@
-name: sparkle
+name: sparkle-dev
 channels:
   - conda-forge
   - defaults

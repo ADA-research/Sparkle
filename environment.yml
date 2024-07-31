@@ -11,3 +11,6 @@ dependencies:
   - gnuplot # Only used for reports
   - libnuma # runsolver compilation
   - numactl # runsolver compilation
+  - pip # Sparkle installation
+  pip:
+    - SparkleAI
