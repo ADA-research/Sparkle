@@ -3,10 +3,8 @@
 """Helper functions for selection report generation."""
 import sys
 import numpy as np
-from shutil import which
 from pathlib import Path
 from collections import Counter
-import subprocess
 
 import plotly.express as px
 import pandas as pd
@@ -362,21 +360,6 @@ def generate_report(latex_source_path: Path,
     report_path = stex.compile_pdf(target_path, report_name)
 
     print(f"Report is placed at: {report_path}")
-
-
-def generate_pdf(eps_file: str,
-                 output_dir: Path = None) -> None:
-    """Generate PDF using epstopdf."""
-    # Some systems are missing epstopdf so a copy is included
-    epsbackup = Path(__file__).parent.parent.resolve() / "Components/epstopdf.pl"
-    epstopdf = which("epstopdf") or epsbackup
-    subprocess_epstopdf = subprocess.run([epstopdf, eps_file],
-                                         capture_output=True,
-                                         cwd=output_dir)
-
-    if subprocess_epstopdf.returncode != 0:
-        print(f"(Eps To PDF) Error whilst converting Eps to PDF {eps_file}"
-              f"{subprocess_epstopdf.stderr.decode()}")
 
 
 def generate_comparison_plot(points: list,
