@@ -6,24 +6,19 @@ import sys
 import subprocess
 from pathlib import Path
 from sparkle.types import SolverStatus
-from sparkle.tools.slurm_parsing import parse_commandline_dict
+from sparkle.tools.solver_wrapper_parsing import *
 
-# Convert the argument of the target_algorithm script to dictionary
-args = parse_commandline_dict(sys.argv[1:])
 
-# Extract and delete data that needs specific formatting
-solver_dir = Path(args["solver_dir"])
-instance = Path(args["instance"])
-specifics = args["specifics"]
-seed = int(args["seed"])
+# Parse the arguments of the solver wrapper
+args_dict = parse_solver_wrapper_args(sys.argv[1:])
 
-del args["solver_dir"]
-del args["instance"]
-del args["cutoff_time"]
-del args["seed"]
-del args["specifics"]
-del args["run_length"]
+# Extract certain args from the above dict for use further below
+solver_dir = args_dict["solver_dir"]
+instance = args_dict["instance"]
+seed = args_dict["seed"]
+specifics = args_dict["specifics"]
 
+# Construct the base solver call
 solver_name = "PbO-CCSAT"
 solver_exec = f"{solver_dir / solver_name}" if solver_dir != Path(".") else "./" + \
     solver_name
@@ -31,23 +26,10 @@ solver_cmd = [solver_exec,
               "-inst", str(instance),
               "-seed", str(seed)]
 
-# Construct call from args dictionary
-params = []
-if "config_path" in args:
-    # The arguments were not directly given and must be parsed from a file
-    config_str = Path(args["config_path"]).open("r").readlines()[seed]
-    # Extract the args without any quotes
-    config_split = [arg.strip().replace("'", "").replace('"', "").strip("-")
-                    for arg in config_str.split(" -") if arg.strip() != ""]
-    for arg in config_split:
-        varname, value = arg.strip("'").strip('"').split(" ", maxsplit=1)
-        params.extend([f"-{varname}", value])
-else:
-    # Construct from dictionary arguments
-    for key in args:
-        if args[key] is not None:
-            params.extend(["-" + str(key), str(args[key])])
+# Get further params for the solver call
+params = get_solver_call_params(args_dict)
 
+# Execute the solver call
 try:
     solver_call = subprocess.run(solver_cmd + params,
                                  capture_output=True)
@@ -86,3 +68,5 @@ outdir = {"status": status.value,
           "solver_call": solver_cmd + params}
 
 print(outdir)
+
+print("hello")
