@@ -63,7 +63,7 @@ You will need to reactivate the environment every time you log in, before using 
 
 The file `environment.yml` contains a tested list of Python packages with fixed versions required to execute Sparkle. We recommended using it.
 
-The file `environment-dev.txt` contains unpinned packages and the dependencies are not resolved. It is used for development and may cause problems.
+The file `dev-env.yml` is used for developer mode of the Sparkle package and contains several extra packages for testing.
 
 The two environments can be created in parallel since one is named `sparkle` and the other `sparkle-dev`. If you want to update an environment it is better to do a clean installation by removing and recreating it. For example:
 

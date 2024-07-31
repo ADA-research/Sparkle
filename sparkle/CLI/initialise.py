@@ -124,7 +124,8 @@ def initialise_sparkle(download_examples: bool = False) -> None:
                                capture_output=True)
             if compile_runsolver.returncode != 0:
                 print("WARNING: Compilation of Runsolver failed with the following msg:"
-                      f"[{compile_runsolver.returncode}] {compile_runsolver.stderr}")
+                      f"[{compile_runsolver.returncode}] "
+                      f"{compile_runsolver.stderr.decode()}")
             else:
                 print("Runsolver compiled successfully!")
     # Check that java is available
