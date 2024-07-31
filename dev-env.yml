@@ -8,7 +8,6 @@ variables: # runsolver compilation
 dependencies:
   - python=3.10
   - swig=4.0.2 # SMAC3 C++ compiler
-  - gnuplot # Only used for reports
   - libnuma # runsolver compilation
   - numactl # runsolver compilation
   - pip

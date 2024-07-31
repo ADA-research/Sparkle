@@ -23,6 +23,9 @@ setup(name="SparkleAI",
           "tabulate==0.9.0",
           "RunRunner==0.1.4",
           "pcsparser @ git+https://git@github.com/jeroenrook/pcsparser.git",
+          # Reporting packages
+          "plotly==5.23.0",
+          "kaleido==0.2.1",
           # Autofolio packages
           "xgboost==2.0.3",
           "scikit-learn==1.3.2",
