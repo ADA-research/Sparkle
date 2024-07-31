@@ -420,10 +420,7 @@ def generate_comparison_plot(points: list,
         output_dir: directory path to place the figure and its intermediate files in
             (default: current working directory)
     """
-    if output_dir is None:
-        output_dir = Path()
-    elif isinstance(output_dir, str):
-        output_dir = Path(output_dir)
+    output_dir = Path() if output_dir is None else Path(output_dir)
 
     points = np.array(points)
     if replace_zeros:
@@ -465,7 +462,7 @@ def generate_comparison_plot(points: list,
     output_plot = output_dir / f"{figure_filename}.pdf"
 
     df = pd.DataFrame(points, columns=[xlabel, ylabel])
-    log_scale = True if scale == "log" else False
+    log_scale = scale == "log"
     fig = px.scatter(data_frame=df, x=xlabel, y=ylabel,
                      range_x=[min_value, max_value], range_y=[min_value, max_value],
                      title=title, log_x=log_scale, log_y=log_scale,
@@ -478,21 +475,23 @@ def generate_comparison_plot(points: list,
         plot_bgcolor="white"
     )
     fig.update_xaxes(
+        type="linear" if not log_scale else "log",
         mirror=True,
         tickmode="linear",
         ticks="outside",
         tick0=0,
-        dtick=100,
+        dtick=100 if not log_scale else 1,
         showline=True,
         linecolor="black",
         gridcolor="lightgrey"
     )
     fig.update_yaxes(
+        type="linear" if not log_scale else "log",
         mirror=True,
         tickmode="linear",
         ticks="outside",
         tick0=0,
-        dtick=100,
+        dtick=100 if not log_scale else 1,
         showline=True,
         linecolor="black",
         gridcolor="lightgrey"
