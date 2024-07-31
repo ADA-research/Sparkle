@@ -30,11 +30,11 @@ extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revis
 solverA_path="Examples/Resources/Solvers/CSCCSat/"
 solverB_path="Examples/Resources/Solvers/MiniSAT/"
 
-CLI/initialise.py > /dev/null
-CLI/add_instances.py $instances_path > /dev/null
-CLI/add_feature_extractor.py $extractor_path > /dev/null
-CLI/add_solver.py $solverA_path > /dev/null
-CLI/add_solver.py $solverB_path > /dev/null
+sparkle/CLI/initialise.py > /dev/null
+sparkle/CLI/add_instances.py $instances_path > /dev/null
+sparkle/CLI/add_feature_extractor.py $extractor_path > /dev/null
+sparkle/CLI/add_solver.py $solverA_path > /dev/null
+sparkle/CLI/add_solver.py $solverB_path > /dev/null
 
 # Activate test data to simulate the compute_features and run_solvers commands
 cp $feature_data_test $feature_data_path
@@ -42,7 +42,7 @@ cp $performance_data_test $performance_data_path
 
 # Construct sparkle portfolio selector
 output_true="Marginal contribution (actual selector) computing done!"
-output=$(CLI/construct_sparkle_portfolio_selector.py | tail -1)
+output=$(sparkle/CLI/construct_sparkle_portfolio_selector.py | tail -1)
 
 if [[ $output == $output_true ]];
 then

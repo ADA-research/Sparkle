@@ -12,17 +12,17 @@
 #SBATCH --nodes=1
 
 # Initialise
-CLI/initialise.py > /dev/null
+sparkle/CLI/initialise.py > /dev/null
 
 # Add instances
 instances_name="PTN"
 instances_source="Examples/Resources/Instances/$instances_name"
-CLI/add_instances.py $instances_source > /dev/null
+sparkle/CLI/add_instances.py $instances_source > /dev/null
 
 # Remove instances
 instances_path="Instances/$instances_name"
 output_true="Removing instances in directory $instances_path done!"
-output=$(CLI/remove_instances.py $instances_path | tail -1)
+output=$(sparkle/CLI/remove_instances.py $instances_path | tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -36,11 +36,11 @@ fi
 
 instances_name="CCAG/Instances/CCAG/"
 instances_source="Examples/Resources/$instances_name"
-CLI/add_instances.py $instances_source > /dev/null
+sparkle/CLI/add_instances.py $instances_source > /dev/null
 
 instances_path="Instances/CCAG"
 output_true="Removing instances in directory $instances_path done!"
-output=$(CLI/remove_instances.py $instances_path | tail -1)
+output=$(sparkle/CLI/remove_instances.py $instances_path | tail -1)
 
 if [[ $output == $output_true ]];
 then

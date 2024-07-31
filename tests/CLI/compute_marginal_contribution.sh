@@ -21,7 +21,7 @@ performance_data_path="Performance_Data/sparkle_performance_data.csv"
 performance_data_tmp="tests/CLI/test_files/Performance_Data/sparkle_performance_data.csv.tmp"
 performance_data_test="tests/CLI/test_files/Performance_Data/test_construct_sparkle_portfolio_selector.csv"
 
-selector_path="Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
+selector_path="Output/Selection/sparkle_portfolio_selector"
 selector_tmp="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector.tmp"
 selector_test="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
 
@@ -37,11 +37,11 @@ extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revis
 solverA_path="Examples/Resources/Solvers/CSCCSat/"
 solverB_path="Examples/Resources/Solvers/MiniSAT/"
 
-CLI/initialise.py > /dev/null
-CLI/add_instances.py $instances_path > /dev/null
-CLI/add_feature_extractor.py $extractor_path > /dev/null
-CLI/add_solver.py $solverA_path > /dev/null
-CLI/add_solver.py $solverB_path > /dev/null
+sparkle/CLI/initialise.py > /dev/null
+sparkle/CLI/add_instances.py $instances_path > /dev/null
+sparkle/CLI/add_feature_extractor.py $extractor_path > /dev/null
+sparkle/CLI/add_solver.py $solverA_path > /dev/null
+sparkle/CLI/add_solver.py $solverB_path > /dev/null
 
 # Activate test data to simulate the compute_features, run_solvers and construct_sparkle_portfolio_selector commands
 cp $feature_data_test $feature_data_path
@@ -50,7 +50,7 @@ cp $selector_test $selector_path
 
 # Compute marginal contribution for the perfect selector
 output_true="Marginal contribution (perfect selector) computing done!"
-output=$(CLI/compute_marginal_contribution.py --perfect --settings-file $settings_file | tail -1)
+output=$(sparkle/CLI/compute_marginal_contribution.py --perfect --settings-file $settings_file | tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -62,7 +62,7 @@ fi
 
 # Compute marginal contribution for the actual selector
 output_true="Marginal contribution (actual selector) computing done!"
-output=$(CLI/compute_marginal_contribution.py --actual --settings-file $settings_file | tail -1)
+output=$(sparkle/CLI/compute_marginal_contribution.py --actual --settings-file $settings_file | tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -77,4 +77,3 @@ mv $feature_data_tmp $feature_data_path 2> /dev/null
 mv $performance_data_tmp $performance_data_path 2> /dev/null
 # OR true to get success exit code even when no user data was stored in the tmp file
 mv $selector_tmp $selector_path 2> /dev/null || true
-

@@ -63,7 +63,7 @@ You will need to reactivate the environment every time you log in, before using 
 
 The file `environment.yml` contains a tested list of Python packages with fixed versions required to execute Sparkle. We recommended using it.
 
-The file `environment-dev.txt` contains unpinned packages and the dependencies are not resolved. It is used for development and may cause problems.
+The file `dev-env.yml` is used for developer mode of the Sparkle package and contains several extra packages for testing.
 
 The two environments can be created in parallel since one is named `sparkle` and the other `sparkle-dev`. If you want to update an environment it is better to do a clean installation by removing and recreating it. For example:
 
@@ -164,11 +164,10 @@ changes are needed.
 
 ## Executing commands
 
-Executing commands in Sparkle is as simple as running them in the top
-directory of Sparkle, for example:
+Executing commands in Sparkle is as simple as running them terminal for example:
 
 ```
-CLI/initialise.py
+sparkle initialise
 ```
 
 Do note that when running on a cluster additional arguments may be
@@ -176,7 +175,7 @@ needed, for instance under the Slurm workload manager the above command would ch
 something like:
 
 ```
-srun -N1 -n1 -c1 CLI/initialise.py
+srun -N1 -n1 -c1 sparkle/CLI/initialise.py
 ```
 
 In the `Examples/` directory a number of common command sequences are
@@ -689,7 +688,7 @@ of your call to a Sparkle command. Take for instance the following
 command:
 
 ```
-srun -N1 -n1 -p graceTST CLI/configure_solver.py --solver Solvers/PbO-CCSAT-Generic --instances-train Instances/PTN/
+srun -N1 -n1 -p graceTST sparkle/CLI/configure_solver.py --solver Solvers/PbO-CCSAT-Generic --instances-train Instances/PTN/
 ```
 
 This call restricts itself to the `graceTST` partition (the

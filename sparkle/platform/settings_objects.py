@@ -35,17 +35,96 @@ class SettingState(Enum):
 
 class Settings:
     """Read, write, set, and get settings."""
+    # CWD Prefix
+    cwd_prefix = Path()  # Empty for now
 
-    # Settings path names and default
-    __settings_file = Path("sparkle_settings.ini")
+    # Library prefix
+    lib_prefix = Path(__file__).parent.parent.resolve()
+
+    # Default directory names
+    rawdata_dir = Path("Raw_Data")
+    analysis_dir = Path("Analysis")
     __settings_dir = Path("Settings")
-    DEFAULT_settings_path = PurePath(__settings_dir / __settings_file)
+    __settings_file = Path("sparkle_settings.ini")
+
+    # Default settings path
+    DEFAULT_settings_path = PurePath(cwd_prefix / __settings_dir / __settings_file)
+
+    # Default library pathing
+    DEFAULT_components = lib_prefix / "Components"
+
+    # Example settings path
+    DEFAULT_example_settings_path = PurePath(DEFAULT_components / "sparkle_settings.ini")
+
+    # Runsolver component
+    DEFAULT_runsolver_dir = DEFAULT_components / "runsolver" / "src"
+    DEFAULT_runsolver_exec = DEFAULT_runsolver_dir / "runsolver"
+
+    # Ablation component
+    DEFAULT_ablation_dir = DEFAULT_components / "ablationAnalysis-0.9.4"
+    DEFAULT_ablation_exec = DEFAULT_ablation_dir / "ablationAnalysis"
+    DEFAULT_ablation_validation_exec = DEFAULT_ablation_dir / "ablationValidation"
+
+    # Autofolio component
+    DEFAULT_general_sparkle_selector = DEFAULT_components / "AutoFolio/scripts/autofolio"
+
+    # Report component
+    DEFAULT_latex_source = DEFAULT_components / "Sparkle-latex-source"
+    DEFAULT_latex_bib = DEFAULT_latex_source / "SparkleReport.bib"
+
+    # Default input directory pathing
+    DEFAULT_solver_dir = cwd_prefix / "Solvers"
+    DEFAULT_instance_dir = cwd_prefix / "Instances"
+    DEFAULT_extractor_dir = cwd_prefix / "Extractors"
+    DEFAULT_snapshot_dir = cwd_prefix / "Snapshots"
+
+    # Default output directory pathing
+    DEFAULT_tmp_output = cwd_prefix / "Tmp"
+    DEFAULT_output = cwd_prefix / "Output"
+    DEFAULT_configuration_output = DEFAULT_output / "Configuration"
+    DEFAULT_selection_output = DEFAULT_output / "Selection"
+    DEFAULT_validation_output = DEFAULT_output / "Validation"
+    DEFAULT_parallel_portfolio_output = DEFAULT_output / "Parallel_Portfolio"
+    DEFAULT_ablation_output = DEFAULT_output / "Ablation"
+
+    # Default output subdirs
+    DEFAULT_configuration_output_raw = DEFAULT_configuration_output / rawdata_dir
+    DEFAULT_configuration_output_analysis = DEFAULT_configuration_output / analysis_dir
+    DEFAULT_selection_output_raw = DEFAULT_selection_output / rawdata_dir
+    DEFAULT_selection_output_analysis = DEFAULT_selection_output / analysis_dir
+    DEFAULT_parallel_portfolio_output_raw =\
+        DEFAULT_parallel_portfolio_output / rawdata_dir
+    DEFAULT_parallel_portfolio_output_analysis =\
+        DEFAULT_parallel_portfolio_output / analysis_dir
+    DEFAULT_selection_output_test = DEFAULT_selection_output / "Test_Cases"
+
+    # Old default output dirs which should be part of something else
+    DEFAULT_feature_data = cwd_prefix / "Feature_Data"
+    DEFAULT_performance_data = cwd_prefix / "Performance_Data"
+
+    # Collection of all working dirs for platform
+    DEFAULT_working_dirs = [
+        DEFAULT_output, DEFAULT_configuration_output,
+        DEFAULT_selection_output, DEFAULT_validation_output,
+        DEFAULT_tmp_output,
+        DEFAULT_solver_dir, DEFAULT_instance_dir,
+        DEFAULT_feature_data, DEFAULT_performance_data,
+        DEFAULT_extractor_dir,
+    ]
+
+    # Old default file paths from GV which should be turned into variables
+    DEFAULT_algorithm_selector_path =\
+        DEFAULT_selection_output / "sparkle_portfolio_selector"
+    DEFAULT_marginal_contribution_actual_path =\
+        DEFAULT_selection_output / "marginal_contribution_actual.txt"
+    DEFAULT_feature_data_path =\
+        DEFAULT_feature_data / "sparkle_feature_data.csv"
+    DEFAULT_performance_data_path =\
+        DEFAULT_performance_data / "sparkle_performance_data.csv"
 
     # Constant default values
     DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")
     DEFAULT_general_sparkle_configurator = cim.SMAC2.__name__
-    DEFAULT_general_sparkle_selector =\
-        Path("sparkle/Components/AutoFolio/scripts/autofolio")
     DEFAULT_general_solution_verifier = SolutionVerifier.NONE
     DEFAULT_general_target_cutoff_time = 60
     DEFAULT_general_penalty_multiplier = 10
@@ -68,14 +147,6 @@ class Settings:
 
     DEFAULT_parallel_portfolio_check_interval = 4
     DEFAULT_parallel_portfolio_num_seeds_per_solver = 1
-
-    # Default Pathing
-    DEFAULT_output = Path("Output")
-    DEFAULT_tmp_output = Path("Tmp")
-    DEFAULT_configuration_output = DEFAULT_output / "Configuration"
-    DEFAULT_selection_output = DEFAULT_output / "Selection"
-    DEFAULT_configuration_output_raw = DEFAULT_configuration_output / "Raw_Data"
-    DEFAULT_selection_output_raw = DEFAULT_selection_output / "Raw_Data"
 
     def __init__(self: Settings, file_path: PurePath = None) -> None:
         """Initialise a settings object."""
@@ -124,7 +195,7 @@ class Settings:
         """Read the settings from an INI file."""
         # Read file
         file_settings = configparser.ConfigParser()
-        file_settings.read(str(file_path))
+        file_settings.read(file_path)
 
         # Set internal settings based on data read from FILE if they were read
         # successfully

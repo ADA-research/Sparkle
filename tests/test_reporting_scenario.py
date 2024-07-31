@@ -1,5 +1,5 @@
 """Tests for the reporting_scenario module."""
-from CLI.help import reporting_scenario as rs
+from sparkle.CLI.help import reporting_scenario as rs
 
 
 def test_none_if_empty_path() -> None:

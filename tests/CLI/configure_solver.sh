@@ -27,9 +27,9 @@ solver_path="Solvers/PbO-CCSAT-Generic/"
 instances_src_path="${examples_path}${instances_path}"
 solver_src_path="${examples_path}${solver_path}"
 
-CLI/initialise.py > /dev/null
-CLI/add_instances.py $instances_src_path > /dev/null
-CLI/add_solver.py $solver_src_path > /dev/null
+sparkle/CLI/initialise.py > /dev/null
+sparkle/CLI/add_instances.py $instances_src_path > /dev/null
+sparkle/CLI/add_solver.py $solver_src_path > /dev/null
 
 # Set up output conditions
 output_true="Running configuration finished!"
@@ -39,7 +39,7 @@ then
 fi
 
 # Configure solver
-output=$(CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(sparkle/CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
@@ -61,7 +61,7 @@ fi
 sleep 1 # Sleep to avoid interference from previous test
 
 # Configure solver with performance measure option RUNTIME
-output=$(CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --performance-measure RUNTIME --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(sparkle/CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --performance-measure RUNTIME --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
@@ -85,7 +85,7 @@ sleep 1 # Sleep to avoid interference from previous test
 # TODO: Add test: Configure solver with performance measure option QUALITY (needs a quality configuration solver+instances)
 
 # Configure solver with cutoff time option
-output=$(CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --target-cutoff-time 3 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(sparkle/CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --target-cutoff-time 3 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
@@ -107,7 +107,7 @@ fi
 sleep 1 # Sleep to avoid interference from previous test
 
 # Configure solver with budget per run option
-output=$(CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --wallclock-time 10 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(sparkle/CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --wallclock-time 10 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
@@ -129,7 +129,7 @@ fi
 sleep 1 # Sleep to avoid interference from previous test
 
 # Configure solver with number of runs option
-output=$(CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --number-of-runs 5 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(sparkle/CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --number-of-runs 5 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
@@ -147,4 +147,3 @@ else
 		kill_started_jobs_slurm
 	fi
 fi
-

@@ -10,10 +10,10 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner, Run
 
-from CLI.help import global_variables as gv
+from sparkle.CLI.help import global_variables as gv
 
 from sparkle.configurator.implementations import SMAC2
-from CLI.help.command_help import CommandName
+from sparkle.platform import CommandName
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 
@@ -26,9 +26,21 @@ class AblationScenario:
                  test_set: InstanceSet,
                  output_dir: Path,
                  ablation_executable: Path = None,
+                 ablation_validation_executable: Path = None,
                  override_dirs: bool = False) -> None:
-        """Initialize ablation scenario."""
+        """Initialize ablation scenario.
+
+        Args:
+            solver: Solver object
+            train_set: The training instance
+            test_set: The test instance
+            output_dir: The output directory
+            ablation_executable: (Only for execution) The ablation executable
+            ablation_validation_executable: (Only for execution) The validation exec
+            override_dirs: Whether to clean the scenario directory if it already exists
+        """
         self.ablation_exec = ablation_executable
+        self.ablation_validation_exec = ablation_validation_executable
         self.solver = solver
         self.train_set = train_set
         self.test_set = test_set
@@ -62,8 +74,9 @@ class AblationScenario:
             None
         """
         ablation_scenario_dir = self.scenario_dir
-        perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-        configurator = gv.settings.get_general_sparkle_configurator()
+        perf_measure =\
+            gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
+        configurator = gv.settings().get_general_sparkle_configurator()
         _, opt_config_str = configurator.get_optimal_configuration(
             self.solver, self.train_set, performance=perf_measure)
 
@@ -85,11 +98,11 @@ class AblationScenario:
 
         smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
         objective_str = "MEAN10" if smac_run_obj == "RUNTIME" else "MEAN"
-        smac_each_run_cutoff_length = gv.settings.get_configurator_target_cutoff_length()
-        smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
-        concurrent_clis = gv.settings.get_slurm_max_parallel_runs_per_node()
-        ablation_racing = gv.settings.get_ablation_racing_flag()
-        configurator = gv.settings.get_general_sparkle_configurator()
+        run_cutoff_time = gv.settings().get_general_target_cutoff_time()
+        run_cutoff_length = gv.settings().get_configurator_target_cutoff_length()
+        concurrent_clis = gv.settings().get_slurm_max_parallel_runs_per_node()
+        ablation_racing = gv.settings().get_ablation_racing_flag()
+        configurator = gv.settings().get_general_sparkle_configurator()
         pcs_file_path = f"{self.solver.get_pcs_file().absolute()}"  # Get Solver PCS
 
         # Create config file
@@ -101,8 +114,8 @@ class AblationScenario:
                   f"deterministic = {1 if self.solver.deterministic else 0}\n"
                   f"run_obj = {smac_run_obj}\n"
                   f"overall_obj = {objective_str}\n"
-                  f"cutoffTime = {smac_each_run_cutoff_time}\n"
-                  f"cutoff_length = {smac_each_run_cutoff_length}\n"
+                  f"cutoffTime = {run_cutoff_time}\n"
+                  f"cutoff_length = {run_cutoff_length}\n"
                   f"cli-cores = {concurrent_clis}\n"
                   f"useRacing = {ablation_racing}\n"
                   "seed = 1234\n"
@@ -179,17 +192,17 @@ class AblationScenario:
             A  list of Run objects. Empty when running locally.
         """
         # 1. submit the ablation to the runrunner queue
-        clis = gv.settings.get_slurm_max_parallel_runs_per_node()
+        clis = gv.settings().get_slurm_max_parallel_runs_per_node()
         cmd = f"{self.ablation_exec.absolute()} --optionFile ablation_config.txt"
         srun_options = ["-N1", "-n1", f"-c{clis}"]
         sbatch_options = [f"--cpus-per-task={clis}"] +\
-            gv.settings.get_slurm_extra_options(as_args=True)
+            gv.settings().get_slurm_extra_options(as_args=True)
 
         run_ablation = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
             name=CommandName.RUN_ABLATION,
-            base_dir=gv.sparkle_tmp_path,
+            base_dir=gv.settings().DEFAULT_tmp_output,
             path=self.scenario_dir,
             sbatch_options=sbatch_options,
             srun_options=srun_options)
@@ -203,8 +216,8 @@ class AblationScenario:
         if self.test_set is not None:
             # Validation dir should have a copy of all needed files, except for the
             # output of the ablation run, which is stored in ablation-run[seed].txt
-            validation_exec = self.ablation_exec.parent / "ablationValidation"
-            cmd = f"{validation_exec.absolute()} --optionFile ablation_config.txt "\
+            cmd = f"{self.ablation_validation_exec.absolute()} "\
+                  "--optionFile ablation_config.txt "\
                   "--ablationLogFile ../log/ablation-run1234.txt"
 
             run_ablation_validation = rrr.add_to_queue(
@@ -212,7 +225,7 @@ class AblationScenario:
                 cmd=cmd,
                 name=CommandName.RUN_ABLATION_VALIDATION,
                 path=self.validation_dir,
-                base_dir=gv.sparkle_tmp_path,
+                base_dir=gv.settings().DEFAULT_tmp_output,
                 dependencies=run_ablation,
                 sbatch_options=sbatch_options,
                 srun_options=srun_options)

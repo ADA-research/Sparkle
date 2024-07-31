@@ -14,7 +14,7 @@
 # Initialise
 snapshot_file="tests/CLI/test_files/test_snapshot.zip"
 output_true="Snapshot file $snapshot_file loaded successfully!"
-output=$(CLI/load_snapshot.py $snapshot_file | tail -1)
+output=$(sparkle/CLI/load_snapshot.py $snapshot_file | tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -23,4 +23,3 @@ else
 	echo "[failure] load_snapshot test failed with output:"
 	echo $output
 fi
-

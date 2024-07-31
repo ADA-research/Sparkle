@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for selection report generation."""
-import os
 import sys
 import numpy as np
-from shutil import which
 from pathlib import Path
 from collections import Counter
-import subprocess
+
+import plotly.express as px
+import pandas as pd
+import plotly.io as pio
 
 from sparkle.platform import tex_help as stex
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from CLI.support import compute_marginal_contribution_help as scmch
+from sparkle.CLI.support import compute_marginal_contribution_help as scmch
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
+
+pio.kaleido.scope.mathjax = None  # Bug fix for kaleido
 
 
 def underscore_for_latex(string: str) -> str:
@@ -359,33 +362,6 @@ def generate_report(latex_source_path: Path,
     print(f"Report is placed at: {report_path}")
 
 
-def generate_gnuplot(output_gnuplot_script: str,
-                     output_dir: Path = None) -> None:
-    """Generates plot from script using GNU plot."""
-    subprocess_plot = subprocess.run(["gnuplot", output_gnuplot_script],
-                                     capture_output=True,
-                                     cwd=output_dir)
-
-    if subprocess_plot.returncode != 0:
-        print(f"(GnuPlot) Error whilst plotting {output_gnuplot_script}:\n"
-              f"{subprocess_plot.stderr.decode()}\n")
-
-
-def generate_pdf(eps_file: str,
-                 output_dir: Path = None) -> None:
-    """Generate PDF using epstopdf."""
-    # Some systems are missing epstopdf so a copy is included
-    epsbackup = Path(os.path.abspath(Path.cwd())) / "sparkle/Components/epstopdf.pl"
-    epstopdf = which("epstopdf") or epsbackup
-    subprocess_epstopdf = subprocess.run([epstopdf, eps_file],
-                                         capture_output=True,
-                                         cwd=output_dir)
-
-    if subprocess_epstopdf.returncode != 0:
-        print(f"(Eps To PDF) Error whilst converting Eps to PDF {eps_file}"
-              f"{subprocess_epstopdf.stderr.decode()}")
-
-
 def generate_comparison_plot(points: list,
                              figure_filename: str,
                              xlabel: str = "default",
@@ -427,10 +403,7 @@ def generate_comparison_plot(points: list,
         output_dir: directory path to place the figure and its intermediate files in
             (default: current working directory)
     """
-    if output_dir is None:
-        output_dir = Path()
-    elif isinstance(output_dir, str):
-        output_dir = Path(output_dir)
+    output_dir = Path() if output_dir is None else Path(output_dir)
 
     points = np.array(points)
     if replace_zeros:
@@ -469,59 +442,44 @@ def generate_comparison_plot(points: list,
     if scale == "log" and np.min(points) <= 0:
         raise Exception("Cannot plot negative and zero values on a log scales")
 
-    output_data_file = f"{figure_filename}.dat"
-    output_gnuplot_script = output_dir / f"{figure_filename}.plt"
-    output_eps_file = f"{figure_filename}.eps"
+    output_plot = output_dir / f"{figure_filename}.pdf"
 
-    # Create data file
-    with (output_dir / output_data_file).open("w") as fout:
-        for point in points:
-            fout.write(" ".join([str(c) for c in point]) + "\n")
-
-    # Generate plot script
-    with output_gnuplot_script.open("w") as fout:
-        fout.write(f"set xlabel '{xlabel}'\n"
-                   f"set ylabel '{ylabel}'\n"
-                   f"set title '{title}'\n"
-                   "unset key\n"
-                   f"set xrange [{min_value}:{max_value}]\n"
-                   f"set yrange [{min_value}:{max_value}]\n")
-        if scale == "log":
-            fout.write("set logscale x\n"
-                       "set logscale y\n")
-        fout.write("set grid lc rgb '#CCCCCC' lw 2\n"
-                   "set size square\n"
-                   f"set arrow from {min_value},{min_value} to {max_value},{max_value}"
-                   " nohead lc rgb '#AAAAAA'\n")
-        # TODO magnitude lines for linear scale
-        if magnitude_lines > 0 and scale == "log":
-            for order in range(1, magnitude_lines + 1):
-                min_shift = min_value * 10 ** order
-                max_shift = 10**(np.log10(max_value) - order)
-                if min_shift >= max_value:  # Outside plot
-                    # Only print magnitude lines if the fall within the visible plotting
-                    # area.
-                    break
-
-                fout.write(f"set arrow from {min_value},{min_shift} to {max_shift},"
-                           f"{max_value} nohead lc rgb '#CCCCCC' dashtype '-'\n"
-                           f"set arrow from {min_shift},{min_value} to {max_value},"
-                           f"{max_shift} nohead lc rgb '#CCCCCC' dashtype '-'\n")
-
-        if penalty_time is not None:
-            fout.write(f"set arrow from {min_value},{penalty_time} to {max_value},"
-                       f"{penalty_time} nohead lc rgb '#AAAAAA'\n"
-                       f"set arrow from {penalty_time},{min_value} to {penalty_time},"
-                       f"{max_value} nohead lc rgb '#AAAAAA'\n")
-
-        fout.write('set terminal postscript eps color solid linewidth "Helvetica" 20\n'
-                   f"set output '{output_eps_file}\n"
-                   "set style line 1 pt 2 ps 1.5 lc rgb 'royalblue' \n"
-                   f"plot '{output_data_file}' ls 1\n")
-
-    generate_gnuplot(output_gnuplot_script.name, output_dir)
-    generate_pdf(output_eps_file, output_dir)
-    output_gnuplot_script.unlink(missing_ok=True)
+    df = pd.DataFrame(points, columns=[xlabel, ylabel])
+    log_scale = scale == "log"
+    fig = px.scatter(data_frame=df, x=xlabel, y=ylabel,
+                     range_x=[min_value, max_value], range_y=[min_value, max_value],
+                     title=title, log_x=log_scale, log_y=log_scale,
+                     width=500, height=500)
+    # Add in the seperation line
+    fig.add_shape(type="line", x0=0, y0=0, x1=max_value, y1=max_value,
+                  line=dict(color="lightgrey", width=1))
+    fig.update_traces(marker=dict(color="RoyalBlue", symbol="x"))
+    fig.update_layout(
+        plot_bgcolor="white"
+    )
+    fig.update_xaxes(
+        type="linear" if not log_scale else "log",
+        mirror=True,
+        tickmode="linear",
+        ticks="outside",
+        tick0=0,
+        dtick=100 if not log_scale else 1,
+        showline=True,
+        linecolor="black",
+        gridcolor="lightgrey"
+    )
+    fig.update_yaxes(
+        type="linear" if not log_scale else "log",
+        mirror=True,
+        tickmode="linear",
+        ticks="outside",
+        tick0=0,
+        dtick=100 if not log_scale else 1,
+        showline=True,
+        linecolor="black",
+        gridcolor="lightgrey"
+    )
+    fig.write_image(output_plot)
 
 
 def generate_report_selection(target_path: Path,

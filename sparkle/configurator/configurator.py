@@ -17,7 +17,7 @@ from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 
 class Configurator:
     """Abstact class to use different configurators like SMAC."""
-    configurator_cli_path = Path("sparkle/configurator/configurator_cli.py")
+    configurator_cli_path = Path(__file__).parent.resolve() / "configurator_cli.py"
 
     def __init__(self: Configurator, validator: Validator, output_path: Path,
                  executable_path: Path, configurator_target: Path,

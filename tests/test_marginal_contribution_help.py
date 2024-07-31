@@ -4,16 +4,11 @@ from __future__ import annotations
 from unittest import TestCase
 from pathlib import Path
 
-from CLI.support import compute_marginal_contribution_help as scmch
+from sparkle.CLI.support import compute_marginal_contribution_help as scmch
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
-from CLI.help import global_variables as gv
-from sparkle.platform.settings_objects import Settings
 
 from unittest.mock import patch
 from unittest.mock import MagicMock
-
-global settings
-gv.settings = Settings()
 
 
 class TestMarginalContribution(TestCase):
@@ -33,10 +28,11 @@ class TestMarginalContribution(TestCase):
         )
         self.assertListEqual(output, result)
 
-    @patch("CLI.support.compute_marginal_contribution_help."
+    @patch("sparkle.CLI.support.compute_marginal_contribution_help."
            "compute_actual_performance_for_instance")
     def test_compute_actual_selector_performance(
-            self: TestCase, patch_perf_for_instance: MagicMock) -> None:
+            self: TestCase,
+            patch_perf_for_instance: MagicMock) -> None:
         """Test for method compute_actual_selector_performance."""
         pth = "tests/CLI/test_files/Sparkle_Portfolio_Selector/"\
               "sparkle_portfolio_selector"

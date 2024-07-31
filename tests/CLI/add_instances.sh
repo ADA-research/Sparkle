@@ -12,13 +12,13 @@
 #SBATCH --nodes=1
 
 # Initialise
-CLI/initialise.py > /dev/null
+sparkle/CLI/initialise.py > /dev/null
 
 # Add instances
 instances_path="Examples/Resources/Instances/PTN"
 output_true="Adding instance set PTN done!"
 output_true_b=""
-output=$(CLI/add_instances.py $instances_path | tail -1)
+output=$(sparkle/CLI/add_instances.py $instances_path | tail -1)
 
 if [[ $output == $output_true ]] || [[ $output == $output_true_b ]];
 then
@@ -31,7 +31,7 @@ fi
 # Add multi-file instances
 instances_path="Examples/Resources/CCAG/Instances/CCAG/"
 output_true="Adding instance set CCAG done!"
-output=$(CLI/add_instances.py $instances_path | tail -1)
+output=$(sparkle/CLI/add_instances.py $instances_path | tail -1)
 
 if [[ $output == $output_true ]] || [[ $output == $output_true_b ]];
 then

@@ -9,8 +9,7 @@ from pathlib import Path
 
 import runrunner as rrr
 
-from CLI.help.command_help import CommandName
-
+from sparkle.platform import CommandName
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
@@ -85,8 +84,7 @@ class TestConfigurator():
                                                     output_path=expected_outputs,
                                                     parallel_jobs=2,
                                                     sbatch_options=[],
-                                                    srun_options=["-N1", "-n1"],
-                                                    path=SMAC2.configurator_path
+                                                    srun_options=["-N1", "-n1"]
                                                     )
         assert runs == [None]
 
