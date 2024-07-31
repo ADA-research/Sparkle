@@ -15,17 +15,19 @@ The Sparkle package can be installed using Pip. We recommend creating a new virt
     $ pip install SparkleAI
 ```
 
-Alternatively, to be able to fully use the Command Line Interface (CLI) of Sparkle, a Conda environment is required (For Conda installation see [here]( https://docs.conda.io/en/latest/miniconda.html)). Simply download the `environment.yml` file from the Github and run
+Alternatively, to be able to fully use the Command Line Interface (CLI) of Sparkle, a Conda environment is required (For Conda installation see [here]( https://docs.conda.io/en/latest/miniconda.html)). Simply download the `environment.yml` file from the Github and run:
 
 ```bash
     $ conda env create -f environment.yml
 ```
 
-And afterwards activated by
+And afterwards activated by:
 
 ```bash
     $ conda activate sparkle
 ```
+
+Note that the creation of the Conda environment also takes care of the installation of Sparkle itself.
 
 ### Install dependencies
 Asside from several package dependencies, Sparkle's package / CLI relies on a few user supplied executables:
