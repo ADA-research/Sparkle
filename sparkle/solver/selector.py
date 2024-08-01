@@ -75,7 +75,8 @@ class Selector(SparkleCallable):
                   runtime_cutoff: int | float | str = None,
                   wallclock_limit: int | float | str = None,
                   run_on: Runner = Runner.SLURM,
-                  sbatch_options: list[str] = None) -> Run:
+                  sbatch_options: list[str] = None,
+                  base_dir: Path = Path()) -> Run:
         """Construct the Selector.
 
         Args:
@@ -85,6 +86,9 @@ class Selector(SparkleCallable):
             objective: The objective to optimize for selection.
             runtime_cutoff: Cutoff for the runtime in seconds.
             wallclock_limit: Cutoff for the wallclock time in seconds.
+            run_on: Which runner to use. Defaults to slurm.
+            sbatch_options: Additional options to pass to sbatch.
+            base_dir: The base directory to run the Selector in.
 
         Returns:
             Path to the constructed Selector.
@@ -106,7 +110,7 @@ class Selector(SparkleCallable):
             runner=run_on,
             cmd=[cmd_str],
             name=CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
-            base_dir=self.raw_output_directory,
+            base_dir=base_dir,
             stdout=Path("normal.log"),
             stderr=Path("error.log"),
             sbatch_options=sbatch_options)

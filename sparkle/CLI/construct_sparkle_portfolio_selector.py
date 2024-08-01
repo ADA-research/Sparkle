@@ -142,7 +142,8 @@ if __name__ == "__main__":
                                       cutoff_time,
                                       selector_timeout,
                                       run_on=run_on,
-                                      sbatch_options=sbatch_options)
+                                      sbatch_options=sbatch_options,
+                                      base_dir=gv.settings().DEFAULT_tmp_output)
     if run_on == Runner.LOCAL:
         print("Sparkle portfolio selector constructed!")
     else:
@@ -168,7 +169,8 @@ if __name__ == "__main__":
                                              cutoff_time,
                                              selector_timeout,
                                              run_on=run_on,
-                                             sbatch_options=sbatch_options)
+                                             sbatch_options=sbatch_options,
+                                             base_dir=gv.settings().DEFAULT_tmp_output)
             dependencies.append(ablated_run)
             if run_on == Runner.LOCAL:
                 print(f"Portfolio selector without {solver_name} constructed!")
@@ -180,6 +182,8 @@ if __name__ == "__main__":
     marginal_contribution = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd,
+        name=CommandName.COMPUTE_MARGINAL_CONTRIBUTION,
+        base_dir=gv.settings().DEFAULT_tmp_output,
         dependencies=dependencies,
         sbatch_options=sbatch_options)
 
