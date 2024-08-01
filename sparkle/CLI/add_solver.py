@@ -140,7 +140,7 @@ if __name__ == "__main__":
         srun_options = ["-N1", "-n1"] + sbatch_options
         run_construct_portfolio_selector = rrr.add_to_queue(
             cmd="sparkle/CLI/construct_sparkle_portfolio_selector.py",
-            name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
+            name=CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
             dependencies=dependency_run_list,
             base_dir=gv.settings().DEFAULT_tmp_output,
             sbatch_options=sbatch_options,

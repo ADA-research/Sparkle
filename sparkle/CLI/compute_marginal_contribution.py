@@ -17,15 +17,10 @@ from sparkle.CLI.help import argparse_custom as apc
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument(*apc.PerfectArgument.names,
-                       **apc.PerfectArgument.kwargs)
-    group.add_argument(*apc.ActualArgument.names,
-                       **apc.ActualArgument.kwargs)
-    parser.add_argument(*apc.RecomputeMarginalContributionArgument.names,
-                        **apc.RecomputeMarginalContributionArgument.kwargs)
-    parser.add_argument(*apc.SelectorTimeoutArgument.names,
-                        **apc.SelectorTimeoutArgument.kwargs)
+    parser.add_argument(*apc.PerfectArgument.names,
+                        **apc.PerfectArgument.kwargs)
+    parser.add_argument(*apc.ActualArgument.names,
+                        **apc.ActualArgument.kwargs)
     parser.add_argument(*apc.PerformanceMeasureArgument.names,
                         **apc.PerformanceMeasureArgument.kwargs)
     parser.add_argument(*apc.SettingsFileArgument.names,
@@ -58,9 +53,10 @@ if __name__ == "__main__":
         gv.settings().set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
+    selection_scenario = gv.latest_scenario().get_selection_scenario_path()
 
     scmch.compute_marginal_contribution(
-        args.perfect, args.actual, args.recompute, args.selector_timeout
+        selection_scenario, args.perfect, args.actual
     )
 
     # Write used settings to file

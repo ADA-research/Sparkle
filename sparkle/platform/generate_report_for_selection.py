@@ -99,7 +99,7 @@ def get_dict_sbs_penalty_time_on_each_instance(
 
 def get_actual_portfolio_selector_performance_per_instance(
         performance_data: PerformanceDataFrame,
-        actual_portfolio_selector_path: Path,
+        selection_scenario: Path,
         feature_data: FeatureDataFrame,
         capvalue: int,
         penalised_time: int) -> dict[str, int]:
@@ -112,6 +112,7 @@ def get_actual_portfolio_selector_performance_per_instance(
     minimise =\
         objective.PerformanceMeasure != PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION
 
+    actual_portfolio_selector_path = selection_scenario / "portfolio_selector"
     actual_selector_penalty = {}
     for instance in performance_data.instances:
         used_time_for_this_instance, flag_successfully_solving = \
@@ -212,7 +213,7 @@ def selection_report_variables(
         target_dir: Path,
         bibliograpghy_path: Path,
         extractor_path: Path,
-        actual_portfolio_selector_path: Path,
+        selection_scenario: Path,
         train_data: PerformanceDataFrame,
         feature_data: FeatureDataFrame,
         extractor_cutoff: int,
@@ -231,7 +232,7 @@ def selection_report_variables(
     """
     objective = SparkleObjective(train_data.objective_names[0])
     actual_performance_dict = get_actual_portfolio_selector_performance_per_instance(
-        train_data, actual_portfolio_selector_path, feature_data, cutoff, penalty)
+        train_data, selection_scenario, feature_data, cutoff, penalty)
     latex_dict = {"bibliographypath": str(bibliograpghy_path.absolute()),
                   "numSolvers": str(train_data.num_solvers),
                   "solverList": stex.get_directory_list(train_data.solvers)}
@@ -244,7 +245,7 @@ def selection_report_variables(
     latex_dict["performanceComputationCutoffTime"] = str(cutoff)
     rank_list_perfect = scmch.compute_perfect_selector_marginal_contribution(train_data)
     rank_list_actual = scmch.compute_actual_selector_marginal_contribution(
-        train_data, feature_data, performance_cutoff=cutoff)
+        train_data, feature_data, selection_scenario, performance_cutoff=cutoff)
     latex_dict["solverPerfectRankingList"] = solver_rank_list_latex(rank_list_perfect)
     latex_dict["solverActualRankingList"] = solver_rank_list_latex(rank_list_actual)
     latex_dict["PARRankingList"] = get_par_ranking_list(train_data, objective)
@@ -396,7 +397,7 @@ def generate_report_selection(target_path: Path,
                               latex_template: Path,
                               bibliography_path: Path,
                               extractor_path: Path,
-                              selector_path: Path,
+                              selection_scenario: Path,
                               feature_data: FeatureDataFrame,
                               train_data: PerformanceDataFrame,
                               extractor_cutoff: int,
@@ -411,7 +412,7 @@ def generate_report_selection(target_path: Path,
         latex_template: The template for the report
         bibliography_path: Path to the bib file.
         extractor_path: Path to the extractor used
-        selector_path: Path to the selector
+        selection_scenario: Path to the selector scenario
         feature_data: Feature data created by extractor
         train_data: The performance input data for the selector
         extractor_cutoff: The maximum time for the selector to run
@@ -428,7 +429,7 @@ def generate_report_selection(target_path: Path,
     dict_variable_to_value = selection_report_variables(target_path,
                                                         bibliography_path,
                                                         extractor_path,
-                                                        selector_path,
+                                                        selection_scenario,
                                                         train_data,
                                                         feature_data,
                                                         extractor_cutoff,

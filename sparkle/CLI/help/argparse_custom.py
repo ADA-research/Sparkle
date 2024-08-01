@@ -88,6 +88,12 @@ AblationArgument = ArgumentContainer(names=["--ablation"],
                                      kwargs={"required": False,
                                              "action": "store_true",
                                              "help": "run ablation after configuration"})
+SelectorAblationArgument =\
+    ArgumentContainer(names=["--solver-ablation"],
+                      kwargs={"required": False,
+                              "action": "store_true",
+                              "help": "construct a selector for "
+                                      "each solver ablation combination"})
 
 ActualArgument = ArgumentContainer(names=["--actual"],
                                    kwargs={"action": "store_true",

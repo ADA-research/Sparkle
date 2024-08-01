@@ -12,8 +12,6 @@ import tabulate
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from sparkle.CLI.construct_sparkle_portfolio_selector\
-    import construct_sparkle_portfolio_selector
 from sparkle.types.objective import PerformanceMeasure
 
 
@@ -141,11 +139,10 @@ def compute_actual_performance_for_instance(
 def compute_actual_selector_marginal_contribution(
         performance_data: PerformanceDataFrame,
         feature_data: FeatureDataFrame,
+        selector_scenario: Path,
         aggregation_function: Callable[[list[float]], float] = mean,
         performance_cutoff: int | float = None,
-        minimise: bool = True,
-        flag_recompute: bool = False,
-        selector_timeout: int = 172000) -> list[tuple[str, float]]:
+        minimise: bool = True) -> list[tuple[str, float]]:
     """Compute the marginal contributions of solvers in the selector.
 
     Args:
@@ -161,30 +158,19 @@ def compute_actual_selector_marginal_contribution(
       A list of 2-tuples where every 2-tuple is of the form
         (solver name, marginal contribution, best_performance).
     """
-    actual_margi_cont_path = gv.settings().DEFAULT_marginal_contribution_actual_path
+    actual_margi_cont_path = selector_scenario / "marginal_contribution_actual.txt"
     # If the marginal contribution already exists in file, read it and return
-    if not flag_recompute and actual_margi_cont_path.is_file():
-        print("Marginal contribution for the actual selector already computed, reading "
-              "from file instead! Use --recompute to force recomputation.")
+    if actual_margi_cont_path.is_file():
+        print("Marginal contribution for selector already computed, reading from file.")
         return ast.literal_eval(actual_margi_cont_path.open().read())
 
     print(f"In this calculation, cutoff is {performance_cutoff} seconds")
 
-    # Compute performance of actual selector
-    # NOTE: Should we recompute for all solvers?
-    print("Computing actual performance for portfolio selector with all solvers ...")
-    actual_portfolio_selector_path = gv.settings().DEFAULT_algorithm_selector_path
-    construct_sparkle_portfolio_selector(actual_portfolio_selector_path,
-                                         performance_data,
-                                         feature_data,
-                                         selector_timeout=selector_timeout)
+    actual_portfolio_selector_path = selector_scenario / "portfolio_selector"
 
     if not actual_portfolio_selector_path.exists():
-        print(f"****** ERROR: {actual_portfolio_selector_path} does not exist! ******")
-        print("****** ERROR: AutoFolio constructing the actual portfolio selector with"
-              " all solvers failed! ******")
-        print("****** Use virtual best performance instead of actual "
-              "performance for this portfolio selector! ******")
+        print(f"ERROR: Selector {actual_portfolio_selector_path} does not exist! "
+              "Cannot compute marginal contribution.")
         sys.exit(-1)
 
     actual_selector_performance = compute_actual_selector_performance(
@@ -206,43 +192,28 @@ def compute_actual_selector_marginal_contribution(
         tmp_performance_df = performance_data.copy()
         # 2. Remove the solver from this copy
         tmp_performance_df.remove_solver(solver)
-        # 3. create the actual selector path
-        tmp_actual_portfolio_selector = (
-            gv.settings().DEFAULT_selection_output / f"without_{solver_name}"
-            / "sparkle_portfolio_selector")
+        ablated_actual_portfolio_selector =\
+            selector_scenario / f"ablate_{solver_name}" / "portfolio_selector"
+        if not ablated_actual_portfolio_selector.exists():
+            print(f"WARNING: Selector without {solver_name} does not exist! "
+                  f"Cannot compute marginal contribution without {solver_name}.")
+            continue
 
-        if tmp_actual_portfolio_selector.exists():
-            tmp_actual_portfolio_selector.unlink()
-        else:
-            tmp_actual_portfolio_selector.parent.mkdir(parents=True, exist_ok=True)
-
-        if tmp_performance_df.num_solvers >= 1:
-            # 4. Construct the portfolio selector for this subset
-            construct_sparkle_portfolio_selector(
-                tmp_actual_portfolio_selector, tmp_performance_df,
-                feature_data)
-        else:
-            print("****** WARNING: No solver exists ! ******")
-
-        if not tmp_actual_portfolio_selector.exists():
-            sys.exit(-1)
-
-        tmp_asp = compute_actual_selector_performance(
-            tmp_actual_portfolio_selector, tmp_performance_df,
+        ablated_asp = compute_actual_selector_performance(
+            ablated_actual_portfolio_selector, tmp_performance_df,
             feature_data, minimise, aggregation_function, performance_cutoff)
 
         print(f"Actual performance for portfolio selector ex. solver {solver_name} is "
-              f"{tmp_asp}")
-        print("Computing done!")
+              f"{ablated_asp}. Computing done!")
 
         # 1. If the performance remains equal, this solver did not contribute
         # 2. If there is a performance decay without this solver, it does contribute
         # 3. If there is a performance improvement, we have a bad portfolio selector
-        if tmp_asp == actual_selector_performance:
+        if ablated_asp == actual_selector_performance:
             marginal_contribution = 0.0
-        elif not compare(tmp_asp, actual_selector_performance):
+        elif not compare(ablated_asp, actual_selector_performance):
             # In the case that the performance decreases, we have a contributing solver
-            marginal_contribution = tmp_asp / actual_selector_performance
+            marginal_contribution = ablated_asp / actual_selector_performance
         else:
             print("****** WARNING DUBIOUS SELECTOR/SOLVER: "
                   f"The omission of solver {solver_name} yields an improvement. "
@@ -250,7 +221,7 @@ def compute_actual_selector_marginal_contribution(
                   "to construct a portfolio without this solver.")
             marginal_contribution = 0.0
 
-        rank_list.append((solver, marginal_contribution, tmp_asp))
+        rank_list.append((solver, marginal_contribution, ablated_asp))
         print(f"Marginal contribution (to Actual Selector) for solver {solver_name} is "
               f"{marginal_contribution}")
 
@@ -262,18 +233,16 @@ def compute_actual_selector_marginal_contribution(
 
 
 def compute_marginal_contribution(
-        flag_compute_perfect: bool, flag_compute_actual: bool,
-        flag_recompute: bool, selector_timeout: int) -> None:
+        scenario: Path,
+        flag_compute_perfect: bool, flag_compute_actual: bool) -> None:
     """Compute the marginal contribution.
 
     Args:
+        scenario: Path to the selector scenario for which to compute
         flag_compute_perfect: Flag indicating if the contribution for the perfect
             portfolio selector should be computed.
         flag_compute_actual: Flag indicating if the contribution for the actual portfolio
              selector should be computed.
-        flag_recompute: Flag indicating whether marginal contributions
-            should be recalculated.
-        selector_timeout: The cuttoff time to configure the algorithm selector.
     """
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
@@ -312,11 +281,10 @@ def compute_marginal_contribution(
         contribution_data = compute_actual_selector_marginal_contribution(
             performance_data,
             feature_data,
+            scenario,
             aggregation_function,
             capvalue,
-            minimise,
-            flag_recompute=flag_recompute,
-            selector_timeout=selector_timeout
+            minimise
         )
         table = tabulate.tabulate(
             contribution_data,

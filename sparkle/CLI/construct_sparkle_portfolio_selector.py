@@ -4,9 +4,11 @@ import sys
 import argparse
 from pathlib import Path
 
+import runrunner as rrr
+from runrunner.base import Runner
+
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from sparkle.CLI.support import compute_marginal_contribution_help as scmch
 from sparkle.CLI.help import sparkle_logging as sl
 from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help import argparse_custom as ac
@@ -27,7 +29,10 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.SelectorTimeoutArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureArgument.names,
                         **ac.PerformanceMeasureArgument.kwargs)
-
+    parser.add_argument(*ac.SelectorAblationArgument.names,
+                        **ac.SelectorAblationArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
     return parser
 
 
@@ -41,55 +46,6 @@ def judge_exist_remaining_jobs(feature_data_csv: Path,
     return performance_data.has_missing_performance()
 
 
-def construct_sparkle_portfolio_selector(selector_path: Path,
-                                         performance_data: PerformanceDataFrame,
-                                         feature_data: FeatureDataFrame,
-                                         selector_timeout: int = None) -> None:
-    """Create the Sparkle portfolio selector.
-
-    Applies several checks before executing, such as missing data imputation.
-
-    Args:
-        selector_path: Portfolio selector path.
-        performance_data: Performance data.
-        feature_data: Feature data.
-        flag_recompute: Whether or not to recompute if the selector exists and no data
-            was changed. Defaults to False.
-        selector_timeout: The cuttoff time to configure the algorithm selector. If None
-            uses the default selector configuration. Defaults to None.
-    """
-    cutoff_time = gv.settings().get_general_target_cutoff_time()
-
-    # Selector (AutoFolio) cannot handle cutoff time less than 2, adjust if needed
-    cutoff_time = max(cutoff_time, 2)
-
-    # Determine the objective function
-    perf_measure = gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
-    if perf_measure == PerformanceMeasure.RUNTIME:
-        objective_function = "runtime"
-    elif perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or\
-            perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-        objective_function = "solution_quality"
-    else:
-        print("ERROR: Unknown performance measure in portfolio selector construction.")
-        sys.exit(-1)
-
-    if feature_data.has_missing_value():
-        print("****** WARNING: There are missing values in the feature data, and all "
-              "missing values will be imputed as the mean value of all other non-missing"
-              " values! ******")
-        print("Imputing all missing values...")
-        feature_data.impute_missing_values()
-
-    selector = gv.settings().get_general_sparkle_selector()
-    selector_path = selector.construct(selector_path,
-                                       performance_data,
-                                       feature_data,
-                                       objective_function,
-                                       cutoff_time,
-                                       selector_timeout)
-
-
 if __name__ == "__main__":
     # Log command call
     sl.log_command(sys.argv)
@@ -99,11 +55,14 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
+    selector_timeout = args.selector_timeout
     flag_recompute_portfolio = args.recompute_portfolio_selector
     flag_recompute_marg_cont = args.recompute_marginal_contribution
+    run_on = args.run_on
+    solver_ablation = args.solver_ablation
 
     check_for_initialise(
-        COMMAND_DEPENDENCIES[CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR]
+        COMMAND_DEPENDENCIES[CommandName.CONSTRUCT_PORTFOLIO_SELECTOR]
     )
 
     if ac.set_by_user(args, "performance_measure"):
@@ -112,6 +71,7 @@ if __name__ == "__main__":
         )
 
     print("Start constructing Sparkle portfolio selector ...")
+    selector = gv.settings().get_general_sparkle_selector()
 
     flag_judge_exist_remaining_jobs = judge_exist_remaining_jobs(
         gv.settings().DEFAULT_feature_data_path,
@@ -125,35 +85,100 @@ if __name__ == "__main__":
         print("Sparkle portfolio selector is not successfully constructed!")
         sys.exit(-1)
 
+    # Selector (AutoFolio) cannot handle cutoff time less than 2, adjust if needed
+    cutoff_time = max(gv.settings().get_general_target_cutoff_time(), 2)
+
+    # Determine the objective function
+    perf_measure = gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
+    if perf_measure == PerformanceMeasure.RUNTIME:
+        objective_function = "runtime"
+    elif perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or\
+            perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
+        objective_function = "solution_quality"
+    else:
+        print("ERROR: Unknown performance measure in portfolio selector construction.")
+        sys.exit(-1)
+
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
 
-    selector_path = gv.settings().DEFAULT_algorithm_selector_path
-    if selector_path.exists() and not flag_recompute_portfolio:
-        print("Portfolio selector already exists. Set the recompute flag to re-create.")
-    else:
-        construct_sparkle_portfolio_selector(
-            selector_path,
-            performance_data,
-            feature_data,
-            args.selector_timeout
-        )
-        print("Sparkle portfolio selector constructed!")
+    if feature_data.has_missing_value():
+        print("****** WARNING: There are missing values in the feature data, and all "
+              "missing values will be imputed as the mean value of all other non-missing"
+              " values! ******")
+        print("Imputing all missing values...")
+        feature_data.impute_missing_values()
 
-    print(f"Sparkle portfolio selector located at {selector_path}")
+    # TODO: Allow user to specify subsets of data to be used
+
+    # Selector is named after the instance sets it will be trained on
+    instance_sets = [instance_set.name
+                     for instance_set in gv.settings().DEFAULT_instance_dir.iterdir()]
+    selection_scenario_path = (
+        gv.settings().DEFAULT_selection_output
+        / gv.settings().DEFAULT_general_sparkle_selector.name
+        / "_".join(instance_sets))
 
     # Update latest scenario
-    gv.latest_scenario().set_selection_portfolio_path(selector_path)
+    gv.latest_scenario().set_selection_scenario_path(selection_scenario_path)
     gv.latest_scenario().set_latest_scenario(Scenario.SELECTION)
     # Set to default to overwrite possible old path
     gv.latest_scenario().set_selection_test_case_directory()
 
-    # Compute and print marginal contributions of the perfect and actual portfolio
-    # selectors
-    scmch.compute_marginal_contribution(flag_compute_perfect=True,
-                                        flag_compute_actual=True,
-                                        flag_recompute=flag_recompute_marg_cont,
-                                        selector_timeout=args.selector_timeout)
+    selector_path = selection_scenario_path / "portfolio_selector"
+    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
+    if selector_path.exists() and not flag_recompute_portfolio:
+        print("Portfolio selector already exists. Set the recompute flag to re-create.")
+        sys.exit()
+
+    selector_path.parent.mkdir(exist_ok=True, parents=True)
+    selector_run = selector.construct(selector_path,
+                                      performance_data,
+                                      feature_data,
+                                      objective_function,
+                                      cutoff_time,
+                                      selector_timeout,
+                                      run_on=run_on,
+                                      sbatch_options=sbatch_options)
+    if run_on == Runner.LOCAL:
+        print("Sparkle portfolio selector constructed!")
+    else:
+        print("Sparkle portfolio selector constructor running...")
+
+    dependencies = [selector_run]
+    if solver_ablation:
+        for solver in performance_data.solvers:
+            solver_name = Path(solver).name
+            ablate_solver_dir = selection_scenario_path / f"ablate_{solver_name}"
+            ablate_solver_selector = ablate_solver_dir / "portfolio_selector"
+            if (ablate_solver_selector.exists() and not flag_recompute_portfolio):
+                print(f"Portfolio selector without {solver_name} already exists. "
+                      "Set the recompute flag to re-create.")
+                continue
+            ablate_solver_dir.mkdir(exist_ok=True, parents=True)
+            ablated_performance_data = performance_data.copy()
+            ablated_performance_data.remove_solver(solver)
+            ablated_run = selector.construct(ablate_solver_selector,
+                                             ablated_performance_data,
+                                             feature_data,
+                                             objective_function,
+                                             cutoff_time,
+                                             selector_timeout,
+                                             run_on=run_on,
+                                             sbatch_options=sbatch_options)
+            dependencies.append(ablated_run)
+            if run_on == Runner.LOCAL:
+                print(f"Portfolio selector without {solver_name} constructed!")
+            else:
+                print(f"Portfolio selector without {solver_name} constructor running...")
+    performance_str = PerformanceMeasure.to_str(perf_measure)
+    cmd = ("sparkle/CLI/compute_marginal_contribution.py --perfect --actual "
+           f"{ac.PerformanceMeasureArgument.names[0]} {performance_str}")
+    marginal_contribution = rrr.add_to_queue(
+        runner=run_on,
+        cmd=cmd,
+        dependencies=dependencies,
+        sbatch_options=sbatch_options)
 
     # Write used settings to file
     gv.settings().write_used_settings()

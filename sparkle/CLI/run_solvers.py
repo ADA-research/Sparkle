@@ -152,7 +152,7 @@ def run_solvers_on_instances(
         runs.append(rrr.add_to_queue(
             runner=run_on,
             cmd="sparkle/CLI/construct_sparkle_portfolio_selector.py",
-            name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
+            name=CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
             dependencies=runs[-1],
             base_dir=gv.settings().DEFAULT_tmp_output,
             sbatch_options=sbatch_user_options))

@@ -64,7 +64,8 @@ if __name__ == "__main__":
 
     # Log command call
     sl.log_command(sys.argv)
-
+    import time
+    start = time.time()
     # Define command line arguments
     parser = parser_function()
 
@@ -123,8 +124,9 @@ if __name__ == "__main__":
             print("ERROR: The generate_report command is not yet implemented for the"
                   " QUALITY_ABSOLUTE performance measure! (functionality coming soon)")
             sys.exit(-1)
-
-        if not gv.settings().DEFAULT_algorithm_selector_path.is_file():
+        selection_scenario = gv.latest_scenario().get_selection_scenario_path()
+        actual_portfolio_selector_path = selection_scenario / "portfolio_selector"
+        if not actual_portfolio_selector_path.is_file():
             print("Before generating a Sparkle report, please first construct the "
                   "Sparkle portfolio selector!")
             print("Not generating a Sparkle report, stopping execution!")
@@ -143,13 +145,12 @@ if __name__ == "__main__":
                 test_case_path / "sparkle_performance_data.csv")
             test_data.penalise(gv.settings().get_general_target_cutoff_time(),
                                gv.settings().get_penalised_time())
-        actual_portfolio_selector_path = gv.settings().DEFAULT_algorithm_selector_path
         sgfs.generate_report_selection(gv.settings().DEFAULT_selection_output_analysis,
                                        gv.settings().DEFAULT_latex_source,
                                        "template-Sparkle-for-selection.tex",
                                        gv.settings().DEFAULT_latex_bib,
                                        gv.settings().DEFAULT_extractor_dir,
-                                       actual_portfolio_selector_path,
+                                       selection_scenario,
                                        feature_data,
                                        train_data,
                                        gv.settings().get_general_extractor_cutoff_time(),
@@ -245,3 +246,4 @@ if __name__ == "__main__":
 
     # Write used settings to file
     gv.settings().write_used_settings()
+    print(f"Took: {time.time() - start}s")

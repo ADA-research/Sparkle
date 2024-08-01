@@ -571,7 +571,8 @@ class PerformanceDataFrame():
         pd_copy.csv_filepath = csv_filepath
         return pd_copy
 
-    def to_autofolio(self: PerformanceDataFrame) -> Path:
+    def to_autofolio(self: PerformanceDataFrame,
+                     target: Path = None) -> Path:
         """Port the data to a format acceptable for AutoFolio."""
         if self.multi_objective or self.n_runs > 1:
             print(f"ERROR: Currently no porting available for {self.csv_filepath} "
@@ -579,6 +580,9 @@ class PerformanceDataFrame():
             return
         autofolio_df = self.dataframe.copy()
         autofolio_df.index = autofolio_df.index.droplevel(["Objective", "Run"])
-        path = self.csv_filepath.parent / f"autofolio_{self.csv_filepath.name}"
+        if target is None:
+            path = self.csv_filepath.parent / f"autofolio_{self.csv_filepath.name}"
+        else:
+            path = target / f"autofolio_{self.csv_filepath.name}"
         autofolio_df.to_csv(path)
         return path

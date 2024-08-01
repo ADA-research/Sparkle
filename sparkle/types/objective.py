@@ -27,6 +27,21 @@ class PerformanceMeasure(Enum):
             return PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION
         return PerformanceMeasure.ERR
 
+    @staticmethod
+    def to_str(performance_measure: PerformanceMeasure) -> str:
+        """Return a given PerformanceMeasure as str."""
+        if performance_measure == PerformanceMeasure.DEFAULT:
+            return "DEFAULT"
+        if performance_measure == PerformanceMeasure.RUNTIME:
+            return "RUNTIME"
+        elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
+            return "QUALITY_ABSOLUTE"
+        elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
+            return "QUALITY_ABSOLUTE_MAXIMISATION"
+        elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
+            return "QUALITY_ABSOLUTE_MINIMISATION"
+        return "ERR"
+
 
 class SparkleObjective():
     """Objective for Sparkle specified by user.

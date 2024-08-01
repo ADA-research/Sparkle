@@ -60,7 +60,7 @@ class CommandName(str, Enum):
     COMPUTE_FEATURES = "compute_features"
     COMPUTE_MARGINAL_CONTRIBUTION = "compute_marginal_contribution"
     CONFIGURE_SOLVER = "configure_solver"
-    CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR = "construct_sparkle_portfolio_selector"
+    CONSTRUCT_PORTFOLIO_SELECTOR = "construct_portfolio_selector"
     GENERATE_REPORT = "generate_report"
     INITIALISE = "initialise"
     REMOVE_FEATURE_EXTRACTOR = "remove_feature_extractor"
@@ -103,18 +103,18 @@ COMMAND_DEPENDENCIES = {
                                    CommandName.ADD_INSTANCES],
     CommandName.COMPUTE_MARGINAL_CONTRIBUTION: [
         CommandName.INITIALISE,
-        CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR],
+        CommandName.CONSTRUCT_PORTFOLIO_SELECTOR],
     CommandName.CONFIGURE_SOLVER: [CommandName.INITIALISE,
                                    CommandName.ADD_INSTANCES,
                                    CommandName.ADD_SOLVER],
-    CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR: [CommandName.INITIALISE,
-                                                       CommandName.COMPUTE_FEATURES,
-                                                       CommandName.RUN_SOLVERS],
+    CommandName.CONSTRUCT_PORTFOLIO_SELECTOR: [CommandName.INITIALISE,
+                                               CommandName.COMPUTE_FEATURES,
+                                               CommandName.RUN_SOLVERS],
     CommandName.GENERATE_REPORT: [CommandName.INITIALISE,
                                   CommandName.CONFIGURE_SOLVER,
                                   CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
                                   CommandName.RUN_ABLATION,
-                                  CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
+                                  CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
                                   CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR],
     CommandName.INITIALISE: [],
     CommandName.REMOVE_FEATURE_EXTRACTOR: [CommandName.INITIALISE],
@@ -127,7 +127,7 @@ COMMAND_DEPENDENCIES = {
                               CommandName.ADD_SOLVER],
     CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR: [
         CommandName.INITIALISE,
-        CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR],
+        CommandName.CONSTRUCT_PORTFOLIO_SELECTOR],
     CommandName.RUN_STATUS: [],
     CommandName.SPARKLE_WAIT: [],
     CommandName.SYSTEM_STATUS: [],
