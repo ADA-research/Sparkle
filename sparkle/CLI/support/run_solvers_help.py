@@ -7,7 +7,7 @@ from pathlib import Path
 from sparkle.CLI.help import global_variables as gv
 from sparkle.platform.settings_objects import SolutionVerifier
 from sparkle.solver import Solver
-from sparkle.solver import sat_help as sh
+from sparkle.solver import sat as sh
 import sparkle.tools.general as tg
 from sparkle.tools.runsolver_parsing import handle_timeouts
 from sparkle.types import SolverStatus
