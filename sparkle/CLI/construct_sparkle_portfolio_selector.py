@@ -58,7 +58,6 @@ if __name__ == "__main__":
     selector_timeout = args.selector_timeout
     flag_recompute_portfolio = args.recompute_portfolio_selector
     flag_recompute_marg_cont = args.recompute_marginal_contribution
-    run_on = args.run_on
     solver_ablation = args.solver_ablation
 
     check_for_initialise(
@@ -69,6 +68,10 @@ if __name__ == "__main__":
         gv.settings().set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
+    if args.run_on is not None:
+        gv.settings().set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
+    run_on = gv.settings().get_run_on()
 
     print("Start constructing Sparkle portfolio selector ...")
     selector = gv.settings().get_general_sparkle_selector()
