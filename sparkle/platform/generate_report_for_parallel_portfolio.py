@@ -7,6 +7,7 @@ import plotly.express as px
 import pandas as pd
 import plotly.io as pio
 
+from sparkle.platform import latex as stex
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 from sparkle.instance import InstanceSet
@@ -32,7 +33,7 @@ def get_solver_list_latex(solver_list: list[str]) -> str:
         solver_name = Path(solver_split[0]).name
         solver_seeds = int(solver_split[2]) if len(solver_split) == 3 else 0
 
-        latex_itemize += f"\\item \\textbf{{{sgfs.underscore_for_latex(solver_name)}}}\n"
+        latex_itemize += f"\\item \\textbf{{{stex.underscore_for_latex(solver_name)}}}\n"
         # Only include if we used more than one seed
         if solver_seeds > 1:
             seeds = ",".join(list[range(1, solver_seeds + 1)])
@@ -165,7 +166,7 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
         data.append([sbs_penalty_time, sparkle_penalty_time])
 
     generate_figure(target_directory, float(penalised_time),
-                    f"SBS ({sgfs.underscore_for_latex(sbs_solver)})",
+                    f"SBS ({stex.underscore_for_latex(sbs_solver)})",
                     "Parallel-Portfolio", figure_filename, objective.metric, data)
     latex_include = f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
     return (latex_include, dict_all_solvers,
@@ -213,7 +214,7 @@ def get_results_table(results: dict[str, str, str],
         "} & \\textbf{\\#Timeouts} & "
         "\\textbf{\\#Cancelled} & \\textbf{\\# Solved} \\\\ \\hline ")
     table_string += (
-        f"{sgfs.underscore_for_latex(parallel_portfolio_path.name)} & "
+        f"{stex.underscore_for_latex(parallel_portfolio_path.name)} & "
         f"{round(portfolio_par,2)} & {n_unsolved_instances} & {total_killed} & "
         f"{n_instances-n_unsolved_instances} \\\\ ")
     table_string += "\\end{tabular}"
@@ -235,14 +236,14 @@ def get_results_table(results: dict[str, str, str],
         if solver_name not in solver_with_solutions:
             cancelled = n_instances - n_unsolved_instances
             table_string += (
-                f"{sgfs.underscore_for_latex(solver_name)} & "
+                f"{stex.underscore_for_latex(solver_name)} & "
                 f"{round(dict_all_solvers[line], 2)} & {n_unsolved_instances} & "
                 f"{cancelled} & 0 \\\\ ")
         else:
             cancelled = (n_instances - n_unsolved_instances
                          - solver_with_solutions[solver_name])
             table_string += (
-                f"{sgfs.underscore_for_latex(solver_name)} & "
+                f"{stex.underscore_for_latex(solver_name)} & "
                 f"{round(dict_all_solvers[line], 2)} & {n_unsolved_instances} & "
                 f"{cancelled} & {solver_with_solutions[solver_name]} \\\\ ")
     table_string += "\\end{tabular}"
@@ -299,7 +300,7 @@ def parallel_report_variables(target_directory: Path,
     inst_succes = []
     for solver in solvers_solutions:
         inst_succes.append("\\item Solver "
-                           f"\\textbf{{{sgfs.underscore_for_latex(solver)}}}, was the "
+                           f"\\textbf{{{stex.underscore_for_latex(solver)}}}, was the "
                            "best solver on "
                            f"\\textbf{{{solvers_solutions[solver]}}} instance(s)")
     if unsolved_instances > 0:
@@ -402,7 +403,7 @@ def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
         target_path, parallel_portfolio_path, bibliograpghy_path, objective,
         cutoff, penalised_time, instances)
 
-    sgfs.generate_report(latex_template,
+    stex.generate_report(latex_template,
                          "template-Sparkle-for-parallel-portfolio.tex",
                          target_path,
                          "Sparkle_Report_Parallel_Portfolio",

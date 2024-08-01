@@ -443,8 +443,7 @@ def test_configuration_report_variables_with_features(mocker: MockFixture) -> No
                              return_value=test_dict)
     mock_iterdir = mocker.patch("pathlib.Path.iterdir",
                                 return_value=[Path("extract1"), Path("extract2")])
-    mock_extractor_list = mocker.patch("sparkle.platform.generate_report_for_selection."
-                                       "get_feature_extractor_list",
+    mock_extractor_list = mocker.patch("sparkle.platform.latex.get_directory_list",
                                        return_value="43")
     mocker.patch("pathlib.Path.mkdir", return_value=None)
     extractor_dir = Path("extract/dir")
@@ -642,8 +641,8 @@ def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:
     mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "configuration_report_variables",
                              return_value=value_dict)
-    mock_generate_report = mocker.patch("sparkle.platform.generate_report_for_selection."
-                                        "generate_report", return_value=None)
+    mock_generate_report = mocker.patch("sparkle.platform.latex.generate_report",
+                                        return_value=None)
 
     sgrch.generate_report_for_configuration(solver,
                                             configurator,
@@ -682,7 +681,7 @@ def test_generate_report_for_configuration(mocker: MockFixture) -> None:
     mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "configuration_report_variables",
                              return_value=value_dict)
-    mock_generate_report = mocker.patch("sparkle.platform.generate_report_for_selection"
+    mock_generate_report = mocker.patch("sparkle.platform.latex"
                                         ".generate_report", return_value=None)
 
     sgrch.generate_report_for_configuration(solver,

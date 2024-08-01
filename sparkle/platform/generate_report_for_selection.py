@@ -10,44 +10,12 @@ import plotly.express as px
 import pandas as pd
 import plotly.io as pio
 
-from sparkle.platform import tex_help as stex
+from sparkle.platform import latex as stex
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.CLI.support import compute_marginal_contribution_help as scmch
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 
 pio.kaleido.scope.mathjax = None  # Bug fix for kaleido
-
-
-def underscore_for_latex(string: str) -> str:
-    """Return the input str with the underscores escaped for use in LaTeX.
-
-    Args:
-        string: A given str with underscores.
-
-    Returns:
-        The corresponding str with underscores escaped.
-    """
-    return string.replace("_", "\\_")
-
-
-def get_solver_list_latex(solver_list: list[str] = None) -> str:
-    """Get the list of solvers for use in a LaTeX document.
-
-    Returns:
-        The list of solver names as LaTeX str.
-    """
-    return "".join(f"\\item \\textbf{{{Path(solver_path).name}}}\n"
-                   for solver_path in solver_list)
-
-
-def get_feature_extractor_list(extractor_dir: Path) -> str:
-    """Get the feature extractors for use in a LaTeX document.
-
-    Returns:
-        The list of feature extractors as LaTeX str.
-    """
-    return "".join(f"\\item \\textbf{{{Path(extractor_path).name}}}\n"
-                   for extractor_path in extractor_dir.iterdir())
 
 
 def get_num_instance_sets(instance_list: list[str]) -> str:
@@ -99,29 +67,20 @@ def get_par_ranking_list(performance_data: PerformanceDataFrame,
                    for solver, solver_penalty in solver_penalty_ranking)
 
 
-def get_actual_par(performance_dict: dict) -> str:
+def get_par(performance: dict | PerformanceDataFrame) -> str:
     """PAR (Penalised Average Runtime) of the Sparkle portfolio selector.
 
     Returns:
         The PAR (Penalised Average Runtime) of the Sparkle portfolio selector over a set
         of instances.
     """
-    mean_performance = sum(performance_dict.values()) / len(performance_dict)
+    if isinstance(performance, dict):
+        mean_performance = sum(performance.values()) / len(performance)
+    else:
+        # Selecting the first solver because in this case its the Selector (Only solver)
+        solver = performance.solvers[0]
+        performance.dataframe[solver].sum() / performance.num_instances
     return str(mean_performance)
-
-
-def get_test_actual_par(performance_data: PerformanceDataFrame) -> str:
-    """Return the true PAR (Penalised Average Runtime) score on a test set.
-
-    Args:
-        test_case_directory: Path to the test case directory.
-
-    Returns:
-        PAR score (Penalised Average Runtime) as string.
-    """
-    # Its selecting the first solver because in this case its the Selector (Only solver)
-    solver = performance_data.solvers[0]
-    return str(performance_data.dataframe[solver].sum() / performance_data.num_instances)
 
 
 def get_dict_sbs_penalty_time_on_each_instance(
@@ -254,11 +213,11 @@ def selection_report_variables(
         bibliograpghy_path: Path,
         extractor_path: Path,
         actual_portfolio_selector_path: Path,
+        train_data: PerformanceDataFrame,
         feature_data: FeatureDataFrame,
         extractor_cutoff: int,
         cutoff: int,
         penalty: int,
-        train_data: PerformanceDataFrame,
         test_case_data: PerformanceDataFrame = None) -> dict[str, str]:
     """Returns: a dict matching variables in the LaTeX template with their values.
 
@@ -275,10 +234,10 @@ def selection_report_variables(
         train_data, actual_portfolio_selector_path, feature_data, cutoff, penalty)
     latex_dict = {"bibliographypath": str(bibliograpghy_path.absolute()),
                   "numSolvers": str(train_data.num_solvers),
-                  "solverList": get_solver_list_latex(train_data.solvers)}
+                  "solverList": stex.get_directory_list(train_data.solvers)}
     latex_dict["numFeatureExtractors"] = str(len(
         [p for p in extractor_path.iterdir() if p.is_dir()]))
-    latex_dict["featureExtractorList"] = get_feature_extractor_list(extractor_path)
+    latex_dict["featureExtractorList"] = stex.get_directory_list(extractor_path)
     latex_dict["numInstanceClasses"] = get_num_instance_sets(train_data.instances)
     latex_dict["instanceClassList"] = get_instance_set_count_list(train_data.instances)
     latex_dict["featureComputationCutoffTime"] = str(extractor_cutoff)
@@ -290,7 +249,7 @@ def selection_report_variables(
     latex_dict["solverActualRankingList"] = solver_rank_list_latex(rank_list_actual)
     latex_dict["PARRankingList"] = get_par_ranking_list(train_data, objective)
     latex_dict["VBSPAR"] = str(train_data.calc_vbs_penalty_time())
-    latex_dict["actualPAR"] = get_actual_par(actual_performance_dict)
+    latex_dict["actualPAR"] = get_par(actual_performance_dict)
     latex_dict["metric"] = objective.metric
     latex_dict["figure-portfolio-selector-sparkle-vs-sbs"] =\
         get_figure_portfolio_selector_sparkle_vs_sbs(target_dir, objective, train_data,
@@ -306,60 +265,10 @@ def selection_report_variables(
             f"\\textbf{ {test_case_data.csv_filepath.parent.name} }"
         latex_dict["numInstanceInTestInstanceClass"] =\
             str(test_case_data.num_instances)
-        latex_dict["testActualPAR"] = get_test_actual_par(test_case_data)
+        latex_dict["testActualPAR"] = get_par(test_case_data)
         latex_dict["testBool"] = r"\testtrue"
 
     return latex_dict
-
-
-def fill_template_tex(template_tex: str, variables: dict) -> str:
-    """Given a latex template, replaces all the @@ variables using the dict.
-
-    Args:
-        template_tex: The template to be populated
-        variables: Variable names (key) with their target (value)
-
-    Returns:
-        The populated latex string.
-    """
-    for variable_key, target_value in variables.items():
-        variable = "@@" + variable_key + "@@"
-        # We don't modify variable names in the Latex file
-        if "\\includegraphics" not in target_value and "\\label" not in target_value:
-            # Rectify underscores in target_value
-            target_value = target_value.replace("_", r"\textunderscore ")
-        template_tex = template_tex.replace(variable, target_value)
-    return template_tex
-
-
-def generate_report(latex_source_path: Path,
-                    latex_template_name: str,
-                    target_path: Path,
-                    report_name: str,
-                    variable_dict: dict) -> None:
-    """General steps to generate a report.
-
-    Args:
-        latex_source_path: The path to the template
-        latex_template_name: The template name
-        target_path: The directory where the result should be placed
-        report_name: The name of the pdf (without suffix)
-        variable_dict: TBD
-    """
-    latex_template_filepath = latex_source_path / latex_template_name
-
-    report_content = latex_template_filepath.open("r").read()
-    report_content = fill_template_tex(report_content, variable_dict)
-
-    target_path.mkdir(parents=True, exist_ok=True)
-    latex_report_filepath = target_path / report_name
-    latex_report_filepath = latex_report_filepath.with_suffix(".tex")
-    Path(latex_report_filepath).open("w+").write(report_content)
-
-    stex.check_tex_commands_exist(target_path)
-    report_path = stex.compile_pdf(target_path, report_name)
-
-    print(f"Report is placed at: {report_path}")
 
 
 def generate_comparison_plot(points: list,
@@ -520,14 +429,14 @@ def generate_report_selection(target_path: Path,
                                                         bibliography_path,
                                                         extractor_path,
                                                         selector_path,
+                                                        train_data,
                                                         feature_data,
                                                         extractor_cutoff,
                                                         cutoff,
                                                         penalty,
-                                                        train_data,
                                                         test_case_data)
-    generate_report(latex_dir,
-                    latex_template,
-                    target_path,
-                    latex_report_filename,
-                    dict_variable_to_value)
+    stex.generate_report(latex_dir,
+                         latex_template,
+                         target_path,
+                         latex_report_filename,
+                         dict_variable_to_value)

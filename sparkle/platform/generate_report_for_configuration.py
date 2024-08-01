@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 import math
 
-from sparkle.platform import generate_report_for_selection as sgfs
+from sparkle.platform import latex as stex
 from sparkle.solver.ablation import AblationScenario
 from sparkle.solver.validator import Validator
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
@@ -413,7 +413,7 @@ def configuration_report_variables(target_dir: Path,
         full_dict["numFeatureExtractors"] =\
             str(len([p for p in extractor_dir.iterdir()]))
         full_dict["featureExtractorList"] =\
-            sgfs.get_feature_extractor_list(extractor_dir)
+            stex.get_directory_list(extractor_dir)
         full_dict["featureComputationCutoffTime"] = str(extractor_cuttoff)
 
     return full_dict
@@ -596,7 +596,7 @@ def generate_report_for_configuration(solver: Solver,
         target_path, solver, configurator, validator, extractor_dir, bibliography_path,
         train_set, penalty_multiplier, extractor_cuttoff, test_set,
         ablation)
-    sgfs.generate_report(latex_template_path,
+    stex.generate_report(latex_template_path,
                          "template-Sparkle-for-configuration.tex",
                          target_path,
                          "Sparkle_Report_for_Configuration",
