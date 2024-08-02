@@ -15,7 +15,6 @@ from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.configurator.implementations import SMAC2
 from sparkle.types.objective import SparkleObjective, PerformanceMeasure
-from sparkle.platform.generate_report_for_selection import generate_comparison_plot
 from sparkle import about
 
 
@@ -205,9 +204,9 @@ def get_figure_configure_vs_default(configured_results: list[list[str]],
         plot_params["penalty_time"] = run_cutoff_time * penalty_multiplier
         plot_params["replace_zeros"] = True
 
-    generate_comparison_plot(points,
-                             figure_filename,
-                             **plot_params)
+    stex.generate_comparison_plot(points,
+                                  figure_filename,
+                                  **plot_params)
 
     return f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
 
@@ -413,7 +412,7 @@ def configuration_report_variables(target_dir: Path,
         full_dict["numFeatureExtractors"] =\
             str(len([p for p in extractor_dir.iterdir()]))
         full_dict["featureExtractorList"] =\
-            stex.get_directory_list(extractor_dir)
+            stex.list_to_latex([(p.name, "") for p in extractor_dir.iterdir()])
         full_dict["featureComputationCutoffTime"] = str(extractor_cuttoff)
 
     return full_dict

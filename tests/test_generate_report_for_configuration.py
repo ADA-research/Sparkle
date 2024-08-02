@@ -194,8 +194,7 @@ def test_get_figure_configure_vs_default(mocker: MockFixture) -> None:
     mock_data = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_data_for_plot",
                              return_value=points)
-    mock_plot = mocker.patch("sparkle.platform.generate_report_for_configuration."
-                             "generate_comparison_plot")
+    mock_plot = mocker.patch("sparkle.platform.latex.generate_comparison_plot")
 
     figure_string = sgrch.get_figure_configure_vs_default(configured_dir,
                                                           default_dir,
@@ -239,8 +238,7 @@ def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
     mock_data = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_data_for_plot",
                              return_value=points)
-    mock_plot = mocker.patch("sparkle.platform.generate_report_for_configuration."
-                             "generate_comparison_plot")
+    mock_plot = mocker.patch("sparkle.platform.latex.generate_comparison_plot")
 
     figure_string = sgrch.get_figure_configure_vs_default(configured_dir,
                                                           default_dir,

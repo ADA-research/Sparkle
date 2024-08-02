@@ -2,20 +2,13 @@
 # -*- coding: UTF-8 -*-
 """Helper functions for selection report generation."""
 import sys
-import numpy as np
 from pathlib import Path
 import ast
 from collections import Counter
 
-import plotly.express as px
-import pandas as pd
-import plotly.io as pio
-
 from sparkle.platform import latex as stex
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.types.objective import SparkleObjective
-
-pio.kaleido.scope.mathjax = None  # Bug fix for kaleido
 
 
 def get_num_instance_sets(instance_list: list[str]) -> int:
@@ -37,14 +30,14 @@ def get_instance_set_count_list(instance_list: list[str] = None) -> str:
     Returns:
         The list of instance sets as LaTeX str.
     """
-    instance_list = [Path(instance_path).parent.name
-                     for instance_path in instance_list]
+    instance_list = [Path(instance_path).parent.name for instance_path in instance_list]
     count = Counter(instance_list)
-    return "".join(f"\\item \\textbf{ {inst_key} }, consisting of {count[inst_key]} "
-                   "instances\n" for inst_key in count)
+    rows = [(inst_key, f", constisting of {count[inst_key]} instances")
+            for inst_key in count]
+    return stex.list_to_latex(rows)
 
 
-def solver_ranked_latex_list(solver_performance_ranking: list[tuple[str, float]],
+def solver_ranked_latex_list(solver_ranking: list[tuple[str, float]],
                              objective: SparkleObjective = None) -> str:
     """Convert a list of the solvers ranked by performance to LaTeX.
 
@@ -52,8 +45,8 @@ def solver_ranked_latex_list(solver_performance_ranking: list[tuple[str, float]]
         The list of solvers ranked as LaTeX str.
     """
     objective_str = f"{objective.metric} :" if objective is not None else ""
-    return "".join(f"\\item \\textbf{{{row[0]}}},{objective_str} {row[1]}\n"
-                   for row in solver_performance_ranking)
+    return stex.list_to_latex([(row[0], f",{objective_str} {row[1]}")
+                               for row in solver_ranking])
 
 
 def get_portfolio_selector_performance(selection_scenario: Path) -> PerformanceDataFrame:
@@ -93,16 +86,16 @@ def get_figure_portfolio_selector_vs_sbs(
     figure_filename = "figure_portfolio_selector_sparkle_vs_sbs"
     sbs_solver_name = Path(sbs_solver).name
 
-    generate_comparison_plot(points,
-                             figure_filename,
-                             xlabel=f"SBS ({sbs_solver_name}) [{objective.metric}]",
-                             ylabel=f"Sparkle Selector [{objective.metric}]",
-                             limit="magnitude",
-                             limit_min=0.25,
-                             limit_max=0.25,
-                             penalty_time=penalty,
-                             replace_zeros=True,
-                             output_dir=output_dir)
+    stex.generate_comparison_plot(points,
+                                  figure_filename,
+                                  xlabel=f"SBS ({sbs_solver_name}) [{objective.metric}]",
+                                  ylabel=f"Sparkle Selector [{objective.metric}]",
+                                  limit="magnitude",
+                                  limit_min=0.25,
+                                  limit_max=0.25,
+                                  penalty_time=penalty,
+                                  replace_zeros=True,
+                                  output_dir=output_dir)
     return f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
 
 
@@ -129,16 +122,16 @@ def get_figure_portfolio_selector_sparkle_vs_vbs(
 
     figure_filename = "figure_portfolio_selector_sparkle_vs_vbs"
 
-    generate_comparison_plot(points,
-                             figure_filename,
-                             xlabel=f"VBS [{objective.metric}]",
-                             ylabel=f"Sparkle Selector [{objective.name}]",
-                             limit="magnitude",
-                             limit_min=0.25,
-                             limit_max=0.25,
-                             penalty_time=penalty,
-                             replace_zeros=True,
-                             output_dir=output_dir)
+    stex.generate_comparison_plot(points,
+                                  figure_filename,
+                                  xlabel=f"VBS [{objective.metric}]",
+                                  ylabel=f"Sparkle Selector [{objective.name}]",
+                                  limit="magnitude",
+                                  limit_min=0.25,
+                                  limit_max=0.25,
+                                  penalty_time=penalty,
+                                  replace_zeros=True,
+                                  output_dir=output_dir)
 
     return f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
 
@@ -170,10 +163,13 @@ def selection_report_variables(
     single_best_solver = solver_performance_ranking[0][0]
     latex_dict = {"bibliographypath": bibliograpghy_path.absolute(),
                   "numSolvers": train_data.num_solvers,
-                  "solverList": stex.get_directory_list(train_data.solvers)}
+                  "solverList": stex.list_to_latex([(s, "")
+                                                    for s in train_data.solvers])}
     latex_dict["numFeatureExtractors"] = len(
         [p for p in extractor_path.iterdir() if p.is_dir()])
-    latex_dict["featureExtractorList"] = stex.get_directory_list(extractor_path)
+    stex.list_to_latex([(f, "") for f in extractor_path.iterdir()])
+    latex_dict["featureExtractorList"] = stex.list_to_latex(
+        [(f, "") for f in extractor_path.iterdir()])
     latex_dict["numInstanceClasses"] = get_num_instance_sets(train_data.instances)
     latex_dict["instanceClassList"] = get_instance_set_count_list(train_data.instances)
     latex_dict["featureComputationCutoffTime"] = extractor_cutoff
@@ -207,126 +203,6 @@ def selection_report_variables(
         latex_dict["testBool"] = r"\testtrue"
 
     return latex_dict
-
-
-def generate_comparison_plot(points: list,
-                             figure_filename: str,
-                             xlabel: str = "default",
-                             ylabel: str = "optimised",
-                             title: str = "",
-                             scale: str = "log",
-                             limit: str = "magnitude",
-                             limit_min: float = 0.2,
-                             limit_max: float = 0.2,
-                             penalty_time: float = None,
-                             replace_zeros: bool = True,
-                             magnitude_lines: int = 2147483647,
-                             output_dir: Path = None) -> None:
-    """Create comparison plots between two different solvers/portfolios.
-
-    Args:
-        points: list of points which represents with the performance results of
-        (solverA, solverB)
-        figure_filename: filename without filetype (e.g., .jpg) to save the figure to.
-        xlabel: Name of solverA (default: default)
-        ylabel: Name of solverB (default: optimised)
-        title: Display title in the image (default: None)
-        scale: [linear, log] (default: linear)
-        limit: The method to compute the axis limits in the figure
-            [absolute, relative, magnitude] (default: relative)
-            absolute: Uses the limit_min/max values as absolute values
-            relative: Decreases/increases relatively to the min/max values found in the
-            points. E.g., min/limit_min and max*limit_max
-            magnitude: Increases the order of magnitude(10) of the min/max values in the
-            points. E.g., 10**floor(log10(min)-limit_min)
-            and 10**ceil(log10(max)+limit_max)
-        limit_min: Value used to compute the minimum limit
-        limit_max: Value used to compute the maximum limit
-        penalty_time: Acts as the maximum value the figure takes in consideration for
-        computing the figure limits. This is only relevant for runtime objectives
-        replace_zeros: Replaces zeros valued performances to a very small value to make
-        plotting on log-scale possible
-        magnitude_lines: Draw magnitude lines (only supported for log scale)
-        output_dir: directory path to place the figure and its intermediate files in
-            (default: current working directory)
-    """
-    output_dir = Path() if output_dir is None else Path(output_dir)
-
-    points = np.array(points)
-    if replace_zeros:
-        zero_runtime = 0.000001  # Microsecond
-        if np.any(points <= 0):
-            print("WARNING: Zero or negative valued performance values detected. Setting"
-                  f" these values to {zero_runtime}.")
-        points[points <= 0] = zero_runtime
-
-    # process labels
-    # LaTeX safe formatting
-    xlabel = xlabel.replace("_", "\\_").replace("$", "\\$").replace("^", "\\^")
-    ylabel = ylabel.replace("_", "\\_").replace("$", "\\$").replace("^", "\\^")
-
-    # process range values
-    min_point_value = np.min(points)
-    max_point_value = np.max(points)
-    if penalty_time is not None:
-        if (penalty_time < max_point_value):
-            print("ERROR: Penalty time too small for the given performance data.")
-            sys.exit(-1)
-        max_point_value = penalty_time
-
-    if limit == "absolute":
-        min_value = limit_min
-        max_value = limit_max
-    elif limit == "relative":
-        min_value = (min_point_value * (1 / limit_min) if min_point_value > 0
-                     else min_point_value * limit_min)
-        max_value = (max_point_value * limit_max if max_point_value > 0
-                     else max_point_value * (1 / limit_max))
-    elif limit == "magnitude":
-        min_value = 10 ** (np.floor(np.log10(min_point_value)) - limit_min)
-        max_value = 10 ** (np.ceil(np.log10(max_point_value)) + limit_max)
-
-    if scale == "log" and np.min(points) <= 0:
-        raise Exception("Cannot plot negative and zero values on a log scales")
-
-    output_plot = output_dir / f"{figure_filename}.pdf"
-
-    df = pd.DataFrame(points, columns=[xlabel, ylabel])
-    log_scale = scale == "log"
-    fig = px.scatter(data_frame=df, x=xlabel, y=ylabel,
-                     range_x=[min_value, max_value], range_y=[min_value, max_value],
-                     title=title, log_x=log_scale, log_y=log_scale,
-                     width=500, height=500)
-    # Add in the seperation line
-    fig.add_shape(type="line", x0=0, y0=0, x1=max_value, y1=max_value,
-                  line=dict(color="lightgrey", width=1))
-    fig.update_traces(marker=dict(color="RoyalBlue", symbol="x"))
-    fig.update_layout(
-        plot_bgcolor="white"
-    )
-    fig.update_xaxes(
-        type="linear" if not log_scale else "log",
-        mirror=True,
-        tickmode="linear",
-        ticks="outside",
-        tick0=0,
-        dtick=100 if not log_scale else 1,
-        showline=True,
-        linecolor="black",
-        gridcolor="lightgrey"
-    )
-    fig.update_yaxes(
-        type="linear" if not log_scale else "log",
-        mirror=True,
-        tickmode="linear",
-        ticks="outside",
-        tick0=0,
-        dtick=100 if not log_scale else 1,
-        showline=True,
-        linecolor="black",
-        gridcolor="lightgrey"
-    )
-    fig.write_image(output_plot)
 
 
 def generate_report_selection(target_path: Path,
