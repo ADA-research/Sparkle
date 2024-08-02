@@ -1,7 +1,6 @@
 """Test public methods of sparkle performance data csv."""
 
 from __future__ import annotations
-import pandas
 from unittest import TestCase
 from pathlib import Path
 
@@ -62,16 +61,6 @@ class TestPerformanceData(TestCase):
         result = self.pd_nan.remaining_jobs()
         assert result == remaining
 
-    def test_get_best_performance_per_instance(self: TestPerformanceData) -> None:
-        """Test getting the best performance on each instance."""
-        max_perf = [64.0, 87.0, 87.0, 49.0, 86.0]
-        result = self.pd_nan.get_best_performance_per_instance(best=pandas.DataFrame.max)
-        assert result == max_perf
-
-        min_perf = [30.0, 5.0, 3.0, 8.0, 41.0]
-        result = self.pd_nan.get_best_performance_per_instance()
-        assert result == min_perf
-
     def test_calc_best_performance_instance(self: TestPerformanceData)\
             -> None:
         """Test calculating best score on instance."""
@@ -98,15 +87,6 @@ class TestPerformanceData(TestCase):
         result = self.pd.best_performance(
             aggregation_function=sum, minimise=False)
         assert result == vbs_portfolio
-
-    def test_get_dict_vbs_penalty_time_on_each_instance(self: TestPerformanceData)\
-            -> None:
-        """Test getting a dictionary representing penalized runtime per instance."""
-        penalty = 40
-        penalty_time_dict = {"Instance1": 30, "Instance2": 5, "Instance3": 3,
-                             "Instance4": 8, "Instance5": 40}
-        result = self.pd.get_dict_vbs_penalty_time_on_each_instance(penalty)
-        assert result == penalty_time_dict
 
     def test_get_solver_ranking(self: TestPerformanceData) -> None:
         """Test getting the solver ranking list with penalty."""

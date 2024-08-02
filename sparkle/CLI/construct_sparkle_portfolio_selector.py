@@ -43,7 +43,7 @@ def judge_exist_remaining_jobs(feature_data_csv: Path,
     if feature_data.has_missing_vectors():
         return True
     performance_data = PerformanceDataFrame(performance_data_csv)
-    return performance_data.has_missing_performance()
+    return performance_data.has_missing_values
 
 
 if __name__ == "__main__":

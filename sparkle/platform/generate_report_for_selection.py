@@ -113,7 +113,7 @@ def get_figure_portfolio_selector_sparkle_vs_vbs(
     Returns:
         LaTeX str to include the comparison plot in a LaTeX report.
     """
-    vbs_performance = train_data.get_best_performance()
+    vbs_performance = train_data.best_instance_performance()
     instances = actual_portfolio_selector_penalty.instances
     solver = actual_portfolio_selector_penalty.solvers[0]
     points = [(vbs_performance[instance],
@@ -181,7 +181,7 @@ def selection_report_variables(
     latex_dict["solverActualRankingList"] = solver_ranked_latex_list(rank_list_actual)
     latex_dict["PARRankingList"] = solver_ranked_latex_list(solver_performance_ranking,
                                                             objective)
-    latex_dict["VBSPAR"] = train_data.get_best_performance().mean()
+    latex_dict["VBSPAR"] = train_data.best_instance_performance().mean()
     latex_dict["actualPAR"] = actual_performance_data.mean()
     latex_dict["metric"] = objective.metric
     latex_dict["figure-portfolio-selector-sparkle-vs-sbs"] =\
