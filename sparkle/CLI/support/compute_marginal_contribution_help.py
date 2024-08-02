@@ -14,27 +14,6 @@ from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.types.objective import PerformanceMeasure
 
 
-def compute_perfect_selector_marginal_contribution(
-        performance_data: PerformanceDataFrame,
-        aggregation_function: Callable[[list[float]], float] = mean,
-        minimise: bool = True) -> list[tuple[str, float]]:
-    """Return the marginal contributions of solvers for the VBS.
-
-    Args:
-      performance_data: Performance DataFrame to compute the contribution for.
-      aggregation_function: function to aggregate the per instance scores
-      minimise: flag indicating if scores should be minimised or maximised
-
-    Returns:
-      A list of 3-tuples of the form:
-        (solver name, marginal contribution, best score w/o solver).
-    """
-    contribution_data = performance_data.marginal_contribution(aggregation_function,
-                                                               minimise)
-    contribution_data.sort(key=lambda contribution: contribution[1], reverse=True)
-    return contribution_data
-
-
 def compute_actual_selector_performance(
         actual_portfolio_selector: Path,
         performance_data: PerformanceDataFrame,

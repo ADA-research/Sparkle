@@ -62,10 +62,9 @@ def compute_marginal_contribution(
 
     if compute_perfect:
         print("Computing each solver's marginal contribution to perfect selector ...")
-        contribution_data = scmch.compute_perfect_selector_marginal_contribution(
-            performance_data,
-            aggregation_function,
-            minimise)
+        contribution_data = performance_data.marginal_contribution(aggregation_function,
+                                                                   minimise,
+                                                                   sort=True)
         table = tabulate.tabulate(
             contribution_data,
             headers=["Solver", "Marginal Contribution", "Best Performance"],)

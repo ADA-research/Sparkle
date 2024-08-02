@@ -468,12 +468,12 @@ class PerformanceDataFrame():
 
         return aggregation_function(instance_best)
 
-    def marginal_contribution(self: PerformanceDataFrame,
-                              aggregation_function: Callable[[list[float]], float],
-                              minimise: bool,
-                              pre_selection: list[str] = None,
-                              objective: str = None,
-                              ) -> list[float]:
+    def marginal_contribution(
+            self: PerformanceDataFrame,
+            aggregation_function: Callable[[list[float]], float] = mean,
+            minimise: bool = True,
+            objective: str = None,
+            sort: bool = False) -> list[float]:
         """Return the marginal contribution of the solvers on the instances.
 
         Args:
@@ -482,6 +482,7 @@ class PerformanceDataFrame():
             capvalue_list: List of capvalue per instance
             penalty_list: List of penalty per instance
             objective: The objective for which we calculate the marginal contribution.
+            sort: Whether to sort the results afterwards
 
         Returns:
             The marginal contribution of each solver.
@@ -505,7 +506,31 @@ class PerformanceDataFrame():
                 # No change, no contribution
                 marginal_contribution = 0.0
             output.append((solver, marginal_contribution, missing_solver_best))
+        if sort:
+            output.sort(key=lambda x: x[1], reverse=minimise)
         return output
+
+    def get_best_performance(
+            self: PerformanceDataFrame,
+            objective: str = None,
+            run_id: int = None,
+            minimise: bool = True) -> float:
+        """Return the best performance for each instance in the portfolio."""
+        objective = self.verify_objective(objective)
+        subdf = self.dataframe.xs(objective, level=0)
+        if run_id is not None:
+            run_id = self.verify_run_id(run_id)
+            subdf = subdf.xs(run_id, level=1)
+        else:
+            # Drop the run level
+            subdf = subdf.droplevel(level=1)
+        if minimise:
+            series = subdf.min(axis=1)
+        else:
+            series = subdf.max(axis=1)
+        # Ensure we always return the lowest for each run
+        series = series.sort_values()
+        return series.groupby(series.index).first()
 
     def get_dict_vbs_penalty_time_on_each_instance(
             self: PerformanceDataFrame,
@@ -542,7 +567,7 @@ class PerformanceDataFrame():
                            cutoff: float = None,
                            penalty: float = None,
                            objective: str = None,
-                           minimise: bool = True) -> list[list[float]]:
+                           minimise: bool = True) -> list[tuple[str, float]]:
         """Return a list with solvers ranked by (penalised) performance."""
         objective = self.verify_objective(objective)
         if cutoff is not None and penalty is not None:

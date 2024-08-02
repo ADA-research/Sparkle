@@ -14,20 +14,6 @@ from unittest.mock import MagicMock
 class TestMarginalContribution(TestCase):
     """Tests function of Marginal Contribution help."""
 
-    def test_compute_perfect_selector_marginal_contribution(self: TestCase) -> None:
-        """Test for method compute_perfect_selector_marginal_contribution."""
-        performance_data = PerformanceDataFrame(
-            Path("tests/CLI/test_files/Performance_Data/"
-                 "test_construct_sparkle_portfolio_selector.csv"))
-        result = [("Solvers/CSCCSat", 1.7980089765503102, 33117.589),
-                  ("Solvers/MiniSAT", 0.0, 18419.034293999997)]
-        output = scmch.compute_perfect_selector_marginal_contribution(
-            aggregation_function=sum,
-            minimise=True,
-            performance_data=performance_data
-        )
-        self.assertListEqual(output, result)
-
     @patch("sparkle.CLI.support.compute_marginal_contribution_help."
            "compute_actual_performance_for_instance")
     def test_compute_actual_selector_performance(
