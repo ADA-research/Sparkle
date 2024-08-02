@@ -254,6 +254,23 @@ class PerformanceDataFrame():
         objective, run = self.verify_indexing(objective, run)
         return self.dataframe.loc[(objective, instance, run), solver]
 
+    def get_values(self: PerformanceDataFrame,
+                   solver: str,
+                   instance: str = None,
+                   objective: str = None,
+                   run: int = None) -> list[float]:
+        """Return a list of solver values."""
+        subdf = self.dataframe[solver]
+        if objective is not None:
+            objective = self.verify_objective(objective)
+            subdf = subdf.xs(objective, level=0, drop_level=False)
+        if instance is not None:
+            subdf = subdf.xs(instance, level=1, drop_level=False)
+        if run is not None:
+            run = self.verify_run_id(run)
+            subdf = subdf.xs(run, level=2, drop_level=False)
+        return subdf.to_list()
+
     @property
     def num_objectives(self: PerformanceDataFrame) -> int:
         """Retrieve the number of objectives in the DataFrame."""
@@ -521,27 +538,22 @@ class PerformanceDataFrame():
         # Return average
         return min_instance_df.sum() / self.dataframe.index.size
 
-    def get_solver_penalty_time_ranking(self: PerformanceDataFrame,
-                                        cutoff_time: int = None,
-                                        penalty: int = None,
-                                        objective: str = None,
-                                        ) -> list[list[float]]:
-        """Return a list with solvers ranked by penalised runtime."""
+    def get_solver_ranking(self: PerformanceDataFrame,
+                           cutoff: float = None,
+                           penalty: float = None,
+                           objective: str = None,
+                           minimise: bool = True) -> list[list[float]]:
+        """Return a list with solvers ranked by (penalised) performance."""
         objective = self.verify_objective(objective)
-        if cutoff_time is not None and penalty is not None:
-            self.penalise(cutoff_time, penalty, objective)
-        solver_penalty_time_ranking = []
-        num_instances = self.dataframe.index.size
+        if cutoff is not None and penalty is not None:
+            self.penalise(cutoff, penalty, objective, not minimise)
+        num_solver_entries = self.num_instances * self.num_runs
         sub_df = self.dataframe.loc(axis=0)[objective, :, :]
-        for solver in self.dataframe.columns:
-            average_time = sub_df[solver].sum() / num_instances
-            solver_penalty_time_ranking.append([solver, average_time])
-
-        # Sort the list by second value (the penalised run time)
-        solver_penalty_time_ranking.sort(
-            key=lambda this_penalty_time: this_penalty_time[1])
-
-        return solver_penalty_time_ranking
+        solver_ranking = [(solver, sub_df[solver].sum() / num_solver_entries)
+                          for solver in self.solvers]
+        # Sort the list by second value (the performance)
+        solver_ranking.sort(key=lambda performance: performance[1])
+        return solver_ranking
 
     def save_csv(self: PerformanceDataFrame, csv_filepath: Path = None) -> None:
         """Write a CSV to the given path.

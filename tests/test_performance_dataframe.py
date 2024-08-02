@@ -117,13 +117,12 @@ class TestPerformanceData(TestCase):
         print(self.pd.dataframe)
         assert result == vbs_penalized
 
-    def test_get_solver_penalty_time_ranking_list(self: TestPerformanceData) -> None:
+    def test_get_solver_ranking(self: TestPerformanceData) -> None:
         """Test getting the solver ranking list with penalty."""
         cutoff = 50
         multiplier = 10
         penalty = cutoff * multiplier
-        rank_list = [["AlgorithmB", 210.8], ["AlgorithmC", 216.6],
-                     ["AlgorithmE", 218.8], ["AlgorithmA", 310.4], ["AlgorithmD", 313.8]]
-        result = self.pd.get_solver_penalty_time_ranking(cutoff_time=cutoff,
-                                                         penalty=penalty)
+        rank_list = [("AlgorithmB", 210.8), ("AlgorithmC", 216.6),
+                     ("AlgorithmE", 218.8), ("AlgorithmA", 310.4), ("AlgorithmD", 313.8)]
+        result = self.pd.get_solver_ranking(cutoff=cutoff, penalty=penalty)
         assert result == rank_list

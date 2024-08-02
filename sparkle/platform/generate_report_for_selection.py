@@ -13,7 +13,7 @@ import plotly.io as pio
 from sparkle.platform import latex as stex
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.CLI.support import compute_marginal_contribution_help as scmch
-from sparkle.types.objective import PerformanceMeasure, SparkleObjective
+from sparkle.types.objective import SparkleObjective
 
 pio.kaleido.scope.mathjax = None  # Bug fix for kaleido
 
@@ -62,7 +62,7 @@ def get_par_ranking_list(performance_data: PerformanceDataFrame,
     Returns:
         The list of solvers ranked by PAR as LaTeX str.
     """
-    solver_penalty_ranking = performance_data.get_solver_penalty_time_ranking()
+    solver_penalty_ranking = performance_data.get_solver_ranking()
     return "".join(f"\\item \\textbf{{{solver}}}, {objective.metric}: {solver_penalty}\n"
                    for solver, solver_penalty in solver_penalty_ranking)
 
@@ -91,41 +91,31 @@ def get_dict_sbs_penalty_time_on_each_instance(
         A dict that maps instance name str to their penalised performance int.
     """
     solver_penalty_time_ranking_list =\
-        performance_data.get_solver_penalty_time_ranking()
+        performance_data.get_solver_ranking()
     sbs_solver = solver_penalty_time_ranking_list[0][0]
     return {instance: performance_data.get_value(sbs_solver, instance)
             for instance in performance_data.instances}
 
 
-def get_actual_portfolio_selector_performance_per_instance(
-        performance_data: PerformanceDataFrame,
-        selection_scenario: Path,
-        feature_data: FeatureDataFrame,
-        capvalue: int,
-        penalised_time: int) -> dict[str, int]:
+def get_portfolio_selector_performance(selection_scenario: Path) -> dict[str, int]:
     """Creates a dictionary with the portfolio selector performance on each instance.
 
     Returns:
-        A dict that maps instance name str to their penalised performance int.
+        A dict that maps instance name str to performance.
     """
-    objective = SparkleObjective(performance_data.objective_names[0])
-    minimise =\
-        objective.PerformanceMeasure != PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION
+    portfolio_selector_performance_path = selection_scenario / "performance.csv"
+    if not portfolio_selector_performance_path.exists():
+        print(f"ERROR: {portfolio_selector_performance_path} does not exist.")
+        sys.exit(-1)
 
-    actual_portfolio_selector_path = selection_scenario / "portfolio_selector"
-    actual_selector_penalty = {}
-    for instance in performance_data.instances:
-        used_time_for_this_instance, flag_successfully_solving = \
-            scmch.compute_actual_performance_for_instance(
-                actual_portfolio_selector_path, instance, feature_data,
-                performance_data, minimise, objective.PerformanceMeasure, capvalue)
-
-        if flag_successfully_solving:
-            actual_selector_penalty[instance] = used_time_for_this_instance
-        else:
-            actual_selector_penalty[instance] = penalised_time
-
-    return actual_selector_penalty
+    portfolio_selector_performance =\
+        PerformanceDataFrame(portfolio_selector_performance_path)
+    selector_performance = {}
+    for instance in portfolio_selector_performance.instances:
+        performance = portfolio_selector_performance.get_value(
+            "portfolio_selector", instance)
+        selector_performance[instance] = performance
+    return selector_performance
 
 
 def get_figure_portfolio_selector_sparkle_vs_sbs(output_dir: Path,
@@ -154,7 +144,7 @@ def get_figure_portfolio_selector_sparkle_vs_sbs(output_dir: Path,
     figure_filename = "figure_portfolio_selector_sparkle_vs_sbs"
 
     solver_penalty_time_ranking_list =\
-        train_data.get_solver_penalty_time_ranking()
+        train_data.get_solver_ranking()
     sbs_solver = Path(solver_penalty_time_ranking_list[0][0]).name
 
     generate_comparison_plot(points,
@@ -231,8 +221,8 @@ def selection_report_variables(
         A dict matching str variables in the LaTeX template with their value str.
     """
     objective = SparkleObjective(train_data.objective_names[0])
-    actual_performance_dict = get_actual_portfolio_selector_performance_per_instance(
-        train_data, selection_scenario, feature_data, cutoff, penalty)
+    actual_performance_dict = get_portfolio_selector_performance(
+        selection_scenario)
     latex_dict = {"bibliographypath": str(bibliograpghy_path.absolute()),
                   "numSolvers": str(train_data.num_solvers),
                   "solverList": stex.get_directory_list(train_data.solvers)}

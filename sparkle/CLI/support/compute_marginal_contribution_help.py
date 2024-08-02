@@ -8,7 +8,6 @@ import operator
 from pathlib import Path
 from typing import Callable
 from statistics import mean
-import tabulate
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
@@ -56,84 +55,87 @@ def compute_actual_selector_performance(
     Returns:
       The selector performance as a single floating point number.
     """
+    performance_path = actual_portfolio_selector.parent / "performance.csv"
+    if performance_path.exists():
+        selector_performance_data = PerformanceDataFrame(performance_path)
+        return aggregation_function(
+            selector_performance_data.get_values("portfolio_selector"))
     penalty_factor = gv.settings().get_general_penalty_multiplier()
-    performances = []
-    perf_measure = gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
+    objective = gv.settings().get_general_sparkle_objectives()[0]
+    perf_measure = objective.PerformanceMeasure
+    selector_performance_data = performance_data.copy()
+    for solver in selector_performance_data.solvers:
+        selector_performance_data.remove_solver(solver)
+    selector_performance_data.add_solver("portfolio_selector")
+    selector_performance_data.csv_filepath =\
+        actual_portfolio_selector.parent / "performance.csv"
+    selector = gv.settings().get_general_sparkle_selector()
     for instance in performance_data.instances:
         # We get the performance for an instance by infering the model predicition
         # for the instance.
-        performance_instance, flag_success = compute_actual_performance_for_instance(
-            actual_portfolio_selector, instance, feature_data,
-            performance_data, minimise, perf_measure, performance_cutoff)
-
-        if not flag_success and performance_cutoff is not None:
-            performance_instance = performance_cutoff * penalty_factor
-
-        performances.append(performance_instance)
-
-    return aggregation_function(performances)
+        feature_vector = feature_data.get_instance(instance)
+        predict_schedule = selector.run(actual_portfolio_selector, feature_vector)
+        performance_instance = compute_actual_performance_for_instance(
+            predict_schedule, instance, performance_data, minimise,
+            perf_measure, performance_cutoff)
+        selector_performance_data.set_value(performance_instance,
+                                            "portfolio_selector",
+                                            instance,
+                                            objective=objective.str_id)
+    if performance_cutoff is not None:
+        selector_performance_data.penalise(performance_cutoff,
+                                           performance_cutoff * penalty_factor,
+                                           lower_bound=minimise)
+    selector_performance_data.save_csv()
+    return aggregation_function(
+        selector_performance_data.get_values("portfolio_selector"))
 
 
 def compute_actual_performance_for_instance(
-        actual_portfolio_selector: Path,
+        predict_schedule: list[tuple[str, float]],
         instance: str,
-        feature_data: FeatureDataFrame,
         performance_data: PerformanceDataFrame,
         minimise: bool,
         objective_type: PerformanceMeasure,
-        performance_cutoff: float = None) -> tuple[float, bool]:
+        performance_cutoff: float = None) -> float:
     """Return the actual performance of the selector on a given instance.
 
     Args:
-      actual_portfolio_selector: Path to the portfolio selector.
+      predict_schedule: The prediction schedule.
       instance: Instance name.
-      feature_data: The feature data.
       performance_data: The Performance data
       minimise: Whether the performance value should be minimized or maximized
       objective_type: Whether we are dealing with run time or not.
       performance_cutoff: Cutoff value for this instance
 
     Returns:
-      A 2-tuple where the first entry is the performance measure and
-      the second entry is a Boolean indicating whether the instance was solved
-      within the cutoff time (Runtime) or at least one solver performance
-      did not exceed capvalue
+      The aggregated performance measure aggregated over all instances.
     """
-    # Get the prediction of the selector over the solvers
-    selector = gv.settings().get_general_sparkle_selector()
-    feature_vector = feature_data.get_instance(instance)
-    predict_schedule = selector.run(actual_portfolio_selector, feature_vector)
     compare = operator.lt if minimise else operator.gt
-
-    performance = None
-    flag_successfully_solving = False
+    total_performance = None
     if objective_type == PerformanceMeasure.RUNTIME:
         performance_list = []
-        # In case of Runtime, we loop through the selected solvers
+        # A prediction schedule yields a solver and for how long its allowed to run
         for solver, schedule_cutoff in predict_schedule:
-            # A prediction is a solver and its score given by the Selector
-            performance = float(performance_data.get_value(solver, instance))
-            performance_list.append(performance)
-            # 1. if performance <= predicted runtime we have a successfull solver
-            if performance <= schedule_cutoff:
-                # 2. Success if the tried solvers < selector cutoff_time
-                if sum(performance_list) <= performance_cutoff:
-                    flag_successfully_solving = True
-                break
-            # 3. Else, we set the failed solver to the cutoff time
-            performance_list[-1] = schedule_cutoff
-            performance = sum(performance_list)
-            # 4. If we have exceeded cutoff_time, we are done
-            if performance_cutoff is not None and performance > performance_cutoff:
+            # A prediction is a solver and its MAXIMUM RUNTIME
+            solver_performance = float(performance_data.get_value(solver, instance))
+            # We run the solver up to its scheduled cut off
+            performance_list.append(min(schedule_cutoff, solver_performance))
+            total_performance = sum(performance_list)
+            # If the solver was not killed by the selector
+            if solver_performance <= schedule_cutoff:
+                break  # We have found a working solver, break
+            # If we have exceeded cutoff_time, we are done
+            if performance_cutoff is not None and total_performance > performance_cutoff:
                 break
     else:
         # Minimum or maximum of predicted solvers
         for solver, _ in predict_schedule:
             solver_performance = float(performance_data.get_value(solver, instance))
-            if performance is None or compare(solver_performance, performance):
-                performance = solver_performance
-
-    return performance, flag_successfully_solving
+            if total_performance is None or compare(solver_performance,
+                                                    total_performance):
+                total_performance = solver_performance
+    return total_performance
 
 
 def compute_actual_selector_marginal_contribution(
@@ -161,7 +163,6 @@ def compute_actual_selector_marginal_contribution(
     actual_margi_cont_path = selector_scenario / "marginal_contribution_actual.txt"
     # If the marginal contribution already exists in file, read it and return
     if actual_margi_cont_path.is_file():
-        print("Marginal contribution for selector already computed, reading from file.")
         return ast.literal_eval(actual_margi_cont_path.open().read())
 
     print(f"In this calculation, cutoff is {performance_cutoff} seconds")
@@ -230,64 +231,3 @@ def compute_actual_selector_marginal_contribution(
     # Write actual selector contributions to file
     actual_margi_cont_path.open("w").write(str(rank_list))
     return rank_list
-
-
-def compute_marginal_contribution(
-        scenario: Path,
-        flag_compute_perfect: bool, flag_compute_actual: bool) -> None:
-    """Compute the marginal contribution.
-
-    Args:
-        scenario: Path to the selector scenario for which to compute
-        flag_compute_perfect: Flag indicating if the contribution for the perfect
-            portfolio selector should be computed.
-        flag_compute_actual: Flag indicating if the contribution for the actual portfolio
-             selector should be computed.
-    """
-    performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
-    feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
-    performance_measure =\
-        gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
-    aggregation_function = gv.settings().get_general_metric_aggregation_function()
-    capvalue = gv.settings().get_general_cap_value()
-    if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
-        minimise = False
-    elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-        minimise = True
-    else:
-        # assume runtime optimization
-        capvalue = gv.settings().get_general_target_cutoff_time()
-        minimise = True
-
-    if not (flag_compute_perfect | flag_compute_actual):
-        print("ERROR: compute_marginal_contribution called without a flag set to"
-              " True, stopping execution")
-        sys.exit(-1)
-
-    if flag_compute_perfect:
-        print("Computing each solver's marginal contribution to perfect selector ...")
-        contribution_data = compute_perfect_selector_marginal_contribution(
-            performance_data,
-            aggregation_function,
-            minimise)
-        table = tabulate.tabulate(
-            contribution_data,
-            headers=["Solver", "Marginal Contribution", "Best Performance"],)
-        print(table, "\n")
-        print("Marginal contribution (perfect selector) computing done!")
-
-    if flag_compute_actual:
-        print("Start computing marginal contribution per Solver to actual selector...")
-        contribution_data = compute_actual_selector_marginal_contribution(
-            performance_data,
-            feature_data,
-            scenario,
-            aggregation_function,
-            capvalue,
-            minimise
-        )
-        table = tabulate.tabulate(
-            contribution_data,
-            headers=["Solver", "Marginal Contribution", "Best Performance"],)
-        print(table, "\n")
-        print("Marginal contribution (actual selector) computing done!")

@@ -66,6 +66,11 @@ class SparkleObjective():
             print(f"WARNING: Performance measure {performance_measure} not found!")
         return
 
+    @property
+    def str_id(self: SparkleObjective) -> str:
+        """Return a string of the format TYPE:METRIC."""
+        return f"{PerformanceMeasure.to_str(self.PerformanceMeasure)}:{self.metric}"
+
     @staticmethod
     def from_multi_str(performance_setting: str) -> list[SparkleObjective]:
         """Create one or more Objectives from the settings string."""
