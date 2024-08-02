@@ -4,6 +4,7 @@
 import sys
 import numpy as np
 from pathlib import Path
+import ast
 from collections import Counter
 
 import plotly.express as px
@@ -12,13 +13,12 @@ import plotly.io as pio
 
 from sparkle.platform import latex as stex
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from sparkle.CLI.support import compute_marginal_contribution_help as scmch
 from sparkle.types.objective import SparkleObjective
 
 pio.kaleido.scope.mathjax = None  # Bug fix for kaleido
 
 
-def get_num_instance_sets(instance_list: list[str]) -> str:
+def get_num_instance_sets(instance_list: list[str]) -> int:
     """Get the number of instance sets.
 
     Args:
@@ -27,8 +27,8 @@ def get_num_instance_sets(instance_list: list[str]) -> str:
     Returns:
         The number of instance sets as LaTeX str.
     """
-    return str(len(set([Path(instance_path).parent.name
-                        for instance_path in instance_list])))
+    return len(set([Path(instance_path).parent.name
+                    for instance_path in instance_list]))
 
 
 def get_instance_set_count_list(instance_list: list[str] = None) -> str:
@@ -44,56 +44,16 @@ def get_instance_set_count_list(instance_list: list[str] = None) -> str:
                    "instances\n" for inst_key in count)
 
 
-def solver_rank_list_latex(rank_list: list[tuple[str, float]]) -> str:
-    """Convert solvers ranked by marginal contribution to latex.
-
-    Returns:
-        Solvers in the VBS (virtual best solver) ranked by marginal contribution as LaTeX
-        str.
-    """
-    return "".join(f"\\item \\textbf{ {Path(solver).name} }, marginal contribution: "
-                   f"{value}\n" for solver, value, _ in rank_list)
-
-
-def get_ranked_latex_list(solver_performance_ranking: list[tuple, str],
-                          objective: SparkleObjective) -> str:
-    """Get a list of the solvers ranked by performance.
+def solver_ranked_latex_list(solver_performance_ranking: list[tuple[str, float]],
+                             objective: SparkleObjective = None) -> str:
+    """Convert a list of the solvers ranked by performance to LaTeX.
 
     Returns:
         The list of solvers ranked as LaTeX str.
     """
-    return "".join(f"\\item \\textbf{{{solver}}}, {objective.metric}: {solver_penalty}\n"
-                   for solver, solver_penalty in solver_performance_ranking)
-
-
-def get_mean_performance(performance: dict | PerformanceDataFrame) -> str:
-    """PAR (Penalised Average Runtime) of the Sparkle portfolio selector.
-
-    Returns:
-        The PAR (Penalised Average Runtime) of the Sparkle portfolio selector over a set
-        of instances.
-    """
-    if isinstance(performance, dict):
-        mean = sum(performance.values()) / len(performance)
-    else:
-        # Selecting the first solver because in this case its the Selector (Only solver)
-        solver = performance.solvers[0]
-        mean = performance.dataframe[solver].sum() / performance.num_instances
-    return str(mean)
-
-
-def get_dict_sbs_penalty_time_on_each_instance(
-        performance_data: PerformanceDataFrame) -> dict[str, int]:
-    """Returns a dictionary with the penalised performance of the Single Best Solver.
-
-    Returns:
-        A dict that maps instance name str to their penalised performance int.
-    """
-    solver_penalty_time_ranking_list =\
-        performance_data.get_solver_ranking()
-    sbs_solver = solver_penalty_time_ranking_list[0][0]
-    return {instance: performance_data.get_value(sbs_solver, instance)
-            for instance in performance_data.instances}
+    objective_str = f"{objective.metric} :" if objective is not None else ""
+    return "".join(f"\\item \\textbf{{{row[0]}}},{objective_str} {row[1]}\n"
+                   for row in solver_performance_ranking)
 
 
 def get_portfolio_selector_performance(selection_scenario: Path) -> PerformanceDataFrame:
@@ -208,25 +168,25 @@ def selection_report_variables(
     actual_performance_data = get_portfolio_selector_performance(selection_scenario)
     solver_performance_ranking = train_data.get_solver_ranking()
     single_best_solver = solver_performance_ranking[0][0]
-    latex_dict = {"bibliographypath": str(bibliograpghy_path.absolute()),
-                  "numSolvers": str(train_data.num_solvers),
+    latex_dict = {"bibliographypath": bibliograpghy_path.absolute(),
+                  "numSolvers": train_data.num_solvers,
                   "solverList": stex.get_directory_list(train_data.solvers)}
-    latex_dict["numFeatureExtractors"] = str(len(
-        [p for p in extractor_path.iterdir() if p.is_dir()]))
+    latex_dict["numFeatureExtractors"] = len(
+        [p for p in extractor_path.iterdir() if p.is_dir()])
     latex_dict["featureExtractorList"] = stex.get_directory_list(extractor_path)
     latex_dict["numInstanceClasses"] = get_num_instance_sets(train_data.instances)
     latex_dict["instanceClassList"] = get_instance_set_count_list(train_data.instances)
-    latex_dict["featureComputationCutoffTime"] = str(extractor_cutoff)
-    latex_dict["performanceComputationCutoffTime"] = str(cutoff)
+    latex_dict["featureComputationCutoffTime"] = extractor_cutoff
+    latex_dict["performanceComputationCutoffTime"] = cutoff
     rank_list_perfect = train_data.marginal_contribution(sort=True)
-    rank_list_actual = scmch.compute_actual_selector_marginal_contribution(
-        train_data, feature_data, selection_scenario, performance_cutoff=cutoff)
-    latex_dict["solverPerfectRankingList"] = solver_rank_list_latex(rank_list_perfect)
-    latex_dict["solverActualRankingList"] = solver_rank_list_latex(rank_list_actual)
-    latex_dict["PARRankingList"] = get_ranked_latex_list(solver_performance_ranking,
-                                                         objective)
-    latex_dict["VBSPAR"] = str(train_data.calc_vbs_penalty_time())
-    latex_dict["actualPAR"] = get_mean_performance(actual_performance_data)
+    mg_actual_path = selection_scenario / "marginal_contribution_actual.txt"
+    rank_list_actual = ast.literal_eval(mg_actual_path.open().read())
+    latex_dict["solverPerfectRankingList"] = solver_ranked_latex_list(rank_list_perfect)
+    latex_dict["solverActualRankingList"] = solver_ranked_latex_list(rank_list_actual)
+    latex_dict["PARRankingList"] = solver_ranked_latex_list(solver_performance_ranking,
+                                                            objective)
+    latex_dict["VBSPAR"] = train_data.get_best_performance().mean()
+    latex_dict["actualPAR"] = actual_performance_data.mean()
     latex_dict["metric"] = objective.metric
     latex_dict["figure-portfolio-selector-sparkle-vs-sbs"] =\
         get_figure_portfolio_selector_vs_sbs(
@@ -242,8 +202,8 @@ def selection_report_variables(
         latex_dict["testInstanceClass"] =\
             f"\\textbf{ {test_case_data.csv_filepath.parent.name} }"
         latex_dict["numInstanceInTestInstanceClass"] =\
-            str(test_case_data.num_instances)
-        latex_dict["testActualPAR"] = get_mean_performance(test_case_data)
+            test_case_data.num_instances
+        latex_dict["testActualPAR"] = test_case_data.mean()
         latex_dict["testBool"] = r"\testtrue"
 
     return latex_dict

@@ -9,7 +9,7 @@ import operator
 from pathlib import Path
 import sys
 import math
-from statistics import mean
+import statistics
 import pandas as pd
 
 from sparkle.types.objective import SparkleObjective
@@ -271,6 +271,20 @@ class PerformanceDataFrame():
             subdf = subdf.xs(run, level=2, drop_level=False)
         return subdf.to_list()
 
+    def mean(self: PerformanceDataFrame,
+             solver: str = None,
+             instance: str = None) -> float:
+        """Return the mean value of the dataframe."""
+        subset = self.dataframe
+        if solver is not None:
+            subset = subset.xs(solver, axis=1, drop_level=False)
+        if instance is not None:
+            subset = subset.xs(instance, axis=0, drop_level=False)
+        value = subset.mean()
+        if isinstance(value, pd.Series):
+            return value.mean()
+        return value
+
     @property
     def num_objectives(self: PerformanceDataFrame) -> int:
         """Retrieve the number of objectives in the DataFrame."""
@@ -404,7 +418,7 @@ class PerformanceDataFrame():
             minimise: bool,
             objective: str = None,
             exclude_solvers: list[str] = [],
-            run_aggregator: Callable = mean) -> float:
+            run_aggregator: Callable = statistics.mean) -> float:
         """Return the best performance for a specific instance.
 
         Args:
@@ -470,7 +484,7 @@ class PerformanceDataFrame():
 
     def marginal_contribution(
             self: PerformanceDataFrame,
-            aggregation_function: Callable[[list[float]], float] = mean,
+            aggregation_function: Callable = statistics.mean,
             minimise: bool = True,
             objective: str = None,
             sort: bool = False) -> list[float]:
@@ -514,7 +528,7 @@ class PerformanceDataFrame():
             self: PerformanceDataFrame,
             objective: str = None,
             run_id: int = None,
-            minimise: bool = True) -> float:
+            minimise: bool = True) -> pd.Series:
         """Return the best performance for each instance in the portfolio."""
         objective = self.verify_objective(objective)
         subdf = self.dataframe.xs(objective, level=0)

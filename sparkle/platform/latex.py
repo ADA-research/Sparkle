@@ -62,7 +62,8 @@ def fill_template_tex(template_tex: str, variables: dict) -> str:
         The populated latex string.
     """
     for variable_key, target_value in variables.items():
-        variable = "@@" + variable_key + "@@"
+        variable = f"@@{variable_key}@@"
+        target_value = str(target_value)
         # We don't modify variable names in the Latex file
         if "\\includegraphics" not in target_value and "\\label" not in target_value:
             # Rectify underscores in target_value

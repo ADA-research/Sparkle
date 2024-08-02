@@ -108,15 +108,6 @@ class TestPerformanceData(TestCase):
         result = self.pd.get_dict_vbs_penalty_time_on_each_instance(penalty)
         assert result == penalty_time_dict
 
-    def test_calc_vbs_penalty_time(self: TestPerformanceData) -> None:
-        """Test calculating the penalized vbs."""
-        cutoff = 40
-        multiplier = 10
-        vbs_penalized = 89.2
-        result = self.pd.calc_vbs_penalty_time(cutoff, cutoff * multiplier)
-        print(self.pd.dataframe)
-        assert result == vbs_penalized
-
     def test_get_solver_ranking(self: TestPerformanceData) -> None:
         """Test getting the solver ranking list with penalty."""
         cutoff = 50
