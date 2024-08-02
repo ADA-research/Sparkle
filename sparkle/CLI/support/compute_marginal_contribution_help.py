@@ -14,6 +14,53 @@ from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.types.objective import PerformanceMeasure
 
 
+def compute_actual_performance_for_instance(
+        predict_schedule: list[tuple[str, float]],
+        instance: str,
+        performance_data: PerformanceDataFrame,
+        minimise: bool,
+        objective_type: PerformanceMeasure,
+        performance_cutoff: float = None) -> float:
+    """Return the actual performance of the selector on a given instance.
+
+    Args:
+      predict_schedule: The prediction schedule.
+      instance: Instance name.
+      performance_data: The Performance data
+      minimise: Whether the performance value should be minimized or maximized
+      objective_type: Whether we are dealing with run time or not.
+      performance_cutoff: Cutoff value for this instance
+
+    Returns:
+      The aggregated performance measure aggregated over all instances.
+    """
+    compare = operator.lt if minimise else operator.gt
+    total_performance = None
+    if objective_type == PerformanceMeasure.RUNTIME:
+        performance_list = []
+        # A prediction schedule yields a solver and for how long its allowed to run
+        for solver, schedule_cutoff in predict_schedule:
+            # A prediction is a solver and its MAXIMUM RUNTIME
+            solver_performance = float(performance_data.get_value(solver, instance))
+            # We run the solver up to its scheduled cut off
+            performance_list.append(min(schedule_cutoff, solver_performance))
+            total_performance = sum(performance_list)
+            # If the solver was not killed by the selector
+            if solver_performance <= schedule_cutoff:
+                break  # We have found a working solver, break
+            # If we have exceeded cutoff_time, we are done
+            if performance_cutoff is not None and total_performance > performance_cutoff:
+                break
+    else:
+        # Minimum or maximum of predicted solvers
+        for solver, _ in predict_schedule:
+            solver_performance = float(performance_data.get_value(solver, instance))
+            if total_performance is None or compare(solver_performance,
+                                                    total_performance):
+                total_performance = solver_performance
+    return total_performance
+
+
 def compute_actual_selector_performance(
         actual_portfolio_selector: Path,
         performance_data: PerformanceDataFrame,
@@ -68,53 +115,6 @@ def compute_actual_selector_performance(
     selector_performance_data.save_csv()
     return aggregation_function(
         selector_performance_data.get_values("portfolio_selector"))
-
-
-def compute_actual_performance_for_instance(
-        predict_schedule: list[tuple[str, float]],
-        instance: str,
-        performance_data: PerformanceDataFrame,
-        minimise: bool,
-        objective_type: PerformanceMeasure,
-        performance_cutoff: float = None) -> float:
-    """Return the actual performance of the selector on a given instance.
-
-    Args:
-      predict_schedule: The prediction schedule.
-      instance: Instance name.
-      performance_data: The Performance data
-      minimise: Whether the performance value should be minimized or maximized
-      objective_type: Whether we are dealing with run time or not.
-      performance_cutoff: Cutoff value for this instance
-
-    Returns:
-      The aggregated performance measure aggregated over all instances.
-    """
-    compare = operator.lt if minimise else operator.gt
-    total_performance = None
-    if objective_type == PerformanceMeasure.RUNTIME:
-        performance_list = []
-        # A prediction schedule yields a solver and for how long its allowed to run
-        for solver, schedule_cutoff in predict_schedule:
-            # A prediction is a solver and its MAXIMUM RUNTIME
-            solver_performance = float(performance_data.get_value(solver, instance))
-            # We run the solver up to its scheduled cut off
-            performance_list.append(min(schedule_cutoff, solver_performance))
-            total_performance = sum(performance_list)
-            # If the solver was not killed by the selector
-            if solver_performance <= schedule_cutoff:
-                break  # We have found a working solver, break
-            # If we have exceeded cutoff_time, we are done
-            if performance_cutoff is not None and total_performance > performance_cutoff:
-                break
-    else:
-        # Minimum or maximum of predicted solvers
-        for solver, _ in predict_schedule:
-            solver_performance = float(performance_data.get_value(solver, instance))
-            if total_performance is None or compare(solver_performance,
-                                                    total_performance):
-                total_performance = solver_performance
-    return total_performance
 
 
 def compute_actual_selector_marginal_contribution(
