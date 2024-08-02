@@ -605,13 +605,13 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     mock_ablation_table.assert_called_once_with(ablation_scenario)
     assert test_dict == {
         "instanceSetTest": test_set.name,
-        "numInstanceInTestingInstanceSet": "1",
-        "optimisedConfigurationTestingPerformancePAR": "42.1",
-        "defaultConfigurationTestingPerformancePAR": "42.2",
+        "numInstanceInTestingInstanceSet": 1,
+        "optimisedConfigurationTestingPerformancePAR": 42.1,
+        "defaultConfigurationTestingPerformancePAR": 42.2,
         "figure-configured-vs-default-test": "figure-string",
-        "timeoutsTestDefault": "3",
-        "timeoutsTestConfigured": "2",
-        "timeoutsTestOverlap": "1",
+        "timeoutsTestDefault": 3,
+        "timeoutsTestConfigured": 2,
+        "timeoutsTestOverlap": 1,
         "ablationBool": "ablationtrue",
         "ablationPath": "ablation/path"
     }
