@@ -19,14 +19,9 @@ feature_data_test="tests/CLI/test_files/Feature_Data/test_construct_portfolio_se
 performance_data_path="Output/Performance_Data/sparkle_performance_data.csv"
 performance_data_test="tests/CLI/test_files/Performance_Data/test_construct_portfolio_selector.csv"
 
-selector_path="Output/Selection/sparkle_portfolio_selector"
-selector_test="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
-
-test_results_dir="Output/Selection/Test_Cases/PTN2/"
-test_results_path="Output/Selection/Test_Cases/PTN2/sparkle_performance_data.csv"
-test_results_test="tests/CLI/test_files/Selector/Test_Cases/"
-
-# Prepare for test
+# Copy selector construction output to simulate the construct_portfolio_selector command
+source_output="tests/CLI/test_files/Output/Selection"
+target_output="Output/Selection"
 instances_path="Examples/Resources/Instances/PTN"
 instances_path_test="Examples/Resources/Instances/PTN2"
 instance_path_test="Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf"
@@ -50,7 +45,7 @@ cp $feature_data_test $feature_data_path
 cp $performance_data_test $performance_data_path
 cp $selector_test $selector_path
 cp $scenario_source $scenario_path
-cp -r $test_results_test ./
+cp -r $source_output $target_output
 
 # Run generate report for tetst
 output_true="Report for test generated ..."
