@@ -66,14 +66,11 @@ class TestPerformanceData(TestCase):
         """Test calculating best score on instance."""
         bp_instance_min = [30.0, 5.0, 3.0, 8.0, 41.0]
         bp_instance_max = [64.0, 87.0, 87.0, 96.0, 86.0]
-        for idx, instance in enumerate(self.pd.dataframe.index):
-            result = self.pd.best_performance_instance(
-                instance=instance, minimise=True)
-            assert result == bp_instance_min[idx]
-
-            result = self.pd.best_performance_instance(
-                instance=instance, minimise=False)
-            assert result == bp_instance_max[idx]
+        result_min = self.pd.best_instance_performance(minimise=True)
+        result_max = self.pd.best_instance_performance(minimise=False)
+        for idx, _ in enumerate(self.pd.dataframe.index):
+            assert result_min.iloc[idx] == bp_instance_min[idx]
+            assert result_max.iloc[idx] == bp_instance_max[idx]
 
     def test_calc_best_performance(self: TestPerformanceData)\
             -> None:
