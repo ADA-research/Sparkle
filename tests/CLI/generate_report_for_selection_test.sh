@@ -21,7 +21,7 @@ performance_data_test="tests/CLI/test_files/Performance_Data/test_construct_port
 
 # Copy selector construction output to simulate the construct_portfolio_selector command
 source_output="tests/CLI/test_files/Output/Selection"
-target_output="Output/Selection"
+target_output="Output"
 instances_path="Examples/Resources/Instances/PTN"
 instances_path_test="Examples/Resources/Instances/PTN2"
 instance_path_test="Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf"
