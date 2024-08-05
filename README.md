@@ -9,7 +9,7 @@ Specifically, Sparkle facilitates the use of:
 
 ## Installation
 
-The Sparkle package can be installed using Pip. We recommend creating a new virtual environment (For example, [PyEnv](https://github.com/pyenv/pyenv)) before to ensure no clashes between dependencies occur. 
+The Sparkle package can be installed using Pip. We recommend creating a new virtual environment (For example, [venv](https://docs.python.org/3/library/venv.html)) before to ensure no clashes between dependencies occur. 
 
 ```bash
     $ pip install SparkleAI
