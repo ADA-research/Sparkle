@@ -48,9 +48,10 @@ To make sure feature computation and solver performance computation are done bef
 
 `sparkle wait`
 
-Construct a portfolio selector, using the previously computed features and the results of running the solvers
+Construct a portfolio selector, using the previously computed features and the results of running the solvers. Run with --solver-ablation for actual marginal contribution computation.
 
-`sparkle construct_portfolio_selector --selector-timeout 1000`
+`sparkle construct_portfolio_selector --selector-timeout 1000 --solver-ablation`
+
 
 Wait for the constructor to complete its computations
 

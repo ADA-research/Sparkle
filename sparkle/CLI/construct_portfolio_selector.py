@@ -177,7 +177,8 @@ if __name__ == "__main__":
             else:
                 print(f"Portfolio selector without {solver_name} constructor running...")
     performance_str = PerformanceMeasure.to_str(perf_measure)
-    cmd = ("sparkle/CLI/compute_marginal_contribution.py --perfect --actual "
+    with_actual = "--actual" if solver_ablation else ""
+    cmd = (f"sparkle/CLI/compute_marginal_contribution.py --perfect {with_actual} "
            f"{ac.PerformanceMeasureArgument.names[0]} {performance_str}")
 
     marginal_contribution = rrr.add_to_queue(
