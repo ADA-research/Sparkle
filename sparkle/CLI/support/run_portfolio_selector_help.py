@@ -68,11 +68,13 @@ def call_solver_solve_instance_within_cutoff(
 
 # Only called in portfolio_core and run_portfolio_selector
 def portfolio_selector_solve_instance(
+        selector_model: Path,
         instance: Path,
         performance_data: PerformanceDataFrame = None) -> None:
     """Call the Sparkle portfolio selector to solve a single instance.
 
     Args:
+        selector_model: The selector to run
         instance: Path to the instance to run on
         performance_data: path to the performance data
     """
@@ -102,8 +104,7 @@ def portfolio_selector_solve_instance(
 
     print("Sparkle portfolio selector predicting ...")
     selector = gv.settings().get_general_sparkle_selector()
-    predict_schedule = selector.run(gv.settings().DEFAULT_algorithm_selector_path,
-                                    feature_vector)
+    predict_schedule = selector.run(selector_model, feature_vector)
 
     if predict_schedule is None:
         # Selector Failed to produce prediction
@@ -143,7 +144,6 @@ def run_portfolio_selector_on_instances(
         performance_data.add_instance(str(instance_path))
 
     performance_data.add_solver(portfolio_selector.name)
-
     performance_data.save_csv()
 
     # TODO: Instead of using run_sparkle_portfolio_core.py, we should do here:
@@ -152,8 +152,10 @@ def run_portfolio_selector_on_instances(
     #    a dependency on run object of 1
     # 3. Run the solver and place the results in the performance dataframe w dependency
     #    (Difficult, which solver is determined by 2)
-    run_core = Path(__file__).parent.resolve() / "core" / "run_sparkle_portfolio_core.py"
+    run_core = Path(__file__).parent.parent.resolve() /\
+        "core" / "run_portfolio_selector_core.py"
     cmd_list = [f"python {run_core} "
+                f"--selector {portfolio_selector}"
                 f"--performance-data-csv {performance_data.csv_filepath} "
                 f"--instance {instance_path}" for instance_path in instances]
     run = rrr.add_to_queue(

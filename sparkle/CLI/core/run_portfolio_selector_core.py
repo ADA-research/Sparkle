@@ -11,7 +11,9 @@ from sparkle.structures import PerformanceDataFrame
 if __name__ == "__main__":
     # Define command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--instance", required=True, type=str, nargs="+",
+    parser.add_argument("--selector", required=True, type=Path,
+                        help="path to portfolio selector")
+    parser.add_argument("--instance", required=True, type=Path, nargs="+",
                         help="path to instance to run on")
     parser.add_argument("--performance-data-csv", required=True, type=str,
                         help="path to performance data csv")
@@ -20,7 +22,10 @@ if __name__ == "__main__":
     # Process command line arguments
     # Turn multiple instance files into a space separated string
     # NOTE: Not sure if this is actually supported
+    selector = Path(args.selector)
     instance_path = " ".join(args.instance)
     performance_data = PerformanceDataFrame(Path(args.performance_data_csv))
     # Run portfolio selector
-    srpsh.portfolio_selector_solve_instance(Path(instance_path), performance_data)
+    srpsh.portfolio_selector_solve_instance(selector,
+                                            Path(instance_path),
+                                            performance_data)
