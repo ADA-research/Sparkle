@@ -65,8 +65,8 @@
 (cmd-construct-sparkle-parallel-portfolio)=
 
 ```{eval-rst}
-.. autoprogram:: construct_sparkle_portfolio_selector:parser_function()
-   :prog: construct_sparkle_portfolio_selector.py
+.. autoprogram:: construct_portfolio_selector:parser_function()
+   :prog: construct_portfolio_selector.py
 
 ```
 

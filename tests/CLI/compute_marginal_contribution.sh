@@ -14,10 +14,10 @@
 
 ## Data
 feature_data_path="Output/Feature_Data/sparkle_feature_data.csv"
-feature_data_test="tests/CLI/test_files/Feature_Data/test_construct_sparkle_portfolio_selector.csv"
+feature_data_test="tests/CLI/test_files/Feature_Data/test_construct_portfolio_selector.csv"
 
 performance_data_path="Output/Performance_Data/sparkle_performance_data.csv"
-performance_data_test="tests/CLI/test_files/Performance_Data/test_construct_sparkle_portfolio_selector.csv"
+performance_data_test="tests/CLI/test_files/Performance_Data/test_construct_portfolio_selector.csv"
 
 # Prepare for test
 settings_file="tests/CLI/test_files/Settings/sparkle_settings.ini"
@@ -32,7 +32,7 @@ sparkle/CLI/add_feature_extractor.py $extractor_path > /dev/null
 sparkle/CLI/add_solver.py $solverA_path > /dev/null
 sparkle/CLI/add_solver.py $solverB_path > /dev/null
 
-# Activate test data to simulate the compute_features, run_solvers and construct_sparkle_portfolio_selector commands
+# Activate test data to simulate the compute_features, run_solvers and construct_portfolio_selector commands
 cp $feature_data_test $feature_data_path
 cp $performance_data_test $performance_data_path
 

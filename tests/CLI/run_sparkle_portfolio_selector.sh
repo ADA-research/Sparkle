@@ -41,7 +41,7 @@ sparkle/CLI/add_feature_extractor.py $extractor_path > /dev/null
 sparkle/CLI/add_solver.py $solverA_path > /dev/null
 sparkle/CLI/add_solver.py $solverB_path > /dev/null
 
-# Activate test data to simulate the compute_features, run_solvers and construct_sparkle_portfolio_selector commands
+# Activate test data to simulate the compute_features, run_solvers and construct_portfolio_selector commands
 cp $selector_test $selector_path
 
 # Run portfolio selector on a single instance

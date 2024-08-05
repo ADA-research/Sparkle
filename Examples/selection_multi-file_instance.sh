@@ -48,7 +48,7 @@ sparkle wait
 
 # Construct a portfolio selector, using the previously computed features and the results of running the solvers. We again set the performance measure to absolute quality.
 
-sparkle construct_sparkle_portfolio_selector --performance-measure QUALITY_ABSOLUTE
+sparkle construct_portfolio_selector --performance-measure QUALITY_ABSOLUTE
 
 #### [Coming soon] Generate a report
 
