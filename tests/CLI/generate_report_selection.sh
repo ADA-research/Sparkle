@@ -13,22 +13,14 @@
 #SBATCH --cpus-per-task=1
 
 ## Data
-feature_data_path="Feature_Data/sparkle_feature_data.csv"
-feature_data_tmp="tests/CLI/test_files/Feature_Data/sparkle_feature_data.csv.tmp"
+feature_data_path="Output/Feature_Data/sparkle_feature_data.csv"
 feature_data_test="tests/CLI/test_files/Feature_Data/test_construct_portfolio_selector.csv"
 
-performance_data_path="Performance_Data/sparkle_performance_data.csv"
-performance_data_tmp="tests/CLI/test_files/Performance_Data/sparkle_performance_data.csv.tmp"
+performance_data_path="Output/Performance_Data/sparkle_performance_data.csv"
 performance_data_test="tests/CLI/test_files/Performance_Data/test_construct_portfolio_selector.csv"
 
 selector_path="Output/Selection/sparkle_portfolio_selector"
-selector_tmp="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector.tmp"
 selector_test="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
-
-# Save user data if any
-mv $feature_data_path $feature_data_tmp 2> /dev/null
-mv $performance_data_path $performance_data_tmp 2> /dev/null
-mv $selector_path $selector_tmp 2> /dev/null
 
 # Prepare for test
 instances_path="Examples/Resources/Instances/PTN"
@@ -59,10 +51,3 @@ else
 	echo "[failure] generate_report test failed with output:"
 	echo $output
 fi
-
-# Restore original data if any
-mv $feature_data_tmp $feature_data_path 2> /dev/null
-mv $performance_data_tmp $performance_data_path 2> /dev/null
-# OR true to get success exit code even when no user data was stored in the tmp file
-mv $selector_tmp $selector_path 2> /dev/null || true
-
