@@ -279,8 +279,8 @@ class PerformanceDataFrame():
         objective, run = self.verify_indexing(objective, run)
         self.dataframe.at[(objective, instance, run), solver] = value
 
-    def remove_solver(self: PerformanceDataFrame, solver_name: str) -> None:
-        """Drop a solver from the Dataframe."""
+    def remove_solver(self: PerformanceDataFrame, solver_name: str | list[str]) -> None:
+        """Drop one or more solvers from the Dataframe."""
         self.dataframe.drop(solver_name, axis=1, inplace=True)
 
     def remove_instance(self: PerformanceDataFrame, instance_name: str) -> None:

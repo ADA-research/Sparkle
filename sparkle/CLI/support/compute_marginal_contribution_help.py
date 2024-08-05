@@ -81,6 +81,7 @@ def compute_actual_selector_performance(
     Returns:
       The selector performance as a single floating point number.
     """
+    print("SCHLIUNGOODSFOIUSDJHFISDHIUFHJDSIUFHJDFISU!!!")
     performance_path = actual_portfolio_selector.parent / "performance.csv"
     if performance_path.exists():
         selector_performance_data = PerformanceDataFrame(performance_path)
@@ -89,9 +90,9 @@ def compute_actual_selector_performance(
     penalty_factor = gv.settings().get_general_penalty_multiplier()
     objective = gv.settings().get_general_sparkle_objectives()[0]
     perf_measure = objective.PerformanceMeasure
+    print(performance_data.dataframe)
     selector_performance_data = performance_data.copy()
-    for solver in selector_performance_data.solvers:
-        selector_performance_data.remove_solver(solver)
+    selector_performance_data.remove_solver(selector_performance_data.solvers)
     selector_performance_data.add_solver("portfolio_selector")
     selector_performance_data.csv_filepath =\
         actual_portfolio_selector.parent / "performance.csv"
@@ -104,15 +105,17 @@ def compute_actual_selector_performance(
         performance_instance = compute_actual_performance_for_instance(
             predict_schedule, instance, performance_data, minimise,
             perf_measure, performance_cutoff)
+        print(performance_instance)
         selector_performance_data.set_value(performance_instance,
                                             "portfolio_selector",
-                                            instance,
-                                            objective=objective.str_id)
+                                            instance)
     if performance_cutoff is not None:
         selector_performance_data.penalise(performance_cutoff,
                                            performance_cutoff * penalty_factor,
                                            lower_bound=minimise)
     selector_performance_data.save_csv()
+    print(selector_performance_data.dataframe)
+    print(selector_performance_data.get_values("portfolio_selector"))
     return aggregation_function(
         selector_performance_data.get_values("portfolio_selector"))
 

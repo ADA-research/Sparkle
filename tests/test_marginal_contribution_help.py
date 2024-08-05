@@ -16,8 +16,12 @@ class TestMarginalContribution(TestCase):
 
     @patch("sparkle.CLI.support.compute_marginal_contribution_help."
            "compute_actual_performance_for_instance")
+    @patch("sparkle.structures.PerformanceDataFrame.save_csv")
+    @patch("sparkle.solver.selector.Selector.run")
     def test_compute_actual_selector_performance(
             self: TestCase,
+            patch_selector_run: MagicMock,
+            patch_save: MagicMock,
             patch_perf_for_instance: MagicMock) -> None:
         """Test for method compute_actual_selector_performance."""
         pth = Path("tests/CLI/test_files/Sparkle_Portfolio_Selector/"
@@ -28,12 +32,11 @@ class TestMarginalContribution(TestCase):
                                 "test_construct_sparkle_portfolio_selector.csv")
 
         result = 526.805294
-        patch_perf_for_instance.side_effect = [(61.0, False), (28.1747, True),
-                                               (61.0, False), (9.98625, True),
-                                               (0.107158, True), (61.0, False),
-                                               (0.537186, True), (61.0, False),
-                                               (61.0, False), (61.0, False),
-                                               (61.0, False), (61.0, False)]
+        patch_selector_run.return_value = None
+        patch_save.return_value = None
+        patch_perf_for_instance.side_effect = [61.0, 28.1747, 61.0, 9.98625,
+                                               0.107158, 61.0, 0.537186, 61.0,
+                                               61.0, 61.0, 61.0, 61.0]
         performance_df = PerformanceDataFrame(perf_path)
         feature_df = FeatureDataFrame(feature_csv_path)
         output = scmch.compute_actual_selector_performance(pth,
