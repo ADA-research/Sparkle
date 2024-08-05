@@ -3,8 +3,10 @@
 """Helper functions for selection report generation."""
 import sys
 from pathlib import Path
-import ast
 from collections import Counter
+
+from sparkle.CLI.compute_marginal_contribution\
+    import compute_selector_marginal_contribution
 
 from sparkle.platform import latex as stex
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
@@ -141,7 +143,7 @@ def selection_report_variables(
         bibliograpghy_path: Path,
         extractor_path: Path,
         selection_scenario: Path,
-        train_data: PerformanceDataFrame,
+        performance_data: PerformanceDataFrame,
         feature_data: FeatureDataFrame,
         extractor_cutoff: int,
         cutoff: int,
@@ -157,40 +159,45 @@ def selection_report_variables(
     Returns:
         A dict matching str variables in the LaTeX template with their value str.
     """
-    objective = SparkleObjective(train_data.objective_names[0])
+    objective = SparkleObjective(performance_data.objective_names[0])
     actual_performance_data = get_portfolio_selector_performance(selection_scenario)
-    solver_performance_ranking = train_data.get_solver_ranking()
+    solver_performance_ranking = performance_data.get_solver_ranking()
     single_best_solver = solver_performance_ranking[0][0]
     latex_dict = {"bibliographypath": bibliograpghy_path.absolute(),
-                  "numSolvers": train_data.num_solvers,
+                  "numSolvers": performance_data.num_solvers,
                   "solverList": stex.list_to_latex([(s, "")
-                                                    for s in train_data.solvers])}
+                                                    for s in performance_data.solvers])}
     latex_dict["numFeatureExtractors"] = len(
         [p for p in extractor_path.iterdir() if p.is_dir()])
     stex.list_to_latex([(f, "") for f in extractor_path.iterdir()])
     latex_dict["featureExtractorList"] = stex.list_to_latex(
         [(f, "") for f in extractor_path.iterdir()])
-    latex_dict["numInstanceClasses"] = get_num_instance_sets(train_data.instances)
-    latex_dict["instanceClassList"] = get_instance_set_count_list(train_data.instances)
+    latex_dict["numInstanceClasses"] = get_num_instance_sets(performance_data.instances)
+    latex_dict["instanceClassList"] =\
+        get_instance_set_count_list(performance_data.instances)
     latex_dict["featureComputationCutoffTime"] = extractor_cutoff
     latex_dict["performanceComputationCutoffTime"] = cutoff
-    rank_list_perfect = train_data.marginal_contribution(sort=True)
-    mg_actual_path = selection_scenario / "marginal_contribution_actual.txt"
-    rank_list_actual = ast.literal_eval(mg_actual_path.open().read())
+    rank_list_perfect = performance_data.marginal_contribution(sort=True)
+    rank_list_actual = compute_selector_marginal_contribution(performance_data,
+                                                              feature_data,
+                                                              selection_scenario)
     latex_dict["solverPerfectRankingList"] = solver_ranked_latex_list(rank_list_perfect)
     latex_dict["solverActualRankingList"] = solver_ranked_latex_list(rank_list_actual)
     latex_dict["PARRankingList"] = solver_ranked_latex_list(solver_performance_ranking,
                                                             objective)
-    latex_dict["VBSPAR"] = train_data.best_instance_performance().mean()
+    latex_dict["VBSPAR"] = performance_data.best_instance_performance().mean()
     latex_dict["actualPAR"] = actual_performance_data.mean()
     latex_dict["metric"] = objective.metric
     latex_dict["figure-portfolio-selector-sparkle-vs-sbs"] =\
         get_figure_portfolio_selector_vs_sbs(
-            target_dir, objective, train_data,
+            target_dir, objective, performance_data,
             actual_performance_data, single_best_solver, penalty)
     latex_dict["figure-portfolio-selector-sparkle-vs-vbs"] =\
-        get_figure_portfolio_selector_sparkle_vs_vbs(target_dir, objective, train_data,
-                                                     actual_performance_data, penalty)
+        get_figure_portfolio_selector_sparkle_vs_vbs(target_dir,
+                                                     objective,
+                                                     performance_data,
+                                                     actual_performance_data,
+                                                     penalty)
     latex_dict["testBool"] = r"\testfalse"
 
     # Train and test

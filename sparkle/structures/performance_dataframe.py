@@ -478,6 +478,7 @@ class PerformanceDataFrame():
         Returns:
             The performance of the schedule over the instances in the dictionary.
         """
+        objective = self.verify_objective(objective)
         select = min if minimise else max
         performances = [0.0 for _ in range(len(schedule.keys()))]
         for idx, instance in enumerate(schedule.keys()):

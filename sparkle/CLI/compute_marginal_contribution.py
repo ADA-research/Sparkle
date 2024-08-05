@@ -4,7 +4,6 @@ import sys
 import argparse
 from pathlib import Path
 import operator
-import ast
 from typing import Callable
 from statistics import mean
 
@@ -76,13 +75,13 @@ def compute_selector_performance(
         schedule[instance] = predict_schedule
 
     schedule_performance = selector_performance_data.schedule_performance(
-        schedule, "portfolio_selector", minimise)
+        schedule, target_solver="portfolio_selector", minimise=minimise)
     # Remove solvers from the dataframe
     selector_performance_data.remove_solver(performance_data.solvers)
     if performance_cutoff is not None:
         selector_performance_data.penalise(performance_cutoff,
                                            performance_cutoff * penalty_factor,
-                                           lower_bound=minimise)
+                                           lower_bound=not minimise)
     selector_performance_data.save_csv()  # Save the results to disk
     return aggregation_function(schedule_performance)
 
@@ -109,26 +108,16 @@ def compute_selector_marginal_contribution(
       A list of 2-tuples where every 2-tuple is of the form
         (solver name, marginal contribution, best_performance).
     """
-    actual_margi_cont_path = selector_scenario / "marginal_contribution_actual.txt"
-    # If the marginal contribution already exists in file, read it and return
-    if actual_margi_cont_path.is_file():
-        return ast.literal_eval(actual_margi_cont_path.open().read())
+    portfolio_selector_path = selector_scenario / "portfolio_selector"
 
-    print(f"In this calculation, cutoff is {performance_cutoff} seconds")
-
-    actual_portfolio_selector_path = selector_scenario / "portfolio_selector"
-
-    if not actual_portfolio_selector_path.exists():
-        print(f"ERROR: Selector {actual_portfolio_selector_path} does not exist! "
+    if not portfolio_selector_path.exists():
+        print(f"ERROR: Selector {portfolio_selector_path} does not exist! "
               "Cannot compute marginal contribution.")
         sys.exit(-1)
 
-    actual_selector_performance = compute_selector_performance(
-        actual_portfolio_selector_path, performance_data,
+    selector_performance = compute_selector_performance(
+        portfolio_selector_path, performance_data,
         feature_data, minimise, aggregation_function, performance_cutoff)
-
-    print("Actual performance for portfolio selector with all solvers is "
-          f"{actual_selector_performance}")
 
     rank_list = []
     compare = operator.lt if minimise else operator.gt
@@ -136,8 +125,6 @@ def compute_selector_marginal_contribution(
     # NOTE: This could be parallelised
     for solver in performance_data.solvers:
         solver_name = Path(solver).name
-        print("Computing actual performance for portfolio selector excluding solver "
-              f"{solver_name} ...")
         # 1. Copy the dataframe original df
         tmp_performance_df = performance_data.copy()
         # 2. Remove the solver from this copy
@@ -149,21 +136,18 @@ def compute_selector_marginal_contribution(
                   f"Cannot compute marginal contribution without {solver_name}.")
             continue
 
-        ablated_asp = compute_selector_performance(
+        ablated_selector_performance = compute_selector_performance(
             ablated_actual_portfolio_selector, tmp_performance_df,
             feature_data, minimise, aggregation_function, performance_cutoff)
-
-        print(f"Actual performance for portfolio selector ex. solver {solver_name} is "
-              f"{ablated_asp}. Computing done!")
 
         # 1. If the performance remains equal, this solver did not contribute
         # 2. If there is a performance decay without this solver, it does contribute
         # 3. If there is a performance improvement, we have a bad portfolio selector
-        if ablated_asp == actual_selector_performance:
+        if ablated_selector_performance == selector_performance:
             marginal_contribution = 0.0
-        elif not compare(ablated_asp, actual_selector_performance):
+        elif not compare(ablated_selector_performance, selector_performance):
             # In the case that the performance decreases, we have a contributing solver
-            marginal_contribution = ablated_asp / actual_selector_performance
+            marginal_contribution = ablated_selector_performance / selector_performance
         else:
             print("****** WARNING DUBIOUS SELECTOR/SOLVER: "
                   f"The omission of solver {solver_name} yields an improvement. "
@@ -171,14 +155,9 @@ def compute_selector_marginal_contribution(
                   "to construct a portfolio without this solver.")
             marginal_contribution = 0.0
 
-        rank_list.append((solver, marginal_contribution, ablated_asp))
-        print(f"Marginal contribution (to Actual Selector) for solver {solver_name} is "
-              f"{marginal_contribution}")
+        rank_list.append((solver, marginal_contribution, ablated_selector_performance))
 
     rank_list.sort(key=lambda contribution: contribution[1], reverse=True)
-
-    # Write actual selector contributions to file
-    actual_margi_cont_path.open("w").write(str(rank_list))
     return rank_list
 
 
@@ -223,6 +202,7 @@ def compute_marginal_contribution(
 
     if compute_actual:
         print("Start computing marginal contribution per Solver to actual selector...")
+        print(f"In this calculation, cutoff is {capvalue} seconds")
         contribution_data = compute_selector_marginal_contribution(
             performance_data,
             feature_data,
