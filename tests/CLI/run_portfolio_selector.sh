@@ -16,9 +16,12 @@
 #SBATCH --cpus-per-task=1
 
 ## Data
-selector_path="Output/Selection/sparkle_portfolio_selector"
-selector_tmp="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector.tmp"
-selector_test="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
+selector_dir="Output/Selection/autofolio/PTN"
+selector_path="Output/Selection/autofolio/PTN/portfolio_selector"
+selector_test="tests/CLI/test_files/Output/Selection/autofolio/PTN/portfolio_selector"
+scenario_source="tests/CLI/test_files/Settings/latest_scenario_selection.ini"
+scenario_path="Output/latest_scenario.ini"
+
 
 # Save user data if any
 mv $selector_path $selector_tmp 2> /dev/null
@@ -42,6 +45,8 @@ sparkle/CLI/add_solver.py $solverA_path > /dev/null
 sparkle/CLI/add_solver.py $solverB_path > /dev/null
 
 # Activate test data to simulate the compute_features, run_solvers and construct_portfolio_selector commands
+mkdir -p $selector_dir
+cp $scenario_source $scenario_path
 cp $selector_test $selector_path
 
 # Run portfolio selector on a single instance
