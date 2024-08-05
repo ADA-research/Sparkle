@@ -49,7 +49,6 @@ exclude =
     Instances/,
     Log/,
     Output/,
-    Performance_Data/,
     __pycache__,
     .pytest_cache,
     Snapshots/,
