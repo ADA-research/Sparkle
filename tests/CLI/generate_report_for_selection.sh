@@ -53,8 +53,8 @@ output=$(sparkle/CLI/generate_report.py --settings-file $sparkle_test_settings_p
 
 if [[ $output == $output_true ]];
 then
-	echo "[success] generate_report_for_selection_test test succeeded"
+	echo "[success] generate_report_for_selection with test set succeeded"
 else
-	echo "[failure] generate_report_for_selection_test test failed with output:"
+	echo "[failure] generate_report_for_selection with test set failed with output:"
 	echo $output
 fi
