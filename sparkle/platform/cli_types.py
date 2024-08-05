@@ -88,7 +88,7 @@ class CommandName(str, Enum):
 # but can optionally wait for VALIDATE_CONFIGURED_VS_DEFAULT as well
 #
 # 'Either or' dependency: GENERATE_REPORT can run after CONFIGURE_SOLVER, but
-# also after CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR, but does not need both
+# also after CONSTRUCT_PORTFOLIO_SELECTOR, but does not need both
 #
 # TODO: Check if empty dependency lists are correct. These were not important
 # when this was implemented, but might have 'trivial' dependencies, such as the

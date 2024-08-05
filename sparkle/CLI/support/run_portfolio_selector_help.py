@@ -16,7 +16,7 @@ from sparkle.CLI.support import run_solvers_help as srs
 from sparkle.platform import CommandName
 
 
-# Only called in call_sparkle_portfolio_selector_solve_instance
+# Only called in portfolio_selector_solve_instance
 def call_solver_solve_instance_within_cutoff(
         solver: Solver,
         instance: Path,
@@ -146,7 +146,7 @@ def run_portfolio_selector_on_instances(
     performance_data.add_solver(portfolio_selector.name)
     performance_data.save_csv()
 
-    # TODO: Instead of using run_sparkle_portfolio_core.py, we should do here:
+    # TODO: Instead of using run_portfolio_selector_core.py, we should do here:
     # 1. Get feature data for every feature extractor
     # 2. Use autofolio call to predict the solver per instance with
     #    a dependency on run object of 1
