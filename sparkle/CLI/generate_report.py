@@ -64,8 +64,7 @@ if __name__ == "__main__":
 
     # Log command call
     sl.log_command(sys.argv)
-    import time
-    start = time.time()
+
     # Define command line arguments
     parser = parser_function()
 
@@ -246,4 +245,3 @@ if __name__ == "__main__":
 
     # Write used settings to file
     gv.settings().write_used_settings()
-    print(f"Took: {time.time() - start}s")
