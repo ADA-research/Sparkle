@@ -81,7 +81,7 @@ tests/CLI/run_configured_solver.sh
 tests/CLI/run_parallel_portfolio.sh
 
 # Test generate report (selection)
-tests/CLI/generate_report__for_selection.sh
+tests/CLI/generate_report_for_selection.sh
 
 # Test generate report for configuration
 tests/CLI/generate_report_for_configuration.sh
