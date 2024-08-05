@@ -30,9 +30,7 @@ slurm_available=$(detect_slurm)
 
 # Copy scenario
 scenario_path="Output/latest_scenario.ini"
-scenario_tmp="Output/latest_scenario.tmp"
 scenario_test="tests/CLI/test_files/Settings/latest_scenario_configuration.ini"
-mv $scenario_path $scenario_tmp 2> /dev/null # Save user scenario
 cp $scenario_test $scenario_path # Activate test scenario
 
 # Settings
