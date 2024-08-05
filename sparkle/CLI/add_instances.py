@@ -99,11 +99,6 @@ if __name__ == "__main__":
 
     print(f"\nAdding instance set {instance_set.name} done!")
 
-    if gv.settings().DEFAULT_algorithm_selector_path.exists():
-        gv.settings().DEFAULT_algorithm_selector_path.unlink()
-        print("Removing Sparkle portfolio selector "
-              f"{gv.settings().DEFAULT_algorithm_selector_path} done!")
-
     if args.run_extractor_now:
         print("Start computing features ...")
         compute_features(gv.settings().DEFAULT_feature_data_path, False)

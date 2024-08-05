@@ -64,9 +64,4 @@ if __name__ == "__main__":
         feature_data.save_csv()
     shutil.rmtree(extractor.directory)
 
-    if gv.settings().DEFAULT_algorithm_selector_path.exists():
-        shutil.rmtree(gv.settings().DEFAULT_algorithm_selector_path)
-        print("Removing Sparkle portfolio selector "
-              f"{gv.settings().DEFAULT_algorithm_selector_path} done!")
-
     print(f"Removing feature extractor {extractor.name} done!")

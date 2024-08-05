@@ -120,11 +120,6 @@ if __name__ == "__main__":
 
     print(f"Adding solver {solver_source.name} done!")
 
-    if gv.settings().DEFAULT_algorithm_selector_path.exists():
-        gv.settings().DEFAULT_algorithm_selector_path.unlink()
-        print("Removing Sparkle portfolio selector "
-              f"{gv.settings().DEFAULT_algorithm_selector_path} done!")
-
     if nickname is not None:
         sfh.add_remove_platform_item(solver_directory,
                                      gv.solver_nickname_list_path, key=nickname)

@@ -113,8 +113,6 @@ class Settings:
     ]
 
     # Old default file paths from GV which should be turned into variables
-    DEFAULT_algorithm_selector_path =\
-        DEFAULT_selection_output / "sparkle_portfolio_selector"
     DEFAULT_feature_data_path =\
         DEFAULT_feature_data / "sparkle_feature_data.csv"
     DEFAULT_performance_data_path =\
