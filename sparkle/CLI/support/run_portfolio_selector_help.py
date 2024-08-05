@@ -43,7 +43,7 @@ def call_solver_solve_instance_within_cutoff(
         flag_solved = True
 
     if performance_data is not None:
-        solver_name = "sparkle_portfolio_selector"
+        solver_name = "portfolio_selector"
         print(f"Trying to write: {cpu_time_penal}, {solver_name}, {instance}")
         try:
             # Creating a seperate locked file for writing

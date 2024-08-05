@@ -56,7 +56,6 @@ exclude =
     Reference_Lists/,
     scratch/,
     Solvers/,
-    Sparkle_Portfolio_Selector/,
     Tmp/,
     tests/test_files,
     build/,

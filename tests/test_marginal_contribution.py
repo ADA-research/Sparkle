@@ -22,8 +22,8 @@ class TestMarginalContribution(TestCase):
             patch_selector_run: MagicMock,
             patch_save: MagicMock) -> None:
         """Test for method compute_actual_selector_performance."""
-        pth = Path("tests/CLI/test_files/Sparkle_Portfolio_Selector/"
-                   "sparkle_portfolio_selector")
+        pth = Path("tests/CLI/test_files/Output/Selection/autofolio/PTN/"
+                   "portfolio_selector")
         perf_path = Path("tests/CLI/test_files/Performance_Data/"
                          "test_construct_portfolio_selector.csv")
         feature_csv_path = Path("tests/CLI/test_files/Feature_Data/"

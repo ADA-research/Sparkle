@@ -30,7 +30,7 @@ solver_src_path="${examples_path}${solver_path}"
 
 config_scenario_path="Output/Configuration/Raw_Data/SMAC2/scenarios/"
 config_test_data="tests/CLI/test_files/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN"
-latest_ini="tests/CLI/test_files/Output/latest_scenario.ini"
+latest_ini="tests/CLI/test_files/Settings/latest_scenario_configuration.ini"
 latest_ini_target="Output/"
 
 sparkle/CLI/initialise.py > /dev/null
