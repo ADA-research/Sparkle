@@ -13,7 +13,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--selector", required=True, type=Path,
                         help="path to portfolio selector")
-    parser.add_argument("--instance", required=True, type=Path, nargs="+",
+    parser.add_argument("--instance", required=True, type=str, nargs="+",
                         help="path to instance to run on")
     parser.add_argument("--performance-data-csv", required=True, type=str,
                         help="path to performance data csv")

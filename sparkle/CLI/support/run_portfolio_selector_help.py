@@ -155,7 +155,7 @@ def run_portfolio_selector_on_instances(
     run_core = Path(__file__).parent.parent.resolve() /\
         "core" / "run_portfolio_selector_core.py"
     cmd_list = [f"python {run_core} "
-                f"--selector {portfolio_selector}"
+                f"--selector {portfolio_selector} "
                 f"--performance-data-csv {performance_data.csv_filepath} "
                 f"--instance {instance_path}" for instance_path in instances]
     run = rrr.add_to_queue(

@@ -46,8 +46,8 @@ def solver_ranked_latex_list(solver_ranking: list[tuple[str, float]],
     Returns:
         The list of solvers ranked as LaTeX str.
     """
-    objective_str = f"{objective.metric} :" if objective is not None else ""
-    return stex.list_to_latex([(row[0], f",{objective_str} {row[1]}")
+    objective_str = f"{objective.metric}: " if objective is not None else ""
+    return stex.list_to_latex([(row[0], f", {objective_str} {row[1]}")
                                for row in solver_ranking])
 
 

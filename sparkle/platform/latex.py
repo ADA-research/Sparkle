@@ -53,7 +53,7 @@ def list_to_latex(content: list | list[tuple]) -> str:
         The list as LaTeX str.
     """
     if isinstance(content[0], tuple):
-        return "".join(f"\\item \\textbf{{{item[0]}}}: {item[1]}" for item in content)
+        return "".join(f"\\item \\textbf{{{item[0]}}}{item[1]}" for item in content)
     return "".join(f"\\item {item}\n" for item in content)
 
 
@@ -101,10 +101,9 @@ def generate_comparison_plot(points: list,
     output_dir = Path() if output_dir is None else Path(output_dir)
 
     df = pd.DataFrame(points, columns=[xlabel, ylabel])
-    if replace_zeros:
-        if any(df < 0):
-            print("WARNING: Negative valued performance values detected. Setting"
-                  f" these values to {0.0}.")
+    if replace_zeros and (df < 0).any(axis=None):
+        print("WARNING: Negative valued performance values detected. Setting"
+              f" these values to {0.0}.")
         df[df < 0] = 0.0
 
     # process range values
