@@ -47,16 +47,15 @@ then
 	output_true="Running selector construction. Waiting for Slurm job(s) with id(s): "
 fi
 
-
 output=$(sparkle/CLI/construct_sparkle_portfolio_selector.py | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] construct_sparkle_portfolio_selector test succeeded"
-    jobids=${output#"$output_true"}
-    jobids=${jobids//,}
 	if [[ $slurm_available =~ "${slurm_true}" ]];
 	then
+        jobids=${output#"$output_true"}
+        jobids=${jobids//,}
 		scancel $jobids
 	fi
 else              
