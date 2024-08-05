@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Import utils
+. tests/CLI/utils.sh
+
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/construct_sparkle_portfolio_selector.sh
@@ -11,18 +14,15 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
+slurm_true="slurm"
+slurm_available=$(detect_slurm)
+
 ## Data
-feature_data_path="Feature_Data/sparkle_feature_data.csv"
-feature_data_tmp="tests/CLI/test_files/Feature_Data/sparkle_feature_data.csv.tmp"
+feature_data_path="Output/Feature_Data/sparkle_feature_data.csv"
 feature_data_test="tests/CLI/test_files/Feature_Data/test_construct_sparkle_portfolio_selector.csv"
 
-performance_data_path="Performance_Data/sparkle_performance_data.csv"
-performance_data_tmp="tests/CLI/test_files/Performance_Data/sparkle_performance_data.csv.tmp"
+performance_data_path="Output/Performance_Data/sparkle_performance_data.csv"
 performance_data_test="tests/CLI/test_files/Performance_Data/test_construct_sparkle_portfolio_selector.csv"
-
-# Save user data if any
-mv $feature_data_path $feature_data_tmp 2> /dev/null
-mv $performance_data_path $performance_data_tmp 2> /dev/null
 
 # Prepare for test
 instances_path="Examples/Resources/Instances/PTN"
@@ -41,16 +41,34 @@ cp $feature_data_test $feature_data_path
 cp $performance_data_test $performance_data_path
 
 # Construct sparkle portfolio selector
-output_true="Marginal contribution (actual selector) computing done!"
+output_true="Selector marginal contribution computing done!"
+if [[ $slurm_available =~ "${slurm_true}" ]];
+then
+	output_true="Running selector construction. Waiting for Slurm job(s) with id(s): "
+fi
+
+
 output=$(sparkle/CLI/construct_sparkle_portfolio_selector.py | tail -1)
 
-if [[ $output == $output_true ]];
+if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] construct_sparkle_portfolio_selector test succeeded"
+    jobids=${output#"$output_true"}
+    jobids=${jobids//,}
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobids
+	fi
 else              
 	echo "[failure] construct_sparkle_portfolio_selector test failed with output:"
 	echo $output
+    if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
+
+# TODO: Cancel the slurm job
 
 # Restore original data if any
 mv $feature_data_tmp $feature_data_path 2> /dev/null

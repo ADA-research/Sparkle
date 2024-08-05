@@ -179,6 +179,7 @@ if __name__ == "__main__":
     performance_str = PerformanceMeasure.to_str(perf_measure)
     cmd = ("sparkle/CLI/compute_marginal_contribution.py --perfect --actual "
            f"{ac.PerformanceMeasureArgument.names[0]} {performance_str}")
+
     marginal_contribution = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd,
@@ -186,6 +187,13 @@ if __name__ == "__main__":
         base_dir=gv.settings().DEFAULT_tmp_output,
         dependencies=dependencies,
         sbatch_options=sbatch_options)
+    dependencies.append(marginal_contribution)
+    if run_on == Runner.LOCAL:
+        marginal_contribution.wait()
+        print("Selector marginal contribution computing done!")
+    else:
+        print(f"Running selector construction. Waiting for Slurm job(s) with id(s): "
+              f"{', '.join([d.run_id for d in dependencies])}")
 
     # Write used settings to file
     gv.settings().write_used_settings()
