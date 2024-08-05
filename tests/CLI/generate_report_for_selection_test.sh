@@ -43,13 +43,12 @@ sparkle/CLI/add_solver.py $solverB_path > /dev/null
 # Activate test data to simulate the compute_features, run_solvers, construct_portfolio_selector and run_portfolio_selector commands
 cp $feature_data_test $feature_data_path
 cp $performance_data_test $performance_data_path
-cp $selector_test $selector_path
 cp $scenario_source $scenario_path
 cp -r $source_output $target_output
 
 # Run generate report for tetst
 output_true="Report for test generated ..."
-output=$(sparkle/CLI/generate_report.py --test-case-directory $test_results_dir --settings-file $sparkle_test_settings_path | tail -1)
+output=$(sparkle/CLI/generate_report.py --settings-file $sparkle_test_settings_path | tail -1)
 # --settings-file $sparkle_test_settings_path
 
 if [[ $output == $output_true ]];
