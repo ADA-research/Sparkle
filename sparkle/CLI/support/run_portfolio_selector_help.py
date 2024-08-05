@@ -66,7 +66,7 @@ def call_solver_solve_instance_within_cutoff(
     return flag_solved
 
 
-# Only called in portfolio_core and run_sparkle_portfolio_selector
+# Only called in portfolio_core and run_portfolio_selector
 def portfolio_selector_solve_instance(
         instance: Path,
         performance_data: PerformanceDataFrame = None) -> None:
@@ -122,7 +122,7 @@ def portfolio_selector_solve_instance(
             print("The instance is not solved in this call")
 
 
-# Only called in run_sparkle_portfolio_selector
+# Only called in run_portfolio_selector
 def run_portfolio_selector_on_instances(
         instances: list[Path],
         performance_data: PerformanceDataFrame,
@@ -159,7 +159,7 @@ def run_portfolio_selector_on_instances(
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
-        name=CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR,
+        name=CommandName.RUN_PORTFOLIO_SELECTOR,
         base_dir=gv.settings().DEFAULT_tmp_output,
         sbatch_options=gv.settings().get_slurm_extra_options(as_args=True),
         srun_options=["-N1", "-n1"])

@@ -153,8 +153,8 @@
 (cmd-run-sparkle-portfolio-selector)=
 
 ```{eval-rst}
-.. autoprogram:: run_sparkle_portfolio_selector:parser_function()
-   :prog: run_sparkle_portfolio_selector.py
+.. autoprogram:: run_portfolio_selector:parser_function()
+   :prog: run_portfolio_selector.py
 
 ```
 

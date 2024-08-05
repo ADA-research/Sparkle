@@ -66,7 +66,7 @@ tests/CLI/configure_solver_validate.sh
 tests/CLI/construct_portfolio_selector.sh
 
 # Test run sparkle portfolio selector
-tests/CLI/run_sparkle_portfolio_selector.sh
+tests/CLI/run_portfolio_selector.sh
 
 # Test validate configured vs default
 tests/CLI/validate_configured_vs_default.sh

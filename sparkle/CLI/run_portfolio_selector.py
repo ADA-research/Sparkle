@@ -57,7 +57,7 @@ if __name__ == "__main__":
         gv.settings().DEFAULT_instance_dir, InstanceSet)
 
     check_for_initialise(
-        COMMAND_DEPENDENCIES[CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR]
+        COMMAND_DEPENDENCIES[CommandName.RUN_PORTFOLIO_SELECTOR]
     )
 
     if ac.set_by_user(args, "settings_file"):
@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     if gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure\
             == PerformanceMeasure.QUALITY_ABSOLUTE:
-        print("ERROR: The run_sparkle_portfolio_selector command is not yet implemented"
+        print("ERROR: The run_portfolio_selector command is not yet implemented"
               " for the QUALITY_ABSOLUTE performance measure!")
         sys.exit(-1)
     selector_path = gv.settings().DEFAULT_selection_output / "sparkle_portfolio_selector"

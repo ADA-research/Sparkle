@@ -68,13 +68,13 @@ sparkle construct_portfolio_selector --performance-measure QUALITY_ABSOLUTE
 
 # Run the portfolio selector on a *single* testing instance; the result will be printed to the command line. We again set the performance measure to absolute quality.
 
-#sparkle run_sparkle_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/Banking2.model Examples/Resources/CCAG/Instances/CCAG2/Banking2.constraints --performance-measure QUALITY_ABSOLUTE
+#sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/Banking2.model Examples/Resources/CCAG/Instances/CCAG2/Banking2.constraints --performance-measure QUALITY_ABSOLUTE
 
 #### Run on an instance set
 
 # Run the portfolio selector on a testing instance *set*. We again set the performance measure to absolute quality.
 
-#sparkle run_sparkle_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/ --performance-measure QUALITY_ABSOLUTE
+#sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/ --performance-measure QUALITY_ABSOLUTE
 
 #### Generate a report including results on the test set
 

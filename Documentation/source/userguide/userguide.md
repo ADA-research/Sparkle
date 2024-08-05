@@ -364,7 +364,7 @@ to get a description of the required arguments and other options.
 % *  remove_solver.py
 % *  run_ablation.py
 % *  run_solvers.py
-% *  run_sparkle_portfolio_selector.py
+% *  run_portfolio_selector.py
 % *  run_status.py
 % *  save_snapshot.py
 % *  system_status.py

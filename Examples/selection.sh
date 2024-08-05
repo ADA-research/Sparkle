@@ -68,13 +68,13 @@ sparkle generate_report
 
 # Run the portfolio selector on a *single* testing instance; the result will be printed to the command line
 
-sparkle run_sparkle_portfolio_selector Examples/Resources/Instances/PTN2/plain7824.cnf
+sparkle run_portfolio_selector Examples/Resources/Instances/PTN2/plain7824.cnf
 
 #### Run on an instance set
 
 # Run the portfolio selector on a testing instance *set*
 
-sparkle run_sparkle_portfolio_selector Examples/Resources/Instances/PTN2/
+sparkle run_portfolio_selector Examples/Resources/Instances/PTN2/
 
 #### Generate a report including results on the test set
 

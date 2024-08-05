@@ -5,9 +5,9 @@
 
 # Execute this script from the Sparkle directory
 
-#SBATCH --job-name=test/run_sparkle_portfolio_selector.sh
-#SBATCH --output=Tmp/run_sparkle_portfolio_selector.sh.txt
-#SBATCH --error=Tmp/run_sparkle_portfolio_selector.sh.err
+#SBATCH --job-name=test/run_portfolio_selector.sh
+#SBATCH --output=Tmp/run_portfolio_selector.sh.txt
+#SBATCH --error=Tmp/run_portfolio_selector.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=
@@ -46,13 +46,13 @@ cp $selector_test $selector_path
 
 # Run portfolio selector on a single instance
 output_true="Running Sparkle portfolio selector done!"
-output=$(sparkle/CLI/run_sparkle_portfolio_selector.py $instance_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available| tail -1)
+output=$(sparkle/CLI/run_portfolio_selector.py $instance_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available| tail -1)
 
 if [[ $output == $output_true ]];
 then
-	echo "[success] ($slurm_available) run_sparkle_portfolio_selector on single instance test succeeded"
+	echo "[success] ($slurm_available) run_portfolio_selector on single instance test succeeded"
 else
-	echo "[failure] ($slurm_available) run_sparkle_portfolio_selector on single instance test failed with output:"
+	echo "[failure] ($slurm_available) run_portfolio_selector on single instance test failed with output:"
 	echo $output
 fi
 
@@ -61,13 +61,13 @@ if [[ $slurm_available == $slurm_true ]];
 then
 	output_true="Sparkle portfolio selector is running ..."
 fi
-output=$(sparkle/CLI/run_sparkle_portfolio_selector.py $instances_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available| tail -1)
+output=$(sparkle/CLI/run_portfolio_selector.py $instances_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available| tail -1)
 
 if [[ $output == $output_true ]];
 then
-	echo "[success] ($slurm_available) run_sparkle_portfolio_selector on instance directory test succeeded"
+	echo "[success] ($slurm_available) run_portfolio_selector on instance directory test succeeded"
 else
-	echo "[failure] ($slurm_available) run_sparkle_portfolio_selector on instance directory test failed with output:"
+	echo "[failure] ($slurm_available) run_portfolio_selector on instance directory test failed with output:"
 	echo $output
 fi
 

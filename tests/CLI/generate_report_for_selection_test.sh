@@ -52,7 +52,7 @@ sparkle/CLI/add_feature_extractor.py $extractor_path > /dev/null
 sparkle/CLI/add_solver.py $solverA_path > /dev/null
 sparkle/CLI/add_solver.py $solverB_path > /dev/null
 
-# Activate test data to simulate the compute_features, run_solvers, construct_portfolio_selector and run_sparkle_portfolio_selector commands
+# Activate test data to simulate the compute_features, run_solvers, construct_portfolio_selector and run_portfolio_selector commands
 cp $feature_data_test $feature_data_path
 cp $performance_data_test $performance_data_path
 cp $selector_test $selector_path

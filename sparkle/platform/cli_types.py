@@ -71,7 +71,7 @@ class CommandName(str, Enum):
     ABLATION_CALLBACK = "ablation_callback"
     ABLATION_VALIDATION_CALLBACK = "ablation_validation_callback"
     RUN_SOLVERS = "run_solvers"
-    RUN_SPARKLE_PORTFOLIO_SELECTOR = "run_sparkle_portfolio_selector"
+    RUN_PORTFOLIO_SELECTOR = "run_portfolio_selector"
     RUN_STATUS = "run_status"
     SPARKLE_WAIT = "sparkle_wait"
     SYSTEM_STATUS = "system_status"
@@ -115,7 +115,7 @@ COMMAND_DEPENDENCIES = {
                                   CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
                                   CommandName.RUN_ABLATION,
                                   CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
-                                  CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR],
+                                  CommandName.RUN_PORTFOLIO_SELECTOR],
     CommandName.INITIALISE: [],
     CommandName.REMOVE_FEATURE_EXTRACTOR: [CommandName.INITIALISE],
     CommandName.REMOVE_INSTANCES: [CommandName.INITIALISE],
@@ -125,7 +125,7 @@ COMMAND_DEPENDENCIES = {
     CommandName.RUN_SOLVERS: [CommandName.INITIALISE,
                               CommandName.ADD_INSTANCES,
                               CommandName.ADD_SOLVER],
-    CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR: [
+    CommandName.RUN_PORTFOLIO_SELECTOR: [
         CommandName.INITIALISE,
         CommandName.CONSTRUCT_PORTFOLIO_SELECTOR],
     CommandName.RUN_STATUS: [],
