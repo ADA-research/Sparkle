@@ -127,8 +127,8 @@ if __name__ == "__main__":
         actual_portfolio_selector_path = selection_scenario / "portfolio_selector"
         if not actual_portfolio_selector_path.is_file():
             print("Before generating a Sparkle report, please first construct the "
-                  "Sparkle portfolio selector!")
-            print("Not generating a Sparkle report, stopping execution!")
+                  "Sparkle portfolio selector. Not generating a Sparkle report, "
+                  "stopping execution!")
             sys.exit(-1)
 
         print("Generating report for selection...")
