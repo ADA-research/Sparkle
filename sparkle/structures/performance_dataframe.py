@@ -459,6 +459,43 @@ class PerformanceDataFrame():
                                                        minimise=minimise)
         return aggregation_function(instance_best)
 
+    def schedule_performance(
+            self: PerformanceDataFrame,
+            schedule: dict[str: list[tuple[str, float | None]]],
+            target_solver: str = None,
+            minimise: bool = True,
+            objective: str = None) -> float:
+        """Return the performance of a selection schedule on the portfolio.
+
+        Args:
+            schedule: Compute the best performance according to a selection schedule.
+                A dictionary with instances as keys and a list of tuple consisting of
+                (solver, max_runtime) or solvers if no runtime prediction should be used.
+            target_solver: If not None, store the values in this solver of the DF.
+            minimise: Whether the scores are minimised or not
+            objective: The objective for which we calculate the best performance
+
+        Returns:
+            The performance of the schedule over the instances in the dictionary.
+        """
+        select = min if minimise else max
+        performances = [0.0 for _ in range(len(schedule.keys()))]
+        for idx, instance in enumerate(schedule.keys()):
+            for idy, (solver, max_runtime) in enumerate(schedule[instance]):
+                performance = self.get_value(solver, instance, objective)
+                if max_runtime is not None:  # We are dealing with runtime
+                    performances[idx] += performance
+                    if performance < max_runtime:
+                        break  # Solver finished in time
+                else:  # Quality, we take the best found performance
+                    if idy == 0:  # First solver, set initial value
+                        performances[idx] = performance
+                        continue
+                    performances[idx] = select(performances[idx], performance)
+            if target_solver is not None:
+                self.set_value(performances[idx], target_solver, instance, objective)
+        return performances
+
     def marginal_contribution(
             self: PerformanceDataFrame,
             aggregation_function: Callable = statistics.mean,
