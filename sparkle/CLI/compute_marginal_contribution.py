@@ -62,10 +62,12 @@ def compute_selector_performance(
             selector_performance_data.get_values("portfolio_selector"))
     penalty_factor = gv.settings().get_general_penalty_multiplier()
     selector_performance_data = performance_data.copy()
+
     selector_performance_data.add_solver("portfolio_selector")
     selector_performance_data.csv_filepath =\
         actual_portfolio_selector.parent / "performance.csv"
     selector = gv.settings().get_general_sparkle_selector()
+
     schedule = {}
     for instance in performance_data.instances:
         # We get the performance for an instance by infering the model predicition
@@ -73,7 +75,6 @@ def compute_selector_performance(
         feature_vector = feature_data.get_instance(instance)
         predict_schedule = selector.run(actual_portfolio_selector, feature_vector)
         schedule[instance] = predict_schedule
-
     schedule_performance = selector_performance_data.schedule_performance(
         schedule, target_solver="portfolio_selector", minimise=minimise)
     # Remove solvers from the dataframe

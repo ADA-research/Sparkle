@@ -17,8 +17,12 @@ class TestMarginalContribution(TestCase):
 
     @patch("sparkle.structures.PerformanceDataFrame.save_csv")
     @patch("sparkle.solver.selector.Selector.run")
+    @patch("pathlib.Path.mkdir")
+    @patch("pathlib.Path.exists")
     def test_compute_actual_selector_performance(
             self: TestCase,
+            patch_exists: MagicMock,
+            patch_mkdir: MagicMock,
             patch_selector_run: MagicMock,
             patch_save: MagicMock) -> None:
         """Test for method compute_actual_selector_performance."""
@@ -29,11 +33,14 @@ class TestMarginalContribution(TestCase):
         feature_csv_path = Path("tests/CLI/test_files/Feature_Data/"
                                 "test_construct_portfolio_selector.csv")
 
-        result = 1534.9195245
-        patch_selector_run.side_effect = [[("Solvers/CSCCSat", 61.0)]] * 12
-        patch_save.return_value = None
         performance_df = PerformanceDataFrame(perf_path)
         feature_df = FeatureDataFrame(feature_csv_path)
+        result = 1534.9195245
+
+        patch_exists.return_value = False  # Block loading from file
+        patch_mkdir.return_value = None  # Stop creating unnecesarry dir
+        patch_selector_run.side_effect = [[("Solvers/CSCCSat", 61.0)]] * 12
+        patch_save.return_value = None
         output = cmc.compute_selector_performance(pth,
                                                   performance_df,
                                                   feature_df,
