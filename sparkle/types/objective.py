@@ -66,7 +66,6 @@ class SparkleObjective():
             print(f"WARNING: Performance measure {performance_measure} not found!")
         return
 
-
     def __str__(self: SparkleObjective) -> str:
         """Return a string of the format TYPE:METRIC."""
         return f"{PerformanceMeasure.to_str(self.PerformanceMeasure)}:{self.metric}"
