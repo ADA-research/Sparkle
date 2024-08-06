@@ -106,10 +106,8 @@ if __name__ == "__main__":
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
 
     if feature_data.has_missing_value():
-        print("****** WARNING: There are missing values in the feature data, and all "
-              "missing values will be imputed as the mean value of all other non-missing"
-              " values! ******")
-        print("Imputing all missing values...")
+        print("WARNING: Missing values in the feature data, will be imputed as the mean "
+              "value of all other non-missing values! Imputing all missing values...")
         feature_data.impute_missing_values()
 
     # TODO: Allow user to specify subsets of data to be used
