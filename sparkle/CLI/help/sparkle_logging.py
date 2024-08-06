@@ -54,7 +54,6 @@ def _update_caller_file_path(timestamp: str) -> None:
     global caller_out_dir
     caller_out_dir = Path(caller_dir)
     global caller_log_path
-    print(caller_out_dir)
     caller_log_path = PurePath(log_dir / caller_out_dir / caller_file)
     global caller_log_dir
     caller_log_dir = log_dir / caller_out_dir
@@ -67,8 +66,7 @@ def _update_caller_file_path(timestamp: str) -> None:
     # If the caller output file does not exist yet, write the header
     print(caller_log_path)
     if not Path(caller_log_path).is_file():
-        output_header = ("     Timestamp                              Path           "
-                         "                  Description\n")
+        output_header = "\t Timestamp\t\t\t\t\t\t\t  Path\t\t\t\t\t\t\t Description\n"
         with Path(caller_log_path).open("a") as output_file:
             output_file.write(output_header)
 
@@ -84,7 +82,6 @@ def add_output(output_path: str, description: str) -> None:
     # Prepare logging information
     timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
     output_str = f"{timestamp}\t{output_path}\t{description}\n"
-    print(caller_log_path)
     # Write output path and description to caller file
     with Path(caller_log_path).open("a") as output_file:
         output_file.write(output_str)
