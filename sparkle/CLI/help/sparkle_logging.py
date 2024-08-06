@@ -64,7 +64,6 @@ def _update_caller_file_path(timestamp: str) -> None:
     caller_log_dir.mkdir(parents=True, exist_ok=True)
 
     # If the caller output file does not exist yet, write the header
-    print(caller_log_path)
     if not Path(caller_log_path).is_file():
         output_header = ("     Timestamp                              Path           "
                          "                  Description\n")
@@ -83,7 +82,6 @@ def add_output(output_path: str, description: str) -> None:
     # Prepare logging information
     timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
     output_str = f"{timestamp}\t{output_path}\t{description}\n"
-    print(caller_log_path)
     # Write output path and description to caller file
     with Path(caller_log_path).open("a") as output_file:
         output_file.write(output_str)
