@@ -65,8 +65,7 @@ def _update_caller_file_path(timestamp: str) -> None:
 
     # If the caller output file does not exist yet, write the header
     if not Path(caller_log_path).is_file():
-        output_header = ("     Timestamp                              Path           "
-                         "                  Description\n")
+        output_header = "\t Timestamp\t\t\t\t\t\t\t  Path\t\t\t\t\t\t\t Description\n"
         with Path(caller_log_path).open("a") as output_file:
             output_file.write(output_header)
 
