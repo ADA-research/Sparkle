@@ -99,8 +99,8 @@ class Settings:
     DEFAULT_selection_output_test = DEFAULT_selection_output / "Test_Cases"
 
     # Old default output dirs which should be part of something else
-    DEFAULT_feature_data = cwd_prefix / "Feature_Data"
-    DEFAULT_performance_data = cwd_prefix / "Performance_Data"
+    DEFAULT_feature_data = DEFAULT_output / "Feature_Data"
+    DEFAULT_performance_data = DEFAULT_output / "Performance_Data"
 
     # Collection of all working dirs for platform
     DEFAULT_working_dirs = [
@@ -113,10 +113,6 @@ class Settings:
     ]
 
     # Old default file paths from GV which should be turned into variables
-    DEFAULT_algorithm_selector_path =\
-        DEFAULT_selection_output / "sparkle_portfolio_selector"
-    DEFAULT_marginal_contribution_actual_path =\
-        DEFAULT_selection_output / "marginal_contribution_actual.txt"
     DEFAULT_feature_data_path =\
         DEFAULT_feature_data / "sparkle_feature_data.csv"
     DEFAULT_performance_data_path =\

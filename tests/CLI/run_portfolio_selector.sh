@@ -5,9 +5,9 @@
 
 # Execute this script from the Sparkle directory
 
-#SBATCH --job-name=test/run_sparkle_portfolio_selector.sh
-#SBATCH --output=Tmp/run_sparkle_portfolio_selector.sh.txt
-#SBATCH --error=Tmp/run_sparkle_portfolio_selector.sh.err
+#SBATCH --job-name=test/run_portfolio_selector.sh
+#SBATCH --output=Tmp/run_portfolio_selector.sh.txt
+#SBATCH --error=Tmp/run_portfolio_selector.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=
@@ -16,9 +16,12 @@
 #SBATCH --cpus-per-task=1
 
 ## Data
-selector_path="Output/Selection/sparkle_portfolio_selector"
-selector_tmp="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector.tmp"
-selector_test="tests/CLI/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
+selector_dir="Output/Selection/autofolio/PTN"
+selector_path="Output/Selection/autofolio/PTN/portfolio_selector"
+selector_test="tests/CLI/test_files/Output/Selection/autofolio/PTN/portfolio_selector"
+scenario_source="tests/CLI/test_files/Settings/latest_scenario_selection.ini"
+scenario_path="Output/latest_scenario.ini"
+
 
 # Save user data if any
 mv $selector_path $selector_tmp 2> /dev/null
@@ -41,18 +44,20 @@ sparkle/CLI/add_feature_extractor.py $extractor_path > /dev/null
 sparkle/CLI/add_solver.py $solverA_path > /dev/null
 sparkle/CLI/add_solver.py $solverB_path > /dev/null
 
-# Activate test data to simulate the compute_features, run_solvers and construct_sparkle_portfolio_selector commands
+# Activate test data to simulate the compute_features, run_solvers and construct_portfolio_selector commands
+mkdir -p $selector_dir
+cp $scenario_source $scenario_path
 cp $selector_test $selector_path
 
 # Run portfolio selector on a single instance
 output_true="Running Sparkle portfolio selector done!"
-output=$(sparkle/CLI/run_sparkle_portfolio_selector.py $instance_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available| tail -1)
+output=$(sparkle/CLI/run_portfolio_selector.py $instance_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available| tail -1)
 
 if [[ $output == $output_true ]];
 then
-	echo "[success] ($slurm_available) run_sparkle_portfolio_selector on single instance test succeeded"
+	echo "[success] ($slurm_available) run_portfolio_selector on single instance test succeeded"
 else
-	echo "[failure] ($slurm_available) run_sparkle_portfolio_selector on single instance test failed with output:"
+	echo "[failure] ($slurm_available) run_portfolio_selector on single instance test failed with output:"
 	echo $output
 fi
 
@@ -61,13 +66,13 @@ if [[ $slurm_available == $slurm_true ]];
 then
 	output_true="Sparkle portfolio selector is running ..."
 fi
-output=$(sparkle/CLI/run_sparkle_portfolio_selector.py $instances_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available| tail -1)
+output=$(sparkle/CLI/run_portfolio_selector.py $instances_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available| tail -1)
 
 if [[ $output == $output_true ]];
 then
-	echo "[success] ($slurm_available) run_sparkle_portfolio_selector on instance directory test succeeded"
+	echo "[success] ($slurm_available) run_portfolio_selector on instance directory test succeeded"
 else
-	echo "[failure] ($slurm_available) run_sparkle_portfolio_selector on instance directory test failed with output:"
+	echo "[failure] ($slurm_available) run_portfolio_selector on instance directory test failed with output:"
 	echo $output
 fi
 

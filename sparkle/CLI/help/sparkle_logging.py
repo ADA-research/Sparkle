@@ -49,16 +49,15 @@ def _update_caller_file_path(timestamp: str) -> None:
     """
     caller_file = caller + "_main_log.txt"
     caller_dir = Path(timestamp + "_" + caller)
+    log_dir = gv.settings().DEFAULT_output / "Log"
     # Set caller directory for other Sparkle functions to use
     global caller_out_dir
     caller_out_dir = Path(caller_dir)
     global caller_log_path
-    caller_log_path = PurePath(gv.settings().DEFAULT_output / caller_out_dir
-                               / caller_file)
+    print(caller_out_dir)
+    caller_log_path = PurePath(log_dir / caller_out_dir / caller_file)
     global caller_log_dir
-    log_dir_name = Path("Log")
-    caller_log_dir = (
-        gv.settings().DEFAULT_output / log_dir_name / caller_out_dir)
+    caller_log_dir = log_dir / caller_out_dir
 
     # Create needed directories if they don't exist
     caller_dir = Path(caller_log_path).parents[0]
@@ -66,10 +65,11 @@ def _update_caller_file_path(timestamp: str) -> None:
     caller_log_dir.mkdir(parents=True, exist_ok=True)
 
     # If the caller output file does not exist yet, write the header
+    print(caller_log_path)
     if not Path(caller_log_path).is_file():
         output_header = ("     Timestamp                              Path           "
                          "                  Description\n")
-        with Path(str(caller_log_path)).open("a") as output_file:
+        with Path(caller_log_path).open("a") as output_file:
             output_file.write(output_header)
 
 
@@ -84,9 +84,9 @@ def add_output(output_path: str, description: str) -> None:
     # Prepare logging information
     timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
     output_str = f"{timestamp}\t{output_path}\t{description}\n"
-
+    print(caller_log_path)
     # Write output path and description to caller file
-    with Path(str(caller_log_path)).open("a") as output_file:
+    with Path(caller_log_path).open("a") as output_file:
         output_file.write(output_str)
 
 

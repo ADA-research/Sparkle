@@ -69,9 +69,4 @@ if __name__ == "__main__":
 
     shutil.rmtree(solver_path)
 
-    if gv.settings().DEFAULT_algorithm_selector_path.exists():
-        shutil.rmtree(gv.settings().DEFAULT_algorithm_selector_path)
-        print("Removing Sparkle portfolio selector "
-              f"{gv.settings().DEFAULT_algorithm_selector_path} done!")
-
     print(f"Removing solver {solver_path.name} done!")

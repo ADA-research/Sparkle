@@ -355,7 +355,7 @@ to get a description of the required arguments and other options.
 % *  compute_features.py
 % *  compute_marginal_contribution.py
 % *  :ref:`cmd:configure_solver`
-% *  construct_sparkle_portfolio_selector.py
+% *  construct_portfolio_selector.py
 % *  :ref:`cmd:generate_report`
 % *  :ref:`cmd:initialise`
 % *  load_snapshot.py
@@ -364,7 +364,7 @@ to get a description of the required arguments and other options.
 % *  remove_solver.py
 % *  run_ablation.py
 % *  run_solvers.py
-% *  run_sparkle_portfolio_selector.py
+% *  run_portfolio_selector.py
 % *  run_status.py
 % *  save_snapshot.py
 % *  system_status.py

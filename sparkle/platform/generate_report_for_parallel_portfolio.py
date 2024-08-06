@@ -269,8 +269,10 @@ def parallel_report_variables(target_directory: Path,
     Returns:
         A dictionary that maps variables used in the LaTeX report to values.
     """
-    variables_dict = {"bibliographypath":
-                      str(bibliograpghy_path.absolute())}
+    variables_dict = {"bibliographypath": bibliograpghy_path.absolute(),
+                      "cutoffTime": cutoff,
+                      "performanceMetric": objective.metric,
+                      "numInstanceClasses": "1"}  # Currently no support for multi sets
     # Get the results data
     csv_data = [line.split(",") for line in
                 (parallel_portfolio_path / "results.csv").open("r").readlines()]
@@ -280,11 +282,8 @@ def parallel_report_variables(target_directory: Path,
         if row[0] in results.keys():
             results[row[0]].append([row[1], row[2], row[3]])
 
-    variables_dict["numSolvers"] = str(len(solver_list))
+    variables_dict["numSolvers"] = len(solver_list)
     variables_dict["solverList"] = get_solver_list_latex(solver_list)
-    variables_dict["numInstanceClasses"] = "1"  # We currently do not support multi sets
-    variables_dict["cutoffTime"] = str(cutoff)
-    variables_dict["performanceMetric"] = objective.metric
     variables_dict["instanceClassList"] =\
         sgfs.get_instance_set_count_list(instance_set.instance_paths)
 

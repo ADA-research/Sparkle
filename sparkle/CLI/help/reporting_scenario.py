@@ -63,7 +63,7 @@ class ReportingScenario:
         # If the file does not exist set default values
         if not Path(file_path).is_file():
             self.set_latest_scenario()
-            self.set_selection_portfolio_path()
+            self.set_selection_scenario_path()
             self.set_selection_test_case_directory()
             self.set_parallel_portfolio_path()
             self.set_parallel_portfolio_instance_path()
@@ -87,14 +87,13 @@ class ReportingScenario:
                     file_scenario.remove_option(section, option)
 
             section = "selection"
-            option_names = ("portfolio_path",)  # Comma to make it a tuple
+            option_names = ("scenario_path",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = Path(file_scenario.get(section, option))
-                    self.set_selection_portfolio_path(value)
+                    self.set_selection_scenario_path(value)
                     file_scenario.remove_option(section, option)
 
-            section = "selection"
             option_names = ("test_case_directory",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
@@ -228,17 +227,17 @@ class ReportingScenario:
 
     # Selection settings ###
 
-    def set_selection_portfolio_path(
+    def set_selection_scenario_path(
             self: ReportingScenario, value: Path = DEFAULT_selection_portfolio_path)\
             -> None:
         """Set the path to portfolio selector used for algorithm selection."""
         section = "selection"
-        name = "portfolio_path"
+        name = "scenario_path"
         self.path_setter(section, name, value)
 
-    def get_selection_portfolio_path(self: ReportingScenario) -> Path:
+    def get_selection_scenario_path(self: ReportingScenario) -> Path:
         """Return the path to portfolio selector used for algorithm selection."""
-        return Path(self.__scenario["selection"]["portfolio_path"])
+        return Path(self.__scenario["selection"]["scenario_path"])
 
     def set_selection_test_case_directory(
             self: ReportingScenario,

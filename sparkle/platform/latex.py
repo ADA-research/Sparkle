@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper classes/method for LaTeX and bibTeX."""
+import sys
 from shutil import which
 from pathlib import Path
 import subprocess
 from enum import Enum
+
+import numpy as np
+import pandas as pd
+import plotly.express as px
+import plotly.io as pio
+
+pio.kaleido.scope.mathjax = None  # Bug fix for kaleido
 
 
 class ReportType(str, Enum):
@@ -35,20 +43,129 @@ def underscore_for_latex(string: str) -> str:
     return string.replace("_", "\\_")
 
 
-def get_directory_list(source: Path | list[Path]) -> str:
-    """Get the Path names in a list for use in a LaTeX document.
+def list_to_latex(content: list | list[tuple]) -> str:
+    """Convert a list to LaTeX.
 
     Args:
-        source: The source directory or list of Paths
+        content: The list to convert. If a tuple, first item will be boldface.
 
     Returns:
-        The list of directory names as LaTeX str.
+        The list as LaTeX str.
     """
-    if isinstance(source, Path):
-        source = [p for p in source.iterdir()]
-    # Patching with Path(path) in case a list of str is given
-    return "".join(f"\\item \\textbf{{{Path(path).name}}}\n"
-                   for path in source)
+    if isinstance(content[0], tuple):
+        return "".join(f"\\item \\textbf{{{item[0]}}}{item[1]}" for item in content)
+    return "".join(f"\\item {item}\n" for item in content)
+
+
+def generate_comparison_plot(points: list,
+                             figure_filename: str,
+                             xlabel: str = "default",
+                             ylabel: str = "optimised",
+                             title: str = "",
+                             scale: str = "log",
+                             limit: str = "magnitude",
+                             limit_min: float = 0.2,
+                             limit_max: float = 0.2,
+                             penalty_time: float = None,
+                             replace_zeros: bool = True,
+                             magnitude_lines: int = 2147483647,
+                             output_dir: Path = None) -> None:
+    """Create comparison plots between two different solvers/portfolios.
+
+    Args:
+        points: list of points which represents with the performance results of
+        (solverA, solverB)
+        figure_filename: filename without filetype (e.g., .jpg) to save the figure to.
+        xlabel: Name of solverA (default: default)
+        ylabel: Name of solverB (default: optimised)
+        title: Display title in the image (default: None)
+        scale: [linear, log] (default: linear)
+        limit: The method to compute the axis limits in the figure
+            [absolute, relative, magnitude] (default: relative)
+            absolute: Uses the limit_min/max values as absolute values
+            relative: Decreases/increases relatively to the min/max values found in the
+            points. E.g., min/limit_min and max*limit_max
+            magnitude: Increases the order of magnitude(10) of the min/max values in the
+            points. E.g., 10**floor(log10(min)-limit_min)
+            and 10**ceil(log10(max)+limit_max)
+        limit_min: Value used to compute the minimum limit
+        limit_max: Value used to compute the maximum limit
+        penalty_time: Acts as the maximum value the figure takes in consideration for
+        computing the figure limits. This is only relevant for runtime objectives
+        replace_zeros: Replaces zeros valued performances to a very small value to make
+        plotting on log-scale possible
+        magnitude_lines: Draw magnitude lines (only supported for log scale)
+        output_dir: directory path to place the figure and its intermediate files in
+            (default: current working directory)
+    """
+    output_dir = Path() if output_dir is None else Path(output_dir)
+
+    df = pd.DataFrame(points, columns=[xlabel, ylabel])
+    if replace_zeros and (df < 0).any(axis=None):
+        print("WARNING: Negative valued performance values detected. Setting"
+              f" these values to {0.0}.")
+        df[df < 0] = 0.0
+
+    # process range values
+    min_point_value = df.min(numeric_only=True).min()
+    max_point_value = df.max(numeric_only=True).max()
+    if penalty_time is not None:
+        if penalty_time < max_point_value:
+            print("ERROR: Penalty time too small for the given performance data.")
+            sys.exit(-1)
+        max_point_value = penalty_time
+
+    if limit == "absolute":
+        min_value = limit_min
+        max_value = limit_max
+    elif limit == "relative":
+        min_value = (min_point_value * (1 / limit_min) if min_point_value > 0
+                     else min_point_value * limit_min)
+        max_value = (max_point_value * limit_max if max_point_value > 0
+                     else max_point_value * (1 / limit_max))
+    elif limit == "magnitude":
+        min_value = 10 ** (np.floor(np.log10(min_point_value)) - limit_min)
+        max_value = 10 ** (np.ceil(np.log10(max_point_value)) + limit_max)
+
+    if scale == "log" and np.min(points) <= 0:
+        raise Exception("Cannot plot negative and zero values on a log scales")
+
+    output_plot = output_dir / f"{figure_filename}.pdf"
+    log_scale = scale == "log"
+    fig = px.scatter(data_frame=df, x=xlabel, y=ylabel,
+                     range_x=[min_value, max_value], range_y=[min_value, max_value],
+                     title=title, log_x=log_scale, log_y=log_scale,
+                     width=500, height=500)
+    # Add in the seperation line
+    fig.add_shape(type="line", x0=0, y0=0, x1=max_value, y1=max_value,
+                  line=dict(color="lightgrey", width=1))
+    fig.update_traces(marker=dict(color="RoyalBlue", symbol="x"))
+    fig.update_layout(
+        plot_bgcolor="white"
+    )
+    fig.update_xaxes(
+        type="linear" if not log_scale else "log",
+        mirror=True,
+        tickmode="linear",
+        ticks="outside",
+        tick0=0,
+        dtick=100 if not log_scale else 1,
+        showline=True,
+        linecolor="black",
+        gridcolor="lightgrey"
+    )
+    fig.update_yaxes(
+        type="linear" if not log_scale else "log",
+        mirror=True,
+        tickmode="linear",
+        ticks="outside",
+        tick0=0,
+        dtick=100 if not log_scale else 1,
+        showline=True,
+        linecolor="black",
+        gridcolor="lightgrey"
+    )
+    fig.write_image(output_plot)
 
 
 def fill_template_tex(template_tex: str, variables: dict) -> str:
@@ -62,7 +179,8 @@ def fill_template_tex(template_tex: str, variables: dict) -> str:
         The populated latex string.
     """
     for variable_key, target_value in variables.items():
-        variable = "@@" + variable_key + "@@"
+        variable = f"@@{variable_key}@@"
+        target_value = str(target_value)
         # We don't modify variable names in the Latex file
         if "\\includegraphics" not in target_value and "\\label" not in target_value:
             # Rectify underscores in target_value

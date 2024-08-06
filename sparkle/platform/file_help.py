@@ -58,5 +58,4 @@ def remove_temporary_files() -> None:
     for filename in cli_help_path.glob("*.pyc"):
         shutil.rmtree(cli_help_path.joinpath(filename))
     shutil.rmtree(Path("Tmp/"), ignore_errors=True)
-    shutil.rmtree(Path("Feature_Data/Tmp/"), ignore_errors=True)
     shutil.rmtree(Path("Log/"), ignore_errors=True)

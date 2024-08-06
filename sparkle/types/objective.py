@@ -27,6 +27,21 @@ class PerformanceMeasure(Enum):
             return PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION
         return PerformanceMeasure.ERR
 
+    @staticmethod
+    def to_str(performance_measure: PerformanceMeasure) -> str:
+        """Return a given PerformanceMeasure as str."""
+        if performance_measure == PerformanceMeasure.DEFAULT:
+            return "DEFAULT"
+        if performance_measure == PerformanceMeasure.RUNTIME:
+            return "RUNTIME"
+        elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
+            return "QUALITY_ABSOLUTE"
+        elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
+            return "QUALITY_ABSOLUTE_MAXIMISATION"
+        elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
+            return "QUALITY_ABSOLUTE_MINIMISATION"
+        return "ERR"
+
 
 class SparkleObjective():
     """Objective for Sparkle specified by user.
@@ -50,6 +65,11 @@ class SparkleObjective():
         if self.PerformanceMeasure == PerformanceMeasure.ERR:
             print(f"WARNING: Performance measure {performance_measure} not found!")
         return
+
+    @property
+    def str_id(self: SparkleObjective) -> str:
+        """Return a string of the format TYPE:METRIC."""
+        return f"{PerformanceMeasure.to_str(self.PerformanceMeasure)}:{self.metric}"
 
     @staticmethod
     def from_multi_str(performance_setting: str) -> list[SparkleObjective]:
