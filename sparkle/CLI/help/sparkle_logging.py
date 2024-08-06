@@ -54,7 +54,6 @@ def _update_caller_file_path(timestamp: str) -> None:
     global caller_out_dir
     caller_out_dir = Path(caller_dir)
     global caller_log_path
-    print(caller_out_dir)
     caller_log_path = PurePath(log_dir / caller_out_dir / caller_file)
     global caller_log_dir
     caller_log_dir = log_dir / caller_out_dir
