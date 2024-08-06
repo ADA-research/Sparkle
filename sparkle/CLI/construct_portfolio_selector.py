@@ -114,13 +114,12 @@ if __name__ == "__main__":
 
     # TODO: Allow user to specify subsets of data to be used
 
-    # Selector is named after the instance sets it will be trained on
-    instance_sets = [instance_set.name
-                     for instance_set in gv.settings().DEFAULT_instance_dir.iterdir()]
+    # Selector is named after the solvers it can predict, sort for permutation invariance
+    solvers = sorted([s.name for s in gv.settings().DEFAULT_solver_dir.iterdir()])
     selection_scenario_path = (
         gv.settings().DEFAULT_selection_output
         / gv.settings().DEFAULT_general_sparkle_selector.name
-        / "_".join(instance_sets))
+        / "_".join(solvers))
 
     # Update latest scenario
     gv.latest_scenario().set_selection_scenario_path(selection_scenario_path)
