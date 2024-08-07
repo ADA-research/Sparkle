@@ -10,7 +10,7 @@ from runrunner.base import Runner
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import sparkle_logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
-from sparkle.CLI.help import run_solver_help as srcsh
+from sparkle.CLI.support import run_solvers_help as rsh
 from sparkle.instance import InstanceSet
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
@@ -84,11 +84,11 @@ if __name__ == "__main__":
         solver, train_set, performance=objective.PerformanceMeasure)
 
     # Call the configured solver
-    run = srcsh.call_solver(instance_set,
-                            solver,
-                            config=config_str,
-                            commandname=CommandName.RUN_CONFIGURED_SOLVER,
-                            run_on=run_on)
+    run = rsh.call_solver(instance_set,
+                          solver,
+                          config=config_str,
+                          commandname=CommandName.RUN_CONFIGURED_SOLVER,
+                          run_on=run_on)
 
     # Print result
     if run_on == Runner.SLURM:
