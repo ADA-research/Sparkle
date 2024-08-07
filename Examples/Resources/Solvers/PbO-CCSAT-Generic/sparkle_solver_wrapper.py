@@ -68,5 +68,3 @@ outdir = {"status": status.value,
           "solver_call": solver_cmd + params}
 
 print(outdir)
-
-print("hello")
