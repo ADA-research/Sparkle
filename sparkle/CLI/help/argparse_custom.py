@@ -207,11 +207,12 @@ InstancesPathRemoveArgument = \
                               "type": str,
                               "help": "path to or nickname of the instance set"})
 
-JobIdArgument = ArgumentContainer(names=["--job-id"],
-                                  kwargs={"required": False,
-                                          "type": str,
-                                          "default": None,
-                                          "help": "job ID to wait for"})
+JobIDsArgument = ArgumentContainer(names=["--job-ids"],
+                                   kwargs={"required": False,
+                                           "nargs": "+",
+                                           "type": str,
+                                           "default": None,
+                                           "help": "job ID to wait for"})
 
 NicknameFeatureExtractorArgument = \
     ArgumentContainer(names=["--nickname"],
