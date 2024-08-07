@@ -1,6 +1,7 @@
 """This module helps with the argument parsing for solver wrappers."""
 from pathlib import Path
 import ast
+from typing import Any
 
 
 def parse_commandline_dict(args: list[str]) -> dict:
@@ -20,8 +21,15 @@ def parse_commandline_dict(args: list[str]) -> dict:
     return ast.literal_eval(dict_str)
 
 
-def parse_solver_wrapper_args(args: list[str]) -> dict:
-    """Parse the arguments passed to the solver wrapper."""
+def parse_solver_wrapper_args(args: list[str]) -> dict[Any]:
+    """Parse the arguments passed to the solver wrapper.
+
+    Args:
+      args: a list of arguments passed via the command line. It is ensured by Sparkle
+            that this list contains certain keys such as `solver_dir`.
+
+    Returns:
+      A dictionary mapping argument names to their currently held values."""
     args_dict = parse_commandline_dict(args)
 
     # Some data needs specific formatting
