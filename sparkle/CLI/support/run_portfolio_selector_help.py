@@ -16,7 +16,7 @@ from sparkle.CLI.support import run_solvers_help as srs
 from sparkle.platform import CommandName
 
 
-# Only called in call_sparkle_portfolio_selector_solve_instance
+# Only called in portfolio_selector_solve_instance
 def call_solver_solve_instance_within_cutoff(
         solver: Solver,
         instance: Path,
@@ -43,7 +43,7 @@ def call_solver_solve_instance_within_cutoff(
         flag_solved = True
 
     if performance_data is not None:
-        solver_name = "sparkle_portfolio_selector"
+        solver_name = "portfolio_selector"
         print(f"Trying to write: {cpu_time_penal}, {solver_name}, {instance}")
         try:
             # Creating a seperate locked file for writing
@@ -66,13 +66,15 @@ def call_solver_solve_instance_within_cutoff(
     return flag_solved
 
 
-# Only called in portfolio_core and run_sparkle_portfolio_selector
+# Only called in portfolio_core and run_portfolio_selector
 def portfolio_selector_solve_instance(
+        selector_model: Path,
         instance: Path,
         performance_data: PerformanceDataFrame = None) -> None:
     """Call the Sparkle portfolio selector to solve a single instance.
 
     Args:
+        selector_model: The selector to run
         instance: Path to the instance to run on
         performance_data: path to the performance data
     """
@@ -102,8 +104,7 @@ def portfolio_selector_solve_instance(
 
     print("Sparkle portfolio selector predicting ...")
     selector = gv.settings().get_general_sparkle_selector()
-    predict_schedule = selector.run(gv.settings().DEFAULT_algorithm_selector_path,
-                                    feature_vector)
+    predict_schedule = selector.run(selector_model, feature_vector)
 
     if predict_schedule is None:
         # Selector Failed to produce prediction
@@ -122,7 +123,7 @@ def portfolio_selector_solve_instance(
             print("The instance is not solved in this call")
 
 
-# Only called in run_sparkle_portfolio_selector
+# Only called in run_portfolio_selector
 def run_portfolio_selector_on_instances(
         instances: list[Path],
         performance_data: PerformanceDataFrame,
@@ -143,23 +144,24 @@ def run_portfolio_selector_on_instances(
         performance_data.add_instance(str(instance_path))
 
     performance_data.add_solver(portfolio_selector.name)
-
     performance_data.save_csv()
 
-    # TODO: Instead of using run_sparkle_portfolio_core.py, we should do here:
+    # TODO: Instead of using run_portfolio_selector_core.py, we should do here:
     # 1. Get feature data for every feature extractor
     # 2. Use autofolio call to predict the solver per instance with
     #    a dependency on run object of 1
     # 3. Run the solver and place the results in the performance dataframe w dependency
     #    (Difficult, which solver is determined by 2)
-    run_core = Path(__file__).parent.resolve() / "core" / "run_sparkle_portfolio_core.py"
+    run_core = Path(__file__).parent.parent.resolve() /\
+        "core" / "run_portfolio_selector_core.py"
     cmd_list = [f"python {run_core} "
+                f"--selector {portfolio_selector} "
                 f"--performance-data-csv {performance_data.csv_filepath} "
                 f"--instance {instance_path}" for instance_path in instances]
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
-        name=CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR,
+        name=CommandName.RUN_PORTFOLIO_SELECTOR,
         base_dir=gv.settings().DEFAULT_tmp_output,
         sbatch_options=gv.settings().get_slurm_extra_options(as_args=True),
         srun_options=["-N1", "-n1"])

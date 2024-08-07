@@ -120,11 +120,6 @@ if __name__ == "__main__":
 
     print(f"Adding solver {solver_source.name} done!")
 
-    if gv.settings().DEFAULT_algorithm_selector_path.exists():
-        gv.settings().DEFAULT_algorithm_selector_path.unlink()
-        print("Removing Sparkle portfolio selector "
-              f"{gv.settings().DEFAULT_algorithm_selector_path} done!")
-
     if nickname is not None:
         sfh.add_remove_platform_item(solver_directory,
                                      gv.solver_nickname_list_path, key=nickname)
@@ -139,8 +134,8 @@ if __name__ == "__main__":
         sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
         srun_options = ["-N1", "-n1"] + sbatch_options
         run_construct_portfolio_selector = rrr.add_to_queue(
-            cmd="sparkle/CLI/construct_sparkle_portfolio_selector.py",
-            name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
+            cmd="sparkle/CLI/construct_portfolio_selector.py",
+            name=CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
             dependencies=dependency_run_list,
             base_dir=gv.settings().DEFAULT_tmp_output,
             sbatch_options=sbatch_options,

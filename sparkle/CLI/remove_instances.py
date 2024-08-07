@@ -68,9 +68,4 @@ if __name__ == "__main__":
     # Remove the directory and all its files
     shutil.rmtree(instances_path)
 
-    if gv.settings().DEFAULT_algorithm_selector_path.exists():
-        shutil.rmtree(gv.settings().DEFAULT_algorithm_selector_path)
-        print("Removing Sparkle portfolio selector "
-              f"{gv.settings().DEFAULT_algorithm_selector_path} done!")
-
     print(f"Removing instances in directory {instances_path} done!")

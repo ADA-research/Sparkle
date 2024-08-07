@@ -47,8 +47,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.run_on is not None:
-        gv.settings().set_run_on(
-            args.run_on.value, SettingState.CMD_LINE)
+        gv.settings().set_run_on(args.run_on.value, SettingState.CMD_LINE)
     run_on = gv.settings().get_run_on()
 
     instance_set = resolve_object_name(
@@ -57,7 +56,7 @@ if __name__ == "__main__":
         gv.settings().DEFAULT_instance_dir, InstanceSet)
 
     check_for_initialise(
-        COMMAND_DEPENDENCIES[CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR]
+        COMMAND_DEPENDENCIES[CommandName.RUN_PORTFOLIO_SELECTOR]
     )
 
     if ac.set_by_user(args, "settings_file"):
@@ -75,10 +74,12 @@ if __name__ == "__main__":
 
     if gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure\
             == PerformanceMeasure.QUALITY_ABSOLUTE:
-        print("ERROR: The run_sparkle_portfolio_selector command is not yet implemented"
+        print("ERROR: The run_portfolio_selector command is not yet implemented"
               " for the QUALITY_ABSOLUTE performance measure!")
         sys.exit(-1)
-    selector_path = gv.settings().DEFAULT_selection_output / "sparkle_portfolio_selector"
+    selector_scenario = gv.latest_scenario().get_selection_scenario_path()
+    print(selector_scenario)
+    selector_path = selector_scenario / "portfolio_selector"
     if not selector_path.exists() or not selector_path.is_file():
         print("ERROR: The portfolio selector could not be found. Please make sure to "
               "first construct a portfolio selector.")
@@ -109,7 +110,7 @@ if __name__ == "__main__":
         instance = instance_set.instance_paths[0]
         if instance_set.multi_file:
             instance_set._instance_names[0]
-        srpsh.portfolio_selector_solve_instance(instance)
+        srpsh.portfolio_selector_solve_instance(selector_path, instance)
         print("Running Sparkle portfolio selector done!")
     else:
         print("Input instance or instance directory error!")

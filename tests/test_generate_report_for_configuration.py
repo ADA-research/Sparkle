@@ -194,8 +194,7 @@ def test_get_figure_configure_vs_default(mocker: MockFixture) -> None:
     mock_data = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_data_for_plot",
                              return_value=points)
-    mock_plot = mocker.patch("sparkle.platform.generate_report_for_configuration."
-                             "generate_comparison_plot")
+    mock_plot = mocker.patch("sparkle.platform.latex.generate_comparison_plot")
 
     figure_string = sgrch.get_figure_configure_vs_default(configured_dir,
                                                           default_dir,
@@ -239,8 +238,7 @@ def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
     mock_data = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_data_for_plot",
                              return_value=points)
-    mock_plot = mocker.patch("sparkle.platform.generate_report_for_configuration."
-                             "generate_comparison_plot")
+    mock_plot = mocker.patch("sparkle.platform.latex.generate_comparison_plot")
 
     figure_string = sgrch.get_figure_configure_vs_default(configured_dir,
                                                           default_dir,
@@ -441,11 +439,9 @@ def test_configuration_report_variables_with_features(mocker: MockFixture) -> No
     mock_test = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_dict_variable_to_value_test",
                              return_value=test_dict)
-    mock_iterdir = mocker.patch("pathlib.Path.iterdir",
-                                return_value=[Path("extract1"), Path("extract2")])
-    mock_extractor_list = mocker.patch("sparkle.platform.generate_report_for_selection."
-                                       "get_feature_extractor_list",
-                                       return_value="43")
+    mocker.patch("pathlib.Path.iterdir",
+                 return_value=[Path("extract1"), Path("extract2")])
+    mocker.patch("sparkle.platform.latex.list_to_latex", return_value="43")
     mocker.patch("pathlib.Path.mkdir", return_value=None)
     extractor_dir = Path("extract/dir")
     full_dict = sgrch.configuration_report_variables(
@@ -458,8 +454,6 @@ def test_configuration_report_variables_with_features(mocker: MockFixture) -> No
     mock_test.assert_called_once_with(
         output_dir, solver, configurator, validator, ablation_scenario, train_instance,
         test_instance, 1)
-    mock_iterdir.assert_called_once()
-    mock_extractor_list.assert_called_once_with(extractor_dir)
     assert full_dict == {
         "testBool": r"\testtrue",
         "numFeatureExtractors": "2",
@@ -478,7 +472,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     validation_data = [
         ["SolverName", "{}", "InstanceSetName", "InstanceName", "STATUS", "0", "25.323"]]
     report_dir = "reports/directory"
-    cutoff = "60"
+    cutoff = 60
     configurator.scenario.cutoff_time = 60
     configurator.scenario.number_of_runs = 25
     configurator.scenario.wallclock_time = 600
@@ -533,21 +527,21 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
         "solver": solver.name,
         "instanceSetTrain": train_instance.name,
         "sparkleVersion": "0.8",
-        "numInstanceInTrainingInstanceSet": "1",
-        "numSmacRuns": "25",
+        "numInstanceInTrainingInstanceSet": 1,
+        "numSmacRuns": 25,
         "smacObjective": "QUALITY",
-        "smacWholeTimeBudget": "600",
+        "smacWholeTimeBudget": 600,
         "smacEachRunCutoffTime": cutoff,
         "optimisedConfiguration": "123",
-        "optimisedConfigurationTrainingPerformancePAR": "42.1",
-        "defaultConfigurationTrainingPerformancePAR": "42.2",
+        "optimisedConfigurationTrainingPerformancePAR": 42.1,
+        "defaultConfigurationTrainingPerformancePAR": 42.2,
         "figure-configured-vs-default-train": "figure-string",
-        "timeoutsTrainDefault": "3",
-        "timeoutsTrainConfigured": "2",
-        "timeoutsTrainOverlap": "1",
+        "timeoutsTrainDefault": 3,
+        "timeoutsTrainConfigured": 2,
+        "timeoutsTrainOverlap": 1,
         "ablationBool": "ablationtrue",
         "ablationPath": "ablation/path",
-        "bibliographypath": f"{bib_path.absolute()}",
+        "bibliographypath": bib_path.absolute(),
         "featuresBool": "\\featuresfalse"
     }
 
@@ -611,13 +605,13 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     mock_ablation_table.assert_called_once_with(ablation_scenario)
     assert test_dict == {
         "instanceSetTest": test_set.name,
-        "numInstanceInTestingInstanceSet": "1",
-        "optimisedConfigurationTestingPerformancePAR": "42.1",
-        "defaultConfigurationTestingPerformancePAR": "42.2",
+        "numInstanceInTestingInstanceSet": 1,
+        "optimisedConfigurationTestingPerformancePAR": 42.1,
+        "defaultConfigurationTestingPerformancePAR": 42.2,
         "figure-configured-vs-default-test": "figure-string",
-        "timeoutsTestDefault": "3",
-        "timeoutsTestConfigured": "2",
-        "timeoutsTestOverlap": "1",
+        "timeoutsTestDefault": 3,
+        "timeoutsTestConfigured": 2,
+        "timeoutsTestOverlap": 1,
         "ablationBool": "ablationtrue",
         "ablationPath": "ablation/path"
     }
@@ -642,8 +636,8 @@ def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:
     mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "configuration_report_variables",
                              return_value=value_dict)
-    mock_generate_report = mocker.patch("sparkle.platform.generate_report_for_selection."
-                                        "generate_report", return_value=None)
+    mock_generate_report = mocker.patch("sparkle.platform.latex.generate_report",
+                                        return_value=None)
 
     sgrch.generate_report_for_configuration(solver,
                                             configurator,
@@ -682,8 +676,8 @@ def test_generate_report_for_configuration(mocker: MockFixture) -> None:
     mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "configuration_report_variables",
                              return_value=value_dict)
-    mock_generate_report = mocker.patch("sparkle.platform.generate_report_for_selection"
-                                        ".generate_report", return_value=None)
+    mock_generate_report = mocker.patch("sparkle.platform.latex.generate_report",
+                                        return_value=None)
 
     sgrch.generate_report_for_configuration(solver,
                                             configurator,
