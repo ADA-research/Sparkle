@@ -25,11 +25,12 @@ def parse_solver_wrapper_args(args: list[str]) -> dict[Any]:
     """Parse the arguments passed to the solver wrapper.
 
     Args:
-      args: a list of arguments passed via the command line. It is ensured by Sparkle
+        args: a list of arguments passed via the command line. It is ensured by Sparkle
             that this list contains certain keys such as `solver_dir`.
 
     Returns:
-      A dictionary mapping argument names to their currently held values."""
+        A dictionary mapping argument names to their currently held values.
+    """
     args_dict = parse_commandline_dict(args)
 
     # Some data needs specific formatting
