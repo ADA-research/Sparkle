@@ -6,7 +6,8 @@ import sys
 import subprocess
 from pathlib import Path
 from sparkle.types import SolverStatus
-from sparkle.tools.solver_wrapper_parsing import *
+from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args, \
+    get_solver_call_params
 
 
 # Parse the arguments of the solver wrapper

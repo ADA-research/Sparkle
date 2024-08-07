@@ -1,3 +1,4 @@
+"""This module helps with the argument parsing for solver wrappers."""
 from pathlib import Path
 import ast
 
