@@ -23,12 +23,13 @@ if __name__ == "__main__":
     solver_dir = Path(sys.argv[1])
     args["solver_dir"] = str(solver_dir)
     args["instance"] = sys.argv[2]
-    args["specifics"] = sys.argv[3]
+    # sys.argv[3] are the specifics, not used by Sparkle
     args["cutoff_time"] = float(sys.argv[4])
-    args["run_length"] = int(sys.argv[5])
+    # sys.argv[5] is the run length, not used by Sparkle
     args["seed"] = int(sys.argv[6])
     cutoff_time = int(args["cutoff_time"])
     # 2. Build Run Solver call
+    # TODO: Use Solver object instead
     runsolver_binary = solver_dir / "runsolver"
     log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
     log_randstamp = int(random.getrandbits(32))

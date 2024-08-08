@@ -70,9 +70,7 @@ class Validator():
                 # Point to the config line in file
                 config = {"config_path": config}
             config["seed"] = index  # Could be a parameter
-            config["specifics"] = "rawres"
             config["cutoff_time"] = cut_off
-            config["run_length"] = "2147483647"  # Arbitrary, not used by SMAC wrapper
             for instance_set in instance_sets:
                 if subdir is None:
                     out_path = self.out_dir / f"{solver.name}_{instance_set.name}"
@@ -141,8 +139,7 @@ class Validator():
                 config_str = config_path.open("r").readlines()[row_idx]
                 solver_args = Solver.config_str_to_dict(config_str)
             else:
-                for def_arg in ["instance", "solver_dir", "cutoff_time",
-                                "seed", "specifics", "run_length"]:
+                for def_arg in ["instance", "solver_dir", "cutoff_time", "seed"]:
                     if def_arg in solver_args:
                         del solver_args[def_arg]
             solver_args = str(solver_args).replace('"', "'")

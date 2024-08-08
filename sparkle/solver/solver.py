@@ -6,10 +6,17 @@ from typing import Any
 import shlex
 import ast
 from pathlib import Path
-import subprocess
-from sparkle.tools import runsolver_parsing
+
 import pcsparser
+import runrunner as rrr
+from runrunner.local import LocalRun
+from runrunner.slurm import SlurmRun
+from runrunner.base import Status, Runner
+
+from sparkle.tools import runsolver_parsing, general as tg
 from sparkle.types import SparkleCallable, SolverStatus
+from sparkle.platform import CommandName
+from sparkle.solver.verifier import SolutionVerifier
 
 
 class Solver(SparkleCallable):
@@ -21,7 +28,8 @@ class Solver(SparkleCallable):
                  directory: Path,
                  raw_output_directory: Path = None,
                  runsolver_exec: Path = None,
-                 deterministic: bool = None) -> None:
+                 deterministic: bool = None,
+                 verifier: SolutionVerifier = None) -> None:
         """Initialize solver.
 
         Args:
@@ -32,9 +40,11 @@ class Solver(SparkleCallable):
                 By default, runsolver in directory.
             deterministic: Bool indicating determinism of the algorithm.
                 Defaults to False.
+            verifier: The solution verifier to use. If None, no verifier is used.
         """
         super().__init__(directory, runsolver_exec, raw_output_directory)
         self.deterministic = deterministic
+        self.verifier = verifier
         self.meta_data_file = self.directory / Solver.meta_data
 
         if self.raw_output_directory is None:
@@ -94,50 +104,90 @@ class Solver(SparkleCallable):
         return [p for p in parser.pcs.params if p["type"] == "parameter"]
 
     def build_cmd(self: Solver,
-                  instance: str | list[str] = None,
-                  configuration: dict = None,
-                  runsolver_configuration: list[str] = None) -> list[str]:
-        """Build the solver call on an instance with a configuration."""
-        if isinstance(configuration, str):
-            configuration = Solver.config_str_to_dict(configuration)
+                  instance: str | list[str],
+                  seed: int,
+                  cutoff_time: int = None,
+                  configuration: dict = None) -> list[str]:
+        """Build the solver call on an instance with a configuration.
+
+        Args:
+            instance: Path to the instance.
+            seed: Seed of the solver.
+            cutoff_time: Cutoff time for the solver.
+            configuration: Configuration of the solver.
+
+        Returns:
+            List of commands and arguments to execute the solver.
+        """
         if configuration is None:
             configuration = {}
         # Ensure configuration contains required entries for each wrapper
-        if "instance" not in configuration:
-            configuration["instance"] = instance
-        if "solver_dir" not in configuration:
-            configuration["solver_dir"] = str(self.directory.absolute())
-        if "specifics" not in configuration:
-            configuration["specifics"] = ""
-        if "run_length" not in configuration:
-            configuration["run_length"] = ""
-        if "cutoff_time" not in configuration:
+        configuration["solver_dir"] = str(self.directory.absolute())
+        configuration["instance"] = instance
+        configuration["seed"] = seed
+        if cutoff_time is not None:  # Use RunSolver
+            configuration["cutoff_time"] = cutoff_time
+            # Create RunSolver Logs
+            # --timestamp
+            #  instructs to timestamp each line of the solver standard output and
+            #  error files (which are then redirected to stdout)
+
+            # --use-pty
+            # use a pseudo-terminal to collect the solver output. Currently only
+            # available when lines are timestamped. Some I/O libraries (including
+            # the C library) automatically flushes the output after each line when
+            # the standard output is a terminal. There's no automatic flush when
+            # the standard output is a pipe or a plain file. See setlinebuf() for
+            # some details. This option instructs runsolver to use a
+            # pseudo-terminal instead of a pipe/file to collect the solver
+            # output. This fools the solver which will line-buffer its output.
+
+            # -w filename or --watcher-data filename
+            # sends the watcher informations to filename
+
+            # -v filename or --var filename
+            # save the most relevant information (times,...)
+            # in an easy to parse VAR=VALUE file
+
+            # -o filename or --solver-data filename
+            # redirects the solver output (both stdout and stderr) to filename
+            raw_result_path =\
+                Path(f"{self.name}_{instance}_{tg.get_time_pid_random_string()}.rawres")
+            runsolver_watch_data_path = raw_result_path.with_suffix(".log")
+            runsolver_values_path = raw_result_path.with_suffix(".val")
+
+            solver_cmd = [str(self.runsolver_exec.absolute()),
+                          "--timestamp", "--use-pty",
+                          "--cpu-limit", str(cutoff_time),
+                          "-w", str(runsolver_watch_data_path),
+                          "-v", str(runsolver_values_path),
+                          "-o", str(raw_result_path)]
+        else:
             configuration["cutoff_time"] = sys.maxsize
-        # Ensure stringification of dictionary will go correctly
-        configuration = {key: str(configuration[key]) for key in configuration}
-        # Ensure stringifcation of cmd call will go correctly
-        solver_cmd = []
-        if runsolver_configuration is not None:
-            # Ensure stringification of runsolver configuration is done correctly
-            runsolver_configuration = [str(runsolver_config) for runsolver_config in
-                                       runsolver_configuration]
-            # We wrap the solver call in the runsolver executable, by placing it in front
-            solver_cmd += [str(self.runsolver_exec.absolute())] + runsolver_configuration
+            solver_cmd = []
+
+        # Ensure stringification of dictionary will go correctly for key value pairs
         solver_cmd += [str((self.directory / Solver.wrapper).absolute()),
-                       str(configuration)]
+                       str({key: str(configuration[key]) for key in configuration})]
         return solver_cmd
 
-    def run(self: Solver, instance: str | list[str],
+    def run(self: Solver,
+            instance: str | list[str],
+            seed: int,
+            cutoff_time: int = None,
             configuration: dict = None,
-            runsolver_configuration: list[str] = None,
-            cwd: Path = None) -> dict[str, str]:
+            run_on: Runner = Runner.LOCAL,
+            sbatch_options: list[str] = None,
+            cwd: Path = None) -> SlurmRun | dict[str, str]:
         """Run the solver on an instance with a certain configuration.
 
         Args:
             instance: The instance to run the solver on, list in case of multi-file
+            seed: Seed to run the solver with. Fill with abitrary int in case of
+                determnistic solver.
+            cutoff_time: The cutoff time for the solver, measured through RunSolver.
+                If None, will be executed without RunSolver.
             configuration: The solver configuration to use. Can be empty.
-            runsolver_configuration: The runsolver configuration to wrap the solver
-                with. If None (default), runsolver will not be used.
             cwd: Path where to execute. Defaults to self.raw_output_directory.
 
         Returns:
@@ -146,23 +196,36 @@ class Solver(SparkleCallable):
         if cwd is None:
             cwd = self.raw_output_directory
         solver_cmd = self.build_cmd(instance,
-                                    configuration,
-                                    runsolver_configuration)
-        process = subprocess.run(solver_cmd,
-                                 cwd=cwd,
-                                 capture_output=True)
+                                    seed=seed,
+                                    cutoff_time=cutoff_time,
+                                    configuration=configuration)
 
-        # Subprocess resulted in error
-        if process.returncode != 0:
-            print(f"WARNING: Solver {self.name} execution seems to have failed!\n"
-                  f"The used command was: {solver_cmd}\n The error yielded was: \n"
-                  f"\t-stdout: '{process.stdout.decode()}'\n"
-                  f"\t-stderr: '{process.stderr.decode()}'\n")
-            return {"status": SolverStatus.ERROR, }
+        run = rrr.add_to_queue(runner=run_on,
+                               cmd=" ".join(solver_cmd),
+                               name=CommandName.RUN_SOLVER,
+                               base_dir=cwd,
+                               sbatch_options=sbatch_options)
 
-        return Solver.parse_solver_output(process.stdout.decode(),
-                                          runsolver_configuration,
-                                          cwd)
+        if isinstance(run, LocalRun):
+            run.wait()
+            # Subprocess resulted in error
+            if run.status == Status.ERROR:
+                print(f"WARNING: Solver {self.name} execution seems to have failed!\n"
+                      f"The used command was: {solver_cmd}\n The error yielded was: \n"
+                      f"\t-stdout: '{run.jobs[0].stdout}'\n"
+                      f"\t-stderr: '{run.jobs[0].stderr}'\n")
+                return {"status": SolverStatus.ERROR, }
+            runsolver_configuration = None
+            if solver_cmd[0] == str(self.runsolver_exec.absolute()):
+                runsolver_configuration = solver_cmd[:6]
+            solver_output = Solver.parse_solver_output(run.jobs[0].stdout,
+                                                       runsolver_configuration,
+                                                       cwd)
+            if self.verifier is not None:
+                solver_output["status"] = self.verifier.verifiy(
+                    instance, Path(runsolver_configuration[-1]))
+            return solver_output
+        return run
 
     @staticmethod
     def config_str_to_dict(config_str: str) -> dict[str, str]:

@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 # Sparkle SMAC wrapper VRP_heuristic_Jan_MkII_Sparkle
-
-import time
 import sys
 import subprocess
 from pathlib import Path
@@ -14,17 +12,13 @@ args = parse_commandline_dict(sys.argv[1:])
 # Extract and delete data that needs specific formatting
 solver_dir = Path(args["solver_dir"])
 instance = args["instance"]
-specifics = args["specifics"]
 cutoff_time = int(args["cutoff_time"]) + 1
-# run_length = args["run_length"]
 seed = args["seed"]
 
 del args["solver_dir"]
 del args["instance"]
 del args["cutoff_time"]
 del args["seed"]
-del args["specifics"]
-del args["run_length"]
 
 
 # Construct call from args dictionary
@@ -54,19 +48,6 @@ status = r'SUCCESS'  # always ok, code checks per iteration if cutoff time is ex
 
 if len(output_list) > 0:
     quality = output_list[-1].strip()
-
-if specifics == 'rawres':
-    tmp_directory = Path("tmp/")
-    time_stamp = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))
-    rawres_file_name = Path(f"{solver_name}_{instance_name}_{time_stamp}.rawres_solver")
-    if Path.cwd().name != tmp_directory.name:
-        tmp_directory.mkdir(exist_ok=True)
-        raw_result_path = tmp_directory / rawres_file_name
-    else:
-        raw_result_path = rawres_file_name
-    raw_result_path.parent.mkdir(parents=True, exist_ok=True)
-    with raw_result_path.open('w') as outfile:
-        outfile.write(str(solver_cmd + params) + "\n" + output_str)
 
 outdir = {"status": status,
           "quality": quality,

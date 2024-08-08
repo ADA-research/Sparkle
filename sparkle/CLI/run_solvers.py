@@ -30,8 +30,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.TargetCutOffTimeRunSolversArgument.kwargs)
     parser.add_argument(*ac.AlsoConstructSelectorAndReportArgument.names,
                         **ac.AlsoConstructSelectorAndReportArgument.kwargs)
-    parser.add_argument(*ac.VerifierArgument.names,
-                        **ac.VerifierArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,

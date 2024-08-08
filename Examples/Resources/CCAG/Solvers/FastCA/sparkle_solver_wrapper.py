@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """FastCA Solver wrapper."""
-
-import time
 import sys
 import subprocess
 from pathlib import Path
@@ -20,15 +18,12 @@ for instance_file in args["instance"]:
     if Path(instance_file).suffix == ".model":
         instance = Path(instance_file)
         break
-specifics = args["specifics"]
 seed = args["seed"]
 
 del args["solver_dir"]
 del args["instance"]
 del args["cutoff_time"]
 del args["seed"]
-del args["specifics"]
-del args["run_length"]
 
 solver_name = "FastCA"
 if solver_dir != Path("."):
@@ -75,18 +70,6 @@ for line in output_str.splitlines():
         if temp_solution_quality < solution_quality:
             solution_quality = temp_solution_quality
             status = SolverStatus.SUCCESS
-
-if specifics == "rawres":
-    tmp_directory = Path("tmp/")
-    timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
-    rawres_file_name = Path(f"{solver_name}_{instance.name}_{timestamp}.rawres_solver")
-    if tmp_directory not in Path.cwd():
-        tmp_directory.mkdir(exist_ok=True)
-        raw_result_path = tmp_directory / rawres_file_name
-    else:
-        raw_result_path = rawres_file_name
-    with raw_result_path.open("w") as outfile:
-        outfile.write(output_str)
 
 outdir = {"status": status.value,
           "quality": solution_quality,

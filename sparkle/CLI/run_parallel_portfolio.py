@@ -27,6 +27,7 @@ from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.tools.runsolver_parsing import get_runtime, get_status
+from sparkle.types import SolverStatus
 
 
 def run_parallel_portfolio(instances_set: InstanceSet,
@@ -68,10 +69,8 @@ def run_parallel_portfolio(instances_set: InstanceSet,
                 log_path / f"{solver.name}_{instance.name}_{seed}_{log_timestamp}.raw"
             solver_call_list = solver.build_cmd(
                 str(instance),
-                configuration={"specifics": "",
-                               "seed": seed,
-                               "cutoff_time": cutoff,
-                               "run_length": cutoff},
+                configuration={"seed": seed,
+                               "cutoff_time": cutoff},
                 runsolver_configuration=["--timestamp", "--use-pty",
                                          "--cpu-limit", str(cutoff),
                                          "-w", runsolver_watch_log,
@@ -101,7 +100,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
     job_output_dict = {instance_name: {solver.name: {"killed": False,
                                                      "cpu-time": float(sys.maxsize),
                                                      "wc-time": float(sys.maxsize),
-                                                     "status": "UNKNOWN"}
+                                                     "status": SolverStatus.UNKNOWN}
                                        for solver in solvers}
                        for instance_name in instances_set._instance_names}
     n_instance_jobs = num_solvers * seeds_per_solver
@@ -129,7 +128,8 @@ def run_parallel_portfolio(instances_set: InstanceSet,
                     if solver_kills[solver_index] == seeds_per_solver:
                         solver_name = solvers[solver_index].name
                         job_output_dict[instance.name][solver_name]["killed"] = True
-                        job_output_dict[instance.name][solver_name]["status"] = "KILLED"
+                        job_output_dict[instance.name][solver_name]["status"] =\
+                            SolverStatus.KILLED
 
     # Now iterate over runsolver logs to get runtime, get the lowest value per seed
     for index, solver_logs in enumerate(runsolver_logs):
@@ -166,7 +166,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
     for index, instance_name in enumerate(instances_set._instance_names):
         index_str = f"[{index + 1}/{num_instances}] "
         instance_output = job_output_dict[instance_name]
-        if all([instance_output[k]["status"] == "TIMEOUT"
+        if all([instance_output[k]["status"] == SolverStatus.TIMEOUT
                 for k in instance_output.keys()]):
             print(f"\n{index_str}{instance_name} was not solved within the cutoff-time.")
             continue

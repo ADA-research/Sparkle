@@ -14,16 +14,12 @@ args = ast.literal_eval(sys.argv[1])
 
 # Extract and delete data that needs specific formatting
 instance = args["instance"]
-specifics = args["specifics"]
 cutoff_time = int(args["cutoff_time"]) + 1
-# run_length = args["run_length"]
 seed = args["seed"]
 
 del args["instance"]
 del args["cutoff_time"]
 del args["seed"]
-del args["specifics"]
-del args["run_length"]
 
 runsolver_binary = "./runsolver"
 solver_binary = "./VRP_SISRs"
