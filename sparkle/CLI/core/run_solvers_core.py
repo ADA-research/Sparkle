@@ -42,7 +42,8 @@ if __name__ == "__main__":
         instance_path = instance_set.get_path_by_name(instance_name)
         instance_key = instance_name
 
-    solver = Solver(Path(args.solver))
+    verifier = gv.settings().get_general_solution_verifier()
+    solver = Solver(Path(args.solver), verifier=verifier)
     performance_measure = PerformanceMeasure.from_str(args.performance_measure)
     key_str = f"{solver.name}_{instance_name}_{tg.get_time_pid_random_string()}"
     cutoff = gv.settings().get_general_target_cutoff_time()

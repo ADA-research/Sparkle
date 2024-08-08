@@ -151,8 +151,9 @@ class Solver(SparkleCallable):
 
             # -o filename or --solver-data filename
             # redirects the solver output (both stdout and stderr) to filename
+            inst_name = Path(instance).name
             raw_result_path =\
-                Path(f"{self.name}_{instance}_{tg.get_time_pid_random_string()}.rawres")
+                Path(f"{self.name}_{inst_name}_{tg.get_time_pid_random_string()}.rawres")
             runsolver_watch_data_path = raw_result_path.with_suffix(".log")
             runsolver_values_path = raw_result_path.with_suffix(".val")
 
@@ -212,12 +213,12 @@ class Solver(SparkleCallable):
             if run.status == Status.ERROR:
                 print(f"WARNING: Solver {self.name} execution seems to have failed!\n"
                       f"The used command was: {solver_cmd}\n The error yielded was: \n"
-                      f"\t-stdout: '{run.jobs[0].stdout}'\n"
-                      f"\t-stderr: '{run.jobs[0].stderr}'\n")
+                      f"\t-stdout: '{run.jobs[0]._process.stdout}'\n"
+                      f"\t-stderr: '{run.jobs[0]._process.stderr}'\n")
                 return {"status": SolverStatus.ERROR, }
             runsolver_configuration = None
             if solver_cmd[0] == str(self.runsolver_exec.absolute()):
-                runsolver_configuration = solver_cmd[:6]
+                runsolver_configuration = solver_cmd[:11]
             solver_output = Solver.parse_solver_output(run.jobs[0].stdout,
                                                        runsolver_configuration,
                                                        cwd)

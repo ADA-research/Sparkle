@@ -112,8 +112,9 @@ def portfolio_selector_solve_instance(
         # Selector Failed to produce prediction
         sys.exit(-1)
     print("Predicting done!")
+    verifier = gv.settings().get_general_solution_verifier()
     for solver, cutoff_time in predict_schedule:
-        solver = Solver(Path(solver))
+        solver = Solver(Path(solver), verifier=verifier)
         print(f"Calling solver {solver.name} with time budget {cutoff_time} ...")
         flag_solved = call_solver_solve_instance_within_cutoff(
             solver, instance, cutoff_time, performance_data)

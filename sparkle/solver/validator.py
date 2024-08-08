@@ -13,7 +13,6 @@ from sparkle.platform import CommandName
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.tools.runsolver_parsing import get_solver_output, get_solver_args
-from sparkle.tools import general as tg
 
 
 class Validator():
@@ -77,20 +76,12 @@ class Validator():
                 else:
                     out_path = self.out_dir / subdir
                 out_path.mkdir(exist_ok=True)
-                for instance_name, instance_path in zip(instance_set._instance_names,
-                                                        instance_set.instance_paths):
-                    raw_result_path = Path(f"{solver.name}_{instance_name}"
-                                           f"_{tg.get_time_pid_random_string()}.rawres")
-                    runsolver_watch_data_path = raw_result_path.with_suffix(".log")
-                    runsolver_values_path = raw_result_path.with_suffix(".val")
-                    runsolver_args = ["--timestamp", "--use-pty",
-                                      "--cpu-limit", cut_off,
-                                      "-w", runsolver_watch_data_path,
-                                      "-v", runsolver_values_path,
-                                      "-o", raw_result_path]
-                    config["instance"] = str(instance_path.absolute())
-                    cmds.append(" ".join(solver.build_cmd(
-                        configuration=config, runsolver_configuration=runsolver_args)))
+                for instance_path in instance_set.instance_paths:
+                    cmds.append(" ".join(
+                        solver.build_cmd(instance=instance_path.absolute(),
+                                         seed=index,
+                                         cutoff_time=cut_off,
+                                         configuration=config)))
                 out_paths.extend([out_path] * instance_set.size)
         return rrr.add_to_queue(
             runner=run_on,
