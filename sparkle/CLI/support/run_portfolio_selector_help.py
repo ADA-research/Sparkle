@@ -122,8 +122,7 @@ def portfolio_selector_solve_instance(
 
         if flag_solved:
             return
-        else:
-            print("The instance is not solved in this call")
+        print("The instance is not solved in this call")
 
 
 # Only called in run_portfolio_selector

@@ -68,8 +68,6 @@ class Validator():
             elif isinstance(config, Path):
                 # Point to the config line in file
                 config = {"config_path": config}
-            config["seed"] = index  # Could be a parameter
-            config["cutoff_time"] = cut_off
             for instance_set in instance_sets:
                 if subdir is None:
                     out_path = self.out_dir / f"{solver.name}_{instance_set.name}"
