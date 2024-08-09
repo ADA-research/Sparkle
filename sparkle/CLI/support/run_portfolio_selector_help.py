@@ -17,7 +17,7 @@ from sparkle.platform import CommandName
 
 
 # Only called in portfolio_selector_solve_instance
-def call_solver_solve_instance_within_cutoff(
+def call_solver_solve_instance(
         solver: Solver,
         instance: Path,
         cutoff_time: int,
@@ -116,7 +116,7 @@ def portfolio_selector_solve_instance(
     for solver, cutoff_time in predict_schedule:
         solver = Solver(Path(solver), verifier=verifier)
         print(f"Calling solver {solver.name} with time budget {cutoff_time} ...")
-        flag_solved = call_solver_solve_instance_within_cutoff(
+        flag_solved = call_solver_solve_instance(
             solver, instance, cutoff_time, performance_data)
         print(f"Calling solver {solver.name} done!")
 
