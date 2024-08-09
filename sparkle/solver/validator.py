@@ -76,7 +76,7 @@ class Validator():
                 else:
                     out_path = self.out_dir / subdir
                 out_path.mkdir(exist_ok=True)
-                for instance_path in instance_set.instance_paths:
+                for instance_path in instance_set._instance_paths:
                     cmds.append(" ".join(
                         solver.build_cmd(instance=instance_path.absolute(),
                                          seed=index,

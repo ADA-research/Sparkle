@@ -285,7 +285,7 @@ def parallel_report_variables(target_directory: Path,
     variables_dict["numSolvers"] = len(solver_list)
     variables_dict["solverList"] = get_solver_list_latex(solver_list)
     variables_dict["instanceClassList"] =\
-        sgfs.get_instance_set_count_list(instance_set.instance_paths)
+        sgfs.get_instance_set_count_list(instance_set._instance_paths)
 
     # Produce some statistics on the parallel portfolio
     solvers_solutions = {solver: 0 for solver in solver_list}

@@ -42,7 +42,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         solvers: List of solvers to run on the instances.
         run_on: Currently only supports Slurm.
     """
-    num_solvers, num_instances = len(solvers), len(instances_set.instance_paths)
+    num_solvers, num_instances = len(solvers), len(instances_set._instance_paths)
     seeds_per_solver = gv.settings().get_parallel_portfolio_number_of_seeds_per_solver()
     num_jobs = num_solvers * num_instances * seeds_per_solver
     parallel_jobs = min(gv.settings().get_number_of_jobs_in_parallel(), num_jobs)
@@ -58,7 +58,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
     log_path = portfolio_path / "run-status-path"
     log_path.mkdir()
     # Create a command for each instance-solver-seed combination
-    for instance, solver in itertools.product(instances_set.instance_paths, solvers):
+    for instance, solver in itertools.product(instances_set._instance_paths, solvers):
         for _ in range(seeds_per_solver):
             seed = int(random.getrandbits(32))
             runsolver_watch_log =\
@@ -109,7 +109,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         job_status_list = [r.status for r in run.jobs]
         job_status_completed = [status == Status.COMPLETED for status in job_status_list]
         # The jobs are sorted by instance
-        for i, instance in enumerate(instances_set.instance_paths):
+        for i, instance in enumerate(instances_set._instance_paths):
             if instances_done[i]:
                 continue
             instance_job_slice = slice(i * n_instance_jobs, (i + 1) * n_instance_jobs)

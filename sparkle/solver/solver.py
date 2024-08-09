@@ -17,6 +17,7 @@ from sparkle.tools import runsolver_parsing, general as tg
 from sparkle.types import SparkleCallable, SolverStatus
 from sparkle.platform import CommandName
 from sparkle.solver.verifier import SolutionVerifier
+from sparkle.instance import InstanceSet
 
 
 class Solver(SparkleCallable):
@@ -173,17 +174,19 @@ class Solver(SparkleCallable):
         return solver_cmd
 
     def run(self: Solver,
-            instance: str | list[str],
+            instance: str | list[str] | InstanceSet,
             seed: int,
             cutoff_time: int = None,
             configuration: dict = None,
             run_on: Runner = Runner.LOCAL,
+            commandname: CommandName = CommandName.RUN_SOLVER,
             sbatch_options: list[str] = None,
-            cwd: Path = None) -> SlurmRun | dict[str, str]:
+            cwd: Path = None) -> SlurmRun | list[dict[str, Any]] | dict[str, Any]:
         """Run the solver on an instance with a certain configuration.
 
         Args:
-            instance: The instance to run the solver on, list in case of multi-file
+            instance: The instance(s) to run the solver on, list in case of multi-file.
+                In case of an instance set, will run on all instances in the set.
             seed: Seed to run the solver with. Fill with abitrary int in case of
                 determnistic solver.
             cutoff_time: The cutoff time for the solver, measured through RunSolver.
@@ -196,36 +199,54 @@ class Solver(SparkleCallable):
         """
         if cwd is None:
             cwd = self.raw_output_directory
-        solver_cmd = self.build_cmd(instance,
-                                    seed=seed,
-                                    cutoff_time=cutoff_time,
-                                    configuration=configuration)
-
+        print(cwd)
+        cmds = []
+        if isinstance(instance, InstanceSet):
+            for inst in instance.instance_paths:
+                solver_cmd = self.build_cmd(inst.absolute(),
+                                            seed=seed,
+                                            cutoff_time=cutoff_time,
+                                            configuration=configuration)
+                cmds.append(" ".join(solver_cmd))
+        else:
+            solver_cmd = self.build_cmd(instance,
+                                        seed=seed,
+                                        cutoff_time=cutoff_time,
+                                        configuration=configuration)
+            cmds.append(" ".join(solver_cmd))
         run = rrr.add_to_queue(runner=run_on,
-                               cmd=" ".join(solver_cmd),
-                               name=CommandName.RUN_SOLVER,
+                               cmd=cmds,
+                               name=commandname,
                                base_dir=cwd,
+                               path=cwd,
                                sbatch_options=sbatch_options)
 
         if isinstance(run, LocalRun):
             run.wait()
             # Subprocess resulted in error
             if run.status == Status.ERROR:
-                print(f"WARNING: Solver {self.name} execution seems to have failed!\n"
-                      f"The used command was: {solver_cmd}\n The error yielded was: \n"
-                      f"\t-stdout: '{run.jobs[0]._process.stdout}'\n"
-                      f"\t-stderr: '{run.jobs[0]._process.stderr}'\n")
+                print(f"WARNING: Solver {self.name} execution seems to have failed!\n")
+                for i, job in enumerate(run.jobs):
+                    print(f"[Job {i}] The used command was: {cmds[i]}\n"
+                          "The error yielded was:\n"
+                          f"\t-stdout: '{run.jobs[0]._process.stdout}'\n"
+                          f"\t-stderr: '{run.jobs[0]._process.stderr}'\n")
                 return {"status": SolverStatus.ERROR, }
-            runsolver_configuration = None
-            if solver_cmd[0] == str(self.runsolver_exec.absolute()):
-                runsolver_configuration = solver_cmd[:11]
-            solver_output = Solver.parse_solver_output(run.jobs[0].stdout,
-                                                       runsolver_configuration,
-                                                       cwd)
-            if self.verifier is not None:
-                solver_output["status"] = self.verifier.verifiy(
-                    instance, Path(runsolver_configuration[-1]))
-            return solver_output
+
+            solver_outputs = []
+            for i, job in enumerate(run.jobs):
+                solver_cmd = cmds[i].split(" ")
+                runsolver_configuration = None
+                if solver_cmd[0] == str(self.runsolver_exec.absolute()):
+                    runsolver_configuration = solver_cmd[:11]
+                solver_output = Solver.parse_solver_output(run.jobs[i].stdout,
+                                                           runsolver_configuration,
+                                                           cwd)
+                if self.verifier is not None:
+                    solver_output["status"] = self.verifier.verifiy(
+                        instance, Path(runsolver_configuration[-1]))
+                solver_outputs.append(solver_output)
+            return solver_outputs if len(solver_outputs) > 1 else solver_output
         return run
 
     @staticmethod
