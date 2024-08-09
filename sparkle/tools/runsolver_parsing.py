@@ -78,7 +78,8 @@ def get_solver_output(runsolver_configuration: list[str],
         if conf == "-o" or conf == "--solver-data":
             # solver output was redirected
             solver_data_file = Path(runsolver_configuration[idx + 1])
-            solver_output = (log_dir / solver_data_file).open("r").read()
+            if (log_dir / solver_data_file).exists():
+                solver_output = (log_dir / solver_data_file).open("r").read()
         if "-v" in conf or "--var" in conf:
             value_data_file = Path(runsolver_configuration[idx + 1])
         if "--cpu-limit" in conf:

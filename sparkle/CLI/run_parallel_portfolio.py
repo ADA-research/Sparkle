@@ -77,8 +77,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
     check_interval = gv.settings().get_parallel_portfolio_check_interval()
     instances_done = [False] * num_instances
     # We record the 'best' of all seed results per solver-instance
-    job_output_dict = {instance_name: {solver.name: {"killed": False,
-                                                     "cpu_time": float(sys.maxsize),
+    job_output_dict = {instance_name: {solver.name: {"cpu_time": float(sys.maxsize),
                                                      "wc_time": float(sys.maxsize),
                                                      "status": SolverStatus.UNKNOWN}
                                        for solver in solvers}
@@ -107,7 +106,6 @@ def run_parallel_portfolio(instances_set: InstanceSet,
                     # All seeds of a solver were killed on instance, set state to killed
                     if solver_kills[solver_index] == seeds_per_solver:
                         solver_name = solvers[solver_index].name
-                        job_output_dict[instance.name][solver_name]["killed"] = True
                         job_output_dict[instance.name][solver_name]["status"] =\
                             SolverStatus.KILLED
 
@@ -127,7 +125,8 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         if cpu_time < job_output_dict[instance_name][solver_name]["cpu_time"]:
             job_output_dict[instance_name][solver_name]["cpu_time"] = cpu_time
             job_output_dict[instance_name][solver_name]["wc_time"] = wc_time
-            if not job_output_dict[instance_name][solver_name]["killed"]:
+            if (job_output_dict[instance_name][solver_name]["status"]
+                    != SolverStatus.KILLED):
                 job_output_dict[instance_name][solver_name]["status"] =\
                     solver_output["status"]
 
