@@ -48,10 +48,10 @@ if __name__ == "__main__":
     key_str = f"{solver.name}_{instance_name}_{tg.get_time_pid_random_string()}"
     cutoff = gv.settings().get_general_target_cutoff_time()
     solver_output = solver.run(
-        instance_path,
+        instance_path.absolute(),
         seed=args.seed if args.seed else 42,
         cutoff_time=cutoff,
-        cwd=Path.cwd(),
+        cwd=gv.settings().DEFAULT_tmp_output,
         run_on=Runner.LOCAL)
 
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:

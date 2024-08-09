@@ -34,10 +34,10 @@ def call_solver_solve_instance_within_cutoff(
         Whether the instance was solved by the solver
     """
     solver_output = solver.run(
-        instance,
+        instance.absolute(),
         seed=gv.get_seed(),
         cutoff_time=cutoff_time,
-        cwd=Path.cwd(),
+        cwd=gv.settings().DEFAULT_tmp_output,
         run_on=Runner.LOCAL)
     cpu_time, status = solver_output["cpu_time"], solver_output["status"]
     flag_solved = False

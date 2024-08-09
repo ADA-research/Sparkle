@@ -199,7 +199,6 @@ class Solver(SparkleCallable):
         """
         if cwd is None:
             cwd = self.raw_output_directory
-        print(cwd)
         cmds = []
         if isinstance(instance, InstanceSet):
             for inst in instance.instance_paths:
