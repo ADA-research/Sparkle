@@ -8,7 +8,7 @@ from typing import Any
 
 from runrunner.base import Runner
 
-from sparkle.platform.settings_objects import SettingState, Settings, SolutionVerifier
+from sparkle.platform.settings_objects import SettingState, Settings
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform import CommandName
 
@@ -467,12 +467,6 @@ ValidateArgument = ArgumentContainer(names=["--validate"],
 VerboseArgument = ArgumentContainer(names=["--verbose", "-v"],
                                     kwargs={"action": "store_true",
                                             "help": "output status in verbose mode"})
-
-VerifierArgument = \
-    ArgumentContainer(names=["--verifier"],
-                      kwargs={"choices": SolutionVerifier.__members__,
-                              "help": "problem specific verifier that should be used to "
-                                      "verify solutions found by a target algorithm"})
 
 WallClockTimeArgument = \
     ArgumentContainer(names=["--wallclock-time"],

@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """MiniSAT Solver wrapper."""
-
-import time
 import sys
 import subprocess
 from pathlib import Path
@@ -16,7 +14,6 @@ args = parse_commandline_dict(sys.argv[1:])
 # Extract and delete data that needs specific formatting
 solver_dir = Path(args["solver_dir"])
 instance = Path(args["instance"])
-specifics = args["specifics"]
 seed = args["seed"]
 cpu_limit = args["cutoff_time"]
 
@@ -24,8 +21,6 @@ del args["solver_dir"]
 del args["instance"]
 del args["cutoff_time"]
 del args["seed"]
-del args["specifics"]
-del args["run_length"]
 
 solver_name = "minisat"
 if solver_dir != Path("."):
@@ -102,19 +97,6 @@ for line in output_str.splitlines():
     elif line == r"INDETERMINATE":
         status = SolverStatus.TIMEOUT
         break
-
-if specifics == "rawres":
-    tmp_directory = Path("tmp/")
-    timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
-    rawres_file_name = Path(f"{solver_name}_{instance.name}_{timestamp}.rawres_solver")
-    if Path.cwd().name != tmp_directory.name:
-        tmp_directory.mkdir(exist_ok=True)
-        raw_result_path = tmp_directory / rawres_file_name
-    else:
-        raw_result_path = rawres_file_name
-    raw_result_path.parent.mkdir(parents=True, exist_ok=True)
-    with raw_result_path.open("w") as outfile:
-        outfile.write(output_str)
 
 outdir = {"status": status.value,
           "quality": 0,

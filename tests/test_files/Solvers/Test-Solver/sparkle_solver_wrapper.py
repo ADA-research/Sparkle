@@ -13,16 +13,12 @@ args = ast.literal_eval(sys.argv[1])
 
 # Extract and delete data that needs specific formatting
 instance = args["instance"]
-specifics = args["specifics"]
 cutoff_time = int(args["cutoff_time"]) + 1
-# run_length = args["run_length"]
 seed = args["seed"]
 
 del args["instance"]
 del args["cutoff_time"]
 del args["seed"]
-del args["specifics"]
-del args["run_length"]
 
 runsolver_binary = "./runsolver"
 solver_binary = "./PbO-CCSAT"
@@ -63,12 +59,6 @@ for line in output_list:
     elif line == r's UNKNOWN':
         status = SolverStatus.TIMEOUT
         break
-
-if specifics == 'rawres':
-    raw_result_path = Path(runsolver_watch_data_path.replace('.log', '.rawres'))
-    with raw_result_path.open('w') as outfile:
-        for line in output_list:
-            outfile.write(line)
 
 outdir = {"status": status.value,
           "solver_call": runsolver_call + params,

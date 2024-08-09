@@ -12,7 +12,7 @@ from runrunner.base import Runner, Run
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
 from sparkle.CLI.help import sparkle_logging as sl
-from sparkle.platform.settings_objects import Settings, SettingState, SolutionVerifier
+from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
@@ -30,8 +30,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.TargetCutOffTimeRunSolversArgument.kwargs)
     parser.add_argument(*ac.AlsoConstructSelectorAndReportArgument.names,
                         **ac.AlsoConstructSelectorAndReportArgument.kwargs)
-    parser.add_argument(*ac.VerifierArgument.names,
-                        **ac.VerifierArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
@@ -194,10 +192,6 @@ if __name__ == "__main__":
         gv.settings().set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
-
-    if args.verifier is not None:
-        gv.settings().set_general_solution_verifier(
-            SolutionVerifier(args.verifier.lower()), SettingState.CMD_LINE)
 
     if args.target_cutoff_time is not None:
         gv.settings().set_general_target_cutoff_time(

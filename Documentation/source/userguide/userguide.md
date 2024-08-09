@@ -320,11 +320,9 @@ solver_dir: str
 instance: str,
 cutoff_time: int,
 seed: int
-specifics: str
-run_length: str
 ```
 
-Note that all the Paths are handed as str and should be converted in the wrapper. The solver_dir specifies the Path to the executable directory of your algorithm. This can be empty, e.g. the cwd contains your executable. The instance is the path to the instance we are going to run on. Cutoff time is the maximum amount of time your algorithm is allowed to run. Seed is the seed for this run. Specifics and run_length are depricated and should not be used.
+Note that all the Paths are handed as str and should be converted in the wrapper. The solver_dir specifies the Path to the executable directory of your algorithm. This can be empty, e.g. the cwd contains your executable. The instance is the path to the instance we are going to run on. Cutoff time is the maximum amount of time your algorithm is allowed to run. Seed is the seed for this run.
 
 A solver wrapper should always return a dictionary by printing it, containing the following values:
 

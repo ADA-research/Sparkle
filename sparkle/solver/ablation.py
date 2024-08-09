@@ -140,7 +140,7 @@ class AblationScenario:
         # We give the Ablation script the paths of the instances
         file_instance = self.scenario_dir / f"instances{file_suffix}"
         with file_instance.open("w") as fh:
-            for instance in instance_set.instance_paths:
+            for instance in instance_set._instance_paths:
                 # We need to unpack the multi instance file paths in quotes
                 if isinstance(instance, list):
                     joined_instances = " ".join(
