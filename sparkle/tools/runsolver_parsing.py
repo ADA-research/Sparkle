@@ -1,4 +1,5 @@
 """Tools to parse runsolver I/O."""
+import sys
 from pathlib import Path
 import ast
 import re
@@ -68,6 +69,7 @@ def get_solver_output(runsolver_configuration: list[str],
     """Decode solver output dictionary when called with runsolver."""
     solver_output = ""
     value_data_file = None
+    cutoff_time = sys.maxsize
     for idx, conf in enumerate(runsolver_configuration):
         if not isinstance(conf, str):
             # Looking for arg names
@@ -79,6 +81,8 @@ def get_solver_output(runsolver_configuration: list[str],
             solver_output = (log_dir / solver_data_file).open("r").read()
         if "-v" in conf or "--var" in conf:
             value_data_file = Path(runsolver_configuration[idx + 1])
+        if "--cpu-limit" in conf:
+            cutoff_time = float(runsolver_configuration[idx + 1])
 
     if solver_output == "":
         # Still empty, try to read from subprocess
@@ -103,5 +107,8 @@ def get_solver_output(runsolver_configuration: list[str],
             output_dict["runtime"] = wc_time
     else:
         output_dict["runtime"] = math.nan
+
+    if output_dict["runtime"] > cutoff_time:
+        output_dict["status"] = SolverStatus.TIMEOUT
 
     return output_dict

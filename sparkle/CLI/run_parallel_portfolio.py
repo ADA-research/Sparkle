@@ -26,7 +26,6 @@ from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
-from sparkle.tools.runsolver_parsing import get_runtime, get_status
 from sparkle.types import SolverStatus
 
 
@@ -52,36 +51,17 @@ def run_parallel_portfolio(instances_set: InstanceSet,
               " your Sparkle Slurm Settings.")
     print(f"Sparkle parallel portfolio is running {seeds_per_solver} seed(s) per solver "
           f"on {num_solvers} solvers for {num_instances} instances ...")
-    cmd_list, runsolver_logs = [], []
+    cmd_list = []
     cutoff = gv.settings().get_general_target_cutoff_time()
-    log_timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
-    log_path = portfolio_path / "run-status-path"
-    log_path.mkdir()
     # Create a command for each instance-solver-seed combination
     for instance, solver in itertools.product(instances_set._instance_paths, solvers):
         for _ in range(seeds_per_solver):
             seed = int(random.getrandbits(32))
-            runsolver_watch_log =\
-                log_path / f"{solver.name}_{instance.name}_{seed}_{log_timestamp}.log"
-            runsolver_values_log =\
-                log_path / f"{solver.name}_{instance.name}_{seed}_{log_timestamp}.var"
-            raw_result_path =\
-                log_path / f"{solver.name}_{instance.name}_{seed}_{log_timestamp}.raw"
             solver_call_list = solver.build_cmd(
-                str(instance),
-                configuration={"seed": seed,
-                               "cutoff_time": cutoff},
-                runsolver_configuration=["--timestamp", "--use-pty",
-                                         "--cpu-limit", str(cutoff),
-                                         "-w", runsolver_watch_log,
-                                         "-v", runsolver_values_log,
-                                         "-o", raw_result_path])
-
+                instance.absolute(),
+                seed=seed,
+                cutoff_time=cutoff)
             cmd_list.append((" ".join(solver_call_list)).replace("'", '"'))
-            runsolver_logs.append([runsolver_watch_log,
-                                   runsolver_values_log,
-                                   raw_result_path])
-
     # Jobs are added in to the runrunner object in the same order they are provided
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     run = rrr.add_to_queue(
@@ -89,7 +69,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         cmd=cmd_list,
         name=CommandName.RUN_PARALLEL_PORTFOLIO,
         parallel_jobs=parallel_jobs,
-        path=".",
+        path=portfolio_path,
         base_dir=gv.settings().DEFAULT_tmp_output,
         srun_options=["-N1", "-n1"] + sbatch_options,
         sbatch_options=sbatch_options
@@ -98,8 +78,8 @@ def run_parallel_portfolio(instances_set: InstanceSet,
     instances_done = [False] * num_instances
     # We record the 'best' of all seed results per solver-instance
     job_output_dict = {instance_name: {solver.name: {"killed": False,
-                                                     "cpu-time": float(sys.maxsize),
-                                                     "wc-time": float(sys.maxsize),
+                                                     "cpu_time": float(sys.maxsize),
+                                                     "wc_time": float(sys.maxsize),
                                                      "status": SolverStatus.UNKNOWN}
                                        for solver in solvers}
                        for instance_name in instances_set._instance_names}
@@ -132,36 +112,37 @@ def run_parallel_portfolio(instances_set: InstanceSet,
                             SolverStatus.KILLED
 
     # Now iterate over runsolver logs to get runtime, get the lowest value per seed
-    for index, solver_logs in enumerate(runsolver_logs):
+    for index, cmd in enumerate(cmd_list):
+        runsolver_configuration = cmd.split(" ")[:11]
+        solver_output = Solver.parse_solver_output(run.jobs[i].stdout,
+                                                   runsolver_configuration,
+                                                   portfolio_path)
         solver_index = int((index % n_instance_jobs) / seeds_per_solver)
         solver_name = solvers[solver_index].name
         instance_name = instances_set._instance_names[int(index / n_instance_jobs)]
-        if not solver_logs[1].exists():
-            # NOTE: Runsolver is still wrapping up, not a pretty solution
-            time.sleep(5)
-        if not solver_logs[2].exists():
-            # NOTE: Runsolver is still wrapping up, not a pretty solution
-            time.sleep(5)
-        cpu_time, wallclock_time = get_runtime(solver_logs[1])
-        if cpu_time < job_output_dict[instance_name][solver_name]["cpu-time"]:
-            job_output_dict[instance_name][solver_name]["cpu-time"] = cpu_time
-            job_output_dict[instance_name][solver_name]["wc-time"] = wallclock_time
+        if "cpu_time" not in solver_output:
+            cpu_time, wc_time = -1.0, -1.0
+        else:
+            cpu_time, wc_time = solver_output["cpu_time"], solver_output["wc_time"]
+        if cpu_time < job_output_dict[instance_name][solver_name]["cpu_time"]:
+            job_output_dict[instance_name][solver_name]["cpu_time"] = cpu_time
+            job_output_dict[instance_name][solver_name]["wc_time"] = wc_time
             if not job_output_dict[instance_name][solver_name]["killed"]:
                 job_output_dict[instance_name][solver_name]["status"] =\
-                    get_status(solver_logs[1], solver_logs[2])
+                    solver_output["status"]
 
     # Fix the CPU/WC time for non existent logs to instance min time + check_interval
     for instance in job_output_dict.keys():
         no_log_solvers = []
         min_time = cutoff
         for solver in job_output_dict[instance].keys():
-            if job_output_dict[instance][solver]["cpu-time"] == -1.0:
+            if job_output_dict[instance][solver]["cpu_time"] == -1.0:
                 no_log_solvers.append(solver)
-            elif job_output_dict[instance][solver]["cpu-time"] < min_time:
-                min_time = job_output_dict[instance][solver]["cpu-time"]
+            elif job_output_dict[instance][solver]["cpu_time"] < min_time:
+                min_time = job_output_dict[instance][solver]["cpu_time"]
         for solver in no_log_solvers:
-            job_output_dict[instance][solver]["cpu-time"] = min_time + cutoff
-            job_output_dict[instance][solver]["wc-time"] = min_time + cutoff
+            job_output_dict[instance][solver]["cpu_time"] = min_time + cutoff
+            job_output_dict[instance][solver]["wc_time"] = min_time + cutoff
 
     for index, instance_name in enumerate(instances_set._instance_names):
         index_str = f"[{index + 1}/{num_instances}] "
@@ -175,7 +156,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
             solver_name = solvers[sindex % num_solvers].name
             job_info = job_output_dict[instance_name][solver_name]
             print(f"\t- {solver_name} ended with status {job_info['status']} in "
-                  f"{job_info['cpu-time']}s CPU-Time ({job_info['wc-time']}s WC-Time)")
+                  f"{job_info['cpu_time']}s CPU-Time ({job_info['wc_time']}s WC-Time)")
 
     # Write the results to a CSV
     csv_path = portfolio_path / "results.csv"
@@ -185,7 +166,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
             for solver_name in job_output_dict[instance_name].keys():
                 job_o = job_output_dict[instance_name][solver_name]
                 writer.writerow((instance_name, solver_name,
-                                 job_o["status"], job_o["cpu-time"], job_o["wc-time"]))
+                                 job_o["status"], job_o["cpu_time"], job_o["wc_time"]))
 
 
 def parser_function() -> argparse.ArgumentParser:
