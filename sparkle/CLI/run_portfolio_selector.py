@@ -117,11 +117,13 @@ if __name__ == "__main__":
                 f"--performance-data-csv {performance_data.csv_filepath} "
                 f"--instance {instance_path}"
                 for instance_path in instance_set.instance_paths]
+
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
         name=CommandName.RUN_PORTFOLIO_SELECTOR,
         base_dir=gv.settings().DEFAULT_tmp_output,
+        dependencies=feature_run,
         sbatch_options=gv.settings().get_slurm_extra_options(as_args=True))
 
     if run_on == Runner.LOCAL:

@@ -9,7 +9,6 @@ from pathlib import Path
 from runrunner.base import Runner
 
 from sparkle.CLI.help import global_variables as gv
-from sparkle.CLI.support import run_portfolio_selector_help as srpsh
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.solver import Solver
 from sparkle.types import SolverStatus
@@ -101,7 +100,7 @@ if __name__ == "__main__":
     for solver, cutoff_time in predict_schedule:
         solver = Solver(Path(solver), verifier=verifier)
         print(f"Calling solver {solver.name} with time budget {cutoff_time} ...")
-        flag_solved = srpsh.call_solver_solve_instance(
+        flag_solved = call_solver_solve_instance(
             solver, instance_path, cutoff_time, performance_data)
         print(f"Calling solver {solver.name} done!")
 
