@@ -8,7 +8,7 @@ from pathlib import PurePath
 from runrunner.base import Runner
 
 from sparkle.CLI.help import global_variables as gv
-from sparkle.CLI.help import sparkle_logging as sl
+from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.instance import InstanceSet
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES

@@ -10,7 +10,7 @@ from statistics import mean
 import tabulate
 
 from sparkle.CLI.help import global_variables as gv
-from sparkle.CLI.help import sparkle_logging as sl
+from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES

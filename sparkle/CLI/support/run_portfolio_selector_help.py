@@ -46,7 +46,7 @@ def call_solver_solve_instance(
         flag_solved = True
 
     if performance_data is not None:
-        solver_name = "portfolio_selector"
+        solver_name = performance_data.solvers[0]
         print(f"Trying to write: {cpu_time}, {solver_name}, {instance}")
         try:
             # Creating a seperate locked file for writing

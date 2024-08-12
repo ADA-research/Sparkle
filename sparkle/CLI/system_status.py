@@ -7,7 +7,7 @@ import argparse
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import system_status as sssh
-from sparkle.CLI.help import sparkle_logging as sl
+from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
 
 

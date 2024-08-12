@@ -10,7 +10,7 @@ from runrunner.base import Runner, Status, Run
 
 from sparkle.solver import Extractor
 from sparkle.CLI.help import global_variables as gv
-from sparkle.CLI.help import sparkle_logging as sl
+from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.platform import COMMAND_DEPENDENCIES, CommandName

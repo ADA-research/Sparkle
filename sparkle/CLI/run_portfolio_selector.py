@@ -9,7 +9,7 @@ from runrunner import Runner
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.support import run_portfolio_selector_help as srpsh
-from sparkle.CLI.help import sparkle_logging as sl
+from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.types.objective import PerformanceMeasure
