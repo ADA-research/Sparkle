@@ -66,10 +66,10 @@ class FeatureDataFrame:
             feature_group, feature = pair
             self.dataframe.loc[(feature_group, feature, extractor), :] = values[index]
 
-    def add_instance(self: FeatureDataFrame,
-                     instance: str,
-                     values: list[float] = None) -> None:
-        """Add an instance to the dataframe."""
+    def add_instances(self: FeatureDataFrame,
+                      instance: str | list[str],
+                      values: list[float] = None) -> None:
+        """Add one or more instances to the dataframe."""
         if values is None:
             values = FeatureDataFrame.missing_value
         self.dataframe[instance] = values

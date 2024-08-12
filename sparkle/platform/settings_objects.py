@@ -90,7 +90,6 @@ class Settings:
         DEFAULT_parallel_portfolio_output / rawdata_dir
     DEFAULT_parallel_portfolio_output_analysis =\
         DEFAULT_parallel_portfolio_output / analysis_dir
-    DEFAULT_selection_output_test = DEFAULT_selection_output / "Test_Cases"
 
     # Old default output dirs which should be part of something else
     DEFAULT_feature_data = DEFAULT_output / "Feature_Data"

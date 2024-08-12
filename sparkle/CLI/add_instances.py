@@ -92,7 +92,7 @@ if __name__ == "__main__":
         objectives=gv.settings().get_general_sparkle_objectives())
     for instance_path in instance_set.instance_paths:
         # Construct a name path due to multi-file instances
-        feature_data.add_instance(str(instance_path))
+        feature_data.add_instances(str(instance_path))
         performance_data.add_instance(str(instance_path))
     feature_data.save_csv()
     performance_data.save_csv()
