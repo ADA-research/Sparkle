@@ -70,7 +70,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--selector", required=True, type=Path,
                         help="path to portfolio selector")
-    parser.add_argument("--instance", required=True, type=str, nargs="+",
+    parser.add_argument("--instance", required=True, type=str,
                         help="path to instance to run on")
     parser.add_argument("--feature-data-csv", required=True, type=Path,
                         help="path to performance data csv")
@@ -79,18 +79,16 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Process command line arguments
-    # Turn multiple instance files into a space separated string
-    # NOTE: Not sure if this is actually supported
-    selector = Path(args.selector)
-    instance_path = " ".join(args.instance)
+    selector_file = Path(args.selector)
+    instance_path = Path(args.instance)
     feature_data = FeatureDataFrame(Path(args.feature_data_csv))
     performance_data = PerformanceDataFrame(Path(args.performance_data_csv))
 
     # Run portfolio selector
     print("Sparkle portfolio selector predicting ...")
     selector = gv.settings().get_general_sparkle_selector()
-    predict_schedule = selector.run(selector,
-                                    feature_data.get_instance(instance_path.name))
+    predict_schedule = selector.run(selector_file,
+                                    feature_data.get_instance(str(instance_path)))
 
     if predict_schedule is None:  # Selector Failed to produce prediction
         sys.exit(-1)

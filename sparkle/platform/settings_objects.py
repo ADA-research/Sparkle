@@ -107,9 +107,9 @@ class Settings:
 
     # Old default file paths from GV which should be turned into variables
     DEFAULT_feature_data_path =\
-        DEFAULT_feature_data / "sparkle_feature_data.csv"
+        DEFAULT_feature_data / "feature_data.csv"
     DEFAULT_performance_data_path =\
-        DEFAULT_performance_data / "sparkle_performance_data.csv"
+        DEFAULT_performance_data / "performance_data.csv"
 
     # Constant default values
     DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")

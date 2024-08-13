@@ -139,9 +139,8 @@ if __name__ == "__main__":
         test_data = None
         test_case_path = Path(test_case_dir) if test_case_dir is not None else None
         if test_case_dir is not None and (test_case_path
-                                          / "sparkle_performance_data.csv").exists():
-            test_data = PerformanceDataFrame(
-                test_case_path / "sparkle_performance_data.csv")
+                                          / "performance_data.csv").exists():
+            test_data = PerformanceDataFrame(test_case_path / "performance_data.csv")
             test_data.penalise(gv.settings().get_general_target_cutoff_time(),
                                gv.settings().get_penalised_time())
         sgfs.generate_report_selection(gv.settings().DEFAULT_selection_output_analysis,

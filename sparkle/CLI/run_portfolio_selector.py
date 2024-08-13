@@ -88,21 +88,25 @@ if __name__ == "__main__":
 
     # Compute the features of the incoming instances
     test_case_path = selector_scenario / instance_set.name
-    feature_data_path = selector_scenario / f"feature_data_{instance_set.name}.csv"
-    feature_dataframe = FeatureDataFrame(feature_data_path)
-    feature_dataframe.add_instances(instance_set.instance_names)
+    test_case_path.mkdir(exist_ok=True)
+    feature_dataframe = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
+    feature_dataframe.remove_instances(feature_dataframe.instances)
+    feature_dataframe.csv_filepath = test_case_path / "feature_data.csv"
+    feature_dataframe.add_instances(instance_set.instance_paths)
     feature_dataframe.save_csv()
-    feature_run = compute_features(feature_data_path, run_on=run_on)
+    feature_run = compute_features(feature_dataframe, recompute=False, run_on=run_on)
+
+    if run_on == Runner.LOCAL:
+        feature_run.wait()
 
     # Prepare performance data
     performance_data = PerformanceDataFrame(
-        test_case_path / f"performance_data_{instance_set.name}.csv",
+        test_case_path / "performance_data.csv",
         objectives=gv.settings().get_general_sparkle_objectives())
     for instance_name in instance_set.instance_names:
         performance_data.add_instance(instance_name)
     performance_data.add_solver(selector_path.name)
     performance_data.save_csv()
-
     # Update latest scenario
     gv.latest_scenario().set_selection_test_case_directory(test_case_path)
     gv.latest_scenario().set_latest_scenario(Scenario.SELECTION)
@@ -110,24 +114,27 @@ if __name__ == "__main__":
     gv.latest_scenario().write_scenario_ini()
 
     run_core = Path(__file__).parent.parent.resolve() /\
-        "core" / "run_portfolio_selector_core.py"
+        "CLI" / "core" / "run_portfolio_selector_core.py"
     cmd_list = [f"python {run_core} "
                 f"--selector {selector_path} "
-                f"--feature-data-csv {feature_data_path}"
+                f"--feature-data-csv {feature_dataframe.csv_filepath} "
                 f"--performance-data-csv {performance_data.csv_filepath} "
                 f"--instance {instance_path}"
                 for instance_path in instance_set.instance_paths]
 
-    run = rrr.add_to_queue(
+    selector_run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
         name=CommandName.RUN_PORTFOLIO_SELECTOR,
         base_dir=gv.settings().DEFAULT_tmp_output,
-        dependencies=feature_run,
+        stdout=None,
+        dependencies=feature_run if run_on == Runner.SLURM else None,
         sbatch_options=gv.settings().get_slurm_extra_options(as_args=True))
 
     if run_on == Runner.LOCAL:
-        run.wait()
+        selector_run.wait()
+        for job in selector_run.jobs:
+            print(job.stdout)
         print("Running Sparkle portfolio selector done!")
     else:
         print("Sparkle portfolio selector is running ...")
