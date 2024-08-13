@@ -185,6 +185,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.PerformanceMeasureSimpleArgument.kwargs)
     parser.add_argument(*ac.CutOffTimeArgument.names,
                         **ac.CutOffTimeArgument.kwargs)
+    parser.add_argument(*ac.SolverSeedsArgument.names,
+                        **ac.SolverSeedsArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
@@ -232,6 +234,10 @@ if __name__ == "__main__":
         gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
     run_on = gv.settings().get_run_on()
+
+    if args.solver_seeds is not None:
+        gv.settings().set_parallel_portfolio_number_of_seeds_per_solver(
+            args.solver_seeds, SettingState.CMD_LINE)
 
     if run_on == Runner.LOCAL:
         print("Parallel Portfolio is not fully supported yet for Local runs. Exiting.")

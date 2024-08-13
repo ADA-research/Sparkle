@@ -404,6 +404,11 @@ SolverCallsArgument = \
                       kwargs={"type": int,
                               "help": "number of solver calls to execute"})
 
+SolverSeedsArgument = \
+    ArgumentContainer(names=["--solver-seeds"],
+                      kwargs={"type": int,
+                              "help": "number of random seeds per solver to execute"})
+
 SolverRemoveArgument = \
     ArgumentContainer(names=["solver"],
                       kwargs={"metavar": "solver",

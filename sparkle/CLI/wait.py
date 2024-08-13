@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Sparkle command to wait for one or more other commands to complete execution."""
 import sys
+import signal
 import time
 import argparse
 from pathlib import Path
@@ -73,6 +74,13 @@ def wait_for_jobs(path: Path,
         jobs = [job for job in jobs if job.run_id in filter]
 
     running_jobs = jobs
+
+    def signal_handler(num: int, _: any) -> None:
+        """Create clean exit for CTRL + C."""
+        if num == signal.SIGINT:
+            sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
     # If verbosity is quiet there is no need for further information
     if verbosity == VerbosityLevel.QUIET:
         prev_jobs = len(running_jobs) + 1
