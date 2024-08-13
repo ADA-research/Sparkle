@@ -38,19 +38,6 @@ def parse_solver_wrapper_args(args: list[str]) -> dict[Any]:
     args_dict["instance"] = Path(args_dict["instance"])
     args_dict["seed"] = int(args_dict["seed"])
 
-    return args_dict
-
-
-def get_solver_call_params(args_dict: dict) -> list[str]:
-    """Gather the additional parameters for the solver call.
-
-    Args:
-        args_dict: dictionary mapping argument names to their currently held values
-
-    Returns:
-        A list of parameters for the solver call
-    """
-    params = []
     if "config_path" in args_dict:
         # The arguments were not directly given and must be parsed from a file
         config_str = Path(args_dict["config_path"]).open("r")\
@@ -60,14 +47,25 @@ def get_solver_call_params(args_dict: dict) -> list[str]:
                         for arg in config_str.split(" -") if arg.strip() != ""]
         for arg in config_split:
             varname, value = arg.strip("'").strip('"').split(" ", maxsplit=1)
-            params.extend([f"-{varname}", value])
-    else:
-        # Construct from dictionary arguments
-        # Certain arguments are not relevant/have already been processed
-        ignore_args = {"solver_dir", "instance", "cutoff_time", "seed", "specifics",
-                       "run_length"}
-        for key in args_dict:
-            if key not in ignore_args and args_dict[key] is not None:
-                params.extend(["-" + str(key), str(args_dict[key])])
+            args_dict[varname] = value
+
+    return args_dict
+
+
+def get_solver_call_params(args_dict: dict) -> list[str]:
+    """Gather the additional parameters for the solver call.
+
+    Args:
+        args_dict: Dictionary mapping argument names to their currently held values
+
+    Returns:
+        A list of parameters for the solver call
+    """
+    params = []
+    # Certain arguments are not relevant/have already been processed
+    ignore_args = {"solver_dir", "instance", "cutoff_time", "seed"}
+    for key in args_dict:
+        if key not in ignore_args and args_dict[key] is not None:
+            params.extend(["-" + str(key), str(args_dict[key])])
 
     return params
