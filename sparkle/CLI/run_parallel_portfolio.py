@@ -140,8 +140,8 @@ def run_parallel_portfolio(instances_set: InstanceSet,
             elif job_output_dict[instance][solver]["cpu_time"] < min_time:
                 min_time = job_output_dict[instance][solver]["cpu_time"]
         for solver in no_log_solvers:
-            job_output_dict[instance][solver]["cpu_time"] = min_time + cutoff
-            job_output_dict[instance][solver]["wc_time"] = min_time + cutoff
+            job_output_dict[instance][solver]["cpu_time"] = min_time + check_interval
+            job_output_dict[instance][solver]["wc_time"] = min_time + check_interval
 
     for index, instance_name in enumerate(instances_set._instance_names):
         index_str = f"[{index + 1}/{num_instances}] "

@@ -908,11 +908,11 @@ class Settings:
         """Set the parallel portfolio seeds per solver to start."""
         section = "parallel_portfolio"
         name = "num_seeds_per_solver"
-
+        print("Setting: ", value)
         if value is not None and self.__check_setting_state(
                 self.__parallel_portfolio_num_seeds_per_solver_set, origin, name):
             self.__init_section(section)
-            self.__parallel_portfolio_check_interval_set = origin
+            self.__parallel_portfolio_num_seeds_per_solver_set = origin
             self.__settings[section][name] = str(value)
 
     def get_parallel_portfolio_number_of_seeds_per_solver(self: Settings) -> int:
