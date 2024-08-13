@@ -5,23 +5,19 @@ import sys
 import subprocess
 from pathlib import Path
 from sparkle.types import SolverStatus
-from sparkle.tools.slurm_parsing import parse_commandline_dict
-
-# Convert the argument of the target_algorithm script to dictionary
-args = parse_commandline_dict(sys.argv[1:])
+from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args, \
+    get_solver_call_params
 
 
-# Extract and delete data that needs specific formatting
-solver_dir = Path(args["solver_dir"])
-instance = Path(args["instance"])
-seed = args["seed"]
-cpu_limit = args["cutoff_time"]
+# Parse the arguments of the solver wrapper
+args_dict = parse_solver_wrapper_args(sys.argv[1:])
 
-del args["solver_dir"]
-del args["instance"]
-del args["cutoff_time"]
-del args["seed"]
+# Extract certain args from the above dict for use further below
+solver_dir = args_dict["solver_dir"]
+instance = args_dict["instance"]
+seed = args_dict["seed"]
 
+# Construct the base solver call
 solver_name = "minisat"
 if solver_dir != Path("."):
     solver_exec = f"{solver_dir / solver_name}"
@@ -71,10 +67,8 @@ SIMP OPTIONS:
   -sub-lim      = <int32>  [  -1 .. imax] (default: 1000)
   -cl-lim       = <int32>  [  -1 .. imax] (default: 20)"""
 
-params = [f"-cpu-lim={cpu_limit}"] if "cpu-lim" not in args else []
-for key in args:
-    if args[key] is not None:
-        params.append(f"-{key}={args[key]}")
+# Get further params for the solver call
+params = get_solver_call_params(args_dict)
 
 # MiniSAT does not use an instance param, instead the filename is just at the end
 params += [str(instance)]
