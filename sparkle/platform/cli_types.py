@@ -70,6 +70,7 @@ class CommandName(str, Enum):
     RUN_ABLATION_VALIDATION = "run_ablation_validation"
     ABLATION_CALLBACK = "ablation_callback"
     ABLATION_VALIDATION_CALLBACK = "ablation_validation_callback"
+    RUN_SOLVER = "run_solver"
     RUN_SOLVERS = "run_solvers"
     RUN_PORTFOLIO_SELECTOR = "run_portfolio_selector"
     RUN_STATUS = "run_status"

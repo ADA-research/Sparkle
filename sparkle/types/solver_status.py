@@ -7,11 +7,11 @@ class SolverStatus(str, Enum):
     SUCCESS = "SUCCESS"
     CRASHED = "CRASHED"
     TIMEOUT = "TIMEOUT"
+    WRONG = "WRONG"
     UNKNOWN = "UNKNOWN"
     ERROR = "ERROR"
     KILLED = "KILLED"
 
-
-def get_status_from_str(status: str) -> SolverStatus:
-    """Get SolverStatus object from string."""
-    return SolverStatus(status.upper())
+    # SAT specific status
+    SAT = "SAT"
+    UNSAT = "UNSAT"

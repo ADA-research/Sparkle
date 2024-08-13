@@ -21,7 +21,7 @@ setup(name="SparkleAI",
           "pandas==2.2.2",
           "filelock==3.15.1",
           "tabulate==0.9.0",
-          "RunRunner==0.1.4",
+          "RunRunner==0.1.5",
           "pcsparser @ git+https://git@github.com/jeroenrook/pcsparser.git",
           # Reporting packages
           "plotly==5.23.0",

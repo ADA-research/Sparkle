@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-
-import time
 import sys
 import subprocess
 from pathlib import Path
@@ -49,20 +47,6 @@ for line in output_str.splitlines():
     elif line == r's UNKNOWN':
         status = SolverStatus.TIMEOUT
         break
-
-if specifics == 'rawres':
-    tmp_directory = Path("tmp/")
-    cur_time_str = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))
-    rawres_file_name = Path(f"{solver_name}_{instance.name}_" + cur_time_str
-                            + ".rawres_solver")
-    if Path.cwd().name != tmp_directory.name:
-        tmp_directory.mkdir(exist_ok=True)
-        raw_result_path = tmp_directory / rawres_file_name
-    else:
-        raw_result_path = rawres_file_name
-    raw_result_path.parent.mkdir(parents=True, exist_ok=True)
-    with raw_result_path.open('w') as outfile:
-        outfile.write(str(solver_cmd + params) + "\n" + output_str)
 
 outdir = {"status": status.value,
           "quality": 0,

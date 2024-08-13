@@ -5,9 +5,10 @@ from filelock import FileLock
 import argparse
 from pathlib import Path
 
+from runrunner import Runner
+
 from sparkle.CLI.help import global_variables as gv
 import sparkle.tools.general as tg
-from sparkle.CLI.support import run_solvers_help as srs
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.types.objective import PerformanceMeasure
@@ -41,21 +42,22 @@ if __name__ == "__main__":
         instance_path = instance_set.get_path_by_name(instance_name)
         instance_key = instance_name
 
-    solver = Solver(Path(args.solver))
+    verifier = gv.settings().get_general_solution_verifier()
+    solver = Solver(Path(args.solver), verifier=verifier)
     performance_measure = PerformanceMeasure.from_str(args.performance_measure)
     key_str = f"{solver.name}_{instance_name}_{tg.get_time_pid_random_string()}"
-    raw_result_path = f"Tmp/{key_str}.rawres"
     cutoff = gv.settings().get_general_target_cutoff_time()
-    cpu_time, wc_time, cpu_time_penalised, quality, status, raw_result_path =\
-        srs.run_solver_on_instance_and_process_results(solver,
-                                                       instance_path,
-                                                       cutoff,
-                                                       args.seed if args.seed else 42)
+    solver_output = solver.run(
+        instance_path.absolute(),
+        seed=args.seed if args.seed else 42,
+        cutoff_time=cutoff,
+        cwd=gv.settings().DEFAULT_tmp_output,
+        run_on=Runner.LOCAL)
 
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
-        measurement = quality[0]  # TODO: Handle the multi-objective case
+        measurement = solver_output["quality"]  # TODO: Handle the multi-objective case
     elif performance_measure == PerformanceMeasure.RUNTIME:
-        measurement = cpu_time_penalised
+        measurement = solver_output["cpu_time"]
     else:
         print(f"*** ERROR: Unknown performance measure detected: {performance_measure}")
     # Now that we have all the results, we can add them to the performance dataframe

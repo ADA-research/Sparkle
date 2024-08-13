@@ -90,7 +90,7 @@ if __name__ == "__main__":
     performance_data = PerformanceDataFrame(
         gv.settings().DEFAULT_performance_data_path,
         objectives=gv.settings().get_general_sparkle_objectives())
-    for instance_path in instance_set.get_instance_paths:
+    for instance_path in instance_set.instance_paths:
         # Construct a name path due to multi-file instances
         feature_data.add_instance(str(instance_path))
         performance_data.add_instance(str(instance_path))

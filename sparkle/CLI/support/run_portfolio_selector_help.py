@@ -8,16 +8,16 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner, Run
 
+from sparkle.types import SolverStatus
 from sparkle.solver import Extractor, Solver
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
-from sparkle.CLI.support import run_solvers_help as srs
 
 from sparkle.platform import CommandName
 
 
 # Only called in portfolio_selector_solve_instance
-def call_solver_solve_instance_within_cutoff(
+def call_solver_solve_instance(
         solver: Solver,
         instance: Path,
         cutoff_time: int,
@@ -33,25 +33,28 @@ def call_solver_solve_instance_within_cutoff(
     Returns:
         Whether the instance was solved by the solver
     """
-    _, _, cpu_time_penal, _, status, raw_result_path =\
-        srs.run_solver_on_instance_and_process_results(solver,
-                                                       instance,
-                                                       cutoff_time,
-                                                       gv.get_seed())
+    solver_output = solver.run(
+        instance.absolute(),
+        seed=gv.get_seed(),
+        cutoff_time=cutoff_time,
+        cwd=gv.settings().DEFAULT_tmp_output,
+        run_on=Runner.LOCAL)
+    cpu_time, status = solver_output["cpu_time"], solver_output["status"]
     flag_solved = False
-    if status == "SUCCESS" or status == "SAT" or status == "UNSAT":
+    if (status == SolverStatus.SUCCESS
+            or status == SolverStatus.SAT or status == SolverStatus.UNSAT):
         flag_solved = True
 
     if performance_data is not None:
         solver_name = "portfolio_selector"
-        print(f"Trying to write: {cpu_time_penal}, {solver_name}, {instance}")
+        print(f"Trying to write: {cpu_time}, {solver_name}, {instance}")
         try:
             # Creating a seperate locked file for writing
             lock = FileLock(f"{performance_data.csv_filepath}.lock")
             with lock.acquire(timeout=60):
                 # Reload the dataframe to latest version
                 performance_data = PerformanceDataFrame(performance_data.csv_filepath)
-                performance_data.set_value(cpu_time_penal, solver_name, str(instance))
+                performance_data.set_value(cpu_time, solver_name, str(instance))
                 performance_data.save_csv()
             lock.release()
         except Timeout:
@@ -62,7 +65,6 @@ def call_solver_solve_instance_within_cutoff(
         else:
             print(f"Solver {solver.name} failed to solve the instance with status "
                   f"{status}")
-    raw_result_path.unlink(missing_ok=True)
     return flag_solved
 
 
@@ -110,17 +112,17 @@ def portfolio_selector_solve_instance(
         # Selector Failed to produce prediction
         sys.exit(-1)
     print("Predicting done!")
+    verifier = gv.settings().get_general_solution_verifier()
     for solver, cutoff_time in predict_schedule:
-        solver = Solver(Path(solver))
+        solver = Solver(Path(solver), verifier=verifier)
         print(f"Calling solver {solver.name} with time budget {cutoff_time} ...")
-        flag_solved = call_solver_solve_instance_within_cutoff(
+        flag_solved = call_solver_solve_instance(
             solver, instance, cutoff_time, performance_data)
         print(f"Calling solver {solver.name} done!")
 
         if flag_solved:
             return
-        else:
-            print("The instance is not solved in this call")
+        print("The instance is not solved in this call")
 
 
 # Only called in run_portfolio_selector
