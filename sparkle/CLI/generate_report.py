@@ -10,7 +10,7 @@ from sparkle.solver.ablation import AblationScenario
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.platform import \
     generate_report_for_configuration as sgrfch
-from sparkle.CLI.help import sparkle_logging as sl
+from sparkle.CLI.help import logging as sl
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
@@ -127,8 +127,8 @@ if __name__ == "__main__":
         actual_portfolio_selector_path = selection_scenario / "portfolio_selector"
         if not actual_portfolio_selector_path.is_file():
             print("Before generating a Sparkle report, please first construct the "
-                  "Sparkle portfolio selector. Not generating a Sparkle report, "
-                  "stopping execution!")
+                  "Sparkle portfolio selector. Not generating a Sparkle report, stopping"
+                  " execution!")
             sys.exit(-1)
 
         print("Generating report for selection...")
@@ -139,9 +139,8 @@ if __name__ == "__main__":
         test_data = None
         test_case_path = Path(test_case_dir) if test_case_dir is not None else None
         if test_case_dir is not None and (test_case_path
-                                          / "sparkle_performance_data.csv").exists():
-            test_data = PerformanceDataFrame(
-                test_case_path / "sparkle_performance_data.csv")
+                                          / "performance_data.csv").exists():
+            test_data = PerformanceDataFrame(test_case_path / "performance_data.csv")
             test_data.penalise(gv.settings().get_general_target_cutoff_time(),
                                gv.settings().get_penalised_time())
         sgfs.generate_report_selection(gv.settings().DEFAULT_selection_output_analysis,

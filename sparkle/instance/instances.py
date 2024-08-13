@@ -17,7 +17,7 @@ class InstanceSet:
                 is a file, will create an Instance set of size one.
         """
         self.directory: Path = directory
-        self.name: str = directory.name
+        self.name: str = directory.name if directory.is_dir() else directory.stem
         self.multi_file: bool = False
         self._instance_names: list[str] = []
         self._instance_paths: list[Path] = []

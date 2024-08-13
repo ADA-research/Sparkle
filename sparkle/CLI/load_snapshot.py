@@ -5,7 +5,7 @@ import argparse
 from pathlib import Path
 
 from sparkle.CLI.help import snapshot_help
-from sparkle.CLI.help import sparkle_logging as sl
+from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
 
 

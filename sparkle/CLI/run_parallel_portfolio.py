@@ -16,7 +16,7 @@ from runrunner.base import Runner
 from runrunner.slurm import Status
 
 from sparkle.CLI.help.reporting_scenario import Scenario
-from sparkle.CLI.help import sparkle_logging as sl
+from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import global_variables as gv
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise

@@ -10,7 +10,7 @@ from statistics import mean
 import tabulate
 
 from sparkle.CLI.help import global_variables as gv
-from sparkle.CLI.help import sparkle_logging as sl
+from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
@@ -73,8 +73,7 @@ def compute_selector_performance(
         # We get the performance for an instance by infering the model predicition
         # for the instance.
         feature_vector = feature_data.get_instance(instance)
-        predict_schedule = selector.run(actual_portfolio_selector, feature_vector)
-        schedule[instance] = predict_schedule
+        schedule[instance] = selector.run(actual_portfolio_selector, feature_vector)
     schedule_performance = selector_performance_data.schedule_performance(
         schedule, target_solver="portfolio_selector", minimise=minimise)
     # Remove solvers from the dataframe
@@ -134,7 +133,7 @@ def compute_selector_marginal_contribution(
             selector_scenario / f"ablate_{solver_name}" / "portfolio_selector"
         if not ablated_actual_portfolio_selector.exists():
             print(f"WARNING: Selector without {solver_name} does not exist! "
-                  f"Cannot compute marginal contribution without {solver_name}.")
+                  f"Cannot compute marginal contribution of {solver_name}.")
             continue
 
         ablated_selector_performance = compute_selector_performance(

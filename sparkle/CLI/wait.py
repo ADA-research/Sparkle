@@ -10,7 +10,7 @@ from runrunner.base import Status
 from tabulate import tabulate
 
 from sparkle.platform.cli_types import VerbosityLevel, TEXT
-from sparkle.CLI.help import sparkle_logging as sl
+from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help import global_variables as gv
 
