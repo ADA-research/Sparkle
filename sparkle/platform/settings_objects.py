@@ -668,8 +668,6 @@ class Settings:
             self.__general_verbosity_set = origin
             self.__settings[section][name] = value.name
 
-        return
-
     def get_general_verbosity(self: Settings) -> VerbosityLevel:
         """Return the general verbosity."""
         if self.__general_verbosity_set == SettingState.NOT_SET:
@@ -908,7 +906,7 @@ class Settings:
         """Set the parallel portfolio seeds per solver to start."""
         section = "parallel_portfolio"
         name = "num_seeds_per_solver"
-        print("Setting: ", value)
+
         if value is not None and self.__check_setting_state(
                 self.__parallel_portfolio_num_seeds_per_solver_set, origin, name):
             self.__init_section(section)
@@ -980,7 +978,7 @@ class Settings:
                 cur_val = cur_dict[section].get(name, None)
                 prev_val = prev_dict[section].get(name, None)
                 if cur_val != prev_val:
-                    # do we have yet to print the initial warning?
+                    # Have we printed the initial warning?
                     if not option_changed:
                         print("Warning: The following attributes/options have changed:")
                         option_changed = True
