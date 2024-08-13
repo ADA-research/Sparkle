@@ -51,7 +51,7 @@ cp $selector_test $selector_path
 
 # Run portfolio selector on a single instance
 output_true="Running Sparkle portfolio selector done!"
-output=$(sparkle/CLI/run_portfolio_selector.py $instance_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available| tail -1)
+output=$(sparkle/CLI/run_portfolio_selector.py $instance_path_test --settings-file $sparkle_test_settings_path --run-on local | tail -1)
 
 if [[ $output == $output_true ]];
 then
