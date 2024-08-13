@@ -1,4 +1,4 @@
-"""This module helps with the argument parsing for solver wrappers."""
+"""This module provides tools for the argument parsing for solver wrappers."""
 from pathlib import Path
 import ast
 from typing import Any
@@ -42,7 +42,14 @@ def parse_solver_wrapper_args(args: list[str]) -> dict[Any]:
 
 
 def get_solver_call_params(args_dict: dict) -> list[str]:
-    """Gather the additional parameters for the solver call."""
+    """Gather the additional parameters for the solver call.
+
+    Args:
+        args_dict: dictionary mapping argument names to their currently held values
+
+    Returns:
+        A list of parameters for the solver call
+    """
     params = []
     if "config_path" in args_dict:
         # The arguments were not directly given and must be parsed from a file

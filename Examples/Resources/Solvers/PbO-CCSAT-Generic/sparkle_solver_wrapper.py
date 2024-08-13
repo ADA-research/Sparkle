@@ -15,7 +15,6 @@ args_dict = parse_solver_wrapper_args(sys.argv[1:])
 solver_dir = args_dict["solver_dir"]
 instance = args_dict["instance"]
 seed = args_dict["seed"]
-specifics = args_dict["specifics"]
 
 # Construct the base solver call
 solver_name = "PbO-CCSAT"
