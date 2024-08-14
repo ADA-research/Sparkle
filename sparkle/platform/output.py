@@ -120,10 +120,12 @@ class ConfigurationOutput:
             print("Can't find scenario file")
             return
 
+        scenario_dir = scenario_dir.parent
         # Sets scenario on configurator object
         self.configurator.scenario = \
             ConfigurationScenario.from_file(scenario_file, self.solver,
-                                            self.instance_set_train)
+                                            self.instance_set_train,
+                                            scenario_dir)
         self.configurator.scenario._set_paths(self.configurator.output_path)
 
         # Retrieves validation results and best configuration
@@ -208,7 +210,7 @@ class ConfigurationOutput:
 
     def write_output(self: ConfigurationOutput) -> None:
         """Write data into a json file."""
-        def serialize_configuration_results(cr: ConfigurationResults) -> None:
+        def serialize_configuration_results(cr: ConfigurationResults) -> dict:
             return {
                 "performance": {
                     "configured_metrics": cr.performance.configured_metrics,
@@ -230,12 +232,28 @@ class ConfigurationOutput:
                 }
             }
 
+        def write_scenario_file(cs: ConfigurationScenario) -> dict:
+            return {
+                "number_of_runs": cs.number_of_runs,
+                "solver_calls": cs.solver_calls,
+                "cpu_time": cs.cpu_time,
+                "wallclock_time": cs.wallclock_time,
+                "cutoff_time": cs.cutoff_time,
+                "cutoff_length": cs.cutoff_length,
+                "sparkle_objective": cs.sparkle_objective.name,
+                "use_features": cs.use_features,
+                "configurator_target": cs.configurator_target,
+                "feature_data": cs.feature_data,
+            }
+
         output_data = {
             "solver": self.solver.name if self.solver else None,
             "configurator": (
                 str(self.configurator.executable_path) if self.configurator else None
             ),
             "best_config": self.best_config,
+            "scenario": write_scenario_file(self.configurator.scenario)
+            if self.configurator.scenario else None,
             "training_set": (
                 serialize_configuration_results(self.training) if self.training else None
             ),

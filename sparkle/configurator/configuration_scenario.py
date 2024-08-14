@@ -6,6 +6,7 @@ import shutil
 from pathlib import Path
 
 import pandas as pd
+import os
 
 from sparkle.types.objective import SparkleObjective, PerformanceMeasure
 from sparkle.solver import Solver
@@ -184,8 +185,8 @@ class ConfigurationScenario:
         return result
 
     @staticmethod
-    def from_file(scenario_file: Path, solver: Solver, instance_set: InstanceSet) -> \
-            ConfigurationScenario:
+    def from_file(scenario_file: Path, solver: Solver, instance_set: InstanceSet,
+                  scenario_folder: Path = None) -> ConfigurationScenario:
         """Reads scenario file and initalises ConfigurationScenario."""
         config = {}
         with scenario_file.open() as file:
@@ -210,10 +211,16 @@ class ConfigurationScenario:
         # TODO: Add METRIC to objective
         objective = SparkleObjective(f"{config['run_obj']}:UNKNOWN")
 
+        number_of_runs = None
+        if scenario_folder is not None:
+            subfolders = os.listdir(scenario_folder)
+            number_of_runs = \
+                sum(1 for folder in subfolders if folder.startswith("state-run"))
+
         # TODO: Number_of_runs isn't part of the scenario file
         return ConfigurationScenario(solver,
                                      instance_set,
-                                     None,
+                                     number_of_runs,
                                      solver_calls,
                                      cpu_time,
                                      wallclock_limit,
