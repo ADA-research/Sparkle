@@ -1,16 +1,10 @@
 """Test public methods of sparkle performance data csv."""
 
 from __future__ import annotations
-import pandas
 from unittest import TestCase
 from pathlib import Path
 
 from sparkle.structures import PerformanceDataFrame
-from sparkle.platform.settings_objects import Settings
-from CLI.help import global_variables as gv
-
-global settings
-gv.settings = Settings()
 
 
 class TestPerformanceData(TestCase):
@@ -67,29 +61,16 @@ class TestPerformanceData(TestCase):
         result = self.pd_nan.remaining_jobs()
         assert result == remaining
 
-    def test_get_best_performance_per_instance(self: TestPerformanceData) -> None:
-        """Test getting the best performance on each instance."""
-        max_perf = [64.0, 87.0, 87.0, 49.0, 86.0]
-        result = self.pd_nan.get_best_performance_per_instance(best=pandas.DataFrame.max)
-        assert result == max_perf
-
-        min_perf = [30.0, 5.0, 3.0, 8.0, 41.0]
-        result = self.pd_nan.get_best_performance_per_instance()
-        assert result == min_perf
-
     def test_calc_best_performance_instance(self: TestPerformanceData)\
             -> None:
         """Test calculating best score on instance."""
         bp_instance_min = [30.0, 5.0, 3.0, 8.0, 41.0]
         bp_instance_max = [64.0, 87.0, 87.0, 96.0, 86.0]
-        for idx, instance in enumerate(self.pd.dataframe.index):
-            result = self.pd.best_performance_instance(
-                instance=instance, minimise=True)
-            assert result == bp_instance_min[idx]
-
-            result = self.pd.best_performance_instance(
-                instance=instance, minimise=False)
-            assert result == bp_instance_max[idx]
+        result_min = self.pd.best_instance_performance(minimise=True)
+        result_max = self.pd.best_instance_performance(minimise=False)
+        for idx, _ in enumerate(self.pd.dataframe.index):
+            assert result_min.iloc[idx] == bp_instance_min[idx]
+            assert result_max.iloc[idx] == bp_instance_max[idx]
 
     def test_calc_best_performance(self: TestPerformanceData)\
             -> None:
@@ -104,31 +85,12 @@ class TestPerformanceData(TestCase):
             aggregation_function=sum, minimise=False)
         assert result == vbs_portfolio
 
-    def test_get_dict_vbs_penalty_time_on_each_instance(self: TestPerformanceData)\
-            -> None:
-        """Test getting a dictionary representing penalized runtime per instance."""
-        penalty = 40
-        penalty_time_dict = {"Instance1": 30, "Instance2": 5, "Instance3": 3,
-                             "Instance4": 8, "Instance5": 40}
-        result = self.pd.get_dict_vbs_penalty_time_on_each_instance(penalty)
-        assert result == penalty_time_dict
-
-    def test_calc_vbs_penalty_time(self: TestPerformanceData) -> None:
-        """Test calculating the penalized vbs."""
-        cutoff = 40
-        multiplier = 10
-        vbs_penalized = 89.2
-        result = self.pd.calc_vbs_penalty_time(cutoff, cutoff * multiplier)
-        print(self.pd.dataframe)
-        assert result == vbs_penalized
-
-    def test_get_solver_penalty_time_ranking_list(self: TestPerformanceData) -> None:
+    def test_get_solver_ranking(self: TestPerformanceData) -> None:
         """Test getting the solver ranking list with penalty."""
         cutoff = 50
         multiplier = 10
         penalty = cutoff * multiplier
-        rank_list = [["AlgorithmB", 210.8], ["AlgorithmC", 216.6],
-                     ["AlgorithmE", 218.8], ["AlgorithmA", 310.4], ["AlgorithmD", 313.8]]
-        result = self.pd.get_solver_penalty_time_ranking(cutoff_time=cutoff,
-                                                         penalty=penalty)
+        rank_list = [("AlgorithmB", 210.8), ("AlgorithmC", 216.6),
+                     ("AlgorithmE", 218.8), ("AlgorithmA", 310.4), ("AlgorithmD", 313.8)]
+        result = self.pd.get_solver_ranking(cutoff=cutoff, penalty=penalty)
         assert result == rank_list

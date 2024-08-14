@@ -21,16 +21,16 @@ solverC_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
 
 sparkle_test_settings_path="tests/CLI/test_files/Settings/sparkle_settings.ini"
 
-CLI/initialise.py > /dev/null
-CLI/add_instances.py $instances_path > /dev/null
-CLI/add_solver.py $solverA_path > /dev/null
-CLI/add_solver.py $solverB_path > /dev/null
-CLI/add_solver.py $solverC_path > /dev/null
-CLI/run_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-path $instance_path > /dev/null
+sparkle/CLI/initialise.py > /dev/null
+sparkle/CLI/add_instances.py $instances_path > /dev/null
+sparkle/CLI/add_solver.py $solverA_path > /dev/null
+sparkle/CLI/add_solver.py $solverB_path > /dev/null
+sparkle/CLI/add_solver.py $solverC_path > /dev/null
+sparkle/CLI/run_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-path $instance_path > /dev/null
 
 # Generate report for parallel portfolio on a single instance
 output_true="Parallel portfolio report generated ..."
-output=$(CLI/generate_report.py --settings-file $sparkle_test_settings_path | tail -1)
+output=$(sparkle/CLI/generate_report.py --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true ]];
 then

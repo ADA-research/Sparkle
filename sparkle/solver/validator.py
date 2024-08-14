@@ -6,10 +6,10 @@ import sys
 from pathlib import Path
 import csv
 import ast
+import runrunner as rrr
 from runrunner import Runner, Run
 
-from CLI.help.command_help import CommandName
-from CLI.help import run_solver_help as rcsh
+from sparkle.platform import CommandName
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.tools.runsolver_parsing import get_solver_output, get_solver_args
@@ -17,17 +17,22 @@ from sparkle.tools.runsolver_parsing import get_solver_output, get_solver_args
 
 class Validator():
     """Class to handle the validation of solvers on instance sets."""
-    def __init__(self: Validator, out_dir: Path = Path()) -> None:
+    def __init__(self: Validator,
+                 out_dir: Path = Path(),
+                 tmp_out_dir: Path = Path()) -> None:
         """Construct the validator."""
         self.out_dir = out_dir
+        self.tmp_out_dir = tmp_out_dir
 
     def validate(self: Validator,
                  solvers: list[Path] | list[Solver] | Solver | Path,
-                 configurations: list[str] | str | Path,
+                 configurations: list[dict] | dict | Path,
                  instance_sets: list[InstanceSet],
+                 cut_off: int,
                  subdir: Path = None,
                  dependency: list[Run] | Run = None,
-                 run_on: Runner = Runner.SLURM) -> list[Run]:
+                 sbatch_options: list[str] = [],
+                 run_on: Runner = Runner.SLURM) -> Run:
         """Validate a list of solvers (with configurations) on a set of instances.
 
         Args:
@@ -35,13 +40,13 @@ class Validator():
             configurations: list of configurations for each solver we validate.
                 If a path is supplied, will use each line as a configuration.
             instance_sets: set of instance sets on which we want to validate each solver
+            cut_off: maximum run time for the solver per instance
             subdir: The subdir where to place the output in the outputdir. If None,
                 a semi-unique combination of solver_instanceset is created.
             dependency: Jobs to wait for before executing the validation.
+            sbatch_options: list of slurm batch options
             run_on: whether to run on SLURM or local
         """
-        # Seed only relevant when reading from file (Used as line index)
-        use_seed = isinstance(configurations, Path)
         if not isinstance(solvers, list) and isinstance(configurations, list):
             # If we receive one solver but multiple configurations, we cas the
             # Solvers to a list of the same length
@@ -55,27 +60,36 @@ class Validator():
             sys.exit(-1)
         # Ensure we have the object representation of solvers
         solvers = [Solver(s) if isinstance(s, Path) else s for s in solvers]
-        jobs = []
+        cmds = []
+        out_paths = []
         for index, (solver, config) in enumerate(zip(solvers, configurations)):
-            # run a configured solver
             if config is None:
-                config = ""
-
+                config = {}
+            elif isinstance(config, Path):
+                # Point to the config line in file
+                config = {"config_path": config}
             for instance_set in instance_sets:
                 if subdir is None:
                     out_path = self.out_dir / f"{solver.name}_{instance_set.name}"
                 else:
                     out_path = self.out_dir / subdir
-                run = rcsh.call_solver(instance_set,
-                                       solver,
-                                       config=config,
-                                       seed=index if use_seed else None,
-                                       outdir=out_path,
-                                       commandname=CommandName.VALIDATION,
-                                       dependency=dependency,
-                                       run_on=run_on)
-                jobs.append(run)
-        return jobs
+                out_path.mkdir(exist_ok=True)
+                for instance_path in instance_set._instance_paths:
+                    cmds.append(" ".join(
+                        solver.build_cmd(instance=instance_path.absolute(),
+                                         seed=index,
+                                         cutoff_time=cut_off,
+                                         configuration=config)))
+                out_paths.extend([out_path] * instance_set.size)
+        return rrr.add_to_queue(
+            runner=run_on,
+            cmd=cmds,
+            name=CommandName.VALIDATION,
+            base_dir=self.tmp_out_dir,
+            path=out_paths,
+            dependencies=dependency,
+            sbatch_options=sbatch_options,
+        )
 
     def retrieve_raw_results(self: Validator,
                              solver: Solver,
@@ -114,8 +128,7 @@ class Validator():
                 config_str = config_path.open("r").readlines()[row_idx]
                 solver_args = Solver.config_str_to_dict(config_str)
             else:
-                for def_arg in ["instance", "solver_dir", "cutoff_time",
-                                "seed", "specifics", "run_length"]:
+                for def_arg in ["instance", "solver_dir", "cutoff_time", "seed"]:
                     if def_arg in solver_args:
                         del solver_args[def_arg]
             solver_args = str(solver_args).replace('"', "'")

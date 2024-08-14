@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """MiniSAT Solver wrapper."""
-
-import time
 import sys
 import subprocess
 from pathlib import Path
+from sparkle.types import SolverStatus
 from sparkle.tools.slurm_parsing import parse_commandline_dict
 
 # Convert the argument of the target_algorithm script to dictionary
@@ -15,7 +14,6 @@ args = parse_commandline_dict(sys.argv[1:])
 # Extract and delete data that needs specific formatting
 solver_dir = Path(args["solver_dir"])
 instance = Path(args["instance"])
-specifics = args["specifics"]
 seed = args["seed"]
 cpu_limit = args["cutoff_time"]
 
@@ -23,8 +21,6 @@ del args["solver_dir"]
 del args["instance"]
 del args["cutoff_time"]
 del args["seed"]
-del args["specifics"]
-del args["run_length"]
 
 solver_name = "minisat"
 if solver_dir != Path("."):
@@ -92,30 +88,17 @@ except Exception as ex:
 # Convert Solver output to dictionary for configurator target algorithm script
 output_str = solver_call.stdout.decode()
 
-status = r"CRASHED"
+status = SolverStatus.CRASHED
 for line in output_str.splitlines():
     line = line.strip()
     if (line == r"SATISFIABLE") or (line == r"UNSATISFIABLE"):
-        status = r"SUCCESS"
+        status = SolverStatus.SUCCESS
         break
     elif line == r"INDETERMINATE":
-        status = r"TIMEOUT"
+        status = SolverStatus.TIMEOUT
         break
 
-if specifics == "rawres":
-    tmp_directory = Path("tmp/")
-    timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
-    rawres_file_name = Path(f"{solver_name}_{instance.name}_{timestamp}.rawres_solver")
-    if Path.cwd().name != tmp_directory.name:
-        tmp_directory.mkdir(exist_ok=True)
-        raw_result_path = tmp_directory / rawres_file_name
-    else:
-        raw_result_path = rawres_file_name
-    raw_result_path.parent.mkdir(parents=True, exist_ok=True)
-    with raw_result_path.open("w") as outfile:
-        outfile.write(output_str)
-
-outdir = {"status": status,
+outdir = {"status": status.value,
           "quality": 0,
           "solver_call": solver_cmd + params}
 

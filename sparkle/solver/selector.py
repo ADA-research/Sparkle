@@ -4,6 +4,11 @@ from pathlib import Path
 import subprocess
 import ast
 
+import runrunner as rrr
+from runrunner import Runner, Run
+
+
+from sparkle.platform.cli_types import CommandName
 from sparkle.types import SparkleCallable
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 
@@ -21,9 +26,9 @@ class Selector(SparkleCallable):
             raw_output_directory: Directory where the Selector will write its raw output.
                 Defaults to directory / tmp
         """
-        self.selector_path = executable_path
-        self.directory = self.selector_path.parent
-        self.name = self.selector_path.name
+        self.selector_builder_path = executable_path
+        self.directory = self.selector_builder_path.parent
+        self.name = self.selector_builder_path.name
         self.raw_output_directory = raw_output_directory
 
         if not self.raw_output_directory.exists():
@@ -51,7 +56,7 @@ class Selector(SparkleCallable):
             The command list for constructing the Selector.
         """
         # Python3 to avoid execution rights
-        cmd = ["python3", self.selector_path,
+        cmd = ["python3", self.selector_builder_path,
                "--performance_csv", performance_data,
                "--feature_csv", feature_data,
                "--objective", objective,
@@ -68,7 +73,10 @@ class Selector(SparkleCallable):
                   feature_data: FeatureDataFrame,
                   objective: str,
                   runtime_cutoff: int | float | str = None,
-                  wallclock_limit: int | float | str = None) -> Path:
+                  wallclock_limit: int | float | str = None,
+                  run_on: Runner = Runner.SLURM,
+                  sbatch_options: list[str] = None,
+                  base_dir: Path = Path()) -> Run:
         """Construct the Selector.
 
         Args:
@@ -78,6 +86,9 @@ class Selector(SparkleCallable):
             objective: The objective to optimize for selection.
             runtime_cutoff: Cutoff for the runtime in seconds.
             wallclock_limit: Cutoff for the wallclock time in seconds.
+            run_on: Which runner to use. Defaults to slurm.
+            sbatch_options: Additional options to pass to sbatch.
+            base_dir: The base directory to run the Selector in.
 
         Returns:
             Path to the constructed Selector.
@@ -85,25 +96,30 @@ class Selector(SparkleCallable):
         if isinstance(target_file, str):
             target_file = self.raw_output_directory / target_file
         # Convert the dataframes to Selector Format
-        performance_csv = performance_data.to_autofolio()
-        feature_csv = feature_data.to_autofolio()
+        performance_csv = performance_data.to_autofolio(target_file.parent)
+        feature_csv = feature_data.to_autofolio(target_file.parent)
         cmd = self.build_construction_cmd(target_file,
                                           performance_csv,
                                           feature_csv,
                                           objective,
                                           runtime_cutoff,
                                           wallclock_limit)
-        construct = subprocess.run(cmd, capture_output=True)
 
-        # Remove the data copy
-        performance_csv.unlink()
-        feature_csv.unlink()
+        cmd_str = " ".join([str(c) for c in cmd])
+        construct = rrr.add_to_queue(
+            runner=run_on,
+            cmd=[cmd_str],
+            name=CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
+            base_dir=base_dir,
+            stdout=Path("normal.log"),
+            stderr=Path("error.log"),
+            sbatch_options=sbatch_options)
+        if run_on == Runner.LOCAL:
+            construct.wait()
+            if not target_file.is_file():
+                print(f"Selector construction of {self.name} failed!")
 
-        if construct.returncode != 0 or not target_file.is_file():
-            print(f"Selector construction of {self.name} failed! Error:\n"
-                  f"{construct.stderr.decode()}")
-            return None
-        return target_file
+        return construct
 
     def build_cmd(self: Selector,
                   selector_path: Path,
@@ -112,7 +128,7 @@ class Selector(SparkleCallable):
         if isinstance(feature_vector, list):
             feature_vector = " ".join(map(str, feature_vector))
 
-        return ["python3", self.selector_path,
+        return ["python3", self.selector_builder_path,
                 "--load", selector_path,
                 "--feature_vec", feature_vector]
 

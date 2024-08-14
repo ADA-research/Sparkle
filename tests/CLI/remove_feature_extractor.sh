@@ -12,17 +12,17 @@
 #SBATCH --nodes=1
 
 # Initialise
-CLI/initialise.py > /dev/null
+sparkle/CLI/initialise.py > /dev/null
 
 # Add feature extractor
 extractor_name="SAT-features-competition2012_revised_without_SatELite_sparkle"
 extractor_source="Examples/Resources/Extractors/$extractor_name"
-CLI/add_feature_extractor.py $extractor_source > /dev/null
+sparkle/CLI/add_feature_extractor.py $extractor_source > /dev/null
 
 # Remove feature extractor
 extractor_path="Extractors/$extractor_name"
 output_true="Removing feature extractor $extractor_name done!"
-output=$(CLI/remove_feature_extractor.py $extractor_path | tail -1)
+output=$(sparkle/CLI/remove_feature_extractor.py $extractor_path | tail -1)
 
 if [[ $output == $output_true ]];
 then

@@ -54,9 +54,8 @@ def create_temporary_directories() -> None:
 
 def remove_temporary_files() -> None:
     """Remove temporary files. Only removes files not affecting the sparkle state."""
-    sparkle_help_path = Path("CLI/sparkle_help")
-    for filename in sparkle_help_path.glob("*.pyc"):
-        shutil.rmtree(sparkle_help_path.joinpath(filename))
+    cli_help_path = Path("sparkle/CLI/help")
+    for filename in cli_help_path.glob("*.pyc"):
+        shutil.rmtree(cli_help_path.joinpath(filename))
     shutil.rmtree(Path("Tmp/"), ignore_errors=True)
-    shutil.rmtree(Path("Feature_Data/Tmp/"), ignore_errors=True)
     shutil.rmtree(Path("Log/"), ignore_errors=True)

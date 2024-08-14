@@ -7,8 +7,7 @@ import sys
 from pathlib import Path
 import math
 
-from CLI.help import sparkle_logging as sl
-from sparkle.platform import generate_report_for_selection as sgfs
+from sparkle.platform import latex as stex
 from sparkle.solver.ablation import AblationScenario
 from sparkle.solver.validator import Validator
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
@@ -16,7 +15,6 @@ from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.configurator.implementations import SMAC2
 from sparkle.types.objective import SparkleObjective, PerformanceMeasure
-from sparkle.platform.generate_report_for_selection import generate_comparison_plot
 from sparkle import about
 
 
@@ -206,9 +204,9 @@ def get_figure_configure_vs_default(configured_results: list[list[str]],
         plot_params["penalty_time"] = run_cutoff_time * penalty_multiplier
         plot_params["replace_zeros"] = True
 
-    generate_comparison_plot(points,
-                             figure_filename,
-                             **plot_params)
+    stex.generate_comparison_plot(points,
+                                  figure_filename,
+                                  **plot_params)
 
     return f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
 
@@ -412,10 +410,10 @@ def configuration_report_variables(target_dir: Path,
 
     if full_dict["featuresBool"] == "\\featurestrue":
         full_dict["numFeatureExtractors"] =\
-            str(len([p for p in extractor_dir.iterdir()]))
+            len([p for p in extractor_dir.iterdir()])
         full_dict["featureExtractorList"] =\
-            sgfs.get_feature_extractor_list(extractor_dir)
-        full_dict["featureComputationCutoffTime"] = str(extractor_cuttoff)
+            stex.list_to_latex([(p.name, "") for p in extractor_dir.iterdir()])
+        full_dict["featureComputationCutoffTime"] = extractor_cuttoff
 
     return full_dict
 
@@ -448,7 +446,7 @@ def get_dict_variable_to_value_common(solver: Solver,
         solver, train_set, config=opt_config)
     instance_names = set([res[3] for res in res_default])
 
-    latex_dict = {"bibliographypath": str(bibliography_path.absolute())}
+    latex_dict = {"bibliographypath": bibliography_path.absolute()}
     latex_dict["performanceMeasure"] = get_performance_measure(objective,
                                                                penalty_multiplier)
     smac_run_obj = SMAC2.get_smac_run_obj(objective.PerformanceMeasure)
@@ -461,24 +459,19 @@ def get_dict_variable_to_value_common(solver: Solver,
     latex_dict["solver"] = solver.name
     latex_dict["instanceSetTrain"] = train_set.name
     latex_dict["sparkleVersion"] = about.version
-    latex_dict["numInstanceInTrainingInstanceSet"] = str(len(instance_names))
+    latex_dict["numInstanceInTrainingInstanceSet"] = len(instance_names)
 
     run_cutoff_time = configurator.scenario.cutoff_time
     penalty = penalty_multiplier * run_cutoff_time
-    latex_dict["numSmacRuns"] = str(configurator.scenario.number_of_runs)
-    latex_dict["smacObjective"] = str(smac_run_obj)
-    latex_dict["smacWholeTimeBudget"] = str(configurator.scenario.wallclock_time)
-    latex_dict["smacEachRunCutoffTime"] = str(run_cutoff_time)
-    latex_dict["optimisedConfiguration"] = str(opt_config)
-    str_value = get_par_performance(res_conf,
-                                    run_cutoff_time,
-                                    penalty,
-                                    objective)
-    latex_dict["optimisedConfigurationTrainingPerformancePAR"] = str(str_value)
-    str_value = get_par_performance(res_default, run_cutoff_time,
-                                    penalty,
-                                    objective)
-    latex_dict["defaultConfigurationTrainingPerformancePAR"] = str(str_value)
+    latex_dict["numSmacRuns"] = configurator.scenario.number_of_runs
+    latex_dict["smacObjective"] = smac_run_obj
+    latex_dict["smacWholeTimeBudget"] = configurator.scenario.wallclock_time
+    latex_dict["smacEachRunCutoffTime"] = run_cutoff_time
+    latex_dict["optimisedConfiguration"] = opt_config
+    latex_dict["optimisedConfigurationTrainingPerformancePAR"] =\
+        get_par_performance(res_conf, run_cutoff_time, penalty, objective)
+    latex_dict["defaultConfigurationTrainingPerformancePAR"] =\
+        get_par_performance(res_default, run_cutoff_time, penalty, objective)
 
     str_value = get_figure_configured_vs_default_on_instance_set(
         solver, train_set.name, res_default, res_conf, target_directory,
@@ -490,9 +483,9 @@ def get_dict_variable_to_value_common(solver: Solver,
         get_timeouts_instanceset(solver, train_set, configurator, validator,
                                  float(run_cutoff_time), penalty)
 
-    latex_dict["timeoutsTrainDefault"] = str(default_timeouts_train)
-    latex_dict["timeoutsTrainConfigured"] = str(configured_timeouts_train)
-    latex_dict["timeoutsTrainOverlap"] = str(overlapping_timeouts_train)
+    latex_dict["timeoutsTrainDefault"] = default_timeouts_train
+    latex_dict["timeoutsTrainConfigured"] = configured_timeouts_train
+    latex_dict["timeoutsTrainOverlap"] = overlapping_timeouts_train
     latex_dict["ablationBool"] = get_ablation_bool(ablation)
     latex_dict["ablationPath"] = get_ablation_table(ablation)
     latex_dict["featuresBool"] = get_features_bool(
@@ -534,11 +527,11 @@ def get_dict_variable_to_value_test(target_dir: Path,
     penalty = run_cutoff_time * penalty_multiplier
     objective = configurator.scenario.sparkle_objective
     test_dict = {"instanceSetTest": test_set.name}
-    test_dict["numInstanceInTestingInstanceSet"] = str(len(instance_names))
+    test_dict["numInstanceInTestingInstanceSet"] = len(instance_names)
     test_dict["optimisedConfigurationTestingPerformancePAR"] =\
-        str(get_par_performance(res_conf, run_cutoff_time, penalty, objective))
+        get_par_performance(res_conf, run_cutoff_time, penalty, objective)
     test_dict["defaultConfigurationTestingPerformancePAR"] =\
-        str(get_par_performance(res_default, run_cutoff_time, penalty, objective))
+        get_par_performance(res_default, run_cutoff_time, penalty, objective)
     smac_run_obj = SMAC2.get_smac_run_obj(
         configurator.scenario.sparkle_objective.PerformanceMeasure)
     test_dict["figure-configured-vs-default-test"] =\
@@ -556,9 +549,9 @@ def get_dict_variable_to_value_test(target_dir: Path,
                                  float(run_cutoff_time),
                                  penalty)
 
-    test_dict["timeoutsTestDefault"] = str(default_timeouts_test)
-    test_dict["timeoutsTestConfigured"] = str(configured_timeouts_test)
-    test_dict["timeoutsTestOverlap"] = str(overlapping_timeouts_test)
+    test_dict["timeoutsTestDefault"] = default_timeouts_test
+    test_dict["timeoutsTestConfigured"] = configured_timeouts_test
+    test_dict["timeoutsTestOverlap"] = overlapping_timeouts_test
     test_dict["ablationBool"] = get_ablation_bool(ablation)
     test_dict["ablationPath"] = get_ablation_table(ablation)
     return test_dict
@@ -597,75 +590,8 @@ def generate_report_for_configuration(solver: Solver,
         target_path, solver, configurator, validator, extractor_dir, bibliography_path,
         train_set, penalty_multiplier, extractor_cuttoff, test_set,
         ablation)
-    sgfs.generate_report(latex_template_path,
+    stex.generate_report(latex_template_path,
                          "template-Sparkle-for-configuration.tex",
                          target_path,
                          "Sparkle_Report_for_Configuration",
                          variables_dict)
-    sl.add_output(str(target_path), "Sparkle Configuration report")
-
-
-def get_validation_dict(solver: Solver, instance_set: InstanceSet, config: str,
-                        validator: Validator, cutoff_time: int,
-                        penalty_multiplier: int, objective: SparkleObjective):
-    res_default = validator.get_validation_results(
-        solver, instance_set, config="")
-    res_conf = validator.get_validation_results(
-        solver, instance_set, config=config)
-
-    # Convert to dictionary format
-    default_res_dict = {
-        "solver": res_default[0][0],
-        "configuration": res_default[0][1],
-        "instance_set": res_default[0][2],
-        "results": []
-    }
-    for res in res_default:
-        default_res_dict["results"].append(
-            {
-                "instance": res[3],
-                "status": res[4],
-                "quality": res[5],
-                "runtime": res[6]
-            }
-        )
-
-    configured_res_dict = {
-        "solver": res_conf[0][0],
-        "configuration": res_conf[0][1],
-        "instance_set": res_conf[0][2],
-        "results": []
-    }
-    for res in res_conf:
-        configured_res_dict["results"].append(
-            {
-                "instance": res[3],
-                "status": res[4],
-                "quality": res[5],
-                "runtime": res[6]
-            }
-        )
-
-    # Get PAR10 score
-    penalty = penalty_multiplier * cutoff_time
-    perf_par_train_conf = get_par_performance(res_conf,
-                                              cutoff_time,
-                                              penalty,
-                                              objective)
-    perf_par_train_def = get_par_performance(res_default,
-                                             cutoff_time,
-                                             penalty,
-                                             objective)
-    # Agregate results into dictionary
-    dict = {
-        "performance": {
-            "default (PAR10)": perf_par_train_def,
-            "configured (PAR10)": perf_par_train_conf
-        },
-        "results": {
-            "default": default_res_dict,
-            "configured": configured_res_dict
-        }
-    }
-
-    return dict

@@ -17,14 +17,14 @@ class InstanceSet:
                 is a file, will create an Instance set of size one.
         """
         self.directory: Path = directory
-        self.name: str = directory.name
+        self.name: str = directory.name if directory.is_dir() else directory.stem
         self.multi_file: bool = False
         self._instance_names: list[str] = []
-        self.instance_paths: list[Path] = []
+        self._instance_paths: list[Path] = []
 
         if self.directory.is_file():
             # Single instance set
-            self.instance_paths = [self.directory]
+            self._instance_paths = [self.directory]
             self._instance_names = [self.directory.name]
             self.directory = self.directory.parent
         elif (self.directory / InstanceSet.instance_csv).exists():
@@ -34,35 +34,40 @@ class InstanceSet:
             # where each file is present in the self.directory
             for line in csv.reader((self.directory / InstanceSet.instance_csv).open()):
                 self._instance_names.append(line[0])
-                self.instance_paths.append([(self.directory / f) for f in line[1:]])
+                self._instance_paths.append([(self.directory / f) for f in line[1:]])
         else:
             # Default situation, treat each file in the directory as an instance
-            self.instance_paths = [p for p in self.directory.iterdir()]
-            self._instance_names = [p.name for p in self.instance_paths]
+            self._instance_paths = [p for p in self.directory.iterdir()]
+            self._instance_names = [p.name for p in self._instance_paths]
 
     @property
     def size(self: InstanceSet) -> int:
         """Returns the number of instances in the set."""
-        return len(self.instance_paths)
+        return len(self._instance_paths)
 
     @property
     def all_paths(self: InstanceSet) -> list[Path]:
         """Returns all file paths in the instance set as a flat list."""
         if self.multi_file:
-            return [p for instance in self.instance_paths for p in instance] + [
+            return [p for instance in self._instance_paths for p in instance] + [
                 self.directory / InstanceSet.instance_csv]
-        return self.instance_paths
+        return self._instance_paths
 
     @property
-    def get_instance_paths(self: InstanceSet) -> list[Path]:
+    def instance_paths(self: InstanceSet) -> list[Path]:
         """Get processed instance paths for multi-file instances."""
         if self.multi_file:
             return [self.directory / name for name in self._instance_names]
-        return self.instance_paths
+        return self._instance_paths
+
+    @property
+    def instance_names(self: InstanceSet) -> list[str]:
+        """Get processed instance names for multi-file instances."""
+        return self._instance_names
 
     def get_path_by_name(self: InstanceSet, name: str) -> Path | list[Path]:
         """Retrieves an instance paths by its name. Returns None upon failure."""
         for idx, instance_name in enumerate(self._instance_names):
             if instance_name == name:
-                return self.instance_paths[idx]
+                return self._instance_paths[idx]
         return None

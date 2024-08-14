@@ -12,12 +12,12 @@
 #SBATCH --nodes=1
 
 # Initialise
-CLI/initialise.py > /dev/null
+sparkle/CLI/initialise.py > /dev/null
 
 # Add solver
 solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic"
 output_true="Adding solver PbO-CCSAT-Generic done!"
-output=$(CLI/add_solver.py $solver_path | tail -1)
+output=$(sparkle/CLI/add_solver.py $solver_path | tail -1)
 
 if [[ $output == $output_true ]];
 then

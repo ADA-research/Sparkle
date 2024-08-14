@@ -26,9 +26,9 @@ solver_path="Solvers/PbO-CCSAT-Generic/"
 instances_src_path="${examples_path}${instances_path}"
 solver_src_path="${examples_path}${solver_path}"
 
-CLI/initialise.py > /dev/null
-CLI/add_instances.py $instances_src_path > /dev/null
-CLI/add_solver.py $solver_src_path > /dev/null
+sparkle/CLI/initialise.py > /dev/null
+sparkle/CLI/add_instances.py $instances_src_path > /dev/null
+sparkle/CLI/add_solver.py $solver_src_path > /dev/null
 
 # Set up output validation
 output_true="Running configuration finished!"
@@ -38,7 +38,7 @@ then
 fi
 
 # Configure solver
-output=$(CLI/configure_solver.py --validate --ablation --solver $solver_path --instance-set-train $instances_path --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(sparkle/CLI/configure_solver.py --validate --ablation --solver $solver_path --instance-set-train $instances_path --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]]; then
 	echo "[success] ($slurm_available) configure_solver_validation test succeeded"

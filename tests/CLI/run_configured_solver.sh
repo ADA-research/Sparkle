@@ -15,7 +15,7 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=1
 
-CLI/initialise.py > /dev/null
+sparkle/CLI/initialise.py > /dev/null
 
 # Copy configuration results and other files to simulate the configuration command
 config_scenario_path="Output/Configuration/Raw_Data/SMAC2/scenarios/"
@@ -30,9 +30,7 @@ slurm_available=$(detect_slurm)
 
 # Copy scenario
 scenario_path="Output/latest_scenario.ini"
-scenario_tmp="Output/latest_scenario.tmp"
-scenario_test="tests/CLI/test_files/Output/latest_scenario.ini"
-mv $scenario_path $scenario_tmp 2> /dev/null # Save user scenario
+scenario_test="tests/CLI/test_files/Settings/latest_scenario_configuration.ini"
 cp $scenario_test $scenario_path # Activate test scenario
 
 # Settings
@@ -45,12 +43,12 @@ instance_path_test="Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf"
 solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
 
 # Run commands to prepare Sparkle for the test
-CLI/add_instances.py $instances_path_train > /dev/null
-CLI/add_solver.py $solver_path > /dev/null
+sparkle/CLI/add_instances.py $instances_path_train > /dev/null
+sparkle/CLI/add_solver.py $solver_path > /dev/null
 
 # Run configured solver on a single instance
 output_true="Running configured solver done!"
-output=$(CLI/run_configured_solver.py $instance_path_test --settings-file $sparkle_test_settings_path --run-on local | tail -1)
+output=$(sparkle/CLI/run_configured_solver.py $instance_path_test --settings-file $sparkle_test_settings_path --run-on local | tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -65,7 +63,7 @@ if [[ $slurm_available == $slurm_true ]];
 then
 	output_true="Running configured solver. Waiting for Slurm job(s) with id(s):"
 fi
-output=$(CLI/run_configured_solver.py $instances_path_test --settings-file $sparkle_test_settings_path --run-on slurm | tail -1)
+output=$(sparkle/CLI/run_configured_solver.py $instances_path_test --settings-file $sparkle_test_settings_path --run-on slurm | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then

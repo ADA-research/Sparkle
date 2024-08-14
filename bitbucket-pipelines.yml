@@ -19,8 +19,8 @@ pipelines:
               - git status
               - git submodule
               - conda info
-              - conda env create -f environment.yml 
-              - conda activate sparkle
+              - conda env create -f dev-env.yml 
+              - conda activate sparkle-dev
               - pip freeze
               - pytest -v tests/* --junitxml=test-reports/report.xml
             artifacts:

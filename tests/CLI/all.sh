@@ -63,10 +63,10 @@ tests/CLI/configure_solver.sh
 tests/CLI/configure_solver_validate.sh
 
 # Test construct sparkle portfolio selector
-tests/CLI/construct_sparkle_portfolio_selector.sh
+tests/CLI/construct_portfolio_selector.sh
 
 # Test run sparkle portfolio selector
-tests/CLI/run_sparkle_portfolio_selector.sh
+tests/CLI/run_portfolio_selector.sh
 
 # Test validate configured vs default
 tests/CLI/validate_configured_vs_default.sh
@@ -81,10 +81,7 @@ tests/CLI/run_configured_solver.sh
 tests/CLI/run_parallel_portfolio.sh
 
 # Test generate report (selection)
-tests/CLI/generate_report_selection.sh
-
-# Test generate report (selection) for test set
-tests/CLI/generate_report_for_test.sh
+tests/CLI/generate_report_for_selection.sh
 
 # Test generate report for configuration
 tests/CLI/generate_report_for_configuration.sh

@@ -63,7 +63,7 @@ You will need to reactivate the environment every time you log in, before using 
 
 The file `environment.yml` contains a tested list of Python packages with fixed versions required to execute Sparkle. We recommended using it.
 
-The file `environment-dev.txt` contains unpinned packages and the dependencies are not resolved. It is used for development and may cause problems.
+The file `dev-env.yml` is used for developer mode of the Sparkle package and contains several extra packages for testing.
 
 The two environments can be created in parallel since one is named `sparkle` and the other `sparkle-dev`. If you want to update an environment it is better to do a clean installation by removing and recreating it. For example:
 
@@ -164,11 +164,10 @@ changes are needed.
 
 ## Executing commands
 
-Executing commands in Sparkle is as simple as running them in the top
-directory of Sparkle, for example:
+Executing commands in Sparkle is as simple as running them terminal for example:
 
 ```
-CLI/initialise.py
+sparkle initialise
 ```
 
 Do note that when running on a cluster additional arguments may be
@@ -176,7 +175,7 @@ needed, for instance under the Slurm workload manager the above command would ch
 something like:
 
 ```
-srun -N1 -n1 -c1 CLI/initialise.py
+srun -N1 -n1 -c1 sparkle/CLI/initialise.py
 ```
 
 In the `Examples/` directory a number of common command sequences are
@@ -321,11 +320,9 @@ solver_dir: str
 instance: str,
 cutoff_time: int,
 seed: int
-specifics: str
-run_length: str
 ```
 
-Note that all the Paths are handed as str and should be converted in the wrapper. The solver_dir specifies the Path to the executable directory of your algorithm. This can be empty, e.g. the cwd contains your executable. The instance is the path to the instance we are going to run on. Cutoff time is the maximum amount of time your algorithm is allowed to run. Seed is the seed for this run. Specifics and run_length are depricated and should not be used.
+Note that all the Paths are handed as str and should be converted in the wrapper. The solver_dir specifies the Path to the executable directory of your algorithm. This can be empty, e.g. the cwd contains your executable. The instance is the path to the instance we are going to run on. Cutoff time is the maximum amount of time your algorithm is allowed to run. Seed is the seed for this run.
 
 A solver wrapper should always return a dictionary by printing it, containing the following values:
 
@@ -356,7 +353,7 @@ to get a description of the required arguments and other options.
 % *  compute_features.py
 % *  compute_marginal_contribution.py
 % *  :ref:`cmd:configure_solver`
-% *  construct_sparkle_portfolio_selector.py
+% *  construct_portfolio_selector.py
 % *  :ref:`cmd:generate_report`
 % *  :ref:`cmd:initialise`
 % *  load_snapshot.py
@@ -365,7 +362,7 @@ to get a description of the required arguments and other options.
 % *  remove_solver.py
 % *  run_ablation.py
 % *  run_solvers.py
-% *  run_sparkle_portfolio_selector.py
+% *  run_portfolio_selector.py
 % *  run_status.py
 % *  save_snapshot.py
 % *  system_status.py
@@ -689,7 +686,7 @@ of your call to a Sparkle command. Take for instance the following
 command:
 
 ```
-srun -N1 -n1 -p graceTST CLI/configure_solver.py --solver Solvers/PbO-CCSAT-Generic --instances-train Instances/PTN/
+srun -N1 -n1 -p graceTST sparkle/CLI/configure_solver.py --solver Solvers/PbO-CCSAT-Generic --instances-train Instances/PTN/
 ```
 
 This call restricts itself to the `graceTST` partition (the

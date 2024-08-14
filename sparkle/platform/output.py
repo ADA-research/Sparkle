@@ -37,11 +37,12 @@ class ConfigurationPerformance:
         self.default_PAR10 = default_par10
 
 
-class ValResults:
+class ValidationResults:
     """Class that stores validation information and results."""
-    def __init__(self: ValResults, solver: str, configuration: str, instance_set: str,
+    def __init__(self: ValidationResults, solver: str, configuration: str,
+                 instance_set: str,
                  results: list[list[str, Status, float, float]]) -> None:
-        """Initalize ValResults.
+        """Initalize ValidationResults.
 
         Args:
             solver: The name of the solver
@@ -60,7 +61,7 @@ class ValResults:
 class ConfigurationResults:
     """Class that aggregates configuration results."""
     def __init__(self: ConfigurationResults, performance: ConfigurationPerformance,
-                 res_def: ValResults, res_conf: ValResults) -> None:
+                 res_def: ValidationResults, res_conf: ValidationResults) -> None:
         """Initalize ConfigurationResults.
 
         Args:
@@ -216,8 +217,8 @@ class ConfigurationOutput:
         for res in val_default:
             # TODO: status to enum
             results.append([res[3], res[4], res[5], res[6]])
-        results_default = ValResults(val_default[0][0], val_default[0][1],
-                                     val_default[0][2], results)
+        results_default = ValidationResults(val_default[0][0], val_default[0][1],
+                                            val_default[0][2], results)
 
         results = []
         # Form: 0: solver, 1: config, 2: set, 3: instance, 4: status,
@@ -225,8 +226,8 @@ class ConfigurationOutput:
         for res in val_conf:
             # TODO: status to enum
             results.append([res[3], res[4], res[5], res[6]])
-        results_conf = ValResults(val_conf[0][0], val_conf[0][1],
-                                  val_conf[0][2], results)
+        results_conf = ValidationResults(val_conf[0][0], val_conf[0][1],
+                                         val_conf[0][2], results)
 
         cutoff_time = self.configurator.scenario.cutoff_time
         penalty = penalty_multiplier * \

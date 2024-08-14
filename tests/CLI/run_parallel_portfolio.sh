@@ -26,15 +26,15 @@ sparkle_test_settings_path="tests/CLI/test_files/Settings/sparkle_settings.ini"
 slurm_true="slurm"
 slurm_available=$(detect_slurm)
 
-CLI/initialise.py > /dev/null
-CLI/add_instances.py $instances_path > /dev/null
-CLI/add_solver.py $solverA_path > /dev/null
-CLI/add_solver.py $solverB_path > /dev/null
-CLI/add_solver.py $solverC_path > /dev/null
+sparkle/CLI/initialise.py > /dev/null
+sparkle/CLI/add_instances.py $instances_path > /dev/null
+sparkle/CLI/add_solver.py $solverA_path > /dev/null
+sparkle/CLI/add_solver.py $solverB_path > /dev/null
+sparkle/CLI/add_solver.py $solverC_path > /dev/null
 
 # Run sparkle parallel portfolio on a single instance
 output_true="Running Sparkle parallel portfolio is done!"
-output=$(CLI/run_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-path $instance_path --run-on $slurm_available | tail -1)
+output=$(sparkle/CLI/run_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-path $instance_path --run-on $slurm_available | tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -45,7 +45,7 @@ else
 fi
 
 # Run sparkle parallel portfolio on a set of instances
-output=$(CLI/run_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-path $instances_path --run-on $slurm_available | tail -1)
+output=$(sparkle/CLI/run_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-path $instances_path --run-on $slurm_available | tail -1)
 
 if [[ $output == $output_true ]];
 then

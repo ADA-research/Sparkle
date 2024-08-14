@@ -21,13 +21,13 @@ sparkle_test_settings_path="tests/CLI/test_files/Settings/sparkle_settings.ini"
 instances_path="Examples/Resources/Instances/PTN"
 solver_path="Examples/Resources/Solvers/CSCCSat/"
 
-CLI/initialise.py > /dev/null
-CLI/add_instances.py $instances_path > /dev/null
-CLI/add_solver.py $solver_path > /dev/null
+sparkle/CLI/initialise.py > /dev/null
+sparkle/CLI/add_instances.py $instances_path > /dev/null
+sparkle/CLI/add_solver.py $solver_path > /dev/null
 
 # Run solvers
 output_true="Running solvers done!"
-output=$(CLI/run_solvers.py --run-on=local --settings-file $sparkle_test_settings_path | tail -1)
+output=$(sparkle/CLI/run_solvers.py --run-on=local --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -39,7 +39,7 @@ fi
 
 # Run solvers recompute and parallel
 output_true="Running solvers. Waiting for Slurm job(s) with id(s): "
-output=$(CLI/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --recompute | tail -1)
+output=$(sparkle/CLI/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --recompute | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
@@ -53,15 +53,15 @@ else
 fi
 
 # Run solvers with verifier
-output=$(CLI/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --recompute --verifier SAT | tail -1)
+output=$(sparkle/CLI/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --recompute | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
-	echo "[success] run_solvers --recompute --verifier SAT test succeeded"
+	echo "[success] run_solvers --recompute test succeeded"
     jobid=${output##* }
 	scancel $jobid
 else
-	echo "[failure] run_solvers --recompute --verifier SAT test failed with output:"
+	echo "[failure] run_solvers --recompute test failed with output:"
 	echo $output
     kill_started_jobs_slurm
 fi
