@@ -39,8 +39,8 @@ def print_output(terminal_output_file):
         words = line.strip().split()
         if len(words) <= 0:
             continue
-        if len(words) >= 4 and words[1] == 'c' and words[2] == 'Arguments'\
-           and words[3] == 'Error!':
+        if len(words) >= 4 and words[1] == 'c' and words[2] == 'Arguments' and \
+                words[3] == 'Error!':
             status = SolverStatus.CRASHED
             break
         if len(words) >= 4 and words[1] == 'c' and words[2] == 'vertex_cover:':

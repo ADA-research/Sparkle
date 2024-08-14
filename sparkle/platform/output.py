@@ -12,7 +12,6 @@ from sparkle.instance import InstanceSet
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.solver.validator import Validator
-from sparkle.types.objective import SparkleObjective
 
 from sparkle.CLI.help.nicknames import resolve_object_name
 
@@ -38,8 +37,8 @@ class ConfigurationPerformance:
 
 class ValidationResults:
     """Class that stores validation information and results."""
-    def __init__(self: ValidationResults, solver: Solver, configuration: dict,
-                 instance_set: str,
+    def __init__(self: ValidationResults, solver: Solver,
+                 configuration: dict, instance_set: InstanceSet,
                  results: list[list[str, Status, float, float]]) -> None:
         """Initalize ValidationResults.
 
@@ -60,51 +59,49 @@ class ValidationResults:
 class ConfigurationResults:
     """Class that aggregates configuration results."""
     def __init__(self: ConfigurationResults, performance: ConfigurationPerformance,
-                 res_def: ValidationResults, res_conf: ValidationResults) -> None:
+                 results_default: ValidationResults,
+                 results_configured: ValidationResults) -> None:
         """Initalize ConfigurationResults.
 
         Args:
             performance: The performance of the default and configured solver
-            res_def: The default results
-            res_conf: The configured results
+            results_default: The default results
+            results_configured: The configured results
         """
         self.performance = performance
-        self.configured_results = res_conf
-        self.default_results = res_def
+        self.configured_results = results_configured
+        self.default_results = results_default
 
 
 class ConfigurationOutput:
     """Class that collects configuration data and outputs it a json format."""
     solver: Solver = None
     configurator: Configurator = None
-    best_config: str = None
+    best_config: dict = None
     training: ConfigurationResults = None
     test: ConfigurationResults = None
 
-    instance_set_test: InstanceSet = None
-
-    def __init__(self: ConfigurationOutput, path: Path, solver_dir: Path,
-                 solver_name: str, configurator: Configurator,
-                 instance_dir: Path,
+    def __init__(self: ConfigurationOutput, path: Path, solver: Solver,
+                 configurator: Configurator, instance_set_train: InstanceSet,
+                 instance_set_test: InstanceSet,
                  penalty_multiplier: int, output: Path = None) -> None:
         """Initialize Configurator Output class.
 
         Args:
             path: Path to configuration output directory
-            solver_dir: Path to the solver directory
-            solver_name: Name of the solver that was used
+            solver: Solver object
             configurator: The configurator that was used
-            instance_dir: Path to the instance directory
+            instance_set_train: Instance set used for training
+            instance_set_test: Instance set used for testing
             penalty_multiplier: penalty multiplier that is applied to the par performance
             output: Path to the output directory
         """
-        self.solver = resolve_object_name(solver_name,
-                                          gv.solver_nickname_mapping,
-                                          solver_dir, Solver)
+        self.solver = solver
         self.configurator = configurator
+        self.instance_set_train = instance_set_train
+        self.instance_set_test = instance_set_test
         self.penalty_multiplier = penalty_multiplier
         self.directory = path
-        self.instance_dir = instance_dir
 
         if output is None:
             output = path / "Analysis" / "configuration.json"
@@ -124,77 +121,35 @@ class ConfigurationOutput:
             return
 
         # Sets scenario on configurator object
-        self.initalise_scenario(scenario_file)
+        self.configurator.scenario = \
+            ConfigurationScenario.from_file(scenario_file, self.solver,
+                                            self.instance_set_train)
+        self.configurator.scenario._set_paths(self.configurator.output_path)
+
         # Retrieves validation results and best configuration
         self.training, self.best_config =\
-            self.get_validation_data(self.configurator.scenario.instance_set)
+            self.get_validation_data(self.instance_set_train)
+
         # Retrieve test validation results if they exist
         if self.instance_set_test is not None:
             self.test, _ = self.get_validation_data(self.instance_set_test)
 
-        self.write_output()
+    def parse_string_to_dict(self: ConfigurationOutput, input_string: str) -> dict:
+        """Convert a configuration string to a dictionary."""
+        result_dict = {}
+        input_string = input_string.replace("'", "")
+        input_string = input_string.replace(",", "")
+        input_string = input_string.replace(":", "")
+        input_string = input_string.replace("{", "")
+        input_string = input_string.replace("}", "")
+        tokens = input_string.split()
 
-    def initalise_scenario(self: ConfigurationOutput, scenario_file: Path) -> None:
-        """Reads scenario file and initalises ConfigurationScenario."""
-        config = {}
-        with scenario_file.open() as file:
-            for line in file:
-                key, value = line.strip().split(" = ")
-                config[key] = value
+        for i in range(0, len(tokens), 2):
+            key = tokens[i]
+            value = tokens[i + 1]
+            result_dict[key] = value
 
-        instance_set_train = resolve_object_name(
-            config["instance_file"],
-            gv.file_storage_data_mapping[gv.instances_nickname_path],
-            self.instance_dir, InstanceSet)
-        # TODO: Find out why _train.txt is added to end of name
-        # Remove .txt to not cause any issues with later use of
-        # name in self.configurator.scenario._set_paths()
-        instance_set_train.name = instance_set_train.name.replace("_train", "")
-
-        # Set instance_set_test to later retrieve validation results
-        instance_set_test = resolve_object_name(
-            config["test_instance_file"],
-            gv.file_storage_data_mapping[gv.instances_nickname_path],
-            self.instance_dir, InstanceSet)
-        if instance_set_test is not None:
-            self.instance_set_test = instance_set_test
-
-        # Collect relevant settings
-        if "cpu_time" in config:
-            cpu_time = int(config["cpu_time"])
-        else:
-            cpu_time = None
-
-        if "wallclock-limit" in config:
-            wallclock_limit = int(config["wallclock-limit"])
-        else:
-            wallclock_limit = None
-
-        if "runcount-limit" in config:
-            solver_calls = int(config["runcount-limit"])
-        else:
-            solver_calls = None
-
-        if "feature_file" in config:
-            use_features = bool(config["feature_file"])
-        else:
-            use_features = None
-
-        # TODO: Add METRIC to objective
-        objective = SparkleObjective(f"{config['run_obj']}:UNKNOWN")
-
-        # TODO: Number_of_runs isn't part of the scenario file
-        self.configurator.scenario = ConfigurationScenario(self.solver,
-                                                           instance_set_train,
-                                                           None,
-                                                           solver_calls,
-                                                           cpu_time,
-                                                           wallclock_limit,
-                                                           int(config["cutoffTime"]),
-                                                           config["cutoff_length"],
-                                                           objective,
-                                                           use_features)
-        self.configurator.scenario._set_paths(self.configurator.output_path)
+        return result_dict
 
     def get_validation_data(self: ConfigurationOutput, instance_set: InstanceSet) -> \
             tuple[ConfigurationResults, str]:
@@ -220,8 +175,9 @@ class ConfigurationOutput:
         for res in val_default:
             # TODO: status to enum
             results.append([res[3], res[4], res[5], res[6]])
-        results_default = ValidationResults(self.solver, val_default[0][1],
-                                            val_default[0][2], results)
+        configuration = self.parse_string_to_dict(val_default[0][1])
+        results_default = ValidationResults(self.solver, configuration,
+                                            instance_set, results)
 
         results = []
         # Form: 0: solver, 1: config, 2: set, 3: instance, 4: status,
@@ -229,8 +185,9 @@ class ConfigurationOutput:
         for res in val_conf:
             # TODO: status to enum
             results.append([res[3], res[4], res[5], res[6]])
-        results_conf = ValidationResults(self.solver, val_conf[0][1],
-                                         val_conf[0][2], results)
+        configuration = self.parse_string_to_dict(val_conf[0][1])
+        results_conf = ValidationResults(self.solver, configuration,
+                                         instance_set, results)
 
         cutoff_time = self.configurator.scenario.cutoff_time
         penalty = penalty_multiplier * \
@@ -246,6 +203,7 @@ class ConfigurationOutput:
         performance = ConfigurationPerformance(perf_par_conf, perf_par_def)
 
         results = ConfigurationResults(performance, results_default, results_conf)
+        best_config = self.parse_string_to_dict(best_config)
         return results, best_config
 
     def write_output(self: ConfigurationOutput) -> None:
@@ -259,14 +217,14 @@ class ConfigurationOutput:
                 "configured_results": {
                     "solver": cr.configured_results.solver.name,
                     "configuration": cr.configured_results.configuration,
-                    "instance_set": cr.configured_results.instance_set,
+                    "instance_set": cr.configured_results.instance_set.name,
                     "result_header": cr.configured_results.result_header,
                     "result_vals": cr.configured_results.result_vals,
                 },
                 "default_results": {
                     "solver": cr.default_results.solver.name,
                     "configuration": cr.default_results.configuration,
-                    "instance_set": cr.default_results.instance_set,
+                    "instance_set": cr.default_results.instance_set.name,
                     "result_header": cr.default_results.result_header,
                     "result_vals": cr.default_results.result_vals,
                 }
@@ -297,9 +255,15 @@ if __name__ == "__main__":
     gv.settings = Settings()
 
     path = Path("Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN")
+    solver_name = "PbO-CCSAT-Generic"
     solver_dir = gv.settings.DEFAULT_solver_dir
-    instance_dir = gv.settings.DEFAULT_instance_dir
+    solver = resolve_object_name(solver_name,
+                                 gv.solver_nickname_mapping,
+                                 solver_dir, Solver)
     configurator = gv.settings.get_general_sparkle_configurator()
+    instance_set_train = gv.latest_scenario().get_config_instance_set_train()
+    instance_set_test = gv.latest_scenario().get_config_instance_set_test()
     penalty_multiplier = gv.settings.get_general_penalty_multiplier()
-    ConfigurationOutput(path, solver_dir, "PbO-CCSAT-Generic", configurator,
-                        instance_dir, penalty_multiplier)
+    output = ConfigurationOutput(path, solver, configurator, instance_set_train,
+                                 instance_set_test, penalty_multiplier)
+    output.write_output()
