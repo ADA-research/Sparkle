@@ -22,11 +22,6 @@ from pathlib import Path
 
 class ConfigurationOutput:
     """Class that collects configuration data and outputs it a JSON format."""
-    solver: Solver = None
-    configurator: Configurator = None
-    best_config: dict = None
-    training: ConfigurationResults = None
-    test: ConfigurationResults = None
 
     def __init__(self: ConfigurationOutput, path: Path, solver: Solver,
                  configurator: Configurator, instance_set_train: InstanceSet,
@@ -76,6 +71,9 @@ class ConfigurationOutput:
                                             scenario_dir)
         self.configurator.scenario._set_paths(self.configurator.output_path)
 
+        # Retrieve all configurations
+        self.configurations = self.get_configurations(path)
+
         # Retrieves validation results and best configuration
         self.training, self.best_config =\
             self.get_validation_data(self.instance_set_train)
@@ -100,6 +98,24 @@ class ConfigurationOutput:
             result_dict[key] = value
 
         return result_dict
+
+    def get_configurations(self: ConfigurationOutput, path: Path) -> list[dict]:
+        """Read all configurations and transform them to dictionaries."""
+        config_path = path / "validation" / "configurations.csv"
+        configs = []
+
+        # TODO: Should we check if the configurations are unique?
+        # Check if the path exists and is a file
+        if config_path.exists() and config_path.is_file():
+            with config_path.open("r") as file:
+                for line in file:
+                    config = self.parse_string_to_dict(line.strip())
+                    configs.append(config)
+
+        else:
+            print("Can't find configurations")
+
+        return configs
 
     def get_validation_data(self: ConfigurationOutput, instance_set: InstanceSet) -> \
             tuple[ConfigurationResults, str]:
@@ -203,6 +219,7 @@ class ConfigurationOutput:
                 str(self.configurator.executable_path) if self.configurator else None
             ),
             "best_configuration": self.best_config,
+            "configurations": self.configurations,
             "scenario": self.serialize_scenario(self.configurator.scenario)
             if self.configurator.scenario else None,
             "training_set": (
