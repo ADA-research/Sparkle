@@ -21,20 +21,6 @@ from pathlib import Path
 from runrunner.base import Status
 
 
-class ConfigurationPerformance:
-    """Class that stores performance results."""
-    def __init__(self: ConfigurationPerformance, configured_metrics: float,
-                 default_metrics: float) -> None:
-        """Initalize ConfigurationPerformance.
-
-        Args:
-            configured_metrics: The performance of the configured solver
-            default_metrics: The performance result of the default solver
-        """
-        self.configured_metrics = configured_metrics
-        self.default_metrics = default_metrics
-
-
 class ValidationResults:
     """Class that stores validation information and results."""
     def __init__(self: ValidationResults, solver: Solver,
@@ -58,23 +44,28 @@ class ValidationResults:
 
 class ConfigurationResults:
     """Class that aggregates configuration results."""
-    def __init__(self: ConfigurationResults, performance: ConfigurationPerformance,
+    def __init__(self: ConfigurationResults, default_metrics: float,
+                 configured_metrics: float,
                  results_default: ValidationResults,
                  results_configured: ValidationResults) -> None:
         """Initalize ConfigurationResults.
 
         Args:
-            performance: The performance of the default and configured solver
+            default_metrics: The performance result of the default solver
+            configured_metrics: The performance of the configured solver
             results_default: The default results
             results_configured: The configured results
         """
-        self.performance = performance
+        self.performance = {
+            "default_metrics": default_metrics,
+            "configured_metrics": configured_metrics
+        }
         self.configured_results = results_configured
         self.default_results = results_default
 
 
 class ConfigurationOutput:
-    """Class that collects configuration data and outputs it a json format."""
+    """Class that collects configuration data and outputs it a JSON format."""
     solver: Solver = None
     configurator: Configurator = None
     best_config: dict = None
@@ -94,6 +85,7 @@ class ConfigurationOutput:
             instance_set_train: Instance set used for training
             instance_set_test: Instance set used for testing
             penalty_multiplier: penalty multiplier that is applied to the par performance
+                [To be Removed]
             output: Path to the output directory
         """
         self.solver = solver
@@ -202,63 +194,68 @@ class ConfigurationOutput:
                                                   cutoff_time,
                                                   penalty,
                                                   objective)
-        performance = ConfigurationPerformance(perf_par_conf, perf_par_def)
 
-        results = ConfigurationResults(performance, results_default, results_conf)
+        results = ConfigurationResults(perf_par_def, perf_par_conf,
+                                       results_default, results_conf)
         best_config = self.parse_string_to_dict(best_config)
         return results, best_config
 
+    def serialize_configuration_results(self: ConfigurationOutput,
+                                        cr: ConfigurationResults) -> dict:
+        """Transform ConfigurationResults to dictionary format."""
+        return {
+            "performance": {
+                "configured_metrics": cr.configured_results,
+                "default_metrics": cr.default_results,
+            },
+            "configured_results": {
+                "solver": cr.configured_results.solver.name,
+                "configuration": cr.configured_results.configuration,
+                "instance_set": cr.configured_results.instance_set.name,
+                "result_header": cr.configured_results.result_header,
+                "result_vals": cr.configured_results.result_vals,
+            },
+            "default_results": {
+                "solver": cr.default_results.solver.name,
+                "configuration": cr.default_results.configuration,
+                "instance_set": cr.default_results.instance_set.name,
+                "result_header": cr.default_results.result_header,
+                "result_vals": cr.default_results.result_vals,
+            }
+        }
+
+    def serialize_scenario_file(self: ConfigurationOutput,
+                                cs: ConfigurationScenario) -> dict:
+        """Transform ConfigurationScenario to dictionary format."""
+        return {
+            "number_of_runs": cs.number_of_runs,
+            "solver_calls": cs.solver_calls,
+            "cpu_time": cs.cpu_time,
+            "wallclock_time": cs.wallclock_time,
+            "cutoff_time": cs.cutoff_time,
+            "cutoff_length": cs.cutoff_length,
+            "sparkle_objective": cs.sparkle_objective.name,
+            "use_features": cs.use_features,
+            "configurator_target": cs.configurator_target,
+            "feature_data": cs.feature_data,
+        }
+
     def write_output(self: ConfigurationOutput) -> None:
-        """Write data into a json file."""
-        def serialize_configuration_results(cr: ConfigurationResults) -> dict:
-            return {
-                "performance": {
-                    "configured_metrics": cr.performance.configured_metrics,
-                    "default_metrics": cr.performance.default_metrics,
-                },
-                "configured_results": {
-                    "solver": cr.configured_results.solver.name,
-                    "configuration": cr.configured_results.configuration,
-                    "instance_set": cr.configured_results.instance_set.name,
-                    "result_header": cr.configured_results.result_header,
-                    "result_vals": cr.configured_results.result_vals,
-                },
-                "default_results": {
-                    "solver": cr.default_results.solver.name,
-                    "configuration": cr.default_results.configuration,
-                    "instance_set": cr.default_results.instance_set.name,
-                    "result_header": cr.default_results.result_header,
-                    "result_vals": cr.default_results.result_vals,
-                }
-            }
-
-        def write_scenario_file(cs: ConfigurationScenario) -> dict:
-            return {
-                "number_of_runs": cs.number_of_runs,
-                "solver_calls": cs.solver_calls,
-                "cpu_time": cs.cpu_time,
-                "wallclock_time": cs.wallclock_time,
-                "cutoff_time": cs.cutoff_time,
-                "cutoff_length": cs.cutoff_length,
-                "sparkle_objective": cs.sparkle_objective.name,
-                "use_features": cs.use_features,
-                "configurator_target": cs.configurator_target,
-                "feature_data": cs.feature_data,
-            }
-
+        """Write data into a JSON file."""
         output_data = {
             "solver": self.solver.name if self.solver else None,
             "configurator": (
                 str(self.configurator.executable_path) if self.configurator else None
             ),
             "best_config": self.best_config,
-            "scenario": write_scenario_file(self.configurator.scenario)
+            "scenario": self.serialize_scenario_file(self.configurator.scenario)
             if self.configurator.scenario else None,
             "training_set": (
-                serialize_configuration_results(self.training) if self.training else None
+                self.serialize_configuration_results(self.training)
+                if self.training else None
             ),
             "test_set": (
-                serialize_configuration_results(self.test) if self.test else None
+                self.serialize_configuration_results(self.test) if self.test else None
             ),
         }
 
