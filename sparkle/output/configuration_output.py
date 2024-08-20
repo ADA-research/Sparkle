@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sparkle class to organise output."""
+"""Sparkle class to organise configuration output."""
 
 from __future__ import annotations
 
@@ -12,56 +12,12 @@ from sparkle.instance import InstanceSet
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.solver.validator import Validator
+from sparkle.output.structures import ValidationResults, ConfigurationResults
 
 from sparkle.CLI.help.nicknames import resolve_object_name
 
-import os
 import json
 from pathlib import Path
-from runrunner.base import Status
-
-
-class ValidationResults:
-    """Class that stores validation information and results."""
-    def __init__(self: ValidationResults, solver: Solver,
-                 configuration: dict, instance_set: InstanceSet,
-                 results: list[list[str, Status, float, float]]) -> None:
-        """Initalize ValidationResults.
-
-        Args:
-            solver: The name of the solver
-            configuration: The configuration being used
-            instance_set: The set of instances
-            results: Validation results in the format:
-                [["instance", "status", "quality", "runtime"]]
-        """
-        self.solver = solver
-        self.configuration = configuration
-        self.instance_set = instance_set
-        self.result_header = ["instance", "status", "quality", "runtime"]
-        self.result_vals = results
-
-
-class ConfigurationResults:
-    """Class that aggregates configuration results."""
-    def __init__(self: ConfigurationResults, default_metrics: float,
-                 configured_metrics: float,
-                 results_default: ValidationResults,
-                 results_configured: ValidationResults) -> None:
-        """Initalize ConfigurationResults.
-
-        Args:
-            default_metrics: The performance result of the default solver
-            configured_metrics: The performance of the configured solver
-            results_default: The default results
-            results_configured: The configured results
-        """
-        self.performance = {
-            "default_metrics": default_metrics,
-            "configured_metrics": configured_metrics
-        }
-        self.configured_results = results_configured
-        self.default_results = results_default
 
 
 class ConfigurationOutput:
@@ -194,7 +150,6 @@ class ConfigurationOutput:
                                                   cutoff_time,
                                                   penalty,
                                                   objective)
-
         results = ConfigurationResults(perf_par_def, perf_par_conf,
                                        results_default, results_conf)
         best_config = self.parse_string_to_dict(best_config)
@@ -205,27 +160,27 @@ class ConfigurationOutput:
         """Transform ConfigurationResults to dictionary format."""
         return {
             "performance": {
-                "configured_metrics": cr.configured_results,
-                "default_metrics": cr.default_results,
+                "configured_metrics": cr.performance["default_metrics"],
+                "default_metrics": cr.performance["configured_metrics"],
             },
             "configured_results": {
                 "solver": cr.configured_results.solver.name,
                 "configuration": cr.configured_results.configuration,
                 "instance_set": cr.configured_results.instance_set.name,
                 "result_header": cr.configured_results.result_header,
-                "result_vals": cr.configured_results.result_vals,
+                "result_values": cr.configured_results.result_vals,
             },
             "default_results": {
                 "solver": cr.default_results.solver.name,
                 "configuration": cr.default_results.configuration,
                 "instance_set": cr.default_results.instance_set.name,
                 "result_header": cr.default_results.result_header,
-                "result_vals": cr.default_results.result_vals,
+                "result_values": cr.default_results.result_vals,
             }
         }
 
-    def serialize_scenario_file(self: ConfigurationOutput,
-                                cs: ConfigurationScenario) -> dict:
+    def serialize_scenario(self: ConfigurationOutput,
+                           cs: ConfigurationScenario) -> dict:
         """Transform ConfigurationScenario to dictionary format."""
         return {
             "number_of_runs": cs.number_of_runs,
@@ -247,8 +202,8 @@ class ConfigurationOutput:
             "configurator": (
                 str(self.configurator.executable_path) if self.configurator else None
             ),
-            "best_config": self.best_config,
-            "scenario": self.serialize_scenario_file(self.configurator.scenario)
+            "best_configuration": self.best_config,
+            "scenario": self.serialize_scenario(self.configurator.scenario)
             if self.configurator.scenario else None,
             "training_set": (
                 self.serialize_configuration_results(self.training)
@@ -259,7 +214,7 @@ class ConfigurationOutput:
             ),
         }
 
-        Path(os.path.dirname(self.output)).mkdir(exist_ok=True)
+        self.output.parent.mkdir(parents=True, exist_ok=True)
         with self.output.open("w") as f:
             json.dump(output_data, f, indent=4)
         print("Analysis of configuration can be found here: ", self.output)
