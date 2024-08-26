@@ -90,7 +90,6 @@ class Settings:
         DEFAULT_parallel_portfolio_output / rawdata_dir
     DEFAULT_parallel_portfolio_output_analysis =\
         DEFAULT_parallel_portfolio_output / analysis_dir
-    DEFAULT_selection_output_test = DEFAULT_selection_output / "Test_Cases"
 
     # Old default output dirs which should be part of something else
     DEFAULT_feature_data = DEFAULT_output / "Feature_Data"
@@ -108,9 +107,9 @@ class Settings:
 
     # Old default file paths from GV which should be turned into variables
     DEFAULT_feature_data_path =\
-        DEFAULT_feature_data / "sparkle_feature_data.csv"
+        DEFAULT_feature_data / "feature_data.csv"
     DEFAULT_performance_data_path =\
-        DEFAULT_performance_data / "sparkle_performance_data.csv"
+        DEFAULT_performance_data / "performance_data.csv"
 
     # Constant default values
     DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")
@@ -669,8 +668,6 @@ class Settings:
             self.__general_verbosity_set = origin
             self.__settings[section][name] = value.name
 
-        return
-
     def get_general_verbosity(self: Settings) -> VerbosityLevel:
         """Return the general verbosity."""
         if self.__general_verbosity_set == SettingState.NOT_SET:
@@ -913,7 +910,7 @@ class Settings:
         if value is not None and self.__check_setting_state(
                 self.__parallel_portfolio_num_seeds_per_solver_set, origin, name):
             self.__init_section(section)
-            self.__parallel_portfolio_check_interval_set = origin
+            self.__parallel_portfolio_num_seeds_per_solver_set = origin
             self.__settings[section][name] = str(value)
 
     def get_parallel_portfolio_number_of_seeds_per_solver(self: Settings) -> int:
@@ -981,7 +978,7 @@ class Settings:
                 cur_val = cur_dict[section].get(name, None)
                 prev_val = prev_dict[section].get(name, None)
                 if cur_val != prev_val:
-                    # do we have yet to print the initial warning?
+                    # Have we printed the initial warning?
                     if not option_changed:
                         print("Warning: The following attributes/options have changed:")
                         option_changed = True

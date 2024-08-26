@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 """Definitions of constants broadly used in Sparkle."""
-
-import fcntl
 import ast
 from pathlib import Path
 
@@ -39,8 +37,6 @@ def settings() -> Settings:
 
 reference_list_dir = Path("Reference_Lists")
 reference_list_dir.mkdir(exist_ok=True)
-# NOTE: These data structures seem to be only written to / removed from but not read/used
-# NOTE: This could be a bug though, should test before removing stuff!
 extractor_nickname_list_path = reference_list_dir / "sparkle_extractor_nickname_list.txt"
 solver_nickname_list_path = reference_list_dir / "sparkle_solver_nickname_list.txt"
 instances_nickname_path = reference_list_dir / "sparkle_instance_nickname_list.txt"
@@ -52,7 +48,6 @@ file_storage_data_mapping = {solver_nickname_list_path: {},
 for data_path in file_storage_data_mapping.keys():
     if data_path.exists():
         with data_path.open("r+") as fo:
-            fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
             file_storage_data_mapping[data_path] = ast.literal_eval(fo.read())
 
 solver_nickname_mapping = file_storage_data_mapping[solver_nickname_list_path]

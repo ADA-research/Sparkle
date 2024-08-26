@@ -16,7 +16,7 @@ from runrunner.base import Runner
 from runrunner.slurm import Status
 
 from sparkle.CLI.help.reporting_scenario import Scenario
-from sparkle.CLI.help import sparkle_logging as sl
+from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import global_variables as gv
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
@@ -140,8 +140,8 @@ def run_parallel_portfolio(instances_set: InstanceSet,
             elif job_output_dict[instance][solver]["cpu_time"] < min_time:
                 min_time = job_output_dict[instance][solver]["cpu_time"]
         for solver in no_log_solvers:
-            job_output_dict[instance][solver]["cpu_time"] = min_time + cutoff
-            job_output_dict[instance][solver]["wc_time"] = min_time + cutoff
+            job_output_dict[instance][solver]["cpu_time"] = min_time + check_interval
+            job_output_dict[instance][solver]["wc_time"] = min_time + check_interval
 
     for index, instance_name in enumerate(instances_set._instance_names):
         index_str = f"[{index + 1}/{num_instances}] "
@@ -185,6 +185,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.PerformanceMeasureSimpleArgument.kwargs)
     parser.add_argument(*ac.CutOffTimeArgument.names,
                         **ac.CutOffTimeArgument.kwargs)
+    parser.add_argument(*ac.SolverSeedsArgument.names,
+                        **ac.SolverSeedsArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
@@ -232,6 +234,10 @@ if __name__ == "__main__":
         gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
     run_on = gv.settings().get_run_on()
+
+    if args.solver_seeds is not None:
+        gv.settings().set_parallel_portfolio_number_of_seeds_per_solver(
+            args.solver_seeds, SettingState.CMD_LINE)
 
     if run_on == Runner.LOCAL:
         print("Parallel Portfolio is not fully supported yet for Local runs. Exiting.")

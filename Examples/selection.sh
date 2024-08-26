@@ -66,9 +66,9 @@ sparkle generate_report
 
 #### Run on a single instance
 
-# Run the portfolio selector on a *single* testing instance; the result will be printed to the command line
+# Run the portfolio selector on a *single* testing instance; By running it locally, the results will be shown on the commandline
 
-sparkle run_portfolio_selector Examples/Resources/Instances/PTN2/plain7824.cnf
+sparkle run_portfolio_selector Examples/Resources/Instances/PTN2/plain7824.cnf --run-on local
 
 #### Run on an instance set
 

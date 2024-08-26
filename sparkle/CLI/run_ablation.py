@@ -9,7 +9,7 @@ from runrunner.base import Runner
 
 from sparkle.solver.ablation import AblationScenario
 from sparkle.CLI.help import global_variables as gv
-from sparkle.CLI.help import sparkle_logging as sl
+from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet

@@ -13,10 +13,10 @@
 #SBATCH --cpus-per-task=1
 
 ## Data
-feature_data_path="Output/Feature_Data/sparkle_feature_data.csv"
+feature_data_path="Output/Feature_Data/feature_data.csv"
 feature_data_test="tests/CLI/test_files/Feature_Data/test_construct_portfolio_selector.csv"
 
-performance_data_path="Output/Performance_Data/sparkle_performance_data.csv"
+performance_data_path="Output/Performance_Data/performance_data.csv"
 performance_data_test="tests/CLI/test_files/Performance_Data/test_construct_portfolio_selector.csv"
 
 # Copy selector construction output to simulate the construct_portfolio_selector command
