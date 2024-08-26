@@ -5,26 +5,24 @@ import sys
 import subprocess
 from pathlib import Path
 from sparkle.types import SolverStatus
-from sparkle.tools.slurm_parsing import parse_commandline_dict
+from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args, \
+    get_solver_call_params
 
-# Convert the arguments to a dictionary
-args = parse_commandline_dict(sys.argv[1:])
+# Parse the arguments of the solver wrapper
+args_dict = parse_solver_wrapper_args(sys.argv[1:])
 
-# Extract and delete data that needs specific formatting
-solver_dir = Path(args["solver_dir"])
+# Extract certain args from the above dict for use further below
+solver_dir = Path(args_dict["solver_dir"])
+seed = args_dict["seed"]
+
 # We deal with multi-file instances, but only use the .model files
 instance = ""
-for instance_file in args["instance"]:
+for instance_file in args_dict["instance"]:
     if Path(instance_file).suffix == ".model":
         instance = Path(instance_file)
         break
-seed = args["seed"]
 
-del args["solver_dir"]
-del args["instance"]
-del args["cutoff_time"]
-del args["seed"]
-
+# Construct the base solver call
 solver_name = "FastCA"
 if solver_dir != Path("."):
     solver_exec = f"{solver_dir / solver_name}"
@@ -34,12 +32,10 @@ solver_cmd = [solver_exec,
               "-inst", str(instance),
               "-seed", str(seed)]
 
-# Construct call from args dictionary
-params = []
-for key in args:
-    if args[key] is not None:
-        params.extend(["-" + str(key), str(args[key])])
+# Get further params for the solver call
+params = get_solver_call_params(args_dict)
 
+# Execute the solver call
 try:
     solver_call = subprocess.run(solver_cmd + params,
                                  capture_output=True)

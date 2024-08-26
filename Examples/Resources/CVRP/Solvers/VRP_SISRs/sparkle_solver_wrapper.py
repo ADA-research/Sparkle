@@ -4,29 +4,19 @@
 import sys
 import subprocess
 from pathlib import Path
-from sparkle.tools.slurm_parsing import parse_commandline_dict
+from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args, \
+    get_solver_call_params
 
-# Convert the argument of the target_algorithm script to dictionary
-args = parse_commandline_dict(sys.argv[1:])
+# Parse the arguments of the solver wrapper
+args_dict = parse_solver_wrapper_args(sys.argv[1:])
 
-# Extract and delete data that needs specific formatting
-solver_dir = Path(args["solver_dir"])
-instance = args["instance"]
-cutoff_time = int(args["cutoff_time"]) + 1
-seed = args["seed"]
+# Extract certain args from the above dict for use further below
+solver_dir = args_dict["solver_dir"]
+instance = args_dict["instance"]
+seed = args_dict["seed"]
+seed = args_dict["seed"]
 
-del args["solver_dir"]
-del args["instance"]
-del args["cutoff_time"]
-del args["seed"]
-
-
-# Construct call from args dictionary
-params = []
-for key in args:
-    if args[key] is not None:
-        params.extend(["-" + str(key), str(args[key])])
-
+# Construct the base solver call
 solver_binary = "VRP_SISRs"
 solver_exec = f"{solver_dir / solver_binary}" if solver_dir != Path(".") else "./" \
     + solver_binary
@@ -34,11 +24,15 @@ solver_cmd = [solver_exec,
               "-inst", str(instance),
               "-seed", str(seed)]
 
-instance_name = Path(instance).name
-solver_name = Path(solver_binary).name
+# Get further params for the solver call
+params = get_solver_call_params(args_dict)
 
-solver_call = subprocess.run(solver_cmd + params,
+# Execute the solver call
+try:
+    solver_call = subprocess.run(solver_cmd + params,
                              capture_output=True)
+except Exception as ex:
+    print(f"Solver call failed with exception:\n{ex}")
 
 output_str = solver_call.stdout.decode()
 output_list = output_str.splitlines()
