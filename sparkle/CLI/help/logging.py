@@ -7,6 +7,8 @@ import time
 from pathlib import Path
 from pathlib import PurePath
 
+from runrunner.logger import Log as RunRunnerLog
+
 from sparkle.CLI.help import global_variables as gv
 
 
@@ -114,3 +116,6 @@ def log_command(argv: list[str]) -> None:
 
     # Write to log file
     log_path.open("a").write(log_str)
+
+    # Pipe RunRunner log to the same file
+    RunRunnerLog.set_log_file(log_path)
