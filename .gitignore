@@ -9,7 +9,7 @@ Log/*
 Output/*
 Snapshots/*
 Test_Cases/*
-Settings/latest.ini
+Settings/*
 tests/test_files/tmp
 sparkle/Components/ablationAnalysis-0.9.4/scenarios
 sparkle/Components/runsolver/src/*.o
