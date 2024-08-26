@@ -5,6 +5,6 @@ sphinxcontrib-jsmath
 sphinxcontrib-autoprogram
 pandas # Also in environment.yml but needed for readthedocs
 filelock==3.15.1
-RunRunner==0.1.5
+RunRunner==0.1.6.1
 pcsparser @ git+https://github.com/jeroenrook/pcsparser.git
 sphinx_rtd_theme==2.0.0
