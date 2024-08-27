@@ -20,12 +20,18 @@ def main() -> None:
         command_file = module_path / f"{command}.py"
         if command_file.is_file():
             break
+
     if command_file.is_file():
         if not os.access(command_file, os.X_OK):  # Pip installation changes exec rights
             command_file.chmod(0o755)
         os.system(f"{command_file} {' '.join(args)}")
+    elif (module_path / f"{command}.sh").is_file():
+        script_path = (module_path / f"{command}.sh")
+        script_path.chmod(0o755)  # Ensure execution rights with shipment
+        os.system(f"source {script_path}")
+        print("Autocompletion activated")
     else:
-        print(f"Does not understand command {command}")
+        print(f"Sparkle does not understand command <{command}>")
 
 
 if __name__ == "__main__":
