@@ -7,7 +7,6 @@ from pathlib import Path
 
 from runrunner import Runner
 
-from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import global_variables as gv
 import sparkle.tools.general as tg
 from sparkle.solver import Solver
@@ -28,11 +27,13 @@ if __name__ == "__main__":
     parser.add_argument("--performance-measure", choices=PerformanceMeasure.__members__,
                         default=perf_measure,
                         help="the performance measure, e.g. runtime")
+    parser.add_argument("--log-dir", type=Path, required=False,
+                        help="path to the log directory")
     parser.add_argument("--seed", type=str, required=False,
                         help="sets the seed used for the solver")
     args = parser.parse_args()
-
     # Process command line arguments
+    cwd = args.log_dir if args.log_dir is not None else gv.settings().DEFAULT_tmp_output
     # Resolve possible multi-file instance
     instance_path = Path(args.instance)
     instance_name = instance_path.name
@@ -44,15 +45,16 @@ if __name__ == "__main__":
         instance_key = instance_name
 
     verifier = gv.settings().get_general_solution_verifier()
-    solver = Solver(Path(args.solver), verifier=verifier)
+    solver = Solver(args.solver, verifier=verifier)
     performance_measure = PerformanceMeasure.from_str(args.performance_measure)
     key_str = f"{solver.name}_{instance_name}_{tg.get_time_pid_random_string()}"
     cutoff = gv.settings().get_general_target_cutoff_time()
+
     solver_output = solver.run(
         instance_path.absolute(),
         seed=args.seed if args.seed else 42,
         cutoff_time=cutoff,
-        cwd=sl.caller_log_dir,
+        cwd=cwd,
         run_on=Runner.LOCAL)
 
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
@@ -64,7 +66,7 @@ if __name__ == "__main__":
     # Now that we have all the results, we can add them to the performance dataframe
     lock = FileLock(f"{args.performance_data}.lock")  # Lock the file
     with lock.acquire(timeout=60):
-        performance_dataframe = PerformanceDataFrame(Path(args.performance_data))
+        performance_dataframe = PerformanceDataFrame(args.performance_data)
         performance_dataframe.set_value(measurement,
                                         solver=str(args.solver),
                                         instance=str(args.instance))

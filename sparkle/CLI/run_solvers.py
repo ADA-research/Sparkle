@@ -91,7 +91,8 @@ def running_solvers_performance_data(
     cmd_list = [f"{run_solvers_core} "
                 f"--performance-data {performance_data_csv_path} "
                 f"--instance {inst_p} --solver {solver_p} "
-                f"--performance-measure {perf_m.name}" for inst_p, solver_p in jobs]
+                f"--performance-measure {perf_m.name} "
+                f"--log-dir {sl.caller_log_dir}" for inst_p, solver_p in jobs]
 
     run = rrr.add_to_queue(
         runner=run_on,
