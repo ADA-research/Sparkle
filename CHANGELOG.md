@@ -2,6 +2,13 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.8.5] - 2024/09/??
+
+### Changed
+
+### Added
+- CLI autocompletion support, which can be activated with a oneliner after installation [SPRK-332]
+
 ## [0.8.4] - 2024/07/30
 
 ### Changed
