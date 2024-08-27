@@ -29,6 +29,15 @@ And afterwards activated by:
 
 Note that the creation of the Conda environment also takes care of the installation of Sparkle itself.
 
+## Bash
+
+If you want to enable the autocompletion of sparkle commands, after installing Sparkle run:
+```bash
+   $ sparkle autocompletion
+```
+
+This will add the **sparkle** command to the terminals autocompleter, making the typing of commands easier.
+
 ### Install dependencies
 Asside from several package dependencies, Sparkle's package / CLI relies on a few user supplied executables:
 - `LaTex` compiler ([pdflatex](https://gist.github.com/rain1024/98dd5e2c6c8c28f9ea9d)) for report generation
