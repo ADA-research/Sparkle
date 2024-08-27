@@ -8,7 +8,6 @@ from pathlib import PurePath
 from runrunner.base import Runner
 
 from sparkle.CLI.help import global_variables as gv
-from sparkle.solver import pcs
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
@@ -108,8 +107,6 @@ if __name__ == "__main__":
     _, opt_config_str = configurator.get_optimal_configuration(
         solver, instance_set_train, objective.PerformanceMeasure)
     opt_config = Solver.config_str_to_dict(opt_config_str)
-
-    pcs.write_configuration_pcs(solver, opt_config_str, gv.settings().DEFAULT_tmp_output)
 
     validator = Validator(gv.settings().DEFAULT_validation_output, sl.caller_log_dir)
     all_validation_instances = [instance_set_train]
