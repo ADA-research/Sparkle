@@ -33,7 +33,7 @@ Note that the creation of the Conda environment also takes care of the installat
 
 If you want to enable the autocompletion of sparkle commands, after installing Sparkle run:
 ```bash
-   $ sparkle autocompletion
+   $ sparkle activate autocompletion
 ```
 
 This will add the **sparkle** command to the terminals autocompleter, making the typing of commands easier.

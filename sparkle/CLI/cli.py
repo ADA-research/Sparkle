@@ -25,8 +25,8 @@ def main() -> None:
         if not os.access(command_file, os.X_OK):  # Pip installation changes exec rights
             command_file.chmod(0o755)
         os.system(f"{command_file} {' '.join(args)}")
-    elif (module_path / f"{command}.sh").is_file():
-        script_path = (module_path / f"{command}.sh")
+    elif command_file.with_suffix(".sh").is_file():
+        script_path = command_file.with_suffix(".sh")
         script_path.chmod(0o755)  # Ensure execution rights with shipment
         os.system(f"source {script_path}")
         print("Autocompletion activated")
