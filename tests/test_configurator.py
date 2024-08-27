@@ -76,7 +76,9 @@ class TestConfigurator():
         expected_cmds = ANY
         expected_outputs = ANY
 
-        runs = smac2_conf.configure(conf_scenario, validate_after=False)
+        runs = smac2_conf.configure(conf_scenario,
+                                    validate_after=False,
+                                    base_dir=base_dir)
         mock_runrunner_conf.assert_called_once_with(runner=rrr.Runner.SLURM,
                                                     base_dir=base_dir,
                                                     cmd=expected_cmds,
