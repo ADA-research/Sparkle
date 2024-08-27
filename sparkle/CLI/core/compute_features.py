@@ -6,6 +6,7 @@ from pathlib import Path
 from filelock import FileLock
 
 from sparkle.CLI.help import global_variables as gv
+from sparkle.CLI.help import logging
 from sparkle.structures import FeatureDataFrame
 from sparkle.instance import InstanceSet
 from sparkle.solver import Extractor
@@ -48,10 +49,10 @@ if __name__ == "__main__":
 
     extractor = Extractor(extractor_path,
                           gv.settings().DEFAULT_runsolver_exec,
-                          gv.settings().DEFAULT_tmp_output)
+                          logging.caller_log_dir)
     # We are not interested in the runsolver log, but create the file to filter it
     # from the extractor call output
-    runsolver_watch_path = gv.settings().DEFAULT_tmp_output /\
+    runsolver_watch_path = logging.caller_log_dir /\
         f"{instance_name}_{extractor_path.name}.wlog"
     features = extractor.run(instance_list,
                              feature_group=args.feature_group,
@@ -73,4 +74,3 @@ if __name__ == "__main__":
         print("EXCEPTION during retrieving extractor results.\n"
               f"****** WARNING: Feature vector computation on instance {instance_path}"
               " failed! ******")
-    runsolver_watch_path.unlink(missing_ok=True)

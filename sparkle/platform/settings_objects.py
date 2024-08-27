@@ -101,6 +101,7 @@ class Settings:
         DEFAULT_output, DEFAULT_configuration_output,
         DEFAULT_selection_output, DEFAULT_validation_output,
         DEFAULT_tmp_output,
+        DEFAULT_log_output,
         DEFAULT_solver_dir, DEFAULT_instance_dir,
         DEFAULT_feature_data, DEFAULT_performance_data,
         DEFAULT_extractor_dir,

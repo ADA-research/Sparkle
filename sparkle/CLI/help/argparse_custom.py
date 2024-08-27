@@ -106,6 +106,17 @@ AlsoConstructSelectorAndReportArgument = \
                               "help": "after running the solvers also construct the "
                                       "selector and generate the report"})
 
+CleanupArgumentAll = \
+    ArgumentContainer(names=["--all"],
+                      kwargs={"action": "store_true",
+                              "help": "clean all output files"})
+
+CleanupArgumentRemove = \
+    ArgumentContainer(names=["--remove"],
+                      kwargs={"action": "store_true",
+                              "help": "remove all files in the platform, including "
+                                      "user data such as InstanceSets and Solvers"})
+
 CommandArgument = \
     ArgumentContainer(names=["--command"],
                       kwargs={"required": False,

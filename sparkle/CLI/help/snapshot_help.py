@@ -32,6 +32,12 @@ def remove_current_platform() -> None:
         shutil.rmtree(working_dir, ignore_errors=True)
 
 
+def create_working_dirs() -> None:
+    """Create working directories."""
+    for working_dir in gv.settings().DEFAULT_working_dirs:
+        working_dir.mkdir(parents=True, exist_ok=True)
+
+
 def extract_snapshot(snapshot_file: Path) -> None:
     """Restore a Sparkle platform from a snapshot.
 
