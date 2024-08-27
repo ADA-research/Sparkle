@@ -122,6 +122,9 @@ if __name__ == "__main__":
 
     if run_on == Runner.LOCAL:
         validation.wait()
+        print("Running validation done!")
+    else:
+        print(f"Running validation through Slurm with job ID: {validation.run_id}")
 
     # Update latest scenario
     gv.latest_scenario().set_config_solver(solver)
