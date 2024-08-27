@@ -5,7 +5,7 @@ import argparse
 import shutil
 
 from sparkle.CLI.help import logging as sl
-import sparkle.CLI.help.global_variables as gv
+from sparkle.CLI.help import global_variables as gv
 
 
 def parser_function() -> argparse.ArgumentParser:
