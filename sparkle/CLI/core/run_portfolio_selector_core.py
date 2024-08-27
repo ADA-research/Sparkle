@@ -9,6 +9,7 @@ from pathlib import Path
 from runrunner.base import Runner
 
 from sparkle.CLI.help import global_variables as gv
+from sparkle.CLI.help import logging as sl
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.solver import Solver
 from sparkle.types import SolverStatus
@@ -34,7 +35,7 @@ def call_solver_solve_instance(
         instance.absolute(),
         seed=gv.get_seed(),
         cutoff_time=cutoff_time,
-        cwd=gv.settings().DEFAULT_tmp_output,
+        cwd=sl.caller_log_dir,
         run_on=Runner.LOCAL)
     cpu_time, status = solver_output["cpu_time"], solver_output["status"]
     flag_solved = False

@@ -140,7 +140,7 @@ if __name__ == "__main__":
                                       selector_timeout,
                                       run_on=run_on,
                                       sbatch_options=sbatch_options,
-                                      base_dir=gv.settings().DEFAULT_tmp_output)
+                                      base_dir=sl.caller_log_dir)
     if run_on == Runner.LOCAL:
         print("Sparkle portfolio selector constructed!")
     else:
@@ -167,7 +167,7 @@ if __name__ == "__main__":
                                              selector_timeout,
                                              run_on=run_on,
                                              sbatch_options=sbatch_options,
-                                             base_dir=gv.settings().DEFAULT_tmp_output)
+                                             base_dir=sl.caller_log_dir)
             dependencies.append(ablated_run)
             if run_on == Runner.LOCAL:
                 print(f"Portfolio selector without {solver_name} constructed!")
@@ -182,7 +182,7 @@ if __name__ == "__main__":
         runner=run_on,
         cmd=cmd,
         name=CommandName.COMPUTE_MARGINAL_CONTRIBUTION,
-        base_dir=gv.settings().DEFAULT_tmp_output,
+        base_dir=sl.caller_log_dir,
         dependencies=dependencies,
         sbatch_options=sbatch_options)
     dependencies.append(marginal_contribution)

@@ -11,6 +11,7 @@ import runrunner as rrr
 from runrunner.base import Runner, Run
 
 from sparkle.CLI.help import global_variables as gv
+from sparkle.CLI.help import logging as sl
 
 from sparkle.configurator.implementations import SMAC2
 from sparkle.platform import CommandName
@@ -202,7 +203,7 @@ class AblationScenario:
             runner=run_on,
             cmd=cmd,
             name=CommandName.RUN_ABLATION,
-            base_dir=gv.settings().DEFAULT_tmp_output,
+            base_dir=sl.caller_log_dir,
             path=self.scenario_dir,
             sbatch_options=sbatch_options,
             srun_options=srun_options)
@@ -225,7 +226,7 @@ class AblationScenario:
                 cmd=cmd,
                 name=CommandName.RUN_ABLATION_VALIDATION,
                 path=self.validation_dir,
-                base_dir=gv.settings().DEFAULT_tmp_output,
+                base_dir=sl.caller_log_dir,
                 dependencies=run_ablation,
                 sbatch_options=sbatch_options,
                 srun_options=srun_options)

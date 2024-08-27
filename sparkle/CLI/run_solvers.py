@@ -98,7 +98,7 @@ def running_solvers_performance_data(
         cmd=cmd_list,
         parallel_jobs=num_job_in_parallel,
         name=CommandName.RUN_SOLVERS,
-        base_dir=gv.settings().DEFAULT_tmp_output,
+        base_dir=sl.caller_log_dir,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
 
@@ -152,7 +152,7 @@ def run_solvers_on_instances(
             cmd="sparkle/CLI/construct_portfolio_selector.py",
             name=CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
             dependencies=runs[-1],
-            base_dir=gv.settings().DEFAULT_tmp_output,
+            base_dir=sl.caller_log_dir,
             sbatch_options=sbatch_user_options))
 
         runs.append(rrr.add_to_queue(
@@ -160,7 +160,7 @@ def run_solvers_on_instances(
             cmd="sparkle/CLI/generate_report.py",
             name=CommandName.GENERATE_REPORT,
             dependencies=runs[-1],
-            base_dir=gv.settings().DEFAULT_tmp_output,
+            base_dir=sl.caller_log_dir,
             sbatch_options=sbatch_user_options))
 
     if run_on == Runner.LOCAL:

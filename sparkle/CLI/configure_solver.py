@@ -130,7 +130,7 @@ def run_after(solver: Path,
         cmd=command_line,
         name=command,
         dependencies=dependency,
-        base_dir=gv.settings().DEFAULT_tmp_output,
+        base_dir=sl.caller_log_dir,
         srun_options=["-N1", "-n1"],
         sbatch_options=gv.settings().get_slurm_extra_options(as_args=True))
 

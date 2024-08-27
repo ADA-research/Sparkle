@@ -100,7 +100,7 @@ def compute_features(
         cmd=cmd_list,
         name=CommandName.COMPUTE_FEATURES,
         parallel_jobs=parallel_jobs,
-        base_dir=gv.settings().DEFAULT_tmp_output,
+        base_dir=sl.caller_log_dir,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
 

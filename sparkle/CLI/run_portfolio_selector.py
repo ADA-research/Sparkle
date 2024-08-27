@@ -126,7 +126,7 @@ if __name__ == "__main__":
         runner=run_on,
         cmd=cmd_list,
         name=CommandName.RUN_PORTFOLIO_SELECTOR,
-        base_dir=gv.settings().DEFAULT_tmp_output,
+        base_dir=sl.caller_log_dir,
         stdout=None,
         dependencies=feature_run if run_on == Runner.SLURM else None,
         sbatch_options=gv.settings().get_slurm_extra_options(as_args=True))

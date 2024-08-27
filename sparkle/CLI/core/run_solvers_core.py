@@ -7,6 +7,7 @@ from pathlib import Path
 
 from runrunner import Runner
 
+from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import global_variables as gv
 import sparkle.tools.general as tg
 from sparkle.solver import Solver
@@ -51,7 +52,7 @@ if __name__ == "__main__":
         instance_path.absolute(),
         seed=args.seed if args.seed else 42,
         cutoff_time=cutoff,
-        cwd=gv.settings().DEFAULT_tmp_output,
+        cwd=sl.caller_log_dir,
         run_on=Runner.LOCAL)
 
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
