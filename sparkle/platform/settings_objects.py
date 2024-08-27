@@ -80,6 +80,7 @@ class Settings:
     DEFAULT_validation_output = DEFAULT_output / "Validation"
     DEFAULT_parallel_portfolio_output = DEFAULT_output / "Parallel_Portfolio"
     DEFAULT_ablation_output = DEFAULT_output / "Ablation"
+    DEFAULT_log_output = DEFAULT_output / "Log"
 
     # Default output subdirs
     DEFAULT_configuration_output_raw = DEFAULT_configuration_output / rawdata_dir
