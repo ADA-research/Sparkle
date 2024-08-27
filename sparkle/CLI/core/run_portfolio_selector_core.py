@@ -9,7 +9,6 @@ from pathlib import Path
 from runrunner.base import Runner
 
 from sparkle.CLI.help import global_variables as gv
-from sparkle.CLI.help import logging as sl
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.solver import Solver
 from sparkle.types import SolverStatus
@@ -19,6 +18,7 @@ def call_solver_solve_instance(
         solver: Solver,
         instance: Path,
         cutoff_time: int,
+        cwd: Path,
         performance_data: PerformanceDataFrame = None) -> bool:
     """Call the Sparkle portfolio selector to solve a single instance with a cutoff.
 
@@ -26,6 +26,7 @@ def call_solver_solve_instance(
         solver: The solver to run on the instance
         instance: The path to the instance
         cutoff_time: The cutoff time for the solver
+        cwd: The working directory for the solver
         performance_data: The dataframe to store the results in
 
     Returns:
@@ -35,7 +36,7 @@ def call_solver_solve_instance(
         instance.absolute(),
         seed=gv.get_seed(),
         cutoff_time=cutoff_time,
-        cwd=sl.caller_log_dir,
+        cwd=cwd,
         run_on=Runner.LOCAL)
     cpu_time, status = solver_output["cpu_time"], solver_output["status"]
     flag_solved = False
@@ -77,19 +78,20 @@ if __name__ == "__main__":
                         help="path to performance data csv")
     parser.add_argument("--performance-data-csv", required=True, type=Path,
                         help="path to performance data csv")
+    parser.add_argument("--log-dir", type=Path, required=False,
+                        help="path to the log directory")
     args = parser.parse_args()
 
     # Process command line arguments
-    selector_file = Path(args.selector)
-    instance_path = Path(args.instance)
+    cwd = args.log_dir if args.log_dir is not None else gv.settings().DEFAULT_tmp_output
     feature_data = FeatureDataFrame(Path(args.feature_data_csv))
     performance_data = PerformanceDataFrame(Path(args.performance_data_csv))
 
     # Run portfolio selector
     print("Sparkle portfolio selector predicting ...")
     selector = gv.settings().get_general_sparkle_selector()
-    predict_schedule = selector.run(selector_file,
-                                    feature_data.get_instance(str(instance_path)))
+    predict_schedule = selector.run(args.selector,
+                                    feature_data.get_instance(str(args.instance)))
 
     if predict_schedule is None:  # Selector Failed to produce prediction
         sys.exit(-1)
@@ -100,7 +102,7 @@ if __name__ == "__main__":
         solver = Solver(Path(solver), verifier=verifier)
         print(f"Calling solver {solver.name} with time budget {cutoff_time} ...")
         flag_solved = call_solver_solve_instance(
-            solver, instance_path, cutoff_time, performance_data)
+            solver, args.instance, cutoff_time, cwd, performance_data)
         print(f"Calling solver {solver.name} done!")
 
         if flag_solved:

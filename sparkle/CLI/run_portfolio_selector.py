@@ -104,7 +104,8 @@ if __name__ == "__main__":
         test_case_path / "performance_data.csv",
         objectives=gv.settings().get_general_sparkle_objectives())
     for instance_name in instance_set.instance_names:
-        performance_data.add_instance(instance_name)
+        if instance_name not in performance_data.instances:
+            performance_data.add_instance(instance_name)
     performance_data.add_solver(selector_path.name)
     performance_data.save_csv()
     # Update latest scenario
@@ -119,7 +120,8 @@ if __name__ == "__main__":
                 f"--selector {selector_path} "
                 f"--feature-data-csv {feature_dataframe.csv_filepath} "
                 f"--performance-data-csv {performance_data.csv_filepath} "
-                f"--instance {instance_path}"
+                f"--instance {instance_path} "
+                f"--log-dir {sl.caller_log_dir}"
                 for instance_path in instance_set.instance_paths]
 
     selector_run = rrr.add_to_queue(
