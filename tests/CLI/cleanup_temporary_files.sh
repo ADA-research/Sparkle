@@ -13,14 +13,14 @@
 
 
 # Cleanup temporary files
-output_true="Temporary files cleaned!"
-output=$(sparkle/CLI/cleanup_temporary_files.py | tail -1)
+output_true="Cleaned platform of temporary files!"
+output=$(sparkle/CLI/cleanup.py | tail -1)
 
 if [[ $output == $output_true ]];
 then
-	echo "[success] cleanup_temporary_files test succeeded"
+	echo "[success] cleanup test succeeded"
 else
-	echo "[failure] cleanup_temporary_files test failed with output:"
+	echo "[failure] cleanup test failed with output:"
 	echo $output
 fi
 

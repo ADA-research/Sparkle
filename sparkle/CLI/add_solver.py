@@ -137,7 +137,7 @@ if __name__ == "__main__":
             cmd="sparkle/CLI/construct_portfolio_selector.py",
             name=CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
             dependencies=dependency_run_list,
-            base_dir=gv.settings().DEFAULT_tmp_output,
+            base_dir=sl.caller_log_dir,
             sbatch_options=sbatch_options,
             srun_options=srun_options)
 
@@ -147,7 +147,7 @@ if __name__ == "__main__":
             cmd="sparkle/CLI/generate_report.py",
             name=CommandName.GENERATE_REPORT,
             dependencies=dependency_run_list,
-            base_dir=gv.settings().DEFAULT_tmp_output,
+            base_dir=sl.caller_log_dir,
             sbatch_options=sbatch_options,
             srun_options=srun_options)
 

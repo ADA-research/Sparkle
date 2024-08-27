@@ -70,7 +70,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         name=CommandName.RUN_PARALLEL_PORTFOLIO,
         parallel_jobs=parallel_jobs,
         path=portfolio_path,
-        base_dir=gv.settings().DEFAULT_tmp_output,
+        base_dir=sl.caller_log_dir,
         srun_options=["-N1", "-n1"] + sbatch_options,
         sbatch_options=sbatch_options
     )

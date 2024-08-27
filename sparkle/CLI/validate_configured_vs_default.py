@@ -8,7 +8,6 @@ from pathlib import PurePath
 from runrunner.base import Runner
 
 from sparkle.CLI.help import global_variables as gv
-from sparkle.solver import pcs
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
@@ -109,10 +108,7 @@ if __name__ == "__main__":
         solver, instance_set_train, objective.PerformanceMeasure)
     opt_config = Solver.config_str_to_dict(opt_config_str)
 
-    pcs.write_configuration_pcs(solver, opt_config_str, gv.settings().DEFAULT_tmp_output)
-
-    validator = Validator(gv.settings().DEFAULT_validation_output,
-                          gv.settings().DEFAULT_tmp_output)
+    validator = Validator(gv.settings().DEFAULT_validation_output, sl.caller_log_dir)
     all_validation_instances = [instance_set_train]
     if instance_set_test is not None:
         all_validation_instances.append(instance_set_test)
@@ -126,6 +122,9 @@ if __name__ == "__main__":
 
     if run_on == Runner.LOCAL:
         validation.wait()
+        print("Running validation done!")
+    else:
+        print(f"Running validation through Slurm with job ID: {validation.run_id}")
 
     # Update latest scenario
     gv.latest_scenario().set_config_solver(solver)

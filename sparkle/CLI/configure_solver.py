@@ -130,7 +130,7 @@ def run_after(solver: Path,
         cmd=command_line,
         name=command,
         dependencies=dependency,
-        base_dir=gv.settings().DEFAULT_tmp_output,
+        base_dir=sl.caller_log_dir,
         srun_options=["-N1", "-n1"],
         sbatch_options=gv.settings().get_slurm_extra_options(as_args=True))
 
@@ -226,6 +226,7 @@ if __name__ == "__main__":
         scenario=config_scenario,
         sbatch_options=sbatch_options,
         num_parallel_jobs=gv.settings().get_number_of_jobs_in_parallel(),
+        base_dir=sl.caller_log_dir,
         run_on=run_on)
 
     # Update latest scenario

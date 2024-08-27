@@ -86,12 +86,7 @@ def compute_features(
             cmd_list.append(cmd)
 
     print(f"The number of compute jobs: {len(cmd_list)}")
-    if run_on == Runner.LOCAL:
-        print("Running the extractors locally")
-    elif run_on == Runner.SLURM:
-        print("Running the extractors through Slurm")
 
-    # Generate the sbatch script
     parallel_jobs = min(len(cmd_list), gv.settings().get_number_of_jobs_in_parallel())
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     srun_options = ["-N1", "-n1"] + sbatch_options
@@ -100,11 +95,13 @@ def compute_features(
         cmd=cmd_list,
         name=CommandName.COMPUTE_FEATURES,
         parallel_jobs=parallel_jobs,
-        base_dir=gv.settings().DEFAULT_tmp_output,
+        base_dir=sl.caller_log_dir,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
 
-    if run_on == Runner.LOCAL:
+    if run_on == Runner.SLURM:
+        print(f"Running the extractors through Slurm with Job IDs: {run.run_id}")
+    elif run_on == Runner.LOCAL:
         print("Waiting for the local calculations to finish.")
         run.wait()
         for job in run.jobs:

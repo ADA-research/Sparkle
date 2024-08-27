@@ -58,6 +58,7 @@ class Configurator:
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
                   num_parallel_jobs: int = None,
+                  base_dir: Path = None,
                   run_on: Runner = Runner.SLURM) -> Run:
         """Start configuration job.
 
@@ -67,6 +68,7 @@ class Configurator:
                 afterwards or not.
             sbatch_options: List of slurm batch options to use
             num_parallel_jobs: The maximum number of jobs to run in parallel
+            base_dir: The base_dir of RunRunner where the sbatch scripts will be placed
             run_on: On which platform to run the jobs. Default: Slurm.
 
         Returns:

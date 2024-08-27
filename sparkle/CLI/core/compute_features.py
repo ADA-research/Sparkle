@@ -26,9 +26,12 @@ if __name__ == "__main__":
                         help="the group of features to compute, if available for the "
                              "extractor. If not available or provided, all groups will"
                              " be computed.")
+    parser.add_argument("--log-dir", type=Path, required=False,
+                        help="path to the log directory")
     args = parser.parse_args()
 
     # Process command line arguments
+    cwd = args.log_dir if args.log_dir is not None else gv.settings().DEFAULT_tmp_output
     instance_path = Path(args.instance)
     instance_name = instance_path
     if not instance_path.exists():
@@ -48,11 +51,10 @@ if __name__ == "__main__":
 
     extractor = Extractor(extractor_path,
                           gv.settings().DEFAULT_runsolver_exec,
-                          gv.settings().DEFAULT_tmp_output)
+                          cwd)
     # We are not interested in the runsolver log, but create the file to filter it
     # from the extractor call output
-    runsolver_watch_path = gv.settings().DEFAULT_tmp_output /\
-        f"{instance_name}_{extractor_path.name}.wlog"
+    runsolver_watch_path = cwd / f"{instance_name}_{extractor_path.name}.wlog"
     features = extractor.run(instance_list,
                              feature_group=args.feature_group,
                              runsolver_args=["--cpu-limit", cutoff_extractor,
@@ -73,4 +75,3 @@ if __name__ == "__main__":
         print("EXCEPTION during retrieving extractor results.\n"
               f"****** WARNING: Feature vector computation on instance {instance_path}"
               " failed! ******")
-    runsolver_watch_path.unlink(missing_ok=True)
