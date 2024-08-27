@@ -10,7 +10,6 @@ import zipfile
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.tools.general import get_time_pid_random_string
-from sparkle.platform import file_help as sfh
 
 
 def save_current_sparkle_platform() -> None:
@@ -27,16 +26,13 @@ def save_current_sparkle_platform() -> None:
     print(f"Snapshot file {snapshot_tmp_path}.zip saved successfully!")
 
 
-def remove_current_sparkle_platform() -> None:
+def remove_current_platform() -> None:
     """Remove the current Sparkle platform."""
-    print("Cleaning existing Sparkle platform ...")
-    sfh.remove_temporary_files()
     for working_dir in gv.settings().DEFAULT_working_dirs:
         shutil.rmtree(working_dir, ignore_errors=True)
-    print("Existing Sparkle platform cleaned!")
 
 
-def extract_sparkle_snapshot(snapshot_file: Path) -> None:
+def extract_snapshot(snapshot_file: Path) -> None:
     """Restore a Sparkle platform from a snapshot.
 
     Args:
@@ -63,9 +59,9 @@ def load_snapshot(snapshot_file: Path) -> None:
         print(f"ERROR: File {snapshot_file} is not a .zip file!")
         sys.exit(-1)
     print("Cleaning existing Sparkle platform ...")
-    remove_current_sparkle_platform()
+    remove_current_platform()
     print("Existing Sparkle platform cleaned!")
 
     print(f"Loading snapshot file {snapshot_file} ...")
-    extract_sparkle_snapshot(snapshot_file)
+    extract_snapshot(snapshot_file)
     print(f"Snapshot file {snapshot_file} loaded successfully!")
