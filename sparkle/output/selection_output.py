@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.platform.settings_objects import Settings
-from sparkle.output.structures import ConfigurationResults
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.types.objective import SparkleObjective
@@ -54,14 +53,14 @@ class SelectionPerformance:
 
 
 class SelectionOutput:
-    """Class that collects configuration data and outputs it a JSON format."""
+    """Class that collects selection data and outputs it a JSON format."""
 
     def __init__(self: SelectionOutput, selection_scenario: Path,
                  performance_data_path: Path, feature_path: Path,
                  training_instances: list[InstanceSet],
                  test_instances: list[InstanceSet],
                  cutoff_time: int, penalised_time: int,
-                 output: Path = None) -> None:
+                 output: Path) -> None:
         """Initialize SelectionOutput class.
 
         Args:
@@ -112,11 +111,6 @@ class SelectionOutput:
         num_solvers = train_data.num_solvers
         return SelectionSolverData(solver_performance_ranking,
                                    num_solvers)
-
-    def serialize_configuration_results(self: SelectionOutput,
-                                        cr: ConfigurationResults) -> dict:
-        """Transform ConfigurationResults to dictionary format."""
-        return {}
 
     def serialize_solvers(self: SelectionOutput,
                           sd: SelectionSolverData) -> dict:
