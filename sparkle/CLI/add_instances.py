@@ -9,7 +9,7 @@ import shutil
 from sparkle.CLI.help import global_variables as gv
 from sparkle.platform import file_help as sfh
 from sparkle.platform.settings_objects import SettingState
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from sparkle.CLI.compute_features import compute_features
 from sparkle.CLI.run_solvers import running_solvers_performance_data
@@ -73,7 +73,7 @@ if __name__ == "__main__":
                                      gv.instances_nickname_path, key=args.nickname)
 
     print(f"Start adding all instances in directory {instances_source} ...")
-    instance_set = InstanceSet(instances_source)
+    instance_set = instance_set(instances_source)
 
     instances_target.mkdir(parents=True)
     print("Copying files...")
@@ -82,7 +82,7 @@ if __name__ == "__main__":
         shutil.copy(instance_path_source, instances_target)
     print("\nCopying done!")
     # Refresh the instance set as the target instance set
-    instance_set = InstanceSet(instances_target)
+    instance_set = instance_set(instances_target)
 
     # Add the instances to the Feature Data / Performance Data
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)

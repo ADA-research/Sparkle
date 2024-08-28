@@ -11,7 +11,7 @@ from pathlib import Path
 
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver import Solver
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set
 from sparkle.platform.settings_objects import Settings
 
 global settings
@@ -25,7 +25,7 @@ class TestConfigurationScenario(TestCase):
         self.solver_path = Path("tests", "test_files", "Solvers", "Test-Solver")
         self.solver = Solver(self.solver_path)
 
-        self.instance_set = InstanceSet(
+        self.instance_set = instance_set(
             Path("tests/test_files/Instances/Test-Instance-Set"))
         self.run_number = 2
 

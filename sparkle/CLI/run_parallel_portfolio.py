@@ -25,7 +25,7 @@ from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set, InstanceSet
 from sparkle.types import SolverStatus
 
 
@@ -248,7 +248,7 @@ if __name__ == "__main__":
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings().DEFAULT_instance_dir,
-        InstanceSet)
+        instance_set)
     print(f"Running on {instance_set.size} instance(s)...")
 
     if args.cutoff_time is not None:

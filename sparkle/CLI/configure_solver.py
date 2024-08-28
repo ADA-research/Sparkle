@@ -23,7 +23,7 @@ from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.solver import Solver
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set, InstanceSet
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -160,13 +160,13 @@ if __name__ == "__main__":
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, InstanceSet)
+        gv.settings().DEFAULT_instance_dir, instance_set)
     instance_set_test = args.instance_set_test
     if instance_set_test is not None:
         instance_set_test = resolve_object_name(
             args.instance_set_test,
             gv.file_storage_data_mapping[gv.instances_nickname_path],
-            gv.settings().DEFAULT_instance_dir, InstanceSet)
+            gv.settings().DEFAULT_instance_dir, instance_set)
     use_features = args.use_features
     run_on = gv.settings().get_run_on()
     if args.configurator is not None:
@@ -201,7 +201,7 @@ if __name__ == "__main__":
 
         if feature_data.has_missing_value():
             print("You have unfinished feature computation jobs, please run "
-                  "compute_features.py")
+                  "`sparkle compute features`")
             sys.exit(-1)
 
         for index, column in enumerate(feature_data_df):

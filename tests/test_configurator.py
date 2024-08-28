@@ -11,7 +11,7 @@ import runrunner as rrr
 
 from sparkle.platform import CommandName
 from sparkle.solver import Solver
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.implementations import SMAC2
@@ -23,7 +23,7 @@ test_files = Path("tests", "test_files")
 base_dir = test_files / "tmp"
 output = Path("Output")
 smac2_conf = SMAC2(objectives, base_dir, output)
-train_set = InstanceSet(test_files / "Instances/Train-Instance-Set")
+train_set = instance_set(test_files / "Instances/Train-Instance-Set")
 solver = Solver(test_files / "Solvers/Test-Solver")
 sparkle_objective = SparkleObjective("RUNTIME:PAR10")
 conf_scenario = ConfigurationScenario(

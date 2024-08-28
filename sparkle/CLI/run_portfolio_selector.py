@@ -18,7 +18,7 @@ from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set
 from sparkle.CLI.compute_features import compute_features
 
 
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     instance_set = resolve_object_name(
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, InstanceSet)
+        gv.settings().DEFAULT_instance_dir, instance_set)
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_PORTFOLIO_SELECTOR])
 
