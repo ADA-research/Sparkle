@@ -40,8 +40,8 @@ if __name__ == "__main__":
     instance_key = instance_path
     if not instance_path.exists():
         # If its an instance name (Multi-file instance), retrieve path list
-        instance_set = instance_set(instance_path.parent)
-        instance_path = instance_set.get_path_by_name(instance_name)
+        data_set = instance_set(instance_path.parent)
+        instance_path = data_set.get_path_by_name(instance_name)
         instance_key = instance_name
 
     verifier = gv.settings().get_general_solution_verifier()

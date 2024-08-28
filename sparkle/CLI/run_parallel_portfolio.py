@@ -244,12 +244,12 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     # Retrieve instance set
-    instance_set = resolve_object_name(
+    data_set = resolve_object_name(
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings().DEFAULT_instance_dir,
         instance_set)
-    print(f"Running on {instance_set.size} instance(s)...")
+    print(f"Running on {data_set.size} instance(s)...")
 
     if args.cutoff_time is not None:
         gv.settings().set_general_target_cutoff_time(args.cutoff_time,
@@ -281,7 +281,7 @@ if __name__ == "__main__":
             sys.exit()
         shutil.rmtree(portfolio_path)
     portfolio_path.mkdir(parents=True)
-    run_parallel_portfolio(instance_set, portfolio_path, solvers, run_on=run_on)
+    run_parallel_portfolio(data_set, portfolio_path, solvers, run_on=run_on)
 
     # Update latest scenario
     gv.latest_scenario().set_parallel_portfolio_path(portfolio_path)

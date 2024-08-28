@@ -36,8 +36,8 @@ if __name__ == "__main__":
     instance_name = instance_path
     if not instance_path.exists():
         # If its an instance name (Multi-file instance), retrieve path list
-        instance_set = instance_set(instance_path.parent)
-        instance_path = instance_set.get_path_by_name(Path(instance_name).name)
+        data_set = instance_set(instance_path.parent)
+        instance_path = data_set.get_path_by_name(Path(instance_name).name)
 
     extractor_path = Path(args.extractor)
     feature_data_csv_path = Path(args.feature_csv)
