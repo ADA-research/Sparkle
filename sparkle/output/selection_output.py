@@ -81,6 +81,8 @@ class SelectionOutput:
 
         self.training_instances = training_instances
         self.test_instances = test_instances
+        self.cutoff_time = cutoff_time
+        self.penalised_time = penalised_time
 
         train_data = PerformanceDataFrame(performance_data_path)
         train_data.penalise(cutoff_time,
@@ -176,6 +178,13 @@ class SelectionOutput:
             ]
         }
 
+    def serialize_settings(self: SelectionOutput) -> dict:
+        """Transform settings to dictionary format."""
+        return {
+            "cutoff_time": self.cutoff_time,
+            "penalised_time": self.penalised_time
+        }
+
     def write_output(self: SelectionOutput) -> None:
         """Write data into a JSON file."""
         output_data = {
@@ -183,6 +192,7 @@ class SelectionOutput:
             "training_instances": self.serialize_instances(self.training_instances),
             "test_instances": self.serialize_instances(self.test_instances),
             "performance": self.serialize_performance(self.performance_data),
+            "settings": self.serialize_settings(),
             "ranking": self.serialize_rankings()
         }
 
