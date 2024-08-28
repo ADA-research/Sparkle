@@ -32,21 +32,13 @@ class ValidationResults:
 
 class ConfigurationResults:
     """Class that aggregates configuration results."""
-    def __init__(self: ConfigurationResults, default_metrics: float,
-                 configured_metrics: float,
-                 results_default: ValidationResults,
-                 results_configured: ValidationResults) -> None:
+    def __init__(self: ConfigurationResults, metrics: float,
+                 results: ValidationResults) -> None:
         """Initalize ConfigurationResults.
 
         Args:
-            default_metrics: The performance result of the default solver
-            configured_metrics: The performance of the configured solver
-            results_default: The default results
-            results_configured: The configured results
+            metrics: The performance of a configured solver
+            results: The results for one configuration
         """
-        self.performance = {
-            "default_metrics": default_metrics,
-            "configured_metrics": configured_metrics
-        }
-        self.configured_results = results_configured
-        self.default_results = results_default
+        self.performance = metrics
+        self.results = results

@@ -13,6 +13,7 @@ from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.solver.validator import Validator
 from sparkle.output.structures import ValidationResults, ConfigurationResults
+from sparkle.types import SolverStatus
 
 from sparkle.CLI.help.nicknames import resolve_object_name
 
@@ -76,109 +77,86 @@ class ConfigurationOutput:
         config_path = path / "validation" / "configurations.csv"
         self.configurations = self.get_configurations(config_path)
 
-        # Retrieves validation results and best configuration
-        self.training, self.best_config =\
-            self.get_validation_data(self.instance_set_train)
+        # Retrieve best found configuration
+        objective = self.configurator.scenario.sparkle_objective
+        _, self.best_config = self.configurator.get_optimal_configuration(
+            self.solver, self.instance_set_train, objective.PerformanceMeasure)
+
+        # Retrieves validation results for all configurations
+        self.validation_results = []
+        for config in self.configurations:
+            val_res = self.get_validation_data(self.instance_set_train,
+                                               config)
+            self.validation_results.append(val_res)
 
         # Retrieve test validation results if they exist
         if self.instance_set_test is not None:
-            self.test, _ = self.get_validation_data(self.instance_set_test)
+            self.validation_results_test = []
+            for config in self.configurations:
+                val_res = self.get_validation_data(self.instance_set_test,
+                                                   config)
+                self.validation_results_test.append(val_res)
 
     def get_configurations(self: ConfigurationOutput, config_path: Path) -> list[dict]:
         """Read all configurations and transform them to dictionaries."""
         configs = []
 
-        # TODO: Should we check if the configurations are unique?
         # Check if the path exists and is a file
         if config_path.exists() and config_path.is_file():
             with config_path.open("r") as file:
                 for line in file:
                     config = Solver.config_str_to_dict(line.strip())
-                    configs.append(config)
-
-        else:
-            print("Can't find configurations")
+                    if config not in configs:
+                        configs.append(config)
 
         return configs
 
-    def get_validation_data(self: ConfigurationOutput, instance_set: InstanceSet) -> \
-            tuple[ConfigurationResults, str]:
+    def get_validation_data(self: ConfigurationOutput, instance_set: InstanceSet,
+                            config: dict) -> ConfigurationResults:
         """Returns best config and ConfigurationResults for instance set."""
         objective = self.configurator.scenario.sparkle_objective
 
         # Retrieve found configuration
-        x, best_config = self.configurator.get_optimal_configuration(
+        _, best_config = self.configurator.get_optimal_configuration(
             self.solver, instance_set, objective.PerformanceMeasure)
-        # Will be removed once I know what to do with x
-        print(x)
 
         # Retrieve validation results
         validator = Validator(self.directory)
-        val_default = validator.get_validation_results(
-            self.solver, instance_set,
-            source_dir=self.directory, subdir="validation")
-        val_conf = validator.get_validation_results(
+        val_results = validator.get_validation_results(
             self.solver, instance_set, config=best_config,
             source_dir=self.directory, subdir="validation")
 
         results = []
         # Form: 0: solver, 1: config, 2: set, 3: instance, 4: status,
         # 5: quality, 6: runtime
-        for res in val_default:
-            # TODO: status to enum
-            results.append([res[3], res[4], res[5], res[6]])
-        configuration = Solver.config_str_to_dict(val_default[0][1])
-        results_default = ValidationResults(self.solver, configuration,
-                                            instance_set, results)
-
-        results = []
-        # Form: 0: solver, 1: config, 2: set, 3: instance, 4: status,
-        # 5: quality, 6: runtime
-        for res in val_conf:
-            # TODO: status to enum
-            results.append([res[3], res[4], res[5], res[6]])
-        configuration = Solver.config_str_to_dict(val_conf[0][1])
-        results_conf = ValidationResults(self.solver, configuration,
-                                         instance_set, results)
+        for res in val_results:
+            results.append([res[3], SolverStatus.from_str(res[4]), res[5], res[6]])
+        final_results = ValidationResults(self.solver, config,
+                                          instance_set, results)
 
         cutoff_time = self.configurator.scenario.cutoff_time
         penalty = penalty_multiplier * \
             self.configurator.scenario.cutoff_time
-        perf_par_conf = sgrfch.get_par_performance(val_default,
-                                                   cutoff_time,
-                                                   penalty,
-                                                   objective)
-        perf_par_def = sgrfch.get_par_performance(val_conf,
-                                                  cutoff_time,
-                                                  penalty,
-                                                  objective)
-        results = ConfigurationResults(perf_par_def, perf_par_conf,
-                                       results_default, results_conf)
-        best_config = Solver.config_str_to_dict(best_config)
-        return results, best_config
+        perf_par = sgrfch.get_par_performance(val_results,
+                                              cutoff_time,
+                                              penalty,
+                                              objective)
+
+        return ConfigurationResults(perf_par,
+                                    final_results)
 
     def serialize_configuration_results(self: ConfigurationOutput,
                                         cr: ConfigurationResults) -> dict:
         """Transform ConfigurationResults to dictionary format."""
         return {
-            "performance": {
-                "configured_metrics": cr.performance["default_metrics"],
-                "default_metrics": cr.performance["configured_metrics"],
+            "performance": cr.performance,
+            "results": {
+                "solver": cr.results.solver.name,
+                "configuration": cr.results.configuration,
+                "instance_set": cr.results.instance_set.name,
+                "result_header": cr.results.result_header,
+                "result_values": cr.results.result_vals,
             },
-            "configured_results": {
-                "solver": cr.configured_results.solver.name,
-                "configuration": cr.configured_results.configuration,
-                "instance_set": cr.configured_results.instance_set.name,
-                "result_header": cr.configured_results.result_header,
-                "result_values": cr.configured_results.result_vals,
-            },
-            "default_results": {
-                "solver": cr.default_results.solver.name,
-                "configuration": cr.default_results.configuration,
-                "instance_set": cr.default_results.instance_set.name,
-                "result_header": cr.default_results.result_header,
-                "result_values": cr.default_results.result_vals,
-            }
         }
 
     def serialize_scenario(self: ConfigurationOutput,
@@ -208,12 +186,16 @@ class ConfigurationOutput:
             "configurations": self.configurations,
             "scenario": self.serialize_scenario(self.configurator.scenario)
             if self.configurator.scenario else None,
-            "training_set": (
-                self.serialize_configuration_results(self.training)
-                if self.training else None
-            ),
+            "training_results": [
+                self.serialize_configuration_results(validation_result)
+                for validation_result in self.validation_results
+            ],
             "test_set": (
-                self.serialize_configuration_results(self.test) if self.test else None
+                [
+                    self.serialize_configuration_results(validation_result)
+                    for validation_result in self.validation_results_test
+                ]
+                if self.instance_set_test else None
             ),
         }
 
