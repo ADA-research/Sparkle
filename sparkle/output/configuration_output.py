@@ -47,8 +47,11 @@ class ConfigurationOutput:
         self.directory = path
 
         if output is None:
-            output = path / "Analysis" / "configuration.json"
-        self.output = output
+            self.output = path / "Analysis" / "configuration.json"
+        elif output.is_dir():
+            self.output = output / "configuration.json"
+        else:
+            self.output = output
 
         # TODO: Fix this spaghetti code to find the scenario file
         solver_dir_name = path.name
@@ -72,7 +75,8 @@ class ConfigurationOutput:
         self.configurator.scenario._set_paths(self.configurator.output_path)
 
         # Retrieve all configurations
-        self.configurations = self.get_configurations(path)
+        config_path = path / "validation" / "configurations.csv"
+        self.configurations = self.get_configurations(config_path)
 
         # Retrieves validation results and best configuration
         self.training, self.best_config =\
@@ -82,26 +86,8 @@ class ConfigurationOutput:
         if self.instance_set_test is not None:
             self.test, _ = self.get_validation_data(self.instance_set_test)
 
-    def parse_string_to_dict(self: ConfigurationOutput, input_string: str) -> dict:
-        """Convert a configuration string to a dictionary."""
-        result_dict = {}
-        input_string = input_string.replace("'", "")
-        input_string = input_string.replace(",", "")
-        input_string = input_string.replace(":", "")
-        input_string = input_string.replace("{", "")
-        input_string = input_string.replace("}", "")
-        tokens = input_string.split()
-
-        for i in range(0, len(tokens), 2):
-            key = tokens[i]
-            value = tokens[i + 1]
-            result_dict[key] = value
-
-        return result_dict
-
-    def get_configurations(self: ConfigurationOutput, path: Path) -> list[dict]:
+    def get_configurations(self: ConfigurationOutput, config_path: Path) -> list[dict]:
         """Read all configurations and transform them to dictionaries."""
-        config_path = path / "validation" / "configurations.csv"
         configs = []
 
         # TODO: Should we check if the configurations are unique?
@@ -109,7 +95,7 @@ class ConfigurationOutput:
         if config_path.exists() and config_path.is_file():
             with config_path.open("r") as file:
                 for line in file:
-                    config = self.parse_string_to_dict(line.strip())
+                    config = Solver.config_str_to_dict(line.strip())
                     configs.append(config)
 
         else:
@@ -123,8 +109,10 @@ class ConfigurationOutput:
         objective = self.configurator.scenario.sparkle_objective
 
         # Retrieve found configuration
-        _, best_config = self.configurator.get_optimal_configuration(
+        x, best_config = self.configurator.get_optimal_configuration(
             self.solver, instance_set, objective.PerformanceMeasure)
+        # Will be removed once I know what to do with x
+        print(x)
 
         # Retrieve validation results
         validator = Validator(self.directory)
@@ -141,7 +129,7 @@ class ConfigurationOutput:
         for res in val_default:
             # TODO: status to enum
             results.append([res[3], res[4], res[5], res[6]])
-        configuration = self.parse_string_to_dict(val_default[0][1])
+        configuration = Solver.config_str_to_dict(val_default[0][1])
         results_default = ValidationResults(self.solver, configuration,
                                             instance_set, results)
 
@@ -151,7 +139,7 @@ class ConfigurationOutput:
         for res in val_conf:
             # TODO: status to enum
             results.append([res[3], res[4], res[5], res[6]])
-        configuration = self.parse_string_to_dict(val_conf[0][1])
+        configuration = Solver.config_str_to_dict(val_conf[0][1])
         results_conf = ValidationResults(self.solver, configuration,
                                          instance_set, results)
 
@@ -168,7 +156,7 @@ class ConfigurationOutput:
                                                   objective)
         results = ConfigurationResults(perf_par_def, perf_par_conf,
                                        results_default, results_conf)
-        best_config = self.parse_string_to_dict(best_config)
+        best_config = Solver.config_str_to_dict(best_config)
         return results, best_config
 
     def serialize_configuration_results(self: ConfigurationOutput,
