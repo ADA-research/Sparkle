@@ -26,7 +26,7 @@ class ConfigurationOutput:
     def __init__(self: ConfigurationOutput, path: Path, solver: Solver,
                  configurator: Configurator, instance_set_train: InstanceSet,
                  instance_set_test: InstanceSet,
-                 penalty_multiplier: int, output: Path = None) -> None:
+                 penalty_multiplier: int, output: Path) -> None:
         """Initialize Configurator Output class.
 
         Args:
@@ -46,9 +46,7 @@ class ConfigurationOutput:
         self.penalty_multiplier = penalty_multiplier
         self.directory = path
 
-        if output is None:
-            self.output = path / "Analysis" / "configuration.json"
-        elif output.is_dir():
+        if output.is_dir():
             self.output = output / "configuration.json"
         else:
             self.output = output
@@ -239,6 +237,7 @@ if __name__ == "__main__":
     instance_set_train = gv.latest_scenario().get_config_instance_set_train()
     instance_set_test = gv.latest_scenario().get_config_instance_set_test()
     penalty_multiplier = gv.settings.get_general_penalty_multiplier()
+    output = path / "Analysis"
     output = ConfigurationOutput(path, solver, configurator, instance_set_train,
-                                 instance_set_test, penalty_multiplier)
+                                 instance_set_test, penalty_multiplier, output)
     output.write_output()
