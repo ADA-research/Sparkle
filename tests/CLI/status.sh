@@ -2,9 +2,9 @@
 
 # Execute this script from the Sparkle directory
 
-#SBATCH --job-name=test/system_status.sh
-#SBATCH --output=Tmp/system_status.sh.txt
-#SBATCH --error=Tmp/system_status.sh.err
+#SBATCH --job-name=test/status.sh
+#SBATCH --output=Tmp/status.sh.txt
+#SBATCH --error=Tmp/status.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=
@@ -13,7 +13,7 @@
 
 # System status
 output_true="Current system status of Sparkle reported!"
-output=$(sparkle/CLI/system_status.py | tail -1)
+output=$(sparkle/CLI/status.py | tail -1)
 
 if [[ $output == $output_true ]];
 then
