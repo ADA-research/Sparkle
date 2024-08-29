@@ -22,6 +22,9 @@ from sparkle.solver.validator import Validator
 from sparkle.instance import InstanceSet
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
+from sparkle.platform.output.configuration_output import ConfigurationOutput
+from sparkle.platform.output.selection_output import SelectionOutput
+from sparkle.platform.output.parallel_portfolio_output import ParallelPortfolioOutput
 
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
@@ -143,6 +146,23 @@ if __name__ == "__main__":
             test_data = PerformanceDataFrame(test_case_path / "performance_data.csv")
             test_data.penalise(gv.settings().get_general_target_cutoff_time(),
                                gv.settings().get_penalised_time())
+
+        # Create machine readable selection output
+        instance_folders = set(Path(instance).parent
+                               for instance in train_data.instances)
+        instance_sets = []
+        for dir in instance_folders:
+            set = InstanceSet(dir)
+            instance_sets.append(set)
+        test_set = InstanceSet(Path(test_case_dir))
+        cutoff_time = gv.settings().get_general_target_cutoff_time()
+        penalised_time = gv.settings().get_penalised_time()
+        output_dir = selection_scenario / "Analysis"
+        selection_output = SelectionOutput(selection_scenario, train_data, feature_data,
+                                           instance_sets, [test_set], cutoff_time,
+                                           penalised_time, output_dir)
+        selection_output.write_output()
+
         sgfs.generate_report_selection(gv.settings().DEFAULT_selection_output_analysis,
                                        gv.settings().DEFAULT_latex_source,
                                        "template-Sparkle-for-selection.tex",
@@ -161,6 +181,16 @@ if __name__ == "__main__":
             print("Report for test generated ...")
 
     elif gv.latest_scenario().get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
+        # Machine readable Output
+        cutoff_time = gv.settings().get_general_target_cutoff_time()
+        penalised_time = gv.settings().get_penalised_time()
+        output_dir = parallel_portfolio_path / "Analysis"
+        parallel_portfolio_output = ParallelPortfolioOutput(parallel_portfolio_path,
+                                                            pap_instance_set,
+                                                            cutoff_time,
+                                                            penalised_time,
+                                                            output_dir)
+        parallel_portfolio_output.write_output()
         # Reporting for parallel portfolio
         sgrfpph.generate_report_parallel_portfolio(
             parallel_portfolio_path,
@@ -227,6 +257,20 @@ if __name__ == "__main__":
             ablation_scenario = AblationScenario(
                 solver, instance_set_train, instance_set_test,
                 gv.settings().DEFAULT_ablation_output)
+
+        # Create machine readable output
+        # Where can this path variable be found?
+        path = \
+            Path("Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN")
+        penalty_multiplier = gv.settings().get_general_penalty_multiplier()
+        output = path / "Analysis"
+        config_output = ConfigurationOutput(path, solver, configurator,
+                                            instance_set_train,
+                                            instance_set_test,
+                                            penalty_multiplier,
+                                            output)
+        config_output.write_output()
+
         sgrfch.generate_report_for_configuration(
             solver,
             gv.settings().get_general_sparkle_configurator(),

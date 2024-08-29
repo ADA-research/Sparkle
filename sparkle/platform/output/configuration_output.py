@@ -12,7 +12,7 @@ from sparkle.instance import InstanceSet
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.solver.validator import Validator
-from sparkle.output.structures import ValidationResults, ConfigurationResults
+from sparkle.platform.output.structures import ValidationResults, ConfigurationResults
 from sparkle.types import SolverStatus
 
 from sparkle.CLI.help.nicknames import resolve_object_name
@@ -135,7 +135,7 @@ class ConfigurationOutput:
                                           instance_set, results)
 
         cutoff_time = self.configurator.scenario.cutoff_time
-        penalty = penalty_multiplier * \
+        penalty = self.penalty_multiplier * \
             self.configurator.scenario.cutoff_time
         perf_par = sgrfch.get_par_performance(val_results,
                                               cutoff_time,
@@ -160,19 +160,19 @@ class ConfigurationOutput:
         }
 
     def serialize_scenario(self: ConfigurationOutput,
-                           cs: ConfigurationScenario) -> dict:
+                           scenario: ConfigurationScenario) -> dict:
         """Transform ConfigurationScenario to dictionary format."""
         return {
-            "number_of_runs": cs.number_of_runs,
-            "solver_calls": cs.solver_calls,
-            "cpu_time": cs.cpu_time,
-            "wallclock_time": cs.wallclock_time,
-            "cutoff_time": cs.cutoff_time,
-            "cutoff_length": cs.cutoff_length,
-            "sparkle_objective": cs.sparkle_objective.name,
-            "use_features": cs.use_features,
-            "configurator_target": cs.configurator_target,
-            "feature_data": cs.feature_data,
+            "number_of_runs": scenario.number_of_runs,
+            "solver_calls": scenario.solver_calls,
+            "cpu_time": scenario.cpu_time,
+            "wallclock_time": scenario.wallclock_time,
+            "cutoff_time": scenario.cutoff_time,
+            "cutoff_length": scenario.cutoff_length,
+            "sparkle_objective": scenario.sparkle_objective.name,
+            "use_features": scenario.use_features,
+            "configurator_target": scenario.configurator_target,
+            "feature_data": scenario.feature_data,
         }
 
     def write_output(self: ConfigurationOutput) -> None:

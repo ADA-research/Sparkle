@@ -9,54 +9,18 @@ from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.types.objective import SparkleObjective
 from sparkle.instance import InstanceSet
+from sparkle.platform.output.structures import SelectionPerformance, SelectionSolverData
 
 import json
-import sys
 from pathlib import Path, PurePath
-
-
-class SelectionSolverData:
-    """Class that stores solver information."""
-    def __init__(self: SelectionSolverData,
-                 solver_performance_ranking: list[tuple[str, float]],
-                 num_solvers: int) -> None:
-        """Initalize SelectionSolverData.
-
-        Args:
-            solver_performance_ranking: list with solvers ranked by avg. performance
-            num_solvers: The number of solvers
-        """
-        self.solver_performance_ranking = solver_performance_ranking
-        self.single_best_solver = solver_performance_ranking[0][0]
-        self.num_solvers = num_solvers
-
-
-class SelectionPerformance:
-    """Class that stores selection performance results."""
-    def __init__(self: SelectionSolverData,
-                 performance_path: Path,
-                 vbs_par: float, metric: str) -> None:
-        """Initalize SelectionPerformance.
-
-        Args:
-            performance_path: Path to portfolio selector performance
-            vbs_par: The performance of the virtual best selector
-            metric: The metric of the SparkleObjective
-        """
-        if not performance_path.exists():
-            print(f"ERROR: {performance_path} does not exist.")
-            sys.exit(-1)
-        actual_performance_data = PerformanceDataFrame(performance_path)
-        self.vbs_par = vbs_par
-        self.actual_PAR = actual_performance_data.mean()
-        self.metric = metric
 
 
 class SelectionOutput:
     """Class that collects selection data and outputs it a JSON format."""
 
     def __init__(self: SelectionOutput, selection_scenario: Path,
-                 performance_data_path: Path, feature_path: Path,
+                 train_data: PerformanceDataFrame,
+                 feature_data: FeatureDataFrame,
                  training_instances: list[InstanceSet],
                  test_instances: list[InstanceSet],
                  cutoff_time: int, penalised_time: int,
@@ -65,8 +29,8 @@ class SelectionOutput:
 
         Args:
             selection_scenario: Path to selection output directory
-            performance_data_path: Path to the selector performance data
-            feature_path: Path to the csv feature file
+            train_data: The performance input data for the selector
+            feature_data: Feature data created by extractor
             training_instances: The set of training instances
             test_instances: The set of test instances
             cutoff_time: The cutoff time
@@ -83,26 +47,22 @@ class SelectionOutput:
         self.cutoff_time = cutoff_time
         self.penalised_time = penalised_time
 
-        train_data = PerformanceDataFrame(performance_data_path)
-        train_data.penalise(cutoff_time,
-                            penalised_time)
         self.objective = SparkleObjective(train_data.objective_names[0])
         self.solver_data = self.get_solver_data(train_data)
 
         # Collect marginal contribution data
-        feature_data = FeatureDataFrame(feature_path)
-        self.rank_list_perfect = train_data.marginal_contribution(sort=True)
-        self.rank_list_actual = \
+        self.marginal_contribution_perfect = train_data.marginal_contribution(sort=True)
+        self.marginal_contribution_actual = \
             sgfs.compute_selector_marginal_contribution(train_data,
                                                         feature_data,
                                                         selection_scenario)
 
         # Collect performance data
         portfolio_selector_performance_path = selection_scenario / "performance.csv"
-        vbs_par = train_data.best_instance_performance().mean()
+        vbs_performance = train_data.best_instance_performance().mean()
         metric = self.objective.metric
         self.performance_data = SelectionPerformance(portfolio_selector_performance_path,
-                                                     vbs_par, metric)
+                                                     vbs_performance, metric)
 
     def get_solver_data(self: SelectionOutput,
                         train_data: PerformanceDataFrame) -> SelectionSolverData:
@@ -131,7 +91,7 @@ class SelectionOutput:
                               sp: SelectionPerformance) -> dict:
         """Transform SelectionPerformance to dictionary format."""
         return {
-            "vbs_par": sp.vbs_par,
+            "vbs_performance": sp.vbs_performance,
             "actual_PAR": sp.actual_PAR,
             "objective": self.objective.name,
             "metric": sp.metric
@@ -151,24 +111,24 @@ class SelectionOutput:
             ]
         }
 
-    def serialize_rankings(self: SelectionOutput) -> dict:
+    def serialize_contribution(self: SelectionOutput) -> dict:
         """Transform marginal contribution ranking to dictionary format."""
         return {
-            "rank_list_actual": [
+            "marginal_contribution_actual": [
                 {
                     "solver_name": ranking[0],
                     "marginal_contribution": ranking[1],
                     "best_performance": ranking[2]
                 }
-                for ranking in self.rank_list_actual
+                for ranking in self.marginal_contribution_actual
             ],
-            "rank_list_perfect": [
+            "marginal_contribution_perfect": [
                 {
                     "solver_name": ranking[0],
                     "marginal_contribution": ranking[1],
                     "best_performance": ranking[2]
                 }
-                for ranking in self.rank_list_perfect
+                for ranking in self.marginal_contribution_perfect
             ]
         }
 
@@ -187,7 +147,7 @@ class SelectionOutput:
             "test_instances": self.serialize_instances(self.test_instances),
             "performance": self.serialize_performance(self.performance_data),
             "settings": self.serialize_settings(),
-            "ranking": self.serialize_rankings()
+            "marginal_contribution": self.serialize_contribution()
         }
 
         self.output.parent.mkdir(parents=True, exist_ok=True)
@@ -201,12 +161,15 @@ if __name__ == "__main__":
     Settings.check_settings_changes(gv.settings(), prev_settings)
 
     path = Path("Output/Selection/autofolio/CSCCSat_MiniSAT_PbO-CCSAT-Generic")
-    perf_path = gv.settings().DEFAULT_performance_data_path
-    feature_path = gv.settings().DEFAULT_feature_data_path
+    train_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
+    feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
+    train_data.penalise(gv.settings().get_general_target_cutoff_time(),
+                        gv.settings().get_penalised_time())
     cutoff_time = gv.settings().get_general_target_cutoff_time()
     penalised_time = gv.settings().get_penalised_time()
 
-    train_instances = PerformanceDataFrame(perf_path).instances
+    train_instances = \
+        PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path).instances
     parent_folders = set(Path(instance).parent for instance in train_instances)
     instance_sets = []
     for dir in parent_folders:
@@ -218,6 +181,6 @@ if __name__ == "__main__":
 
     output = path / "Analysis" / "selection.json"
 
-    output = SelectionOutput(path, perf_path, feature_path, instance_sets,
+    output = SelectionOutput(path, train_data, feature_data, instance_sets,
                              [test_set], cutoff_time, penalised_time, output)
     output.write_output()

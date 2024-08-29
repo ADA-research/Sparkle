@@ -7,46 +7,10 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.platform.settings_objects import Settings
 from sparkle.platform import generate_report_for_parallel_portfolio as sgrfpp
 from sparkle.instance import InstanceSet
+from sparkle.platform.output.structures import ParallelPortfolioResults
 
 import json
 from pathlib import Path, PurePath
-
-
-class ParallelPortfolioResults:
-    """Class that stores parallel portfolio results."""
-    def __init__(self: ParallelPortfolioOutput,
-                 unsolved_instances: int,
-                 sbs: str,
-                 runtime_solvers: dict[str, float],
-                 instance_results: dict[str, list]) -> None:
-        """Initalize SelectionSolverData.
-
-        Args:
-            unsolved_instances: Number of unsolved instances
-            sbs: Name of the single best solver
-            runtime_solvers: Dictionary containing penalised average runtime per solver
-            instance_results: Dictionary containing
-        """
-        self.unsolved_instances = unsolved_instances
-        self.sbs = sbs
-        self.runtime_solvers = runtime_solvers
-        self.instance_results = instance_results
-
-        self.solver_performance = {}
-        # Iterate over each instance and aggregate the results
-        for _, results in self.instance_results.items():
-            for solver_result in results:
-                solver_name = solver_result[0]
-                outcome = solver_result[1]
-                # Initialize the solver's record in solver_performance if not present
-                if solver_name not in self.solver_performance:
-                    self.solver_performance[solver_name] = {
-                        "TIMEOUT": 0,
-                        "KILLED": 0,
-                        "SUCCESS": 0
-                    }
-                # Increment the appropriate outcome count
-                self.solver_performance[solver_name][outcome] += 1
 
 
 class ParallelPortfolioOutput:
