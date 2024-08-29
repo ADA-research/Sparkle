@@ -157,11 +157,12 @@ if __name__ == "__main__":
         test_set = InstanceSet(Path(test_case_dir))
         cutoff_time = gv.settings().get_general_target_cutoff_time()
         penalised_time = gv.settings().get_penalised_time()
-        output_dir = selection_scenario / "Analysis"
+        output = gv.settings().DEFAULT_selection_output_analysis
         selection_output = SelectionOutput(selection_scenario, train_data, feature_data,
                                            instance_sets, [test_set], cutoff_time,
-                                           penalised_time, output_dir)
+                                           penalised_time, output)
         selection_output.write_output()
+        print("Machine readable selection output can be found here: ", output)
 
         sgfs.generate_report_selection(gv.settings().DEFAULT_selection_output_analysis,
                                        gv.settings().DEFAULT_latex_source,
@@ -184,13 +185,14 @@ if __name__ == "__main__":
         # Machine readable Output
         cutoff_time = gv.settings().get_general_target_cutoff_time()
         penalised_time = gv.settings().get_penalised_time()
-        output_dir = parallel_portfolio_path / "Analysis"
+        output = gv.settings().DEFAULT_parallel_portfolio_output_analysis
         parallel_portfolio_output = ParallelPortfolioOutput(parallel_portfolio_path,
                                                             pap_instance_set,
                                                             cutoff_time,
                                                             penalised_time,
-                                                            output_dir)
+                                                            output)
         parallel_portfolio_output.write_output()
+        print("Machine readable parallel portfolio output can be found here: ", output)
         # Reporting for parallel portfolio
         sgrfpph.generate_report_parallel_portfolio(
             parallel_portfolio_path,
@@ -263,13 +265,14 @@ if __name__ == "__main__":
         path = \
             Path("Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN")
         penalty_multiplier = gv.settings().get_general_penalty_multiplier()
-        output = path / "Analysis"
+        output = gv.settings().DEFAULT_configuration_output_analysis
         config_output = ConfigurationOutput(path, solver, configurator,
                                             instance_set_train,
                                             instance_set_test,
                                             penalty_multiplier,
                                             output)
         config_output.write_output()
+        print("Machine readable configuration output can be found here: ", output)
 
         sgrfch.generate_report_for_configuration(
             solver,

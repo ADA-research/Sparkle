@@ -3,8 +3,6 @@
 
 from __future__ import annotations
 
-from sparkle.CLI.help import global_variables as gv
-from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.types.objective import SparkleObjective
@@ -12,7 +10,7 @@ from sparkle.instance import InstanceSet
 from sparkle.platform.output.structures import SelectionPerformance, SelectionSolverData
 
 import json
-from pathlib import Path, PurePath
+from pathlib import Path
 
 
 class SelectionOutput:
@@ -37,7 +35,7 @@ class SelectionOutput:
             penalised_time: The penalised time
             output: Path to the output directory
         """
-        if output.is_dir():
+        if not output.is_file():
             self.output = output / "selection.json"
         else:
             self.output = output
@@ -92,7 +90,7 @@ class SelectionOutput:
         """Transform SelectionPerformance to dictionary format."""
         return {
             "vbs_performance": sp.vbs_performance,
-            "actual_PAR": sp.actual_PAR,
+            "actual_performance": sp.actual_performance,
             "objective": self.objective.name,
             "metric": sp.metric
         }
@@ -153,34 +151,3 @@ class SelectionOutput:
         self.output.parent.mkdir(parents=True, exist_ok=True)
         with self.output.open("w") as f:
             json.dump(output_data, f, indent=4)
-        print("Analysis of selection can be found here: ", self.output)
-
-
-if __name__ == "__main__":
-    prev_settings = Settings(PurePath("Settings/latest.ini"))
-    Settings.check_settings_changes(gv.settings(), prev_settings)
-
-    path = Path("Output/Selection/autofolio/CSCCSat_MiniSAT_PbO-CCSAT-Generic")
-    train_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
-    feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
-    train_data.penalise(gv.settings().get_general_target_cutoff_time(),
-                        gv.settings().get_penalised_time())
-    cutoff_time = gv.settings().get_general_target_cutoff_time()
-    penalised_time = gv.settings().get_penalised_time()
-
-    train_instances = \
-        PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path).instances
-    parent_folders = set(Path(instance).parent for instance in train_instances)
-    instance_sets = []
-    for dir in parent_folders:
-        set = InstanceSet(dir)
-        instance_sets.append(set)
-
-    test_case_dir = gv.latest_scenario().get_selection_test_case_directory()
-    test_set = InstanceSet(Path(test_case_dir))
-
-    output = path / "Analysis" / "selection.json"
-
-    output = SelectionOutput(path, train_data, feature_data, instance_sets,
-                             [test_set], cutoff_time, penalised_time, output)
-    output.write_output()

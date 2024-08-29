@@ -3,14 +3,12 @@
 
 from __future__ import annotations
 
-from sparkle.CLI.help import global_variables as gv
-from sparkle.platform.settings_objects import Settings
 from sparkle.platform import generate_report_for_parallel_portfolio as sgrfpp
 from sparkle.instance import InstanceSet
 from sparkle.platform.output.structures import ParallelPortfolioResults
 
 import json
-from pathlib import Path, PurePath
+from pathlib import Path
 
 
 class ParallelPortfolioOutput:
@@ -29,7 +27,7 @@ class ParallelPortfolioOutput:
             penalised_time: The penalised time
             output: Path to the output directory
         """
-        if output.is_dir():
+        if not output.is_file():
             self.output = output / "parallel_portfolio.json"
         else:
             self.output = output
@@ -125,23 +123,3 @@ class ParallelPortfolioOutput:
         self.output.parent.mkdir(parents=True, exist_ok=True)
         with self.output.open("w") as f:
             json.dump(output_data, f, indent=4)
-        print("Analysis of selection can be found here: ", self.output)
-
-
-if __name__ == "__main__":
-    prev_settings = Settings(PurePath("Settings/latest.ini"))
-    Settings.check_settings_changes(gv.settings(), prev_settings)
-
-    path = Path("Output/Parallel_Portfolio/Raw_Data/runtime_experiment")
-    perf_path = gv.settings().DEFAULT_performance_data_path
-    feature_path = gv.settings().DEFAULT_feature_data_path
-    cutoff_time = gv.settings().get_general_target_cutoff_time()
-    penalised_time = gv.settings().get_penalised_time()
-
-    instance_set = gv.latest_scenario().get_parallel_portfolio_instance_set()
-
-    output = path / "Analysis" / "parallel_portfolio.json"
-
-    output = ParallelPortfolioOutput(path, instance_set, cutoff_time,
-                                     penalised_time, output)
-    output.write_output()

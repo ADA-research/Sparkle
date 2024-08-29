@@ -82,7 +82,7 @@ class SelectionPerformance:
             sys.exit(-1)
         actual_performance_data = PerformanceDataFrame(performance_path)
         self.vbs_performance = vbs_performance
-        self.actual_PAR = actual_performance_data.mean()
+        self.actual_performance = actual_performance_data.mean()
         self.metric = metric
 
 
@@ -117,7 +117,8 @@ class ParallelPortfolioResults:
                     self.solver_performance[solver_name] = {
                         "TIMEOUT": 0,
                         "KILLED": 0,
-                        "SUCCESS": 0
+                        "SUCCESS": 0,
+                        "CRASHED": 0
                     }
                 # Increment the appropriate outcome count
                 self.solver_performance[solver_name][outcome] += 1

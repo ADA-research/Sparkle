@@ -3,10 +3,8 @@
 
 from __future__ import annotations
 
-from sparkle.CLI.help import global_variables as gv
 from sparkle.platform import \
     generate_report_for_configuration as sgrfch
-from sparkle.platform.settings_objects import Settings
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
@@ -14,8 +12,6 @@ from sparkle.configurator.configurator import Configurator
 from sparkle.solver.validator import Validator
 from sparkle.platform.output.structures import ValidationResults, ConfigurationResults
 from sparkle.types import SolverStatus
-
-from sparkle.CLI.help.nicknames import resolve_object_name
 
 import json
 from pathlib import Path
@@ -36,7 +32,7 @@ class ConfigurationOutput:
             configurator: The configurator that was used
             instance_set_train: Instance set used for training
             instance_set_test: Instance set used for testing
-            penalty_multiplier: penalty multiplier that is applied to the par performance
+            penalty_multiplier: penalty multiplier that is applied to the performance
                 [To be Removed]
             output: Path to the output directory
         """
@@ -47,7 +43,7 @@ class ConfigurationOutput:
         self.penalty_multiplier = penalty_multiplier
         self.directory = path
 
-        if output.is_dir():
+        if not output.is_file():
             self.output = output / "configuration.json"
         else:
             self.output = output
@@ -130,7 +126,7 @@ class ConfigurationOutput:
         # Form: 0: solver, 1: config, 2: set, 3: instance, 4: status,
         # 5: quality, 6: runtime
         for res in val_results:
-            results.append([res[3], SolverStatus.from_str(res[4]), res[5], res[6]])
+            results.append([res[3], SolverStatus(res[4]), res[5], res[6]])
         final_results = ValidationResults(self.solver, config,
                                           instance_set, results)
 
@@ -182,7 +178,7 @@ class ConfigurationOutput:
             "configurator": (
                 str(self.configurator.executable_path) if self.configurator else None
             ),
-            "best_configuration": self.best_config,
+            "best_configuration": Solver.config_str_to_dict(self.best_config),
             "configurations": self.configurations,
             "scenario": self.serialize_scenario(self.configurator.scenario)
             if self.configurator.scenario else None,
@@ -202,24 +198,3 @@ class ConfigurationOutput:
         self.output.parent.mkdir(parents=True, exist_ok=True)
         with self.output.open("w") as f:
             json.dump(output_data, f, indent=4)
-        print("Analysis of configuration can be found here: ", self.output)
-
-
-if __name__ == "__main__":
-    global settings
-    gv.settings = Settings()
-
-    path = Path("Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN")
-    solver_name = "PbO-CCSAT-Generic"
-    solver_dir = gv.settings.DEFAULT_solver_dir
-    solver = resolve_object_name(solver_name,
-                                 gv.solver_nickname_mapping,
-                                 solver_dir, Solver)
-    configurator = gv.settings.get_general_sparkle_configurator()
-    instance_set_train = gv.latest_scenario().get_config_instance_set_train()
-    instance_set_test = gv.latest_scenario().get_config_instance_set_test()
-    penalty_multiplier = gv.settings.get_general_penalty_multiplier()
-    output = path / "Analysis"
-    output = ConfigurationOutput(path, solver, configurator, instance_set_train,
-                                 instance_set_test, penalty_multiplier, output)
-    output.write_output()
