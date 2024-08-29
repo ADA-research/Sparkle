@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sparkle command to display the status of the Sparkle platform."""
+"""Command to display the status of the platform."""
 
 import sys
 import argparse
@@ -37,7 +37,8 @@ if __name__ == "__main__":
     sssh.print_sparkle_list([e for e in gv.settings().DEFAULT_extractor_dir.iterdir()],
                             "Extractor", args.verbose)
     sssh.print_sparkle_list([i for i in gv.settings().DEFAULT_instance_dir.iterdir()],
-                            "Instance", args.verbose)
+                            "Instance Set", args.verbose)
+
     sssh.print_feature_computation_jobs(
         gv.settings().DEFAULT_feature_data_path, args.verbose
     )
