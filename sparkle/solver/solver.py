@@ -220,9 +220,6 @@ class Solver(SparkleCallable):
                                         cutoff_time=cutoff_time,
                                         configuration=configuration)
             cmds.append(" ".join(solver_cmd))
-        print()
-        for c in cmds:
-            print(c)
         run = rrr.add_to_queue(runner=run_on,
                                cmd=cmds,
                                name=commandname,

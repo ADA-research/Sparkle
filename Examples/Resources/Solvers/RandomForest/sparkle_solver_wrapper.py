@@ -205,10 +205,6 @@ class RandomForest:
             "time": time.time() - start_time,
             "size": model_size,
         }
-        print(y_test)
-        print(y_pred)
-        print(performances)
-        ###
         return {k: performances[k] for k in self.objectives}
 
 
@@ -348,6 +344,6 @@ if __name__ == "__main__":
     # sys.stdout.write(
     # f"Result for SMAC3v2: status={status};cost={cost_str};runtime={run_time}\n")
     outdir = {"status": status,
-              "quality": result.values()}
+              "quality": list(result.values())}
 
     print(outdir)
