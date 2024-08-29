@@ -128,9 +128,8 @@ class IterableFileInstanceSet(InstanceSet):
             target: Path to the instances directory. If multiple files are found,
                 they are assumed to have the same number of instances.
         """
-        super.__init__(target)
+        super().__init__(target)
         self.directory = target
-        self.name = target.name
         self._instance_paths =\
             [p for p in self.directory.iterdir()
              if p.suffix in IterableFileInstanceSet.supported_filetypes]
