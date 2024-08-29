@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 
 
-class PerformanceMeasure(Enum):
+class PerformanceMeasure(str, Enum):
     """Possible performance measures."""
     ERR = -1
     DEFAULT = 0

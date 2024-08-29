@@ -52,6 +52,7 @@ if __name__ == "__main__":
 
     solver_output = solver.run(
         instance_path.absolute(),
+        objectives=gv.settings().get_general_sparkle_objectives(),
         seed=args.seed if args.seed else 42,
         cutoff_time=cutoff,
         cwd=cwd,

@@ -42,6 +42,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstanceSetTestArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
                         **ac.PerformanceMeasureSimpleArgument.kwargs)
+    parser.add_argument(*ac.SparkleObjectiveArgument.names,
+                        **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeConfigurationArgument.names,
                         **ac.TargetCutOffTimeConfigurationArgument.kwargs)
     parser.add_argument(*ac.WallClockTimeArgument.names,
@@ -76,6 +78,9 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
     if args.performance_measure is not None:
         gv.settings().set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE)
+    elif args.objectives is not None:
+        gv.settings().set_general_sparkle_objectives(
+            args.objectives, SettingState.CMD_LINE)
     if args.target_cutoff_time is not None:
         gv.settings().set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)

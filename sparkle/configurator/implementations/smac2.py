@@ -108,6 +108,7 @@ class SMAC2(Configurator):
                 [scenario.solver] * self.scenario.number_of_runs,
                 output_csv.absolute(),
                 [scenario.instance_set],
+                [self.scenario.sparkle_objective],
                 scenario.cutoff_time,
                 subdir=Path(),
                 dependency=configuration_run,

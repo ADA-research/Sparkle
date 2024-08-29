@@ -7,6 +7,7 @@ from typing import Any
 def parse_commandline_dict(args: list[str]) -> dict:
     """Parses a commandline dictionary to the object."""
     dict_str = " ".join(args)
+    return ast.literal_eval(dict_str)
     # Remove white space
     dict_str = dict_str.replace(" ", "")
     # Remove all quotes to avoid double strings

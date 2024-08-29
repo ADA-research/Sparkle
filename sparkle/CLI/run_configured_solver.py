@@ -88,6 +88,7 @@ if __name__ == "__main__":
     if run_on == Runner.LOCAL:
         print(f"Start running solver on {data_set.size} instances...")
     run = solver.run(instance=data_set,
+                     objectives=gv.settings().get_general_sparkle_objectives(),
                      seed=gv.get_seed(),
                      cutoff_time=custom_cutoff,
                      configuration=config,

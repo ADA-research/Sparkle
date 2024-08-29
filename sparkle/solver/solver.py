@@ -18,6 +18,7 @@ from sparkle.types import SparkleCallable, SolverStatus
 from sparkle.platform import CommandName
 from sparkle.solver.verifier import SolutionVerifier
 from sparkle.instance import InstanceSet
+from sparkle.types.objective import SparkleObjective
 
 
 class Solver(SparkleCallable):
@@ -106,6 +107,7 @@ class Solver(SparkleCallable):
 
     def build_cmd(self: Solver,
                   instance: str | list[str],
+                  objectives: list[SparkleObjective],
                   seed: int,
                   cutoff_time: int = None,
                   configuration: dict = None) -> list[str]:
@@ -126,6 +128,7 @@ class Solver(SparkleCallable):
         configuration["solver_dir"] = str(self.directory.absolute())
         configuration["instance"] = instance
         configuration["seed"] = seed
+        configuration["objectives"] = ",".join([str(obj) for obj in objectives])
         if cutoff_time is not None:  # Use RunSolver
             configuration["cutoff_time"] = cutoff_time
             # Create RunSolver Logs
@@ -169,12 +172,14 @@ class Solver(SparkleCallable):
             solver_cmd = []
 
         # Ensure stringification of dictionary will go correctly for key value pairs
+        configuration = {key: str(configuration[key]) for key in configuration}
         solver_cmd += [str((self.directory / Solver.wrapper).absolute()),
-                       str({key: str(configuration[key]) for key in configuration})]
+                       f'"{configuration}"']
         return solver_cmd
 
     def run(self: Solver,
             instance: str | list[str] | InstanceSet,
+            objectives: list[SparkleObjective],
             seed: int,
             cutoff_time: int = None,
             configuration: dict = None,
@@ -203,16 +208,21 @@ class Solver(SparkleCallable):
         if isinstance(instance, InstanceSet):
             for inst in instance.instance_paths:
                 solver_cmd = self.build_cmd(inst.absolute(),
+                                            objectives=objectives,
                                             seed=seed,
                                             cutoff_time=cutoff_time,
                                             configuration=configuration)
                 cmds.append(" ".join(solver_cmd))
         else:
             solver_cmd = self.build_cmd(instance,
+                                        objectives=objectives,
                                         seed=seed,
                                         cutoff_time=cutoff_time,
                                         configuration=configuration)
             cmds.append(" ".join(solver_cmd))
+        print()
+        for c in cmds:
+            print(c)
         run = rrr.add_to_queue(runner=run_on,
                                cmd=cmds,
                                name=commandname,

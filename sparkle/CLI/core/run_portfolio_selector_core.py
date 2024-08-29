@@ -34,6 +34,7 @@ def call_solver_solve_instance(
     """
     solver_output = solver.run(
         instance.absolute(),
+        objectives=gv.settings().get_general_sparkle_objectives(),
         seed=gv.get_seed(),
         cutoff_time=cutoff_time,
         cwd=cwd,

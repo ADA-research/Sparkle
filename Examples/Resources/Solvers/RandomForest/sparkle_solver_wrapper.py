@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: UTF-8 -*-
 """Solver wrapper for RandomForest implementation."""
 from __future__ import annotations
 import copy
@@ -23,6 +25,7 @@ from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 from sparkle.tools.solver_wrapper_parsing import parse_commandline_dict
+from sparkle.types.objective import SparkleObjective
 
 
 class DataSet():
@@ -195,13 +198,16 @@ class RandomForest:
         averaging = "binary"
 
         performances = {
-            "accuracy": 1 - accuracy_score(y_test, y_pred),
-            "precision": 1 - precision_score(y_test, y_pred, average=averaging),
-            "recall": 1 - recall_score(y_test, y_pred, average=averaging),
-            "f1": 1 - f1_score(y_test, y_pred, average=averaging),
+            "accuracy": accuracy_score(y_test, y_pred),
+            "precision": precision_score(y_test, y_pred, average=averaging),
+            "recall": recall_score(y_test, y_pred, average=averaging),
+            "f1": f1_score(y_test, y_pred, average=averaging),
             "time": time.time() - start_time,
             "size": model_size,
         }
+        print(y_test)
+        print(y_pred)
+        print(performances)
         ###
         return {k: performances[k] for k in self.objectives}
 
@@ -212,15 +218,15 @@ if __name__ == "__main__":
     dataset = Path(args["instance"])
     solver_dir = Path(args["solver_dir"])
     seed = args["seed"]
-    cutoff = int(args["cutoff_time"])
-    obj = args["objective"]  # This is not yet given by sparkle?
+    cutoff = float(args["cutoff_time"])
+    objectives = SparkleObjective.from_multi_str(args["objectives"])
     instance = "0"  # Place holder
 
     del args["solver_dir"]
     del args["instance"]
     del args["cutoff_time"]
     del args["seed"]
-    del args["objective"]
+    del args["objectives"]
     config = args
 
     # parser = argparse.ArgumentParser()
@@ -275,7 +281,7 @@ if __name__ == "__main__":
 
     dataset = DataSet().load_from_csv(dataset)
     rf = RandomForest(dataset)
-    rf.objectives = obj
+    rf.objectives = [o.metric.lower() for o in objectives]
 
     for k, v in config.items():
         if v == "True":
@@ -317,8 +323,7 @@ if __name__ == "__main__":
         result = rf.train(config, instance, seed)
     except Exception:
         status = "CRASHED"
-        result = {k: 100 for k in obj}
-
+        result = {k: 100 for k in objectives}
     # res = {
     #    "status": status,
     #    "cost": list(result.values()),
@@ -343,6 +348,6 @@ if __name__ == "__main__":
     # sys.stdout.write(
     # f"Result for SMAC3v2: status={status};cost={cost_str};runtime={run_time}\n")
     outdir = {"status": status,
-              "quality": result[obj]}
+              "quality": result.values()}
 
     print(outdir)
