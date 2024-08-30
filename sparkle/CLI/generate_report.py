@@ -162,7 +162,7 @@ if __name__ == "__main__":
                                            instance_sets, [test_set], cutoff_time,
                                            penalised_time, output)
         selection_output.write_output()
-        print("Machine readable selection output can be found here: ", output)
+        print("Machine readable selection output is placed at: ", output)
 
         sgfs.generate_report_selection(gv.settings().DEFAULT_selection_output_analysis,
                                        gv.settings().DEFAULT_latex_source,
@@ -192,7 +192,7 @@ if __name__ == "__main__":
                                                             penalised_time,
                                                             output)
         parallel_portfolio_output.write_output()
-        print("Machine readable parallel portfolio output can be found here: ", output)
+        print("Machine readable parallel portfolio output is placed at: ", output)
         # Reporting for parallel portfolio
         sgrfpph.generate_report_parallel_portfolio(
             parallel_portfolio_path,
@@ -261,9 +261,13 @@ if __name__ == "__main__":
                 gv.settings().DEFAULT_ablation_output)
 
         # Create machine readable output
-        # Where can this path variable be found?
-        path = \
-            Path("Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN")
+        solver_name = gv.latest_scenario().get_config_solver().name
+        instance_set_name = gv.latest_scenario().get_config_instance_set_train().name
+        path = Path(
+            f"Output/Configuration/Raw_Data/"
+            f"SMAC2/scenarios/{solver_name}_{instance_set_name}"
+        )
+        print(path)
         penalty_multiplier = gv.settings().get_general_penalty_multiplier()
         output = gv.settings().DEFAULT_configuration_output_analysis
         config_output = ConfigurationOutput(path, solver, configurator,
@@ -272,7 +276,7 @@ if __name__ == "__main__":
                                             penalty_multiplier,
                                             output)
         config_output.write_output()
-        print("Machine readable configuration output can be found here: ", output)
+        print("Machine readable configuration output is placed at: ", output)
 
         sgrfch.generate_report_for_configuration(
             solver,
