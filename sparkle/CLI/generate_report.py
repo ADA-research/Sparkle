@@ -57,6 +57,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.PerformanceMeasureArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*ac.GenerateJSONArgument.names,
+                        **ac.GenerateJSONArgument.kwargs)
     return parser
 
 
@@ -75,6 +77,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     selection = args.selection
     test_case_dir = args.test_case_directory
+    only_json = args.only_json
 
     solver = resolve_object_name(args.solver,
                                  gv.solver_nickname_mapping,
@@ -164,24 +167,28 @@ if __name__ == "__main__":
         selection_output.write_output()
         print("Machine readable selection output is placed at: ", output)
 
-        sgfs.generate_report_selection(gv.settings().DEFAULT_selection_output_analysis,
-                                       gv.settings().DEFAULT_latex_source,
-                                       "template-Sparkle-for-selection.tex",
-                                       gv.settings().DEFAULT_latex_bib,
-                                       gv.settings().DEFAULT_extractor_dir,
-                                       selection_scenario,
-                                       feature_data,
-                                       train_data,
-                                       gv.settings().get_general_extractor_cutoff_time(),
-                                       gv.settings().get_general_target_cutoff_time(),
-                                       gv.settings().get_penalised_time(),
-                                       test_data)
-        if test_case_dir is None:
-            print("Report generated ...")
-        else:
-            print("Report for test generated ...")
+        if not only_json:
+            sgfs.generate_report_selection(
+                gv.settings().DEFAULT_selection_output_analysis,
+                gv.settings().DEFAULT_latex_source,
+                "template-Sparkle-for-selection.tex",
+                gv.settings().DEFAULT_latex_bib,
+                gv.settings().DEFAULT_extractor_dir,
+                selection_scenario,
+                feature_data,
+                train_data,
+                gv.settings().get_general_extractor_cutoff_time(),
+                gv.settings().get_general_target_cutoff_time(),
+                gv.settings().get_penalised_time(),
+                test_data
+            )
+            if test_case_dir is None:
+                print("Report generated ...")
+            else:
+                print("Report for test generated ...")
 
     elif gv.latest_scenario().get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
+        # Reporting for parallel portfolio
         # Machine readable Output
         cutoff_time = gv.settings().get_general_target_cutoff_time()
         penalised_time = gv.settings().get_penalised_time()
@@ -193,17 +200,18 @@ if __name__ == "__main__":
                                                             output)
         parallel_portfolio_output.write_output()
         print("Machine readable parallel portfolio output is placed at: ", output)
-        # Reporting for parallel portfolio
-        sgrfpph.generate_report_parallel_portfolio(
-            parallel_portfolio_path,
-            gv.settings().DEFAULT_parallel_portfolio_output_analysis,
-            gv.settings().DEFAULT_latex_source,
-            gv.settings().DEFAULT_latex_bib,
-            gv.settings().get_general_sparkle_objectives()[0],
-            gv.settings().get_general_target_cutoff_time(),
-            gv.settings().get_penalised_time(),
-            pap_instance_set)
-        print("Parallel portfolio report generated ...")
+
+        if not only_json:
+            sgrfpph.generate_report_parallel_portfolio(
+                parallel_portfolio_path,
+                gv.settings().DEFAULT_parallel_portfolio_output_analysis,
+                gv.settings().DEFAULT_latex_source,
+                gv.settings().DEFAULT_latex_bib,
+                gv.settings().get_general_sparkle_objectives()[0],
+                gv.settings().get_general_target_cutoff_time(),
+                gv.settings().get_penalised_time(),
+                pap_instance_set)
+            print("Parallel portfolio report generated ...")
     else:
         # Reporting for algorithm configuration
         if solver is None:
@@ -278,20 +286,21 @@ if __name__ == "__main__":
         config_output.write_output()
         print("Machine readable configuration output is placed at: ", output)
 
-        sgrfch.generate_report_for_configuration(
-            solver,
-            gv.settings().get_general_sparkle_configurator(),
-            Validator(gv.settings().DEFAULT_validation_output),
-            gv.settings().DEFAULT_extractor_dir,
-            gv.settings().DEFAULT_configuration_output_analysis,
-            gv.settings().DEFAULT_latex_source,
-            gv.settings().DEFAULT_latex_bib,
-            instance_set_train,
-            gv.settings().get_general_penalty_multiplier(),
-            gv.settings().get_general_extractor_cutoff_time(),
-            instance_set_test,
-            ablation=ablation_scenario
-        )
+        if not only_json:
+            sgrfch.generate_report_for_configuration(
+                solver,
+                gv.settings().get_general_sparkle_configurator(),
+                Validator(gv.settings().DEFAULT_validation_output),
+                gv.settings().DEFAULT_extractor_dir,
+                gv.settings().DEFAULT_configuration_output_analysis,
+                gv.settings().DEFAULT_latex_source,
+                gv.settings().DEFAULT_latex_bib,
+                instance_set_train,
+                gv.settings().get_general_penalty_multiplier(),
+                gv.settings().get_general_extractor_cutoff_time(),
+                instance_set_test,
+                ablation=ablation_scenario
+            )
 
     # Write used settings to file
     gv.settings().write_used_settings()

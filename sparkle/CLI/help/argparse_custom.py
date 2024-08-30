@@ -150,6 +150,14 @@ ExtractorPathArgument = ArgumentContainer(names=["extractor_path"],
                                                           "feature extractor"
                                                   })
 
+GenerateJSONArgument = ArgumentContainer(names=["--only_json"],
+                                         kwargs={"required": False,
+                                                 "default": False,
+                                                 "type": bool,
+                                                 "help": "if set to True, only generate "
+                                                         "machine readable output"
+                                                 })
+
 InstancePathPositional = ArgumentContainer(names=["instance_path"],
                                            kwargs={"type": Path,
                                                    "help": "Path to an instance (set)"})
