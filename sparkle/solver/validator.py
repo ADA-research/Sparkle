@@ -120,7 +120,7 @@ class Validator():
             if res.suffix != ".rawres":
                 continue
             solver_args = get_solver_args(res.with_suffix(".log"))
-            solver_args = ast.literal_eval(solver_args.strip())
+            solver_args = ast.literal_eval(solver_args)
             instance_path = Path(solver_args["instance"])
             # Remove default args
             if "config_path" in solver_args:
@@ -136,6 +136,7 @@ class Validator():
                     if def_arg in solver_args:
                         del solver_args[def_arg]
             solver_args = str(solver_args).replace('"', "'")
+
             for instance_set in instance_sets:
                 if instance_path.name in instance_set._instance_names:
                     out_dict = get_solver_output(

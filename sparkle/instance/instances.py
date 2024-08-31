@@ -134,7 +134,7 @@ class IterableFileInstanceSet(InstanceSet):
             [p for p in self.directory.iterdir()
              if p.suffix in IterableFileInstanceSet.supported_filetypes]
         self._size = len(self._instance_paths[0].open().readlines())
-        self._instance_names = [i for i in range(self._size)]
+        self._instance_names = [p.name for p in self._instance_paths]
 
     @property
     def size(self: IterableFileInstanceSet) -> int:

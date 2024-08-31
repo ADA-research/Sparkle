@@ -116,6 +116,7 @@ if __name__ == "__main__":
         solvers=[solver] * 2,
         configurations=[None, opt_config],
         instance_sets=all_validation_instances,
+        objectives=gv.settings().get_general_sparkle_objectives(),
         cut_off=gv.settings().get_general_target_cutoff_time(),
         sbatch_options=gv.settings().get_slurm_extra_options(as_args=True),
         run_on=run_on)
