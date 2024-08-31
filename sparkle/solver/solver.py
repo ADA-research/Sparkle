@@ -5,6 +5,7 @@ import sys
 from typing import Any
 import shlex
 import ast
+import json
 from pathlib import Path
 
 import pcsparser
@@ -174,7 +175,7 @@ class Solver(SparkleCallable):
         # Ensure stringification of dictionary will go correctly for key value pairs
         configuration = {key: str(configuration[key]) for key in configuration}
         solver_cmd += [str((self.directory / Solver.wrapper).absolute()),
-                       f'"{configuration}"']
+                       f"{json.dumps(configuration)}"]
         return solver_cmd
 
     def run(self: Solver,

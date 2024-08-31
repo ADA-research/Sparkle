@@ -113,17 +113,17 @@ class RandomForest:
         use_max_samples2 = EqualsCondition(child=max_samples_type, parent=bootstrap,
                                            value=True)
 
-        cs.add_hyperparameters([n_estimators, criterion, max_depth_type, max_depth,
-                               min_samples_split, min_samples_leaf,
-                               min_weight_fraction_leaf, max_features_type,
-                               max_features_special, max_features_float,
-                               max_leaf_nodes_type, max_leaf_nodes,
-                               min_impurity_decrease, bootstrap, oob_score,
-                               max_samples_type, max_samples])
+        cs.add([n_estimators, criterion, max_depth_type, max_depth,
+                min_samples_split, min_samples_leaf,
+                min_weight_fraction_leaf, max_features_type,
+                max_features_special, max_features_float,
+                max_leaf_nodes_type, max_leaf_nodes,
+                min_impurity_decrease, bootstrap, oob_score,
+                max_samples_type, max_samples])
 
-        cs.add_conditions([use_max_depth, use_max_features_float,
-                           use_max_features_special, use_max_leaf_nodes, use_oob_score,
-                           use_max_samples, use_max_samples2])
+        cs.add([use_max_depth, use_max_features_float,
+                use_max_features_special, use_max_leaf_nodes, use_oob_score,
+                use_max_samples, use_max_samples2])
 
         return cs
 
@@ -216,7 +216,7 @@ if __name__ == "__main__":
     seed = args["seed"]
     cutoff = float(args["cutoff_time"])
     objectives = SparkleObjective.from_multi_str(args["objectives"])
-    instance = "0"  # Place holder
+    instance = "-1"  # Place holder
 
     del args["solver_dir"]
     del args["instance"]
