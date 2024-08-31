@@ -7,6 +7,7 @@ from typing import Any
 def parse_commandline_dict(args: list[str]) -> dict:
     """Parses a commandline dictionary to the object."""
     dict_str = " ".join(args)
+    dict_str = dict_str[dict_str.index("{"):dict_str.index("}") + 1]  # Slurm script fix
     return ast.literal_eval(dict_str)
 
 
@@ -37,6 +38,7 @@ def parse_solver_wrapper_args(args: list[str]) -> dict[Any]:
         for arg in config_split:
             varname, value = arg.strip("'").strip('"').split(" ", maxsplit=1)
             args_dict[varname] = value
+        del args_dict["config_path"]
 
     return args_dict
 

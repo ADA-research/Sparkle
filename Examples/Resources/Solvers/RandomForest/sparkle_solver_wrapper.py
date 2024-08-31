@@ -24,7 +24,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
-from sparkle.tools.solver_wrapper_parsing import parse_commandline_dict
+from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args
 from sparkle.types.objective import SparkleObjective
 
 
@@ -210,7 +210,7 @@ class RandomForest:
 
 if __name__ == "__main__":
     # Wrapper for RandomForest to run MO-ParamILS
-    args = parse_commandline_dict(sys.argv[1:])
+    args = parse_solver_wrapper_args(sys.argv[1:])
     dataset = Path(args["instance"])
     solver_dir = Path(args["solver_dir"])
     seed = args["seed"]
