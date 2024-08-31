@@ -225,56 +225,6 @@ if __name__ == "__main__":
     del args["objectives"]
     config = args
 
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("--dataset", required=True, type=Path)
-    # parser.add_argument("--instance", required=True, type=str)
-    # parser.add_argument("--seed", required=True, type=int)
-    # parser.add_argument("--cutoff", required=False, type=int)
-    # parser.add_argument("--config", required=True, action="append", nargs="+",
-    #  default=[])
-    # parser.add_argument("--obj", required=True, action="append", nargs="+", default=[],
-    # choices=["precision", "recall", "accuracy", "f1score", "time", "size"])
-
-    """if "--config" in sys.argv:
-        old_style = False
-        args = parser.parse_args()
-        config = []
-        for c in args.config:
-            config += c
-        assert len(config) % 2 == 0
-
-        dataset = args.dataset
-        instance = args.instance
-        seed = args.seed
-        obj = []
-        for o in args.obj:
-            obj += o
-        config = {k: v for k, v in zip(config[::2], config[1::2])}
-    else:
-        # ParamILS Style
-        old_style = True
-        args = sys.argv
-        i = 1
-        state = 0
-        obj = []
-        while True:
-            if re.match("--", args[i]):
-                key = args[i][2:]
-                if key == "dataset":
-                    dataset = args[i+1]
-                if key == "obj":
-                    obj.append(args[i+1])
-                i += 2
-                continue
-            break
-        # <instance name> <instance-specific
-        # information> <cutoff time> <cutoff length> <seed>
-        instance, _, _, _, seed = args[i:i+5]
-        seed = max(min(int(seed), 2**32-1), 0)
-
-        i += 5
-        config = {k[1:]: v for k, v in zip(args[i::2], args[i+1::2])}"""
-
     dataset = DataSet().load_from_csv(dataset)
     rf = RandomForest(dataset)
     rf.objectives = [o.metric.lower() for o in objectives]
@@ -290,18 +240,21 @@ if __name__ == "__main__":
             config[k] = float(v)
 
     # Fix constraints
-    if config["max_depth_type"] != "int" and "max_depth" in config:
+    if ("max_depth_type" in config and config["max_depth_type"] != "int"
+            and "max_depth" in config):
         del config["max_depth"]
 
-    if config["max_features_type"] == "float" and "max_features_special" in config:
-        del config["max_features_special"]
-    elif config["max_features_type"] == "special" and "max_features_float" in config:
-        del config["max_features_float"]
+    if "max_features_type" in config:
+        if config["max_features_type"] == "float" and "max_features_special" in config:
+            del config["max_features_special"]
+        elif config["max_features_type"] == "special" and "max_features_float" in config:
+            del config["max_features_float"]
 
-    if config["max_leaf_nodes_type"] != "int" and "max_leaf_nodes" in config:
+    if ("max_leaf_nodes_type" in config and config["max_leaf_nodes_type"] != "int"
+            and "max_leaf_nodes" in config):
         del config["max_leaf_nodes"]
 
-    if config["bootstrap"] is False:
+    if "bootstrap" in config and config["bootstrap"] is False:
         if "oob_score" in config:
             del config["oob_score"]
         if "max_samples_type" in config:
@@ -320,29 +273,7 @@ if __name__ == "__main__":
     except Exception:
         status = "CRASHED"
         result = {k: 100 for k in objectives}
-    # res = {
-    #    "status": status,
-    #    "cost": list(result.values()),
-    #    "runtime": 1.0,
-    #    "mics": ""
-    # }
 
-    # Result: <status>, <runtime>, <quality>, <seed>
-    # if len(rf.objectives) > 1:
-    #    cost_str = "[{}]".format(", ".join([str(float(c)) for _, c in result.items()]))
-    # else:
-    #    cost_str = f"{list(result.values())[0]}"
-    # sys.stdout.write(f"Result: {status}, {cost_str}, {seed}\n")
-
-    # f"Result for SMAC3v2: status={self.data.status};cost={cost_str};
-    # runtime={self.data.time};additional_info={self.data.additional}")
-    # if len(rf.objectives) > 1:
-    #    cost_str = ",".join([str(float(c)) for _, c in result.items()])
-    # else:
-    #    cost_str = f"{list(result.values())[0]}"
-
-    # sys.stdout.write(
-    # f"Result for SMAC3v2: status={status};cost={cost_str};runtime={run_time}\n")
     outdir = {"status": status,
               "quality": list(result.values())}
 
