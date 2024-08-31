@@ -210,7 +210,7 @@ class RandomForest:
 
 if __name__ == "__main__":
     # Wrapper for RandomForest to run MO-ParamILS
-    args = parse_solver_wrapper_args(sys.argv[1:])
+    args = parse_solver_wrapper_args(sys.argv)
     dataset = Path(args["instance"])
     solver_dir = Path(args["solver_dir"])
     seed = args["seed"]
@@ -240,31 +240,59 @@ if __name__ == "__main__":
             config[k] = float(v)
 
     # Fix constraints
-    if ("max_depth_type" in config and config["max_depth_type"] != "int"
-            and "max_depth" in config):
-        del config["max_depth"]
+    if "max_depth_type" in config:
+        if config["max_depth_type"] != "int" and "max_depth" in config:
+            del config["max_depth"]
+    else:
+        config["max_depth_type"] = "None"
 
     if "max_features_type" in config:
         if config["max_features_type"] == "float" and "max_features_special" in config:
             del config["max_features_special"]
         elif config["max_features_type"] == "special" and "max_features_float" in config:
             del config["max_features_float"]
+    else:
+        config["max_features_type"] = "special"
 
-    if ("max_leaf_nodes_type" in config and config["max_leaf_nodes_type"] != "int"
-            and "max_leaf_nodes" in config):
-        del config["max_leaf_nodes"]
+    if "max_leaf_nodes_type" in config:
+        if config["max_leaf_nodes_type"] != "int" and "max_leaf_nodes" in config:
+            del config["max_leaf_nodes"]
+    else:
+        config["max_leaf_nodes_type"] = "None"
 
-    if "bootstrap" in config and config["bootstrap"] is False:
-        if "oob_score" in config:
-            del config["oob_score"]
-        if "max_samples_type" in config:
-            del config["max_samples_type"]
-        if "max_samples" in config:
-            del config["max_samples"]
+    if "bootstrap" in config:
+        if config["bootstrap"] is False:
+            if "oob_score" in config:
+                del config["oob_score"]
+            if "max_samples_type" in config:
+                del config["max_samples_type"]
+            if "max_samples" in config:
+                del config["max_samples"]
+    else:
+        config["bootstrap"] = True
+        config["oob_score"] = True
 
     if "max_samples_type" in config:
         if config["max_samples_type"] != "float" and "max_samples" in config:
             del config["max_samples"]
+
+    # Fill missing mappings with default
+    if "criterion" not in config:
+        config["criterion"] = "gini"
+    if "min_impurity_decrease" not in config:
+        config["min_impurity_decrease"] = 0.0
+    if "min_samples_leaf" not in config:
+        config["min_samples_leaf"] = 1
+    if "min_samples_split" not in config:
+        config["min_samples_split"] = 2
+    if "min_weight_fraction_leaf" not in config:
+        config["min_weight_fraction_leaf"] = 0.0
+    if "n_estimators" not in config:
+        config["n_estimators"] = 100
+    if "max_features_special" not in config:
+        config["max_features_special"] = "sqrt"
+    if "max_samples_type" not in config:
+        config["max_samples_type"] = "None"
 
     config = Configuration(rf.configspace, config)
     status = "SUCCESS"

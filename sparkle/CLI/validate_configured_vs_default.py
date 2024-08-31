@@ -37,6 +37,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.ConfiguratorArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureArgument.names,
                         **ac.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*ac.SparkleObjectiveArgument.names,
+                        **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeValidationArgument.names,
                         **ac.TargetCutOffTimeValidationArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
@@ -89,6 +91,10 @@ if __name__ == "__main__":
                             gv.settings().get_general_sparkle_objectives()])
         gv.settings().set_general_sparkle_objectives(
             set_str, SettingState.CMD_LINE
+        )
+    elif ac.set_by_user(args, "objectives"):
+        gv.settings().set_general_sparkle_objectives(
+            args.objectives, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "target_cutoff_time"):
         gv.settings().set_general_target_cutoff_time(
