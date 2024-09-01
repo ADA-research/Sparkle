@@ -13,6 +13,7 @@ from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver import Solver
 from sparkle.instance import instance_set
 from sparkle.platform.settings_objects import Settings
+from sparkle.types.objective import SparkleObjective
 
 global settings
 settings = Settings()
@@ -38,8 +39,7 @@ class TestConfigurationScenario(TestCase):
         self.wallclock_time = 600
         self.cutoff_time = 60
         self.cutoff_length = "max"
-        self.sparkle_objective =\
-            settings.get_general_sparkle_objectives()[0]
+        self.sparkle_objective = SparkleObjective("RUNTIME:PAR10")
         self.configurator = settings.get_general_sparkle_configurator()
         self.scenario = ConfigurationScenario(
             solver=self.solver,
@@ -119,6 +119,5 @@ class TestConfigurationScenario(TestCase):
         output = self.scenario.scenario_file_path.open().read()
         # Strip the output of the homedirs (Due to absolute paths)
         output = output.replace(str(Path.home()), "")
-        print(output)
         self.assertEqual(output,
                          reference_scenario_file.open().read())
