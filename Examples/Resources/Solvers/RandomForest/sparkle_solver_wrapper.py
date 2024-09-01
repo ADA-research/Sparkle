@@ -25,7 +25,6 @@ from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args
-from sparkle.types.objective import SparkleObjective
 
 
 class DataSet():
@@ -215,7 +214,7 @@ if __name__ == "__main__":
     solver_dir = Path(args["solver_dir"])
     seed = args["seed"]
     cutoff = float(args["cutoff_time"])
-    objectives = SparkleObjective.from_multi_str(args["objectives"])
+    objectives = args["objectives"]
     instance = "-1"  # Place holder
 
     del args["solver_dir"]
