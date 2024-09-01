@@ -141,4 +141,4 @@ sparkle wait
 
 # Generate a report detailing the results on the training (and optionally testing) set.
 
-sparkle generate_report
+sparkle generate_report --performance-measure QUALITY_ABSOLUTE
