@@ -132,7 +132,8 @@ class Validator():
                 config_str = config_path.open("r").readlines()[row_idx]
                 solver_args = Solver.config_str_to_dict(config_str)
             else:
-                for def_arg in ["instance", "solver_dir", "cutoff_time", "seed"]:
+                for def_arg in ["instance", "solver_dir", "cutoff_time",
+                                "seed", "objectives"]:
                     if def_arg in solver_args:
                         del solver_args[def_arg]
             solver_args = str(solver_args).replace('"', "'")
@@ -187,9 +188,9 @@ class Validator():
         if config is not None:
             # We filter on the config string by subdict
             if isinstance(config, str):
-                config_dict = Solver.config_str_to_dict(config)
+                config = Solver.config_str_to_dict(config)
             csv_data = [line for line in csv_data if
-                        config_dict.items() == ast.literal_eval(line[1]).items()]
+                        config.items() == ast.literal_eval(line[1]).items()]
         return csv_data
 
     def append_entry_to_csv(self: Validator,
