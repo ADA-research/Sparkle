@@ -301,8 +301,8 @@ if __name__ == "__main__":
     except Exception:
         status = "CRASHED"
         result = {k: 100 for k in objectives}
-
+    quality = np.mean(list(result.values()))
     outdir = {"status": status,
-              "quality": list(result.values())}
+              "quality": quality}
 
     print(outdir)
