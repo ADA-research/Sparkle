@@ -53,12 +53,14 @@ def run_parallel_portfolio(instances_set: InstanceSet,
           f"on {num_solvers} solvers for {num_instances} instances ...")
     cmd_list = []
     cutoff = gv.settings().get_general_target_cutoff_time()
+    objectives = gv.settings().get_general_sparkle_objectives()
     # Create a command for each instance-solver-seed combination
     for instance, solver in itertools.product(instances_set._instance_paths, solvers):
         for _ in range(seeds_per_solver):
             seed = int(random.getrandbits(32))
             solver_call_list = solver.build_cmd(
                 instance.absolute(),
+                objectives=objectives,
                 seed=seed,
                 cutoff_time=cutoff)
             cmd_list.append((" ".join(solver_call_list)).replace("'", '"'))
