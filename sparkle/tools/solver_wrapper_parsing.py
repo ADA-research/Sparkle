@@ -57,7 +57,7 @@ def get_solver_call_params(args_dict: dict) -> list[str]:
     """
     params = []
     # Certain arguments are not relevant/have already been processed
-    ignore_args = {"solver_dir", "instance", "cutoff_time", "seed"}
+    ignore_args = {"solver_dir", "instance", "cutoff_time", "seed", "objectives"}
     for key in args_dict:
         if key not in ignore_args and args_dict[key] is not None:
             params.extend(["-" + str(key), str(args_dict[key])])
