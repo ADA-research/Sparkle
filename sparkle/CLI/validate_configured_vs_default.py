@@ -92,7 +92,7 @@ if __name__ == "__main__":
         gv.settings().set_general_sparkle_objectives(
             set_str, SettingState.CMD_LINE
         )
-    elif ac.set_by_user(args, "objectives"):
+    if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
             args.objectives, SettingState.CMD_LINE
         )
@@ -100,7 +100,6 @@ if __name__ == "__main__":
         gv.settings().set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE
         )
-
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
     Settings.check_settings_changes(gv.settings(), prev_settings)
