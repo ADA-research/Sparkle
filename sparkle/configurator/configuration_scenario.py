@@ -145,7 +145,7 @@ class ConfigurationScenario:
         self.instance_file_path.parent.mkdir(exist_ok=True, parents=True)
         with self.instance_file_path.open("w+") as file:
             for instance_path in self.instance_set._instance_paths:
-                file.write(f"{instance_path.absolute()}")
+                file.write(f"{instance_path.absolute()}\n")
 
     def _get_performance_measure(self: ConfigurationScenario) -> str:
         """Retrieve the performance measure of the SparkleObjective.

@@ -117,13 +117,13 @@ class TestConfigurator():
         """Testing SMAC2 ability to retrieve output from raw file."""
         raw_out = test_files / "Configuration/PbO-CCSAT-Generic_PTN_seed_3_smac.txt"
         # By not specifiying an output file, the result is returned to us
-        expected = ("-p_swt '0.9159119091643446' -perform_aspiration '0' "
-                    "-perform_clause_weight '1' -perform_double_cc '0' "
-                    "-perform_first_div '1' -perform_pac '0' -prob_first_div "
-                    "'0.03436305564549758' -prob_novelty '0.2599471980399112' -q_swt "
-                    "'0.9870901739984178' -sel_clause_div '1' -sel_clause_weight_scheme "
-                    "'1' -sel_var_break_tie_greedy '1' -sel_var_div '6' -threshold_swt "
-                    "'31'")
+        expected = (
+            "-gamma_hscore2 '351' -init_solution '1' -p_swt '0.20423712003341465'"
+            " -perform_aspiration '1' -perform_clause_weight '1' "
+            "-perform_double_cc '0' -perform_first_div '0' -perform_pac '1' "
+            "-prob_pac '0.005730374136488115' -q_swt '0.6807207179674418' "
+            "-sel_clause_div '1' -sel_clause_weight_scheme '1' "
+            "-sel_var_break_tie_greedy '4' -sel_var_div '2' -threshold_swt '32'")
         assert SMAC2.organise_output(raw_out) == expected
 
     def test_smac2_get_status_from_logs(self: TestConfigurator) -> None:
