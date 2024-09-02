@@ -10,6 +10,6 @@ dependencies:
   - swig=4.0.2 # SMAC3 C++ compiler
   - libnuma # runsolver compilation
   - numactl # runsolver compilation
-  - pip # Sparkle installation
-  pip:
+  - pip
+  - pip:
     - SparkleAI
