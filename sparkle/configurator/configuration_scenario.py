@@ -185,7 +185,7 @@ class ConfigurationScenario:
 
     @staticmethod
     def from_file(scenario_file: Path, solver: Solver, instance_set: InstanceSet,
-                  scenario_folder: Path = None) -> ConfigurationScenario:
+                  ) -> ConfigurationScenario:
         """Reads scenario file and initalises ConfigurationScenario."""
         config = {}
         with scenario_file.open() as file:
@@ -207,16 +207,11 @@ class ConfigurationScenario:
         use_features = bool(config["feature_file"]) if "feature_file" in config \
             else None
 
-        # TODO: Add METRIC to objective
+        # TODO: Add METRIC to objective -> Can soon be retrieved from algo =
         objective = SparkleObjective(f"{config['run_obj']}:UNKNOWN")
-
-        number_of_runs = None
-        if scenario_folder is not None:
-            state_run_dirs = [p for p in scenario_folder.iterdir()
-                              if p.name.startswith("state-run")]
-            number_of_runs = len(state_run_dirs)
-
-        # TODO: Number_of_runs isn't part of the scenario file
+        results_folder = scenario_file.parent / "results"
+        state_run_dirs = [p for p in results_folder.iterdir() if p.is_file()]
+        number_of_runs = len(state_run_dirs)
         return ConfigurationScenario(solver,
                                      instance_set,
                                      number_of_runs,

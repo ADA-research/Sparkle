@@ -42,31 +42,17 @@ class ConfigurationOutput:
         self.instance_set_test = instance_set_test
         self.penalty_multiplier = penalty_multiplier
         self.directory = path
+        self.output = output / "configuration.json" if not output.is_file() else output
 
-        if not output.is_file():
-            self.output = output / "configuration.json"
-        else:
-            self.output = output
-
-        # TODO: Fix this spaghetti code to find the scenario file
         solver_dir_name = path.name
-        scenario_dir = path / "outdir_train_configuration" / \
-            f"{solver_dir_name}_scenario" / "state-run0"
-        if scenario_dir.is_dir():
-            scenario_file = scenario_dir / "scenario.txt"
-            if not scenario_file.is_file():
-                print("Can't find scenario file")
-                return
-        else:
-            print("Can't find scenario file")
-            return
+        scenario_file = path / f"{solver_dir_name}_scenario.txt"
+        if not scenario_file.is_file():
+            raise Exception("Can't find scenario file")
 
-        scenario_dir = scenario_dir.parent
         # Sets scenario on configurator object
         self.configurator.scenario = \
             ConfigurationScenario.from_file(scenario_file, self.solver,
-                                            self.instance_set_train,
-                                            scenario_dir)
+                                            self.instance_set_train)
         self.configurator.scenario._set_paths(self.configurator.output_path)
 
         # Retrieve all configurations
