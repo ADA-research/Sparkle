@@ -155,9 +155,9 @@ if __name__ == "__main__":
                                for instance in train_data.instances)
         instance_sets = []
         for dir in instance_folders:
-            set = InstanceSet(dir)
+            set = instance_set(dir)
             instance_sets.append(set)
-        test_set = InstanceSet(Path(test_case_dir))
+        test_set = instance_set(Path(test_case_dir))
         cutoff_time = gv.settings().get_general_target_cutoff_time()
         penalised_time = gv.settings().get_penalised_time()
         output = gv.settings().DEFAULT_selection_output_analysis
