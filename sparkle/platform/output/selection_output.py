@@ -39,6 +39,8 @@ class SelectionOutput:
             self.output = output / "selection.json"
         else:
             self.output = output
+        if test_instances is not None and not isinstance(test_instances, list):
+            test_instances = [test_instances]
 
         self.training_instances = training_instances
         self.test_instances = test_instances
