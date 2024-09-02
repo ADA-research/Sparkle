@@ -2,6 +2,21 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.8.5] - 2024/09/02
+
+### Changed
+- Solver wrappers have been simplified in their usage and extra tools are available to the user [SPRK-274]
+- Solver dict parsing hase been simplified [SPRK-310]
+- InstanceSet object has been expanded to now support ML task based data sets [SPRK-325]
+- RunRunner logging is now forwarded to CLI call log, all RunRunner generated files and logs are placed in the same dir instead of Tmp [SPRK-330]
+
+### Added
+- Generating a report now includes a JSON serialised version of all the output data [SPRK-79]
+
+### Fixed
+- Many methods/properties used string variables where Path was needed and have been changed accordingly [SPRK-222]
+
+
 ## [0.8.4] - 2024/07/30
 
 ### Changed
