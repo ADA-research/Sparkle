@@ -6,7 +6,6 @@ import shutil
 from pathlib import Path
 
 import pandas as pd
-import os
 
 from sparkle.types.objective import SparkleObjective, PerformanceMeasure
 from sparkle.solver import Solver
@@ -213,9 +212,9 @@ class ConfigurationScenario:
 
         number_of_runs = None
         if scenario_folder is not None:
-            subfolders = os.listdir(scenario_folder)
-            number_of_runs = \
-                sum(1 for folder in subfolders if folder.startswith("state-run"))
+            state_run_dirs = [p for p in scenario_folder.iterdir()
+                              if p.name.startswith("state-run")]
+            number_of_runs = len(state_run_dirs)
 
         # TODO: Number_of_runs isn't part of the scenario file
         return ConfigurationScenario(solver,
