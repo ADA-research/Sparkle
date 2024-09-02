@@ -30,8 +30,8 @@ solver_src_path="${examples_path}${solver_path}"
 
 config_scenario_path="Output/Configuration/Raw_Data/SMAC2/scenarios/"
 config_test_data="tests/CLI/test_files/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN"
-latest_ini="tests/CLI/test_files/Output/latest_scenario.ini"
-latest_ini_target="Output/"
+latest_ini="tests/CLI/test_files/Settings/latest_scenario_configuration.ini"
+latest_ini_target="Output/latest_scenario.ini"
 
 sparkle/CLI/initialise.py > /dev/null
 sparkle/CLI/add_instances.py $instances_src_path_train > /dev/null
@@ -49,7 +49,7 @@ output=$(sparkle/CLI/validate_configured_vs_default.py --solver $solver_path --i
 output_true="Running validation done!"
 if [[ $slurm_available =~ "${slurm_true}" ]];
 then
-	output_true="[RunRunner] Submitted a run to Slurm (job "
+	output_true="Running validation through Slurm with job ID: "
 fi
 
 if [[ $output =~ "${output_true}" ]];

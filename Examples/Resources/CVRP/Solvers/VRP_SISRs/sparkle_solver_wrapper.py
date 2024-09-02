@@ -1,38 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 # Sparkle SMAC wrapper VRP_heuristic_Jan_MkII_Sparkle
-
-import time
 import sys
 import subprocess
 from pathlib import Path
-from sparkle.tools.slurm_parsing import parse_commandline_dict
+from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args, \
+    get_solver_call_params
 
-# Convert the argument of the target_algorithm script to dictionary
-args = parse_commandline_dict(sys.argv[1:])
+# Parse the arguments of the solver wrapper
+args_dict = parse_solver_wrapper_args(sys.argv[1:])
 
-# Extract and delete data that needs specific formatting
-solver_dir = Path(args["solver_dir"])
-instance = args["instance"]
-specifics = args["specifics"]
-cutoff_time = int(args["cutoff_time"]) + 1
-# run_length = args["run_length"]
-seed = args["seed"]
+# Extract certain args from the above dict for use further below
+solver_dir = args_dict["solver_dir"]
+instance = args_dict["instance"]
+seed = args_dict["seed"]
+seed = args_dict["seed"]
 
-del args["solver_dir"]
-del args["instance"]
-del args["cutoff_time"]
-del args["seed"]
-del args["specifics"]
-del args["run_length"]
-
-
-# Construct call from args dictionary
-params = []
-for key in args:
-    if args[key] is not None:
-        params.extend(["-" + str(key), str(args[key])])
-
+# Construct the base solver call
 solver_binary = "VRP_SISRs"
 solver_exec = f"{solver_dir / solver_binary}" if solver_dir != Path(".") else "./" \
     + solver_binary
@@ -40,11 +24,15 @@ solver_cmd = [solver_exec,
               "-inst", str(instance),
               "-seed", str(seed)]
 
-instance_name = Path(instance).name
-solver_name = Path(solver_binary).name
+# Get further params for the solver call
+params = get_solver_call_params(args_dict)
 
-solver_call = subprocess.run(solver_cmd + params,
+# Execute the solver call
+try:
+    solver_call = subprocess.run(solver_cmd + params,
                              capture_output=True)
+except Exception as ex:
+    print(f"Solver call failed with exception:\n{ex}")
 
 output_str = solver_call.stdout.decode()
 output_list = output_str.splitlines()
@@ -54,19 +42,6 @@ status = r'SUCCESS'  # always ok, code checks per iteration if cutoff time is ex
 
 if len(output_list) > 0:
     quality = output_list[-1].strip()
-
-if specifics == 'rawres':
-    tmp_directory = Path("tmp/")
-    time_stamp = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))
-    rawres_file_name = Path(f"{solver_name}_{instance_name}_{time_stamp}.rawres_solver")
-    if Path.cwd().name != tmp_directory.name:
-        tmp_directory.mkdir(exist_ok=True)
-        raw_result_path = tmp_directory / rawres_file_name
-    else:
-        raw_result_path = rawres_file_name
-    raw_result_path.parent.mkdir(parents=True, exist_ok=True)
-    with raw_result_path.open('w') as outfile:
-        outfile.write(str(solver_cmd + params) + "\n" + output_str)
 
 outdir = {"status": status,
           "quality": quality,

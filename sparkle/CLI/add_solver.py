@@ -14,7 +14,7 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
 from sparkle.CLI.run_solvers import running_solvers_performance_data
 from sparkle.solver import Solver
-from sparkle.CLI.help import sparkle_logging as sl
+from sparkle.CLI.help import logging as sl
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as apc
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         if not (configurator_wrapper_path.is_file()
                 and os.access(configurator_wrapper_path, os.X_OK)):
             print(f"WARNING: Solver {solver_source.name} does not have a solver wrapper "
-                  f"(Missing file {gv.sparkle_solver_wrapper}) or is not executable. ")
+                  f"(Missing file {Solver.wrapper}) or is not executable. ")
 
     # Start add solver
     solver_directory = gv.settings().DEFAULT_solver_dir / solver_source.name
@@ -120,11 +120,6 @@ if __name__ == "__main__":
 
     print(f"Adding solver {solver_source.name} done!")
 
-    if gv.settings().DEFAULT_algorithm_selector_path.exists():
-        gv.settings().DEFAULT_algorithm_selector_path.unlink()
-        print("Removing Sparkle portfolio selector "
-              f"{gv.settings().DEFAULT_algorithm_selector_path} done!")
-
     if nickname is not None:
         sfh.add_remove_platform_item(solver_directory,
                                      gv.solver_nickname_list_path, key=nickname)
@@ -139,10 +134,10 @@ if __name__ == "__main__":
         sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
         srun_options = ["-N1", "-n1"] + sbatch_options
         run_construct_portfolio_selector = rrr.add_to_queue(
-            cmd="sparkle/CLI/construct_sparkle_portfolio_selector.py",
-            name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
+            cmd="sparkle/CLI/construct_portfolio_selector.py",
+            name=CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
             dependencies=dependency_run_list,
-            base_dir=gv.settings().DEFAULT_tmp_output,
+            base_dir=sl.caller_log_dir,
             sbatch_options=sbatch_options,
             srun_options=srun_options)
 
@@ -152,7 +147,7 @@ if __name__ == "__main__":
             cmd="sparkle/CLI/generate_report.py",
             name=CommandName.GENERATE_REPORT,
             dependencies=dependency_run_list,
-            base_dir=gv.settings().DEFAULT_tmp_output,
+            base_dir=sl.caller_log_dir,
             sbatch_options=sbatch_options,
             srun_options=srun_options)
 

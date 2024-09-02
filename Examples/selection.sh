@@ -48,9 +48,13 @@ sparkle run_solvers
 
 sparkle wait
 
-# Construct a portfolio selector, using the previously computed features and the results of running the solvers
+# Construct a portfolio selector, using the previously computed features and the results of running the solvers. Run with --solver-ablation for actual marginal contribution computation.
 
-sparkle construct_sparkle_portfolio_selector --selector-timeout 1000
+sparkle construct_portfolio_selector --selector-timeout 1000 --solver-ablation
+
+# Wait for the constructor to complete its computations
+
+sparkle wait
 
 #### Generate a report
 
@@ -62,15 +66,15 @@ sparkle generate_report
 
 #### Run on a single instance
 
-# Run the portfolio selector on a *single* testing instance; the result will be printed to the command line
+# Run the portfolio selector on a *single* testing instance; By running it locally, the results will be shown on the commandline
 
-sparkle run_sparkle_portfolio_selector Examples/Resources/Instances/PTN2/plain7824.cnf
+sparkle run_portfolio_selector Examples/Resources/Instances/PTN2/plain7824.cnf --run-on local
 
 #### Run on an instance set
 
 # Run the portfolio selector on a testing instance *set*
 
-sparkle run_sparkle_portfolio_selector Examples/Resources/Instances/PTN2/
+sparkle run_portfolio_selector Examples/Resources/Instances/PTN2/
 
 #### Generate a report including results on the test set
 
@@ -115,7 +119,7 @@ sparkle wait
 
 #Now we can train a selector based on these features.
 
-sparkle construct_sparkle_portfolio_selector --selector-timeout 1000
+sparkle construct_portfolio_selector --selector-timeout 1000
 
 # Wait for the computation to be done.
 

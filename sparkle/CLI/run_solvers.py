@@ -11,8 +11,8 @@ from runrunner.base import Runner, Run
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
-from sparkle.CLI.help import sparkle_logging as sl
-from sparkle.platform.settings_objects import Settings, SettingState, SolutionVerifier
+from sparkle.CLI.help import logging as sl
+from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
@@ -30,8 +30,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.TargetCutOffTimeRunSolversArgument.kwargs)
     parser.add_argument(*ac.AlsoConstructSelectorAndReportArgument.names,
                         **ac.AlsoConstructSelectorAndReportArgument.kwargs)
-    parser.add_argument(*ac.VerifierArgument.names,
-                        **ac.VerifierArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
@@ -93,14 +91,15 @@ def running_solvers_performance_data(
     cmd_list = [f"{run_solvers_core} "
                 f"--performance-data {performance_data_csv_path} "
                 f"--instance {inst_p} --solver {solver_p} "
-                f"--performance-measure {perf_m.name}" for inst_p, solver_p in jobs]
+                f"--performance-measure {perf_m.name} "
+                f"--log-dir {sl.caller_log_dir}" for inst_p, solver_p in jobs]
 
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
         parallel_jobs=num_job_in_parallel,
         name=CommandName.RUN_SOLVERS,
-        base_dir=gv.settings().DEFAULT_tmp_output,
+        base_dir=sl.caller_log_dir,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
 
@@ -151,10 +150,10 @@ def run_solvers_on_instances(
     if also_construct_selector_and_report:
         runs.append(rrr.add_to_queue(
             runner=run_on,
-            cmd="sparkle/CLI/construct_sparkle_portfolio_selector.py",
-            name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
+            cmd="sparkle/CLI/construct_portfolio_selector.py",
+            name=CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
             dependencies=runs[-1],
-            base_dir=gv.settings().DEFAULT_tmp_output,
+            base_dir=sl.caller_log_dir,
             sbatch_options=sbatch_user_options))
 
         runs.append(rrr.add_to_queue(
@@ -162,7 +161,7 @@ def run_solvers_on_instances(
             cmd="sparkle/CLI/generate_report.py",
             name=CommandName.GENERATE_REPORT,
             dependencies=runs[-1],
-            base_dir=gv.settings().DEFAULT_tmp_output,
+            base_dir=sl.caller_log_dir,
             sbatch_options=sbatch_user_options))
 
     if run_on == Runner.LOCAL:
@@ -194,10 +193,6 @@ if __name__ == "__main__":
         gv.settings().set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
-
-    if args.verifier is not None:
-        gv.settings().set_general_solution_verifier(
-            SolutionVerifier(args.verifier.lower()), SettingState.CMD_LINE)
 
     if args.target_cutoff_time is not None:
         gv.settings().set_general_target_cutoff_time(

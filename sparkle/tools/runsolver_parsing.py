@@ -1,9 +1,11 @@
 """Tools to parse runsolver I/O."""
-
+import sys
 from pathlib import Path
 import ast
 import re
 import math
+
+from sparkle.types import SolverStatus
 
 
 def get_runtime(runsolver_values_path: Path,
@@ -24,38 +26,31 @@ def get_runtime(runsolver_values_path: Path,
     return cpu_time, wc_time
 
 
-def handle_timeouts(runtime: float, status: str,
-                    cutoff_time: float, penalty: float) -> tuple[float, str]:
-    """Determines whether runtime should be penalised based on status and cutoff."""
-    if runtime > cutoff_time or status == "TIMEOUT":
-        if status == "CRASHED":
-            status = "TIMEOUT"
-        return penalty, status
-    return runtime, status
-
-
-def get_status(runsolver_values_path: Path, runsolver_raw_path: Path) -> str:
+def get_status(runsolver_values_path: Path, runsolver_raw_path: Path) -> SolverStatus:
     """Get run status from runsolver logs."""
     if not runsolver_values_path.exists():
         # Runsolver value log was not created, job was stopped ''incorrectly''
-        return "KILLED"
+        return SolverStatus.KILLED
     # First check if runsolver reported time out
     for line in reversed(runsolver_values_path.open("r").readlines()):
         if line.strip().startswith("TIMEOUT="):
             if line.strip() == "TIMEOUT=true":
-                return "TIMEOUT"
+                return SolverStatus.TIMEOUT
             break
     if runsolver_raw_path is None:
-        return "UNKNOWN"
+        return SolverStatus.UNKNOWN
     if not runsolver_raw_path.exists():
         # Runsolver log was not created, job was stopped ''incorrectly''
-        return "KILLED"
+        return SolverStatus.KILLED
     # Last line of runsolver log should contain the raw sparkle solver wrapper output
     runsolver_raw_contents = runsolver_raw_path.open("r").read().strip()
+    # cutoff_time =
     sparkle_wrapper_dict_str = runsolver_raw_contents.splitlines()[-1]
     solver_regex_filter = re.findall("{.*}", sparkle_wrapper_dict_str)[0]
     output_dict = ast.literal_eval(solver_regex_filter)
-    return output_dict["status"]
+    status = SolverStatus(output_dict["status"])
+    # if status == SolverStatus.CRASHED and cpu_time > cutoff_time
+    return status
 
 
 def get_solver_args(runsolver_log_path: Path) -> str:
@@ -63,17 +58,17 @@ def get_solver_args(runsolver_log_path: Path) -> str:
     if runsolver_log_path.exists():
         for line in runsolver_log_path.open("r").readlines():
             if line.startswith("command line:"):
-                # Can't take string from GV due to circular imports
-                return line.split("sparkle_solver_wrapper.py", 1)[1]
+                return line.split("sparkle_solver_wrapper.py", 1)[1].strip().strip("'")
     return ""
 
 
 def get_solver_output(runsolver_configuration: list[str],
                       process_output: str,
-                      log_dir: Path) -> dict[str, str]:
+                      log_dir: Path) -> dict[str, str | object]:
     """Decode solver output dictionary when called with runsolver."""
     solver_output = ""
     value_data_file = None
+    cutoff_time = sys.maxsize
     for idx, conf in enumerate(runsolver_configuration):
         if not isinstance(conf, str):
             # Looking for arg names
@@ -82,9 +77,12 @@ def get_solver_output(runsolver_configuration: list[str],
         if conf == "-o" or conf == "--solver-data":
             # solver output was redirected
             solver_data_file = Path(runsolver_configuration[idx + 1])
-            solver_output = (log_dir / solver_data_file).open("r").read()
+            if (log_dir / solver_data_file).exists():
+                solver_output = (log_dir / solver_data_file).open("r").read()
         if "-v" in conf or "--var" in conf:
             value_data_file = Path(runsolver_configuration[idx + 1])
+        if "--cpu-limit" in conf:
+            cutoff_time = float(runsolver_configuration[idx + 1])
 
     if solver_output == "":
         # Still empty, try to read from subprocess
@@ -97,7 +95,7 @@ def get_solver_output(runsolver_configuration: list[str],
     except Exception as ex:
         print(f"WARNING: Solver output decoding failed with exception: [{ex}]. "
               f"Assuming TIMEOUT.")
-        output_dict = {"status": "TIMEOUT", "quality": math.nan}
+        output_dict = {"status": SolverStatus.TIMEOUT, "quality": math.nan}
 
     if value_data_file is not None:
         cpu_time, wc_time = get_runtime(log_dir / value_data_file)
@@ -109,5 +107,8 @@ def get_solver_output(runsolver_configuration: list[str],
             output_dict["runtime"] = wc_time
     else:
         output_dict["runtime"] = math.nan
+
+    if output_dict["runtime"] > cutoff_time:
+        output_dict["status"] = SolverStatus.TIMEOUT
 
     return output_dict

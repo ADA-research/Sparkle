@@ -3,9 +3,17 @@
 """Helper functions for parallel portfolio report generation."""
 from pathlib import Path
 
+import plotly.express as px
+import pandas as pd
+import plotly.io as pio
+
+from sparkle.platform import latex as stex
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 from sparkle.instance import InstanceSet
+
+
+pio.kaleido.scope.mathjax = None  # Bug fix for kaleido
 
 
 def get_solver_list_latex(solver_list: list[str]) -> str:
@@ -25,7 +33,7 @@ def get_solver_list_latex(solver_list: list[str]) -> str:
         solver_name = Path(solver_split[0]).name
         solver_seeds = int(solver_split[2]) if len(solver_split) == 3 else 0
 
-        latex_itemize += f"\\item \\textbf{{{sgfs.underscore_for_latex(solver_name)}}}\n"
+        latex_itemize += f"\\item \\textbf{{{stex.underscore_for_latex(solver_name)}}}\n"
         # Only include if we used more than one seed
         if solver_seeds > 1:
             seeds = ",".join(list[range(1, solver_seeds + 1)])
@@ -150,19 +158,16 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
                                                                          penalised_time)
 
     figure_filename = "figure_parallel_portfolio_sparkle_vs_sbs"
-    data_filename = "data_parallel_portfolio_sparkle_vs_sbs.dat"
-    data_filepath = target_directory / data_filename
+    data = []
+    for instance in dict_sbs_penalty_time_on_each_instance:
+        sbs_penalty_time = dict_sbs_penalty_time_on_each_instance[instance]
+        sparkle_penalty_time = (
+            dict_actual_parallel_portfolio_penalty_time_on_each_instance[instance])
+        data.append([sbs_penalty_time, sparkle_penalty_time])
 
-    with data_filepath.open("w") as outfile:
-        for instance in dict_sbs_penalty_time_on_each_instance:
-            sbs_penalty_time = dict_sbs_penalty_time_on_each_instance[instance]
-            sparkle_penalty_time = (
-                dict_actual_parallel_portfolio_penalty_time_on_each_instance[instance])
-            outfile.write(str(sbs_penalty_time) + " " + str(sparkle_penalty_time) + "\n")
-
-    generate_figure(target_directory, data_filename, float(penalised_time),
-                    f"SBS ({sgfs.underscore_for_latex(sbs_solver)})",
-                    "Parallel-Portfolio", figure_filename, objective.metric)
+    generate_figure(target_directory, float(penalised_time),
+                    f"SBS ({stex.underscore_for_latex(sbs_solver)})",
+                    "Parallel-Portfolio", figure_filename, objective.metric, data)
     latex_include = f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
     return (latex_include, dict_all_solvers,
             dict_actual_parallel_portfolio_penalty_time_on_each_instance)
@@ -209,7 +214,7 @@ def get_results_table(results: dict[str, str, str],
         "} & \\textbf{\\#Timeouts} & "
         "\\textbf{\\#Cancelled} & \\textbf{\\# Solved} \\\\ \\hline ")
     table_string += (
-        f"{sgfs.underscore_for_latex(parallel_portfolio_path.name)} & "
+        f"{stex.underscore_for_latex(parallel_portfolio_path.name)} & "
         f"{round(portfolio_par,2)} & {n_unsolved_instances} & {total_killed} & "
         f"{n_instances-n_unsolved_instances} \\\\ ")
     table_string += "\\end{tabular}"
@@ -231,14 +236,14 @@ def get_results_table(results: dict[str, str, str],
         if solver_name not in solver_with_solutions:
             cancelled = n_instances - n_unsolved_instances
             table_string += (
-                f"{sgfs.underscore_for_latex(solver_name)} & "
+                f"{stex.underscore_for_latex(solver_name)} & "
                 f"{round(dict_all_solvers[line], 2)} & {n_unsolved_instances} & "
                 f"{cancelled} & 0 \\\\ ")
         else:
             cancelled = (n_instances - n_unsolved_instances
                          - solver_with_solutions[solver_name])
             table_string += (
-                f"{sgfs.underscore_for_latex(solver_name)} & "
+                f"{stex.underscore_for_latex(solver_name)} & "
                 f"{round(dict_all_solvers[line], 2)} & {n_unsolved_instances} & "
                 f"{cancelled} & {solver_with_solutions[solver_name]} \\\\ ")
     table_string += "\\end{tabular}"
@@ -264,8 +269,10 @@ def parallel_report_variables(target_directory: Path,
     Returns:
         A dictionary that maps variables used in the LaTeX report to values.
     """
-    variables_dict = {"bibliographypath":
-                      str(bibliograpghy_path.absolute())}
+    variables_dict = {"bibliographypath": bibliograpghy_path.absolute(),
+                      "cutoffTime": cutoff,
+                      "performanceMetric": objective.metric,
+                      "numInstanceClasses": "1"}  # Currently no support for multi sets
     # Get the results data
     csv_data = [line.split(",") for line in
                 (parallel_portfolio_path / "results.csv").open("r").readlines()]
@@ -275,13 +282,10 @@ def parallel_report_variables(target_directory: Path,
         if row[0] in results.keys():
             results[row[0]].append([row[1], row[2], row[3]])
 
-    variables_dict["numSolvers"] = str(len(solver_list))
+    variables_dict["numSolvers"] = len(solver_list)
     variables_dict["solverList"] = get_solver_list_latex(solver_list)
-    variables_dict["numInstanceClasses"] = "1"  # We currently do not support multi sets
-    variables_dict["cutoffTime"] = str(cutoff)
-    variables_dict["performanceMetric"] = objective.metric
     variables_dict["instanceClassList"] =\
-        sgfs.get_instance_set_count_list(instance_set.instance_paths)
+        sgfs.get_instance_set_count_list(instance_set._instance_paths)
 
     # Produce some statistics on the parallel portfolio
     solvers_solutions = {solver: 0 for solver in solver_list}
@@ -295,7 +299,7 @@ def parallel_report_variables(target_directory: Path,
     inst_succes = []
     for solver in solvers_solutions:
         inst_succes.append("\\item Solver "
-                           f"\\textbf{{{sgfs.underscore_for_latex(solver)}}}, was the "
+                           f"\\textbf{{{stex.underscore_for_latex(solver)}}}, was the "
                            "best solver on "
                            f"\\textbf{{{solvers_solutions[solver]}}} instance(s)")
     if unsolved_instances > 0:
@@ -325,51 +329,52 @@ def parallel_report_variables(target_directory: Path,
 
 
 def generate_figure(
-        target_directory: Path, data_parallel_portfolio_sparkle_vs_sbs_filename: str,
-        penalty_time: float, sbs_name: str, parallel_portfolio_sparkle_name: str,
-        figure_parallel_portfolio_sparkle_vs_sbs_filename: str,
-        performance_measure: str) -> None:
+        target_directory: Path,
+        penalty_time: float, sbs_name: str, parallel_portfolio_name: str,
+        figure_parallel_portfolio_vs_sbs_filename: str,
+        performance_measure: str, data: list) -> None:
     """Generates image for parallel portfolio report."""
     upper_bound = penalty_time * 1.5
     lower_bound = 0.01
 
-    output_eps_file =\
-        f"{figure_parallel_portfolio_sparkle_vs_sbs_filename}.eps"
-    sbs_name = sbs_name.replace("/", "_")
-    output_gnuplot_script = f"{parallel_portfolio_sparkle_name}_vs_{sbs_name}.plt"
+    output_plot = target_directory / f"{figure_parallel_portfolio_vs_sbs_filename}.pdf"
 
-    with (target_directory / output_gnuplot_script).open("w+") as outfile:
-        outfile.write(f"set xlabel '{sbs_name}, {performance_measure}'\n"
-                      f"set ylabel '{parallel_portfolio_sparkle_name}, "
-                      f"{performance_measure}'\n"
-                      f"set title '{parallel_portfolio_sparkle_name} vs {sbs_name}'\n"
-                      "unset key\n"
-                      f"set xrange [{lower_bound}:{upper_bound}]\n"
-                      f"set yrange [{lower_bound}:{upper_bound}]\n"
-                      "set logscale x\n"
-                      "set logscale y\n"
-                      "set grid\n"
-                      "set size square\n"
-                      f"set arrow from {lower_bound},{lower_bound} to {upper_bound},"
-                      f"{upper_bound} nohead lc rgb 'black'\n")
-
-        if performance_measure == "PAR10":
-            # Cutoff time x axis
-            outfile.write(f"set arrow from {penalty_time},{lower_bound} to "
-                          f"{penalty_time},{upper_bound} nohead lc rgb 'black' lt 2\n")
-            # Cutoff time y axis
-            outfile.write(f"set arrow from {lower_bound},{penalty_time} to {upper_bound}"
-                          f",{penalty_time} nohead lc rgb 'black' lt 2\n")
-
-        outfile.write('set terminal postscript eps color dashed linewidth "Helvetica"'
-                      " 20\n")
-        outfile.write(f"set output '{output_eps_file}'\n"
-                      f"plot '{data_parallel_portfolio_sparkle_vs_sbs_filename}' with "
-                      "points pt 2 ps 2\n")
-
-    sgfs.generate_gnuplot(output_gnuplot_script, target_directory)
-    sgfs.generate_pdf(output_eps_file, target_directory)
-    Path(output_gnuplot_script).unlink(missing_ok=True)
+    xlabel = f"{sbs_name}, {performance_measure}"
+    ylabel = f"{parallel_portfolio_name}"
+    df = pd.DataFrame(data, columns=[xlabel, ylabel])
+    fig = px.scatter(data_frame=df, x=xlabel, y=ylabel,
+                     range_x=[lower_bound, upper_bound],
+                     range_y=[lower_bound, upper_bound],
+                     log_x=True, log_y=True,
+                     width=500, height=500)
+    # Add in the seperation line
+    fig.add_shape(type="line", x0=0, y0=0, x1=upper_bound, y1=upper_bound,
+                  line=dict(color="lightgrey", width=1))
+    fig.update_traces(marker=dict(color="RoyalBlue", symbol="x"))
+    fig.update_layout(
+        plot_bgcolor="white"
+    )
+    fig.update_xaxes(
+        type="log",
+        mirror=True,
+        dtick=1,
+        ticks="outside",
+        showline=True,
+        showgrid=True,
+        linecolor="black",
+        gridcolor="lightgrey"
+    )
+    fig.update_yaxes(
+        type="log",
+        mirror=True,
+        dtick=1,
+        ticks="outside",
+        showline=True,
+        showgrid=True,
+        linecolor="black",
+        gridcolor="lightgrey"
+    )
+    fig.write_image(output_plot)
 
 
 def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
@@ -397,7 +402,7 @@ def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
         target_path, parallel_portfolio_path, bibliograpghy_path, objective,
         cutoff, penalised_time, instances)
 
-    sgfs.generate_report(latex_template,
+    stex.generate_report(latex_template,
                          "template-Sparkle-for-parallel-portfolio.tex",
                          target_path,
                          "Sparkle_Report_Parallel_Portfolio",

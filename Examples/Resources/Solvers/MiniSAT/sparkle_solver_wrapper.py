@@ -1,32 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """MiniSAT Solver wrapper."""
-
-import time
 import sys
 import subprocess
 from pathlib import Path
 from sparkle.types import SolverStatus
-from sparkle.tools.slurm_parsing import parse_commandline_dict
-
-# Convert the argument of the target_algorithm script to dictionary
-args = parse_commandline_dict(sys.argv[1:])
+from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args, \
+    get_solver_call_params
 
 
-# Extract and delete data that needs specific formatting
-solver_dir = Path(args["solver_dir"])
-instance = Path(args["instance"])
-specifics = args["specifics"]
-seed = args["seed"]
-cpu_limit = args["cutoff_time"]
+# Parse the arguments of the solver wrapper
+args_dict = parse_solver_wrapper_args(sys.argv[1:])
 
-del args["solver_dir"]
-del args["instance"]
-del args["cutoff_time"]
-del args["seed"]
-del args["specifics"]
-del args["run_length"]
+# Extract certain args from the above dict for use further below
+solver_dir = args_dict["solver_dir"]
+instance = args_dict["instance"]
+seed = args_dict["seed"]
 
+# Construct the base solver call
 solver_name = "minisat"
 if solver_dir != Path("."):
     solver_exec = f"{solver_dir / solver_name}"
@@ -76,10 +67,8 @@ SIMP OPTIONS:
   -sub-lim      = <int32>  [  -1 .. imax] (default: 1000)
   -cl-lim       = <int32>  [  -1 .. imax] (default: 20)"""
 
-params = [f"-cpu-lim={cpu_limit}"] if "cpu-lim" not in args else []
-for key in args:
-    if args[key] is not None:
-        params.append(f"-{key}={args[key]}")
+# Get further params for the solver call
+params = get_solver_call_params(args_dict)
 
 # MiniSAT does not use an instance param, instead the filename is just at the end
 params += [str(instance)]
@@ -102,19 +91,6 @@ for line in output_str.splitlines():
     elif line == r"INDETERMINATE":
         status = SolverStatus.TIMEOUT
         break
-
-if specifics == "rawres":
-    tmp_directory = Path("tmp/")
-    timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
-    rawres_file_name = Path(f"{solver_name}_{instance.name}_{timestamp}.rawres_solver")
-    if Path.cwd().name != tmp_directory.name:
-        tmp_directory.mkdir(exist_ok=True)
-        raw_result_path = tmp_directory / rawres_file_name
-    else:
-        raw_result_path = rawres_file_name
-    raw_result_path.parent.mkdir(parents=True, exist_ok=True)
-    with raw_result_path.open("w") as outfile:
-        outfile.write(output_str)
 
 outdir = {"status": status.value,
           "quality": 0,

@@ -3,7 +3,7 @@
 import sys
 
 from sparkle.CLI.help import snapshot_help
-from sparkle.CLI.help import sparkle_logging as sl
+from sparkle.CLI.help import logging as sl
 import argparse
 
 

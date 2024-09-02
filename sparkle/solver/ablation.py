@@ -11,6 +11,7 @@ import runrunner as rrr
 from runrunner.base import Runner, Run
 
 from sparkle.CLI.help import global_variables as gv
+from sparkle.CLI.help import logging as sl
 
 from sparkle.configurator.implementations import SMAC2
 from sparkle.platform import CommandName
@@ -74,11 +75,10 @@ class AblationScenario:
             None
         """
         ablation_scenario_dir = self.scenario_dir
-        perf_measure =\
-            gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
+        objective = gv.settings().get_general_sparkle_objectives()[0]
         configurator = gv.settings().get_general_sparkle_configurator()
         _, opt_config_str = configurator.get_optimal_configuration(
-            self.solver, self.train_set, performance=perf_measure)
+            self.solver, self.train_set, performance=objective.PerformanceMeasure)
 
         # We need to check which params are missing and supplement with default values
         pcs = self.solver.get_pcs()
@@ -96,7 +96,7 @@ class AblationScenario:
                 formatted = format(ctx.create_decimal(float_value), "f")
                 opt_config_str = opt_config_str.replace(value, formatted)
 
-        smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
+        smac_run_obj = SMAC2.get_smac_run_obj(objective.PerformanceMeasure)
         objective_str = "MEAN10" if smac_run_obj == "RUNTIME" else "MEAN"
         run_cutoff_time = gv.settings().get_general_target_cutoff_time()
         run_cutoff_length = gv.settings().get_configurator_target_cutoff_length()
@@ -108,7 +108,7 @@ class AblationScenario:
         # Create config file
         config_file = Path(f"{ablation_scenario_dir}/ablation_config.txt")
         config = (f'algo = "{configurator.configurator_target.absolute()} '
-                  f'{self.solver.directory.absolute()}"\n'
+                  f'{self.solver.directory.absolute()} {objective}"\n'
                   f"execdir = {self.tmp_dir.absolute()}\n"
                   "experimentDir = ./\n"
                   f"deterministic = {1 if self.solver.deterministic else 0}\n"
@@ -140,7 +140,7 @@ class AblationScenario:
         # We give the Ablation script the paths of the instances
         file_instance = self.scenario_dir / f"instances{file_suffix}"
         with file_instance.open("w") as fh:
-            for instance in instance_set.instance_paths:
+            for instance in instance_set._instance_paths:
                 # We need to unpack the multi instance file paths in quotes
                 if isinstance(instance, list):
                     joined_instances = " ".join(
@@ -202,7 +202,7 @@ class AblationScenario:
             runner=run_on,
             cmd=cmd,
             name=CommandName.RUN_ABLATION,
-            base_dir=gv.settings().DEFAULT_tmp_output,
+            base_dir=sl.caller_log_dir,
             path=self.scenario_dir,
             sbatch_options=sbatch_options,
             srun_options=srun_options)
@@ -225,7 +225,7 @@ class AblationScenario:
                 cmd=cmd,
                 name=CommandName.RUN_ABLATION_VALIDATION,
                 path=self.validation_dir,
-                base_dir=gv.settings().DEFAULT_tmp_output,
+                base_dir=sl.caller_log_dir,
                 dependencies=run_ablation,
                 sbatch_options=sbatch_options,
                 srun_options=srun_options)

@@ -1,29 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Template for users to create Solver wrappers."""
-
-import time
 import sys
 import subprocess
 from pathlib import Path
 from sparkle.types import SolverStatus
-from sparkle.tools.slurm_parsing import parse_commandline_dict
+from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args
 
 # Convert the arguments to a dictionary
-args = parse_commandline_dict(sys.argv[1:])
+args = parse_solver_wrapper_args(sys.argv[1:])
 
 # Extract and delete data that needs specific formatting
 solver_dir = Path(args["solver_dir"])
 instance = Path(args["instance"])
-specifics = args["specifics"]
 seed = args["seed"]
 
 del args["solver_dir"]
 del args["instance"]
 del args["cutoff_time"]
 del args["seed"]
-del args["specifics"]
-del args["run_length"]
 
 solver_name = "EXAMPLE_SOLVER"
 if solver_dir != Path("."):
@@ -58,18 +53,6 @@ for line in output_str.splitlines():
     elif line == r"s UNKNOWN":
         status = SolverStatus.TIMEOUT
         break
-
-if specifics == "rawres":
-    tmp_directory = Path("tmp/")
-    timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
-    rawres_file_name = Path(f"{solver_name}_{instance.name}_{timestamp}.rawres_solver")
-    if tmp_directory not in Path.cwd():
-        tmp_directory.mkdir(exist_ok=True)
-        raw_result_path = tmp_directory / rawres_file_name
-    else:
-        raw_result_path = rawres_file_name
-    with raw_result_path.open("w") as outfile:
-        outfile.write(output_str)
 
 outdir = {"status": status.value,
           "quality": 0,

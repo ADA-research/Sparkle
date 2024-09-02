@@ -27,7 +27,7 @@ sparkle/CLI/add_instances.py $instances_path > /dev/null
 sparkle/CLI/add_feature_extractor.py $extractor_path > /dev/null
 
 
-output_true="[RunRunner] Submitted a run to Slurm "
+output_true="Running the extractors through Slurm"
 output=$(sparkle/CLI/compute_features.py --settings-file $sparkle_test_settings_path --run-on slurm | tail -1)
 
 if [[ $output =~ "${output_true}" ]];

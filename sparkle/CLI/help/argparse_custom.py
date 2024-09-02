@@ -8,7 +8,7 @@ from typing import Any
 
 from runrunner.base import Runner
 
-from sparkle.platform.settings_objects import SettingState, Settings, SolutionVerifier
+from sparkle.platform.settings_objects import SettingState, Settings
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform import CommandName
 
@@ -88,6 +88,12 @@ AblationArgument = ArgumentContainer(names=["--ablation"],
                                      kwargs={"required": False,
                                              "action": "store_true",
                                              "help": "run ablation after configuration"})
+SelectorAblationArgument =\
+    ArgumentContainer(names=["--solver-ablation"],
+                      kwargs={"required": False,
+                              "action": "store_true",
+                              "help": "construct a selector for "
+                                      "each solver ablation combination"})
 
 ActualArgument = ArgumentContainer(names=["--actual"],
                                    kwargs={"action": "store_true",
@@ -99,6 +105,17 @@ AlsoConstructSelectorAndReportArgument = \
                       kwargs={"action": "store_true",
                               "help": "after running the solvers also construct the "
                                       "selector and generate the report"})
+
+CleanupArgumentAll = \
+    ArgumentContainer(names=["--all"],
+                      kwargs={"action": "store_true",
+                              "help": "clean all output files"})
+
+CleanupArgumentRemove = \
+    ArgumentContainer(names=["--remove"],
+                      kwargs={"action": "store_true",
+                              "help": "remove all files in the platform, including "
+                                      "user data such as InstanceSets and Solvers"})
 
 CommandArgument = \
     ArgumentContainer(names=["--command"],
@@ -143,6 +160,14 @@ ExtractorPathArgument = ArgumentContainer(names=["extractor_path"],
                                                   "help": "path or nickname of the "
                                                           "feature extractor"
                                                   })
+
+GenerateJSONArgument = ArgumentContainer(names=["--only-json"],
+                                         kwargs={"required": False,
+                                                 "default": False,
+                                                 "type": bool,
+                                                 "help": "if set to True, only generate "
+                                                         "machine readable output"
+                                                 })
 
 InstancePathPositional = ArgumentContainer(names=["instance_path"],
                                            kwargs={"type": Path,
@@ -201,11 +226,12 @@ InstancesPathRemoveArgument = \
                               "type": str,
                               "help": "path to or nickname of the instance set"})
 
-JobIdArgument = ArgumentContainer(names=["--job-id"],
-                                  kwargs={"required": False,
-                                          "type": str,
-                                          "default": None,
-                                          "help": "job ID to wait for"})
+JobIDsArgument = ArgumentContainer(names=["--job-ids"],
+                                   kwargs={"required": False,
+                                           "nargs": "+",
+                                           "type": str,
+                                           "default": None,
+                                           "help": "job ID to wait for"})
 
 NicknameFeatureExtractorArgument = \
     ArgumentContainer(names=["--nickname"],
@@ -397,6 +423,11 @@ SolverCallsArgument = \
                       kwargs={"type": int,
                               "help": "number of solver calls to execute"})
 
+SolverSeedsArgument = \
+    ArgumentContainer(names=["--solver-seeds"],
+                      kwargs={"type": int,
+                              "help": "number of random seeds per solver to execute"})
+
 SolverRemoveArgument = \
     ArgumentContainer(names=["solver"],
                       kwargs={"metavar": "solver",
@@ -461,12 +492,6 @@ VerboseArgument = ArgumentContainer(names=["--verbose", "-v"],
                                     kwargs={"action": "store_true",
                                             "help": "output status in verbose mode"})
 
-VerifierArgument = \
-    ArgumentContainer(names=["--verifier"],
-                      kwargs={"choices": SolutionVerifier.__members__,
-                              "help": "problem specific verifier that should be used to "
-                                      "verify solutions found by a target algorithm"})
-
 WallClockTimeArgument = \
     ArgumentContainer(names=["--wallclock-time"],
                       kwargs={"type": int,
@@ -479,3 +504,9 @@ SelectorTimeoutArgument = \
                               "default": Settings.DEFAULT_portfolio_construction_timeout,
                               "help": "Cuttoff time (in seconds) for the algorithm"
                                       "selector construction"})
+
+SparkleObjectiveArgument = \
+    ArgumentContainer(names=["--objectives"],
+                      kwargs={"type": str,
+                              "help": "the comma seperated objective(s) to use as"
+                                      "'PerformanceMeasure:metric,'"})

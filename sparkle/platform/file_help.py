@@ -3,7 +3,6 @@
 """Helper functions for file manipulation."""
 from __future__ import annotations
 from filelock import FileLock
-import shutil
 from pathlib import Path
 
 
@@ -42,21 +41,3 @@ def add_remove_platform_item(item: any,
     lock = FileLock(f"{file_target}.lock")
     with lock.acquire(timeout=60):
         file_target.open("w").write(str(target))
-
-
-def create_temporary_directories() -> None:
-    """Create directories for temporary files."""
-    tmp_path = Path("Tmp/")
-    if not tmp_path.exists():
-        tmp_path.mkdir()
-    Path("Log/").mkdir(exist_ok=True)
-
-
-def remove_temporary_files() -> None:
-    """Remove temporary files. Only removes files not affecting the sparkle state."""
-    sparkle_help_path = Path("sparkle/CLI/sparkle_help")
-    for filename in sparkle_help_path.glob("*.pyc"):
-        shutil.rmtree(sparkle_help_path.joinpath(filename))
-    shutil.rmtree(Path("Tmp/"), ignore_errors=True)
-    shutil.rmtree(Path("Feature_Data/Tmp/"), ignore_errors=True)
-    shutil.rmtree(Path("Log/"), ignore_errors=True)

@@ -8,7 +8,7 @@ import shutil
 from sparkle.platform import file_help as sfh
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import FeatureDataFrame
-from sparkle.CLI.help import sparkle_logging as sl
+from sparkle.CLI.help import logging as sl
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
@@ -63,10 +63,5 @@ if __name__ == "__main__":
         feature_data.remove_extractor(extractor.name)
         feature_data.save_csv()
     shutil.rmtree(extractor.directory)
-
-    if gv.settings().DEFAULT_algorithm_selector_path.exists():
-        shutil.rmtree(gv.settings().DEFAULT_algorithm_selector_path)
-        print("Removing Sparkle portfolio selector "
-              f"{gv.settings().DEFAULT_algorithm_selector_path} done!")
 
     print(f"Removing feature extractor {extractor.name} done!")

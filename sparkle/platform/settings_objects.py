@@ -11,17 +11,11 @@ import statistics
 from sparkle.types.objective import SparkleObjective
 from sparkle.solver import Selector
 from sparkle.configurator.configurator import Configurator
+from sparkle.solver.verifier import SATVerifier
 from sparkle.configurator import implementations as cim
 
 from runrunner import Runner
 from sparkle.platform.cli_types import VerbosityLevel
-
-
-class SolutionVerifier(Enum):
-    """Possible solution verifiers."""
-
-    NONE = "none"
-    SAT = "sat"
 
 
 class SettingState(Enum):
@@ -60,9 +54,6 @@ class Settings:
     DEFAULT_runsolver_dir = DEFAULT_components / "runsolver" / "src"
     DEFAULT_runsolver_exec = DEFAULT_runsolver_dir / "runsolver"
 
-    # epstopdf component
-    DEFAULT_epstopdf_exec = DEFAULT_components / "epstopdf.pl"
-
     # Ablation component
     DEFAULT_ablation_dir = DEFAULT_components / "ablationAnalysis-0.9.4"
     DEFAULT_ablation_exec = DEFAULT_ablation_dir / "ablationAnalysis"
@@ -89,6 +80,7 @@ class Settings:
     DEFAULT_validation_output = DEFAULT_output / "Validation"
     DEFAULT_parallel_portfolio_output = DEFAULT_output / "Parallel_Portfolio"
     DEFAULT_ablation_output = DEFAULT_output / "Ablation"
+    DEFAULT_log_output = DEFAULT_output / "Log"
 
     # Default output subdirs
     DEFAULT_configuration_output_raw = DEFAULT_configuration_output / rawdata_dir
@@ -99,36 +91,32 @@ class Settings:
         DEFAULT_parallel_portfolio_output / rawdata_dir
     DEFAULT_parallel_portfolio_output_analysis =\
         DEFAULT_parallel_portfolio_output / analysis_dir
-    DEFAULT_selection_output_test = DEFAULT_selection_output / "Test_Cases"
 
     # Old default output dirs which should be part of something else
-    DEFAULT_feature_data = cwd_prefix / "Feature_Data"
-    DEFAULT_performance_data = cwd_prefix / "Performance_Data"
+    DEFAULT_feature_data = DEFAULT_output / "Feature_Data"
+    DEFAULT_performance_data = DEFAULT_output / "Performance_Data"
 
     # Collection of all working dirs for platform
     DEFAULT_working_dirs = [
         DEFAULT_output, DEFAULT_configuration_output,
         DEFAULT_selection_output, DEFAULT_validation_output,
         DEFAULT_tmp_output,
+        DEFAULT_log_output,
         DEFAULT_solver_dir, DEFAULT_instance_dir,
         DEFAULT_feature_data, DEFAULT_performance_data,
         DEFAULT_extractor_dir,
     ]
 
     # Old default file paths from GV which should be turned into variables
-    DEFAULT_algorithm_selector_path =\
-        DEFAULT_selection_output / "sparkle_portfolio_selector"
-    DEFAULT_marginal_contribution_actual_path =\
-        DEFAULT_selection_output / "marginal_contribution_actual.txt"
     DEFAULT_feature_data_path =\
-        DEFAULT_feature_data / "sparkle_feature_data.csv"
+        DEFAULT_feature_data / "feature_data.csv"
     DEFAULT_performance_data_path =\
-        DEFAULT_performance_data / "sparkle_performance_data.csv"
+        DEFAULT_performance_data / "performance_data.csv"
 
     # Constant default values
     DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")
     DEFAULT_general_sparkle_configurator = cim.SMAC2.__name__
-    DEFAULT_general_solution_verifier = SolutionVerifier.NONE
+    DEFAULT_general_solution_verifier = str(None)
     DEFAULT_general_target_cutoff_time = 60
     DEFAULT_general_penalty_multiplier = 10
     DEFAULT_general_extractor_cutoff_time = 60
@@ -230,7 +218,7 @@ class Settings:
             option_names = ("solution_verifier",)
             for option in option_names:
                 if file_settings.has_option(section, option):
-                    value = SolutionVerifier(file_settings.get(section, option).lower())
+                    value = file_settings.get(section, option).lower()
                     self.set_general_solution_verifier(value, state)
                     file_settings.remove_option(section, option)
 
@@ -434,7 +422,7 @@ class Settings:
     # General settings ###
     def set_general_sparkle_objectives(
             self: Settings,
-            value: list[SparkleObjective] = [DEFAULT_general_sparkle_objective, ],
+            value: str | list[SparkleObjective] = [DEFAULT_general_sparkle_objective, ],
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the sparkle objective."""
         section = "general"
@@ -442,7 +430,7 @@ class Settings:
         if value is not None and self.__check_setting_state(
                 self.__general_sparkle_objective_set, origin, name):
             if isinstance(value, list):
-                value = ",".join([obj.name for obj in value])
+                value = ",".join([str(obj) for obj in value])
             self.__init_section(section)
             self.__general_sparkle_objective_set = origin
             self.__settings[section][name] = value
@@ -590,7 +578,7 @@ class Settings:
         return custom_cutoff * self.get_general_penalty_multiplier()
 
     def set_general_solution_verifier(
-            self: Settings, value: SolutionVerifier = DEFAULT_general_solution_verifier,
+            self: Settings, value: str = DEFAULT_general_solution_verifier,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the solution verifier to use."""
         section = "general"
@@ -600,13 +588,16 @@ class Settings:
                 self.__general_solution_verifier_set, origin, name):
             self.__init_section(section)
             self.__general_solution_verifier_set = origin
-            self.__settings[section][name] = value.name
+            self.__settings[section][name] = value
 
-    def get_general_solution_verifier(self: Settings) -> SolutionVerifier:
+    def get_general_solution_verifier(self: Settings) -> object:
         """Return the solution verifier to use."""
         if self.__general_solution_verifier_set == SettingState.NOT_SET:
             self.set_general_solution_verifier()
-        return SolutionVerifier(self.__settings["general"]["solution_verifier"].lower())
+        name = self.__settings["general"]["solution_verifier"].lower()
+        if name == str(SATVerifier()).lower():
+            return SATVerifier()
+        return None
 
     def set_general_target_cutoff_time(
             self: Settings, value: int = DEFAULT_general_target_cutoff_time,
@@ -678,8 +669,6 @@ class Settings:
             self.__init_section(section)
             self.__general_verbosity_set = origin
             self.__settings[section][name] = value.name
-
-        return
 
     def get_general_verbosity(self: Settings) -> VerbosityLevel:
         """Return the general verbosity."""
@@ -923,7 +912,7 @@ class Settings:
         if value is not None and self.__check_setting_state(
                 self.__parallel_portfolio_num_seeds_per_solver_set, origin, name):
             self.__init_section(section)
-            self.__parallel_portfolio_check_interval_set = origin
+            self.__parallel_portfolio_num_seeds_per_solver_set = origin
             self.__settings[section][name] = str(value)
 
     def get_parallel_portfolio_number_of_seeds_per_solver(self: Settings) -> int:
@@ -991,7 +980,7 @@ class Settings:
                 cur_val = cur_dict[section].get(name, None)
                 prev_val = prev_dict[section].get(name, None)
                 if cur_val != prev_val:
-                    # do we have yet to print the initial warning?
+                    # Have we printed the initial warning?
                     if not option_changed:
                         print("Warning: The following attributes/options have changed:")
                         option_changed = True

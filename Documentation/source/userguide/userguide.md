@@ -63,7 +63,7 @@ You will need to reactivate the environment every time you log in, before using 
 
 The file `environment.yml` contains a tested list of Python packages with fixed versions required to execute Sparkle. We recommended using it.
 
-The file `environment-dev.txt` contains unpinned packages and the dependencies are not resolved. It is used for development and may cause problems.
+The file `dev-env.yml` is used for developer mode of the Sparkle package and contains several extra packages for testing.
 
 The two environments can be created in parallel since one is named `sparkle` and the other `sparkle-dev`. If you want to update an environment it is better to do a clean installation by removing and recreating it. For example:
 
@@ -312,7 +312,7 @@ For each type of task run by Sparkle, the `related files` differ. The aim is alw
 
 ### `sparkle_solver_wrapper.py`
 
-The `sparkle_solver_wrapper.py` uses a commandline dictionary to receive it inputs. This can be easily parsed using a Sparkle tool: `from sparkle.tools.slurm_parsing import parse_commandline_dict`.
+The `sparkle_solver_wrapper.py` uses a commandline dictionary to receive it inputs. This can be easily parsed using a Sparkle tool: `from sparkle.tools.slurm_parsing import parse_solver_wrapper_args`.
 The dictionary should always have the following values:
 
 ```
@@ -320,11 +320,9 @@ solver_dir: str
 instance: str,
 cutoff_time: int,
 seed: int
-specifics: str
-run_length: str
 ```
 
-Note that all the Paths are handed as str and should be converted in the wrapper. The solver_dir specifies the Path to the executable directory of your algorithm. This can be empty, e.g. the cwd contains your executable. The instance is the path to the instance we are going to run on. Cutoff time is the maximum amount of time your algorithm is allowed to run. Seed is the seed for this run. Specifics and run_length are depricated and should not be used.
+Note that all the Paths are handed as str and should be converted in the wrapper. The solver_dir specifies the Path to the executable directory of your algorithm. This can be empty, e.g. the cwd contains your executable. The instance is the path to the instance we are going to run on. Cutoff time is the maximum amount of time your algorithm is allowed to run. Seed is the seed for this run.
 
 A solver wrapper should always return a dictionary by printing it, containing the following values:
 
@@ -355,7 +353,7 @@ to get a description of the required arguments and other options.
 % *  compute_features.py
 % *  compute_marginal_contribution.py
 % *  :ref:`cmd:configure_solver`
-% *  construct_sparkle_portfolio_selector.py
+% *  construct_portfolio_selector.py
 % *  :ref:`cmd:generate_report`
 % *  :ref:`cmd:initialise`
 % *  load_snapshot.py
@@ -364,7 +362,7 @@ to get a description of the required arguments and other options.
 % *  remove_solver.py
 % *  run_ablation.py
 % *  run_solvers.py
-% *  run_sparkle_portfolio_selector.py
+% *  run_portfolio_selector.py
 % *  run_status.py
 % *  save_snapshot.py
 % *  system_status.py

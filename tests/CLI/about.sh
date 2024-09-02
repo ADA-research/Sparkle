@@ -14,7 +14,7 @@
 
 # Save record
 output_true="For more details see README.md"
-output=$(sparkle/CLI/about_cli.py | tail -1)
+output=$(sparkle/CLI/about.py | tail -1)
 
 if [[ $output == $output_true ]];
 then

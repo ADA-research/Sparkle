@@ -6,7 +6,6 @@ import shutil
 import os
 from pathlib import Path
 
-from sparkle.platform import file_help as sfh
 from sparkle.platform import CommandName
 from sparkle.CLI.help.argparse_custom import DownloadExamplesArgument
 from sparkle.CLI.help import snapshot_help as snh
@@ -90,12 +89,11 @@ def initialise_sparkle(download_examples: bool = False) -> None:
     gv.settings().DEFAULT_snapshot_dir.mkdir(exist_ok=True)
     if detect_sparkle_platform_exists(check=any):
         snh.save_current_sparkle_platform()
-        snh.remove_current_sparkle_platform()
+        snh.remove_current_platform()
 
         print("Current Sparkle platform found!")
         print("Current Sparkle platform recorded!")
 
-    sfh.create_temporary_directories()
     for working_dir in gv.settings().DEFAULT_working_dirs:
         working_dir.mkdir(exist_ok=True)
 
@@ -124,7 +122,8 @@ def initialise_sparkle(download_examples: bool = False) -> None:
                                capture_output=True)
             if compile_runsolver.returncode != 0:
                 print("WARNING: Compilation of Runsolver failed with the following msg:"
-                      f"[{compile_runsolver.returncode}] {compile_runsolver.stderr}")
+                      f"[{compile_runsolver.returncode}] "
+                      f"{compile_runsolver.stderr.decode()}")
             else:
                 print("Runsolver compiled successfully!")
     # Check that java is available

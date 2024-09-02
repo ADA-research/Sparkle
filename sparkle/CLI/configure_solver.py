@@ -12,7 +12,7 @@ from runrunner.base import Runner, Run
 import runrunner as rrr
 
 from sparkle.CLI.help import global_variables as gv
-from sparkle.CLI.help import sparkle_logging as sl
+from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.structures import FeatureDataFrame
@@ -23,7 +23,7 @@ from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.solver import Solver
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set, InstanceSet
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -42,6 +42,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstanceSetTestArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
                         **ac.PerformanceMeasureSimpleArgument.kwargs)
+    parser.add_argument(*ac.SparkleObjectiveArgument.names,
+                        **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeConfigurationArgument.names,
                         **ac.TargetCutOffTimeConfigurationArgument.kwargs)
     parser.add_argument(*ac.WallClockTimeArgument.names,
@@ -76,6 +78,9 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
     if args.performance_measure is not None:
         gv.settings().set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE)
+    elif args.objectives is not None:
+        gv.settings().set_general_sparkle_objectives(
+            args.objectives, SettingState.CMD_LINE)
     if args.target_cutoff_time is not None:
         gv.settings().set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
@@ -130,7 +135,7 @@ def run_after(solver: Path,
         cmd=command_line,
         name=command,
         dependencies=dependency,
-        base_dir=gv.settings().DEFAULT_tmp_output,
+        base_dir=sl.caller_log_dir,
         srun_options=["-N1", "-n1"],
         sbatch_options=gv.settings().get_slurm_extra_options(as_args=True))
 
@@ -160,13 +165,13 @@ if __name__ == "__main__":
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, InstanceSet)
+        gv.settings().DEFAULT_instance_dir, instance_set)
     instance_set_test = args.instance_set_test
     if instance_set_test is not None:
         instance_set_test = resolve_object_name(
             args.instance_set_test,
             gv.file_storage_data_mapping[gv.instances_nickname_path],
-            gv.settings().DEFAULT_instance_dir, InstanceSet)
+            gv.settings().DEFAULT_instance_dir, instance_set)
     use_features = args.use_features
     run_on = gv.settings().get_run_on()
     if args.configurator is not None:
@@ -201,7 +206,7 @@ if __name__ == "__main__":
 
         if feature_data.has_missing_value():
             print("You have unfinished feature computation jobs, please run "
-                  "compute_features.py")
+                  "`sparkle compute features`")
             sys.exit(-1)
 
         for index, column in enumerate(feature_data_df):
@@ -226,6 +231,7 @@ if __name__ == "__main__":
         scenario=config_scenario,
         sbatch_options=sbatch_options,
         num_parallel_jobs=gv.settings().get_number_of_jobs_in_parallel(),
+        base_dir=sl.caller_log_dir,
         run_on=run_on)
 
     # Update latest scenario

@@ -43,7 +43,7 @@ class SMAC2(Configurator):
         output_path = output_path / SMAC2.__name__
         output_path.mkdir(parents=True, exist_ok=True)
         return super().__init__(
-            validator=Validator(out_dir=output_path, tmp_out_dir=base_dir),
+            validator=Validator(out_dir=output_path),
             output_path=output_path,
             executable_path=SMAC2.configurator_path / "smac",
             configurator_target=SMAC2.configurator_path / SMAC2.target_algorithm,
@@ -57,6 +57,7 @@ class SMAC2(Configurator):
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
                   num_parallel_jobs: int = None,
+                  base_dir: Path = None,
                   run_on: Runner = Runner.SLURM) -> list[Run]:
         """Start configuration job.
 
@@ -65,6 +66,7 @@ class SMAC2(Configurator):
             validate_after: Whether the Validator will be called after the configuration
             sbatch_options: List of slurm batch options to use
             num_parallel_jobs: The maximum number of jobs to run parallel.
+            base_dir: The path where the sbatch scripts will be created for Slurm.
             run_on: On which platform to run the jobs. Default: Slurm.
 
         Returns:
@@ -88,12 +90,11 @@ class SMAC2(Configurator):
         if num_parallel_jobs is not None:
             parallel_jobs = max(num_parallel_jobs,
                                 self.scenario.number_of_runs)
-
         configuration_run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
             name=CommandName.CONFIGURE_SOLVER,
-            base_dir=self.base_dir,
+            base_dir=base_dir,
             output_path=output,
             parallel_jobs=parallel_jobs,
             sbatch_options=sbatch_options,
@@ -102,10 +103,12 @@ class SMAC2(Configurator):
 
         if validate_after:
             self.validator.out_dir = output_csv.parent
+            self.validator.tmp_out_dir = base_dir
             validate_run = self.validator.validate(
                 [scenario.solver] * self.scenario.number_of_runs,
                 output_csv.absolute(),
                 [scenario.instance_set],
+                [self.scenario.sparkle_objective],
                 scenario.cutoff_time,
                 subdir=Path(),
                 dependency=configuration_run,
@@ -177,8 +180,8 @@ class SMAC2(Configurator):
         for line in reversed(output_source.open("r").readlines()):
             if call_key in line:
                 call_str = line.split(call_key, maxsplit=1)[1].strip()
-                # The Configuration appears after the first 7 arguments
-                configuration = call_str.split(" ", 8)[-1]
+                # The Configuration appears after the first 6 arguments
+                configuration = call_str.split(" ", 7)[-1]
                 if output_target is None:
                     return configuration
                 with output_target.open("a") as fout:

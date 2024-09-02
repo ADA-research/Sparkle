@@ -66,10 +66,10 @@ class FeatureDataFrame:
             feature_group, feature = pair
             self.dataframe.loc[(feature_group, feature, extractor), :] = values[index]
 
-    def add_instance(self: FeatureDataFrame,
-                     instance: str,
-                     values: list[float] = None) -> None:
-        """Add an instance to the dataframe."""
+    def add_instances(self: FeatureDataFrame,
+                      instance: str | list[str],
+                      values: list[float] = None) -> None:
+        """Add one or more instances to the dataframe."""
         if values is None:
             values = FeatureDataFrame.missing_value
         self.dataframe[instance] = values
@@ -79,10 +79,10 @@ class FeatureDataFrame:
         """Remove an extractor from the dataframe."""
         self.dataframe.drop(extractor, axis=0, level="Extractor", inplace=True)
 
-    def remove_instance(self: FeatureDataFrame,
-                        instance: str) -> None:
+    def remove_instances(self: FeatureDataFrame,
+                         instances: str | list[str]) -> None:
         """Remove an instance from the dataframe."""
-        self.dataframe.drop(instance, axis=1, inplace=True)
+        self.dataframe.drop(instances, axis=1, inplace=True)
 
     def get_extractors(self: FeatureDataFrame) -> list[str]:
         """Returns all unique extractors in the DataFrame."""
@@ -169,6 +169,11 @@ class FeatureDataFrame:
         """Sorts the DataFrame by Multi-Index for readability."""
         self.dataframe.sort_index(level=FeatureDataFrame.multi_dim_names)
 
+    @property
+    def instances(self: FeatureDataFrame) -> list[str]:
+        """Return the instances in the dataframe."""
+        return self.dataframe.columns
+
     def save_csv(self: FeatureDataFrame, csv_filepath: Path = None) -> None:
         """Write a CSV to the given path.
 
@@ -178,11 +183,15 @@ class FeatureDataFrame:
         csv_filepath = self.csv_filepath if csv_filepath is None else csv_filepath
         self.dataframe.to_csv(csv_filepath)
 
-    def to_autofolio(self: FeatureDataFrame) -> Path:
+    def to_autofolio(self: FeatureDataFrame,
+                     target: Path = None) -> Path:
         """Port the data to a format acceptable for AutoFolio."""
         autofolio_df = self.dataframe.copy()
         autofolio_df.index = autofolio_df.index.map("_".join)  # Reduce Multi-Index
         autofolio_df = autofolio_df.T  # Autofolio has feature columns and instance rows
-        path = self.csv_filepath.parent / f"autofolio_{self.csv_filepath.name}"
+        if target is None:
+            path = self.csv_filepath.parent / f"autofolio_{self.csv_filepath.name}"
+        else:
+            path = target / f"autofolio_{self.csv_filepath.name}"
         autofolio_df.to_csv(path)
         return path
