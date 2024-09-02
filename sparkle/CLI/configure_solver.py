@@ -23,7 +23,7 @@ from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.solver import Solver
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set, InstanceSet
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -42,6 +42,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstanceSetTestArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
                         **ac.PerformanceMeasureSimpleArgument.kwargs)
+    parser.add_argument(*ac.SparkleObjectiveArgument.names,
+                        **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeConfigurationArgument.names,
                         **ac.TargetCutOffTimeConfigurationArgument.kwargs)
     parser.add_argument(*ac.WallClockTimeArgument.names,
@@ -76,6 +78,9 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
     if args.performance_measure is not None:
         gv.settings().set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE)
+    elif args.objectives is not None:
+        gv.settings().set_general_sparkle_objectives(
+            args.objectives, SettingState.CMD_LINE)
     if args.target_cutoff_time is not None:
         gv.settings().set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
@@ -160,13 +165,13 @@ if __name__ == "__main__":
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, InstanceSet)
+        gv.settings().DEFAULT_instance_dir, instance_set)
     instance_set_test = args.instance_set_test
     if instance_set_test is not None:
         instance_set_test = resolve_object_name(
             args.instance_set_test,
             gv.file_storage_data_mapping[gv.instances_nickname_path],
-            gv.settings().DEFAULT_instance_dir, InstanceSet)
+            gv.settings().DEFAULT_instance_dir, instance_set)
     use_features = args.use_features
     run_on = gv.settings().get_run_on()
     if args.configurator is not None:
@@ -201,7 +206,7 @@ if __name__ == "__main__":
 
         if feature_data.has_missing_value():
             print("You have unfinished feature computation jobs, please run "
-                  "compute_features.py")
+                  "`sparkle compute features`")
             sys.exit(-1)
 
         for index, column in enumerate(feature_data_df):

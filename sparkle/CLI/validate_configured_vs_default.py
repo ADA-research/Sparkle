@@ -15,7 +15,7 @@ from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.solver.validator import Validator
 from sparkle.solver import Solver
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
@@ -37,6 +37,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.ConfiguratorArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureArgument.names,
                         **ac.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*ac.SparkleObjectiveArgument.names,
+                        **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeValidationArgument.names,
                         **ac.TargetCutOffTimeValidationArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
@@ -61,11 +63,11 @@ if __name__ == "__main__":
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, InstanceSet)
+        gv.settings().DEFAULT_instance_dir, instance_set)
     instance_set_test = resolve_object_name(
         args.instance_set_test,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, InstanceSet)
+        gv.settings().DEFAULT_instance_dir, instance_set)
 
     if args.run_on is not None:
         gv.settings().set_run_on(
@@ -90,11 +92,14 @@ if __name__ == "__main__":
         gv.settings().set_general_sparkle_objectives(
             set_str, SettingState.CMD_LINE
         )
+    if args.objectives is not None:
+        gv.settings().set_general_sparkle_objectives(
+            args.objectives, SettingState.CMD_LINE
+        )
     if ac.set_by_user(args, "target_cutoff_time"):
         gv.settings().set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE
         )
-
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
     Settings.check_settings_changes(gv.settings(), prev_settings)
@@ -116,6 +121,7 @@ if __name__ == "__main__":
         solvers=[solver] * 2,
         configurations=[None, opt_config],
         instance_sets=all_validation_instances,
+        objectives=gv.settings().get_general_sparkle_objectives(),
         cut_off=gv.settings().get_general_target_cutoff_time(),
         sbatch_options=gv.settings().get_slurm_extra_options(as_args=True),
         run_on=run_on)

@@ -12,7 +12,7 @@ from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.validator import Validator
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 from sparkle.solver import Solver
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set
 import csv
 
 global settings
@@ -552,8 +552,8 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     Test that all needed functions are called to retrieve values and that these
     values are added to the common dictionary.
     """
-    train_set = InstanceSet(Path("tests/test_files/Instances/Train-Instance-Set"))
-    test_set = InstanceSet(Path("tests/test_files/Instances/Test-Instance-Set"))
+    train_set = instance_set(Path("tests/test_files/Instances/Train-Instance-Set"))
+    test_set = instance_set(Path("tests/test_files/Instances/Test-Instance-Set"))
     validation_data = [
         ["SolverName", "{}", "InstanceSetName", "InstanceName", "STATUS", "0", "25.323"]]
     cutoff = "60"

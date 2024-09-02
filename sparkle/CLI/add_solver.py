@@ -87,7 +87,7 @@ if __name__ == "__main__":
         if not (configurator_wrapper_path.is_file()
                 and os.access(configurator_wrapper_path, os.X_OK)):
             print(f"WARNING: Solver {solver_source.name} does not have a solver wrapper "
-                  f"(Missing file {gv.sparkle_solver_wrapper}) or is not executable. ")
+                  f"(Missing file {Solver.wrapper}) or is not executable. ")
 
     # Start add solver
     solver_directory = gv.settings().DEFAULT_solver_dir / solver_source.name

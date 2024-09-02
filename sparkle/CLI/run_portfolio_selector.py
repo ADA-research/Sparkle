@@ -18,7 +18,7 @@ from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set
 from sparkle.CLI.compute_features import compute_features
 
 
@@ -51,10 +51,10 @@ if __name__ == "__main__":
         gv.settings().set_run_on(args.run_on.value, SettingState.CMD_LINE)
     run_on = gv.settings().get_run_on()
 
-    instance_set = resolve_object_name(
+    data_set = resolve_object_name(
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, InstanceSet)
+        gv.settings().DEFAULT_instance_dir, instance_set)
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_PORTFOLIO_SELECTOR])
 
@@ -87,12 +87,12 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     # Compute the features of the incoming instances
-    test_case_path = selector_scenario / instance_set.name
+    test_case_path = selector_scenario / data_set.name
     test_case_path.mkdir(exist_ok=True)
     feature_dataframe = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
     feature_dataframe.remove_instances(feature_dataframe.instances)
     feature_dataframe.csv_filepath = test_case_path / "feature_data.csv"
-    feature_dataframe.add_instances(instance_set.instance_paths)
+    feature_dataframe.add_instances(data_set.instance_paths)
     feature_dataframe.save_csv()
     feature_run = compute_features(feature_dataframe, recompute=False, run_on=run_on)
 
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     performance_data = PerformanceDataFrame(
         test_case_path / "performance_data.csv",
         objectives=gv.settings().get_general_sparkle_objectives())
-    for instance_name in instance_set.instance_names:
+    for instance_name in data_set.instance_names:
         if instance_name not in performance_data.instances:
             performance_data.add_instance(instance_name)
     performance_data.add_solver(selector_path.name)
@@ -122,7 +122,7 @@ if __name__ == "__main__":
                 f"--performance-data-csv {performance_data.csv_filepath} "
                 f"--instance {instance_path} "
                 f"--log-dir {sl.caller_log_dir}"
-                for instance_path in instance_set.instance_paths]
+                for instance_path in data_set.instance_paths]
 
     selector_run = rrr.add_to_queue(
         runner=run_on,

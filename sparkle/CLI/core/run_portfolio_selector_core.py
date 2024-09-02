@@ -34,6 +34,7 @@ def call_solver_solve_instance(
     """
     solver_output = solver.run(
         instance.absolute(),
+        objectives=gv.settings().get_general_sparkle_objectives(),
         seed=gv.get_seed(),
         cutoff_time=cutoff_time,
         cwd=cwd,
@@ -102,7 +103,7 @@ if __name__ == "__main__":
         solver = Solver(Path(solver), verifier=verifier)
         print(f"Calling solver {solver.name} with time budget {cutoff_time} ...")
         flag_solved = call_solver_solve_instance(
-            solver, args.instance, cutoff_time, cwd, performance_data)
+            solver, Path(args.instance), cutoff_time, cwd, performance_data)
         print(f"Calling solver {solver.name} done!")
 
         if flag_solved:

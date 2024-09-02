@@ -14,7 +14,8 @@ from sparkle.instance import InstanceSet
 
 class ConfigurationScenario:
     """Class to handle all activities around configuration scenarios."""
-    def __init__(self: ConfigurationScenario, solver: Solver, instance_set: InstanceSet,
+    def __init__(self: ConfigurationScenario, solver: Solver,
+                 instance_set: InstanceSet,
                  number_of_runs: int = None, solver_calls: int = None,
                  cpu_time: int = None, wallclock_time: int = None,
                  cutoff_time: int = None, cutoff_length: int = None,
@@ -89,8 +90,7 @@ class ConfigurationScenario:
         self.parent_directory = parent_directory
         self.directory = self.parent_directory / "scenarios" / self.name
         self.result_directory = self.directory / "results"
-        self.instance_file_path = self.directory /\
-            f"{self.instance_set.name}_train.txt"
+        self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
         self.outdir_train = self.directory / "outdir_train_configuration"
         self.tmp = self.directory / "tmp"
         self.validation = self.directory / "validation"
@@ -110,11 +110,15 @@ class ConfigurationScenario:
         self.result_directory.mkdir(parents=True)
 
     def _create_scenario_file(self: ConfigurationScenario) -> None:
-        """Create a file with the configuration scenario."""
+        """Create a file with the configuration scenario.
+
+        Writes supplementary information to the target algorithm (algo =) as:
+        algo = {configurator_target} {solver_directory} {sparkle_objective}
+        """
         self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
         with self.scenario_file_path.open("w") as file:
             file.write(f"algo = {self.configurator_target.absolute()} "
-                       f"{self.solver.directory.absolute()}\n"
+                       f"{self.solver.directory.absolute()} {self.sparkle_objective} \n"
                        f"execdir = {self.tmp.absolute()}/\n"
                        f"deterministic = {1 if self.solver.deterministic else 0}\n"
                        f"run_obj = {self._get_performance_measure()}\n"
@@ -136,7 +140,7 @@ class ConfigurationScenario:
             file.write("validation = false" + "\n")
 
     def _prepare_instances(self: ConfigurationScenario) -> None:
-        """Create instance list file."""
+        """Create instance list file without instance specifics."""
         self.instance_file_path.parent.mkdir(exist_ok=True, parents=True)
         with self.instance_file_path.open("w+") as file:
             for instance_path in self.instance_set._instance_paths:
@@ -148,17 +152,18 @@ class ConfigurationScenario:
         Returns:
             Performance measure of the sparkle objective
         """
-        run_performance_measure = self.sparkle_objective.PerformanceMeasure
+        perf_measure = self.sparkle_objective.PerformanceMeasure
 
-        if run_performance_measure == PerformanceMeasure.RUNTIME:
-            run_performance_measure = run_performance_measure.name
-        elif run_performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
-            run_performance_measure = "QUALITY"
+        if perf_measure == PerformanceMeasure.RUNTIME:
+            perf_measure = perf_measure.name
+        elif (perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE
+              or perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION):
+            perf_measure = "QUALITY"
         else:
-            print("Warning: Unknown performance measure", run_performance_measure,
+            print("Warning: Unknown performance measure", perf_measure,
                   "! This is a bug in Sparkle.")
 
-        return run_performance_measure
+        return perf_measure
 
     def _create_feature_file(self: ConfigurationScenario) -> None:
         """Create CSV file from feature data."""
@@ -193,11 +198,6 @@ class ConfigurationScenario:
                 key, value = line.strip().split(" = ")
                 config[key] = value
 
-        # TODO: Find out why _train.txt is added to end of name
-        # Remove .txt to not cause any issues with later use of
-        # name in self.configurator.scenario._set_paths()
-        instance_set.name = instance_set.name.replace("_train", "")
-
         # Collect relevant settings
         cpu_time = int(config["cpu_time"]) if "cpu_time" in config else None
         wallclock_limit = int(config["wallclock-limit"]) if "wallclock-limit" in config \
@@ -207,8 +207,8 @@ class ConfigurationScenario:
         use_features = bool(config["feature_file"]) if "feature_file" in config \
             else None
 
-        # TODO: Add METRIC to objective -> Can soon be retrieved from algo =
-        objective = SparkleObjective(f"{config['run_obj']}:UNKNOWN")
+        objective_str = config["algo"].split(" ")[-1]
+        objective = SparkleObjective(objective_str)
         results_folder = scenario_file.parent / "results"
         state_run_dirs = [p for p in results_folder.iterdir() if p.is_file()]
         number_of_runs = len(state_run_dirs)

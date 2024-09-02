@@ -3,21 +3,13 @@ from pathlib import Path
 import ast
 from typing import Any
 
+from sparkle.types.objective import SparkleObjective
+
 
 def parse_commandline_dict(args: list[str]) -> dict:
     """Parses a commandline dictionary to the object."""
     dict_str = " ".join(args)
-    # Remove white space
-    dict_str = dict_str.replace(" ", "")
-    # Remove all quotes to avoid double strings
-    dict_str = dict_str.replace('"', "").replace("'", "")
-    # Place the quotes only there where needed
-    dict_str = dict_str.replace("{", "{'").replace(":", "':'")
-    dict_str = dict_str.replace("[", "['").replace("]", "']")
-    dict_str = dict_str.replace(",", "','").replace("}", "'}")
-    # Undo quotes at the start and end of lists
-    dict_str = dict_str.replace("':'[", "':[").replace("]','", "],'")
-
+    dict_str = dict_str[dict_str.index("{"):dict_str.index("}") + 1]  # Slurm script fix
     return ast.literal_eval(dict_str)
 
 
@@ -37,6 +29,7 @@ def parse_solver_wrapper_args(args: list[str]) -> dict[Any]:
     args_dict["solver_dir"] = Path(args_dict["solver_dir"])
     args_dict["instance"] = Path(args_dict["instance"])
     args_dict["seed"] = int(args_dict["seed"])
+    args_dict["objectives"] = SparkleObjective.from_multi_str(args_dict["objectives"])
 
     if "config_path" in args_dict:
         # The arguments were not directly given and must be parsed from a file
@@ -48,6 +41,7 @@ def parse_solver_wrapper_args(args: list[str]) -> dict[Any]:
         for arg in config_split:
             varname, value = arg.strip("'").strip('"').split(" ", maxsplit=1)
             args_dict[varname] = value
+        del args_dict["config_path"]
 
     return args_dict
 
@@ -63,7 +57,7 @@ def get_solver_call_params(args_dict: dict) -> list[str]:
     """
     params = []
     # Certain arguments are not relevant/have already been processed
-    ignore_args = {"solver_dir", "instance", "cutoff_time", "seed"}
+    ignore_args = {"solver_dir", "instance", "cutoff_time", "seed", "objectives"}
     for key in args_dict:
         if key not in ignore_args and args_dict[key] is not None:
             params.extend(["-" + str(key), str(args_dict[key])])

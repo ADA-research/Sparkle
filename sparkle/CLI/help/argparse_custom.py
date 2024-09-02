@@ -504,3 +504,9 @@ SelectorTimeoutArgument = \
                               "default": Settings.DEFAULT_portfolio_construction_timeout,
                               "help": "Cuttoff time (in seconds) for the algorithm"
                                       "selector construction"})
+
+SparkleObjectiveArgument = \
+    ArgumentContainer(names=["--objectives"],
+                      kwargs={"type": str,
+                              "help": "the comma seperated objective(s) to use as"
+                                      "'PerformanceMeasure:metric,'"})

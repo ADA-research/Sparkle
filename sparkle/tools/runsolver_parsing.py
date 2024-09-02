@@ -58,8 +58,7 @@ def get_solver_args(runsolver_log_path: Path) -> str:
     if runsolver_log_path.exists():
         for line in runsolver_log_path.open("r").readlines():
             if line.startswith("command line:"):
-                # Can't take string from GV due to circular imports
-                return line.split("sparkle_solver_wrapper.py", 1)[1]
+                return line.split("sparkle_solver_wrapper.py", 1)[1].strip().strip("'")
     return ""
 
 

@@ -9,7 +9,7 @@ import shutil
 from sparkle.CLI.help import global_variables as gv
 from sparkle.platform import file_help as sfh
 from sparkle.platform.settings_objects import SettingState
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from sparkle.CLI.compute_features import compute_features
 from sparkle.CLI.run_solvers import running_solvers_performance_data
@@ -73,16 +73,16 @@ if __name__ == "__main__":
                                      gv.instances_nickname_path, key=args.nickname)
 
     print(f"Start adding all instances in directory {instances_source} ...")
-    instance_set = InstanceSet(instances_source)
+    new_instance_set = instance_set(instances_source)
 
     instances_target.mkdir(parents=True)
     print("Copying files...")
-    for instance_path_source in instance_set.all_paths:
+    for instance_path_source in new_instance_set.all_paths:
         print(f"Copying {instance_path_source} to {instances_target}...", end="\r")
         shutil.copy(instance_path_source, instances_target)
     print("\nCopying done!")
     # Refresh the instance set as the target instance set
-    instance_set = InstanceSet(instances_target)
+    new_instance_set = instance_set(instances_target)
 
     # Add the instances to the Feature Data / Performance Data
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
@@ -90,14 +90,14 @@ if __name__ == "__main__":
     performance_data = PerformanceDataFrame(
         gv.settings().DEFAULT_performance_data_path,
         objectives=gv.settings().get_general_sparkle_objectives())
-    for instance_path in instance_set.instance_paths:
+    for instance_path in new_instance_set.instance_paths:
         # Construct a name path due to multi-file instances
         feature_data.add_instances(str(instance_path))
         performance_data.add_instance(str(instance_path))
     feature_data.save_csv()
     performance_data.save_csv()
 
-    print(f"\nAdding instance set {instance_set.name} done!")
+    print(f"\nAdding instance set {new_instance_set.name} done!")
 
     if args.run_extractor_now:
         print("Start computing features ...")

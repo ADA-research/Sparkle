@@ -8,7 +8,7 @@ import shutil
 from sparkle.CLI.help import global_variables as gv
 from sparkle.platform import file_help as sfh
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set
 from sparkle.CLI.help import logging as sl
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
@@ -45,11 +45,11 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     print(f"Start removing all instances in directory {instances_path} ...")
-    instance_set = InstanceSet(instances_path)
+    old_instance_set = instance_set(instances_path)
     # Remove from feature data and performance data
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
-    for instance in instance_set.instance_paths:
+    for instance in old_instance_set.instance_paths:
         feature_data.remove_instances(str(instance))
         performance_data.remove_instance(str(instance))
 

@@ -312,7 +312,7 @@ For each type of task run by Sparkle, the `related files` differ. The aim is alw
 
 ### `sparkle_solver_wrapper.py`
 
-The `sparkle_solver_wrapper.py` uses a commandline dictionary to receive it inputs. This can be easily parsed using a Sparkle tool: `from sparkle.tools.slurm_parsing import parse_commandline_dict`.
+The `sparkle_solver_wrapper.py` uses a commandline dictionary to receive it inputs. This can be easily parsed using a Sparkle tool: `from sparkle.tools.slurm_parsing import parse_solver_wrapper_args`.
 The dictionary should always have the following values:
 
 ```

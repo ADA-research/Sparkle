@@ -101,3 +101,44 @@ sparkle run_configured_solver Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf
 #It is also possible to run a configured solver directly on an entire directory of instances.
 
 sparkle run_configured_solver Examples/Resources/Instances/PTN2
+
+
+
+
+### Use Sparkle for algorithm configuration - Example 2
+
+# We can also use Sparkle for Machine Learning approaches.
+
+#### Initialise the Sparkle platform
+
+sparkle initialise
+
+#### Add instances
+
+sparkle add_instances Examples/Resources/Instances/Iris
+
+#### Add solver
+
+sparkle add_solver Examples/Resources/Solvers/RandomForest
+
+#### Configure the solver on the data set
+
+sparkle configure_solver --solver RandomForest --instance-set-train Iris --objectives QUALITY_ABSOLUTE_MAXIMISATION:accuracy
+
+#### Wait for the configuration to complete
+
+sparkle wait
+
+# Validate the performance of the best found parameter configuration. The test set is optional.
+
+sparkle validate_configured_vs_default --solver RandomForest --instance-set-train Iris --objectives QUALITY_ABSOLUTE_MAXIMISATION:accuracy
+
+#### Generate a report
+
+# Wait for validation to be completed
+
+sparkle wait
+
+# Generate a report detailing the results on the training (and optionally testing) set.
+
+sparkle generate_report --performance-measure QUALITY_ABSOLUTE

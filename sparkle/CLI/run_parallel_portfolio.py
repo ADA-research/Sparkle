@@ -25,7 +25,7 @@ from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set, InstanceSet
 from sparkle.types import SolverStatus
 
 
@@ -53,12 +53,14 @@ def run_parallel_portfolio(instances_set: InstanceSet,
           f"on {num_solvers} solvers for {num_instances} instances ...")
     cmd_list = []
     cutoff = gv.settings().get_general_target_cutoff_time()
+    objectives = gv.settings().get_general_sparkle_objectives()
     # Create a command for each instance-solver-seed combination
     for instance, solver in itertools.product(instances_set._instance_paths, solvers):
         for _ in range(seeds_per_solver):
             seed = int(random.getrandbits(32))
             solver_call_list = solver.build_cmd(
                 instance.absolute(),
+                objectives=objectives,
                 seed=seed,
                 cutoff_time=cutoff)
             cmd_list.append((" ".join(solver_call_list)).replace("'", '"'))
@@ -244,12 +246,12 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     # Retrieve instance set
-    instance_set = resolve_object_name(
+    data_set = resolve_object_name(
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings().DEFAULT_instance_dir,
-        InstanceSet)
-    print(f"Running on {instance_set.size} instance(s)...")
+        instance_set)
+    print(f"Running on {data_set.size} instance(s)...")
 
     if args.cutoff_time is not None:
         gv.settings().set_general_target_cutoff_time(args.cutoff_time,
@@ -281,7 +283,7 @@ if __name__ == "__main__":
             sys.exit()
         shutil.rmtree(portfolio_path)
     portfolio_path.mkdir(parents=True)
-    run_parallel_portfolio(instance_set, portfolio_path, solvers, run_on=run_on)
+    run_parallel_portfolio(data_set, portfolio_path, solvers, run_on=run_on)
 
     # Update latest scenario
     gv.latest_scenario().set_parallel_portfolio_path(portfolio_path)

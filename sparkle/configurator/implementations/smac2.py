@@ -108,6 +108,7 @@ class SMAC2(Configurator):
                 [scenario.solver] * self.scenario.number_of_runs,
                 output_csv.absolute(),
                 [scenario.instance_set],
+                [self.scenario.sparkle_objective],
                 scenario.cutoff_time,
                 subdir=Path(),
                 dependency=configuration_run,
@@ -179,8 +180,8 @@ class SMAC2(Configurator):
         for line in reversed(output_source.open("r").readlines()):
             if call_key in line:
                 call_str = line.split(call_key, maxsplit=1)[1].strip()
-                # The Configuration appears after the first 7 arguments
-                configuration = call_str.split(" ", 8)[-1]
+                # The Configuration appears after the first 6 arguments
+                configuration = call_str.split(" ", 7)[-1]
                 if output_target is None:
                     return configuration
                 with output_target.open("a") as fout:

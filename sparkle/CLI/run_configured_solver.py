@@ -10,7 +10,7 @@ from runrunner.base import Runner
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
@@ -42,11 +42,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Try to resolve the instance path (Dir or list instance paths)
-    instance_set = resolve_object_name(
+    data_set = resolve_object_name(
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, InstanceSet)
-    if instance_set is None:
+        gv.settings().DEFAULT_instance_dir, instance_set)
+    if data_set is None:
         print(f"Could not resolve instance (set): {args.instance_path}! Exiting...")
         sys.exit(-1)
 
@@ -86,8 +86,9 @@ if __name__ == "__main__":
     # Call the configured solver
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     if run_on == Runner.LOCAL:
-        print(f"Start running solver on {instance_set.size} instances...")
-    run = solver.run(instance=instance_set,
+        print(f"Start running solver on {data_set.size} instances...")
+    run = solver.run(instance=data_set,
+                     objectives=gv.settings().get_general_sparkle_objectives(),
                      seed=gv.get_seed(),
                      cutoff_time=custom_cutoff,
                      configuration=config,
@@ -105,7 +106,7 @@ if __name__ == "__main__":
             run = [run]
         for i, solver_output in enumerate(run):
             print(f"Execution of {solver.name} on instance "
-                  f"{instance_set.instance_names[i]} completed with status "
+                  f"{data_set.instance_names[i]} completed with status "
                   f"{solver_output['status']} in {solver_output['runtime']} seconds.")
         print("Running configured solver done!")
 

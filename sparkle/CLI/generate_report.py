@@ -19,7 +19,7 @@ from sparkle.platform import \
     generate_report_for_parallel_portfolio as sgrfpph
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.platform.output.configuration_output import ConfigurationOutput
@@ -85,11 +85,11 @@ if __name__ == "__main__":
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, InstanceSet)
+        gv.settings().DEFAULT_instance_dir, instance_set)
     instance_set_test = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, InstanceSet)
+        gv.settings().DEFAULT_instance_dir, instance_set)
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.GENERATE_REPORT])
 
@@ -155,9 +155,9 @@ if __name__ == "__main__":
                                for instance in train_data.instances)
         instance_sets = []
         for dir in instance_folders:
-            set = InstanceSet(dir)
+            set = instance_set(dir)
             instance_sets.append(set)
-        test_set = InstanceSet(Path(test_case_dir))
+        test_set = instance_set(Path(test_case_dir))
         cutoff_time = gv.settings().get_general_target_cutoff_time()
         penalised_time = gv.settings().get_penalised_time()
         output = gv.settings().DEFAULT_selection_output_analysis
@@ -165,7 +165,7 @@ if __name__ == "__main__":
                                            instance_sets, [test_set], cutoff_time,
                                            penalised_time, output)
         selection_output.write_output()
-        print("Machine readable selection output is placed at: ", output)
+        print("Machine readable output is placed at: ", selection_output.output)
 
         if not only_json:
             sgfs.generate_report_selection(
@@ -199,7 +199,7 @@ if __name__ == "__main__":
                                                             penalised_time,
                                                             output)
         parallel_portfolio_output.write_output()
-        print("Machine readable parallel portfolio output is placed at: ", output)
+        print("Machine readable output is placed at: ", parallel_portfolio_output.output)
 
         if not only_json:
             sgrfpph.generate_report_parallel_portfolio(
@@ -271,20 +271,16 @@ if __name__ == "__main__":
         # Create machine readable output
         solver_name = gv.latest_scenario().get_config_solver().name
         instance_set_name = gv.latest_scenario().get_config_instance_set_train().name
-        path = Path(
-            f"Output/Configuration/Raw_Data/"
-            f"SMAC2/scenarios/{solver_name}_{instance_set_name}"
-        )
-        print(path)
         penalty_multiplier = gv.settings().get_general_penalty_multiplier()
         output = gv.settings().DEFAULT_configuration_output_analysis
-        config_output = ConfigurationOutput(path, solver, configurator,
+        config_output = ConfigurationOutput(configurator.scenario.directory,
+                                            solver, configurator,
                                             instance_set_train,
                                             instance_set_test,
                                             penalty_multiplier,
                                             output)
         config_output.write_output()
-        print("Machine readable configuration output is placed at: ", output)
+        print("Machine readable output is placed at: ", config_output.output)
 
         if not only_json:
             sgrfch.generate_report_for_configuration(

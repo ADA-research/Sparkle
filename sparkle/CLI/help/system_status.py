@@ -6,7 +6,7 @@ from pathlib import Path
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 
 
-def print_sparkle_list(objects: list[str], type: str, details: bool = False) -> None:
+def print_sparkle_list(objects: list[any], type: str, details: bool = False) -> None:
     """Print a list of sparkle objects.
 
     Args:
@@ -14,15 +14,12 @@ def print_sparkle_list(objects: list[str], type: str, details: bool = False) -> 
         type: The name of the object type
         details: Indicating if output should be detailed
     """
-    print()
     print(f"\nCurrently Sparkle has {len(objects)} {type}(s)"
           + (":" if details else ""))
 
     if details:
         for i, object in enumerate(objects):
             print(f"[{i + 1}]: {type}: {Path(object).name}")
-
-    print()
 
 
 def print_feature_computation_jobs(feature_data_csv: Path,

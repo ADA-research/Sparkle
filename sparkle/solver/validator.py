@@ -12,6 +12,7 @@ from runrunner import Runner, Run
 from sparkle.platform import CommandName
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
+from sparkle.types.objective import SparkleObjective
 from sparkle.tools.runsolver_parsing import get_solver_output, get_solver_args
 
 
@@ -28,6 +29,7 @@ class Validator():
                  solvers: list[Path] | list[Solver] | Solver | Path,
                  configurations: list[dict] | dict | Path,
                  instance_sets: list[InstanceSet],
+                 objectives: list[SparkleObjective],
                  cut_off: int,
                  subdir: Path = None,
                  dependency: list[Run] | Run = None,
@@ -40,6 +42,7 @@ class Validator():
             configurations: list of configurations for each solver we validate.
                 If a path is supplied, will use each line as a configuration.
             instance_sets: set of instance sets on which we want to validate each solver
+            objectives: list of objectives to validate
             cut_off: maximum run time for the solver per instance
             subdir: The subdir where to place the output in the outputdir. If None,
                 a semi-unique combination of solver_instanceset is created.
@@ -77,10 +80,11 @@ class Validator():
                 for instance_path in instance_set._instance_paths:
                     cmds.append(" ".join(
                         solver.build_cmd(instance=instance_path.absolute(),
+                                         objectives=objectives,
                                          seed=index,
                                          cutoff_time=cut_off,
                                          configuration=config)))
-                out_paths.extend([out_path] * instance_set.size)
+                out_paths.extend([out_path] * len(instance_set._instance_paths))
         return rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
@@ -116,7 +120,7 @@ class Validator():
             if res.suffix != ".rawres":
                 continue
             solver_args = get_solver_args(res.with_suffix(".log"))
-            solver_args = ast.literal_eval(solver_args.strip())
+            solver_args = ast.literal_eval(solver_args)
             instance_path = Path(solver_args["instance"])
             # Remove default args
             if "config_path" in solver_args:
@@ -128,10 +132,12 @@ class Validator():
                 config_str = config_path.open("r").readlines()[row_idx]
                 solver_args = Solver.config_str_to_dict(config_str)
             else:
-                for def_arg in ["instance", "solver_dir", "cutoff_time", "seed"]:
+                for def_arg in ["instance", "solver_dir", "cutoff_time",
+                                "seed", "objectives"]:
                     if def_arg in solver_args:
                         del solver_args[def_arg]
             solver_args = str(solver_args).replace('"', "'")
+
             for instance_set in instance_sets:
                 if instance_path.name in instance_set._instance_names:
                     out_dict = get_solver_output(
@@ -182,9 +188,9 @@ class Validator():
         if config is not None:
             # We filter on the config string by subdict
             if isinstance(config, str):
-                config_dict = Solver.config_str_to_dict(config)
+                config = Solver.config_str_to_dict(config)
             csv_data = [line for line in csv_data if
-                        config_dict.items() == ast.literal_eval(line[1]).items()]
+                        config.items() == ast.literal_eval(line[1]).items()]
         return csv_data
 
     def append_entry_to_csv(self: Validator,

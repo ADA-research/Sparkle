@@ -10,7 +10,7 @@ from runrunner import Runner
 from sparkle.CLI.help import global_variables as gv
 import sparkle.tools.general as tg
 from sparkle.solver import Solver
-from sparkle.instance import InstanceSet
+from sparkle.instance import instance_set
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.structures import PerformanceDataFrame
 
@@ -40,8 +40,8 @@ if __name__ == "__main__":
     instance_key = instance_path
     if not instance_path.exists():
         # If its an instance name (Multi-file instance), retrieve path list
-        instance_set = InstanceSet(instance_path.parent)
-        instance_path = instance_set.get_path_by_name(instance_name)
+        data_set = instance_set(instance_path.parent)
+        instance_path = data_set.get_path_by_name(instance_name)
         instance_key = instance_name
 
     verifier = gv.settings().get_general_solution_verifier()
@@ -52,6 +52,7 @@ if __name__ == "__main__":
 
     solver_output = solver.run(
         instance_path.absolute(),
+        objectives=gv.settings().get_general_sparkle_objectives(),
         seed=args.seed if args.seed else 42,
         cutoff_time=cutoff,
         cwd=cwd,
