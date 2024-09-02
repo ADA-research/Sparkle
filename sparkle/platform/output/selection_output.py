@@ -139,10 +139,12 @@ class SelectionOutput:
 
     def write_output(self: SelectionOutput) -> None:
         """Write data into a JSON file."""
+        test_data = self.serialize_instances(self.test_instances) if self.test_instances\
+            else None
         output_data = {
             "solvers": self.serialize_solvers(self.solver_data),
             "training_instances": self.serialize_instances(self.training_instances),
-            "test_instances": self.serialize_instances(self.test_instances),
+            "test_instances": test_data,
             "performance": self.serialize_performance(self.performance_data),
             "settings": self.serialize_settings(),
             "marginal_contribution": self.serialize_contribution()

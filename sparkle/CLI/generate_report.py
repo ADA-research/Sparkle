@@ -157,12 +157,12 @@ if __name__ == "__main__":
         for dir in instance_folders:
             set = instance_set(dir)
             instance_sets.append(set)
-        test_set = instance_set(Path(test_case_dir))
+        test_set = None if test_case_dir is None else instance_set(Path(test_case_dir))
         cutoff_time = gv.settings().get_general_target_cutoff_time()
         penalised_time = gv.settings().get_penalised_time()
         output = gv.settings().DEFAULT_selection_output_analysis
         selection_output = SelectionOutput(selection_scenario, train_data, feature_data,
-                                           instance_sets, [test_set], cutoff_time,
+                                           instance_sets, test_set, cutoff_time,
                                            penalised_time, output)
         selection_output.write_output()
         print("Machine readable output is placed at: ", selection_output.output)
