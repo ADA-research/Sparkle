@@ -75,11 +75,10 @@ class AblationScenario:
             None
         """
         ablation_scenario_dir = self.scenario_dir
-        perf_measure =\
-            gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
+        objective = gv.settings().get_general_sparkle_objectives()[0]
         configurator = gv.settings().get_general_sparkle_configurator()
         _, opt_config_str = configurator.get_optimal_configuration(
-            self.solver, self.train_set, performance=perf_measure)
+            self.solver, self.train_set, performance=objective.PerformanceMeasure)
 
         # We need to check which params are missing and supplement with default values
         pcs = self.solver.get_pcs()
@@ -97,7 +96,7 @@ class AblationScenario:
                 formatted = format(ctx.create_decimal(float_value), "f")
                 opt_config_str = opt_config_str.replace(value, formatted)
 
-        smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
+        smac_run_obj = SMAC2.get_smac_run_obj(objective.PerformanceMeasure)
         objective_str = "MEAN10" if smac_run_obj == "RUNTIME" else "MEAN"
         run_cutoff_time = gv.settings().get_general_target_cutoff_time()
         run_cutoff_length = gv.settings().get_configurator_target_cutoff_length()
@@ -109,7 +108,7 @@ class AblationScenario:
         # Create config file
         config_file = Path(f"{ablation_scenario_dir}/ablation_config.txt")
         config = (f'algo = "{configurator.configurator_target.absolute()} '
-                  f'{self.solver.directory.absolute()}"\n'
+                  f'{self.solver.directory.absolute()} {objective}"\n'
                   f"execdir = {self.tmp_dir.absolute()}\n"
                   "experimentDir = ./\n"
                   f"deterministic = {1 if self.solver.deterministic else 0}\n"
