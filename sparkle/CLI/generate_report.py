@@ -165,7 +165,7 @@ if __name__ == "__main__":
                                            instance_sets, [test_set], cutoff_time,
                                            penalised_time, output)
         selection_output.write_output()
-        print("Machine readable selection output is placed at: ", output)
+        print("Machine readable output is placed at: ", selection_output.output)
 
         if not only_json:
             sgfs.generate_report_selection(
@@ -199,7 +199,7 @@ if __name__ == "__main__":
                                                             penalised_time,
                                                             output)
         parallel_portfolio_output.write_output()
-        print("Machine readable parallel portfolio output is placed at: ", output)
+        print("Machine readable output is placed at: ", parallel_portfolio_output.output)
 
         if not only_json:
             sgrfpph.generate_report_parallel_portfolio(
@@ -271,20 +271,16 @@ if __name__ == "__main__":
         # Create machine readable output
         solver_name = gv.latest_scenario().get_config_solver().name
         instance_set_name = gv.latest_scenario().get_config_instance_set_train().name
-        path = Path(
-            f"Output/Configuration/Raw_Data/"
-            f"SMAC2/scenarios/{solver_name}_{instance_set_name}"
-        )
-        print(path)
         penalty_multiplier = gv.settings().get_general_penalty_multiplier()
         output = gv.settings().DEFAULT_configuration_output_analysis
-        config_output = ConfigurationOutput(path, solver, configurator,
+        config_output = ConfigurationOutput(configurator.scenario.directory,
+                                            solver, configurator,
                                             instance_set_train,
                                             instance_set_test,
                                             penalty_multiplier,
                                             output)
         config_output.write_output()
-        print("Machine readable configuration output is placed at: ", output)
+        print("Machine readable output is placed at: ", config_output.output)
 
         if not only_json:
             sgrfch.generate_report_for_configuration(

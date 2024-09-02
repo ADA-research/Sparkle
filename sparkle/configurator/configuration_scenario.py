@@ -90,8 +90,7 @@ class ConfigurationScenario:
         self.parent_directory = parent_directory
         self.directory = self.parent_directory / "scenarios" / self.name
         self.result_directory = self.directory / "results"
-        self.instance_file_path = self.directory /\
-            f"{self.instance_set.name}_train.txt"
+        self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
         self.outdir_train = self.directory / "outdir_train_configuration"
         self.tmp = self.directory / "tmp"
         self.validation = self.directory / "validation"
@@ -199,11 +198,6 @@ class ConfigurationScenario:
                 key, value = line.strip().split(" = ")
                 config[key] = value
 
-        # TODO: Find out why _train.txt is added to end of name
-        # Remove .txt to not cause any issues with later use of
-        # name in self.configurator.scenario._set_paths()
-        instance_set.name = instance_set.name.replace("_train", "")
-
         # Collect relevant settings
         cpu_time = int(config["cpu_time"]) if "cpu_time" in config else None
         wallclock_limit = int(config["wallclock-limit"]) if "wallclock-limit" in config \
@@ -213,8 +207,8 @@ class ConfigurationScenario:
         use_features = bool(config["feature_file"]) if "feature_file" in config \
             else None
 
-        # TODO: Add METRIC to objective -> Can soon be retrieved from algo =
-        objective = SparkleObjective(f"{config['run_obj']}:UNKNOWN")
+        objective_str = config["algo"].split(" ")[-1]
+        objective = SparkleObjective(objective_str)
         results_folder = scenario_file.parent / "results"
         state_run_dirs = [p for p in results_folder.iterdir() if p.is_file()]
         number_of_runs = len(state_run_dirs)
