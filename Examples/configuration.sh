@@ -95,7 +95,7 @@ sparkle wait
 
 #Now that we have a configured solver, we can run it on a single instance to get a result.
 
-sparkle run_configured_solver Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf
+sparkle run_configured_solver Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf --run-on local
 
 ## Run configured solver on an instance directory
 #It is also possible to run a configured solver directly on an entire directory of instances.
