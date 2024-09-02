@@ -82,7 +82,6 @@ class ConfigurationOutput:
     def get_configurations(self: ConfigurationOutput, config_path: Path) -> list[dict]:
         """Read all configurations and transform them to dictionaries."""
         configs = []
-
         # Check if the path exists and is a file
         if config_path.exists() and config_path.is_file():
             with config_path.open("r") as file:
@@ -90,7 +89,6 @@ class ConfigurationOutput:
                     config = Solver.config_str_to_dict(line.strip())
                     if config not in configs:
                         configs.append(config)
-
         return configs
 
     def get_validation_data(self: ConfigurationOutput, instance_set: InstanceSet,
@@ -123,7 +121,6 @@ class ConfigurationOutput:
                                               cutoff_time,
                                               penalty,
                                               objective)
-
         return ConfigurationResults(perf_par,
                                     final_results)
 
