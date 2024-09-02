@@ -182,3 +182,43 @@ class ConfigurationScenario:
             dir = configurator_solver_path / str(index)
             result.append(dir)
         return result
+
+    @staticmethod
+    def from_file(scenario_file: Path, solver: Solver, instance_set: InstanceSet,
+                  ) -> ConfigurationScenario:
+        """Reads scenario file and initalises ConfigurationScenario."""
+        config = {}
+        with scenario_file.open() as file:
+            for line in file:
+                key, value = line.strip().split(" = ")
+                config[key] = value
+
+        # TODO: Find out why _train.txt is added to end of name
+        # Remove .txt to not cause any issues with later use of
+        # name in self.configurator.scenario._set_paths()
+        instance_set.name = instance_set.name.replace("_train", "")
+
+        # Collect relevant settings
+        cpu_time = int(config["cpu_time"]) if "cpu_time" in config else None
+        wallclock_limit = int(config["wallclock-limit"]) if "wallclock-limit" in config \
+            else None
+        solver_calls = int(config["runcount-limit"]) if "runcount-limit" in config \
+            else None
+        use_features = bool(config["feature_file"]) if "feature_file" in config \
+            else None
+
+        # TODO: Add METRIC to objective -> Can soon be retrieved from algo =
+        objective = SparkleObjective(f"{config['run_obj']}:UNKNOWN")
+        results_folder = scenario_file.parent / "results"
+        state_run_dirs = [p for p in results_folder.iterdir() if p.is_file()]
+        number_of_runs = len(state_run_dirs)
+        return ConfigurationScenario(solver,
+                                     instance_set,
+                                     number_of_runs,
+                                     solver_calls,
+                                     cpu_time,
+                                     wallclock_limit,
+                                     int(config["cutoffTime"]),
+                                     config["cutoff_length"],
+                                     objective,
+                                     use_features)
