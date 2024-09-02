@@ -43,9 +43,6 @@ class DataSet():
 
         self.data = df[attributes].to_numpy()
         self.target = df[target].to_numpy()
-        # TODO: do this in dataset
-        self.target = self.target == "Dropout"
-
         return self
 
 
@@ -208,7 +205,7 @@ class RandomForest:
 
 
 if __name__ == "__main__":
-    # Wrapper for RandomForest to run MO-ParamILS
+    # Wrapper for RandomForest to run from command line
     args = parse_solver_wrapper_args(sys.argv)
     dataset = Path(args["instance"])
     solver_dir = Path(args["solver_dir"])
@@ -300,8 +297,8 @@ if __name__ == "__main__":
     except Exception:
         status = "CRASHED"
         result = {k: 100 for k in objectives}
-    quality = np.mean(list(result.values()))
-    outdir = {"status": status,
-              "quality": quality}
+    quality = list(result.values())[0]
+    outdict = {"status": status,
+               "quality": quality}
 
-    print(outdir)
+    print(outdict)
