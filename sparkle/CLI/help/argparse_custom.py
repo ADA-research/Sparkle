@@ -150,7 +150,7 @@ ExtractorPathArgument = ArgumentContainer(names=["extractor_path"],
                                                           "feature extractor"
                                                   })
 
-GenerateJSONArgument = ArgumentContainer(names=["--only_json"],
+GenerateJSONArgument = ArgumentContainer(names=["--only-json"],
                                          kwargs={"required": False,
                                                  "default": False,
                                                  "type": bool,
