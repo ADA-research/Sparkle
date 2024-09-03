@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
     verifier = gv.settings().get_general_solution_verifier()
     solver = Solver(args.solver, verifier=verifier)
-    performance_measure = PerformanceMeasure.from_str(args.performance_measure)
+    performance_measure = PerformanceMeasure(args.performance_measure)
     key_str = f"{solver.name}_{instance_name}_{tg.get_time_pid_random_string()}"
     cutoff = gv.settings().get_general_target_cutoff_time()
 

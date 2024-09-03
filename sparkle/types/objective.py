@@ -5,42 +5,29 @@ from enum import Enum
 
 class PerformanceMeasure(str, Enum):
     """Possible performance measures."""
-    ERR = -1
-    DEFAULT = 0
-    RUNTIME = 1
-    QUALITY_ABSOLUTE = 2
-    QUALITY_ABSOLUTE_MINIMISATION = 2
-    QUALITY_ABSOLUTE_MAXIMISATION = 3
+    ERR = "ERR"
+    DEFAULT = "DEFAULT"
+    RUNTIME = "RUNTIME"
+    QUALITY_ABSOLUTE = "QUALITY_ABSOLUTE_MINIMISATION"
+    QUALITY_ABSOLUTE_MINIMISATION = "QUALITY_ABSOLUTE_MINIMISATION"
+    QUALITY_ABSOLUTE_MAXIMISATION = "QUALITY_ABSOLUTE_MAXIMISATION"
 
-    @staticmethod
-    def from_str(performance_measure: str) -> PerformanceMeasure:
-        """Return a given str as PerformanceMeasure."""
-        if performance_measure == "DEFAULT":
-            return PerformanceMeasure.DEFAULT
-        if performance_measure == "RUNTIME":
-            return PerformanceMeasure.RUNTIME
-        elif performance_measure == "QUALITY_ABSOLUTE":
-            return PerformanceMeasure.QUALITY_ABSOLUTE
-        elif performance_measure == "QUALITY_ABSOLUTE_MAXIMISATION":
-            return PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION
-        elif performance_measure == "QUALITY_ABSOLUTE_MINIMISATION":
-            return PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION
+    @classmethod
+    def _missing_(cls: PerformanceMeasure, value: object) -> PerformanceMeasure:
+        """Return error performance measure."""
         return PerformanceMeasure.ERR
 
-    @staticmethod
-    def to_str(performance_measure: PerformanceMeasure) -> str:
-        """Return a given PerformanceMeasure as str."""
-        if performance_measure == PerformanceMeasure.DEFAULT:
-            return "DEFAULT"
-        if performance_measure == PerformanceMeasure.RUNTIME:
-            return "RUNTIME"
-        elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
-            return "QUALITY_ABSOLUTE"
-        elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
-            return "QUALITY_ABSOLUTE_MAXIMISATION"
-        elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-            return "QUALITY_ABSOLUTE_MINIMISATION"
-        return "ERR"
+
+class Metric:
+    """Metric for Sparkle objective."""
+
+    def __init__(self: Metric, metric: str) -> None:
+        """Initialize Metric."""
+        self.name = metric
+
+    def __str__(self: Metric) -> str:
+        """Return the name of the metric."""
+        return self.name
 
 
 class SparkleObjective():
@@ -59,16 +46,15 @@ class SparkleObjective():
             performance_measure, metric = performance_setting, ""
         else:
             performance_measure, metric = performance_setting.split(":")
-        self.PerformanceMeasure = PerformanceMeasure.from_str(performance_measure)
+        self.PerformanceMeasure = PerformanceMeasure(performance_measure)
         self.metric = metric
 
         if self.PerformanceMeasure == PerformanceMeasure.ERR:
             print(f"WARNING: Performance measure {performance_measure} not found!")
-        return
 
     def __str__(self: SparkleObjective) -> str:
         """Return a string of the format TYPE:METRIC."""
-        return f"{PerformanceMeasure.to_str(self.PerformanceMeasure)}:{self.metric}"
+        return f"{self.PerformanceMeasure}:{self.metric}"
 
     @staticmethod
     def from_multi_str(performance_setting: str) -> list[SparkleObjective]:

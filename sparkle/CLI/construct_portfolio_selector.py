@@ -173,7 +173,7 @@ if __name__ == "__main__":
                 print(f"Portfolio selector without {solver_name} constructed!")
             else:
                 print(f"Portfolio selector without {solver_name} constructor running...")
-    performance_str = PerformanceMeasure.to_str(perf_measure)
+    performance_str = str(perf_measure)
     with_actual = "--actual" if solver_ablation else ""
     cmd = (f"sparkle/CLI/compute_marginal_contribution.py --perfect {with_actual} "
            f"{ac.PerformanceMeasureArgument.names[0]} {performance_str}")
