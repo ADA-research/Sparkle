@@ -19,17 +19,17 @@ class PCSObject(ABC):
 
     def add_param(self: PCSObject,
                   name: str,
-                  structure: str = "int",
+                  structure: str = "integer",
                   domain: list = [-sys.maxsize, sys.maxsize],
                   scale: str = "linear",
                   default: str = "0",
                   comment: str = None) -> None:
         """Add a parameter to the PCSObject."""
-        if structure not in ["int", "real", "categorical", "ordinal"]:
+        if structure not in ["integer", "real", "categorical", "ordinal"]:
             raise ValueError(f"Parameter structure {structure} not supported.")
 
         # Domain check
-        if structure in ["int", "real"]:
+        if structure in ["integer", "real"]:
             if len(domain) != 2:
                 raise ValueError(f"Parameter domain {domain} not supported.")
             pass
