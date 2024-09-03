@@ -8,13 +8,13 @@ import ast
 import json
 from pathlib import Path
 
-import pcsparser
 import runrunner as rrr
 from runrunner.local import LocalRun
 from runrunner.slurm import SlurmRun
 from runrunner.base import Status, Runner
 
 from sparkle.tools import runsolver_parsing, general as tg
+from sparkle.tools import pcsparser
 from sparkle.types import SparkleCallable, SolverStatus
 from sparkle.platform import CommandName
 from sparkle.solver.verifier import SolutionVerifier
