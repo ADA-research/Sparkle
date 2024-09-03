@@ -9,6 +9,7 @@ Notable changes to Sparkle will be documented in this file.
 - Solver dict parsing hase been simplified [SPRK-310]
 - InstanceSet object has been expanded to now support ML task based data sets [SPRK-325]
 - RunRunner logging is now forwarded to CLI call log, all RunRunner generated files and logs are placed in the same dir instead of Tmp [SPRK-330]
+- PCSParser has been added to the Sparkle Tools instead of installed from Github [SPRK-334]
 
 ### Added
 - Generating a report now includes a JSON serialised version of all the output data [SPRK-79]
