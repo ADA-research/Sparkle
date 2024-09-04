@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-import math
 
 from sparkle.platform import latex as stex
 from sparkle.solver.ablation import AblationScenario
@@ -54,8 +53,6 @@ def get_par_performance(results: list[list[str]],
         PAR performance value
     """
     instance_per_dict = get_dict_instance_to_performance(results,
-                                                         float(cutoff),
-                                                         penalty,
                                                          objective)
     num_instances = len(instance_per_dict.keys())
     sum_par = sum(float(instance_per_dict[instance]) for instance in instance_per_dict)
@@ -63,8 +60,6 @@ def get_par_performance(results: list[list[str]],
 
 
 def get_dict_instance_to_performance(results: list[list[str]],
-                                     cutoff: int,
-                                     penalty: float,
                                      objective: SparkleObjective) -> dict[str, float]:
     """Return a dictionary of instance names and their performance.
 
@@ -83,9 +78,7 @@ def get_dict_instance_to_performance(results: list[list[str]],
     results_per_instance = {}
     for row in results:
         value = float(row[value_column])
-        if value > cutoff or math.isnan(value):
-            value = penalty
-        results_per_instance[Path(row[3]).name] = float(value)
+        results_per_instance[Path(row[3]).name] = value
     return results_per_instance
 
 
@@ -139,9 +132,9 @@ def get_data_for_plot(configured_results: list[list[str]],
         A list of lists containing data points
     """
     dict_instance_to_par_default = get_dict_instance_to_performance(
-        default_results, run_cutoff_time, penalty, objective)
+        default_results, objective)
     dict_instance_to_par_configured = get_dict_instance_to_performance(
-        configured_results, run_cutoff_time, penalty, objective)
+        configured_results, objective)
 
     instances = (dict_instance_to_par_default.keys()
                  & dict_instance_to_par_configured.keys())
@@ -274,9 +267,9 @@ def get_timeouts_instanceset(solver: Solver,
                                                 instance_set,
                                                 config=config)
     dict_instance_to_par_configured = get_dict_instance_to_performance(
-        res_conf, cutoff, penalty, objective)
+        res_conf, objective)
     dict_instance_to_par_default = get_dict_instance_to_performance(
-        res_default, cutoff, penalty, objective)
+        res_default, objective)
 
     return get_timeouts(dict_instance_to_par_configured,
                         dict_instance_to_par_default, penalty)
