@@ -15,19 +15,18 @@ from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.platform import COMMAND_DEPENDENCIES, CommandName
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help import argparse_custom as apc
 from sparkle.structures import FeatureDataFrame
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(*apc.RecomputeFeaturesArgument.names,
-                        **apc.RecomputeFeaturesArgument.kwargs)
-    parser.add_argument(*apc.SettingsFileArgument.names,
-                        **apc.SettingsFileArgument.kwargs)
-    parser.add_argument(*apc.RunOnArgument.names,
-                        **apc.RunOnArgument.kwargs)
+    parser.add_argument(*ac.RecomputeFeaturesArgument.names,
+                        **ac.RecomputeFeaturesArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
 
     return parser
 

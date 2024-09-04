@@ -3,7 +3,7 @@ from pathlib import Path
 import ast
 from typing import Any
 
-from sparkle.types.objective import SparkleObjective
+from sparkle.types import resolve_objective
 
 
 def parse_commandline_dict(args: list[str]) -> dict:
@@ -29,7 +29,8 @@ def parse_solver_wrapper_args(args: list[str]) -> dict[Any]:
     args_dict["solver_dir"] = Path(args_dict["solver_dir"])
     args_dict["instance"] = Path(args_dict["instance"])
     args_dict["seed"] = int(args_dict["seed"])
-    args_dict["objectives"] = SparkleObjective.from_multi_str(args_dict["objectives"])
+    args_dict["objectives"] = [resolve_objective(name)
+                               for name in args_dict["objectives"].split(",")]
 
     if "config_path" in args_dict:
         # The arguments were not directly given and must be parsed from a file

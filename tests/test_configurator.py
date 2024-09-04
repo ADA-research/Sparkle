@@ -15,7 +15,7 @@ from sparkle.instance import instance_set
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.implementations import SMAC2
-from sparkle.types.objective import SparkleObjective, PerformanceMeasure
+from sparkle.types.objective import SparkleObjective, PARk
 
 
 objectives = [SparkleObjective("RUNTIME:PAR10")]
@@ -101,7 +101,7 @@ class TestConfigurator():
         mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
                      return_value=csv_lines)
         opt_conf = smac2_conf.get_optimal_configuration(
-            solver, train_set, performance=PerformanceMeasure.RUNTIME)
+            solver, train_set, PARk(10))
 
         expect_conf = (25.87506525, "-init_solution '1' -p_swt '0.3' -perform_aspiration"
                        " '1' -perform_clause_weight '1' -perform_double_cc '1' "

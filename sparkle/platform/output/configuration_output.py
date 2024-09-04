@@ -62,7 +62,7 @@ class ConfigurationOutput:
         # Retrieve best found configuration
         objective = self.configurator.scenario.sparkle_objective
         _, self.best_config = self.configurator.get_optimal_configuration(
-            self.solver, self.instance_set_train, objective.PerformanceMeasure)
+            self.solver, self.instance_set_train, objective)
 
         # Retrieves validation results for all configurations
         self.validation_results = []
@@ -98,7 +98,7 @@ class ConfigurationOutput:
 
         # Retrieve found configuration
         _, best_config = self.configurator.get_optimal_configuration(
-            self.solver, instance_set, objective.PerformanceMeasure)
+            self.solver, instance_set, objective)
 
         # Retrieve validation results
         validator = Validator(self.directory)

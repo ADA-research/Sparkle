@@ -10,7 +10,7 @@ from sparkle.platform import generate_report_for_configuration as sgrch
 from sparkle.platform.settings_objects import Settings
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.validator import Validator
-from sparkle.types.objective import PerformanceMeasure, SparkleObjective
+from sparkle.types.objective import SparkleObjective, PARk
 from sparkle.solver import Solver
 from sparkle.instance import instance_set
 import csv
@@ -30,8 +30,8 @@ configurator.scenario._set_paths(configurator_path)
 ablation_scenario = AblationScenario(
     solver, Path(train_instance), Path(test_instance), Path(""))
 validator = Validator()
-test_objective_runtime = SparkleObjective("RUNTIME:PAR10")
-test_objective_quality = SparkleObjective("QUALITY_ABSOLUTE:ACCURACY")
+test_objective_runtime = PARk(10)
+test_objective_quality = SparkleObjective("ACCURACY")
 
 
 def test_get_par_performance(mocker: MockFixture) -> None:
@@ -584,8 +584,6 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                  "get_optimal_configuration", return_value=(0.0, "configurino"))
     configurator.scenario.cutoff_time = 60
     configurator.scenario.sparkle_objective = test_objective_quality
-    t = SparkleObjective("QUALITY_ABSOLUTE:ACCURACY")
-    print(t)
     test_dict = sgrch.get_dict_variable_to_value_test(Path("configuration/report"),
                                                       solver,
                                                       configurator,
@@ -597,7 +595,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
 
     mock_figure.assert_called_once_with(
         solver, test_set.name, validation_data, validation_data,
-        Path("configuration/report"), PerformanceMeasure.QUALITY, float(cutoff), 1,
+        Path("configuration/report"), test_objective_quality, float(cutoff), 1,
         test_objective_quality, data_type="test")
     mock_timeouts.assert_called_once_with(
         solver, test_set, configurator, validator, float(cutoff), 60)

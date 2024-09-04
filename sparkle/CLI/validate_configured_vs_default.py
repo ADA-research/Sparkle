@@ -35,8 +35,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstanceSetTestArgument.kwargs)
     parser.add_argument(*ac.ConfiguratorArgument.names,
                         **ac.ConfiguratorArgument.kwargs)
-    parser.add_argument(*ac.PerformanceMeasureArgument.names,
-                        **ac.PerformanceMeasureArgument.kwargs)
     parser.add_argument(*ac.SparkleObjectiveArgument.names,
                         **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeValidationArgument.names,
@@ -86,12 +84,6 @@ if __name__ == "__main__":
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
 
-    if ac.set_by_user(args, "performance_measure"):
-        set_str = ",".join([args.performance_measure + ":" + o.metric for o in
-                            gv.settings().get_general_sparkle_objectives()])
-        gv.settings().set_general_sparkle_objectives(
-            set_str, SettingState.CMD_LINE
-        )
     if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
             args.objectives, SettingState.CMD_LINE
@@ -110,7 +102,7 @@ if __name__ == "__main__":
     objective = gv.settings().get_general_sparkle_objectives()[0]
     # Record optimised configuration
     _, opt_config_str = configurator.get_optimal_configuration(
-        solver, instance_set_train, objective.PerformanceMeasure)
+        solver, instance_set_train, objective)
     opt_config = Solver.config_str_to_dict(opt_config_str)
 
     validator = Validator(gv.settings().DEFAULT_validation_output, sl.caller_log_dir)

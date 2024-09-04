@@ -8,15 +8,15 @@ from pathlib import Path
 from runrunner import Runner
 
 from sparkle.CLI.help import global_variables as gv
+from sparkle.CLI.help import argparse_custom as ac
 import sparkle.tools.general as tg
 from sparkle.solver import Solver
 from sparkle.instance import instance_set
-from sparkle.types.objective import PerformanceMeasure
+from sparkle.types import resolve_objective
 from sparkle.structures import PerformanceDataFrame
 
 
 if __name__ == "__main__":
-    perf_measure = gv.settings().DEFAULT_general_sparkle_objective.PerformanceMeasure
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--performance-data", required=True, type=Path,
@@ -24,9 +24,8 @@ if __name__ == "__main__":
     parser.add_argument("--instance", required=True, type=str,
                         help="path to instance to run on")
     parser.add_argument("--solver", required=True, type=Path, help="path to solver")
-    parser.add_argument("--performance-measure", choices=PerformanceMeasure.__members__,
-                        default=perf_measure,
-                        help="the performance measure, e.g. runtime")
+    parser.add_argument(*ac.SparkleObjectiveArgument.names,
+                        **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument("--log-dir", type=Path, required=False,
                         help="path to the log directory")
     parser.add_argument("--seed", type=str, required=False,
@@ -46,7 +45,6 @@ if __name__ == "__main__":
 
     verifier = gv.settings().get_general_solution_verifier()
     solver = Solver(args.solver, verifier=verifier)
-    performance_measure = PerformanceMeasure(args.performance_measure)
     key_str = f"{solver.name}_{instance_name}_{tg.get_time_pid_random_string()}"
     cutoff = gv.settings().get_general_target_cutoff_time()
 
@@ -58,12 +56,11 @@ if __name__ == "__main__":
         cwd=cwd,
         run_on=Runner.LOCAL)
 
-    if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
-        measurement = solver_output["quality"]  # TODO: Handle the multi-objective case
-    elif performance_measure == PerformanceMeasure.RUNTIME:
+    objectives = resolve_objective(args.objectives)
+    if objectives[0].time:
         measurement = solver_output["cpu_time"]
     else:
-        print(f"*** ERROR: Unknown performance measure detected: {performance_measure}")
+        measurement = solver_output["quality"]  # TODO: Handle the multi-objective case
     # Now that we have all the results, we can add them to the performance dataframe
     lock = FileLock(f"{args.performance_data}.lock")  # Lock the file
     with lock.acquire(timeout=60):

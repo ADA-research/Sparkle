@@ -11,7 +11,6 @@ from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.platform import \
     generate_report_for_configuration as sgrfch
 from sparkle.CLI.help import logging as sl
-from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.reporting_scenario import Scenario
@@ -53,8 +52,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(*ac.TestCaseDirectoryArgument.names,
                         **ac.TestCaseDirectoryArgument.kwargs)
     # Common arguments
-    parser.add_argument(*ac.PerformanceMeasureArgument.names,
-                        **ac.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*ac.SparkleObjectiveArgument.names,
+                        **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
     parser.add_argument(*ac.GenerateJSONArgument.names,
@@ -98,9 +97,9 @@ if __name__ == "__main__":
         gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )
-    if ac.set_by_user(args, "performance_measure"):
+    if ac.set_by_user(args, "objectives"):
         gv.settings().set_general_sparkle_objectives(
-            args.performance_measure, SettingState.CMD_LINE)
+            args.objectives, SettingState.CMD_LINE)
 
     # If no arguments are set get the latest scenario
     if not selection and test_case_dir is None and solver is None:
@@ -122,12 +121,10 @@ if __name__ == "__main__":
 
     # Reporting for algorithm selection
     if selection or test_case_dir is not None:
-        performance_measure =\
-            gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
-        if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or \
-           performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-            print("ERROR: The generate_report command is not yet implemented for the"
-                  " QUALITY_ABSOLUTE performance measure! (functionality coming soon)")
+        objective = gv.settings().get_general_sparkle_objectives()[0]
+        if not objective.time:
+            print("ERROR: The selection report is not implemented for "
+                  " non-runtime objectives!")
             sys.exit(-1)
         selection_scenario = gv.latest_scenario().get_selection_scenario_path()
         actual_portfolio_selector_path = selection_scenario / "portfolio_selector"

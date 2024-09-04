@@ -12,7 +12,6 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.types.objective import PerformanceMeasure
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.help.reporting_scenario import Scenario
@@ -31,8 +30,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
-    parser.add_argument(*ac.PerformanceMeasureArgument.names,
-                        **ac.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*ac.SparkleObjectiveArgument.names,
+                        **ac.SparkleObjectiveArgument.kwargs)
 
     return parser
 
@@ -62,16 +61,15 @@ if __name__ == "__main__":
         gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
-    if ac.set_by_user(args, "performance_measure"):
-        gv.settings().set_general_sparkle_objectives(args.performance_measure,
+    if ac.set_by_user(args, "objectives"):
+        gv.settings().set_general_sparkle_objectives(args.objectives,
                                                      SettingState.CMD_LINE)
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
     Settings.check_settings_changes(gv.settings(), prev_settings)
 
-    if gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure\
-            == PerformanceMeasure.QUALITY_ABSOLUTE:
+    if not gv.settings().get_general_sparkle_objectives()[0].time:
         print("ERROR: The run_portfolio_selector command is not yet implemented"
               " for the QUALITY_ABSOLUTE performance measure!")
         sys.exit(-1)

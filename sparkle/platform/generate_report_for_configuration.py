@@ -14,7 +14,7 @@ from sparkle.configurator.configurator import Configurator, ConfigurationScenari
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.configurator.implementations import SMAC2
-from sparkle.types.objective import SparkleObjective, PerformanceMeasure
+from sparkle.types import SparkleObjective
 from sparkle import about
 
 
@@ -77,7 +77,7 @@ def get_dict_instance_to_performance(results: list[list[str]],
         A dictionary containing the performance for each instance
     """
     value_column = -1  # Last column is runtime
-    if objective.PerformanceMeasure != PerformanceMeasure.RUNTIME:
+    if objective.time:
         # Quality column
         value_column = -2
     results_per_instance = {}
@@ -96,7 +96,7 @@ def get_performance_measure(objective: SparkleObjective,
     Returns:
         A string containing the performance measure
     """
-    smac_run_obj = SMAC2.get_smac_run_obj(objective.PerformanceMeasure)
+    smac_run_obj = SMAC2.get_smac_run_obj(objective)
 
     if smac_run_obj == "RUNTIME":
         return f"PAR{penalty_multiplier}"
@@ -266,7 +266,7 @@ def get_timeouts_instanceset(solver: Solver,
     """
     objective = configurator.scenario.sparkle_objective
     _, config = configurator.get_optimal_configuration(
-        solver, instance_set, objective.PerformanceMeasure)
+        solver, instance_set, objective)
     res_default = validator.get_validation_results(solver,
                                                    instance_set,
                                                    config="")
@@ -439,7 +439,7 @@ def get_dict_variable_to_value_common(solver: Solver,
     """
     objective = configurator.scenario.sparkle_objective
     _, opt_config = configurator.get_optimal_configuration(
-        solver, train_set, objective.PerformanceMeasure)
+        solver, train_set, objective)
     res_default = validator.get_validation_results(
         solver, train_set, config="")
     res_conf = validator.get_validation_results(
@@ -449,7 +449,7 @@ def get_dict_variable_to_value_common(solver: Solver,
     latex_dict = {"bibliographypath": bibliography_path.absolute()}
     latex_dict["performanceMeasure"] = get_performance_measure(objective,
                                                                penalty_multiplier)
-    smac_run_obj = SMAC2.get_smac_run_obj(objective.PerformanceMeasure)
+    smac_run_obj = SMAC2.get_smac_run_obj(objective)
 
     if smac_run_obj == "RUNTIME":
         latex_dict["runtimeBool"] = "\\runtimetrue"
@@ -517,7 +517,7 @@ def get_dict_variable_to_value_test(target_dir: Path,
         A dictionary containting the variables and their values
     """
     _, config = configurator.get_optimal_configuration(
-        solver, train_set, configurator.scenario.sparkle_objective.PerformanceMeasure)
+        solver, train_set, configurator.scenario.sparkle_objective)
     res_default = validator.get_validation_results(
         solver, test_set, config="")
     res_conf = validator.get_validation_results(
@@ -533,7 +533,7 @@ def get_dict_variable_to_value_test(target_dir: Path,
     test_dict["defaultConfigurationTestingPerformancePAR"] =\
         get_par_performance(res_default, run_cutoff_time, penalty, objective)
     smac_run_obj = SMAC2.get_smac_run_obj(
-        configurator.scenario.sparkle_objective.PerformanceMeasure)
+        configurator.scenario.sparkle_objective)
     test_dict["figure-configured-vs-default-test"] =\
         get_figure_configured_vs_default_on_instance_set(
         solver, test_set.name, res_default, res_conf, target_dir, smac_run_obj,

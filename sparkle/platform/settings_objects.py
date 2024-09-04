@@ -8,7 +8,8 @@ from typing import Callable
 import builtins
 import statistics
 
-from sparkle.types.objective import SparkleObjective
+from sparkle.types import SparkleObjective, resolve_objective
+from sparkle.types.objective import PARk
 from sparkle.solver import Selector
 from sparkle.configurator.configurator import Configurator
 from sparkle.solver.verifier import SATVerifier
@@ -114,7 +115,7 @@ class Settings:
         DEFAULT_performance_data / "performance_data.csv"
 
     # Constant default values
-    DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")
+    DEFAULT_general_sparkle_objective = PARk(10)
     DEFAULT_general_sparkle_configurator = cim.SMAC2.__name__
     DEFAULT_general_solution_verifier = str(None)
     DEFAULT_general_target_cutoff_time = 60
@@ -195,8 +196,8 @@ class Settings:
             option_names = ("objective", "smac_run_obj")
             for option in option_names:
                 if file_settings.has_option(section, option):
-                    value = SparkleObjective.from_multi_str(
-                        file_settings.get(section, option))
+                    value = [resolve_objective(obj) for obj in
+                             file_settings.get(section, option).split(",")]
                     self.set_general_sparkle_objectives(value, state)
                     file_settings.remove_option(section, option)
 
@@ -422,7 +423,7 @@ class Settings:
     # General settings ###
     def set_general_sparkle_objectives(
             self: Settings,
-            value: str | list[SparkleObjective] = [DEFAULT_general_sparkle_objective, ],
+            value: list[SparkleObjective] = [DEFAULT_general_sparkle_objective, ],
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the sparkle objective."""
         section = "general"
@@ -431,6 +432,8 @@ class Settings:
                 self.__general_sparkle_objective_set, origin, name):
             if isinstance(value, list):
                 value = ",".join([str(obj) for obj in value])
+            else:
+                value = str(value)
             self.__init_section(section)
             self.__general_sparkle_objective_set = origin
             self.__settings[section][name] = value
@@ -440,8 +443,8 @@ class Settings:
         if self.__general_sparkle_objective_set == SettingState.NOT_SET:
             self.set_general_sparkle_objectives()
 
-        return SparkleObjective.from_multi_str(
-            self.__settings["general"]["objective"])
+        return [resolve_objective(obj)
+                for obj in self.__settings["general"]["objective"].split(",")]
 
     def set_general_sparkle_configurator(
             self: Settings,

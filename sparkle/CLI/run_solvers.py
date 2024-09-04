@@ -24,8 +24,8 @@ def parser_function() -> argparse.ArgumentParser:
 
     parser.add_argument(*ac.RecomputeRunSolversArgument.names,
                         **ac.RecomputeRunSolversArgument.kwargs)
-    parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
-                        **ac.PerformanceMeasureSimpleArgument.kwargs)
+    parser.add_argument(*ac.SparkleObjectiveArgument.names,
+                        **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeRunSolversArgument.names,
                         **ac.TargetCutOffTimeRunSolversArgument.kwargs)
     parser.add_argument(*ac.AlsoConstructSelectorAndReportArgument.names,
@@ -86,12 +86,12 @@ def running_solvers_performance_data(
 
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     srun_options = ["-N1", "-n1"] + sbatch_options
-    perf_m = gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
+    objective = gv.settings().get_general_sparkle_objectives()[0]
     run_solvers_core = Path(__file__).parent.resolve() / "core" / "run_solvers_core.py"
     cmd_list = [f"{run_solvers_core} "
                 f"--performance-data {performance_data_csv_path} "
                 f"--instance {inst_p} --solver {solver_p} "
-                f"--performance-measure {perf_m.name} "
+                f"--objectives {objective} "
                 f"--log-dir {sl.caller_log_dir}" for inst_p, solver_p in jobs]
 
     run = rrr.add_to_queue(

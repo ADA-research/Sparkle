@@ -7,7 +7,7 @@ from pathlib import Path
 from runrunner import Runner
 
 from sparkle.solver import Solver
-from sparkle.types.objective import SparkleObjective, PerformanceMeasure
+from sparkle.types import resolve_objective
 
 
 if __name__ == "__main__":
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # Args 1-7 conditions of the run, the rest are configurations for the solver
     # [Solver_dir, SparkleObjective, instance, specifics, cutoff_time, runlength, seed]
     solver_dir = Path(sys.argv[1])
-    objectives = SparkleObjective.from_multi_str(sys.argv[2])
+    objective = resolve_objective(sys.argv[2])
     instance = sys.argv[3]
     cutoff_time = float(sys.argv[5])
     seed = int(sys.argv[7])
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     # Call Runsolver with the solver configurator wrapper and its arguments
     start_t = time.time()
     output = solver.run(instance=instance,
-                        objectives=objectives,
+                        objectives=[objective],
                         seed=seed,
                         cutoff_time=cutoff_time,
                         configuration=configuration,
@@ -53,8 +53,7 @@ if __name__ == "__main__":
                 # Not a number
                 quality = "0"
     # SMAC2 does not do maximisation, auto-convert
-    if (objectives[0].PerformanceMeasure
-            == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION):
+    if not objective.minimise:
         quality = -1 * float(quality)
     print("Result for SMAC: "
-          f"{output['status']}, {output['runtime']}, 0, {quality}, {seed}")
+          f"{output['status']}, {output['cpu_time']}, 0, {quality}, {seed}")

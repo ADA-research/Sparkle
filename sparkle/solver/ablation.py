@@ -78,7 +78,7 @@ class AblationScenario:
         objective = gv.settings().get_general_sparkle_objectives()[0]
         configurator = gv.settings().get_general_sparkle_configurator()
         _, opt_config_str = configurator.get_optimal_configuration(
-            self.solver, self.train_set, performance=objective.PerformanceMeasure)
+            self.solver, self.train_set, objective=objective)
 
         # We need to check which params are missing and supplement with default values
         pcs = self.solver.get_pcs()
@@ -96,7 +96,7 @@ class AblationScenario:
                 formatted = format(ctx.create_decimal(float_value), "f")
                 opt_config_str = opt_config_str.replace(value, formatted)
 
-        smac_run_obj = SMAC2.get_smac_run_obj(objective.PerformanceMeasure)
+        smac_run_obj = SMAC2.get_smac_run_obj(objective)
         objective_str = "MEAN10" if smac_run_obj == "RUNTIME" else "MEAN"
         run_cutoff_time = gv.settings().get_general_target_cutoff_time()
         run_cutoff_length = gv.settings().get_configurator_target_cutoff_length()

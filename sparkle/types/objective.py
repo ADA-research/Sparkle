@@ -49,6 +49,11 @@ class SparkleObjective:
         """Return a stringified version."""
         return f"{self.name}"
 
+    @property
+    def time(self: SparkleObjective) -> bool:
+        """Return whether the objective is time based."""
+        return self.use_time != UseTime.NO
+
 
 class PARk(SparkleObjective):
     """Penalised Averaged Runtime Objective for Sparkle."""

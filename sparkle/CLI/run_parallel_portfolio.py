@@ -22,7 +22,6 @@ from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
-from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
 from sparkle.instance import instance_set, InstanceSet
@@ -183,8 +182,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.NicknamePortfolioArgument.kwargs)
     parser.add_argument(*ac.SolversArgument.names,
                         **ac.SolversArgument.kwargs)
-    parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
-                        **ac.PerformanceMeasureSimpleArgument.kwargs)
+    parser.add_argument(*ac.SparkleObjectiveArgument.names,
+                        **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.CutOffTimeArgument.names,
                         **ac.CutOffTimeArgument.kwargs)
     parser.add_argument(*ac.SolverSeedsArgument.names,
@@ -257,14 +256,12 @@ if __name__ == "__main__":
         gv.settings().set_general_target_cutoff_time(args.cutoff_time,
                                                      SettingState.CMD_LINE)
 
-    if args.performance_measure is not None:
+    if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
-            args.performance_measure, SettingState.CMD_LINE)
-    if gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure\
-            is not PerformanceMeasure.RUNTIME:
+            args.objectives, SettingState.CMD_LINE)
+    if not gv.settings().get_general_sparkle_objectives()[0].time:
         print("ERROR: Parallel Portfolio is currently only relevant for "
-              f"{PerformanceMeasure.RUNTIME} measurement. In all other cases, "
-              "use validation")
+              "RunTime objectives. In all other cases, use validation")
         sys.exit(-1)
 
     if args.portfolio_name is not None:  # Use a nickname

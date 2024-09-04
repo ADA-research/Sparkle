@@ -28,7 +28,10 @@ def resolve_objective(name: str) -> SparkleObjective:
     Returns:
         Instance of the Objective class or None if not found.
     """
-    # First try to resolve the user input classes
+    minimise = True
+    if ":" in name:
+        name, minimise = name.split(":")
+        minimise = not (minimise.lower() == "max")
     match = class_name_regex.fullmatch(name)
     argument = None
     if match is None:
@@ -37,6 +40,7 @@ def resolve_objective(name: str) -> SparkleObjective:
         # If the name contains an argument, substitute it with 'k' for matching
         name = name.replace(match.groups()[0], "") + "k"
         argument = int(match.groups()[0])
+    # First try to resolve the user input classes
     try:
         user_module = importlib.import_module("Settings.objective")
         for o_name, o_class in inspect.getmembers(user_module,
@@ -55,6 +59,6 @@ def resolve_objective(name: str) -> SparkleObjective:
                 return o_class(argument)
             return o_class()
     if argument is None:
-        return SparkleObjective(name=name)
+        return SparkleObjective(name=name, minimise=minimise)
     # Argument was given but cannot be passed
     return None

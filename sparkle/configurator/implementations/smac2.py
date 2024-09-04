@@ -20,7 +20,7 @@ from sparkle.platform import CommandName
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
 from sparkle.instance import InstanceSet
-from sparkle.types.objective import PerformanceMeasure, SparkleObjective
+from sparkle.types import SparkleObjective
 
 
 class SMAC2(Configurator):
@@ -125,7 +125,7 @@ class SMAC2(Configurator):
             self: Configurator,
             solver: Solver,
             instance_set: InstanceSet,
-            performance: PerformanceMeasure = None,
+            objective: SparkleObjective = None,
             aggregate_config: Callable = mean) -> tuple[float, str]:
         """Returns optimal value and configuration string of solver on instance set."""
         if self.scenario is None:
@@ -139,24 +139,15 @@ class SMAC2(Configurator):
         configurations = list(set(row[1] for row in results))
         column = -2  # Quality column
         config_scores = []
-        if performance == PerformanceMeasure.RUNTIME:
+        if objective is None:
+            objective = self.objectives[0]
+        if objective.time:
             column = -1
         for config in configurations:
             values = [float(row[column]) for row in results if row[1] == config]
             config_scores.append(aggregate_config(values))
 
-        # Now determine which is the best based on the perf measure
-        if performance is None:
-            performance = self.objectives[0].PerformanceMeasure
-        if performance == PerformanceMeasure.RUNTIME or performance ==\
-                PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-            comparison = operator.lt
-        elif performance == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
-            comparison = operator.gt
-        else:
-            print(f"[ERROR] Performance Measure {performance} not detected. "
-                  "Can not determine optimal configuration.")
-            return
+        comparison = operator.lt if objective.minimise else operator.gt
 
         # Return optimal value
         min_index = 0
@@ -196,21 +187,15 @@ class SMAC2(Configurator):
         self.scenario._set_paths(self.output_path)
 
     @staticmethod
-    def get_smac_run_obj(smac_run_obj: PerformanceMeasure) -> str:
+    def get_smac_run_obj(objective: SparkleObjective) -> str:
         """Return the SMAC run objective based on the Performance Measure.
 
         Returns:
             A string that represents the run objective set in the settings.
         """
-        if smac_run_obj == PerformanceMeasure.RUNTIME:
-            return smac_run_obj.name
-        elif smac_run_obj == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-            return "QUALITY"
-        elif smac_run_obj == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
-            print(f"Warning: Performance measure not available for SMAC: {smac_run_obj}")
-        else:
-            print(f"Warning: Unknown SMAC objective {smac_run_obj}")
-        return smac_run_obj
+        if objective.time:
+            return "RUNTIME"
+        return "QUALITY"
 
     def get_status_from_logs(self: SMAC2) -> None:
         """Method to scan the log files of the configurator for warnings."""

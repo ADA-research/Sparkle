@@ -9,7 +9,7 @@ import plotly.io as pio
 
 from sparkle.platform import latex as stex
 from sparkle.platform import generate_report_for_selection as sgfs
-from sparkle.types.objective import PerformanceMeasure, SparkleObjective
+from sparkle.types import SparkleObjective
 from sparkle.instance import InstanceSet
 
 
@@ -321,7 +321,7 @@ def parallel_report_variables(target_directory: Path,
         dict_actual_parallel_portfolio_penalty_time_on_each_instance,
         solvers_solutions, unsolved_instances, instance_set.size, objective.metric)
 
-    if objective.PerformanceMeasure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
+    if objective.minimise:
         variables_dict["decisionBool"] = "\\decisionfalse"
     else:
         variables_dict["decisionBool"] = "\\decisiontrue"
