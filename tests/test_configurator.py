@@ -15,17 +15,17 @@ from sparkle.instance import instance_set
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.implementations import SMAC2
-from sparkle.types.objective import SparkleObjective, PARk
+from sparkle.types.objective import PARk
 
 
-objectives = [SparkleObjective("RUNTIME:PAR10")]
+sparkle_objective = PARk(10)
+objectives = [sparkle_objective]
 test_files = Path("tests", "test_files")
 base_dir = test_files / "tmp"
 output = Path("Output")
 smac2_conf = SMAC2(objectives, base_dir, output)
 train_set = instance_set(test_files / "Instances/Train-Instance-Set")
 solver = Solver(test_files / "Solvers/Test-Solver")
-sparkle_objective = SparkleObjective("RUNTIME:PAR10")
 conf_scenario = ConfigurationScenario(
     solver, train_set,
     number_of_runs=2,
@@ -52,7 +52,7 @@ class TestConfigurator():
             configurator_target=None,
             base_dir=Path(),
             tmp_path=Path(),
-            objectives=[SparkleObjective("RUNTIME:PAR10")])
+            objectives=objectives)
 
         assert configurator.executable_path == exec_path
 
