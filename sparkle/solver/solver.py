@@ -316,5 +316,5 @@ class Solver(SparkleCallable):
                     parsed_output[key] = parsed_output["wall_time"]
                 if objective.post_process is not None:
                     parsed_output[objective] = objective.post_process(
-                        value, solver_output["cutoff_time"])
+                        value, parsed_output["cutoff_time"])
         return parsed_output
