@@ -1,63 +1,66 @@
 """Class for Sparkle Objective and Performance."""
 from __future__ import annotations
 from enum import Enum
+import typing
+import numpy as np
 
 
-class PerformanceMeasure(str, Enum):
-    """Possible performance measures."""
-    ERR = "ERR"
-    DEFAULT = "DEFAULT"
-    RUNTIME = "RUNTIME"
-    QUALITY_ABSOLUTE = "QUALITY_ABSOLUTE_MINIMISATION"
-    QUALITY_ABSOLUTE_MINIMISATION = "QUALITY_ABSOLUTE_MINIMISATION"
-    QUALITY_ABSOLUTE_MAXIMISATION = "QUALITY_ABSOLUTE_MAXIMISATION"
+class UseTime(str, Enum):
+    """Use time or not."""
+    WALL_TIME = "WALL_TIME"
+    CPU_TIME = "CPU_TIME"
+    NO = "NO"
 
     @classmethod
-    def _missing_(cls: PerformanceMeasure, value: object) -> PerformanceMeasure:
-        """Return error performance measure."""
-        return PerformanceMeasure.ERR
+    def _missing_(cls: UseTime, value: object) -> UseTime:
+        """Return error use time."""
+        return UseTime.NO
 
 
-class Metric:
-    """Metric for Sparkle objective."""
+class SparkleObjective:
+    """Objective for Sparkle specified by user."""
 
-    def __init__(self: Metric, metric: str) -> None:
-        """Initialize Metric."""
-        self.name = metric
+    name: str
+    run_aggregator: typing.Callable
+    instance_aggregator: typing.Callable
+    solver_aggregator: typing.Callable
+    minimise: bool
+    post_process: typing.Callable
+    use_time: UseTime
 
-    def __str__(self: Metric) -> str:
-        """Return the name of the metric."""
-        return self.name
-
-
-class SparkleObjective():
-    """Objective for Sparkle specified by user.
-
-    Specified in settings.ini's [general] performance_measure.
-    Contains the type of Performance Measure, and the type of metric.
-    """
-
-    def __init__(self: SparkleObjective, performance_setting: str) -> None:
-        """Create sparkle objective from string of format TYPE:METRIC."""
-        self.name = performance_setting
-        if ":" not in performance_setting:
-            print(f"WARNING: Objective {performance_setting} not fully specified. "
-                  "Continuing with default values.")
-            performance_measure, metric = performance_setting, ""
-        else:
-            performance_measure, metric = performance_setting.split(":")
-        self.PerformanceMeasure = PerformanceMeasure(performance_measure)
-        self.metric = metric
-
-        if self.PerformanceMeasure == PerformanceMeasure.ERR:
-            print(f"WARNING: Performance measure {performance_measure} not found!")
+    def __init__(self: SparkleObjective,
+                 name: str,
+                 run_aggregator: typing.Callable = np.mean,
+                 instance_aggregator: typing.Callable = np.mean,
+                 solver_aggregator: typing.Callable = np.mean,
+                 minimise: bool = True,
+                 post_process: typing.Callable = None,
+                 use_time: UseTime = UseTime.NO) -> None:
+        """Create sparkle objective from string."""
+        self.name = name
+        self.run_aggregator: typing.Callable = run_aggregator
+        self.instance_aggregator: typing.Callable = instance_aggregator
+        self.solver_aggregator: typing.Callable = solver_aggregator
+        self.minimise: bool = minimise
+        self.post_process: typing.Callable = post_process
+        self.use_time: UseTime = use_time
 
     def __str__(self: SparkleObjective) -> str:
-        """Return a string of the format TYPE:METRIC."""
-        return f"{self.PerformanceMeasure}:{self.metric}"
+        """Return a stringified version."""
+        return f"{self.name}"
 
-    @staticmethod
-    def from_multi_str(performance_setting: str) -> list[SparkleObjective]:
-        """Create one or more Objectives from the settings string."""
-        objectives_str = performance_setting.split(",")
-        return [SparkleObjective(objective.strip()) for objective in objectives_str]
+
+class PARk(SparkleObjective):
+    """Penalised Averaged Runtime Objective for Sparkle."""
+
+    def __init__(self: PARk, k: int) -> None:
+        """Initialize PARk."""
+        self.k = k
+
+        def penalise(values: np.array[np.float]) -> list[float]:
+            """Return penalised values."""
+            mask = values > self.cutoff
+            values[mask] = self.cutoff * self.k
+            return values
+
+        super().__init__(f"PAR{k}", use_time=UseTime.WALL_TIME, post_process=penalise)

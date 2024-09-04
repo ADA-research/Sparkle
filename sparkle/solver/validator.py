@@ -149,7 +149,7 @@ class Validator():
                                              instance_path.name,
                                              out_dict["status"],
                                              out_dict["quality"],
-                                             out_dict["runtime"],
+                                             out_dict["cpu_time"],
                                              subdir=subdir)
                     res.unlink()
                     res.with_suffix(".val").unlink(missing_ok=True)

@@ -32,8 +32,6 @@ ablation_scenario = AblationScenario(
 validator = Validator()
 test_objective_runtime = SparkleObjective("RUNTIME:PAR10")
 test_objective_quality = SparkleObjective("QUALITY_ABSOLUTE:ACCURACY")
-test_objective_err = SparkleObjective("ERR:ERR")
-test_objective_err.PerformanceMeasure = PerformanceMeasure.ERR
 
 
 def test_get_par_performance(mocker: MockFixture) -> None:
@@ -586,6 +584,8 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                  "get_optimal_configuration", return_value=(0.0, "configurino"))
     configurator.scenario.cutoff_time = 60
     configurator.scenario.sparkle_objective = test_objective_quality
+    t = SparkleObjective("QUALITY_ABSOLUTE:ACCURACY")
+    print(t)
     test_dict = sgrch.get_dict_variable_to_value_test(Path("configuration/report"),
                                                       solver,
                                                       configurator,
@@ -597,7 +597,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
 
     mock_figure.assert_called_once_with(
         solver, test_set.name, validation_data, validation_data,
-        Path("configuration/report"), "QUALITY", float(cutoff), 1,
+        Path("configuration/report"), PerformanceMeasure.QUALITY, float(cutoff), 1,
         test_objective_quality, data_type="test")
     mock_timeouts.assert_called_once_with(
         solver, test_set, configurator, validator, float(cutoff), 60)

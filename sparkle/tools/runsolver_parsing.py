@@ -11,19 +11,19 @@ from sparkle.types import SolverStatus
 def get_runtime(runsolver_values_path: Path,
                 not_found: float = -1.0) -> tuple[float, float]:
     """Return the CPU and wallclock time reported by runsolver in values log."""
-    cpu_time, wc_time = not_found, not_found
+    cpu_time, wall_time = not_found, not_found
     if runsolver_values_path.exists():
         with runsolver_values_path.open("r") as infile:
             lines = [line.strip().split("=") for line in infile.readlines()
                      if line.count("=") == 1]
             for keyword, value in lines:
                 if keyword == "WCTIME":
-                    wc_time = float(value)
+                    wall_time = float(value)
                 elif keyword == "CPUTIME":
                     cpu_time = float(value)
                     # Order is fixed, CPU is the last thing we want to read, so break
                     break
-    return cpu_time, wc_time
+    return cpu_time, wall_time
 
 
 def get_status(runsolver_values_path: Path, runsolver_raw_path: Path) -> SolverStatus:
@@ -66,6 +66,7 @@ def get_solver_output(runsolver_configuration: list[str],
                       process_output: str,
                       log_dir: Path) -> dict[str, str | object]:
     """Decode solver output dictionary when called with runsolver."""
+    solver_input = None
     solver_output = ""
     value_data_file = None
     cutoff_time = sys.maxsize
@@ -83,6 +84,15 @@ def get_solver_output(runsolver_configuration: list[str],
             value_data_file = Path(runsolver_configuration[idx + 1])
         if "--cpu-limit" in conf:
             cutoff_time = float(runsolver_configuration[idx + 1])
+        if "-w" in conf or "--watcher-data" in conf:
+            watch_file = Path(runsolver_configuration[idx + 1])
+            contents = (log_dir / watch_file).open("r").readlines()
+            runsolver_call = " ".join(str(c) for c in runsolver_configuration)
+            for line in contents:
+                if runsolver_call in line:
+                    solver_input = re.findall("{.*}", line)[0]
+                    solver_input = ast.literal_eval(solver_input)
+                    break
 
     if solver_output == "":
         # Still empty, try to read from subprocess
@@ -97,18 +107,17 @@ def get_solver_output(runsolver_configuration: list[str],
               f"Assuming TIMEOUT.")
         output_dict = {"status": SolverStatus.TIMEOUT, "quality": math.nan}
 
+    output_dict["cutoff_time"] = cutoff_time
     if value_data_file is not None:
-        cpu_time, wc_time = get_runtime(log_dir / value_data_file)
+        cpu_time, wall_time = get_runtime(log_dir / value_data_file)
         output_dict["cpu_time"] = cpu_time
-        output_dict["wc_time"] = wc_time
-        output_dict["runtime"] = cpu_time
-        if cpu_time == -1.0:
-            # If we don't have cpu time, try to fall back on wc
-            output_dict["runtime"] = wc_time
-    else:
-        output_dict["runtime"] = math.nan
-
-    if output_dict["runtime"] > cutoff_time:
+        output_dict["wall_time"] = wall_time
+    if output_dict["cpu_time"] > cutoff_time:
         output_dict["status"] = SolverStatus.TIMEOUT
-
+    # Add the missing objectives (runtime based)
+    if solver_input is not None and "objectives" in solver_input:
+        objectives = solver_input["objectives"]
+        for o_name in objectives:
+            if o_name not in output_dict:
+                output_dict[o_name] = None
     return output_dict

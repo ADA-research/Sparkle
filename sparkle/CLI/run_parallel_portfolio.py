@@ -80,7 +80,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
     instances_done = [False] * num_instances
     # We record the 'best' of all seed results per solver-instance
     job_output_dict = {instance_name: {solver.name: {"cpu_time": float(sys.maxsize),
-                                                     "wc_time": float(sys.maxsize),
+                                                     "wall_time": float(sys.maxsize),
                                                      "status": SolverStatus.UNKNOWN}
                                        for solver in solvers}
                        for instance_name in instances_set._instance_names}
@@ -123,10 +123,10 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         if "cpu_time" not in solver_output:
             cpu_time, wc_time = -1.0, -1.0
         else:
-            cpu_time, wc_time = solver_output["cpu_time"], solver_output["wc_time"]
+            cpu_time, wc_time = solver_output["cpu_time"], solver_output["wall_time"]
         if cpu_time < job_output_dict[instance_name][solver_name]["cpu_time"]:
             job_output_dict[instance_name][solver_name]["cpu_time"] = cpu_time
-            job_output_dict[instance_name][solver_name]["wc_time"] = wc_time
+            job_output_dict[instance_name][solver_name]["wall_time"] = wc_time
             if (job_output_dict[instance_name][solver_name]["status"]
                     != SolverStatus.KILLED):
                 job_output_dict[instance_name][solver_name]["status"] =\
@@ -143,7 +143,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
                 min_time = job_output_dict[instance][solver]["cpu_time"]
         for solver in no_log_solvers:
             job_output_dict[instance][solver]["cpu_time"] = min_time + check_interval
-            job_output_dict[instance][solver]["wc_time"] = min_time + check_interval
+            job_output_dict[instance][solver]["wall_time"] = min_time + check_interval
 
     for index, instance_name in enumerate(instances_set._instance_names):
         index_str = f"[{index + 1}/{num_instances}] "
@@ -167,7 +167,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
             for solver_name in job_output_dict[instance_name].keys():
                 job_o = job_output_dict[instance_name][solver_name]
                 writer.writerow((instance_name, solver_name,
-                                 job_o["status"], job_o["cpu_time"], job_o["wc_time"]))
+                                 job_o["status"], job_o["cpu_time"], job_o["wall_time"]))
 
 
 def parser_function() -> argparse.ArgumentParser:
