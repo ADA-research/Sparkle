@@ -41,19 +41,9 @@ if __name__ == "__main__":
     # Return values to SMAC
     # SMAC2 does not accept nan values etc for quality
     quality = "0"
-    if "quality" in output.keys():
-        quality = output["quality"]
-        if isinstance(quality, dict):
-            # SMAC2 does not support multi-objective so always opt for the first value
-            quality = quality[quality.keys()[0]]
-        elif isinstance(quality, list):
-            quality = quality[0]
-        if not isinstance(quality, int) and not isinstance(quality, float):
-            if not quality.replace("-", "").replace(".", "").isdigit():
-                # Not a number
-                quality = "0"
-    # SMAC2 does not do maximisation, auto-convert
-    if not objective.minimise:
-        quality = -1 * float(quality)
+    if not objective.time and objective.name in output.keys():
+        quality = float(output[objective.name])
+        if not objective.minimise:
+            quality = -1 * quality
     print("Result for SMAC: "
           f"{output['status']}, {output['cpu_time']}, 0, {quality}, {seed}")
