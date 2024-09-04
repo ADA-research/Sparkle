@@ -40,35 +40,34 @@ def test_get_par_performance(mocker: MockFixture) -> None:
     A performance list should be retrieved from results file.
     The mean of the performance values should be computed and returned.
     """
-    cutoff = 42
     mock_get_list = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                  "get_dict_instance_to_performance",
                                  return_value={"one": 10, "two": 5})
 
-    par = sgrch.get_average_performance([], cutoff, 210, test_objective_runtime)
-    mock_get_list.assert_called_once_with([], cutoff, 210, test_objective_runtime)
-    assert par == 7.5
+    avg = sgrch.get_average_performance([], test_objective_runtime)
+    mock_get_list.assert_called_once_with([], test_objective_runtime)
+    assert avg == 7.5
 
 
 def test_get_dict_instance_to_performance(mocker: MockFixture) -> None:
     """Test get_dict_instance_to_performance creates dict from performance list."""
     validation_file = Path("tests/test_files/Validator/validation.csv")
-    csv_data = [line for line in csv.reader(validation_file.open("r"))][1:]
+    csv_data = [line for line in csv.reader(validation_file.open("r"))]
     instance_dict = sgrch.get_dict_instance_to_performance(
         csv_data, test_objective_runtime)
     assert instance_dict == {
-        "Ptn-7824-b01.cnf": 100.5,
-        "Ptn-7824-b03.cnf": 100.5,
-        "Ptn-7824-b05.cnf": 100.5,
-        "Ptn-7824-b07.cnf": 100.5,
-        "Ptn-7824-b09.cnf": 100.5,
-        "Ptn-7824-b11.cnf": 100.5,
-        "Ptn-7824-b13.cnf": 100.5,
-        "Ptn-7824-b15.cnf": 100.5,
-        "Ptn-7824-b17.cnf": 0.993013,
-        "Ptn-7824-b19.cnf": 100.5,
-        "Ptn-7824-b21.cnf": 100.5,
-        "bce7824.cnf": 100.5,
+        "bce7824.cnf": 10.1316,
+        "Ptn-7824-b09.cnf": 10.0667,
+        "Ptn-7824-b13.cnf": 10.0786,
+        "Ptn-7824-b21.cnf": 10.1152,
+        "Ptn-7824-b15.cnf": 10.1177,
+        "Ptn-7824-b01.cnf": 10.0812,
+        "Ptn-7824-b19.cnf": 10.0642,
+        "Ptn-7824-b05.cnf": 10.1184,
+        "Ptn-7824-b03.cnf": 10.1368,
+        "Ptn-7824-b11.cnf": 10.1921,
+        "Ptn-7824-b07.cnf": 10.1672,
+        "Ptn-7824-b17.cnf": 0.993013
     }
 
 
