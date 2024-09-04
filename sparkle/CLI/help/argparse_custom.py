@@ -494,5 +494,4 @@ SelectorTimeoutArgument = \
 SparkleObjectiveArgument = \
     ArgumentContainer(names=["--objectives"],
                       kwargs={"type": str,
-                              "help": "the comma seperated objective(s) to use as"
-                                      "'PerformanceMeasure:metric,'"})
+                              "help": "the comma seperated objective(s) to use."})

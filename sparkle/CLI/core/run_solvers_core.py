@@ -8,7 +8,6 @@ from pathlib import Path
 from runrunner import Runner
 
 from sparkle.CLI.help import global_variables as gv
-from sparkle.CLI.help import argparse_custom as ac
 import sparkle.tools.general as tg
 from sparkle.solver import Solver
 from sparkle.instance import instance_set
@@ -24,8 +23,8 @@ if __name__ == "__main__":
     parser.add_argument("--instance", required=True, type=str,
                         help="path to instance to run on")
     parser.add_argument("--solver", required=True, type=Path, help="path to solver")
-    parser.add_argument(*ac.SparkleObjectiveArgument.names,
-                        **ac.SparkleObjectiveArgument.kwargs)
+    parser.add_argument("--objectives", required=True, type=str,
+                        help="The objectives to use for the solver. Comma separated.")
     parser.add_argument("--log-dir", type=Path, required=False,
                         help="path to the log directory")
     parser.add_argument("--seed", type=str, required=False,
@@ -48,25 +47,24 @@ if __name__ == "__main__":
     key_str = f"{solver.name}_{instance_name}_{tg.get_time_pid_random_string()}"
     cutoff = gv.settings().get_general_target_cutoff_time()
 
+    objectives = [resolve_objective(name) for name in args.objectives.split(",")]
     solver_output = solver.run(
         instance_path.absolute(),
-        objectives=gv.settings().get_general_sparkle_objectives(),
+        objectives=objectives,
         seed=args.seed if args.seed else 42,
         cutoff_time=cutoff,
         cwd=cwd,
         run_on=Runner.LOCAL)
 
-    objectives = resolve_objective(args.objectives)
-    if objectives[0].time:
-        measurement = solver_output["cpu_time"]
-    else:
-        measurement = solver_output["quality"]  # TODO: Handle the multi-objective case
     # Now that we have all the results, we can add them to the performance dataframe
     lock = FileLock(f"{args.performance_data}.lock")  # Lock the file
     with lock.acquire(timeout=60):
         performance_dataframe = PerformanceDataFrame(args.performance_data)
-        performance_dataframe.set_value(measurement,
-                                        solver=str(args.solver),
-                                        instance=str(args.instance))
+        for objective in objectives:
+            measurement = solver_output[objective.name]
+            performance_dataframe.set_value(measurement,
+                                            solver=str(args.solver),
+                                            instance=str(args.instance),
+                                            objective=objective.name)
         performance_dataframe.save_csv()
     lock.release()

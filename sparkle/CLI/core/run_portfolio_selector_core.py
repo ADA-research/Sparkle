@@ -32,14 +32,16 @@ def call_solver_solve_instance(
     Returns:
         Whether the instance was solved by the solver
     """
+    objectives = gv.settings().get_general_sparkle_objectives()
     solver_output = solver.run(
         instance.absolute(),
-        objectives=gv.settings().get_general_sparkle_objectives(),
+        objectives=objectives,
         seed=gv.get_seed(),
         cutoff_time=cutoff_time,
         cwd=cwd,
         run_on=Runner.LOCAL)
-    cpu_time, status = solver_output["cpu_time"], solver_output["status"]
+
+    status = solver_output["status"]
     flag_solved = False
     if (status == SolverStatus.SUCCESS
             or status == SolverStatus.SAT or status == SolverStatus.UNSAT):
@@ -47,14 +49,17 @@ def call_solver_solve_instance(
 
     if performance_data is not None:
         solver_name = performance_data.solvers[0]
-        print(f"Trying to write: {cpu_time}, {solver_name}, {instance}")
         try:
             # Creating a seperate locked file for writing
             lock = FileLock(f"{performance_data.csv_filepath}.lock")
             with lock.acquire(timeout=60):
                 # Reload the dataframe to latest version
                 performance_data = PerformanceDataFrame(performance_data.csv_filepath)
-                performance_data.set_value(cpu_time, solver_name, str(instance))
+                for objective in objectives:
+                    performance_data.set_value(solver_output[objective.name],
+                                               solver_name,
+                                               instance.name,
+                                               objective=objective.name)
                 performance_data.save_csv()
             lock.release()
         except Timeout:

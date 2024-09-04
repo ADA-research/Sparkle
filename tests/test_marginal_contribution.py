@@ -45,8 +45,7 @@ class TestMarginalContribution(TestCase):
                                                   performance_df,
                                                   feature_df,
                                                   True,
-                                                  mean,
-                                                  None)
+                                                  mean)
 
         assert output == result
 

@@ -60,9 +60,8 @@ class SelectionOutput:
         # Collect performance data
         portfolio_selector_performance_path = selection_scenario / "performance.csv"
         vbs_performance = train_data.best_instance_performance().mean()
-        metric = self.objective.metric
-        self.performance_data = SelectionPerformance(portfolio_selector_performance_path,
-                                                     vbs_performance, metric)
+        self.performance_data = SelectionPerformance(
+            portfolio_selector_performance_path, vbs_performance, self.objective.name)
 
     def get_solver_data(self: SelectionOutput,
                         train_data: PerformanceDataFrame) -> SelectionSolverData:

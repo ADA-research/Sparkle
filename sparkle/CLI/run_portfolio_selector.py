@@ -68,8 +68,9 @@ if __name__ == "__main__":
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
     Settings.check_settings_changes(gv.settings(), prev_settings)
-
-    if not gv.settings().get_general_sparkle_objectives()[0].time:
+    objectives = gv.settings().get_general_sparkle_objectives()
+    # NOTE: Is this still relevant?
+    if not objectives[0].time:
         print("ERROR: The run_portfolio_selector command is not yet implemented"
               " for the QUALITY_ABSOLUTE performance measure!")
         sys.exit(-1)
@@ -100,7 +101,7 @@ if __name__ == "__main__":
     # Prepare performance data
     performance_data = PerformanceDataFrame(
         test_case_path / "performance_data.csv",
-        objectives=gv.settings().get_general_sparkle_objectives())
+        objectives=objectives)
     for instance_name in data_set.instance_names:
         if instance_name not in performance_data.instances:
             performance_data.add_instance(instance_name)

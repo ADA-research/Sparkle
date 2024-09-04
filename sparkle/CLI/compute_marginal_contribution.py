@@ -38,8 +38,7 @@ def compute_selector_performance(
         performance_data: PerformanceDataFrame,
         feature_data: FeatureDataFrame,
         minimise: bool,
-        aggregation_function: Callable[[list[float]], float],
-        performance_cutoff: int | float = None) -> float:
+        aggregation_function: Callable[[list[float]], float]) -> float:
     """Return the performance of a selector over all instances.
 
     Args:
@@ -58,7 +57,6 @@ def compute_selector_performance(
         selector_performance_data = PerformanceDataFrame(performance_path)
         return aggregation_function(
             selector_performance_data.get_values("portfolio_selector"))
-    penalty_factor = gv.settings().get_general_penalty_multiplier()
     selector_performance_data = performance_data.copy()
 
     selector_performance_data.add_solver("portfolio_selector")
@@ -76,10 +74,6 @@ def compute_selector_performance(
         schedule, target_solver="portfolio_selector", minimise=minimise)
     # Remove solvers from the dataframe
     selector_performance_data.remove_solver(performance_data.solvers)
-    if performance_cutoff is not None:
-        selector_performance_data.penalise(performance_cutoff,
-                                           performance_cutoff * penalty_factor,
-                                           lower_bound=not minimise)
     selector_performance_data.save_csv()  # Save the results to disk
     return aggregation_function(schedule_performance)
 
@@ -115,7 +109,7 @@ def compute_selector_marginal_contribution(
 
     selector_performance = compute_selector_performance(
         portfolio_selector_path, performance_data,
-        feature_data, minimise, aggregation_function, performance_cutoff)
+        feature_data, minimise, aggregation_function)
 
     rank_list = []
     compare = operator.lt if minimise else operator.gt
@@ -136,7 +130,7 @@ def compute_selector_marginal_contribution(
 
         ablated_selector_performance = compute_selector_performance(
             ablated_actual_portfolio_selector, tmp_performance_df,
-            feature_data, minimise, aggregation_function, performance_cutoff)
+            feature_data, minimise, aggregation_function)
 
         # 1. If the performance remains equal, this solver did not contribute
         # 2. If there is a performance decay without this solver, it does contribute

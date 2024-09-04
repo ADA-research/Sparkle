@@ -167,7 +167,7 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
 
     generate_figure(target_directory, float(penalised_time),
                     f"SBS ({stex.underscore_for_latex(sbs_solver)})",
-                    "Parallel-Portfolio", figure_filename, objective.metric, data)
+                    "Parallel-Portfolio", figure_filename, objective.name, data)
     latex_include = f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
     return (latex_include, dict_all_solvers,
             dict_actual_parallel_portfolio_penalty_time_on_each_instance)
@@ -271,7 +271,7 @@ def parallel_report_variables(target_directory: Path,
     """
     variables_dict = {"bibliographypath": bibliograpghy_path.absolute(),
                       "cutoffTime": cutoff,
-                      "performanceMetric": objective.metric,
+                      "performanceMetric": objective.name,
                       "numInstanceClasses": "1"}  # Currently no support for multi sets
     # Get the results data
     csv_data = [line.split(",") for line in
@@ -319,7 +319,7 @@ def parallel_report_variables(target_directory: Path,
     variables_dict["resultsTable"] = get_results_table(
         results, dict_all_solvers, parallel_portfolio_path,
         dict_actual_parallel_portfolio_penalty_time_on_each_instance,
-        solvers_solutions, unsolved_instances, instance_set.size, objective.metric)
+        solvers_solutions, unsolved_instances, instance_set.size, objective.name)
 
     if objective.minimise:
         variables_dict["decisionBool"] = "\\decisionfalse"

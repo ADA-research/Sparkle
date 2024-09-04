@@ -137,15 +137,11 @@ if __name__ == "__main__":
         print("Generating report for selection...")
         train_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
         feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
-        train_data.penalise(gv.settings().get_general_target_cutoff_time(),
-                            gv.settings().get_penalised_time())
         test_data = None
         test_case_path = Path(test_case_dir) if test_case_dir is not None else None
         if test_case_dir is not None and (test_case_path
                                           / "performance_data.csv").exists():
             test_data = PerformanceDataFrame(test_case_path / "performance_data.csv")
-            test_data.penalise(gv.settings().get_general_target_cutoff_time(),
-                               gv.settings().get_penalised_time())
 
         # Create machine readable selection output
         instance_folders = set(Path(instance).parent

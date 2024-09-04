@@ -91,7 +91,6 @@ if __name__ == "__main__":
     cutoff_time = max(gv.settings().get_general_target_cutoff_time(), 2)
 
     # Determine the objective function
-    perf_measure = gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
     objective = gv.settings().get_general_sparkle_objectives()[0]
     if objective.time:
         objective_function = "runtime"
@@ -128,6 +127,7 @@ if __name__ == "__main__":
         sys.exit()
 
     selector_path.parent.mkdir(exist_ok=True, parents=True)
+
     selector_run = selector.construct(selector_path,
                                       performance_data,
                                       feature_data,
@@ -169,10 +169,9 @@ if __name__ == "__main__":
                 print(f"Portfolio selector without {solver_name} constructed!")
             else:
                 print(f"Portfolio selector without {solver_name} constructor running...")
-    performance_str = str(perf_measure)
     with_actual = "--actual" if solver_ablation else ""
     cmd = (f"sparkle/CLI/compute_marginal_contribution.py --perfect {with_actual} "
-           f"{ac.PerformanceMeasureArgument.names[0]} {performance_str}")
+           f"{ac.SparkleObjectiveArgument.names[0]} {objective}")
 
     marginal_contribution = rrr.add_to_queue(
         runner=run_on,

@@ -497,13 +497,6 @@ class Settings:
         return Selector(Path(self.__settings["general"]["selector"]),
                         self.DEFAULT_selection_output_raw)
 
-    def get_performance_metric_for_report(self: Settings) -> str:
-        """Return a string describing the full performance metric, e.g. PAR10."""
-        objectives = self.get_general_sparkle_objectives()
-        if len(objectives) == 1:
-            return objectives[0].metric
-        return ""
-
     def set_general_cap_value(
             self: Settings, value: float = None,
             origin: SettingState = SettingState.DEFAULT) -> None:
