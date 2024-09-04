@@ -302,6 +302,8 @@ class Solver(SparkleCallable):
             if key in ["status", "cpu_time", "wall_time"]:
                 continue
             objective = resolve_objective(key)
+            if objective is None:
+                continue
             if objective.use_time == UseTime.NO:
                 if objective.post_process is not None:
                     parsed_output[objective] = objective.post_process(value)

@@ -12,7 +12,7 @@ from runrunner import Runner, Run
 from sparkle.platform import CommandName
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
-from sparkle.types.objective import SparkleObjective
+from sparkle.types import SparkleObjective, resolve_objective
 from sparkle.tools.runsolver_parsing import get_solver_output, get_solver_args
 
 
@@ -147,9 +147,7 @@ class Validator():
                                              solver_args,
                                              instance_set,
                                              instance_path.name,
-                                             out_dict["status"],
-                                             out_dict["quality"],
-                                             out_dict["cpu_time"],
+                                             solver_output=out_dict,
                                              subdir=subdir)
                     res.unlink()
                     res.with_suffix(".val").unlink(missing_ok=True)
@@ -198,9 +196,7 @@ class Validator():
                             config_str: str,
                             instance_set: InstanceSet,
                             instance: str,
-                            status: str,
-                            quality: str,
-                            runtime: str,
+                            solver_output: dict,
                             subdir: Path = None) -> None:
         """Append a validation result as a row to a CSV file."""
         if subdir is None:
@@ -209,12 +205,23 @@ class Validator():
         if not out_dir.exists():
             out_dir.mkdir(parents=True)
         csv_file = out_dir / "validation.csv"
+        status = solver_output["status"]
+        cpu_time = solver_output["cpu_time"]
+        wall_time = solver_output["wall_time"]
+        del solver_output["status"]
+        del solver_output["cpu_time"]
+        del solver_output["wall_time"]
+        sorted_keys = sorted(solver_output)
+        objectives = [resolve_objective(key) for key in sorted_keys]
+        objectives = [o for o in objectives if o is not None]
         if not csv_file.exists():
             # Write header
+            header = ["Solver", "Configuration", "InstanceSet", "Instance", "Status",
+                      "CPU Time", "Wallclock Time"] + [o.name for o in objectives]
             with csv_file.open("w") as out:
-                csv.writer(out).writerow(("Solver", "Configuration", "InstanceSet",
-                                          "Instance", "Status", "Quality", "Runtime"))
+                csv.writer(out).writerow((header))
+        values = [solver, config_str, instance_set.name, instance, status, cpu_time,
+                  wall_time] + [solver_output[o.name] for o in objectives]
         with csv_file.open("a") as out:
             writer = csv.writer(out)
-            writer.writerow((solver, config_str, instance_set.name, instance, status,
-                             quality, runtime))
+            writer.writerow(values)

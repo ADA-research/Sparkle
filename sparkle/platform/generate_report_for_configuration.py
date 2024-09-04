@@ -71,10 +71,7 @@ def get_dict_instance_to_performance(results: list[list[str]],
     Returns:
         A dictionary containing the performance for each instance
     """
-    value_column = -1  # Last column is runtime
-    if objective.time:
-        # Quality column
-        value_column = -2
+    value_column = results[0].index(objective.name)
     results_per_instance = {}
     for row in results:
         value = float(row[value_column])
