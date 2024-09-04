@@ -136,13 +136,15 @@ class SMAC2(Configurator):
             source_dir=self.scenario.validation,
             subdir=self.scenario.validation.relative_to(self.validator.out_dir))
         # Group the results per configuration
-        configurations = list(set(row[1] for row in results))
-        config_scores = []
         if objective is None:
             objective = self.objectives[0]
-        column = results[0].index(objective.name)
+        value_column = results[0].index(objective.name)
+        config_column = results[0].index("Configuration")
+        configurations = list(set(row[config_column] for row in results[1:]))
+        config_scores = []
         for config in configurations:
-            values = [float(row[column]) for row in results if row[1] == config]
+            values = [float(row[value_column])
+                      for row in results[1:] if row[1] == config]
             config_scores.append(aggregate_config(values))
 
         comparison = operator.lt if objective.minimise else operator.gt

@@ -296,7 +296,6 @@ class Solver(SparkleCallable):
 
         # cast status attribute from str to Enum
         parsed_output["status"] = SolverStatus(parsed_output["status"])
-
         # apply objectives to parsed output, runtime based objectives added here
         for key, value in parsed_output.items():
             if key in ["status", "cpu_time", "wall_time"]:
@@ -315,6 +314,6 @@ class Solver(SparkleCallable):
                 else:
                     parsed_output[key] = parsed_output["wall_time"]
                 if objective.post_process is not None:
-                    parsed_output[objective] = objective.post_process(
-                        value, parsed_output["cutoff_time"])
+                    parsed_output[key] = objective.post_process(
+                        parsed_output[key], parsed_output["cutoff_time"])
         return parsed_output

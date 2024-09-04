@@ -86,13 +86,10 @@ def get_solver_output(runsolver_configuration: list[str],
             cutoff_time = float(runsolver_configuration[idx + 1])
         if "-w" in conf or "--watcher-data" in conf:
             watch_file = Path(runsolver_configuration[idx + 1])
-            contents = (log_dir / watch_file).open("r").readlines()
-            runsolver_call = " ".join(str(c) for c in runsolver_configuration)
-            for line in contents:
-                if runsolver_call in line:
-                    solver_input = re.findall("{.*}", line)[0]
-                    solver_input = ast.literal_eval(solver_input)
-                    break
+            args_str = get_solver_args(log_dir / watch_file)
+            solver_input = re.findall("{.*}", args_str)[0]
+            solver_input = ast.literal_eval(solver_input)
+            cutoff_time = float(solver_input["cutoff_time"])
 
     if solver_output == "":
         # Still empty, try to read from subprocess
@@ -116,7 +113,7 @@ def get_solver_output(runsolver_configuration: list[str],
         output_dict["status"] = SolverStatus.TIMEOUT
     # Add the missing objectives (runtime based)
     if solver_input is not None and "objectives" in solver_input:
-        objectives = solver_input["objectives"]
+        objectives = solver_input["objectives"].split(",")
         for o_name in objectives:
             if o_name not in output_dict:
                 output_dict[o_name] = None

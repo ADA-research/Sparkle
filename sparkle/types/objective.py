@@ -62,10 +62,10 @@ class PARk(SparkleObjective):
         """Initialize PARk."""
         self.k = k
 
-        def penalise(values: np.array[np.float]) -> list[float]:
-            """Return penalised values."""
-            mask = values > self.cutoff
-            values[mask] = self.cutoff * self.k
-            return values
+        def penalise(value: float, cutoff: float) -> float:
+            """Return penalised value."""
+            if value > cutoff:
+                return cutoff * self.k
+            return value
 
         super().__init__(f"PAR{k}", use_time=UseTime.WALL_TIME, post_process=penalise)

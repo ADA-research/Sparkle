@@ -39,18 +39,16 @@ def get_features_bool(configurator_scenario: ConfigurationScenario,
     return "\\featuresfalse"
 
 
-def get_par_performance(results: list[list[str]],
-                        cutoff: int,
-                        penalty: float,
-                        objective: SparkleObjective) -> float:
+def get_average_performance(results: list[list[str]],
+                            objective: SparkleObjective) -> float:
     """Return the PAR score for a given results file and cutoff time.
 
     Args:
         results_file: Name of the result file
-        cutoff: Cutoff value
+        objective: The objective to average
 
     Returns:
-        PAR performance value
+        Average performance value
     """
     instance_per_dict = get_dict_instance_to_performance(results,
                                                          objective)
@@ -73,25 +71,10 @@ def get_dict_instance_to_performance(results: list[list[str]],
     """
     value_column = results[0].index(objective.name)
     results_per_instance = {}
-    for row in results:
+    for row in results[1:]:
         value = float(row[value_column])
         results_per_instance[Path(row[3]).name] = value
     return results_per_instance
-
-
-def get_performance_measure(objective: SparkleObjective,
-                            penalty_multiplier: int) -> str:
-    """Return the performance measure as LaTeX string.
-
-    Returns:
-        A string containing the performance measure
-    """
-    smac_run_obj = SMAC2.get_smac_run_obj(objective)
-
-    if smac_run_obj == "RUNTIME":
-        return f"PAR{penalty_multiplier}"
-    elif smac_run_obj == "QUALITY":
-        return "performance"
 
 
 def get_ablation_bool(scenario: AblationScenario) -> str:
@@ -112,8 +95,6 @@ def get_ablation_bool(scenario: AblationScenario) -> str:
 
 def get_data_for_plot(configured_results: list[list[str]],
                       default_results: list[list[str]],
-                      run_cutoff_time: float,
-                      penalty: float,
                       objective: SparkleObjective) -> list:
     """Return the required data to plot.
 
@@ -173,8 +154,6 @@ def get_figure_configure_vs_default(configured_results: list[list[str]],
         A string containing the latex command to include the figure
     """
     points = get_data_for_plot(configured_results, default_results,
-                               run_cutoff_time,
-                               run_cutoff_time * penalty_multiplier,
                                objective)
 
     plot_params = {"xlabel": f"Default parameters [{performance_measure}]",
@@ -242,7 +221,6 @@ def get_timeouts_instanceset(solver: Solver,
                              instance_set: InstanceSet,
                              configurator: Configurator,
                              validator: Validator,
-                             cutoff: int,
                              penalty: float) -> tuple[int, int, int]:
     """Return the number of timeouts by configured, default and both on the testing set.
 
@@ -437,8 +415,7 @@ def get_dict_variable_to_value_common(solver: Solver,
     instance_names = set([res[3] for res in res_default])
 
     latex_dict = {"bibliographypath": bibliography_path.absolute()}
-    latex_dict["performanceMeasure"] = get_performance_measure(objective,
-                                                               penalty_multiplier)
+    latex_dict["performanceMeasure"] = objective.name
     smac_run_obj = SMAC2.get_smac_run_obj(objective)
 
     if smac_run_obj == "RUNTIME":
@@ -459,9 +436,9 @@ def get_dict_variable_to_value_common(solver: Solver,
     latex_dict["smacEachRunCutoffTime"] = run_cutoff_time
     latex_dict["optimisedConfiguration"] = opt_config
     latex_dict["optimisedConfigurationTrainingPerformancePAR"] =\
-        get_par_performance(res_conf, run_cutoff_time, penalty, objective)
+        get_average_performance(res_conf, objective)
     latex_dict["defaultConfigurationTrainingPerformancePAR"] =\
-        get_par_performance(res_default, run_cutoff_time, penalty, objective)
+        get_average_performance(res_default, objective)
 
     str_value = get_figure_configured_vs_default_on_instance_set(
         solver, train_set.name, res_default, res_conf, target_directory,
@@ -470,8 +447,7 @@ def get_dict_variable_to_value_common(solver: Solver,
 
     # Retrieve timeout numbers for the training instances
     configured_timeouts_train, default_timeouts_train, overlapping_timeouts_train =\
-        get_timeouts_instanceset(solver, train_set, configurator, validator,
-                                 float(run_cutoff_time), penalty)
+        get_timeouts_instanceset(solver, train_set, configurator, validator, penalty)
 
     latex_dict["timeoutsTrainDefault"] = default_timeouts_train
     latex_dict["timeoutsTrainConfigured"] = configured_timeouts_train
@@ -519,9 +495,9 @@ def get_dict_variable_to_value_test(target_dir: Path,
     test_dict = {"instanceSetTest": test_set.name}
     test_dict["numInstanceInTestingInstanceSet"] = len(instance_names)
     test_dict["optimisedConfigurationTestingPerformancePAR"] =\
-        get_par_performance(res_conf, run_cutoff_time, penalty, objective)
+        get_average_performance(res_conf, objective)
     test_dict["defaultConfigurationTestingPerformancePAR"] =\
-        get_par_performance(res_default, run_cutoff_time, penalty, objective)
+        get_average_performance(res_default, objective)
     smac_run_obj = SMAC2.get_smac_run_obj(
         configurator.scenario.sparkle_objective)
     test_dict["figure-configured-vs-default-test"] =\
@@ -536,7 +512,6 @@ def get_dict_variable_to_value_test(target_dir: Path,
                                  test_set,
                                  configurator,
                                  validator,
-                                 float(run_cutoff_time),
                                  penalty)
 
     test_dict["timeoutsTestDefault"] = default_timeouts_test

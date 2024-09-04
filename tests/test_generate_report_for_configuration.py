@@ -45,7 +45,7 @@ def test_get_par_performance(mocker: MockFixture) -> None:
                                  "get_dict_instance_to_performance",
                                  return_value={"one": 10, "two": 5})
 
-    par = sgrch.get_par_performance([], cutoff, 210, test_objective_runtime)
+    par = sgrch.get_average_performance([], cutoff, 210, test_objective_runtime)
     mock_get_list.assert_called_once_with([], cutoff, 210, test_objective_runtime)
     assert par == 7.5
 
@@ -54,10 +54,8 @@ def test_get_dict_instance_to_performance(mocker: MockFixture) -> None:
     """Test get_dict_instance_to_performance creates dict from performance list."""
     validation_file = Path("tests/test_files/Validator/validation.csv")
     csv_data = [line for line in csv.reader(validation_file.open("r"))][1:]
-    cutoff = 10.05
-    penalty = cutoff * 10
     instance_dict = sgrch.get_dict_instance_to_performance(
-        csv_data, cutoff, penalty, test_objective_runtime)
+        csv_data, test_objective_runtime)
     assert instance_dict == {
         "Ptn-7824-b01.cnf": 100.5,
         "Ptn-7824-b03.cnf": 100.5,
@@ -72,30 +70,6 @@ def test_get_dict_instance_to_performance(mocker: MockFixture) -> None:
         "Ptn-7824-b21.cnf": 100.5,
         "bce7824.cnf": 100.5,
     }
-
-
-def test_get_performance_measure_par10() -> None:
-    """Test get_performance_measure returns correct measure.
-
-    Return `PAR10` for RUNTIME with default penalty multiplier of 10.
-    """
-    measure = sgrch.get_performance_measure(test_objective_runtime, 10)
-    assert measure == "PAR10"
-
-
-def test_get_performance_measure_par5() -> None:
-    """Test get_performance_measure returns correct measure.
-
-    Return `PAR5` for RUNTIME with non-default penalty multiplier of 5.
-    """
-    measure = sgrch.get_performance_measure(test_objective_runtime, 5)
-    assert measure == "PAR5"
-
-
-def test_get_performance_measure_quality(mocker: MockFixture) -> None:
-    """Test get_performance_measure returns correct measure for QUALITY."""
-    measure = sgrch.get_performance_measure(test_objective_quality, None)
-    assert measure == "performance"
 
 
 def test_get_ablation_bool_true(mocker: MockFixture) -> None:
@@ -131,7 +105,7 @@ def test_get_data_for_plot_same_instance(mocker: MockFixture) -> None:
     cutoff = 0
     penalty = 1.0
     points = sgrch.get_data_for_plot(
-        configured_dir, default_dir, cutoff, penalty, test_objective_runtime)
+        configured_dir, default_dir, test_objective_runtime)
 
     mock_dict.assert_any_call(default_dir, cutoff, penalty, test_objective_runtime)
     mock_dict.assert_any_call(configured_dir, cutoff, penalty, test_objective_runtime)
@@ -155,14 +129,12 @@ def test_get_data_for_plot_instance_error(mocker: MockFixture) -> None:
 
     configured_dir = "configured/directory/"
     default_dir = "default/directory/"
-    cutoff = 0
-    penalty = 1.0
     with pytest.raises(SystemExit):
         sgrch.get_data_for_plot(
-            configured_dir, default_dir, cutoff, penalty, test_objective_runtime)
+            configured_dir, default_dir, test_objective_runtime)
 
-    mock_dict.assert_any_call(default_dir, cutoff, penalty, test_objective_runtime)
-    mock_dict.assert_any_call(default_dir, cutoff, penalty, test_objective_runtime)
+    mock_dict.assert_any_call(default_dir, test_objective_runtime)
+    mock_dict.assert_any_call(default_dir, test_objective_runtime)
 
 
 def test_get_figure_configure_vs_default(mocker: MockFixture) -> None:

@@ -13,7 +13,7 @@ from sparkle.platform import CommandName
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.types import SparkleObjective, resolve_objective
-from sparkle.tools.runsolver_parsing import get_solver_output, get_solver_args
+from sparkle.tools.runsolver_parsing import get_solver_args
 
 
 class Validator():
@@ -140,9 +140,12 @@ class Validator():
 
             for instance_set in instance_sets:
                 if instance_path.name in instance_set._instance_names:
-                    out_dict = get_solver_output(
-                        ["-o", res.name, "-v", res.with_suffix(".val").name],
-                        "", log_dir)
+                    out_dict = Solver.parse_solver_output(
+                        "",
+                        ["-o", res.name,
+                         "-v", res.with_suffix(".val").name,
+                         "-w", res.with_suffix(".log").name],
+                        log_dir)
                     self.append_entry_to_csv(solver.name,
                                              solver_args,
                                              instance_set,
@@ -181,14 +184,15 @@ class Validator():
         if subdir is None:
             subdir = Path(f"{solver.name}_{instance_set.name}")
         csv_file = self.out_dir / subdir / "validation.csv"
-        # We skip the header when returning results
-        csv_data = [line for line in csv.reader(csv_file.open("r"))][1:]
+        csv_data = [line for line in csv.reader(csv_file.open("r"))]
+        header = csv_data[0]
         if config is not None:
             # We filter on the config string by subdict
             if isinstance(config, str):
                 config = Solver.config_str_to_dict(config)
-            csv_data = [line for line in csv_data if
+            csv_data = [line for line in csv_data[1:] if
                         config.items() == ast.literal_eval(line[1]).items()]
+            csv_data.insert(0, header)
         return csv_data
 
     def append_entry_to_csv(self: Validator,
