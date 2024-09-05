@@ -22,7 +22,7 @@ def get_measurements(runsolver_values_path: Path,
                 elif keyword == "CPUTIME":
                     cpu_time = float(value)
                 elif keyword == "MAXVM":
-                    memory = float(int(value)/1024.0)  # MB
+                    memory = float(int(value) / 1024.0)  # MB
                     # Order is fixed, CPU is the last thing we want to read, so break
                     break
     return cpu_time, wall_time, memory
