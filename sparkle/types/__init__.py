@@ -11,7 +11,6 @@ from sparkle.types import objective
 from sparkle.types.objective import SparkleObjective, UseTime
 
 
-class_name_regex = re.compile(r"[a-zA-Z]+(\d*)$")
 objective_string_regex = re.compile(r"(?P<name>[\w\-_]+)(:(?P<direction>min|max))?$")
 objective_variable_regex = re.compile(r"(-?\d+)$")
 
