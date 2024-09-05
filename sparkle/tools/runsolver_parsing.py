@@ -8,8 +8,8 @@ import math
 from sparkle.types import SolverStatus
 
 
-def get_runtime(runsolver_values_path: Path,
-                not_found: float = -1.0) -> tuple[float, float]:
+def get_measurements(runsolver_values_path: Path,
+                     not_found: float = -1.0) -> tuple[float, float]:
     """Return the CPU and wallclock time reported by runsolver in values log."""
     cpu_time, wall_time = not_found, not_found
     if runsolver_values_path.exists():
@@ -21,9 +21,11 @@ def get_runtime(runsolver_values_path: Path,
                     wall_time = float(value)
                 elif keyword == "CPUTIME":
                     cpu_time = float(value)
+                elif keyword == "MAXVM":
+                    memory = float(int(value)/1024.0)  # MB
                     # Order is fixed, CPU is the last thing we want to read, so break
                     break
-    return cpu_time, wall_time
+    return cpu_time, wall_time, memory
 
 
 def get_status(runsolver_values_path: Path, runsolver_raw_path: Path) -> SolverStatus:
@@ -106,9 +108,10 @@ def get_solver_output(runsolver_configuration: list[str],
 
     output_dict["cutoff_time"] = cutoff_time
     if value_data_file is not None:
-        cpu_time, wall_time = get_runtime(log_dir / value_data_file)
+        cpu_time, wall_time, memory = get_measurements(log_dir / value_data_file)
         output_dict["cpu_time"] = cpu_time
         output_dict["wall_time"] = wall_time
+        output_dict["memory"] = memory
     if output_dict["cpu_time"] > cutoff_time:
         output_dict["status"] = SolverStatus.TIMEOUT
     # Add the missing objectives (runtime based)
