@@ -12,8 +12,8 @@ from sparkle.types.objective import SparkleObjective, UseTime
 
 
 class_name_regex = re.compile(r"[a-zA-Z]+(\d*)$")
-objective_string_regex = re.compile(r"(?P<name>\w+)(:(?P<direction>min|max))?$")
-objective_variable_regex = re.compile(r"(\d+)$")
+objective_string_regex = re.compile(r"(?P<name>[\w\-_]+)(:(?P<direction>min|max))?$")
+objective_variable_regex = re.compile(r"(-?\d+)$")
 
 
 def _check_class(candidate: Callable) -> bool:
@@ -38,18 +38,17 @@ def resolve_objective(name: str) -> SparkleObjective:
         Instance of the Objective class or None if not found.
     """
     match = objective_string_regex.fullmatch(name)
-    if match is None:
+    if match is None or name == "" or not name[0].isalpha():
         return None
 
     name = match.group("name")
-    minimise = match.group("direction") == "max"  # .group returns "" if no match
+    minimise = not match.group("direction") == "max"  # .group returns "" if no match
 
     # Search for optional variable and record split point between name and variable
-    argument = None
-    name_options = [(name, argument), ]  # Options of names to check for
-    if m := objective_variable_regex.fullmatch(name):
+    name_options = [(name, None), ]  # Options of names to check for
+    if m := objective_variable_regex.search(name):
         argument = int(m.group())
-        name_options += [(name[:m.start()], argument), ] + name_options  # Prepend
+        name_options = [(name[:m.start()], argument), ] + name_options  # Prepend
 
     # First try to resolve the user input classes
     for rname, rarg in name_options:
@@ -58,7 +57,7 @@ def resolve_objective(name: str) -> SparkleObjective:
             for o_name, o_class in inspect.getmembers(user_module,
                                                       predicate=_check_class):
                 if o_name == rname:
-                    if argument is not None:
+                    if rarg is not None:
                         return o_class(rarg)
                     return o_class()
         except Exception:
@@ -69,7 +68,7 @@ def resolve_objective(name: str) -> SparkleObjective:
         for o_name, o_class in inspect.getmembers(objective,
                                                   predicate=_check_class):
             if o_name == rname:
-                if argument is not None:
+                if rarg is not None:
                     return o_class(rarg)
                 return o_class()
 
