@@ -56,7 +56,7 @@ sparkle construct_portfolio_selector --objectives quality
 
 # Generate an experimental report detailing the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report.pdf`. We again set the performance measure to absolute quality.
 
-#sparkle generate_report --performance-measure QUALITY_ABSOLUTE
+#sparkle generate_report --objectives quality
 
 ### [Coming soon] Run the portfolio selector (e.g. on the test set)
 
@@ -68,13 +68,13 @@ sparkle construct_portfolio_selector --objectives quality
 
 # Run the portfolio selector on a *single* testing instance; the result will be printed to the command line. We again set the performance measure to absolute quality.
 
-#sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/Banking2.model Examples/Resources/CCAG/Instances/CCAG2/Banking2.constraints --performance-measure QUALITY_ABSOLUTE
+#sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/Banking2.model Examples/Resources/CCAG/Instances/CCAG2/Banking2.constraints --objectives quality
 
 #### Run on an instance set
 
 # Run the portfolio selector on a testing instance *set*. We again set the performance measure to absolute quality.
 
-#sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/ --performance-measure QUALITY_ABSOLUTE
+#sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/ --objectives quality
 
 #### Generate a report including results on the test set
 
@@ -84,7 +84,7 @@ sparkle construct_portfolio_selector --objectives quality
 
 # Generate an experimental report that includes the results on the test set, and as before the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report_For_Test.pdf`. We again set the performance measure to absolute quality.
 
-#sparkle generate_report --performance-measure QUALITY_ABSOLUTE
+#sparkle generate_report --objectives quality
 
 # By default the `generate_report` command will create a report for the most recent instance set. To generate a report for an older instance set, the desired instance set can be specified with: `--test-case-directory Test_Cases/CCAG2/`
 
