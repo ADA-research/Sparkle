@@ -22,11 +22,10 @@ from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
-from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
 from sparkle.instance import instance_set, InstanceSet
-from sparkle.types import SolverStatus
+from sparkle.types import SolverStatus, resolve_objective, UseTime
 
 
 def run_parallel_portfolio(instances_set: InstanceSet,
@@ -78,9 +77,10 @@ def run_parallel_portfolio(instances_set: InstanceSet,
     )
     check_interval = gv.settings().get_parallel_portfolio_check_interval()
     instances_done = [False] * num_instances
-    # We record the 'best' of all seed results per solver-instance
+    # We record the 'best' of all seed results per solver-instance,
+    # setting start values for objectives that are always present
     job_output_dict = {instance_name: {solver.name: {"cpu_time": float(sys.maxsize),
-                                                     "wc_time": float(sys.maxsize),
+                                                     "wall_time": float(sys.maxsize),
                                                      "status": SolverStatus.UNKNOWN}
                                        for solver in solvers}
                        for instance_name in instances_set._instance_names}
@@ -120,13 +120,12 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         solver_index = int((index % n_instance_jobs) / seeds_per_solver)
         solver_name = solvers[solver_index].name
         instance_name = instances_set._instance_names[int(index / n_instance_jobs)]
-        if "cpu_time" not in solver_output:
-            cpu_time, wc_time = -1.0, -1.0
-        else:
-            cpu_time, wc_time = solver_output["cpu_time"], solver_output["wc_time"]
-        if cpu_time < job_output_dict[instance_name][solver_name]["cpu_time"]:
-            job_output_dict[instance_name][solver_name]["cpu_time"] = cpu_time
-            job_output_dict[instance_name][solver_name]["wc_time"] = wc_time
+        cpu_time = solver_output["cpu_time"]
+        if (cpu_time > 0.0
+                and cpu_time < job_output_dict[instance_name][solver_name]["cpu_time"]):
+            for key, value in solver_output.items():
+                if key in ["cpu_time", "wall_time"] + [o.name for o in objectives]:
+                    job_output_dict[instance_name][solver_name][key] = value
             if (job_output_dict[instance_name][solver_name]["status"]
                     != SolverStatus.KILLED):
                 job_output_dict[instance_name][solver_name]["status"] =\
@@ -143,7 +142,18 @@ def run_parallel_portfolio(instances_set: InstanceSet,
                 min_time = job_output_dict[instance][solver]["cpu_time"]
         for solver in no_log_solvers:
             job_output_dict[instance][solver]["cpu_time"] = min_time + check_interval
-            job_output_dict[instance][solver]["wc_time"] = min_time + check_interval
+            job_output_dict[instance][solver]["wall_time"] = min_time + check_interval
+            # Fix runtime objectives with resolved CPU/Wall times
+            for key, value in job_output_dict[instance][solver].items():
+                objective = resolve_objective(key)
+                if objective is not None and objective.time:
+                    if objective.use_time == UseTime.CPU_TIME:
+                        value = job_output_dict[instance][solver]["cpu_time"]
+                    else:
+                        value = job_output_dict[instance][solver]["wall_time"]
+                    if objective.post_process is not None:
+                        value = objective.post_process(value, cutoff)
+                    job_output_dict[instance][solver][key] = value
 
     for index, instance_name in enumerate(instances_set._instance_names):
         index_str = f"[{index + 1}/{num_instances}] "
@@ -157,17 +167,23 @@ def run_parallel_portfolio(instances_set: InstanceSet,
             solver_name = solvers[sindex % num_solvers].name
             job_info = job_output_dict[instance_name][solver_name]
             print(f"\t- {solver_name} ended with status {job_info['status']} in "
-                  f"{job_info['cpu_time']}s CPU-Time ({job_info['wc_time']}s WC-Time)")
+                  f"{job_info['cpu_time']}s CPU-Time ({job_info['wall_time']}s WC-Time)")
 
     # Write the results to a CSV
     csv_path = portfolio_path / "results.csv"
+    values_header = ["status", "cpu_time", "wall_time"] + [o.name for o in objectives]
+    header = ["Instance", "Solver"] + values_header
+    result_rows = [header]
+    for instance_name in job_output_dict.keys():
+        for solver_name in job_output_dict[instance_name].keys():
+            job_o = job_output_dict[instance_name][solver_name]
+            values = [instance_name, solver_name] + [
+                job_o[key] if key in job_o else "None"
+                for key in values_header]
+            result_rows.append(values)
     with csv_path.open("w") as out:
         writer = csv.writer(out)
-        for instance_name in job_output_dict.keys():
-            for solver_name in job_output_dict[instance_name].keys():
-                job_o = job_output_dict[instance_name][solver_name]
-                writer.writerow((instance_name, solver_name,
-                                 job_o["status"], job_o["cpu_time"], job_o["wc_time"]))
+        writer.writerows(result_rows)
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -183,8 +199,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.NicknamePortfolioArgument.kwargs)
     parser.add_argument(*ac.SolversArgument.names,
                         **ac.SolversArgument.kwargs)
-    parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
-                        **ac.PerformanceMeasureSimpleArgument.kwargs)
+    parser.add_argument(*ac.SparkleObjectiveArgument.names,
+                        **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.CutOffTimeArgument.names,
                         **ac.CutOffTimeArgument.kwargs)
     parser.add_argument(*ac.SolverSeedsArgument.names,
@@ -257,14 +273,12 @@ if __name__ == "__main__":
         gv.settings().set_general_target_cutoff_time(args.cutoff_time,
                                                      SettingState.CMD_LINE)
 
-    if args.performance_measure is not None:
+    if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
-            args.performance_measure, SettingState.CMD_LINE)
-    if gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure\
-            is not PerformanceMeasure.RUNTIME:
+            args.objectives, SettingState.CMD_LINE)
+    if not gv.settings().get_general_sparkle_objectives()[0].time:
         print("ERROR: Parallel Portfolio is currently only relevant for "
-              f"{PerformanceMeasure.RUNTIME} measurement. In all other cases, "
-              "use validation")
+              "RunTime objectives. In all other cases, use validation")
         sys.exit(-1)
 
     if args.portfolio_name is not None:  # Use a nickname

@@ -6,9 +6,11 @@ from __future__ import annotations
 from sparkle.platform import generate_report_for_parallel_portfolio as sgrfpp
 from sparkle.instance import InstanceSet
 from sparkle.platform.output.structures import ParallelPortfolioResults
+from sparkle.types import SparkleObjective
 
 import json
 from pathlib import Path
+import csv
 
 
 class ParallelPortfolioOutput:
@@ -16,15 +18,14 @@ class ParallelPortfolioOutput:
 
     def __init__(self: ParallelPortfolioOutput, parallel_portfolio_path: Path,
                  instance_set: InstanceSet,
-                 cutoff_time: int, penalised_time: int,
+                 objective: SparkleObjective,
                  output: Path) -> None:
         """Initialize ParallelPortfolioOutput class.
 
         Args:
             parallel_portfolio_path: Path to parallel portfolio output directory
             instance_set: List of instances
-            cutoff_time: The cutoff time
-            penalised_time: The penalised time
+            objective: The objective of the portfolio
             output: Path to the output directory
         """
         if not output.is_file():
@@ -33,29 +34,32 @@ class ParallelPortfolioOutput:
             self.output = output
 
         self.instance_set = instance_set
-        self.cutoff_time = cutoff_time
-        self.penalised_time = penalised_time
-
-        csv_data = [line.split(",") for line in
-                    (parallel_portfolio_path / "results.csv").open("r").readlines()]
-        self.solver_list = list(set([line[1] for line in csv_data]))
+        csv_data = [line for line in
+                    csv.reader((parallel_portfolio_path / "results.csv").open("r"))]
+        header = csv_data[0]
+        csv_data = csv_data[1:]
+        solver_column = header.index("Solver")
+        instance_column = header.index("Instance")
+        status_column = header.index("status")
+        objective_column = header.index(objective.name)
+        self.solver_list = list(set([line[solver_column] for line in csv_data]))
 
         # Collect solver performance for each instance
         instance_results = {name: [] for name in instance_set._instance_names}
         for row in csv_data:
-            if row[0] in instance_results.keys():
-                instance_results[row[0]].append([row[1], row[2], row[3]])
+            if row[instance_column] in instance_results.keys():
+                instance_results[row[instance_column]].append(
+                    [row[solver_column], row[status_column], row[objective_column]])
 
         solvers_solutions = self.get_solver_solutions(self.solver_list, csv_data)
         unsolved_instances = self.instance_set.size - sum([solvers_solutions[key]
                                                            for key in solvers_solutions])
         # sbs_runtime is redundant, the same information is available in instance_results
-        _, sbs, runtime_all_solvers =\
-            sgrfpp.get_dict_sbs_penalty_time_on_each_instance(self.solver_list,
-                                                              instance_set,
-                                                              instance_results,
-                                                              cutoff_time,
-                                                              penalised_time)
+        _, sbs, runtime_all_solvers, _ =\
+            sgrfpp.get_portfolio_metrics(self.solver_list,
+                                         instance_set,
+                                         instance_results,
+                                         objective)
 
         self.results = ParallelPortfolioResults(unsolved_instances,
                                                 sbs, runtime_all_solvers,
@@ -92,13 +96,6 @@ class ParallelPortfolioOutput:
             ]
         }
 
-    def serialize_settings(self: ParallelPortfolioOutput) -> dict:
-        """Transform settings to dictionary format."""
-        return {
-            "cutoff_time": self.cutoff_time,
-            "penalised_time": self.penalised_time
-        }
-
     def serialize_results(self: ParallelPortfolioOutput,
                           pr: ParallelPortfolioResults) -> dict:
         """Transform results to dictionary format."""
@@ -117,7 +114,6 @@ class ParallelPortfolioOutput:
             "solvers": self.solver_list,
             "instances": self.serialize_instances([self.instance_set]),
             "results": self.serialize_results(self.results),
-            "settings": self.serialize_settings(),
         }
 
         self.output.parent.mkdir(parents=True, exist_ok=True)

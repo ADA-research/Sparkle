@@ -15,22 +15,20 @@ from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help import argparse_custom as apc
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from sparkle.types.objective import PerformanceMeasure
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(*apc.PerfectArgument.names,
-                        **apc.PerfectArgument.kwargs)
-    parser.add_argument(*apc.ActualArgument.names,
-                        **apc.ActualArgument.kwargs)
-    parser.add_argument(*apc.PerformanceMeasureArgument.names,
-                        **apc.PerformanceMeasureArgument.kwargs)
-    parser.add_argument(*apc.SettingsFileArgument.names,
-                        **apc.SettingsFileArgument.kwargs)
+    parser.add_argument(*ac.PerfectArgument.names,
+                        **ac.PerfectArgument.kwargs)
+    parser.add_argument(*ac.ActualArgument.names,
+                        **ac.ActualArgument.kwargs)
+    parser.add_argument(*ac.SparkleObjectiveArgument.names,
+                        **ac.SparkleObjectiveArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
 
     return parser
 
@@ -40,8 +38,7 @@ def compute_selector_performance(
         performance_data: PerformanceDataFrame,
         feature_data: FeatureDataFrame,
         minimise: bool,
-        aggregation_function: Callable[[list[float]], float],
-        performance_cutoff: int | float = None) -> float:
+        aggregation_function: Callable[[list[float]], float]) -> float:
     """Return the performance of a selector over all instances.
 
     Args:
@@ -60,7 +57,6 @@ def compute_selector_performance(
         selector_performance_data = PerformanceDataFrame(performance_path)
         return aggregation_function(
             selector_performance_data.get_values("portfolio_selector"))
-    penalty_factor = gv.settings().get_general_penalty_multiplier()
     selector_performance_data = performance_data.copy()
 
     selector_performance_data.add_solver("portfolio_selector")
@@ -78,10 +74,6 @@ def compute_selector_performance(
         schedule, target_solver="portfolio_selector", minimise=minimise)
     # Remove solvers from the dataframe
     selector_performance_data.remove_solver(performance_data.solvers)
-    if performance_cutoff is not None:
-        selector_performance_data.penalise(performance_cutoff,
-                                           performance_cutoff * penalty_factor,
-                                           lower_bound=not minimise)
     selector_performance_data.save_csv()  # Save the results to disk
     return aggregation_function(schedule_performance)
 
@@ -117,7 +109,7 @@ def compute_selector_marginal_contribution(
 
     selector_performance = compute_selector_performance(
         portfolio_selector_path, performance_data,
-        feature_data, minimise, aggregation_function, performance_cutoff)
+        feature_data, minimise, aggregation_function)
 
     rank_list = []
     compare = operator.lt if minimise else operator.gt
@@ -138,7 +130,7 @@ def compute_selector_marginal_contribution(
 
         ablated_selector_performance = compute_selector_performance(
             ablated_actual_portfolio_selector, tmp_performance_df,
-            feature_data, minimise, aggregation_function, performance_cutoff)
+            feature_data, minimise, aggregation_function)
 
         # 1. If the performance remains equal, this solver did not contribute
         # 2. If there is a performance decay without this solver, it does contribute
@@ -175,18 +167,12 @@ def compute_marginal_contribution(
     """
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
-    performance_measure =\
-        gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
+    objective = gv.settings().get_general_sparkle_objectives()[0]
     aggregation_function = gv.settings().get_general_metric_aggregation_function()
     capvalue = gv.settings().get_general_cap_value()
-    if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
-        minimise = False
-    elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-        minimise = True
-    else:
-        # assume runtime optimization
+    minimise = objective.minimise
+    if objective.time:
         capvalue = gv.settings().get_general_target_cutoff_time()
-        minimise = True
 
     if compute_perfect:
         # Perfect selector is the computation of the best performance per instance
@@ -236,9 +222,9 @@ if __name__ == "__main__":
         gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
-    if ac.set_by_user(args, "performance_measure"):
+    if ac.set_by_user(args, "objectives"):
         gv.settings().set_general_sparkle_objectives(
-            args.performance_measure, SettingState.CMD_LINE
+            args.objectives, SettingState.CMD_LINE
         )
     selection_scenario = gv.latest_scenario().get_selection_scenario_path()
 

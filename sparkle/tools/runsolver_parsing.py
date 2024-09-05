@@ -8,22 +8,24 @@ import math
 from sparkle.types import SolverStatus
 
 
-def get_runtime(runsolver_values_path: Path,
-                not_found: float = -1.0) -> tuple[float, float]:
+def get_measurements(runsolver_values_path: Path,
+                     not_found: float = -1.0) -> tuple[float, float, float]:
     """Return the CPU and wallclock time reported by runsolver in values log."""
-    cpu_time, wc_time = not_found, not_found
+    cpu_time, wall_time, memory = not_found, not_found, not_found
     if runsolver_values_path.exists():
         with runsolver_values_path.open("r") as infile:
             lines = [line.strip().split("=") for line in infile.readlines()
                      if line.count("=") == 1]
             for keyword, value in lines:
                 if keyword == "WCTIME":
-                    wc_time = float(value)
+                    wall_time = float(value)
                 elif keyword == "CPUTIME":
                     cpu_time = float(value)
+                elif keyword == "MAXVM":
+                    memory = float(int(value) / 1024.0)  # MB
                     # Order is fixed, CPU is the last thing we want to read, so break
                     break
-    return cpu_time, wc_time
+    return cpu_time, wall_time, memory
 
 
 def get_status(runsolver_values_path: Path, runsolver_raw_path: Path) -> SolverStatus:
@@ -66,7 +68,8 @@ def get_solver_output(runsolver_configuration: list[str],
                       process_output: str,
                       log_dir: Path) -> dict[str, str | object]:
     """Decode solver output dictionary when called with runsolver."""
-    solver_output = ""
+    solver_input = None
+    solver_output = None
     value_data_file = None
     cutoff_time = sys.maxsize
     for idx, conf in enumerate(runsolver_configuration):
@@ -83,8 +86,16 @@ def get_solver_output(runsolver_configuration: list[str],
             value_data_file = Path(runsolver_configuration[idx + 1])
         if "--cpu-limit" in conf:
             cutoff_time = float(runsolver_configuration[idx + 1])
+        if "-w" in conf or "--watcher-data" in conf:
+            watch_file = Path(runsolver_configuration[idx + 1])
+            args_str = get_solver_args(log_dir / watch_file)
+            if args_str == "":  # Could not find log file or args
+                continue
+            solver_input = re.findall("{.*}", args_str)[0]
+            solver_input = ast.literal_eval(solver_input)
+            cutoff_time = float(solver_input["cutoff_time"])
 
-    if solver_output == "":
+    if solver_output is None:
         # Still empty, try to read from subprocess
         solver_output = process_output
     # Format output to only the brackets (dict)
@@ -97,18 +108,20 @@ def get_solver_output(runsolver_configuration: list[str],
               f"Assuming TIMEOUT.")
         output_dict = {"status": SolverStatus.TIMEOUT, "quality": math.nan}
 
+    output_dict["cutoff_time"] = cutoff_time
     if value_data_file is not None:
-        cpu_time, wc_time = get_runtime(log_dir / value_data_file)
+        cpu_time, wall_time, memory = get_measurements(log_dir / value_data_file)
         output_dict["cpu_time"] = cpu_time
-        output_dict["wc_time"] = wc_time
-        output_dict["runtime"] = cpu_time
-        if cpu_time == -1.0:
-            # If we don't have cpu time, try to fall back on wc
-            output_dict["runtime"] = wc_time
-    else:
-        output_dict["runtime"] = math.nan
-
-    if output_dict["runtime"] > cutoff_time:
+        output_dict["wall_time"] = wall_time
+        output_dict["memory"] = memory
+    else:  # Could not retrieve cpu and wall time (log does not exist)
+        output_dict["cpu_time"], output_dict["wall_time"] = -1.0, -1.0
+    if output_dict["cpu_time"] > cutoff_time:
         output_dict["status"] = SolverStatus.TIMEOUT
-
+    # Add the missing objectives (runtime based)
+    if solver_input is not None and "objectives" in solver_input:
+        objectives = solver_input["objectives"].split(",")
+        for o_name in objectives:
+            if o_name not in output_dict:
+                output_dict[o_name] = None
     return output_dict

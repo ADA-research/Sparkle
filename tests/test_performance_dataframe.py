@@ -87,10 +87,7 @@ class TestPerformanceData(TestCase):
 
     def test_get_solver_ranking(self: TestPerformanceData) -> None:
         """Test getting the solver ranking list with penalty."""
-        cutoff = 50
-        multiplier = 10
-        penalty = cutoff * multiplier
-        rank_list = [("AlgorithmB", 210.8), ("AlgorithmC", 216.6),
-                     ("AlgorithmE", 218.8), ("AlgorithmA", 310.4), ("AlgorithmD", 313.8)]
-        result = self.pd.get_solver_ranking(cutoff=cutoff, penalty=penalty)
+        rank_list = [("AlgorithmB", 41.0), ("AlgorithmC", 43.6),
+                     ("AlgorithmE", 52.6), ("AlgorithmD", 54.8), ("AlgorithmA", 55.0)]
+        result = self.pd.get_solver_ranking()
         assert result == rank_list

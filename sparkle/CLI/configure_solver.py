@@ -40,8 +40,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstanceSetTrainArgument.kwargs)
     parser.add_argument(*ac.InstanceSetTestArgument.names,
                         **ac.InstanceSetTestArgument.kwargs)
-    parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
-                        **ac.PerformanceMeasureSimpleArgument.kwargs)
     parser.add_argument(*ac.SparkleObjectiveArgument.names,
                         **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeConfigurationArgument.names,
@@ -75,10 +73,7 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
     """
     if args.settings_file is not None:
         gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
-    if args.performance_measure is not None:
-        gv.settings().set_general_sparkle_objectives(
-            args.performance_measure, SettingState.CMD_LINE)
-    elif args.objectives is not None:
+    if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
             args.objectives, SettingState.CMD_LINE)
     if args.target_cutoff_time is not None:

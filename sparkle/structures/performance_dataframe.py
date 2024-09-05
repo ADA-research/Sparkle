@@ -5,20 +5,19 @@
 
 from __future__ import annotations
 from typing import Callable
-import operator
 from pathlib import Path
 import sys
 import math
 import statistics
 import pandas as pd
 
-from sparkle.types.objective import SparkleObjective
+from sparkle.types import SparkleObjective, resolve_objective
 
 
 class PerformanceDataFrame():
     """Class to manage performance data and common operations on them."""
     missing_value = math.nan
-    missing_objective = "DEFAULT:UNKNOWN"
+    missing_objective = "UNKNOWN"
     multi_dim_names = ["Objective", "Instance", "Run"]
 
     def __init__(self: PerformanceDataFrame,
@@ -52,6 +51,11 @@ class PerformanceDataFrame():
         # Runs is a ``static'' dimension
         self.n_runs = n_runs
         self.run_ids = list(range(1, self.n_runs + 1))  # We count runs from 1
+        if objectives is not None:
+            self.objectives = [resolve_objective(o) if isinstance(o, str) else o
+                               for o in objectives]
+        else:
+            self.objectives = [SparkleObjective(PerformanceDataFrame.missing_objective)]
         if init_df:
             if self.csv_filepath.exists():
                 self.dataframe = pd.read_csv(csv_filepath)
@@ -63,10 +67,8 @@ class PerformanceDataFrame():
                         self.dataframe[PerformanceDataFrame.multi_dim_names[0]] =\
                             PerformanceDataFrame.missing_objective
                     else:  # Constructor is provided with the objectives
-                        objectives = [o.name if isinstance(o, SparkleObjective) else o
-                                      for o in objectives]
                         self.dataframe[PerformanceDataFrame.multi_dim_names[0]] =\
-                            objectives
+                            [o.name for o in self.objectives]
                 if (PerformanceDataFrame.multi_dim_names[2] not in self.dataframe.columns
                         or not has_rows):
                     # No runs column present, force into column
@@ -86,14 +88,8 @@ class PerformanceDataFrame():
                     PerformanceDataFrame.multi_dim_names)
             else:
                 # Initialize empty DataFrame
-                if objectives is None:
-                    objective_names = [PerformanceDataFrame.missing_objective]
-                else:
-                    objective_names =\
-                        [o.name if isinstance(o, SparkleObjective) else o
-                         for o in objectives]
                 midx = pd.MultiIndex.from_product(
-                    [objective_names, instances, self.run_ids],
+                    [[o.name for o in self.objectives], instances, self.run_ids],
                     names=PerformanceDataFrame.multi_dim_names)
                 self.dataframe = pd.DataFrame(PerformanceDataFrame.missing_value,
                                               index=midx,
@@ -250,7 +246,9 @@ class PerformanceDataFrame():
             levels = [self.dataframe.index.levels[0].tolist(),
                       [instance_name],
                       self.dataframe.index.levels[2].tolist()]
-            emidx = pd.MultiIndex(levels, names=PerformanceDataFrame.multi_dim_names)
+            # NOTE: Did this fix Jeroen's bug? .from_arrays instead of direct constructor
+            emidx = pd.MultiIndex.from_arrays(levels,
+                                              names=PerformanceDataFrame.multi_dim_names)
             # Create the missing column values
             edf = pd.DataFrame(PerformanceDataFrame.missing_value,
                                index=emidx,
@@ -325,7 +323,7 @@ class PerformanceDataFrame():
 
     # Modifiers
 
-    def penalise(self: PerformanceDataFrame,
+    '''def penalise(self: PerformanceDataFrame,
                  threshold: float,
                  penalty: float,
                  objective: str = None,
@@ -344,7 +342,7 @@ class PerformanceDataFrame():
         objective = self.verify_objective(objective)
         comparison_op = operator.lt if lower_bound else operator.gt
         self.dataframe[comparison_op(self.dataframe.loc[(objective), :],
-                                     threshold)] = penalty
+                                     threshold)] = penalty'''
 
     # Calculables
 
@@ -540,20 +538,17 @@ class PerformanceDataFrame():
         return output
 
     def get_solver_ranking(self: PerformanceDataFrame,
-                           cutoff: float = None,
-                           penalty: float = None,
                            objective: str = None,
                            minimise: bool = True) -> list[tuple[str, float]]:
         """Return a list with solvers ranked by average performance."""
         objective = self.verify_objective(objective)
-        if cutoff is not None and penalty is not None:
-            self.penalise(cutoff, penalty, objective, not minimise)
         num_solver_entries = self.num_instances * self.num_runs
         sub_df = self.dataframe.loc(axis=0)[objective, :, :]
         solver_ranking = [(solver, sub_df[solver].sum() / num_solver_entries)
                           for solver in self.solvers]
         # Sort the list by second value (the performance)
-        solver_ranking.sort(key=lambda performance: performance[1])
+        solver_ranking.sort(key=lambda performance: performance[1],
+                            reverse=(not minimise))
         return solver_ranking
 
     def save_csv(self: PerformanceDataFrame, csv_filepath: Path = None) -> None:

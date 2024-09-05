@@ -51,7 +51,6 @@ class RandomForest:
 
     def __init__(self: RandomForest, dataset: DataSet) -> None:
         """Initialize random forest classifier."""
-        self.objectives = ["precision", "recall"]
         self.dataset = dataset
 
     @property
@@ -201,7 +200,7 @@ class RandomForest:
             "time": time.time() - start_time,
             "size": model_size,
         }
-        return {k: performances[k] for k in self.objectives}
+        return performances
 
 
 if __name__ == "__main__":
@@ -211,7 +210,7 @@ if __name__ == "__main__":
     solver_dir = Path(args["solver_dir"])
     seed = args["seed"]
     cutoff = float(args["cutoff_time"])
-    objectives = args["objectives"]
+    objectives = args["objectives"]  # Fix me: stale?
     instance = "-1"  # Place holder
 
     del args["solver_dir"]
@@ -297,8 +296,9 @@ if __name__ == "__main__":
     except Exception:
         status = "CRASHED"
         result = {k: 100 for k in objectives}
-    quality = list(result.values())[0]
+
+    # quality = list(result.values())[0]
     outdict = {"status": status,
-               "quality": quality}
+               "quality": result}
 
     print(outdict)

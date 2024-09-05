@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from sparkle.types.objective import SparkleObjective, PerformanceMeasure
+from sparkle.types import SparkleObjective
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 
@@ -152,18 +152,9 @@ class ConfigurationScenario:
         Returns:
             Performance measure of the sparkle objective
         """
-        perf_measure = self.sparkle_objective.PerformanceMeasure
-
-        if perf_measure == PerformanceMeasure.RUNTIME:
-            perf_measure = perf_measure.name
-        elif (perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE
-              or perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION):
-            perf_measure = "QUALITY"
-        else:
-            print("Warning: Unknown performance measure", perf_measure,
-                  "! This is a bug in Sparkle.")
-
-        return perf_measure
+        if self.sparkle_objective.time:
+            return "RUNTIME"
+        return "QUALITY"
 
     def _create_feature_file(self: ConfigurationScenario) -> None:
         """Create CSV file from feature data."""

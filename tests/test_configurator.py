@@ -15,17 +15,17 @@ from sparkle.instance import instance_set
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.implementations import SMAC2
-from sparkle.types.objective import SparkleObjective, PerformanceMeasure
+from sparkle.types.objective import PAR
 
 
-objectives = [SparkleObjective("RUNTIME:PAR10")]
+sparkle_objective = PAR(10)
+objectives = [sparkle_objective]
 test_files = Path("tests", "test_files")
 base_dir = test_files / "tmp"
 output = Path("Output")
 smac2_conf = SMAC2(objectives, base_dir, output)
 train_set = instance_set(test_files / "Instances/Train-Instance-Set")
 solver = Solver(test_files / "Solvers/Test-Solver")
-sparkle_objective = SparkleObjective("RUNTIME:PAR10")
 conf_scenario = ConfigurationScenario(
     solver, train_set,
     number_of_runs=2,
@@ -52,7 +52,7 @@ class TestConfigurator():
             configurator_target=None,
             base_dir=Path(),
             tmp_path=Path(),
-            objectives=[SparkleObjective("RUNTIME:PAR10")])
+            objectives=objectives)
 
         assert configurator.executable_path == exec_path
 
@@ -97,21 +97,21 @@ class TestConfigurator():
         """Tests the retrieval of the optimal configuration from SMAC2 run."""
         # Mock the validator call
         csv_file = Path("tests/test_files/Validator/validation_configuration.csv")
-        csv_lines = [line for line in csv.reader(csv_file.open("r"))][1:]
+        csv_lines = [line for line in csv.reader(csv_file.open("r"))]
         mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
                      return_value=csv_lines)
         opt_conf = smac2_conf.get_optimal_configuration(
-            solver, train_set, performance=PerformanceMeasure.RUNTIME)
+            solver, train_set, PAR(10))
 
-        expect_conf = (25.87506525, "-init_solution '1' -p_swt '0.3' -perform_aspiration"
-                       " '1' -perform_clause_weight '1' -perform_double_cc '1' "
-                       "-perform_first_div '0' -perform_pac '0' -q_swt '0.0' "
+        expect_conf = (11.206219166666667, "-gamma_hscore2 '351' -init_solution '1' "
+                       "-p_swt '0.20423712003341465' -perform_aspiration '1' "
+                       "-perform_clause_weight '1' -perform_double_cc '0' "
+                       "-perform_first_div '0' -perform_pac '1' -prob_pac "
+                       "'0.005730374136488115' -q_swt '0.6807207179674418' "
                        "-sel_clause_div '1' -sel_clause_weight_scheme '1' "
-                       "-sel_var_break_tie_greedy '2' -sel_var_div '3' -threshold_swt"
-                       " '300'")
+                       "-sel_var_break_tie_greedy '4' -sel_var_div '2' -threshold_swt "
+                       "'32'")
         assert opt_conf == expect_conf
-
-        # TODO: Replace the Train-Instance-Set/validation.csv
 
     def test_smac2_organise_output(self: TestConfigurator) -> None:
         """Testing SMAC2 ability to retrieve output from raw file."""

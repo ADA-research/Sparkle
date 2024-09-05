@@ -46,7 +46,7 @@ def solver_ranked_latex_list(solver_ranking: list[tuple[str, float]],
     Returns:
         The list of solvers ranked as LaTeX str.
     """
-    objective_str = f"{objective.metric}: " if objective is not None else ""
+    objective_str = f"{objective}: " if objective is not None else ""
     return stex.list_to_latex([(row[0], f", {objective_str} {row[1]}")
                                for row in solver_ranking])
 
@@ -90,8 +90,8 @@ def get_figure_portfolio_selector_vs_sbs(
 
     stex.generate_comparison_plot(points,
                                   figure_filename,
-                                  xlabel=f"SBS ({sbs_solver_name}) [{objective.metric}]",
-                                  ylabel=f"Sparkle Selector [{objective.metric}]",
+                                  xlabel=f"SBS ({sbs_solver_name}) [{objective}]",
+                                  ylabel=f"Sparkle Selector [{objective}]",
                                   limit="magnitude",
                                   limit_min=0.25,
                                   limit_max=0.25,
@@ -126,7 +126,7 @@ def get_figure_portfolio_selector_sparkle_vs_vbs(
 
     stex.generate_comparison_plot(points,
                                   figure_filename,
-                                  xlabel=f"VBS [{objective.metric}]",
+                                  xlabel=f"VBS [{objective}]",
                                   ylabel=f"Sparkle Selector [{objective.name}]",
                                   limit="magnitude",
                                   limit_min=0.25,
@@ -187,7 +187,7 @@ def selection_report_variables(
                                                             objective)
     latex_dict["VBSPAR"] = performance_data.best_instance_performance().mean()
     latex_dict["actualPAR"] = actual_performance_data.mean()
-    latex_dict["metric"] = objective.metric
+    latex_dict["metric"] = objective.name
     latex_dict["figure-portfolio-selector-sparkle-vs-sbs"] =\
         get_figure_portfolio_selector_vs_sbs(
             target_dir, objective, performance_data,

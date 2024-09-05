@@ -15,7 +15,6 @@ from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.types.objective import PerformanceMeasure
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -27,8 +26,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.RecomputeMarginalContributionForSelectorArgument.kwargs)
     parser.add_argument(*ac.SelectorTimeoutArgument.names,
                         **ac.SelectorTimeoutArgument.kwargs)
-    parser.add_argument(*ac.PerformanceMeasureArgument.names,
-                        **ac.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*ac.SparkleObjectiveArgument.names,
+                        **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.SelectorAblationArgument.names,
                         **ac.SelectorAblationArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
@@ -64,9 +63,9 @@ if __name__ == "__main__":
         COMMAND_DEPENDENCIES[CommandName.CONSTRUCT_PORTFOLIO_SELECTOR]
     )
 
-    if ac.set_by_user(args, "performance_measure"):
+    if ac.set_by_user(args, "objectives"):
         gv.settings().set_general_sparkle_objectives(
-            args.performance_measure, SettingState.CMD_LINE
+            args.objectives, SettingState.CMD_LINE
         )
     if args.run_on is not None:
         gv.settings().set_run_on(
@@ -92,15 +91,11 @@ if __name__ == "__main__":
     cutoff_time = max(gv.settings().get_general_target_cutoff_time(), 2)
 
     # Determine the objective function
-    perf_measure = gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
-    if perf_measure == PerformanceMeasure.RUNTIME:
+    objective = gv.settings().get_general_sparkle_objectives()[0]
+    if objective.time:
         objective_function = "runtime"
-    elif perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or\
-            perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-        objective_function = "solution_quality"
     else:
-        print("ERROR: Unknown performance measure in portfolio selector construction.")
-        sys.exit(-1)
+        objective_function = "solution_quality"
 
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
@@ -132,6 +127,7 @@ if __name__ == "__main__":
         sys.exit()
 
     selector_path.parent.mkdir(exist_ok=True, parents=True)
+
     selector_run = selector.construct(selector_path,
                                       performance_data,
                                       feature_data,
@@ -173,10 +169,9 @@ if __name__ == "__main__":
                 print(f"Portfolio selector without {solver_name} constructed!")
             else:
                 print(f"Portfolio selector without {solver_name} constructor running...")
-    performance_str = PerformanceMeasure.to_str(perf_measure)
     with_actual = "--actual" if solver_ablation else ""
     cmd = (f"sparkle/CLI/compute_marginal_contribution.py --perfect {with_actual} "
-           f"{ac.PerformanceMeasureArgument.names[0]} {performance_str}")
+           f"{ac.SparkleObjectiveArgument.names[0]} {objective}")
 
     marginal_contribution = rrr.add_to_queue(
         runner=run_on,

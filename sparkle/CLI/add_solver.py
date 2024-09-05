@@ -17,7 +17,7 @@ from sparkle.solver import Solver
 from sparkle.CLI.help import logging as sl
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help import argparse_custom as apc
+from sparkle.CLI.help import argparse_custom as ac
 from sparkle.platform.settings_objects import SettingState
 
 
@@ -26,21 +26,21 @@ def parser_function() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Add a solver to the Sparkle platform.",
         epilog="")
-    parser.add_argument(*apc.DeterministicArgument.names,
-                        **apc.DeterministicArgument.kwargs)
+    parser.add_argument(*ac.DeterministicArgument.names,
+                        **ac.DeterministicArgument.kwargs)
     group_solver_run = parser.add_mutually_exclusive_group()
-    group_solver_run.add_argument(*apc.RunSolverNowArgument.names,
-                                  **apc.RunSolverNowArgument.kwargs)
-    group_solver_run.add_argument(*apc.RunExtractorLaterArgument.names,
-                                  **apc.RunSolverLaterArgument.kwargs)
-    parser.add_argument(*apc.NicknameSolverArgument.names,
-                        **apc.NicknameSolverArgument.kwargs)
-    parser.add_argument(*apc.SolverPathArgument.names,
-                        **apc.SolverPathArgument.kwargs)
-    parser.add_argument(*apc.RunOnArgument.names,
-                        **apc.RunOnArgument.kwargs)
-    parser.add_argument(*apc.SkipChecksArgument.names,
-                        **apc.SkipChecksArgument.kwargs)
+    group_solver_run.add_argument(*ac.RunSolverNowArgument.names,
+                                  **ac.RunSolverNowArgument.kwargs)
+    group_solver_run.add_argument(*ac.RunExtractorLaterArgument.names,
+                                  **ac.RunSolverLaterArgument.kwargs)
+    parser.add_argument(*ac.NicknameSolverArgument.names,
+                        **ac.NicknameSolverArgument.kwargs)
+    parser.add_argument(*ac.SolverPathArgument.names,
+                        **ac.SolverPathArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
+    parser.add_argument(*ac.SkipChecksArgument.names,
+                        **ac.SkipChecksArgument.kwargs)
     return parser
 
 

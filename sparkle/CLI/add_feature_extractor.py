@@ -13,7 +13,7 @@ from sparkle.CLI.compute_features import compute_features
 from sparkle.CLI.help import logging as sl
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help import argparse_custom as apc
+from sparkle.CLI.help import argparse_custom as ac
 from sparkle.solver import Extractor
 
 
@@ -21,15 +21,15 @@ def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     # Define command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument(*apc.ExtractorPathArgument.names,
-                        **apc.ExtractorPathArgument.kwargs)
+    parser.add_argument(*ac.ExtractorPathArgument.names,
+                        **ac.ExtractorPathArgument.kwargs)
     group_extractor_run = parser.add_mutually_exclusive_group()
-    group_extractor_run.add_argument(*apc.RunExtractorNowArgument.names,
-                                     **apc.RunExtractorNowArgument.kwargs)
-    group_extractor_run.add_argument(*apc.RunExtractorLaterArgument.names,
-                                     **apc.RunExtractorLaterArgument.kwargs)
-    parser.add_argument(*apc.NicknameFeatureExtractorArgument.names,
-                        **apc.NicknameFeatureExtractorArgument.kwargs)
+    group_extractor_run.add_argument(*ac.RunExtractorNowArgument.names,
+                                     **ac.RunExtractorNowArgument.kwargs)
+    group_extractor_run.add_argument(*ac.RunExtractorLaterArgument.names,
+                                     **ac.RunExtractorLaterArgument.kwargs)
+    parser.add_argument(*ac.NicknameFeatureExtractorArgument.names,
+                        **ac.NicknameFeatureExtractorArgument.kwargs)
     return parser
 
 
