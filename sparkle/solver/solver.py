@@ -298,7 +298,7 @@ class Solver(SparkleCallable):
         parsed_output["status"] = SolverStatus(parsed_output["status"])
         # apply objectives to parsed output, runtime based objectives added here
         for key, value in parsed_output.items():
-            if key in ["status", "cpu_time", "wall_time"]:
+            if key == "status":
                 continue
             objective = resolve_objective(key)
             if objective is None:
