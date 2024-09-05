@@ -69,7 +69,7 @@ def get_solver_output(runsolver_configuration: list[str],
                       log_dir: Path) -> dict[str, str | object]:
     """Decode solver output dictionary when called with runsolver."""
     solver_input = None
-    solver_output = ""
+    solver_output = None
     value_data_file = None
     cutoff_time = sys.maxsize
     for idx, conf in enumerate(runsolver_configuration):
@@ -89,11 +89,13 @@ def get_solver_output(runsolver_configuration: list[str],
         if "-w" in conf or "--watcher-data" in conf:
             watch_file = Path(runsolver_configuration[idx + 1])
             args_str = get_solver_args(log_dir / watch_file)
+            if args_str == "":  # Could not find log file or args
+                continue
             solver_input = re.findall("{.*}", args_str)[0]
             solver_input = ast.literal_eval(solver_input)
             cutoff_time = float(solver_input["cutoff_time"])
 
-    if solver_output == "":
+    if solver_output is None:
         # Still empty, try to read from subprocess
         solver_output = process_output
     # Format output to only the brackets (dict)
@@ -112,6 +114,8 @@ def get_solver_output(runsolver_configuration: list[str],
         output_dict["cpu_time"] = cpu_time
         output_dict["wall_time"] = wall_time
         output_dict["memory"] = memory
+    else:  # Could not retrieve cpu and wall time (log does not exist)
+        output_dict["cpu_time"], output_dict["wall_time"] = -1.0, -1.0
     if output_dict["cpu_time"] > cutoff_time:
         output_dict["status"] = SolverStatus.TIMEOUT
     # Add the missing objectives (runtime based)
