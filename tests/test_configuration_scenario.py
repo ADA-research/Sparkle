@@ -13,7 +13,7 @@ from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver import Solver
 from sparkle.instance import instance_set
 from sparkle.platform.settings_objects import Settings
-from sparkle.types.objective import PARk
+from sparkle.types.objective import PAR
 
 global settings
 settings = Settings()
@@ -39,7 +39,7 @@ class TestConfigurationScenario(TestCase):
         self.wallclock_time = 600
         self.cutoff_time = 60
         self.cutoff_length = "max"
-        self.sparkle_objective = PARk(10)
+        self.sparkle_objective = PAR(10)
         self.configurator = settings.get_general_sparkle_configurator()
         self.scenario = ConfigurationScenario(
             solver=self.solver,

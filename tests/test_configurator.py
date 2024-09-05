@@ -15,10 +15,10 @@ from sparkle.instance import instance_set
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.implementations import SMAC2
-from sparkle.types.objective import PARk
+from sparkle.types.objective import PAR
 
 
-sparkle_objective = PARk(10)
+sparkle_objective = PAR(10)
 objectives = [sparkle_objective]
 test_files = Path("tests", "test_files")
 base_dir = test_files / "tmp"
@@ -101,7 +101,7 @@ class TestConfigurator():
         mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
                      return_value=csv_lines)
         opt_conf = smac2_conf.get_optimal_configuration(
-            solver, train_set, PARk(10))
+            solver, train_set, PAR(10))
 
         expect_conf = (11.206219166666667, "-gamma_hscore2 '351' -init_solution '1' "
                        "-p_swt '0.20423712003341465' -perform_aspiration '1' "
