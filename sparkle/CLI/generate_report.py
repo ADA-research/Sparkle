@@ -64,7 +64,6 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
-    Settings.check_settings_changes(gv.settings(), prev_settings)
 
     # Log command call
     sl.log_command(sys.argv)
@@ -97,10 +96,11 @@ if __name__ == "__main__":
         gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )
-    if ac.set_by_user(args, "objectives"):
+    if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
             args.objectives, SettingState.CMD_LINE)
 
+    Settings.check_settings_changes(gv.settings(), prev_settings)
     # If no arguments are set get the latest scenario
     if not selection and test_case_dir is None and solver is None:
         scenario = gv.latest_scenario().get_latest_scenario()
