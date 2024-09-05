@@ -2,6 +2,8 @@
 # -*- coding: UTF-8 -*-
 """Helper functions for parallel portfolio report generation."""
 from pathlib import Path
+import csv
+import operator
 
 import plotly.express as px
 import pandas as pd
@@ -9,7 +11,7 @@ import plotly.io as pio
 
 from sparkle.platform import latex as stex
 from sparkle.platform import generate_report_for_selection as sgfs
-from sparkle.types import SparkleObjective
+from sparkle.types import SparkleObjective, SolverStatus
 from sparkle.instance import InstanceSet
 
 
@@ -42,13 +44,12 @@ def get_solver_list_latex(solver_list: list[str]) -> str:
     return latex_itemize
 
 
-def get_dict_sbs_penalty_time_on_each_instance(
+def get_portfolio_metrics(
         solver_list: list[str],
         instance_set: InstanceSet,
         results: dict[list[str, str]],
-        cutoff: int,
-        penalised_time: int) -> tuple[dict[str, float], str, dict[str, float]]:
-    """Return the penalised run time for the single best solver and per solver.
+        objective: SparkleObjective) -> tuple[dict[str, float], str, dict[str, float]]:
+    """Return the portfolio metrics for SBS, aggregated results per solver and VBS.
 
     Args:
         solver_list: list of solvers
@@ -56,72 +57,42 @@ def get_dict_sbs_penalty_time_on_each_instance(
         results: dictionary of results of the portfolio
 
     Returns:
-        A three-tuple:
-            A dict containing the run time per instance for the single best solver.
+        A quatro-tuple:
+            A dict containing the objective value per instance for the single best solver
             A string containing the name of the single best solver.
-            A second dict containing penalised averaged run time per solver.
+            A second dict with aggrated objective values over all instances per solver.
+            A third dict containing the virtual best solver (Portfolio) per instance.
     """
-    penalised_averaged_runtime = {solver: 0.0 for solver in solver_list}
-    penalised_time = float(penalised_time)
+    corrected_solver_results = {solver: [] for solver in solver_list}
+    instance_worst = None
+    op = operator.gt if objective.minimise else operator.lt
     for instance in results:
-        for (solver, status, runtime) in results[instance]:
-            # Those that did not finish or exceed the thresh get the penalty
-            if float(runtime) >= cutoff or status.lower() != "success":
-                runtime = penalised_time
-            penalised_averaged_runtime[solver] += (float(runtime) / instance_set.size)
-
+        for (solver, status, value) in results[instance]:
+            if value == "None":
+                corrected_solver_results[solver].append(None)
+                continue  # Solver failed to return a value
+            value = float(value)
+            if instance_worst is None or op(value, instance_worst):
+                instance_worst = value
+            if SolverStatus(status) != SolverStatus.SUCCESS:
+                # If the solver wasn't successful, we also assign the worst known value
+                corrected_solver_results[solver].append(None)
+                continue
+            corrected_solver_results[solver].append(float(value))
+        for solver in corrected_solver_results:
+            if corrected_solver_results[solver][-1] is None:
+                corrected_solver_results[solver][-1] = instance_worst
+    aggregated_results_solvers = {solver: objective.instance_aggregator(
+        corrected_solver_results[solver]) for solver in corrected_solver_results}
+    vbs_results_instance = {instance: objective.solver_aggregator(
+        [corrected_solver_results[solver][index] for solver in corrected_solver_results])
+        for index, instance in enumerate(instance_set._instance_names)}
     # Find the single best solver (SBS)
-    sbs_name = min(penalised_averaged_runtime, key=penalised_averaged_runtime.get)
-    sbs_name = Path(sbs_name).name
-    sbs_dict = {name: penalised_time for name in instance_set._instance_names}
-
-    for instance in results:
-        instance_name = Path(instance).name
-        found = False
-        for result in results[instance_name]:
-            if result[0] == sbs_name:
-                found = True
-                if float(result[2]) < penalised_time:
-                    sbs_dict[instance_name] = float(result[2])
-                break
-        if not found:
-            print(f"WARNING: No result found for instance: {instance_name}")
-    return sbs_dict, sbs_name, penalised_averaged_runtime
-
-
-def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
-        instance_set: InstanceSet,
-        results: dict[str, list[str]],
-        cutoff_time: int,
-        penalised_time: int) -> dict[str, float]:
-    """Returns the instance names and corresponding penalised running times of the PaP.
-
-    Args:
-        instance_list: List of instances.
-
-    Returns:
-        A dict of instance names and the penalised running time of the PaP.
-    """
-    instance_penalty_dict = {}
-
-    default_penalty = float(penalised_time)
-
-    for instance_name in instance_set._instance_names:
-        if instance_name in results:
-            selected_value = results[instance_name][0]
-            for solver in results[instance_name]:
-                if solver[2] < selected_value[2]:
-                    selected_value = solver
-            _, status, runtime = selected_value
-            # Assign the measured result if exit status was not timeout
-            # and measured time less then cutoff
-            if float(runtime) < cutoff_time and status != "TIMEOUT":
-                instance_penalty_dict[instance_name] = float(runtime)
-            else:  # Assign the penalized result
-                instance_penalty_dict[instance_name] = default_penalty
-        else:
-            instance_penalty_dict[instance_name] = default_penalty
-    return instance_penalty_dict
+    sbs_name = min(aggregated_results_solvers, key=aggregated_results_solvers.get)
+    sbs_results = corrected_solver_results[sbs_name]
+    sbs_dict = {name: sbs_results[index]
+                for index, name in enumerate(instance_set._instance_names)}
+    return sbs_dict, sbs_name, aggregated_results_solvers, vbs_results_instance
 
 
 def get_figure_parallel_portfolio_sparkle_vs_sbs(
@@ -130,7 +101,6 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
         instance_set: InstanceSet,
         results: list[str],
         objective: SparkleObjective,
-        cutoff: int,
         penalised_time: int) -> tuple[
         str, dict[str, float], dict[str, float]]:
     """Generate PaP vs SBS figure and return a string to include it in LaTeX.
@@ -148,29 +118,16 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
             dict_actual_parallel_portfolio_penalty_time_on_each_instance: A dict with
                 instance names and the penalised running time of the PaP.
     """
-    dict_sbs_penalty_time_on_each_instance, sbs_solver, dict_all_solvers =\
-        get_dict_sbs_penalty_time_on_each_instance(solver_list, instance_set, results,
-                                                   cutoff, penalised_time)
-    dict_actual_parallel_portfolio_penalty_time_on_each_instance =\
-        get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(instance_set,
-                                                                         results,
-                                                                         cutoff,
-                                                                         penalised_time)
-
+    sbs_instance_results, sbs_solver, dict_all_solvers, vbs_instance_results =\
+        get_portfolio_metrics(solver_list, instance_set, results, objective)
     figure_filename = "figure_parallel_portfolio_sparkle_vs_sbs"
-    data = []
-    for instance in dict_sbs_penalty_time_on_each_instance:
-        sbs_penalty_time = dict_sbs_penalty_time_on_each_instance[instance]
-        sparkle_penalty_time = (
-            dict_actual_parallel_portfolio_penalty_time_on_each_instance[instance])
-        data.append([sbs_penalty_time, sparkle_penalty_time])
-
+    data = [[sbs_instance_results[instance], vbs_instance_results[instance]]
+            for instance in sbs_instance_results]
     generate_figure(target_directory, float(penalised_time),
                     f"SBS ({stex.underscore_for_latex(sbs_solver)})",
                     "Parallel-Portfolio", figure_filename, objective.name, data)
     latex_include = f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
-    return (latex_include, dict_all_solvers,
-            dict_actual_parallel_portfolio_penalty_time_on_each_instance)
+    return latex_include, dict_all_solvers, vbs_instance_results
 
 
 def get_results_table(results: dict[str, str, str],
@@ -247,7 +204,6 @@ def get_results_table(results: dict[str, str, str],
                 f"{round(dict_all_solvers[line], 2)} & {n_unsolved_instances} & "
                 f"{cancelled} & {solver_with_solutions[solver_name]} \\\\ ")
     table_string += "\\end{tabular}"
-
     return table_string
 
 
@@ -274,13 +230,21 @@ def parallel_report_variables(target_directory: Path,
                       "performanceMetric": objective.name,
                       "numInstanceClasses": "1"}  # Currently no support for multi sets
     # Get the results data
-    csv_data = [line.split(",") for line in
-                (parallel_portfolio_path / "results.csv").open("r").readlines()]
-    solver_list = list(set([line[1] for line in csv_data]))  # Unique set of solvers
+    csv_data = [line for line in
+                csv.reader((parallel_portfolio_path / "results.csv").open("r"))]
+    header = csv_data[0]
+    csv_data = csv_data[1:]
+    solver_column = header.index("Solver")
+    instance_column = header.index("Instance")
+    status_column = header.index("status")
+    objective_column = header.index(objective.name)
+    solver_list = list(set([line[solver_column]
+                            for line in csv_data]))  # Unique set of solvers
     results = {name: [] for name in instance_set._instance_names}
     for row in csv_data:
-        if row[0] in results.keys():
-            results[row[0]].append([row[1], row[2], row[3]])
+        if row[instance_column] in results.keys():
+            results[row[instance_column]].append(
+                [row[solver_column], row[status_column], row[objective_column]])
 
     variables_dict["numSolvers"] = len(solver_list)
     variables_dict["solverList"] = get_solver_list_latex(solver_list)
@@ -291,9 +255,10 @@ def parallel_report_variables(target_directory: Path,
     solvers_solutions = {solver: 0 for solver in solver_list}
     instance_names_copy = instance_set._instance_names.copy()
     for line in csv_data:
-        if line[0] in instance_names_copy and line[2].lower() == "success":
-            solvers_solutions[line[1]] += 1
-            instance_names_copy.remove(line[0])
+        if (line[instance_column] in instance_names_copy
+                and SolverStatus(line[status_column]) == SolverStatus.SUCCESS):
+            solvers_solutions[line[solver_column]] += 1
+            instance_names_copy.remove(line[instance_column])
     unsolved_instances = instance_set.size - sum([solvers_solutions[key]
                                                   for key in solvers_solutions])
     inst_succes = []
@@ -312,19 +277,18 @@ def parallel_report_variables(target_directory: Path,
         dict_actual_parallel_portfolio_penalty_time_on_each_instance) =\
         get_figure_parallel_portfolio_sparkle_vs_sbs(target_directory, solver_list,
                                                      instance_set, results, objective,
-                                                     cutoff, penalised_time)
+                                                     penalised_time)
 
     variables_dict["figure-parallel-portfolio-sparkle-vs-sbs"] = figure_name
-
     variables_dict["resultsTable"] = get_results_table(
         results, dict_all_solvers, parallel_portfolio_path,
         dict_actual_parallel_portfolio_penalty_time_on_each_instance,
         solvers_solutions, unsolved_instances, instance_set.size, objective.name)
 
-    if objective.minimise:
-        variables_dict["decisionBool"] = "\\decisionfalse"
-    else:
+    if objective.time:
         variables_dict["decisionBool"] = "\\decisiontrue"
+    else:
+        variables_dict["decisionBool"] = "\\decisionfalse"
     return variables_dict
 
 

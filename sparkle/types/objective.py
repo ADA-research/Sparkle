@@ -32,7 +32,7 @@ class SparkleObjective:
                  name: str,
                  run_aggregator: typing.Callable = np.mean,
                  instance_aggregator: typing.Callable = np.mean,
-                 solver_aggregator: typing.Callable = np.mean,
+                 solver_aggregator: typing.Callable = None,
                  minimise: bool = True,
                  post_process: typing.Callable = None,
                  use_time: UseTime = UseTime.NO) -> None:
@@ -40,6 +40,8 @@ class SparkleObjective:
         self.name = name
         self.run_aggregator: typing.Callable = run_aggregator
         self.instance_aggregator: typing.Callable = instance_aggregator
+        if solver_aggregator is None:
+            solver_aggregator = np.min if minimise else np.max
         self.solver_aggregator: typing.Callable = solver_aggregator
         self.minimise: bool = minimise
         self.post_process: typing.Callable = post_process

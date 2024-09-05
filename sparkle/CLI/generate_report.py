@@ -185,11 +185,11 @@ if __name__ == "__main__":
         # Machine readable Output
         cutoff_time = gv.settings().get_general_target_cutoff_time()
         penalised_time = gv.settings().get_penalised_time()
+        objective = gv.settings().get_general_sparkle_objectives()[0]
         output = gv.settings().DEFAULT_parallel_portfolio_output_analysis
         parallel_portfolio_output = ParallelPortfolioOutput(parallel_portfolio_path,
                                                             pap_instance_set,
-                                                            cutoff_time,
-                                                            penalised_time,
+                                                            objective,
                                                             output)
         parallel_portfolio_output.write_output()
         print("Machine readable output is placed at: ", parallel_portfolio_output.output)
