@@ -12,6 +12,8 @@ from sparkle.types.objective import SparkleObjective, UseTime
 
 
 class_name_regex = re.compile(r"[a-zA-Z]+(\d*)$")
+objective_string_regex = re.compile(r"(?P<name>[\w\-_]+)(:(?P<direction>min|max))?$")
+objective_variable_regex = re.compile(r"(-?\d+)$")
 
 
 def _check_class(candidate: Callable) -> bool:
@@ -20,45 +22,55 @@ def _check_class(candidate: Callable) -> bool:
 
 
 def resolve_objective(name: str) -> SparkleObjective:
-    """Try to resolve the objective class by (case sensitive) name.
+    """Try to resolve the objective class by (case-sensitive) name.
+
+    convention: objective_name(variable-k)?(:[min|max])?
+
+    Order of resolving:
+        class_name of user defined SparkleObjectives
+        class_name of sparkle defined SparkleObjectives
+        default SparkleObjective with minimization unless specified as max
 
     Args:
-        name: The name of the objective class. Can included parameter value k.
+        name: The name of the objective class. Can include parameter value k.
 
     Returns:
         Instance of the Objective class or None if not found.
     """
-    minimise = True
-    if ":" in name:
-        name, minimise = name.split(":")
-        minimise = not (minimise.lower() == "max")
-    match = class_name_regex.fullmatch(name)
-    argument = None
-    if match is None:
+    match = objective_string_regex.fullmatch(name)
+    if match is None or name == "" or not name[0].isalpha():
         return None
-    if match.groups()[0] != "":
-        # If the name contains an argument, substitute it with 'k' for matching
-        name = name.replace(match.groups()[0], "") + "k"
-        argument = int(match.groups()[0])
+
+    name = match.group("name")
+    minimise = not match.group("direction") == "max"  # .group returns "" if no match
+
+    # Search for optional variable and record split point between name and variable
+    name_options = [(name, None), ]  # Options of names to check for
+    if m := objective_variable_regex.search(name):
+        argument = int(m.group())
+        name_options = [(name[:m.start()], argument), ] + name_options  # Prepend
+
     # First try to resolve the user input classes
-    try:
-        user_module = importlib.import_module("Settings.objective")
-        for o_name, o_class in inspect.getmembers(user_module,
+    for rname, rarg in name_options:
+        try:
+            user_module = importlib.import_module("Settings.objective")
+            for o_name, o_class in inspect.getmembers(user_module,
+                                                      predicate=_check_class):
+                if o_name == rname:
+                    if rarg is not None:
+                        return o_class(rarg)
+                    return o_class()
+        except Exception:
+            pass
+
+    for rname, rarg in name_options:
+        # Try to match with specially defined classes
+        for o_name, o_class in inspect.getmembers(objective,
                                                   predicate=_check_class):
-            if o_name == name:
-                if argument is not None:
-                    return o_class(argument)
+            if o_name == rname:
+                if rarg is not None:
+                    return o_class(rarg)
                 return o_class()
-    except Exception:
-        pass
-    # Try to match with specially defined classes
-    for o_name, o_class in inspect.getmembers(objective,
-                                              predicate=_check_class):
-        if o_name == name:
-            if argument is not None:
-                return o_class(argument)
-            return o_class()
-    if argument is None:
-        return SparkleObjective(name=name, minimise=minimise)
-    # Argument was given but cannot be passed
-    return None
+
+    # No special objects found. Return objective with full name
+    return SparkleObjective(name=name, minimise=minimise)

@@ -57,12 +57,14 @@ class SparkleObjective:
         return self.use_time != UseTime.NO
 
 
-class PARk(SparkleObjective):
+class PAR(SparkleObjective):
     """Penalised Averaged Runtime Objective for Sparkle."""
 
-    def __init__(self: PARk, k: int) -> None:
-        """Initialize PARk."""
+    def __init__(self: PAR, k: int = 10) -> None:
+        """Initialize PAR."""
         self.k = k
+        if k <= 0:
+            raise ValueError("k must be greater than 0.")
 
         def penalise(value: float, cutoff: float) -> float:
             """Return penalised value."""
