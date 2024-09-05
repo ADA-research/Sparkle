@@ -316,4 +316,6 @@ class Solver(SparkleCallable):
                 if objective.post_process is not None:
                     parsed_output[key] = objective.post_process(
                         parsed_output[key], parsed_output["cutoff_time"])
+        if "cutoff_time" in parsed_output:
+            del parsed_output["cutoff_time"]
         return parsed_output
