@@ -68,4 +68,4 @@ class PARk(SparkleObjective):
                 return cutoff * self.k
             return value
 
-        super().__init__(f"PAR{k}", use_time=UseTime.WALL_TIME, post_process=penalise)
+        super().__init__(f"PAR{k}", use_time=UseTime.CPU_TIME, post_process=penalise)
