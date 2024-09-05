@@ -9,7 +9,7 @@ from sparkle.types import SolverStatus
 
 
 def get_measurements(runsolver_values_path: Path,
-                     not_found: float = -1.0) -> tuple[float, float]:
+                     not_found: float = -1.0) -> tuple[float, float, float]:
     """Return the CPU and wallclock time reported by runsolver in values log."""
     cpu_time, wall_time = not_found, not_found
     if runsolver_values_path.exists():
