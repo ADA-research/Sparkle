@@ -2,6 +2,17 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.8.6] - 2024/09/??
+
+### Changed
+- SparkleObjectives are now used platform wide to define what metrics should be collected from Solvers and stored, how they should be treated (Minisation, aggregation), and can be easily set by the user. They can be overriden with custom implementations by the user.
+
+### Added
+- 
+
+### Fixed
+- 
+
 ## [0.8.5] - 2024/09/02
 
 ### Changed
