@@ -36,9 +36,9 @@ sparkle compute_features
 
 #### Run the solvers
 
-# Run the solvers on all instances. For the CCAG (Constrained Covering Array Generation) problem we measure the absolute quality performance by setting the `--performance-measure` option, to avoid needing this for every command it can also be set in `Settings/sparkle_settings.ini`.
+# Run the solvers on all instances. For the CCAG (Constrained Covering Array Generation) problem we measure the absolute quality by setting the `--objectives` option, to avoid needing this for every command it can also be set in `Settings/sparkle_settings.ini`.
 
-sparkle run_solvers --performance-measure QUALITY_ABSOLUTE
+sparkle run_solvers --objectives quality
 
 #### Construct a portfolio selector
 
@@ -48,7 +48,7 @@ sparkle wait
 
 # Construct a portfolio selector, using the previously computed features and the results of running the solvers. We again set the performance measure to absolute quality.
 
-sparkle construct_portfolio_selector --performance-measure QUALITY_ABSOLUTE
+sparkle construct_portfolio_selector --objectives quality
 
 #### [Coming soon] Generate a report
 
