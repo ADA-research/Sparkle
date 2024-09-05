@@ -9,7 +9,7 @@ import builtins
 import statistics
 
 from sparkle.types import SparkleObjective, resolve_objective
-from sparkle.types.objective import PARk
+from sparkle.types.objective import PAR
 from sparkle.solver import Selector
 from sparkle.configurator.configurator import Configurator
 from sparkle.solver.verifier import SATVerifier
@@ -115,7 +115,7 @@ class Settings:
         DEFAULT_performance_data / "performance_data.csv"
 
     # Constant default values
-    DEFAULT_general_sparkle_objective = PARk(10)
+    DEFAULT_general_sparkle_objective = PAR(10)
     DEFAULT_general_sparkle_configurator = cim.SMAC2.__name__
     DEFAULT_general_solution_verifier = str(None)
     DEFAULT_general_target_cutoff_time = 60
