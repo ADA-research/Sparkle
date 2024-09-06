@@ -4,8 +4,6 @@ import sys
 import argparse
 from pathlib import Path
 import operator
-from typing import Callable
-from statistics import mean
 
 import tabulate
 
@@ -16,6 +14,7 @@ from sparkle.CLI.help import argparse_custom as ac
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
+from sparkle.types import SparkleObjective
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -37,17 +36,14 @@ def compute_selector_performance(
         actual_portfolio_selector: Path,
         performance_data: PerformanceDataFrame,
         feature_data: FeatureDataFrame,
-        minimise: bool,
-        aggregation_function: Callable[[list[float]], float]) -> float:
+        objective: SparkleObjective) -> float:
     """Return the performance of a selector over all instances.
 
     Args:
       actual_portfolio_selector: Path to portfolio selector.
       performance_data: The performance data.
       feature_data: The feature data.
-      minimise: Flag indicating, if scores should be minimised.
-      aggregation_function: function to aggregate the performance per instance
-      performance_cutoff: Optional performance cutoff.
+      objective: Objective to compute the performance for
 
     Returns:
       The selector performance as a single floating point number.
@@ -55,7 +51,7 @@ def compute_selector_performance(
     performance_path = actual_portfolio_selector.parent / "performance.csv"
     if performance_path.exists():
         selector_performance_data = PerformanceDataFrame(performance_path)
-        return aggregation_function(
+        return objective.instance_aggregator(
             selector_performance_data.get_values("portfolio_selector"))
     selector_performance_data = performance_data.copy()
 
@@ -71,30 +67,26 @@ def compute_selector_performance(
         feature_vector = feature_data.get_instance(instance)
         schedule[instance] = selector.run(actual_portfolio_selector, feature_vector)
     schedule_performance = selector_performance_data.schedule_performance(
-        schedule, target_solver="portfolio_selector", minimise=minimise)
+        schedule, target_solver="portfolio_selector", objective=objective)
     # Remove solvers from the dataframe
     selector_performance_data.remove_solver(performance_data.solvers)
     selector_performance_data.save_csv()  # Save the results to disk
-    return aggregation_function(schedule_performance)
+    return objective.instance_aggregator(schedule_performance)
 
 
 def compute_selector_marginal_contribution(
         performance_data: PerformanceDataFrame,
         feature_data: FeatureDataFrame,
         selector_scenario: Path,
-        aggregation_function: Callable[[list[float]], float] = mean,
-        performance_cutoff: int | float = None,
-        minimise: bool = True) -> list[tuple[str, float]]:
+        objective: SparkleObjective) -> list[tuple[str, float]]:
     """Compute the marginal contributions of solvers in the selector.
 
     Args:
       performance_data: Performance data object
-      aggregation_function: Function to aggregate score values
-      minimise: Flag indicating if scores should be minimised
-      performance_cutoff: The cutoff performance of a solver
       feature_data_csv_path: Path to the CSV file with the feature data.
-      flag_recompute: Boolean indicating whether marginal contributions should
-        be recalculated even if they already exist in a file. Defaults to False.
+      selector_scenario: Path to the selector scenario for which to compute
+        marginal contribution.
+      objective: Objective to compute the marginal contribution for.
 
     Returns:
       A list of 2-tuples where every 2-tuple is of the form
@@ -109,10 +101,10 @@ def compute_selector_marginal_contribution(
 
     selector_performance = compute_selector_performance(
         portfolio_selector_path, performance_data,
-        feature_data, minimise, aggregation_function)
+        feature_data, objective)
 
     rank_list = []
-    compare = operator.lt if minimise else operator.gt
+    compare = operator.lt if objective.minimise else operator.gt
     # Compute contribution per solver
     # NOTE: This could be parallelised
     for solver in performance_data.solvers:
@@ -130,7 +122,7 @@ def compute_selector_marginal_contribution(
 
         ablated_selector_performance = compute_selector_performance(
             ablated_actual_portfolio_selector, tmp_performance_df,
-            feature_data, minimise, aggregation_function)
+            feature_data, objective)
 
         # 1. If the performance remains equal, this solver did not contribute
         # 2. If there is a performance decay without this solver, it does contribute
@@ -168,18 +160,12 @@ def compute_marginal_contribution(
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
     objective = gv.settings().get_general_sparkle_objectives()[0]
-    aggregation_function = gv.settings().get_general_metric_aggregation_function()
-    capvalue = gv.settings().get_general_cap_value()
-    minimise = objective.minimise
-    if objective.time:
-        capvalue = gv.settings().get_general_target_cutoff_time()
 
     if compute_perfect:
         # Perfect selector is the computation of the best performance per instance
         print("Computing each solver's marginal contribution to perfect selector ...")
-        contribution_data = performance_data.marginal_contribution(aggregation_function,
-                                                                   minimise,
-                                                                   sort=True)
+        contribution_data = performance_data.marginal_contribution(
+            objective=objective.name, sort=True)
         table = tabulate.tabulate(
             contribution_data,
             headers=["Solver", "Marginal Contribution", "Best Performance"],)
@@ -188,14 +174,11 @@ def compute_marginal_contribution(
 
     if compute_actual:
         print("Start computing marginal contribution per Solver to actual selector...")
-        print(f"In this calculation, cutoff is {capvalue} seconds")
         contribution_data = compute_selector_marginal_contribution(
             performance_data,
             feature_data,
             scenario,
-            aggregation_function,
-            capvalue,
-            minimise
+            objective
         )
         table = tabulate.tabulate(
             contribution_data,

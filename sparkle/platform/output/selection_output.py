@@ -21,6 +21,7 @@ class SelectionOutput:
                  feature_data: FeatureDataFrame,
                  training_instances: list[InstanceSet],
                  test_instances: list[InstanceSet],
+                 objective: SparkleObjective,
                  cutoff_time: int, penalised_time: int,
                  output: Path) -> None:
         """Initialize SelectionOutput class.
@@ -31,6 +32,7 @@ class SelectionOutput:
             feature_data: Feature data created by extractor
             training_instances: The set of training instances
             test_instances: The set of test instances
+            objective: The objective of the selector
             cutoff_time: The cutoff time
             penalised_time: The penalised time
             output: Path to the output directory
@@ -47,26 +49,29 @@ class SelectionOutput:
         self.cutoff_time = cutoff_time
         self.penalised_time = penalised_time
 
-        self.objective = SparkleObjective(train_data.objective_names[0])
-        self.solver_data = self.get_solver_data(train_data)
-
+        self.objective = objective
+        self.solver_data = self.get_solver_data(train_data, self.objective)
         # Collect marginal contribution data
-        self.marginal_contribution_perfect = train_data.marginal_contribution(sort=True)
+        self.marginal_contribution_perfect = train_data.marginal_contribution(objective,
+                                                                              sort=True)
         self.marginal_contribution_actual = \
             sgfs.compute_selector_marginal_contribution(train_data,
                                                         feature_data,
-                                                        selection_scenario)
+                                                        selection_scenario,
+                                                        objective)
 
         # Collect performance data
         portfolio_selector_performance_path = selection_scenario / "performance.csv"
-        vbs_performance = train_data.best_instance_performance().mean()
+        vbs_performance = objective.instance_aggregator(
+            train_data.best_instance_performance(objective=objective.name))
         self.performance_data = SelectionPerformance(
-            portfolio_selector_performance_path, vbs_performance, self.objective.name)
+            portfolio_selector_performance_path, vbs_performance, self.objective)
 
     def get_solver_data(self: SelectionOutput,
-                        train_data: PerformanceDataFrame) -> SelectionSolverData:
+                        train_data: PerformanceDataFrame,
+                        objective: SparkleObjective) -> SelectionSolverData:
         """Initalise SelectionSolverData object."""
-        solver_performance_ranking = train_data.get_solver_ranking()
+        solver_performance_ranking = train_data.get_solver_ranking(objective=objective)
         num_solvers = train_data.num_solvers
         return SelectionSolverData(solver_performance_ranking,
                                    num_solvers)

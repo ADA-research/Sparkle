@@ -142,7 +142,6 @@ if __name__ == "__main__":
         if test_case_dir is not None and (test_case_path
                                           / "performance_data.csv").exists():
             test_data = PerformanceDataFrame(test_case_path / "performance_data.csv")
-
         # Create machine readable selection output
         instance_folders = set(Path(instance).parent
                                for instance in train_data.instances)
@@ -154,9 +153,10 @@ if __name__ == "__main__":
         cutoff_time = gv.settings().get_general_target_cutoff_time()
         penalised_time = gv.settings().get_penalised_time()
         output = gv.settings().DEFAULT_selection_output_analysis
-        selection_output = SelectionOutput(selection_scenario, train_data, feature_data,
-                                           instance_sets, test_set, cutoff_time,
-                                           penalised_time, output)
+        selection_output = SelectionOutput(
+            selection_scenario, train_data, feature_data,
+            instance_sets, test_set, objective, cutoff_time,
+            penalised_time, output)
         selection_output.write_output()
         print("Machine readable output is placed at: ", selection_output.output)
 
@@ -170,6 +170,7 @@ if __name__ == "__main__":
                 selection_scenario,
                 feature_data,
                 train_data,
+                objective,
                 gv.settings().get_general_extractor_cutoff_time(),
                 gv.settings().get_general_target_cutoff_time(),
                 gv.settings().get_penalised_time(),

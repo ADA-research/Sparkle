@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
 """Sparkle output structures."""
-
 from __future__ import annotations
-
-from sparkle.solver import Solver
-from sparkle.types import SolverStatus
-from sparkle.instance import InstanceSet
-from sparkle.structures import PerformanceDataFrame
-
+import sys
 from pathlib import Path
 
-import sys
-
 from runrunner.base import Status
+
+from sparkle.solver import Solver
+from sparkle.types import SolverStatus, SparkleObjective
+from sparkle.instance import InstanceSet
+from sparkle.structures import PerformanceDataFrame
 
 
 class ValidationResults:
@@ -70,21 +67,23 @@ class SelectionPerformance:
     """Class that stores selection performance results."""
     def __init__(self: SelectionSolverData,
                  performance_path: Path,
-                 vbs_performance: float, metric: str) -> None:
+                 vbs_performance: float,
+                 objective: SparkleObjective) -> None:
         """Initalize SelectionPerformance.
 
         Args:
             performance_path: Path to portfolio selector performance
             vbs_performance: The performance of the virtual best selector
-            metric: The metric of the SparkleObjective
+            objective: The objective (Performance type)
         """
         if not performance_path.exists():
             print(f"ERROR: {performance_path} does not exist.")
             sys.exit(-1)
         actual_performance_data = PerformanceDataFrame(performance_path)
         self.vbs_performance = vbs_performance
-        self.actual_performance = actual_performance_data.mean()
-        self.metric = metric
+        self.actual_performance = actual_performance_data.mean(
+            objective=objective.name)
+        self.metric = objective.name
 
 
 class ParallelPortfolioResults:
