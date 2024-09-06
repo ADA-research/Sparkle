@@ -6,7 +6,7 @@ from pathlib import Path
 
 from sparkle.CLI import compute_marginal_contribution as cmc
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
-from sparkle.types.objective import SparkleObjective
+from sparkle.types.objective import PAR
 
 from unittest.mock import patch
 from unittest.mock import MagicMock
@@ -33,7 +33,7 @@ class TestMarginalContribution(TestCase):
         feature_csv_path = Path("tests/CLI/test_files/Feature_Data/"
                                 "test_construct_portfolio_selector.csv")
 
-        objective = SparkleObjective(PerformanceDataFrame.missing_objective)
+        objective = PAR(10)
         performance_df = PerformanceDataFrame(perf_path)
         feature_df = FeatureDataFrame(feature_csv_path)
         result = 1534.9195244999999
