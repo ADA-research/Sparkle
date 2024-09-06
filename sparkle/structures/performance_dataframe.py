@@ -577,14 +577,19 @@ class PerformanceDataFrame():
         return pd_copy
 
     def to_autofolio(self: PerformanceDataFrame,
+                     objective: SparkleObjective = None,
                      target: Path = None) -> Path:
         """Port the data to a format acceptable for AutoFolio."""
-        if self.multi_objective or self.n_runs > 1:
+        if (objective is None and self.multi_objective or self.n_runs > 1):
             print(f"ERROR: Currently no porting available for {self.csv_filepath} "
                   "to Autofolio due to multi objective or number of runs.")
             return
         autofolio_df = self.dataframe.copy()
-        autofolio_df.index = autofolio_df.index.droplevel(["Objective", "Run"])
+        if objective is not None:
+            autofolio_df = autofolio_df.loc[objective.name]
+            autofolio_df.index = autofolio_df.index.droplevel("Run")
+        else:
+            autofolio_df.index = autofolio_df.index.droplevel(["Objective", "Run"])
         if target is None:
             path = self.csv_filepath.parent / f"autofolio_{self.csv_filepath.name}"
         else:

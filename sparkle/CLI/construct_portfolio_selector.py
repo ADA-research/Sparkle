@@ -92,10 +92,6 @@ if __name__ == "__main__":
 
     # Determine the objective function
     objective = gv.settings().get_general_sparkle_objectives()[0]
-    if objective.time:
-        objective_function = "runtime"
-    else:
-        objective_function = "solution_quality"
 
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
@@ -131,7 +127,7 @@ if __name__ == "__main__":
     selector_run = selector.construct(selector_path,
                                       performance_data,
                                       feature_data,
-                                      objective_function,
+                                      objective,
                                       cutoff_time,
                                       selector_timeout,
                                       run_on=run_on,
@@ -158,7 +154,7 @@ if __name__ == "__main__":
             ablated_run = selector.construct(ablate_solver_selector,
                                              ablated_performance_data,
                                              feature_data,
-                                             objective_function,
+                                             objective,
                                              cutoff_time,
                                              selector_timeout,
                                              run_on=run_on,
