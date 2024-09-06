@@ -375,11 +375,8 @@ class PerformanceDataFrame():
         df = self.dataframe.stack(future_stack=True)
         if not rerun:
             df = df[df.isnull()]
-        if not self.multi_objective:
-            df.index = df.index.droplevel(["Objective"])
-        if self.n_runs == 1:
-            df.index = df.index.droplevel(["Run"])
-        return df.index.tolist()
+        df.index = df.index.droplevel(["Objective"])
+        return df.index.unique().tolist()
 
     # TODO: This method should be refactored or not exist
     def remaining_jobs(self: PerformanceDataFrame) -> dict[str, list[str]]:

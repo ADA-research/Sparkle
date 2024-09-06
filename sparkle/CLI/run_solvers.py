@@ -92,7 +92,7 @@ def running_solvers_performance_data(
                 f"--performance-data {performance_data_csv_path} "
                 f"--instance {inst_p} --solver {solver_p} "
                 f"--objectives {','.join([str(o) for o in objectives])} "
-                f"--log-dir {sl.caller_log_dir}" for inst_p, solver_p in jobs]
+                f"--log-dir {sl.caller_log_dir}" for inst_p, _, solver_p in jobs]
 
     run = rrr.add_to_queue(
         runner=run_on,

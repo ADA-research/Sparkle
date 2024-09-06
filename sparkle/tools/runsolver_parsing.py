@@ -3,7 +3,6 @@ import sys
 from pathlib import Path
 import ast
 import re
-import math
 
 from sparkle.types import SolverStatus
 
@@ -30,15 +29,17 @@ def get_measurements(runsolver_values_path: Path,
 
 def get_status(runsolver_values_path: Path, runsolver_raw_path: Path) -> SolverStatus:
     """Get run status from runsolver logs."""
-    if not runsolver_values_path.exists():
-        # Runsolver value log was not created, job was stopped ''incorrectly''
-        return SolverStatus.KILLED
+    if not runsolver_values_path.exists() and (runsolver_raw_path is not None
+                                               and not runsolver_raw_path.exists()):
+        # Runsolver logs were not created, job was stopped ''incorrectly''
+        return SolverStatus.CRASHED
     # First check if runsolver reported time out
-    for line in reversed(runsolver_values_path.open("r").readlines()):
-        if line.strip().startswith("TIMEOUT="):
-            if line.strip() == "TIMEOUT=true":
-                return SolverStatus.TIMEOUT
-            break
+    if runsolver_values_path.exists():
+        for line in reversed(runsolver_values_path.open("r").readlines()):
+            if line.strip().startswith("TIMEOUT="):
+                if line.strip() == "TIMEOUT=true":
+                    return SolverStatus.TIMEOUT
+                break
     if runsolver_raw_path is None:
         return SolverStatus.UNKNOWN
     if not runsolver_raw_path.exists():
@@ -103,10 +104,11 @@ def get_solver_output(runsolver_configuration: list[str],
     try:
         solver_regex_filter = re.findall("{.*}", solver_output)[0]
         output_dict = ast.literal_eval(solver_regex_filter)
-    except Exception as ex:
-        print(f"WARNING: Solver output decoding failed with exception: [{ex}]. "
-              f"Assuming TIMEOUT.")
-        output_dict = {"status": SolverStatus.TIMEOUT, "quality": math.nan}
+    except Exception:
+        config_str = " ".join(runsolver_configuration)
+        print("WARNING: Solver output decoding failed from RunSolver configuration: "
+              f"'{config_str}'. Setting status to 'UNKNOWN'.")
+        output_dict = {"status": SolverStatus.UNKNOWN}
 
     output_dict["cutoff_time"] = cutoff_time
     if value_data_file is not None:

@@ -11,6 +11,8 @@ import csv
 import itertools
 from pathlib import Path, PurePath
 
+from tqdm import tqdm
+
 import runrunner as rrr
 from runrunner.base import Runner
 from runrunner.slurm import Status
@@ -79,37 +81,60 @@ def run_parallel_portfolio(instances_set: InstanceSet,
     instances_done = [False] * num_instances
     # We record the 'best' of all seed results per solver-instance,
     # setting start values for objectives that are always present
-    job_output_dict = {instance_name: {solver.name: {"cpu_time": float(sys.maxsize),
-                                                     "wall_time": float(sys.maxsize),
-                                                     "status": SolverStatus.UNKNOWN}
+    default_objective_values = {}
+    for o in objectives:
+        default_value = float(sys.maxsize) if o.minimise else 0
+        # Default values for time objectives can be linked to cutoff time
+        if o.time:
+            default_value = cutoff + 1.0
+            if o.post_process is not None:
+                default_value = o.post_process(default_value, cutoff)
+        default_objective_values[o.name] = default_value
+    job_output_dict = {instance_name: {solver.name: default_objective_values.copy()
                                        for solver in solvers}
                        for instance_name in instances_set._instance_names}
     n_instance_jobs = num_solvers * seeds_per_solver
-    while not all(instances_done):
-        time.sleep(check_interval)
-        job_status_list = [r.status for r in run.jobs]
-        job_status_completed = [status == Status.COMPLETED for status in job_status_list]
-        # The jobs are sorted by instance
-        for i, instance in enumerate(instances_set._instance_paths):
-            if instances_done[i]:
-                continue
-            instance_job_slice = slice(i * n_instance_jobs, (i + 1) * n_instance_jobs)
-            if any(job_status_completed[instance_job_slice]):
-                instances_done[i] = True
-                # Kill all running jobs for this instance
-                solver_kills = [0] * num_solvers
-                for job_index in range(i * n_instance_jobs, (i + 1) * n_instance_jobs):
-                    if not job_status_completed[job_index]:
-                        run.jobs[job_index].kill()
-                        solver_index = int(
-                            (job_index % n_instance_jobs) / seeds_per_solver)
-                        solver_kills[solver_index] += 1
-                for solver_index in range(num_solvers):
-                    # All seeds of a solver were killed on instance, set state to killed
-                    if solver_kills[solver_index] == seeds_per_solver:
-                        solver_name = solvers[solver_index].name
-                        job_output_dict[instance.name][solver_name]["status"] =\
-                            SolverStatus.KILLED
+
+    with tqdm(total=len(instances_done)) as pbar:
+        pbar.set_description("Instances done")
+        while not all(instances_done):
+            prev_done = sum(instances_done)
+            time.sleep(check_interval)
+            job_status_list = [r.status for r in run.jobs]
+            job_status_completed = [status == Status.COMPLETED
+                                    for status in job_status_list]
+            # The jobs are sorted by instance
+            for i, instance in enumerate(instances_set._instance_paths):
+                if instances_done[i]:
+                    continue
+                instance_job_slice = slice(i * n_instance_jobs,
+                                           (i + 1) * n_instance_jobs)
+                if any(job_status_completed[instance_job_slice]):
+                    instances_done[i] = True
+                    # Kill all running jobs for this instance
+                    solver_kills = [0] * num_solvers
+                    for job_index in range(i * n_instance_jobs,
+                                           (i + 1) * n_instance_jobs):
+                        if not job_status_completed[job_index]:
+                            run.jobs[job_index].kill()
+                            solver_index = int(
+                                (job_index % n_instance_jobs) / seeds_per_solver)
+                            solver_kills[solver_index] += 1
+                    for solver_index in range(num_solvers):
+                        # All seeds of a solver were killed on instance, set status kill
+                        if solver_kills[solver_index] == seeds_per_solver:
+                            solver_name = solvers[solver_index].name
+                            job_output_dict[instance.name][solver_name]["status"] =\
+                                SolverStatus.KILLED
+            pbar.update(sum(instances_done) - prev_done)
+
+    # Attempt to verify that all logs have been written (Slurm I/O latency)
+    for index, cmd in enumerate(cmd_list):
+        runsolver_configuration = cmd.split(" ")[:11]
+        logs = [portfolio_path / p for p in runsolver_configuration
+                if Path(p).suffix in [".log", ".val", ".rawres"]]
+        if not all([p.exists() for p in logs]):
+            time.sleep(check_interval)
 
     # Now iterate over runsolver logs to get runtime, get the lowest value per seed
     for index, cmd in enumerate(cmd_list):
@@ -121,25 +146,24 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         solver_name = solvers[solver_index].name
         instance_name = instances_set._instance_names[int(index / n_instance_jobs)]
         cpu_time = solver_output["cpu_time"]
-        if (cpu_time > 0.0
-                and cpu_time < job_output_dict[instance_name][solver_name]["cpu_time"]):
+        cmd_output = job_output_dict[instance_name][solver_name]
+        if cpu_time > 0.0 and cpu_time < cmd_output["cpu_time"]:
             for key, value in solver_output.items():
-                if key in ["cpu_time", "wall_time"] + [o.name for o in objectives]:
+                if key in [o.name for o in objectives]:
                     job_output_dict[instance_name][solver_name][key] = value
-            if (job_output_dict[instance_name][solver_name]["status"]
-                    != SolverStatus.KILLED):
-                job_output_dict[instance_name][solver_name]["status"] =\
-                    solver_output["status"]
+            if "status" not in cmd_output or cmd_output["status"] != SolverStatus.KILLED:
+                cmd_output["status"] = solver_output["status"]
 
     # Fix the CPU/WC time for non existent logs to instance min time + check_interval
     for instance in job_output_dict.keys():
         no_log_solvers = []
         min_time = cutoff
         for solver in job_output_dict[instance].keys():
-            if job_output_dict[instance][solver]["cpu_time"] == -1.0:
+            cpu_time = job_output_dict[instance][solver]["cpu_time"]
+            if cpu_time == -1.0 or cpu_time == float(sys.maxsize):
                 no_log_solvers.append(solver)
-            elif job_output_dict[instance][solver]["cpu_time"] < min_time:
-                min_time = job_output_dict[instance][solver]["cpu_time"]
+            elif cpu_time < min_time:
+                min_time = cpu_time
         for solver in no_log_solvers:
             job_output_dict[instance][solver]["cpu_time"] = min_time + check_interval
             job_output_dict[instance][solver]["wall_time"] = min_time + check_interval
@@ -171,7 +195,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
 
     # Write the results to a CSV
     csv_path = portfolio_path / "results.csv"
-    values_header = ["status", "cpu_time", "wall_time"] + [o.name for o in objectives]
+    values_header = ["status"] + [o.name for o in objectives]
     header = ["Instance", "Solver"] + values_header
     result_rows = [header]
     for instance_name in job_output_dict.keys():

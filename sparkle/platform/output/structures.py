@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from sparkle.solver import Solver
+from sparkle.types import SolverStatus
 from sparkle.instance import InstanceSet
 from sparkle.structures import PerformanceDataFrame
 
@@ -115,10 +116,7 @@ class ParallelPortfolioResults:
                 # Initialize the solver's record in solver_performance if not present
                 if solver_name not in self.solver_performance:
                     self.solver_performance[solver_name] = {
-                        "TIMEOUT": 0,
-                        "KILLED": 0,
-                        "SUCCESS": 0,
-                        "CRASHED": 0
+                        status: 0 for status in SolverStatus
                     }
                 # Increment the appropriate outcome count
                 self.solver_performance[solver_name][outcome] += 1

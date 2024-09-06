@@ -364,10 +364,9 @@ class Settings:
 
         # Print error if unable to read the settings
         else:
-            print(f"ERROR: Failed to read settings from {file_path} The file may "
-                  "have been empty, located in a different path, or be in another format"
-                  " than INI. Settings from different sources will be used (e.g. default"
-                  " values).")
+            print(f"ERROR: Failed to read settings from {file_path} The file may have "
+                  "been empty, located in a different path, or be in another format than"
+                  " INI. Default Settings values be used.")
 
     def write_used_settings(self: Settings) -> None:
         """Write the used settings to the default locations."""
@@ -434,6 +433,15 @@ class Settings:
                 value = ",".join([str(obj) for obj in value])
             else:
                 value = str(value)
+            # Append standard Sparkle Objectives
+            if "status" not in value:
+                value += ",status"
+            if "cpu_time" not in value:
+                value += ",cpu_time"
+            if "wall_time" not in value:
+                value += ",wall_time"
+            if "memory" not in value:
+                value += ",memory"
             self.__init_section(section)
             self.__general_sparkle_objective_set = origin
             self.__settings[section][name] = value
