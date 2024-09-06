@@ -26,19 +26,19 @@ class TestPerformanceData(TestCase):
         result = self.pd.get_job_list()
         assert result == job_list
 
-        job_list = [("Instance1", "AlgorithmA"), ("Instance1", "AlgorithmB"),
-                    ("Instance1", "AlgorithmC"), ("Instance1", "AlgorithmD"),
-                    ("Instance1", "AlgorithmE"), ("Instance2", "AlgorithmA"),
-                    ("Instance2", "AlgorithmB"), ("Instance2", "AlgorithmC"),
-                    ("Instance2", "AlgorithmD"), ("Instance2", "AlgorithmE"),
-                    ("Instance3", "AlgorithmA"), ("Instance3", "AlgorithmB"),
-                    ("Instance3", "AlgorithmC"), ("Instance3", "AlgorithmD"),
-                    ("Instance3", "AlgorithmE"), ("Instance4", "AlgorithmA"),
-                    ("Instance4", "AlgorithmB"), ("Instance4", "AlgorithmC"),
-                    ("Instance4", "AlgorithmD"), ("Instance4", "AlgorithmE"),
-                    ("Instance5", "AlgorithmA"), ("Instance5", "AlgorithmB"),
-                    ("Instance5", "AlgorithmC"), ("Instance5", "AlgorithmD"),
-                    ("Instance5", "AlgorithmE")]
+        job_list = [("Instance1", 1, "AlgorithmA"), ("Instance1", 1, "AlgorithmB"),
+                    ("Instance1", 1, "AlgorithmC"), ("Instance1", 1, "AlgorithmD"),
+                    ("Instance1", 1, "AlgorithmE"), ("Instance2", 1, "AlgorithmA"),
+                    ("Instance2", 1, "AlgorithmB"), ("Instance2", 1, "AlgorithmC"),
+                    ("Instance2", 1, "AlgorithmD"), ("Instance2", 1, "AlgorithmE"),
+                    ("Instance3", 1, "AlgorithmA"), ("Instance3", 1, "AlgorithmB"),
+                    ("Instance3", 1, "AlgorithmC"), ("Instance3", 1, "AlgorithmD"),
+                    ("Instance3", 1, "AlgorithmE"), ("Instance4", 1, "AlgorithmA"),
+                    ("Instance4", 1, "AlgorithmB"), ("Instance4", 1, "AlgorithmC"),
+                    ("Instance4", 1, "AlgorithmD"), ("Instance4", 1, "AlgorithmE"),
+                    ("Instance5", 1, "AlgorithmA"), ("Instance5", 1, "AlgorithmB"),
+                    ("Instance5", 1, "AlgorithmC"), ("Instance5", 1, "AlgorithmD"),
+                    ("Instance5", 1, "AlgorithmE")]
         result = self.pd.get_job_list(rerun=True)
         assert result == job_list
 
@@ -65,24 +65,15 @@ class TestPerformanceData(TestCase):
             -> None:
         """Test calculating best score on instance."""
         bp_instance_min = [30.0, 5.0, 3.0, 8.0, 41.0]
-        bp_instance_max = [64.0, 87.0, 87.0, 96.0, 86.0]
-        result_min = self.pd.best_instance_performance(minimise=True)
-        result_max = self.pd.best_instance_performance(minimise=False)
+        result_min = self.pd.best_instance_performance()
         for idx, _ in enumerate(self.pd.dataframe.index):
             assert result_min.iloc[idx] == bp_instance_min[idx]
-            assert result_max.iloc[idx] == bp_instance_max[idx]
 
     def test_calc_best_performance(self: TestPerformanceData)\
             -> None:
         """Test calculating vbs on the entire portfolio."""
-        vbs_portfolio = 87.0
-        result = self.pd.best_performance(
-            aggregation_function=sum, minimise=True)
-        assert result == vbs_portfolio
-
-        vbs_portfolio = 420.0
-        result = self.pd.best_performance(
-            aggregation_function=sum, minimise=False)
+        vbs_portfolio = 17.4
+        result = self.pd.best_performance()
         assert result == vbs_portfolio
 
     def test_get_solver_ranking(self: TestPerformanceData) -> None:

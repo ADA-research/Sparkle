@@ -3,10 +3,10 @@
 from __future__ import annotations
 from unittest import TestCase
 from pathlib import Path
-from statistics import mean
 
 from sparkle.CLI import compute_marginal_contribution as cmc
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
+from sparkle.types.objective import SparkleObjective
 
 from unittest.mock import patch
 from unittest.mock import MagicMock
@@ -33,9 +33,10 @@ class TestMarginalContribution(TestCase):
         feature_csv_path = Path("tests/CLI/test_files/Feature_Data/"
                                 "test_construct_portfolio_selector.csv")
 
+        objective = SparkleObjective(PerformanceDataFrame.missing_objective)
         performance_df = PerformanceDataFrame(perf_path)
         feature_df = FeatureDataFrame(feature_csv_path)
-        result = 1534.9195245
+        result = 1534.9195244999999
 
         patch_exists.return_value = False  # Block loading from file
         patch_mkdir.return_value = None  # Stop creating unnecesarry dir
@@ -44,8 +45,7 @@ class TestMarginalContribution(TestCase):
         output = cmc.compute_selector_performance(pth,
                                                   performance_df,
                                                   feature_df,
-                                                  True,
-                                                  mean)
+                                                  objective)
 
         assert output == result
 

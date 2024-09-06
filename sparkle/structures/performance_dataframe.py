@@ -65,6 +65,11 @@ class PerformanceDataFrame():
                     else:  # Constructor is provided with the objectives
                         self.dataframe[PerformanceDataFrame.multi_dim_names[0]] =\
                             [o.name for o in self.objectives]
+                else:
+                    # Objectives are present, determine which ones
+                    names = self.dataframe[PerformanceDataFrame.multi_dim_names[0]]
+                    self.objectives = [resolve_objective(name) for name in
+                                       names.unique()]
                 if (PerformanceDataFrame.multi_dim_names[2] not in self.dataframe.columns
                         or not has_rows):
                     # No runs column present, force into column
