@@ -1,0 +1,1 @@
+"""Test ablation scenario class."""
