@@ -30,6 +30,7 @@ def test_groupwise_computation() -> None:
     # TODO: Write test
     pass
 
+
 def test_build_cmd() -> None:
     """Test for method build_cmd."""
     # TODO: Write test
