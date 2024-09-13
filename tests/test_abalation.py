@@ -15,13 +15,16 @@ def test_create_configuration_file() -> None:
 
 def test_create_instance_file() -> None:
     """Test for method create_instance_file."""
-    # TODO: Write test
+    # TODO: Write test for with training set
+    # TODO: Write test for with test set
     pass
 
 
 def test_check_for_ablation() -> None:
     """Test for method check_for_ablation."""
-    # TODO: Write test
+    # TODO: Write test for when correct file exists
+    # TODO: Write test for when file does not exist
+    # TODO: Write test for when file is corrupted
     pass
 
 
