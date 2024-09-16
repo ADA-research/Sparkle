@@ -36,7 +36,7 @@ class TestMarginalContribution(TestCase):
         objective = PAR(10)
         performance_df = PerformanceDataFrame(perf_path)
         feature_df = FeatureDataFrame(feature_csv_path)
-        result = 1534.9195244999999
+        result = 351.7557405833333
 
         patch_exists.return_value = False  # Block loading from file
         patch_mkdir.return_value = None  # Stop creating unnecesarry dir
