@@ -1,8 +1,8 @@
 (cmd-about)=
 
 ```{eval-rst}
-.. autoprogram:: about_cli:parser_function()
-   :prog: about_cli.py
+.. autoprogram:: about:parser_function()
+   :prog: about.py
 
 ```
 
@@ -30,11 +30,11 @@
 
 ```
 
-(cmd-cleanup-temporary-files)=
+(cmd-cleanup)=
 
 ```{eval-rst}
-.. autoprogram:: cleanup_temporary_files:parser_function()
-   :prog: cleanup_temporary_files.py
+.. autoprogram:: cleanup:parser_function()
+   :prog: cleanup.py
 
 ```
 
