@@ -99,6 +99,10 @@ class PerformanceDataFrame():
             # Sort the index to optimize lookup speed
             self.dataframe = self.dataframe.sort_index()
 
+    def __repr__(self: PerformanceDataFrame) -> str:
+        """Return string representation of the DataFrame."""
+        return self.dataframe.__repr__()
+
     # Properties
 
     @property
@@ -427,8 +431,8 @@ class PerformanceDataFrame():
             series = subdf.min(axis=1)
         else:
             series = subdf.max(axis=1)
-        # Ensure we always return the lowest for each run
-        series = series.sort_values()
+        # Ensure we always return the best for each run
+        series = series.sort_values(ascending=objective.minimise)
         return series.groupby(series.index).first().astype(float)
 
     def best_performance(
@@ -532,6 +536,9 @@ class PerformanceDataFrame():
         if isinstance(objective, str):
             objective = resolve_objective(objective)
         sub_df = self.dataframe.loc(axis=0)[objective.name, :, :]
+        # Reduce Runs Dimension
+        sub_df = sub_df.droplevel("Run")
+        sub_df = sub_df.groupby(sub_df.index).agg(func=objective.run_aggregator)
         solver_ranking = [(solver, objective.instance_aggregator(
             sub_df[solver].astype(float))) for solver in self.solvers]
         # Sort the list by second value (the performance)
