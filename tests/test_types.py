@@ -33,7 +33,7 @@ class TestResolveObjective(unittest.TestCase):
             input_name += ":min" if minimise else ":max"
             objective = resolve_objective(input_name)
             self.assertIsInstance(objective, SparkleObjective)
-            self.assertEqual(objective.name, name)
+            self.assertEqual(objective.name, input_name)
             self.assertEqual(objective.minimise, minimise)
 
     def test_failing_strings(self: TestResolveObjective) -> None:
