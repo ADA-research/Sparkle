@@ -1,24 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Module to manage performance data CSV files and common operations on them."""
-
-
 from __future__ import annotations
-from typing import Callable
-import operator
 from pathlib import Path
 import sys
 import math
-import statistics
 import pandas as pd
 
-from sparkle.types.objective import SparkleObjective
+from sparkle.types import SparkleObjective, resolve_objective
 
 
 class PerformanceDataFrame():
     """Class to manage performance data and common operations on them."""
     missing_value = math.nan
-    missing_objective = "DEFAULT:UNKNOWN"
+    missing_objective = "UNKNOWN"
     multi_dim_names = ["Objective", "Instance", "Run"]
 
     def __init__(self: PerformanceDataFrame,
@@ -52,6 +47,11 @@ class PerformanceDataFrame():
         # Runs is a ``static'' dimension
         self.n_runs = n_runs
         self.run_ids = list(range(1, self.n_runs + 1))  # We count runs from 1
+        if objectives is not None:
+            self.objectives = [resolve_objective(o) if isinstance(o, str) else o
+                               for o in objectives]
+        else:
+            self.objectives = [SparkleObjective(PerformanceDataFrame.missing_objective)]
         if init_df:
             if self.csv_filepath.exists():
                 self.dataframe = pd.read_csv(csv_filepath)
@@ -63,10 +63,13 @@ class PerformanceDataFrame():
                         self.dataframe[PerformanceDataFrame.multi_dim_names[0]] =\
                             PerformanceDataFrame.missing_objective
                     else:  # Constructor is provided with the objectives
-                        objectives = [o.name if isinstance(o, SparkleObjective) else o
-                                      for o in objectives]
                         self.dataframe[PerformanceDataFrame.multi_dim_names[0]] =\
-                            objectives
+                            [o.name for o in self.objectives]
+                else:
+                    # Objectives are present, determine which ones
+                    names = self.dataframe[PerformanceDataFrame.multi_dim_names[0]]
+                    self.objectives = [resolve_objective(name) for name in
+                                       names.unique()]
                 if (PerformanceDataFrame.multi_dim_names[2] not in self.dataframe.columns
                         or not has_rows):
                     # No runs column present, force into column
@@ -86,14 +89,8 @@ class PerformanceDataFrame():
                     PerformanceDataFrame.multi_dim_names)
             else:
                 # Initialize empty DataFrame
-                if objectives is None:
-                    objective_names = [PerformanceDataFrame.missing_objective]
-                else:
-                    objective_names =\
-                        [o.name if isinstance(o, SparkleObjective) else o
-                         for o in objectives]
                 midx = pd.MultiIndex.from_product(
-                    [objective_names, instances, self.run_ids],
+                    [[o.name for o in self.objectives], instances, self.run_ids],
                     names=PerformanceDataFrame.multi_dim_names)
                 self.dataframe = pd.DataFrame(PerformanceDataFrame.missing_value,
                                               index=midx,
@@ -101,6 +98,10 @@ class PerformanceDataFrame():
                 self.save_csv()
             # Sort the index to optimize lookup speed
             self.dataframe = self.dataframe.sort_index()
+
+    def __repr__(self: PerformanceDataFrame) -> str:
+        """Return string representation of the DataFrame."""
+        return self.dataframe.__repr__()
 
     # Properties
 
@@ -165,8 +166,7 @@ class PerformanceDataFrame():
         """
         if objective is None:
             if self.multi_objective:
-                print("Error: MO Performance Data, but objective not specified.")
-                sys.exit(-1)
+                raise ValueError("Error: MO Data, but objective not specified.")
             elif self.num_objectives == 1:
                 return self.objective_names[0]
             else:
@@ -250,7 +250,9 @@ class PerformanceDataFrame():
             levels = [self.dataframe.index.levels[0].tolist(),
                       [instance_name],
                       self.dataframe.index.levels[2].tolist()]
-            emidx = pd.MultiIndex(levels, names=PerformanceDataFrame.multi_dim_names)
+            # NOTE: Did this fix Jeroen's bug? .from_arrays instead of direct constructor
+            emidx = pd.MultiIndex.from_arrays(levels,
+                                              names=PerformanceDataFrame.multi_dim_names)
             # Create the missing column values
             edf = pd.DataFrame(PerformanceDataFrame.missing_value,
                                index=emidx,
@@ -304,7 +306,7 @@ class PerformanceDataFrame():
                   run: int = None) -> float:
         """Index a value of the DataFrame and return it."""
         objective, run = self.verify_indexing(objective, run)
-        return self.dataframe.loc[(objective, instance, run), solver]
+        return float(self.dataframe.loc[(objective, instance, run), solver])
 
     def get_values(self: PerformanceDataFrame,
                    solver: str,
@@ -325,7 +327,7 @@ class PerformanceDataFrame():
 
     # Modifiers
 
-    def penalise(self: PerformanceDataFrame,
+    '''def penalise(self: PerformanceDataFrame,
                  threshold: float,
                  penalty: float,
                  objective: str = None,
@@ -344,20 +346,22 @@ class PerformanceDataFrame():
         objective = self.verify_objective(objective)
         comparison_op = operator.lt if lower_bound else operator.gt
         self.dataframe[comparison_op(self.dataframe.loc[(objective), :],
-                                     threshold)] = penalty
+                                     threshold)] = penalty'''
 
     # Calculables
 
     def mean(self: PerformanceDataFrame,
+             objective: str = None,
              solver: str = None,
              instance: str = None) -> float:
-        """Return the mean value of the dataframe."""
-        subset = self.dataframe
+        """Return the mean value of a slice of the dataframe."""
+        objective = self.verify_objective(objective)
+        subset = self.dataframe.xs(objective, level=0)
         if solver is not None:
             subset = subset.xs(solver, axis=1, drop_level=False)
         if instance is not None:
             subset = subset.xs(instance, axis=0, drop_level=False)
-        value = subset.mean()
+        value = subset.astype(float).mean()
         if isinstance(value, pd.Series):
             return value.mean()
         return value
@@ -377,11 +381,8 @@ class PerformanceDataFrame():
         df = self.dataframe.stack(future_stack=True)
         if not rerun:
             df = df[df.isnull()]
-        if not self.multi_objective:
-            df.index = df.index.droplevel(["Objective"])
-        if self.n_runs == 1:
-            df.index = df.index.droplevel(["Run"])
-        return df.index.tolist()
+        df.index = df.index.droplevel(["Objective"])
+        return df.index.unique().tolist()
 
     # TODO: This method should be refactored or not exist
     def remaining_jobs(self: PerformanceDataFrame) -> dict[str, list[str]]:
@@ -400,10 +401,9 @@ class PerformanceDataFrame():
 
     def best_instance_performance(
             self: PerformanceDataFrame,
-            objective: str = None,
+            objective: str | SparkleObjective = None,
             run_id: int = None,
-            exclude_solvers: list[str] = None,
-            minimise: bool = True) -> pd.Series:
+            exclude_solvers: list[str] = None) -> pd.Series:
         """Return the best performance for each instance in the portfolio.
 
         Args:
@@ -411,13 +411,14 @@ class PerformanceDataFrame():
             run_id: The run for which we calculate the best performance. If None,
                 we consider all runs.
             exclude_solvers: List of solvers to exclude in the calculation.
-            minimise: Whether we should minimise or maximise the score
 
         Returns:
             The best performance for each instance in the portfolio.
         """
         objective = self.verify_objective(objective)
-        subdf = self.dataframe.xs(objective, level=0)
+        if isinstance(objective, str):
+            objective = resolve_objective(objective)
+        subdf = self.dataframe.xs(objective.name, level=0)
         if exclude_solvers is not None:
             subdf = subdf.drop(exclude_solvers, axis=1)
         if run_id is not None:
@@ -426,45 +427,40 @@ class PerformanceDataFrame():
         else:
             # Drop the run level
             subdf = subdf.droplevel(level=1)
-        if minimise:
+        if objective.minimise:
             series = subdf.min(axis=1)
         else:
             series = subdf.max(axis=1)
-        # Ensure we always return the lowest for each run
-        series = series.sort_values()
-        return series.groupby(series.index).first()
+        # Ensure we always return the best for each run
+        series = series.sort_values(ascending=objective.minimise)
+        return series.groupby(series.index).first().astype(float)
 
     def best_performance(
             self: PerformanceDataFrame,
-            aggregation_function: Callable[[list[float]], float],
-            minimise: bool,
             exclude_solvers: list[str] = [],
-            objective: str = None) -> float:
+            objective: str | SparkleObjective = None) -> float:
         """Return the overall best performance of the portfolio.
 
         Args:
-            aggregation_function: The method of combining all VBS scores together
-            minimise: Whether the scores are minimised or not
-            capvalue_list: List of capvalue per instance
-            penalty_list: List of penalty per instance
             exclude_solvers: List of solvers to exclude in the calculation.
                 Defaults to none.
+            objective: The objective for which we calculate the best performance
 
         Returns:
             The aggregated best performance of the portfolio over all instances.
         """
         objective = self.verify_objective(objective)
-        instance_best = self.best_instance_performance(objective,
-                                                       exclude_solvers=exclude_solvers,
-                                                       minimise=minimise)
-        return aggregation_function(instance_best)
+        if isinstance(objective, str):
+            objective = resolve_objective(objective)
+        instance_best = self.best_instance_performance(
+            objective, exclude_solvers=exclude_solvers).to_numpy(dtype=float)
+        return objective.instance_aggregator(instance_best)
 
     def schedule_performance(
             self: PerformanceDataFrame,
             schedule: dict[str: list[tuple[str, float | None]]],
             target_solver: str = None,
-            minimise: bool = True,
-            objective: str = None) -> float:
+            objective: str | SparkleObjective = None) -> float:
         """Return the performance of a selection schedule on the portfolio.
 
         Args:
@@ -472,60 +468,53 @@ class PerformanceDataFrame():
                 A dictionary with instances as keys and a list of tuple consisting of
                 (solver, max_runtime) or solvers if no runtime prediction should be used.
             target_solver: If not None, store the values in this solver of the DF.
-            minimise: Whether the scores are minimised or not
             objective: The objective for which we calculate the best performance
 
         Returns:
             The performance of the schedule over the instances in the dictionary.
         """
         objective = self.verify_objective(objective)
-        select = min if minimise else max
+        if isinstance(objective, str):
+            objective = resolve_objective(objective)
+        select = min if objective.minimise else max
         performances = [0.0 for _ in range(len(schedule.keys()))]
-        for idx, instance in enumerate(schedule.keys()):
-            for idy, (solver, max_runtime) in enumerate(schedule[instance]):
-                performance = self.get_value(solver, instance, objective)
+        for ix, instance in enumerate(schedule.keys()):
+            for iy, (solver, max_runtime) in enumerate(schedule[instance]):
+                performance = self.get_value(solver, instance, objective.name)
                 if max_runtime is not None:  # We are dealing with runtime
-                    performances[idx] += performance
+                    performances[ix] += performance
                     if performance < max_runtime:
                         break  # Solver finished in time
                 else:  # Quality, we take the best found performance
-                    if idy == 0:  # First solver, set initial value
-                        performances[idx] = performance
+                    if iy == 0:  # First solver, set initial value
+                        performances[ix] = performance
                         continue
-                    performances[idx] = select(performances[idx], performance)
+                    performances[ix] = select(performances[ix], performance)
             if target_solver is not None:
-                self.set_value(performances[idx], target_solver, instance, objective)
+                self.set_value(performances[ix], target_solver, instance, objective.name)
         return performances
 
     def marginal_contribution(
             self: PerformanceDataFrame,
-            aggregation_function: Callable = statistics.mean,
-            minimise: bool = True,
-            objective: str = None,
+            objective: str | SparkleObjective = None,
             sort: bool = False) -> list[float]:
         """Return the marginal contribution of the solvers on the instances.
 
         Args:
-            aggregation_function: Function for combining scores over instances together.
-            minimise: Whether we should minimise or maximise the score of the objective.
-            capvalue_list: List of capvalue per instance
-            penalty_list: List of penalty per instance
             objective: The objective for which we calculate the marginal contribution.
             sort: Whether to sort the results afterwards
-
         Returns:
             The marginal contribution of each solver.
         """
         output = []
         objective = self.verify_objective(objective)
-        best_performance = self.best_performance(
-            aggregation_function, minimise, objective=objective)
+        if isinstance(objective, str):
+            objective = resolve_objective(objective)
+        best_performance = self.best_performance(objective=objective)
         for solver in self.solvers:
             # By calculating the best performance excluding this Solver,
             # we can determine its relative impact on the portfolio.
             missing_solver_best = self.best_performance(
-                aggregation_function,
-                minimise,
                 exclude_solvers=[solver],
                 objective=objective)
             # Now we need to see how much the portfolio's best performance
@@ -536,24 +525,25 @@ class PerformanceDataFrame():
                 marginal_contribution = 0.0
             output.append((solver, marginal_contribution, missing_solver_best))
         if sort:
-            output.sort(key=lambda x: x[1], reverse=minimise)
+            output.sort(key=lambda x: x[1], reverse=objective.minimise)
         return output
 
     def get_solver_ranking(self: PerformanceDataFrame,
-                           cutoff: float = None,
-                           penalty: float = None,
-                           objective: str = None,
-                           minimise: bool = True) -> list[tuple[str, float]]:
+                           objective: str | SparkleObjective = None
+                           ) -> list[tuple[str, float]]:
         """Return a list with solvers ranked by average performance."""
         objective = self.verify_objective(objective)
-        if cutoff is not None and penalty is not None:
-            self.penalise(cutoff, penalty, objective, not minimise)
-        num_solver_entries = self.num_instances * self.num_runs
-        sub_df = self.dataframe.loc(axis=0)[objective, :, :]
-        solver_ranking = [(solver, sub_df[solver].sum() / num_solver_entries)
-                          for solver in self.solvers]
+        if isinstance(objective, str):
+            objective = resolve_objective(objective)
+        sub_df = self.dataframe.loc(axis=0)[objective.name, :, :]
+        # Reduce Runs Dimension
+        sub_df = sub_df.droplevel("Run")
+        sub_df = sub_df.groupby(sub_df.index).agg(func=objective.run_aggregator)
+        solver_ranking = [(solver, objective.instance_aggregator(
+            sub_df[solver].astype(float))) for solver in self.solvers]
         # Sort the list by second value (the performance)
-        solver_ranking.sort(key=lambda performance: performance[1])
+        solver_ranking.sort(key=lambda performance: performance[1],
+                            reverse=(not objective.minimise))
         return solver_ranking
 
     def save_csv(self: PerformanceDataFrame, csv_filepath: Path = None) -> None:
@@ -585,14 +575,19 @@ class PerformanceDataFrame():
         return pd_copy
 
     def to_autofolio(self: PerformanceDataFrame,
+                     objective: SparkleObjective = None,
                      target: Path = None) -> Path:
         """Port the data to a format acceptable for AutoFolio."""
-        if self.multi_objective or self.n_runs > 1:
+        if (objective is None and self.multi_objective or self.n_runs > 1):
             print(f"ERROR: Currently no porting available for {self.csv_filepath} "
                   "to Autofolio due to multi objective or number of runs.")
             return
         autofolio_df = self.dataframe.copy()
-        autofolio_df.index = autofolio_df.index.droplevel(["Objective", "Run"])
+        if objective is not None:
+            autofolio_df = autofolio_df.loc[objective.name]
+            autofolio_df.index = autofolio_df.index.droplevel("Run")
+        else:
+            autofolio_df.index = autofolio_df.index.droplevel(["Objective", "Run"])
         if target is None:
             path = self.csv_filepath.parent / f"autofolio_{self.csv_filepath.name}"
         else:

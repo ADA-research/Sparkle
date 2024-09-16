@@ -9,7 +9,6 @@ from typing import Any
 from runrunner.base import Runner
 
 from sparkle.platform.settings_objects import SettingState, Settings
-from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform import CommandName
 
 
@@ -287,19 +286,6 @@ PerfectArgument = ArgumentContainer(names=["--perfect"],
                                             "help": "compute the marginal contribution "
                                                     "for the perfect selector"})
 
-PerformanceMeasureArgument = \
-    ArgumentContainer(names=["--performance-measure"],
-                      kwargs={"choices": PerformanceMeasure.__members__,
-                              "default": Settings.
-                              DEFAULT_general_sparkle_objective.PerformanceMeasure,
-                              "action": SetByUser,
-                              "help": "the performance measure, e.g. runtime"})
-
-PerformanceMeasureSimpleArgument = \
-    ArgumentContainer(names=["--performance-measure"],
-                      kwargs={"choices": PerformanceMeasure.__members__,
-                              "help": "the performance measure, e.g. runtime"})
-
 RacingArgument = ArgumentContainer(names=["--racing"],
                                    kwargs={"type": bool,
                                            "default": Settings.
@@ -508,5 +494,4 @@ SelectorTimeoutArgument = \
 SparkleObjectiveArgument = \
     ArgumentContainer(names=["--objectives"],
                       kwargs={"type": str,
-                              "help": "the comma seperated objective(s) to use as"
-                                      "'PerformanceMeasure:metric,'"})
+                              "help": "the comma seperated objective(s) to use."})

@@ -123,7 +123,7 @@ sparkle add_solver Examples/Resources/Solvers/RandomForest
 
 #### Configure the solver on the data set
 
-sparkle configure_solver --solver RandomForest --instance-set-train Iris --objectives QUALITY_ABSOLUTE_MAXIMISATION:accuracy
+sparkle configure_solver --solver RandomForest --instance-set-train Iris --objectives accuracy:max
 
 #### Wait for the configuration to complete
 
@@ -131,7 +131,7 @@ sparkle wait
 
 # Validate the performance of the best found parameter configuration. The test set is optional.
 
-sparkle validate_configured_vs_default --solver RandomForest --instance-set-train Iris --objectives QUALITY_ABSOLUTE_MAXIMISATION:accuracy
+sparkle validate_configured_vs_default --solver RandomForest --instance-set-train Iris --objectives accuracy:max
 
 #### Generate a report
 
@@ -141,4 +141,4 @@ sparkle wait
 
 # Generate a report detailing the results on the training (and optionally testing) set.
 
-sparkle generate_report --performance-measure QUALITY_ABSOLUTE
+sparkle generate_report --objectives accuracy:max

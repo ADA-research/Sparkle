@@ -25,9 +25,9 @@ sparkle add_solver Examples/Resources/CVRP/Solvers/VRP_SISRs/
 
 #### Configure the solver
 
-# Perform configuration on the solver to obtain a target configuration. For the VRP we measure the absolute quality performance by setting the `--performance-measure` option, to avoid needing this for every command it can also be set in `Settings/sparkle_settings.ini`.
+# Perform configuration on the solver to obtain a target configuration. For the VRP we measure the absolute quality performance by setting the `--objectives` option, to avoid needing this for every command it can also be set in `Settings/sparkle_settings.ini`.
 
-sparkle configure_solver --solver Solvers/VRP_SISRs/ --instance-set-train Instances/X-1-10/ --performance-measure QUALITY_ABSOLUTE
+sparkle configure_solver --solver Solvers/VRP_SISRs/ --instance-set-train Instances/X-1-10/ --objectives quality
 
 #### Validate the configuration
 
@@ -37,7 +37,7 @@ sparkle wait
 
 # Validate the performance of the best found parameter configuration. The test set is optional. We again set the performance measure to absolute quality.
 
-sparkle validate_configured_vs_default --solver Solvers/VRP_SISRs/ --instance-set-train Instances/X-1-10/ --instance-set-test Instances/X-11-20/ --performance-measure QUALITY_ABSOLUTE
+sparkle validate_configured_vs_default --solver Solvers/VRP_SISRs/ --instance-set-train Instances/X-1-10/ --instance-set-test Instances/X-11-20/ --objectives quality
 
 #### Generate a report
 
@@ -47,7 +47,7 @@ sparkle wait
 
 # Generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in a `Configuration_Reports/` subdirectory for the solver, training set, and optionally test set like `VRP_SISRs_X-1-10_X-11-20/Sparkle-latex-generator-for-configuration/`. We again set the performance measure to absolute quality.
 
-sparkle generate_report --performance-measure QUALITY_ABSOLUTE
+sparkle generate_report --objectives quality
 
 # By default the `generate_report` command will create a report for the most recent solver and instance set(s). To generate a report for older solver-instance set combinations, the desired solver can be specified with `--solver Solvers/CVRP/VRP_SISRs/`, the training instance set with `--instance-set-train Instances/CVRP/X-1-10/`, and the testing instance set with `--instance-set-test Instances/CVRP/X-11-20/`.
 

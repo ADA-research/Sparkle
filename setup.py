@@ -21,6 +21,7 @@ setup(name="SparkleAI",
           "pandas==2.2.2",
           "filelock==3.15.1",
           "tabulate==0.9.0",
+          "tqdm==4.66.5",
           "RunRunner==0.1.6.4",
           # Reporting packages
           "plotly==5.23.0",

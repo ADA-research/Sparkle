@@ -62,7 +62,7 @@ class ConfigurationOutput:
         # Retrieve best found configuration
         objective = self.configurator.scenario.sparkle_objective
         _, self.best_config = self.configurator.get_optimal_configuration(
-            self.solver, self.instance_set_train, objective.PerformanceMeasure)
+            self.solver, self.instance_set_train, objective)
 
         # Retrieves validation results for all configurations
         self.validation_results = []
@@ -98,29 +98,28 @@ class ConfigurationOutput:
 
         # Retrieve found configuration
         _, best_config = self.configurator.get_optimal_configuration(
-            self.solver, instance_set, objective.PerformanceMeasure)
+            self.solver, instance_set, objective)
 
         # Retrieve validation results
         validator = Validator(self.directory)
         val_results = validator.get_validation_results(
             self.solver, instance_set, config=best_config,
             source_dir=self.directory, subdir="validation")
-
+        header = val_results[0]
         results = []
-        # Form: 0: solver, 1: config, 2: set, 3: instance, 4: status,
-        # 5: quality, 6: runtime
-        for res in val_results:
-            results.append([res[3], SolverStatus(res[4]), res[5], res[6]])
+        value_column = header.index(objective.name)
+        instance_column = header.index("Instance")
+        status_column = header.index("Status")
+        cpu_time_column = header.index("CPU Time")
+        wall_time_column = header.index("Wallclock Time")
+        for res in val_results[1:]:
+            results.append([res[instance_column], SolverStatus(res[status_column]),
+                            res[value_column], res[cpu_time_column],
+                            res[wall_time_column]])
         final_results = ValidationResults(self.solver, config,
                                           instance_set, results)
-
-        cutoff_time = self.configurator.scenario.cutoff_time
-        penalty = self.penalty_multiplier * \
-            self.configurator.scenario.cutoff_time
-        perf_par = sgrfch.get_par_performance(val_results,
-                                              cutoff_time,
-                                              penalty,
-                                              objective)
+        perf_par = sgrfch.get_average_performance(val_results,
+                                                  objective)
         return ConfigurationResults(perf_par,
                                     final_results)
 

@@ -10,7 +10,7 @@ from sparkle.platform import generate_report_for_configuration as sgrch
 from sparkle.platform.settings_objects import Settings
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.validator import Validator
-from sparkle.types.objective import PerformanceMeasure, SparkleObjective
+from sparkle.types.objective import SparkleObjective, PAR
 from sparkle.solver import Solver
 from sparkle.instance import instance_set
 import csv
@@ -30,74 +30,45 @@ configurator.scenario._set_paths(configurator_path)
 ablation_scenario = AblationScenario(
     solver, Path(train_instance), Path(test_instance), Path(""))
 validator = Validator()
-test_objective_runtime = SparkleObjective("RUNTIME:PAR10")
-test_objective_quality = SparkleObjective("QUALITY_ABSOLUTE:ACCURACY")
-test_objective_err = SparkleObjective("ERR:ERR")
-test_objective_err.PerformanceMeasure = PerformanceMeasure.ERR
+test_objective_runtime = PAR(10)
+test_objective_quality = SparkleObjective("ACCURACY")
 
 
-def test_get_par_performance(mocker: MockFixture) -> None:
-    """Test get_par_performance returns correct PAR value.
+def test_get_average_performance(mocker: MockFixture) -> None:
+    """Test get_average_performance returns correct value.
 
     A performance list should be retrieved from results file.
     The mean of the performance values should be computed and returned.
     """
-    cutoff = 42
     mock_get_list = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                  "get_dict_instance_to_performance",
                                  return_value={"one": 10, "two": 5})
 
-    par = sgrch.get_par_performance([], cutoff, 210, test_objective_runtime)
-    mock_get_list.assert_called_once_with([], cutoff, 210, test_objective_runtime)
-    assert par == 7.5
+    avg = sgrch.get_average_performance([], test_objective_runtime)
+    mock_get_list.assert_called_once_with([], test_objective_runtime)
+    assert avg == 7.5
 
 
 def test_get_dict_instance_to_performance(mocker: MockFixture) -> None:
     """Test get_dict_instance_to_performance creates dict from performance list."""
     validation_file = Path("tests/test_files/Validator/validation.csv")
-    csv_data = [line for line in csv.reader(validation_file.open("r"))][1:]
-    cutoff = 10.05
-    penalty = cutoff * 10
+    csv_data = [line for line in csv.reader(validation_file.open("r"))]
     instance_dict = sgrch.get_dict_instance_to_performance(
-        csv_data, cutoff, penalty, test_objective_runtime)
+        csv_data, test_objective_runtime)
     assert instance_dict == {
-        "Ptn-7824-b01.cnf": 100.5,
-        "Ptn-7824-b03.cnf": 100.5,
-        "Ptn-7824-b05.cnf": 100.5,
-        "Ptn-7824-b07.cnf": 100.5,
-        "Ptn-7824-b09.cnf": 100.5,
-        "Ptn-7824-b11.cnf": 100.5,
-        "Ptn-7824-b13.cnf": 100.5,
-        "Ptn-7824-b15.cnf": 100.5,
-        "Ptn-7824-b17.cnf": 0.993013,
-        "Ptn-7824-b19.cnf": 100.5,
-        "Ptn-7824-b21.cnf": 100.5,
-        "bce7824.cnf": 100.5,
+        "bce7824.cnf": 10.1316,
+        "Ptn-7824-b09.cnf": 10.0667,
+        "Ptn-7824-b13.cnf": 10.0786,
+        "Ptn-7824-b21.cnf": 10.1152,
+        "Ptn-7824-b15.cnf": 10.1177,
+        "Ptn-7824-b01.cnf": 10.0812,
+        "Ptn-7824-b19.cnf": 10.0642,
+        "Ptn-7824-b05.cnf": 10.1184,
+        "Ptn-7824-b03.cnf": 10.1368,
+        "Ptn-7824-b11.cnf": 10.1921,
+        "Ptn-7824-b07.cnf": 10.1672,
+        "Ptn-7824-b17.cnf": 0.993013
     }
-
-
-def test_get_performance_measure_par10() -> None:
-    """Test get_performance_measure returns correct measure.
-
-    Return `PAR10` for RUNTIME with default penalty multiplier of 10.
-    """
-    measure = sgrch.get_performance_measure(test_objective_runtime, 10)
-    assert measure == "PAR10"
-
-
-def test_get_performance_measure_par5() -> None:
-    """Test get_performance_measure returns correct measure.
-
-    Return `PAR5` for RUNTIME with non-default penalty multiplier of 5.
-    """
-    measure = sgrch.get_performance_measure(test_objective_runtime, 5)
-    assert measure == "PAR5"
-
-
-def test_get_performance_measure_quality(mocker: MockFixture) -> None:
-    """Test get_performance_measure returns correct measure for QUALITY."""
-    measure = sgrch.get_performance_measure(test_objective_quality, None)
-    assert measure == "performance"
 
 
 def test_get_ablation_bool_true(mocker: MockFixture) -> None:
@@ -130,13 +101,11 @@ def test_get_data_for_plot_same_instance(mocker: MockFixture) -> None:
 
     configured_dir = "configured/directory/"
     default_dir = "default/directory/"
-    cutoff = 0
-    penalty = 1.0
     points = sgrch.get_data_for_plot(
-        configured_dir, default_dir, cutoff, penalty, test_objective_runtime)
+        configured_dir, default_dir, test_objective_runtime)
 
-    mock_dict.assert_any_call(default_dir, cutoff, penalty, test_objective_runtime)
-    mock_dict.assert_any_call(configured_dir, cutoff, penalty, test_objective_runtime)
+    mock_dict.assert_any_call(default_dir, test_objective_runtime)
+    mock_dict.assert_any_call(configured_dir, test_objective_runtime)
     assert points == [[1.0, 0.01]]
 
 
@@ -157,14 +126,12 @@ def test_get_data_for_plot_instance_error(mocker: MockFixture) -> None:
 
     configured_dir = "configured/directory/"
     default_dir = "default/directory/"
-    cutoff = 0
-    penalty = 1.0
     with pytest.raises(SystemExit):
         sgrch.get_data_for_plot(
-            configured_dir, default_dir, cutoff, penalty, test_objective_runtime)
+            configured_dir, default_dir, test_objective_runtime)
 
-    mock_dict.assert_any_call(default_dir, cutoff, penalty, test_objective_runtime)
-    mock_dict.assert_any_call(default_dir, cutoff, penalty, test_objective_runtime)
+    mock_dict.assert_any_call(default_dir, test_objective_runtime)
+    mock_dict.assert_any_call(default_dir, test_objective_runtime)
 
 
 def test_get_figure_configure_vs_default(mocker: MockFixture) -> None:
@@ -179,7 +146,6 @@ def test_get_figure_configure_vs_default(mocker: MockFixture) -> None:
     reports_dir = Path("configuration/report")
     filename = "figure.jpg"
     cutoff = 0
-    penalty = 1.0
     points = [[1.0, 0.1]]
     performance_measure = "PERF_MEASURE"
     plot_params = {"xlabel": f"Default parameters [{performance_measure}]",
@@ -205,8 +171,8 @@ def test_get_figure_configure_vs_default(mocker: MockFixture) -> None:
                                                           1,
                                                           test_objective_runtime)
 
-    mock_data.assert_called_once_with(configured_dir, default_dir, cutoff,
-                                      cutoff * penalty, test_objective_runtime)
+    mock_data.assert_called_once_with(configured_dir, default_dir,
+                                      test_objective_runtime)
     mock_plot.assert_called_once_with(points, filename, **plot_params)
     assert figure_string == f"\\includegraphics[width=0.6\\textwidth]{{{filename}}}"
 
@@ -249,7 +215,7 @@ def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
                                                           10,
                                                           test_objective_runtime)
 
-    mock_data.assert_called_once_with(configured_dir, default_dir, cutoff, 10,
+    mock_data.assert_called_once_with(configured_dir, default_dir,
                                       test_objective_runtime)
     mock_plot.assert_called_once_with(points, filename, **plot_params)
     assert figure_string == f"\\includegraphics[width=0.6\\textwidth]{{{filename}}}"
@@ -481,7 +447,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     mocker.patch("sparkle.about.version", "0.8")
     mocker.patch("sparkle.platform.generate_"
                  "report_for_configuration."
-                 "get_par_performance",
+                 "get_average_performance",
                  side_effect=[42.1, 42.2])
     mocker.patch("sparkle.platform.generate_report_for_configuration."
                  "get_features_bool",
@@ -517,12 +483,12 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                         validation_data, report_dir, "QUALITY",
                                         float(cutoff), 1, test_objective_quality)
     mock_timeouts.assert_called_once_with(
-        solver, train_instance, configurator, validator, float(cutoff), 60)
+        solver, train_instance, configurator, validator, 60)
     mock_ablation_bool.assert_called_once_with(ablation_scenario)
     mock_ablation_table.assert_called_once_with(ablation_scenario)
 
     assert common_dict == {
-        "performanceMeasure": "performance",
+        "performanceMeasure": "ACCURACY",
         "runtimeBool": "\\runtimefalse",
         "solver": solver.name,
         "instanceSetTrain": train_instance.name,
@@ -560,7 +526,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
 
     mocker.patch("sparkle.platform.generate_"
                  "report_for_configuration."
-                 "get_par_performance",
+                 "get_average_performance",
                  side_effect=[42.1, 42.2])
     mock_figure = mocker.patch("sparkle.platform.generate_"
                                "report_for_configuration."
@@ -600,7 +566,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
         Path("configuration/report"), "QUALITY", float(cutoff), 1,
         test_objective_quality, data_type="test")
     mock_timeouts.assert_called_once_with(
-        solver, test_set, configurator, validator, float(cutoff), 60)
+        solver, test_set, configurator, validator, 60)
     mock_ablation_bool.assert_called_once_with(ablation_scenario)
     mock_ablation_table.assert_called_once_with(ablation_scenario)
     assert test_dict == {

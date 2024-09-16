@@ -8,7 +8,8 @@ from typing import Callable
 import builtins
 import statistics
 
-from sparkle.types.objective import SparkleObjective
+from sparkle.types import SparkleObjective, resolve_objective
+from sparkle.types.objective import PAR
 from sparkle.solver import Selector
 from sparkle.configurator.configurator import Configurator
 from sparkle.solver.verifier import SATVerifier
@@ -114,7 +115,7 @@ class Settings:
         DEFAULT_performance_data / "performance_data.csv"
 
     # Constant default values
-    DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")
+    DEFAULT_general_sparkle_objective = PAR(10)
     DEFAULT_general_sparkle_configurator = cim.SMAC2.__name__
     DEFAULT_general_solution_verifier = str(None)
     DEFAULT_general_target_cutoff_time = 60
@@ -195,8 +196,8 @@ class Settings:
             option_names = ("objective", "smac_run_obj")
             for option in option_names:
                 if file_settings.has_option(section, option):
-                    value = SparkleObjective.from_multi_str(
-                        file_settings.get(section, option))
+                    value = [resolve_objective(obj) for obj in
+                             file_settings.get(section, option).split(",")]
                     self.set_general_sparkle_objectives(value, state)
                     file_settings.remove_option(section, option)
 
@@ -363,10 +364,9 @@ class Settings:
 
         # Print error if unable to read the settings
         else:
-            print(f"ERROR: Failed to read settings from {file_path} The file may "
-                  "have been empty, located in a different path, or be in another format"
-                  " than INI. Settings from different sources will be used (e.g. default"
-                  " values).")
+            print(f"ERROR: Failed to read settings from {file_path} The file may have "
+                  "been empty, located in a different path, or be in another format than"
+                  " INI. Default Settings values be used.")
 
     def write_used_settings(self: Settings) -> None:
         """Write the used settings to the default locations."""
@@ -422,7 +422,7 @@ class Settings:
     # General settings ###
     def set_general_sparkle_objectives(
             self: Settings,
-            value: str | list[SparkleObjective] = [DEFAULT_general_sparkle_objective, ],
+            value: list[SparkleObjective] = [DEFAULT_general_sparkle_objective, ],
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the sparkle objective."""
         section = "general"
@@ -431,6 +431,17 @@ class Settings:
                 self.__general_sparkle_objective_set, origin, name):
             if isinstance(value, list):
                 value = ",".join([str(obj) for obj in value])
+            else:
+                value = str(value)
+            # Append standard Sparkle Objectives
+            if "status" not in value:
+                value += ",status"
+            if "cpu_time" not in value:
+                value += ",cpu_time"
+            if "wall_time" not in value:
+                value += ",wall_time"
+            if "memory" not in value:
+                value += ",memory"
             self.__init_section(section)
             self.__general_sparkle_objective_set = origin
             self.__settings[section][name] = value
@@ -440,8 +451,8 @@ class Settings:
         if self.__general_sparkle_objective_set == SettingState.NOT_SET:
             self.set_general_sparkle_objectives()
 
-        return SparkleObjective.from_multi_str(
-            self.__settings["general"]["objective"])
+        return [resolve_objective(obj)
+                for obj in self.__settings["general"]["objective"].split(",")]
 
     def set_general_sparkle_configurator(
             self: Settings,
@@ -493,13 +504,6 @@ class Settings:
             self.set_general_sparkle_selector()
         return Selector(Path(self.__settings["general"]["selector"]),
                         self.DEFAULT_selection_output_raw)
-
-    def get_performance_metric_for_report(self: Settings) -> str:
-        """Return a string describing the full performance metric, e.g. PAR10."""
-        objectives = self.get_general_sparkle_objectives()
-        if len(objectives) == 1:
-            return objectives[0].metric
-        return ""
 
     def set_general_cap_value(
             self: Settings, value: float = None,

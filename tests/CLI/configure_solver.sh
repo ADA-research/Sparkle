@@ -60,8 +60,8 @@ fi
 
 sleep 1 # Sleep to avoid interference from previous test
 
-# Configure solver with performance measure option RUNTIME
-output=$(sparkle/CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --performance-measure RUNTIME --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+# Configure solver with objective PAR10
+output=$(sparkle/CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --objectives PAR10 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then

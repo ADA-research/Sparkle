@@ -12,7 +12,7 @@ from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
 from sparkle.instance import InstanceSet
-from sparkle.types.objective import PerformanceMeasure, SparkleObjective
+from sparkle.types import SparkleObjective
 
 
 class Configurator:
@@ -80,7 +80,7 @@ class Configurator:
     def get_optimal_configuration(self: Configurator,
                                   solver: Solver,
                                   instance_set: InstanceSet,
-                                  performance: PerformanceMeasure) -> tuple[float, str]:
+                                  objective: SparkleObjective) -> tuple[float, str]:
         """Returns the optimal configuration string for a solver of an instance set."""
         raise NotImplementedError
 

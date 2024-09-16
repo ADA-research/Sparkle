@@ -16,28 +16,28 @@ from sparkle.CLI.run_solvers import running_solvers_performance_data
 from sparkle.CLI.help import logging as sl
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help import argparse_custom as apc
+from sparkle.CLI.help import argparse_custom as ac
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(*apc.InstancesPathArgument.names,
-                        **apc.InstancesPathArgument.kwargs)
+    parser.add_argument(*ac.InstancesPathArgument.names,
+                        **ac.InstancesPathArgument.kwargs)
     group_extractor_run = parser.add_mutually_exclusive_group()
-    group_extractor_run.add_argument(*apc.RunExtractorNowArgument.names,
-                                     **apc.RunExtractorNowArgument.kwargs)
-    group_extractor_run.add_argument(*apc.RunExtractorLaterArgument.names,
-                                     **apc.RunExtractorLaterArgument.kwargs)
+    group_extractor_run.add_argument(*ac.RunExtractorNowArgument.names,
+                                     **ac.RunExtractorNowArgument.kwargs)
+    group_extractor_run.add_argument(*ac.RunExtractorLaterArgument.names,
+                                     **ac.RunExtractorLaterArgument.kwargs)
     group_solver = parser.add_mutually_exclusive_group()
-    group_solver.add_argument(*apc.RunSolverNowArgument.names,
-                              **apc.RunSolverNowArgument.kwargs)
-    group_solver.add_argument(*apc.RunSolverLaterArgument.names,
-                              **apc.RunSolverLaterArgument.kwargs)
-    parser.add_argument(*apc.NicknameInstanceSetArgument.names,
-                        **apc.NicknameInstanceSetArgument.kwargs)
-    parser.add_argument(*apc.RunOnArgument.names,
-                        **apc.RunOnArgument.kwargs)
+    group_solver.add_argument(*ac.RunSolverNowArgument.names,
+                              **ac.RunSolverNowArgument.kwargs)
+    group_solver.add_argument(*ac.RunSolverLaterArgument.names,
+                              **ac.RunSolverLaterArgument.kwargs)
+    parser.add_argument(*ac.NicknameInstanceSetArgument.names,
+                        **ac.NicknameInstanceSetArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
 
     return parser
 

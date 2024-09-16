@@ -1,4 +1,4 @@
-Solver,Configuration,InstanceSet,Instance,Status,Quality,Runtime
+Solver,Configuration,InstanceSet,Instance,Status,Quality,PAR10
 PbO-CCSAT-Generic,{},PTN,bce7824.cnf,TIMEOUT,nan,10.0681
 PbO-CCSAT-Generic,"{'init_solution': '1', 'p_swt': '0.3', 'perform_aspiration': '1', 'perform_clause_weight': '1', 'perform_double_cc': '1', 'perform_first_div': '0', 'perform_pac': '0', 'q_swt': '0.0', 'sel_clause_div': '1', 'sel_clause_weight_scheme': '1', 'sel_var_break_tie_greedy': '2', 'sel_var_div': '3', 'threshold_swt': '300'}",PTN,Ptn-7824-b09.cnf,TIMEOUT,nan,10.0775
 PbO-CCSAT-Generic,{},PTN,Ptn-7824-b13.cnf,TIMEOUT,0,10.144

@@ -24,8 +24,8 @@ def parser_function() -> argparse.ArgumentParser:
 
     parser.add_argument(*ac.RecomputeRunSolversArgument.names,
                         **ac.RecomputeRunSolversArgument.kwargs)
-    parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
-                        **ac.PerformanceMeasureSimpleArgument.kwargs)
+    parser.add_argument(*ac.SparkleObjectiveArgument.names,
+                        **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeRunSolversArgument.names,
                         **ac.TargetCutOffTimeRunSolversArgument.kwargs)
     parser.add_argument(*ac.AlsoConstructSelectorAndReportArgument.names,
@@ -86,13 +86,13 @@ def running_solvers_performance_data(
 
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     srun_options = ["-N1", "-n1"] + sbatch_options
-    perf_m = gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
+    objectives = gv.settings().get_general_sparkle_objectives()
     run_solvers_core = Path(__file__).parent.resolve() / "core" / "run_solvers_core.py"
     cmd_list = [f"{run_solvers_core} "
                 f"--performance-data {performance_data_csv_path} "
                 f"--instance {inst_p} --solver {solver_p} "
-                f"--performance-measure {perf_m.name} "
-                f"--log-dir {sl.caller_log_dir}" for inst_p, solver_p in jobs]
+                f"--objectives {','.join([str(o) for o in objectives])} "
+                f"--log-dir {sl.caller_log_dir}" for inst_p, _, solver_p in jobs]
 
     run = rrr.add_to_queue(
         runner=run_on,
@@ -189,9 +189,9 @@ if __name__ == "__main__":
         # Do first, so other command line options can override settings from the file
         gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
 
-    if args.performance_measure is not None:
+    if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
-            args.performance_measure, SettingState.CMD_LINE
+            args.objectives, SettingState.CMD_LINE
         )
 
     if args.target_cutoff_time is not None:
