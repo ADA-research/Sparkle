@@ -122,7 +122,7 @@ class FeatureDataFrame:
     def has_missing_vectors(self: FeatureDataFrame) -> bool:
         """Returns True if there are any Extractors still to be run on any instance."""
         for instance in self.dataframe.columns:
-            for extractor in self.extractors():
+            for extractor in self.extractors:
                 extractor_features = self.dataframe.xs(extractor, level=2,
                                                        drop_level=False)
                 if extractor_features.loc[:, instance].isnull().all():
@@ -137,7 +137,7 @@ class FeatureDataFrame:
                 that needs to be computed.
         """
         remaining_jobs = []
-        for extractor in self.extractors():
+        for extractor in self.extractors:
             for group in self.get_feature_groups(extractor):
                 subset = self.dataframe.xs((group, extractor), level=(0, 2))
                 for instance in self.dataframe.columns:
