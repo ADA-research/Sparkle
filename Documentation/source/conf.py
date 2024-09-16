@@ -17,8 +17,8 @@ import sys
 
 # Add path to sparkle root
 sys.path.insert(0, os.path.abspath("../.."))
-sys.path.insert(0, os.path.abspath("../../CLI"))
 sys.path.insert(0, os.path.abspath("../../sparkle"))
+sys.path.insert(0, os.path.abspath("../../sparkle/CLI"))
 print("sys.path: ", sys.path)
 
 from sparkle import about  # noqa: E402
@@ -26,8 +26,8 @@ from sparkle import about  # noqa: E402
 # -- Project information -----------------------------------------------------
 
 project = "Sparkle"
-copyright = "2021, ADA Research Group, LIACS"
-author = "ADA Research Group, LIACS"
+copyright = "2024, ADA Research Group, AIM @ RWTH Aachen"
+author = "ADA Research Group, AIM @ RWTH Aachen"
 
 # The short X.Y version
 version = about.version
@@ -156,7 +156,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, "sparkle.tex", "Sparkle Documentation",
-     "ADA Research Group, LIACS", "manual"),
+     "ADA Research Group, AIM @ RWTH Aachen", "manual"),
 ]
 
 # Manually installed sty files not easily available from conda
