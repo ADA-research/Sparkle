@@ -371,7 +371,7 @@ to get a description of the required arguments and other options.
 %```{eval-rst}
 %.. include:: commandlist.md
 %```
-```{include} userguide/commandlist.md
+```{include} commandlist.md
 ```
 
 ```{note}
@@ -383,7 +383,7 @@ brackets} indicate a set of inputs to choose from.
 %```{eval-rst}
 %.. include:: commandsautoprogram.md
 %```
-```{include} userguide/commandsautoprogram.md
+```{include} commandsautoprogram.md
 ```
 
 % Commented out

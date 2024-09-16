@@ -16,10 +16,10 @@ import os
 import sys
 
 # Add path to sparkle root
-sys.path.insert(0, os.path.abspath("../../../.."))
-sys.path.insert(0, os.path.abspath("../../.."))
-sys.path.insert(0, os.path.abspath("../../../sparkle"))
-sys.path.insert(0, os.path.abspath("../../../sparkle/CLI"))
+#sys.path.insert(0, os.path.abspath("../../../.."))
+#sys.path.insert(0, os.path.abspath("../../.."))
+sys.path.append(os.path.abspath("../../../sparkle"))
+sys.path.append(os.path.abspath("../../../sparkle/CLI"))
 print("sys.path: ", sys.path)
 
 from sparkle import about  # noqa: E402
