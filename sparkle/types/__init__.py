@@ -20,7 +20,7 @@ def _check_class(candidate: Callable) -> bool:
     return inspect.isclass(candidate) and issubclass(candidate, SparkleObjective)
 
 
-def resolve_objective(name: str) -> SparkleObjective:
+def resolve_objective(objective_name: str) -> SparkleObjective:
     """Try to resolve the objective class by (case-sensitive) name.
 
     convention: objective_name(variable-k)?(:[min|max])?
@@ -36,8 +36,8 @@ def resolve_objective(name: str) -> SparkleObjective:
     Returns:
         Instance of the Objective class or None if not found.
     """
-    match = objective_string_regex.fullmatch(name)
-    if match is None or name == "" or not name[0].isalpha():
+    match = objective_string_regex.fullmatch(objective_name)
+    if match is None or objective_name == "" or not objective_name[0].isalpha():
         return None
 
     name = match.group("name")
@@ -72,4 +72,4 @@ def resolve_objective(name: str) -> SparkleObjective:
                 return o_class()
 
     # No special objects found. Return objective with full name
-    return SparkleObjective(name=name, minimise=minimise)
+    return SparkleObjective(name=objective_name, minimise=minimise)
