@@ -99,6 +99,10 @@ class PerformanceDataFrame():
             # Sort the index to optimize lookup speed
             self.dataframe = self.dataframe.sort_index()
 
+    def __repr__(self: PerformanceDataFrame) -> str:
+        """Return string representation of the DataFrame."""
+        return self.dataframe.__repr__()
+
     # Properties
 
     @property
