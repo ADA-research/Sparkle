@@ -7,15 +7,18 @@ Specifically, Sparkle facilitates the use of:
  * Automated algorithm configuration
  * Automated algorithm selection
 
+Furthermore, Sparkle handles various tasks for the user such as:
+
+ * Algorithm meta information collection and statistics calculation
+ * Instance/Data Set management and feature extraction
+ * Compute cluster job submission and monitoring
+ * Log file collection
+
 ## Installation
 
-The Sparkle package can be installed using Pip. We recommend creating a new virtual environment (For example, [venv](https://docs.python.org/3/library/venv.html)) before to ensure no clashes between dependencies occur. 
+The quick and full installation of Sparkle can be done using Conda (For Conda installation see [here]( https://docs.conda.io/en/latest/miniconda.html)). 
 
-```bash
-    $ pip install SparkleAI
-```
-
-Alternatively, to be able to fully use the Command Line Interface (CLI) of Sparkle, a Conda environment is required (For Conda installation see [here]( https://docs.conda.io/en/latest/miniconda.html)). Simply download the `environment.yml` file from the Github and run:
+Simply download the `environment.yml` file from the Github and run:
 
 ```bash
     $ conda env create -f environment.yml
@@ -27,7 +30,15 @@ And afterwards activated by:
     $ conda activate sparkle
 ```
 
-Note that the creation of the Conda environment also takes care of the installation of Sparkle itself.
+Note that the creation of the Conda environment also takes care of the installation of the Sparkle package itself. 
+
+The Sparkle package can be installed using Pip. We recommend creating a new virtual environment (For example, [venv](https://docs.python.org/3/library/venv.html)) before to ensure no clashes between dependencies occur. 
+
+```bash
+    $ pip install SparkleAI
+```
+
+Note that a direct installation through Pip does not handle certain dependencies of the Sparkle CLI, such as the required libraries for compiling [RunSolver]((http://www.cril.univ-artois.fr/~roussel/runsolver/)).
 
 ### Install dependencies
 Asside from several package dependencies, Sparkle's package / CLI relies on a few user supplied executables:
@@ -47,7 +58,7 @@ See the `Examples` directory for some examples on how to use `Sparkle`. All Spar
 
 ## Documentation
 
-The documentation can be read at https://sparkle-ai.readthedocs.io/. 
+The documentation can be read at https://ada-research.github.io/Sparkle/. 
 
 A `PDF` is also available in the repository at [Documentation/sparkle-userguide.pdf](./Documentation/sparkle-userguide.pdf).
 
@@ -78,13 +89,10 @@ K. van der Blom, H. H. Hoos, C. Luo and J. G. Rook, **Sparkle: Toward Accessible
 }
 ```
 
-
 ## Maintainers
 Thijs Snelleman,
 Jeroen Rook,
 Holger H. Hoos,
-Noah Peil,
-Brian Schiller
 
 ## Contributors
 Chuan Luo,
@@ -99,7 +107,9 @@ Malte Schwerin,
 Aaron Berger,
 Marie Anastacio,
 Aaron Berger
-Koen van der Blom
+Koen van der Blom,
+Noah Peil,
+Brian Schiller
 
 ## Contact
 sparkle@aim.rwth-aachen.de
