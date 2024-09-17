@@ -2,11 +2,13 @@
 
 ## File structure
 
+The platform automatically generates a file structure for both input and output upon initialisation.
+
 (dir-instances)=
 
-### A typical instance directory
+### Instance directory
 
-An instance directory should look something like this:
+The instance directory has the following structure:
 
 ```
 Instances/
@@ -17,60 +19,32 @@ Instances/
     instance_z.cnf
 ```
 
-This directory simply contains a collection of instances, as example
-here SAT instances in the CNF format are given.
+Each directory under the Instances directory represents an `Instance Set` and each file is considered an instance. Note that if your dataset is a single file, it will be considered a single instance in the set.
 
-For instances consisting of multiple files one additional file called `sparkle_instance_list.txt` should be
-included in the `Example_Instance_Set` directory, describing which
-files together form an instance. The format is a single instance per
-line with each file separated by a space, as shown below.
+For instances consisting of multiple files one additional file called `instances.csv` should be included in the `Example_Instance_Set` directory, describing which files together form an instance. The format is a single instance per line with each file separated by a space, as shown below.
 
 ```
-instance_a_part_one.abc instance_a_part_two.xyz
-instance_b_part_one.abc instance_b_part_two.xyz
+instance_name_a instance_a_part_one.abc ... instance_a_part_n.xyz
+instance_name_b instance_b_part_one.abc ... instance_b_part_n.xyz
 ...                     ...
-instance_z_part_one.abc instance_z_part_two.xyz
+instance_name_z instance_z_part_one.abc ... instance_z_part_n.xyz
 ```
 
 (dir-solvers)=
 
-### A typical solver directory (configuration)
+### Solver Directory
 
-A solver directory should look something like this:
+The solver directory has the following structure:
 
 ```
 Solver/
   Example_Solver/
-    solver
     sparkle_solver_wrapper.py
     parameters.pcs
+    ...
 ```
 
-Here `solver` is a binary executable of the solver that is to be
-configured. The `sparkle_solver_wrapper.py` is a wrapper that Sparkle
-should call to run the solver with specific settings, and then returns a
-result for the configurator. In `parameters.pcs` the configurable
-parameters are described in the PCS format. Finally, when importing your
-Solver into Sparkle, a binary executable of the runsolver tool `runsolver` is added.
-This allows Sparkle to make fair time measurements for all configuration experiments.
-
-(dir-solvers-selection)=
-
-### A typical solver directory (selection)
-
-A solver directory should look something like this:
-
-```
-Solver/
-  Example_Solver/
-    solver
-    sparkle_solver_wrapper.py
-```
-
-Here `solver` is a binary executable of a solver that is to be
-included in a portfolio selector. The `sparkle_solver_wrapper.py`
-is a wrapper that Sparkle should call to run the solver on a specific
-instance.
+The `sparkle_solver_wrapper.py` is a wrapper that Sparkle should call to run the solver with specific settings, and then returns a result for the configurator. In `parameters.pcs` the configurable parameters are described in the PCS format. Finally, when importing your Solver into Sparkle, a binary executable of the runsolver tool `runsolver` is added. This allows Sparkle to make fair time and computational cost measurements for all configuration experiments.
 
 ### The output directory
 
@@ -123,25 +97,17 @@ For each type of task run by Sparkle, the `related files` differ. The aim is alw
 (settings)=
 ## Platform Settings
 
-Most settings can be controlled through
-`Settings/sparkle_settings.ini`. Possible settings are summarised per
-category in {numref}`settings-details`. For any settings
-that are not provided the defaults will be used. Meaning, in the extreme
-case, that if the settings file is empty (and nothing is set through the
-command line) everything will run with default values.
+Most settings can be controlled through the `Settings` directory, specifically the `Settings/sparkle_settings.ini` file. Possible settings are summarised per category in {numref}`settings-details`. For any settings that are not provided the defaults will be used. Meaning, in the extreme case, that if the settings file is empty (and nothing is set through the command line) everything will run with default values.
 
-For convenience after every command `Settings/latest.ini` is written
-with the used settings. This can, for instance, be used to provide the
-same settings to the next command in a chain. E.g. for
-`validate_configured_vs_default` after `configure_solver`. The used
-settings are also recorded in the relevant `Output/` subdirectory.
-Note that when writing settings Sparkle always uses the name, and not an
-alias. 
+For convenience after every command `Settings/latest.ini` is written with the used settings. Here any overrides by commandline arguments are reflected. This can, for instance, provide the same settings to the next command in a chain. E.g. for `validate_configured_vs_default` after `configure_solver`. The used settings are also recorded in the relevant `Output/` subdirectory. Note that when writing settings Sparkle always uses the name, and not an alias.
+
+```{note}
+When overriding settings in `sparkle_settings.ini` with the commandline arguments, this is considered as 'temporary' and only denoted in the latest_settings, but does not actually affect the values in sparkle_settings.ini
+```
 
 ### Example `sparkle_settings.ini`
 
-This is a short example to show the format, see the settings file in
-`Settings/sparkle_settings.ini` for more.
+This is a short example to show the format.
 
 ```
 [general]
@@ -154,6 +120,8 @@ number_of_runs = 25
 [slurm]
 number_of_runs_in_parallel = 25
 ```
+
+When initialising a new platform, the user is provided with a default settings.ini, which can be viewed [here](https://raw.githubusercontent.com/ADA-research/Sparkle/main/sparkle/Components/sparkle_settings.ini).
 
 (sparkle-objective)=
 ### Sparkle Objectives
@@ -187,15 +155,11 @@ It is possible to redefine these attributes for your specific objective. The pla
 
 **\[general\]**
 
-`performance_measure`
-> aliases: `smac_run_obj`
+`objective`
+> aliases: `objective`
 >
-> values: `{RUNTIME, QUALITY_ABSOLUTE` (also: `QUALITY}`)
-> > `RUNTIME` focuses on runtime the solver requires,
-> >
-> > `QUALITY_ABSOLUTE` and `QUALITY` focuses on the average absolute improvements on the instances
->
-> description: The type of performance measure that sparkle uses. 
+> values: `str`, comma seperated for multiple
+> description: The type of objectives Sparkle considers, see {ref}`Sparkle Objective section <sparkle-objective>` for more. 
 
 `target_cutoff_time`
 > aliases: `smac_each_run_cutoff_time`, `cutoff_time_each_performance_computation`

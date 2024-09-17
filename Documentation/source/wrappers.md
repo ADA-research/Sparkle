@@ -1,7 +1,7 @@
 (solver-wrapper)=
 # Wrapping your Algorithm
 
-When using Sparkle for your specific projects, you will want to plug in your own algorithms into the platform. To that end, a piece of wrapper code of about ~50 lines must be written to make sure the platform is able to submit calls to your algorithm, as well as parse the output.
+When using Sparkle for your specific projects, you will want to plug in your own algorithms into the platform. To that end, a piece of wrapper code of about ~50 lines must be written to make sure the platform is able to submit calls to your algorithm, as well as parse the output. This should in general not take longer than five minutes to write.
 
 A template for the wrapper that connects your algorithm with Sparkle is
 available at `Examples/Resources/Solvers/template/sparkle_solver_wrapper.py`.
@@ -9,7 +9,7 @@ Within this template a number of `TODO`s are indicated where you are likely to n
 
 (solver-wrapper-file)=
 
-## sparkle_solver_wrapper.py
+## Solver Wrapper Python script
 
 The `sparkle_solver_wrapper.py` uses a commandline dictionary to receive it inputs. This can be easily parsed using a Sparkle tool: `from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args`.
 After parsing it with the Sparkle tools, the dictionary should always have the following values:
@@ -42,8 +42,8 @@ The solver_call is only used for logging purposes, to allow for easy inspection 
 
 (pcs-file)=
 
-### Parameter configuration space (PCS) file
-In order to use algorithm configuration, the algorithm configuration space must be specified in a PCS file.
+## PCS file
+In order to use algorithm configuration, the algorithm configuration space must be specified in a PCS (Parameter configuration space) file.
 
 ```{note}
 See the {doc}`tutorial <tutorials>` page for a walk-through on how to perform configuration with Sparkle.

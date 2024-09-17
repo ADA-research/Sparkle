@@ -19,23 +19,18 @@ something like:
 srun -N1 -n1 -c1 path/to/package/sparkle/CLI/initialise.py
 ```
 
-In the `Examples/` directory a number of common command sequences are
-given. For instance, for configuration with specified training and
-testing sets see e.g. `Examples/configuration.md` for an example of a
-sequence of commands to execute. Note that some command run in the
-background and need time to complete before the next command is
-executed. To see whether a command is still running the Slurm command
-`squeue` can be used.
+In the `Examples/` directory a number of common command sequences are given. For instance, for configuration with specified training and
+testing sets see e.g. `Examples/configuration.md` for an example of a sequence of commands to execute. Note that some command run in the background and need time to complete before the next command is executed. To see whether a command is still running the `wait` command can be used.
 
-In the `Output/` directory paths to generated scripts and logs are
-gathered per executed command.
+In the `Output/` directory paths to generated scripts and logs are gathered per executed command.
 
+```{note}
+When typing a sparkle command name that consists of multiple words, both spaces and underscores are accepted as seperators.
+```
 
 ## List of Commands
 
-Currently the commands below are available in Sparkle (listed
-alphabetically). Every command can be called with the `–help` option
-to get a description of the required arguments and other options.
+Currently the commands below are available in Sparkle (listed alphabetically). Every command can be called with the `–help` option to get a description of the required arguments and other options.
 
 
 ```{include} commandlist.md
