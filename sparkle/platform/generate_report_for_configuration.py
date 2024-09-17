@@ -436,7 +436,8 @@ def get_dict_variable_to_value_common(solver: Solver,
 
     # Retrieve timeout numbers for the training instances
     configured_timeouts_train, default_timeouts_train, overlapping_timeouts_train =\
-        get_timeouts_instanceset(solver, train_set, configurator, validator, run_cutoff_time)
+        get_timeouts_instanceset(solver, train_set, configurator, validator,
+                                 run_cutoff_time)
 
     latex_dict["timeoutsTrainDefault"] = default_timeouts_train
     latex_dict["timeoutsTrainConfigured"] = configured_timeouts_train

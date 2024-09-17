@@ -4,9 +4,6 @@ import configparser
 from enum import Enum
 from pathlib import Path
 from pathlib import PurePath
-from typing import Callable
-import builtins
-import statistics
 
 from sparkle.types import SparkleObjective, resolve_objective
 from sparkle.types.objective import PAR
