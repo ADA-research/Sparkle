@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Automatic extraction of command list from their implementations."""
+"""Automatic extraction of library list from their implementations."""
 
 import os
 from pathlib import Path
 
 if __name__ == "__main__":
-    command_dir = "../sparkle/CLI"
+    command_dir = "../sparkle"
 
     commands = []
 

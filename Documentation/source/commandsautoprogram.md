@@ -2,7 +2,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.about:parser_function()
-   :prog: about.py
+   :prog: about
 
 ```
 
@@ -10,7 +10,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.add_feature_extractor:parser_function()
-   :prog: add_feature_extractor.py
+   :prog: add_feature_extractor
 
 ```
 
@@ -18,7 +18,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.add_instances:parser_function()
-   :prog: add_instances.py
+   :prog: add_instances
 
 ```
 
@@ -26,7 +26,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.add_solver:parser_function()
-   :prog: add_solver.py
+   :prog: add_solver
 
 ```
 
@@ -34,7 +34,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.cleanup:parser_function()
-   :prog: cleanup.py
+   :prog: cleanup
 
 ```
 
@@ -42,7 +42,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.compute_features:parser_function()
-   :prog: compute_features.py
+   :prog: compute_features
 
 ```
 
@@ -50,7 +50,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.compute_marginal_contribution:parser_function()
-   :prog: compute_marginal_contribution.py
+   :prog: compute_marginal_contribution
 
 ```
 
@@ -58,7 +58,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.configure_solver:parser_function()
-   :prog: configure_solver.py
+   :prog: configure_solver
 
 ```
 
@@ -66,7 +66,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.construct_portfolio_selector:parser_function()
-   :prog: construct_portfolio_selector.py
+   :prog: construct_portfolio_selector
 
 ```
 
@@ -74,7 +74,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.generate_report:parser_function()
-   :prog: generate_report.py
+   :prog: generate_report
 
 ```
 
@@ -82,7 +82,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.initialise:parser_function()
-   :prog: initialise.py
+   :prog: initialise
 
 ```
 
@@ -90,7 +90,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.load_snapshot:parser_function()
-   :prog: load_snapshot.py
+   :prog: load_snapshot
 
 ```
 
@@ -98,7 +98,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.remove_feature_extractor:parser_function()
-   :prog: remove_feature_extractor.py
+   :prog: remove_feature_extractor
 
 ```
 
@@ -106,7 +106,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.remove_instances:parser_function()
-   :prog: remove_instances.py
+   :prog: remove_instances
 
 ```
 
@@ -114,7 +114,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.remove_solver:parser_function()
-   :prog: remove_solver.py
+   :prog: remove_solver
 
 ```
 
@@ -122,7 +122,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.run_ablation:parser_function()
-   :prog: run_ablation.py
+   :prog: run_ablation
 
 ```
 
@@ -130,7 +130,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.run_configured_solver:parser_function()
-   :prog: run_configured_solver.py
+   :prog: run_configured_solver
 
 ```
 
@@ -138,7 +138,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.run_parallel_portfolio:parser_function()
-   :prog: run_parallel_portfolio.py
+   :prog: run_parallel_portfolio
 
 ```
 
@@ -146,7 +146,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.run_portfolio_selector:parser_function()
-   :prog: run_portfolio_selector.py
+   :prog: run_portfolio_selector
 
 ```
 
@@ -154,7 +154,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.run_solvers:parser_function()
-   :prog: run_solvers.py
+   :prog: run_solvers
 
 ```
 
@@ -162,7 +162,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.save_snapshot:parser_function()
-   :prog: save_snapshot.py
+   :prog: save_snapshot
 
 ```
 
@@ -170,7 +170,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.status:parser_function()
-   :prog: status.py
+   :prog: status
 
 ```
 
@@ -178,7 +178,7 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.validate_configured_vs_default:parser_function()
-   :prog: validate_configured_vs_default.py
+   :prog: validate_configured_vs_default
 
 ```
 
@@ -186,6 +186,6 @@
 
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.wait:parser_function()
-   :prog: wait.py
+   :prog: wait
 
 ```

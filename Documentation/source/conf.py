@@ -53,6 +53,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
     "sphinxcontrib.autoprogram",
+    "sphinx_copybutton",
     "myst_parser",
 ]
 
@@ -80,7 +81,7 @@ language = "en-gb"
 exclude_patterns = ["userguide/index.md", "userguide/commandsautoprogram.md"]
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = None
+pygments_style = "default"
 
 
 # -- Options for HTML output -------------------------------------------------

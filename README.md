@@ -1,6 +1,6 @@
-# Sparkle
+# _Sparkle_
 
-Sparkle is a Programming by Optimisation (PbO)-based problem-solving platform designed to enable the widespread and effective use of PbO techniques for improving the state-of-the-art in solving a broad range of prominent AI problems, including SAT and AI Planning.
+> A Programming by Optimisation (PbO)-based problem-solving platform designed to enable the widespread and effective use of PbO techniques for improving the state-of-the-art in solving a broad range of prominent AI problems, including SAT and AI Planning.
 
 Specifically, Sparkle facilitates the use of:
 
@@ -14,31 +14,45 @@ Furthermore, Sparkle handles various tasks for the user such as:
  * Compute cluster job submission and monitoring
  * Log file collection
 
+(quick-install)=
+
 ## Installation
 
 The quick and full installation of Sparkle can be done using Conda (For Conda installation see [here]( https://docs.conda.io/en/latest/miniconda.html)). 
 
-Simply download the `environment.yml` file from the Github and run:
+Simply download the `environment.yml` file from the [Github](https://github.com/ADA-research/Sparkle/blob/main/environment.yml) with wget:
 
 ```bash
-    $ conda env create -f environment.yml
+    wget https://raw.githubusercontent.com/ADA-research/Sparkle/main/environment.yml
 ```
 
-And afterwards activated by:
+and run:
 
 ```bash
-    $ conda activate sparkle
+    conda env create -f environment.yml
 ```
 
-Note that the creation of the Conda environment also takes care of the installation of the Sparkle package itself. 
-
-The Sparkle package can be installed using Pip. We recommend creating a new virtual environment (For example, [venv](https://docs.python.org/3/library/venv.html)) before to ensure no clashes between dependencies occur. 
+which can then be activated by:
 
 ```bash
-    $ pip install SparkleAI
+    conda activate sparkle
 ```
 
-Note that a direct installation through Pip does not handle certain dependencies of the Sparkle CLI, such as the required libraries for compiling [RunSolver]((http://www.cril.univ-artois.fr/~roussel/runsolver/)).
+```{note}
+The creation of the Conda environment also takes care of the installation of the Sparkle package itself. 
+```
+
+```{note}
+You will need to reactivate the environment every time you log in, before using Sparkle.
+```
+
+Sparkle can also be installed as a standalone package using Pip. We recommend creating a new virtual environment (For example, [venv](https://docs.python.org/3/library/venv.html)) before to ensure no clashes between dependencies occur. 
+
+```bash
+pip install SparkleAI
+```
+
+Note that a direct installation through Pip does not handle certain dependencies of the Sparkle CLI, such as the required libraries for compiling [RunSolver](https://www.cril.univ-artois.fr/~roussel/runsolver/).
 
 ### Install dependencies
 Asside from several package dependencies, Sparkle's package / CLI relies on a few user supplied executables:
@@ -50,7 +64,22 @@ Other dependencies are handled by the Conda environment, but if that is not an o
 - [libnuma](https://anaconda.org/esrf-bcu/libnuma) and [numactl](https://anaconda.org/brown-data-science/numactl) for [Runsolver](http://www.cril.univ-artois.fr/~roussel/runsolver/) compilation which sparkle uses to measure solvers meta data. This is restricted to Linux based systems.
 - [Swig](https://anaconda.org/conda-forge/swig/) 4.0.2 for [SMAC3](https://github.com/automl/SMAC3), which is in turn used by [AutoFolio](https://github.com/automl/AutoFolio).
 
-For detailed installation instructions see the documentation: https://sparkle-ai.readthedocs.io/
+For detailed installation instructions see the documentation: https://ada-research.github.io/Sparkle/
+
+## Developer installation
+
+The file `dev-env.yml` is used for developer mode of the Sparkle package and contains several extra packages for testing.
+
+The two environments can be created in parallel since one is named `sparkle` and the other `sparkle-dev`. If you want to update an environment it is better to do a clean installation by removing and recreating it. For example:
+
+```bash
+conda deactivate
+conda env remove -n sparkle
+conda env create -f environment.yml
+conda activate sparkle
+```
+
+This should be fast as both `conda` and `pip` use local cache for the packages.
 
 ## Examples
 
@@ -60,7 +89,7 @@ See the `Examples` directory for some examples on how to use `Sparkle`. All Spar
 
 The documentation can be read at https://ada-research.github.io/Sparkle/. 
 
-A `PDF` is also available in the repository at [Documentation/sparkle-userguide.pdf](./Documentation/sparkle-userguide.pdf).
+A `PDF` is also available in the [repository](https://raw.githubusercontent.com/ADA-research/Sparkle/main/Documentation/sparkle-userguide.pdf).
 
 ## Licensing
 

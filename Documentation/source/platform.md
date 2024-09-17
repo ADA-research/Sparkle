@@ -1,193 +1,4 @@
-# Sparkle user guide
-
-## Quick start
-
-```{note}
-Sparkle currently relies on [Slurm](https://slurm.schedmd.com/), but in some cases works locally as well.
-Sparkle also relies on [RunSolver](http://www.cril.univ-artois.fr/~roussel/runsolver/), which is a Linux based program. Thus Sparkle can only run on Linux based systems in many cases.
-```
-
-
-
-Follow these steps:
-
-1. {ref}`Install Sparkle <quick-install>`
-2. Prepare an {ref}`algorithm configuration <quick-config-environment>` or an {ref}`algorithm selection <quick-select-environment>`.
-3. {ref}`Execute commands <quick-execute-commands>`
-
-(quick-install)=
-
-## Installing Sparkle
-
-```{note}
-The installation process use the `conda` command available in [Anaconda](https://www.anaconda.com/) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html) to manage some dependencies.
-```
-
-### Get a copy of Sparkle
-
-To get a copy of Sparkle you can clone the repository.
-
-If `git` is available on your system, this will clone the Sparkle repository and create a subdirectory named `sparkle` :
-
-```shell
-$ git clone https://github.com/ADA-research/Sparkle
-```
-
-You can also download the stable version here: 
-
-### Install dependencies
-
-Sparkle depends on Python 3.9+, swig 3.0, gnuplot, LaTeX, and multiple Python packages. An easy way to install most of what is needed is to use the `conda` package manager (<https://docs.conda.io/en/latest/miniconda.html>).
-
-```{note}
-LaTeX is used to create the reports and the documentation and must be installed manually on the system. If you don't plan to use the reports or recreate the documentations, you can skip it.
-```
-
-You can install the base requirements with
-
-```shell
-$ conda env create -f environment.yml
-```
-
-This will create an environment named `sparkle` that contains everything needed to run Sparkle, except LaTeX that needs to be installed manually.
-
-To activate the environment in the current shell, execute:
-
-```shell
-$ conda activate sparkle
-```
-
-```{note}
-You will need to reactivate the environment every time you log in, before using Sparkle.
-```
-
-The file `environment.yml` contains a tested list of Python packages with fixed versions required to execute Sparkle. We recommended using it.
-
-The file `dev-env.yml` is used for developer mode of the Sparkle package and contains several extra packages for testing.
-
-The two environments can be created in parallel since one is named `sparkle` and the other `sparkle-dev`. If you want to update an environment it is better to do a clean installation by removing and recreating it. For example:
-
-```shell
-$ conda deactivate
-$ conda env remove -n sparkle
-$ conda env create -f environment.yml
-$ conda activate sparkle
-```
-
-This should be fast as both `conda` and `pip` use local cache for the packages.
-
-### Configure Sparkle/Slurm
-
-Before running Sparkle, you probably want to have a look at the settings described in {numref}`settings`.
-In particular, the default Slurm settings are set to work with the Grace cluster in Leiden University and should be adapted to your specific cluster.
-
-(quick-config-environment)=
-
-## Algorithm Configuration
-
-Configuring an algorithm has the following minimal requirements for the
-algorithm (for an example of a solver directory see {numref}`dir-solvers`):
-
-- A working solver executable
-- An algorithm wrapper called `sparkle_solver_wrapper.py`
-- A PCS (parameter configuration space) file
-
-Further, training and testing instance sets are needed (for an example
-of an instances directory see {numref}`dir-instances`). For
-the purpose of testing whether your configuration setup works with
-Sparkle, it is advised to primarily use instances that are solved
-(relatively) quickly even with the default parameters.
-
-```{note}
-See the {doc}`example </examples/configuration>` page for a walk-through on how to perform configuration with Sparkle.
-```
-
-(quick-config-wrapper)=
-
-### Creating a wrapper for your algorithm
-
-A template for the wrapper that connects your algorithm with Sparkle is
-available at `Examples/Resources/Solvers/template/sparkle_solver_wrapper.py`. Within
-this template a number of `TODO`s are indicated where you are likely
-to need to make changes for your specific algorithm. You can also
-compare the different example solvers to get an idea for what kind of
-changes are needed.
-
-(quick-pcs-file)=
-
-### Parameter configuration space (PCS) file
-
-The PCS (parameter configuration space) format [^id4] is used to pass the
-possible parameter ranges of an algorithm to Sparkle in a `.pcs` file.
-For an example see e.g.
-`Examples/Resources/Solvers/PbO-CCSAT-Generic/PbO-CCSAT-params_test.pcs`.
-
-In this file you should enter all configurable parameters of your
-algorithm. Note that parameters such as the random seed used by the
-algorithm should not be configured and therefore should also not be
-included in the PCS file.
-
-(quick-select-environment)=
-
-## Algorithm Selection
-
-Creating a portfolio selector requires multiple algorithms with the
-following minimal requirements (for an example of a solver directory see
-{numref}`dir-solvers-selection`):
-
-- A working solver executable
-- An algorithm wrapper called `sparkle_solver_wrapper.py`
-
-Further, training and testing instance sets are needed (for an example
-of an instances directory see {numref}`dir-instances`). For
-the purpose of testing whether your selection setup works with Sparkle,
-it is advised to primarily use instances that are solved (relatively)
-quickly.
-
-```{note}
-See the {doc}`example </examples/selection>` page for a walk-through on how to perform selection with Sparkle.
-```
-
-(quick-select-wrapper)=
-
-### Creating a wrapper for your algorithm
-
-A template for the wrapper that connects your algorithm with Sparkle is
-available at
-`Examples/Resources/Solvers/template/sparkle_solver_wrapper.py`.
-Within this template a number of `TODO`s are indicated where you are
-likely to need to make changes for your specific algorithm. You can also
-compare the different example solvers to get an idea for what kind of
-changes are needed.
-
-(quick-execute-commands)=
-
-## Executing commands
-
-Executing commands in Sparkle is as simple as running them terminal for example:
-
-```
-sparkle initialise
-```
-
-Do note that when running on a cluster additional arguments may be
-needed, for instance under the Slurm workload manager the above command would change to
-something like:
-
-```
-srun -N1 -n1 -c1 sparkle/CLI/initialise.py
-```
-
-In the `Examples/` directory a number of common command sequences are
-given. For instance, for configuration with specified training and
-testing sets see e.g. `Examples/configuration.md` for an example of a
-sequence of commands to execute. Note that some command run in the
-background and need time to complete before the next command is
-executed. To see whether a command is still running the Slurm command
-`squeue` can be used.
-
-In the `Output/` directory paths to generated scripts and logs are
-gathered per executed command.
+# Platform
 
 ## File structure
 
@@ -308,184 +119,9 @@ For each type of task run by Sparkle, the `related files` differ. The aim is alw
 
 *For analysis* a link to the folder on which the analysis was performed (configuration, portfolio or selection), the performance evaluation from it and the report if it was generated.
 
-## Wrappers
-
-### `sparkle_solver_wrapper.py`
-
-The `sparkle_solver_wrapper.py` uses a commandline dictionary to receive it inputs. This can be easily parsed using a Sparkle tool: `from sparkle.tools.slurm_parsing import parse_solver_wrapper_args`.
-The dictionary should always have the following values:
-
-```
-solver_dir: str
-instance: str,
-cutoff_time: int,
-seed: int
-```
-
-Note that all the Paths are handed as str and should be converted in the wrapper. The solver_dir specifies the Path to the executable directory of your algorithm. This can be empty, e.g. the cwd contains your executable. The instance is the path to the instance we are going to run on. Cutoff time is the maximum amount of time your algorithm is allowed to run. Seed is the seed for this run.
-
-A solver wrapper should always return a dictionary by printing it, containing the following values:
-
-```
-status: str
-quality: int,
-solver_call: str
-```
-
-Status can hold the following values `{SUCCESS, TIMEOUT, CRASHED}`. If
-the status is not known, reporting `SUCCESS` will allow Sparkle to continue, but may mean that Sparkle does not know when the algorithm
-crashed, and continues with faulty results.
-The quality may be irrelevant for your purpose and can thus be set to some default value.
-The solver_call is only used for logging purposes, to allow for easy inspection of the solver wrapper's subprocess.
-
-## Commands
-
-Currently the commands below are available in Sparkle (listed
-alphabetically). Every command can be called with the `–help` option
-to get a description of the required arguments and other options.
-
-% Commented out!
-% *  about.py
-% *  add_feature_extractor
-% *  add_instances.py
-% *  :ref:`cmd:add_solver`
-% *  cleanup_temporary_files.py
-% *  compute_features.py
-% *  compute_marginal_contribution.py
-% *  :ref:`cmd:configure_solver`
-% *  construct_portfolio_selector.py
-% *  :ref:`cmd:generate_report`
-% *  :ref:`cmd:initialise`
-% *  load_snapshot.py
-% *  remove_feature_extractor.py
-% *  remove_instances.py
-% *  remove_solver.py
-% *  run_ablation.py
-% *  run_solvers.py
-% *  run_portfolio_selector.py
-% *  run_status.py
-% *  save_snapshot.py
-% *  system_status.py
-% *  :ref:`cmd:validate_configured_vs_default`
-
-%```{eval-rst}
-%.. include:: commandlist.md
-%```
-```{include} commandlist.md
-```
-
-```{note}
-Arguments in \[square brackets\] are optional, arguments without brackets
-are mandatory. Input in \<chevrons> indicate required text input, {curly
-brackets} indicate a set of inputs to choose from.
-```
-
-%```{eval-rst}
-%.. include:: commandsautoprogram.md
-%```
-```{include} commandsautoprogram.md
-```
-
-% Commented out
-% .. _cmd:add_solver:
-%
-% ``add_solver.py``
-% -----------------
-%
-% Add a solver to the Sparkle platform.
-%
-% Arguments:
-%
-% *  ``[-–run-solver-later]``
-% *  ``[-–run-solver-now]``
-% *  ``[-–parallel]``
-% *  ``–-deterministic {0, 1}``
-% *  ``<solver_source_directory>``
-%
-% .. _cmd:configure_solver:
-%
-% ``configure_solver.py``
-% -----------------------
-%
-% Configure a solver in the Sparkle platform.
-%
-% Arguments:
-%
-% *  ``–-solver <solver>``
-% *  ``–-instance-set-train <instance-set-train>``
-% *  ``[-–instance-set-test <instance-set-test>]``
-% *  ``–-validate``
-% *  ``–-ablation``
-%
-% Note that the test instance set is only used if the ``-–ablation`` or
-% ``–-validation`` flags are given.
-%
-% .. _cmd:generate_report:
-%
-% ``generate_report.py``
-% ----------------------
-%
-% Without any arguments a report for the most recent algorithm selection
-% or algorithm configuration procedure is generated.
-%
-% Generate a configuration report
-% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%
-% Generate a report describing the configuration results for a solver and
-% specific instance sets in the Sparkle platform.
-%
-% Arguments:
-%
-% *  ``-–solver <solver>``
-% *  ``[-–instance-set-train <instance-set-train>]``
-% *  ``[-–instance-set-test <instance-set-test>]``
-%
-% Note that if a test instance set is given, the training instance set
-% must also be given.
-%
-% .. _cmd:initialise:
-%
-% ``initialise.py``
-% -----------------
-%
-% Initialise the Sparkle platform, this command does not have any
-% arguments.
-%
-% .. _cmd:run_ablation:
-%
-% ``run_ablation.py``
-% -------------------
-%
-% Runs parameter importance between the default and configured parameters
-% with ablation. This command requires a finished configuration for the
-% solver instance pair.
-%
-% Arguments:
-%
-% *  ``–-solver <solver>``
-% *  ``[-–instance-set-train <instance-set-train>]``
-% *  ``[-–instance-set-test <instance-set-test>]``
-%
-% Note that if no test instance set is given, the validation is performed
-% on the training set.
-%
-% .. _cmd:validate_configured_vs_default:
-%
-% ``validate_configured_vs_default.py``
-% -------------------------------------
-%
-% Test the performance of the configured solver and the default solver by
-% doing validation experiments on the training and test sets.
-%
-% Arguments:
-%
-% *  ``-–solver <solver>``
-% *  ``-–instance-set-train <instance-set-train>``
-% *  ``[-–instance-set-test <instance-set-test>]``
 
 (settings)=
-
-## Sparkle settings
+## Platform Settings
 
 Most settings can be controlled through
 `Settings/sparkle_settings.ini`. Possible settings are summarised per
@@ -500,7 +136,7 @@ same settings to the next command in a chain. E.g. for
 `validate_configured_vs_default` after `configure_solver`. The used
 settings are also recorded in the relevant `Output/` subdirectory.
 Note that when writing settings Sparkle always uses the name, and not an
-alias.
+alias. 
 
 ### Example `sparkle_settings.ini`
 
@@ -509,7 +145,7 @@ This is a short example to show the format, see the settings file in
 
 ```
 [general]
-performance_measure = RUNTIME
+objective = RUNTIME
 target_cutoff_time = 60
 
 [configuration]
@@ -519,8 +155,34 @@ number_of_runs = 25
 number_of_runs_in_parallel = 25
 ```
 
-(settings-details)=
+(sparkle-objective)=
+### Sparkle Objectives
+To define an objective for your algorithms, you can define them in the `general` section of your `Settings.ini` like the following:
 
+```
+[general]
+objective = PAR10,loss,accuracy:max
+```
+
+In the above example we have defined three objectives: Penalised Average Runtime, the loss function value of our algorithm on the task, and the accuracy of our algorithm on the task. Note that objectives are by default assumed to be _minimised_ and we must therefore specify **accuracy_:max_** to clarifiy this. The platform predefines for the user three objectives: cpu time, wallclock time and memory. These objectives will always recorded next to whatever the user may choose.
+
+```{note}
+Although the Platform supports multiple objectives to be registered for any Solver, not all used components, such as SMAC and Ablation Analysis, support Multi-Objective optimisation. In any such case, the first defined objective is considered the most important and used in these situations
+```
+
+Moreover, when aggregating an objective over various dimensions, Sparkle assumes the following:
+
+- When aggregating multiple Solvers (Algorithms), we aggregate by taking the minimum/maximum value.
+- When aggregating multiple runs on the same instances, we aggregate by taking the mean.
+- When aggregating multiple instances, we aggregate by taking the mean.
+
+It is possible to redefine these attributes for your specific objective. The platform looks for a file called `objective.py` in your Settings directory of the platform, and reads your own object definitions, which can overwrite existing definitions in the library. E.g. when creating an objective definition that already exists in the library, the user definiton simply overrules the library definition. Note that there are a few constraints and details:
+
+- The objective must inherit from the `SparkleObjective` class
+- The objective can be parametrised by an integer, such as `PAR` followed by `10` is interpreted as instantiating the `PAR` class with argument `10`
+- The classnames are constrained to the format of alphabetical letters followed by numericals
+
+(settings-details)=
 ### Names and possible values
 
 **\[general\]**
@@ -643,7 +305,7 @@ as follows:
   other settings, including settings files provided through the command
   line.
 
-### Slurm (focused on Grace)
+## Slurm (focused on Grace)
 
 Slurm settings can be specified in the `Settings/settings.ini` file. Any Slurm Setting not internally recognised by Sparkle will be added to the `sbatch` or `srun` calls.
 Currently these settings are inserted *as is* in any Slurm calls done by Sparkle. This means that any options exclusive to one or the other currently should not be used (see {numref}`slurm-disallowed`).
@@ -700,6 +362,8 @@ for `sbatch`. This means that if you specify the `graceTST`
 partition (as above) in your command, but the `graceADA` partition in
 the settings file, Slurm will still execute any nested `srun` commands
 on the `graceTST` partition only.
+
+
 
 ## Required packages
 

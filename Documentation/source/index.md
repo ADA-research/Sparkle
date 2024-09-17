@@ -3,19 +3,29 @@
 % You can adapt this file completely to your liking, but it should at least
 % contain the root `toctree` directive.
 
-# Sparkle's Documentation
+``` {include} ../../README.md
+```
 
-``` {include} userguide/userguide.md
+
+```{toctree}
+:caption: 'Platform'
+:hidden:
+:maxdepth: 2
+
+quickstart
+tutorials
+wrappers
+commands
+platform
+
 ```
 
 ```{toctree}
-:caption: 'Contents:'
-:maxdepth: 3
-:numbered:
+:caption: 'Library'
 :hidden:
+:maxdepth: 2
 
-userguide/userguide
-examples/examples
+commands
 ```
 
 % _generated/modules
