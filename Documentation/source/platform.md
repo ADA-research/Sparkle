@@ -57,27 +57,23 @@ The output directory is located at the root of the Sparkle directory. Its struct
 ```
 Output/
   Logs/
-  Common/
-    Raw_Data/
-    Analysis/
+    commandname_timestamp/
+        logs
   Configuration/
-    Raw_Data/
-      run_<alias>/
-        related files
+    configurator/
+        Raw_Data/
+            related files
     Analysis/
   Parallel_Portfolio/
     Raw_Data/
-      run_<alias>/
         related files
     Analysis/
   Selection/
-    Raw_Data/
-      run_<alias>/
-        related files
+    selector/
+        solver_scenario/
+            related files
     Analysis/
 ```
-
-The `alias` is based on the command and a timestamp.
 
 The `Logs` directory should contain the history of commands and their output such that one can easily know what has been done in which order and find enough pointers to debug unwanted behaviour.
 
@@ -256,32 +252,16 @@ as follows:
 - File –- Settings form the `Settings/sparkle_settings.ini` overwrite
   default values, but are overwritten by settings given through the
   command line;
-- Command line file -– Settings files provided through the command line,
+- Command line Settings file -– Settings files provided through the command line,
   overwrite default values and other settings files.
 - Command line –- Settings given through the command line overwrite all
   other settings, including settings files provided through the command
   line.
 
-## Slurm (focused on Grace)
+## Slurm
 
-Slurm settings can be specified in the `Settings/settings.ini` file. Any Slurm Setting not internally recognised by Sparkle will be added to the `sbatch` or `srun` calls.
-Currently these settings are inserted *as is* in any Slurm calls done by Sparkle. This means that any options exclusive to one or the other currently should not be used (see {numref}`slurm-disallowed`).
-
-To overwrite the default settings specific to the cluster Grace in Leiden, you should set the option "--partition" with a valid value on your cluster.
-Also, you might have to adapt "--mem-per-cpu" to your system.
-
-#### Tested options
-
-Below a list of tested Slurm options for `srun` and `sbatch` is
-included. Most other options for these commands should also be safe to
-use (given they are valid), but have not been explicitly tested. Note
-that any options related to commands other than `srun` and `sbatch`
-should not be used with Sparkle, and should not be included in
-`Settings/settings.ini`s Slurm section.
-
-- `-–partition / -p`
-- `-–exclude`
-- `-–nodelist`
+Slurm settings can be specified in the `Settings/settings.ini` file. Any setting in the Slurm section not internally recognised by Sparkle will be added to the `sbatch` or `srun` calls. Currently these settings are inserted *as is* in any Slurm calls done by Sparkle. This means that any options exclusive to one or the other currently should not be used (see {numref}`slurm-disallowed`).
+To overwrite the default settings specific to the cluster, you should set the option "--partition" with a valid value on your cluster. Also, you might have to adapt the default "--mem-per-cpu" value to your system.
 
 (slurm-disallowed)=
 
@@ -297,142 +277,10 @@ The options below are exclusive to `srun` and are thus disallowed:
 
 - `-–label`
 
-#### Nested `srun` calls
-
-A number of Sparkle commands internally call the `srun` command, and
-for those commands the provided settings need to match the restrictions
-of your call to a Sparkle command. Take for instance the following
-command:
-
-```
-srun -N1 -n1 -p graceTST sparkle/CLI/configure_solver.py --solver Solvers/PbO-CCSAT-Generic --instances-train Instances/PTN/
-```
-
-This call restricts itself to the `graceTST` partition (the
-`graceTST` partition only consists of node 22). So if the settings
-file contains the setting `–exclude=ethnode22`, all available nodes
-are excluded, and the command cannot execute any internal `srun`
-commands it may have.
-
-Finally, Slurm ignores nested partition settings for `srun`, but not
-for `sbatch`. This means that if you specify the `graceTST`
-partition (as above) in your command, but the `graceADA` partition in
-the settings file, Slurm will still execute any nested `srun` commands
-on the `graceTST` partition only.
-
-
-
 ## Required packages
-
-### Sparkle on Grace
-
-Grace is the computing cluster of the ADA group [^id5] at LIACS, Leiden
-University. Since not all packages required by Sparkle are installed on
-the system, some have to be installed local to the user.
-
-(solver-grace)=
-
-#### Making your algorithm run on Grace
-
-Shell and Python scripts should work as is. If a compiled binary does
-not work, you may have to compile it on Grace and manually install
-packages on Grace that are needed by your algorithm.
-
-#### General requirements
 
 Other software used by Sparkle:
 
 - `pdflatex`
 - `latex`
 - `bibtex`
-- `gnuplot`
-- `gnuplot-x11`
-
-To manually install `gnuplot` see for instance the instructions on
-their website <http://www.gnuplot.info/development/>
-
-## Installation and compilation of examples
-
-### Solvers
-
-#### CSCCSat
-
-CSCCSat can be recompiled as follows in the
-`Examples/Resources/Solvers/CSCCSat/` directory:
-
-```
-unzip src.zip
-cd src/CSCCSat_source_codes/
-make
-cp CSCCSat ../../
-```
-
-#### MiniSAT
-
-MiniSAT can be recompiled as follows in the
-`Examples/Resources/Solvers/MiniSAT/` directory:
-
-```
-unzip src.zip
-cd minisat-master/
-make
-cp build/release/bin/minisat ../
-```
-
-#### PbO-CCSAT
-
-PbO-CCSAT can be recompiled as follows in the
-`Examples/Resources/Solvers/PbO-CCSAT-Generic/` directory:
-
-```
-unzip src.zip
-cd PbO-CCSAT-master/PbO-CCSAT_process_oriented_version_source_code/
-make
-cp PbO-CCSAT ../../
-```
-
-#### TCA and FastCA
-
-The TCA and FastCA solvers, require `GLIBCXX_3.4.21`. This library
-comes with `GCC 5.1.0` (or greater). Following installation you may
-have to update environment variables such as
-`LD_LIBRARY_PATH, LD_RUN_PATH, CPATH` to point to your installation
-directory.
-
-TCA can be recompiled as follows in the
-`Examples/Resources/CCAG/Solvers/TCA/` directory:
-
-```
-unzip src.zip
-cd TCA-master/
-make clean
-make
-cp TCA ../
-```
-
-FastCA can be recompiled as follows in the
-`Examples/Resources/CCAG/Solvers/FastCA/` directory:
-
-```
-unzip src.zip
-cd fastca-master/fastCA/
-make clean
-make
-cp FastCA ../../
-```
-
-#### VRP_SISRs
-
-VRP_SISRs can be recompiled as follows in the
-`Examples/Resources/CVRP/Solvers/VRP_SISRs/` directory:
-
-```
-unzip src.zip
-cd src/
-make
-cp VRP_SISRs ../
-```
-
-[^id4]: See: <http://aclib.net/cssc2014/pcs-format.pdf>
-
-[^id5]: <http://ada.liacs.nl/>

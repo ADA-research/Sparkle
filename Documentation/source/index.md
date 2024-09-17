@@ -25,7 +25,7 @@ platform
 :hidden:
 :maxdepth: 2
 
-commands
+generatedlibs
 ```
 
 % _generated/modules
