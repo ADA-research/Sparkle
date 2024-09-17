@@ -66,7 +66,6 @@ def generate_comparison_plot(points: list,
                              limit: str = "magnitude",
                              limit_min: float = 0.2,
                              limit_max: float = 0.2,
-                             penalty_time: float = None,
                              replace_zeros: bool = True,
                              magnitude_lines: int = 2147483647,
                              output_dir: Path = None) -> None:
@@ -90,7 +89,6 @@ def generate_comparison_plot(points: list,
             and 10**ceil(log10(max)+limit_max)
         limit_min: Value used to compute the minimum limit
         limit_max: Value used to compute the maximum limit
-        penalty_time: Acts as the maximum value the figure takes in consideration for
         computing the figure limits. This is only relevant for runtime objectives
         replace_zeros: Replaces zeros valued performances to a very small value to make
         plotting on log-scale possible
@@ -109,11 +107,6 @@ def generate_comparison_plot(points: list,
     # process range values
     min_point_value = df.min(numeric_only=True).min()
     max_point_value = df.max(numeric_only=True).max()
-    if penalty_time is not None:
-        if penalty_time < max_point_value:
-            print("ERROR: Penalty time too small for the given performance data.")
-            sys.exit(-1)
-        max_point_value = penalty_time
 
     if limit == "absolute":
         min_value = limit_min

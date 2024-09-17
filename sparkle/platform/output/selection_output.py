@@ -22,7 +22,7 @@ class SelectionOutput:
                  training_instances: list[InstanceSet],
                  test_instances: list[InstanceSet],
                  objective: SparkleObjective,
-                 cutoff_time: int, penalised_time: int,
+                 cutoff_time: int,
                  output: Path) -> None:
         """Initialize SelectionOutput class.
 
@@ -47,7 +47,6 @@ class SelectionOutput:
         self.training_instances = training_instances
         self.test_instances = test_instances
         self.cutoff_time = cutoff_time
-        self.penalised_time = penalised_time
 
         self.objective = objective
         self.solver_data = self.get_solver_data(train_data, self.objective)
@@ -140,7 +139,6 @@ class SelectionOutput:
         """Transform settings to dictionary format."""
         return {
             "cutoff_time": self.cutoff_time,
-            "penalised_time": self.penalised_time
         }
 
     def write_output(self: SelectionOutput) -> None:

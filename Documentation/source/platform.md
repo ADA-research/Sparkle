@@ -175,13 +175,6 @@ It is possible to redefine these attributes for your specific objective. The pla
 >
 > description: The time a feature extractor is allowed to run before it is terminated. In case of multiple feature extractors this budget is divided equally.
 
-`penalty_multiplier`
-> aliases: `penalty_number`
->
-> values: integer
->
-> description: In case of not solving an instance within the cutoff time the runtime is set to be the `penalty_multiplier * cutoff_time`.
-
 `solution_verifier`
 > aliases: N/A
 >

@@ -119,7 +119,6 @@ class Settings:
     DEFAULT_general_sparkle_configurator = cim.SMAC2.__name__
     DEFAULT_general_solution_verifier = str(None)
     DEFAULT_general_target_cutoff_time = 60
-    DEFAULT_general_penalty_multiplier = 10
     DEFAULT_general_extractor_cutoff_time = 60
     DEFAULT_number_of_jobs_in_parallel = 25
     DEFAULT_general_verbosity = VerbosityLevel.STANDARD
@@ -151,9 +150,6 @@ class Settings:
         self.__general_sparkle_selector_set = SettingState.NOT_SET
         self.__general_solution_verifier_set = SettingState.NOT_SET
         self.__general_target_cutoff_time_set = SettingState.NOT_SET
-        self.__general_cap_value_set = SettingState.NOT_SET
-        self.__general_penalty_multiplier_set = SettingState.NOT_SET
-        self.__general_metric_aggregation_function_set = SettingState.NOT_SET
         self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
         self.__general_verbosity_set = SettingState.NOT_SET
         self.__general_check_interval_set = SettingState.NOT_SET
@@ -229,20 +225,6 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_general_target_cutoff_time(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("cap_value",)
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getfloat(section, option)
-                    self.set_general_cap_value(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("penalty_multiplier", "penalty_number")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_general_penalty_multiplier(value, state)
                     file_settings.remove_option(section, option)
 
             option_names = ("extractor_cutoff_time",
@@ -504,82 +486,6 @@ class Settings:
             self.set_general_sparkle_selector()
         return Selector(Path(self.__settings["general"]["selector"]),
                         self.DEFAULT_selection_output_raw)
-
-    def set_general_cap_value(
-            self: Settings, value: float = None,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the general cap value."""
-        section = "general"
-        name = "cap_value"
-
-        if value is not None and self.__check_setting_state(
-                self.__general_cap_value_set, origin, name):
-            self.__init_section(section)
-            self.__general_cap_value_set = origin
-            self.__settings[section][name] = float(value)
-
-    def get_general_cap_value(self: Settings) -> float:
-        """Get the general cap value."""
-        if self.__general_cap_value_set == SettingState.NOT_SET:
-            self.set_general_cap_value()
-
-        if "cap_value" in self.__settings["general"]:
-            return self.__settings["general"]["cap_value"]
-        return None
-
-    def set_general_penalty_multiplier(
-            self: Settings, value: int = DEFAULT_general_penalty_multiplier,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the penalty multiplier."""
-        section = "general"
-        name = "penalty_multiplier"
-
-        if value is not None and self.__check_setting_state(
-                self.__general_penalty_multiplier_set, origin, name):
-            self.__init_section(section)
-            self.__general_penalty_multiplier_set = origin
-            self.__settings[section][name] = str(value)
-
-    def get_general_penalty_multiplier(self: Settings) -> int:
-        """Return the penalty multiplier."""
-        if self.__general_penalty_multiplier_set == SettingState.NOT_SET:
-            self.set_general_penalty_multiplier()
-
-        return int(self.__settings["general"]["penalty_multiplier"])
-
-    def set_general_metric_aggregation_function(
-            self: Settings, value: str = "mean",
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the general aggregation function of performance measure."""
-        section = "general"
-        name = "metric_aggregation_function"
-
-        if value is not None and self.__check_setting_state(
-                self.__general_metric_aggregation_function_set, origin, name):
-            self.__init_section(section)
-            self.__general_metric_aggregation_function_set = origin
-            self.__settings[section][name] = value
-
-    def get_general_metric_aggregation_function(self: Settings) -> Callable:
-        """Set the general aggregation function of performance measure."""
-        if self.__general_metric_aggregation_function_set == SettingState.NOT_SET:
-            self.set_general_metric_aggregation_function()
-        method = self.__settings["general"]["metric_aggregation_function"]
-        libraries = (builtins, statistics)
-        for lib in libraries:
-            if not isinstance(method, str):
-                break
-            try:
-                method = getattr(lib, method)
-            except AttributeError:
-                continue
-        return method
-
-    def get_penalised_time(self: Settings, custom_cutoff: int = None) -> int:
-        """Return the penalised time associated with the cutoff time."""
-        if custom_cutoff is None:
-            custom_cutoff = self.get_general_target_cutoff_time()
-        return custom_cutoff * self.get_general_penalty_multiplier()
 
     def set_general_solution_verifier(
             self: Settings, value: str = DEFAULT_general_solution_verifier,

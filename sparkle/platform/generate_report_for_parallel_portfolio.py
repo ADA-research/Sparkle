@@ -100,8 +100,7 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
         solver_list: list[str],
         instance_set: InstanceSet,
         results: list[str],
-        objective: SparkleObjective,
-        penalised_time: int) -> tuple[
+        objective: SparkleObjective) -> tuple[
         str, dict[str, float], dict[str, float]]:
     """Generate PaP vs SBS figure and return a string to include it in LaTeX.
 
@@ -123,7 +122,7 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
     figure_filename = "figure_parallel_portfolio_sparkle_vs_sbs"
     data = [[sbs_instance_results[instance], vbs_instance_results[instance]]
             for instance in sbs_instance_results]
-    generate_figure(target_directory, float(penalised_time),
+    generate_figure(target_directory,
                     f"SBS ({stex.underscore_for_latex(sbs_solver)})",
                     "Parallel-Portfolio", figure_filename, objective.name, data)
     latex_include = f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
@@ -212,7 +211,6 @@ def parallel_report_variables(target_directory: Path,
                               bibliograpghy_path: Path,
                               objective: SparkleObjective,
                               cutoff: int,
-                              penalised_time: int,
                               instance_set: InstanceSet) -> dict[str, str]:
     """Returns a mapping between LaTeX report variables and their values.
 
@@ -276,8 +274,7 @@ def parallel_report_variables(target_directory: Path,
     (figure_name, dict_all_solvers,
         dict_actual_parallel_portfolio_penalty_time_on_each_instance) =\
         get_figure_parallel_portfolio_sparkle_vs_sbs(target_directory, solver_list,
-                                                     instance_set, results, objective,
-                                                     penalised_time)
+                                                     instance_set, results, objective)
 
     variables_dict["figure-parallel-portfolio-sparkle-vs-sbs"] = figure_name
     variables_dict["resultsTable"] = get_results_table(
@@ -294,11 +291,11 @@ def parallel_report_variables(target_directory: Path,
 
 def generate_figure(
         target_directory: Path,
-        penalty_time: float, sbs_name: str, parallel_portfolio_name: str,
+        sbs_name: str, parallel_portfolio_name: str,
         figure_parallel_portfolio_vs_sbs_filename: str,
         performance_measure: str, data: list) -> None:
     """Generates image for parallel portfolio report."""
-    upper_bound = penalty_time * 1.5
+    upper_bound = max([x for xs in data for x in xs]) * 1.5
     lower_bound = 0.01
 
     output_plot = target_directory / f"{figure_parallel_portfolio_vs_sbs_filename}.pdf"
@@ -347,7 +344,6 @@ def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
                                        bibliograpghy_path: Path,
                                        objective: SparkleObjective,
                                        cutoff: int,
-                                       penalised_time: int,
                                        instances: InstanceSet) -> None:
     """Generate a report for a parallel algorithm portfolio.
 
@@ -358,13 +354,12 @@ def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
         bibliograpghy_path: Path to the bib file
         objective: The objective of the portfolio
         cutoff: The cutoff time for each solver
-        penalised_time: The penalty for TIMEOUT solvers
         instances: List of instances.
     """
     target_path.mkdir(parents=True, exist_ok=True)
     dict_variable_to_value = parallel_report_variables(
         target_path, parallel_portfolio_path, bibliograpghy_path, objective,
-        cutoff, penalised_time, instances)
+        cutoff, instances)
 
     stex.generate_report(latex_template,
                          "template-Sparkle-for-parallel-portfolio.tex",

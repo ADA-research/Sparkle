@@ -22,8 +22,7 @@ class ConfigurationOutput:
 
     def __init__(self: ConfigurationOutput, path: Path, solver: Solver,
                  configurator: Configurator, instance_set_train: InstanceSet,
-                 instance_set_test: InstanceSet,
-                 penalty_multiplier: int, output: Path) -> None:
+                 instance_set_test: InstanceSet, output: Path) -> None:
         """Initialize Configurator Output class.
 
         Args:
@@ -32,15 +31,12 @@ class ConfigurationOutput:
             configurator: The configurator that was used
             instance_set_train: Instance set used for training
             instance_set_test: Instance set used for testing
-            penalty_multiplier: penalty multiplier that is applied to the performance
-                [To be Removed]
             output: Path to the output directory
         """
         self.solver = solver
         self.configurator = configurator
         self.instance_set_train = instance_set_train
         self.instance_set_test = instance_set_test
-        self.penalty_multiplier = penalty_multiplier
         self.directory = path
         self.output = output / "configuration.json" if not output.is_file() else output
 
