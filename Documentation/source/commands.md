@@ -42,8 +42,5 @@ are mandatory. Input in \<chevrons> indicate required text input, {curly
 brackets} indicate a set of inputs to choose from.
 ```
 
-%```{eval-rst}
-%.. include:: commandsautoprogram.md
-%```
 ```{include} commandsautoprogram.md
 ```

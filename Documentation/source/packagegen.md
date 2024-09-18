@@ -1,11 +1,9 @@
-
 (mod-about)=
 ```{eval-rst}
 about
 ===============
 .. automodule:: sparkle.about
-    :members:
-    :imported-members:
+    :members: 
 ```
 
 (mod-configurator)=
@@ -13,8 +11,7 @@ about
 configurator
 ===============
 .. automodule:: sparkle.configurator
-    :members:
-    :imported-members:
+    :members: 
 ```
 
 (mod-instance)=
@@ -22,8 +19,7 @@ configurator
 instance
 ===============
 .. automodule:: sparkle.instance
-    :members:
-    :imported-members:
+    :members: instance_set,FileInstanceSet,InstanceSet,IterableFileInstanceSet,MultiFileInstanceSet
 ```
 
 (mod-platform)=
@@ -31,8 +27,7 @@ instance
 platform
 ===============
 .. automodule:: sparkle.platform
-    :members:
-    :imported-members:
+    :members: CommandName,SettingState,Settings
 ```
 
 (mod-solver)=
@@ -40,8 +35,7 @@ platform
 solver
 ===============
 .. automodule:: sparkle.solver
-    :members:
-    :imported-members:
+    :members: Extractor,Selector,Solver
 ```
 
 (mod-structures)=
@@ -49,8 +43,7 @@ solver
 structures
 ===============
 .. automodule:: sparkle.structures
-    :members:
-    :imported-members:
+    :members: FeatureDataFrame,PerformanceDataFrame
 ```
 
 (mod-tools)=
@@ -58,8 +51,7 @@ structures
 tools
 ===============
 .. automodule:: sparkle.tools
-    :members:
-    :imported-members:
+    :members: get_solver_args,get_solver_call_params,get_time_pid_random_string,PCSParser,SlurmBatch
 ```
 
 (mod-types)=
@@ -67,6 +59,5 @@ tools
 types
 ===============
 .. automodule:: sparkle.types
-    :members:
-    :imported-members:
+    :members: _check_class,resolve_objective,FeatureGroup,FeatureSubgroup,FeatureType,SolverStatus,SparkleCallable,SparkleObjective,UseTime
 ```
