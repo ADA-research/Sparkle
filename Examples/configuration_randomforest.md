@@ -1,26 +1,26 @@
-### Configuring Random Forest on Iris
+## Configuring Random Forest on Iris
 
 We can also use Sparkle for Machine Learning approaches, such as Random Forest for the Iris data set. Note that in this case, the entire data set is considered as being one instance.
 
-#### Initialise the Sparkle platform
+### Initialise the Sparkle platform
 
 ```bash
 sparkle initialise
 ```
 
-#### Add instances
+### Add instances
 
 ```bash
 sparkle add_instances Examples/Resources/Instances/Iris
 ```
 
-#### Add solver
+### Add solver
 
 ```bash
 sparkle add_solver Examples/Resources/Solvers/RandomForest
 ```
 
-#### Configure the solver on the data set
+### Configure the solver on the data set
 
 ```bash
 sparkle configure_solver --solver RandomForest --instance-set-train Iris --objectives accuracy:max
@@ -34,7 +34,7 @@ Validate the performance of the best found parameter configuration. The test set
 sparkle validate_configured_vs_default --solver RandomForest --instance-set-train Iris --objectives accuracy:max
 ```
 
-#### Generate a report
+### Generate a report
 
 Wait for validation to be completed
 

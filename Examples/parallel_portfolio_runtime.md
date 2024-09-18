@@ -1,13 +1,13 @@
-### Running a Parallel Portfolio
+## Running a Parallel Portfolio
 In this tutorial we will measure the runtime performance of several algorithms in parallel. The general idea is that we consider the algorithms as a portfolio that we run in parallel (hence the name) and terminate all running algorithms once a solution is found.
 
-#### Initialise the Sparkle platform
+### Initialise the Sparkle platform
 
 ```bash
 sparkle initialise
 ```
 
-#### Add instances
+### Add instances
 First we add the instances to the platform that we want to use for our experiment. Note that if our instance set contains multiple instances, the portfolio will attempt to run them all in parallel.
 Note that you should use the full path to the directory containing the instance(s)
 
@@ -15,7 +15,7 @@ Note that you should use the full path to the directory containing the instance(
 sparkle add_instances Examples/Resources/Instances/PTN/
 ```
 
-#### Add solvers
+### Add solvers
 Now we can add our solvers to the portfolio that we want to "race" in parallel against eachother.
 The path used should be the full path to the solver directory and should contain the solver executable and the `sparkle_solver_wrapper` wrapper. It is always a good idea to keep the amount of files in your solver directory to a minimum.
 
@@ -25,7 +25,7 @@ sparkle add_solver Examples/Resources/Solvers/MiniSAT/
 sparkle add_solver Examples/Resources/Solvers/PbO-CCSAT-Generic/
 ```
 
-#### Run the portfolio 
+### Run the portfolio 
 
 By running the portfolio a list of jobs will be created which will be executed by the cluster.
 Use the `--cutoff-time` option to specify the maximal time for which the portfolio is allowed to run.
@@ -40,7 +40,7 @@ If your solvers are non-deterministic (e.g. the random seed used to start your a
 sparkle run_parallel_portfolio --instance-path Instances/PTN/ --portfolio-name runtime_experiment
 ```
 
-#### Generate the report
+### Generate the report
 
 The report details the experimental procedure and performance information. 
 This will be located at `Output/Parallel_Portfolio/Sparkle_Report.pdf`

@@ -1,7 +1,9 @@
 (tutorials)=
 # Tutorials
 
-### Setting up Sparkle
+In this section we demonstrate the usage of the platform for the main applications: Algorithm Configuration and Selection.
+
+## Setting up Sparkle
 
 Before running Sparkle, you probably want to have a look at the settings described in the {ref}`Platform <settings>` section.
 In particular, the default Slurm settings should be reconfigured to work with your cluster, for example by specifying a partition to run on.
@@ -14,7 +16,7 @@ Although the examples come precompiled with the download, in some cases they may
 
 The CSCCSat Solver can be recompiled as follows in the `Examples/Resources/Solvers/CSCCSat/` directory:
 
-```
+```bash
 unzip src.zip
 cd src/CSCCSat_source_codes/
 make
