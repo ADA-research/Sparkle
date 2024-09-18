@@ -64,7 +64,6 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinxcontrib.autoprogram",
     "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary",
     "sphinx_copybutton",
     "myst_parser",
 ]

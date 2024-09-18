@@ -34,7 +34,7 @@ and run:
 
 which can then be activated by:
 
-```bash
+```
     conda activate sparkle
 ```
 
@@ -72,7 +72,7 @@ The file `dev-env.yml` is used for developer mode of the Sparkle package and con
 
 The two environments can be created in parallel since one is named `sparkle` and the other `sparkle-dev`. If you want to update an environment it is better to do a clean installation by removing and recreating it. For example:
 
-```bash
+```
 conda deactivate
 conda env remove -n sparkle
 conda env create -f environment.yml
