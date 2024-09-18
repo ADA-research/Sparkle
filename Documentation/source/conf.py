@@ -20,7 +20,7 @@ sys.path.append(os.path.abspath("../../sparkle"))
 sys.path.append(os.path.abspath("../../sparkle/CLI"))
 print("sys.path: ", sys.path)
 
-from sparkle import about  # noqa: E402
+import sparkle  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
@@ -29,9 +29,9 @@ copyright = "2024, ADA Research Group, AIM @ RWTH Aachen"
 author = "ADA Research Group, AIM @ RWTH Aachen"
 
 # The short X.Y version
-version = about.version
+version = sparkle.about.version
 # The full version, including alpha/beta/rc tags
-release = about.version
+release = sparkle.about.version
 
 
 # -- General configuration ---------------------------------------------------
@@ -53,6 +53,8 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
     "sphinxcontrib.autoprogram",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx_copybutton",
     "myst_parser",
 ]

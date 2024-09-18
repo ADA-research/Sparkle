@@ -12,7 +12,7 @@ To initialise a new Sparkle platform, select a (preferably new / empty) director
 sparkle initialise
 ```
 
-This sets up various default directories and files for Sparkle to use that you can customise later. Note that if you wish to download the files for the {ref}`Examples <examples>`, you can run the command with the flag:
+This sets up various default directories and files for Sparkle to use that you can customise later. Note that if you wish to download the files for the {ref}`Tutorials <tutorials>`, you can run the command with the flag:
 
 ```shell
 sparkle initialise --download-examples

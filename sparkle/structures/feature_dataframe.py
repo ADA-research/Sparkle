@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Module to manage feature data CSV files and common operation son them."""
+"""Module to manage feature data files and common operations on them."""
 from __future__ import annotations
 import pandas as pd
 import math

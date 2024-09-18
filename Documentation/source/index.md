@@ -17,15 +17,12 @@ tutorials
 wrappers
 commands
 platform
-
 ```
 
 ```{toctree}
-:caption: 'Library'
-:hidden:
-:maxdepth: 2
-
-generatedlibs
+:caption: 'Package Modules'
+:maxdepth: 4
+packagegen
 ```
 
 % _generated/modules

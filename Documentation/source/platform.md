@@ -260,20 +260,24 @@ as follows:
 
 ## Slurm
 
-Slurm settings can be specified in the `Settings/settings.ini` file. Any setting in the Slurm section not internally recognised by Sparkle will be added to the `sbatch` or `srun` calls. Currently these settings are inserted *as is* in any Slurm calls done by Sparkle. This means that any options exclusive to one or the other currently should not be used (see {numref}`slurm-disallowed`).
-To overwrite the default settings specific to the cluster, you should set the option "--partition" with a valid value on your cluster. Also, you might have to adapt the default "--mem-per-cpu" value to your system.
+Slurm settings can be specified in the `Settings/settings.ini` file. Any setting in the Slurm section not internally recognised by Sparkle will be added to the `sbatch` or `srun` calls. It is advised to overwrite the default settings specific to your cluster, such as the option "--partition" with a valid value on your cluster. Also, you might have to adapt the default "--mem-per-cpu" value to your system. For example, your Slurm section in the `settings.ini` could look like:
 
-(slurm-disallowed)=
+```
+[slurm]
+partition = CPU
+mem-per-cpu = 6000
+...
+time = 25:00
+```
 
-#### Disallowed options
-
-The options below are exclusive to `sbatch` and are thus disallowed:
+**Discouraged options**
+Currently these settings are inserted *as is* in any Slurm calls done by Sparkle. This means that any options exclusive to one or the other currently should not be used. The options below are exclusive to `sbatch` and are thus discouraged:
 
 - `-–array`
 - `-–clusters`
 - `-–wrap`
 
-The options below are exclusive to `srun` and are thus disallowed:
+The options below are exclusive to `srun` and are thus discouraged:
 
 - `-–label`
 

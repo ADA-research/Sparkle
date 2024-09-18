@@ -35,7 +35,7 @@ objective: any,
 solver_call: str (optional)
 ```
 
-Status can hold the following various values such as `{SUCCESS, TIMEOUT, CRASHED}`, see {ref}`SolverStatus <types-status>` for a descriptin of the Enum. If the status is not known, reporting `SUCCESS` will allow Sparkle to continue, but may mean that Sparkle does not know when the algorithm crashed, and continues with faulty results.
+Status can hold the following various values such as `{SUCCESS, TIMEOUT, CRASHED}`, see {ref}`SolverStatus <mod-types>` for a descriptin of the Enum. If the status is not known, reporting `SUCCESS` will allow Sparkle to continue, but may mean that Sparkle does not know when the algorithm crashed, and continues with faulty results.
 To return the values of your objectives, make sure to specify them with the exact same key string as they are specified in your Settings. This key is used to map it into the platform. If you have multiple objectives, simply place each key value pair in the dictionary.
 The solver_call is only used for logging purposes, to allow for easy inspection of the solver wrapper's subprocess.
 
@@ -49,7 +49,7 @@ In order to use algorithm configuration, the algorithm configuration space must 
 See the {doc}`tutorial <tutorials>` page for a walk-through on how to perform configuration with Sparkle.
 ```
 
-The PCS (parameter configuration space) format [^id4] is used to pass the possible parameter ranges of an algorithm to Sparkle in a `.pcs` file. For an example see e.g. `Examples/Resources/Solvers/PbO-CCSAT-Generic/PbO-CCSAT-params_test.pcs`.
+The PCS (parameter configuration space) format is used to pass the possible parameter ranges of an algorithm to Sparkle in a `.pcs` file. For an example see e.g. `Examples/Resources/Solvers/PbO-CCSAT-Generic/PbO-CCSAT-params_test.pcs`.
 
 In this file you should enter all configurable parameters of your algorithm. Note that parameters such as the random seed used by the
 algorithm should not be configured and therefore should also not be included in the PCS file.
