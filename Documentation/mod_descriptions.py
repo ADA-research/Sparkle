@@ -12,9 +12,9 @@ if __name__ == "__main__":
     sphinx_list = []
     sphinx_blocs = []
     for module_name, obj in submodules:
-        module_methods = [method_name for method_name, _ in 
+        module_methods = [method_name for method_name, _ in
                           inspect.getmembers(obj, inspect.isfunction)]
-        module_classes = [class_name for class_name, class_obj in 
+        module_classes = [class_name for class_name, class_obj in
                           inspect.getmembers(obj, inspect.isclass)
                           if class_obj.__module__.startswith(sparkle.__name__)]
         listed_members = ",".join(module_methods + module_classes)
