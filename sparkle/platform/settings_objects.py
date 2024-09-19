@@ -186,7 +186,7 @@ class Settings:
         # successfully
         if file_settings.sections() != []:
             section = "general"
-            option_names = ("objective")
+            option_names = ("objective", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = [resolve_objective(obj) for obj in
@@ -195,21 +195,21 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             # Comma so python understands it's a tuple...
-            option_names = ("configurator",)
+            option_names = ("configurator", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
                     self.set_general_sparkle_configurator(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("selector",)
+            option_names = ("selector", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
                     self.set_general_sparkle_selector(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("solution_verifier",)
+            option_names = ("solution_verifier", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option).lower()
@@ -298,7 +298,7 @@ class Settings:
                     self.set_number_of_jobs_in_parallel(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("max_parallel_runs_per_node", "clis_per_node", )
+            option_names = ("max_parallel_runs_per_node", "clis_per_node")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
