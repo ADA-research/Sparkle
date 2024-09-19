@@ -1,7 +1,7 @@
 (tutorials)=
 # Tutorials
 
-In this section we demonstrate the usage of the platform for the main applications: Algorithm Configuration and Selection.
+In this section we demonstrate the usage of the platform for Algorithm Configuration, the creation of Algorithm Portfolios and Algorithm Selection.
 
 ## Setting up Sparkle
 
@@ -79,8 +79,7 @@ make
 cp VRP_SISRs ../
 ```
 
-
-```{include} ../../Examples/configuration.md
+```{include} ../../Examples/configuration_runtime.md
 ```
 
 ```{include} ../../Examples/configuration_quality.md

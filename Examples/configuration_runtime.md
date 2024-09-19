@@ -45,7 +45,7 @@ To make sure configuration is completed before running validation you can use th
 sparkle wait
 ```
 
-Validate the performance of the best found parameter configuration. The test set is optional.
+Now we can validate the performance of the best found parameter configuration against the default configuration specified in the PCS file. The test set is optional.
 
 ```bash
 sparkle validate_configured_vs_default --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/

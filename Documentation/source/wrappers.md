@@ -53,3 +53,7 @@ The PCS (parameter configuration space) format is used to pass the possible para
 
 In this file you should enter all configurable parameters of your algorithm. Note that parameters such as the random seed used by the
 algorithm should not be configured and therefore should also not be included in the PCS file.
+
+```{warning}
+Although you can specify _default_ values for your parameters, it is not guaranteed each parameter will always be present in the input dictionary. It is therefore strongly encouraged to have the default values available for each parameter in your wrapper.
+```

@@ -66,7 +66,7 @@ Other dependencies are handled by the Conda environment, but if that is not an o
 
 For detailed installation instructions see the documentation: https://ada-research.github.io/Sparkle/
 
-## Developer installation
+### Developer installation
 
 The file `dev-env.yml` is used for developer mode of the Sparkle package and contains several extra packages for testing.
 
@@ -81,27 +81,27 @@ conda activate sparkle
 
 This should be fast as both `conda` and `pip` use local cache for the packages.
 
-## Examples
+#### Examples
 
 See the `Examples` directory for some examples on how to use `Sparkle`. All Sparkle CLI commands need to be executed from the root of the initialised Sparkle directory.
 
-## Documentation
+#### Documentation
 
 The documentation can be read at https://ada-research.github.io/Sparkle/. 
 
 A `PDF` is also available in the [repository](https://raw.githubusercontent.com/ADA-research/Sparkle/main/Documentation/sparkle-userguide.pdf).
 
-## Licensing
+#### Licensing
 
 Sparkle is distributed under the MIT licence
 
-### Component licences 
+##### Component licences 
 
 Sparkle is distributed with a number of external components, solvers, and instance sets. Descriptions and licensing information for each these are included in the `sparkle/Components` and `Examples/Resources/` directories.
 
 The SATzilla 2012 feature extractor is used from `http://www.cs.ubc.ca/labs/beta/Projects/SATzilla/` with some modifications. The main modification of this component is to disable calling the SAT instance preprocessor called SatELite. It is located in: `Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/`
 
-## Citation
+### Citation
 
 If you use Sparkle for one of your papers and want to cite it, please cite our [paper](https://doi.org/10.1109/TEVC.2022.3215013) describing Sparkle:
 K. van der Blom, H. H. Hoos, C. Luo and J. G. Rook, **Sparkle: Toward Accessible Meta-Algorithmics for Improving the State of the Art in Solving Challenging Problems**, in _IEEE Transactions on Evolutionary Computation_, vol. 26, no. 6, pp. 1351-1364, Dec. 2022, doi: 10.1109/TEVC.2022.3215013.
@@ -118,12 +118,12 @@ K. van der Blom, H. H. Hoos, C. Luo and J. G. Rook, **Sparkle: Toward Accessible
 }
 ```
 
-## Maintainers
+### Maintainers
 Thijs Snelleman,
 Jeroen Rook,
 Holger H. Hoos,
 
-## Contributors
+### Contributors
 Chuan Luo,
 Richard Middelkoop,
 Jérémie Gobeil,
@@ -140,6 +140,6 @@ Koen van der Blom,
 Noah Peil,
 Brian Schiller
 
-## Contact
+### Contact
 sparkle@aim.rwth-aachen.de
 

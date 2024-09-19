@@ -20,7 +20,7 @@ srun -N1 -n1 -c1 path/to/package/sparkle/CLI/initialise.py
 ```
 
 In the `Examples/` directory a number of common command sequences are given. For instance, for configuration with specified training and
-testing sets see e.g. `Examples/configuration.md` for an example of a sequence of commands to execute. Note that some command run in the background and need time to complete before the next command is executed. To see whether a command is still running the `wait` command can be used.
+testing sets see e.g. `Examples/configuration_runtime.sh` for an example of a sequence of commands to execute. Note that some command run in the background and need time to complete before the next command is executed. To see whether a command is still running the `wait` command can be used.
 
 In the `Output/` directory paths to generated scripts and logs are gathered per executed command.
 
