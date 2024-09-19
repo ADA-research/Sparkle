@@ -23,19 +23,20 @@ The quick and full installation of Sparkle can be done using Conda (For Conda in
 Simply download the `environment.yml` file from the [Github](https://github.com/ADA-research/Sparkle/blob/main/environment.yml) with wget:
 
 ```bash
-    wget https://raw.githubusercontent.com/ADA-research/Sparkle/main/environment.yml
+wget https://raw.githubusercontent.com/ADA-research/Sparkle/main/environment.yml
 ```
 
 and run:
 
 ```bash
-    conda env create -f environment.yml
+conda env create -f environment.yml
 ```
 
-which can then be activated by:
+The installation of the environment may take a few minutes depending on your internet connection.
+Once the environment has been created it can be activated by:
 
 ```
-    conda activate sparkle
+conda activate sparkle
 ```
 
 ```{note}
@@ -43,7 +44,7 @@ The creation of the Conda environment also takes care of the installation of the
 ```
 
 ```{note}
-You will need to reactivate the environment every time you log in, before using Sparkle.
+You will need to reactivate the environment every time you start the terminal, before using Sparkle.
 ```
 
 Sparkle can also be installed as a standalone package using Pip. We recommend creating a new virtual environment (For example, [venv](https://docs.python.org/3/library/venv.html)) before to ensure no clashes between dependencies occur. 

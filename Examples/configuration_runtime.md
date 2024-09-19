@@ -31,11 +31,13 @@ If needed solvers can also include additional files or scripts in their director
 
 ### Configure the solver
 
-Perform configuration on the solver to obtain a target configuration
+To perform configuration on the solver to obtain a target configuration we run:
 
 ```bash
 sparkle configure_solver --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/
 ```
+
+This step should take about ~10 minutes, although it is of course very cluster / slurm settings dependant.
 
 ### Validate the configuration
 
