@@ -186,7 +186,7 @@ class Settings:
         # successfully
         if file_settings.sections() != []:
             section = "general"
-            option_names = ("objective", "smac_run_obj")
+            option_names = ("objective")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = [resolve_objective(obj) for obj in
@@ -216,8 +216,8 @@ class Settings:
                     self.set_general_solution_verifier(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("target_cutoff_time", "smac_each_run_cutoff_time",
-                            "cutoff_time_each_performance_computation")
+            option_names = ("target_cutoff_time",
+                            "cutoff_time_each_solver_call")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
@@ -230,13 +230,6 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_general_extractor_cutoff_time(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("number_of_jobs_in_parallel", "num_job_in_parallel")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_number_of_jobs_in_parallel(value, state)
                     file_settings.remove_option(section, option)
 
             option_names = ("run_on", )
@@ -262,28 +255,28 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             section = "configuration"
-            option_names = ("wallclock_time", "smac_whole_time_budget")
+            option_names = ("wallclock_time", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_config_wallclock_time(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("cpu_time", "smac_cpu_time_budget")
+            option_names = ("cpu_time", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_config_cpu_time(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("solver_calls", "smac_solver_calls_budget")
+            option_names = ("solver_calls", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_config_solver_calls(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("number_of_runs", "num_of_smac_runs")
+            option_names = ("number_of_runs", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
@@ -298,6 +291,13 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             section = "slurm"
+            option_names = ("number_of_jobs_in_parallel", "num_job_in_parallel")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_number_of_jobs_in_parallel(value, state)
+                    file_settings.remove_option(section, option)
+
             option_names = ("max_parallel_runs_per_node", "clis_per_node", )
             for option in option_names:
                 if file_settings.has_option(section, option):
@@ -548,7 +548,7 @@ class Settings:
             self: Settings, value: int = DEFAULT_number_of_jobs_in_parallel,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the number of runs Sparkle can do in parallel."""
-        section = "general"
+        section = "slurm"
         name = "number_of_jobs_in_parallel"
 
         if value is not None and self.__check_setting_state(
@@ -562,7 +562,7 @@ class Settings:
         if self.__number_of_jobs_in_parallel_set == SettingState.NOT_SET:
             self.set_number_of_jobs_in_parallel()
 
-        return int(self.__settings["general"]["number_of_jobs_in_parallel"])
+        return int(self.__settings["slurm"]["number_of_jobs_in_parallel"])
 
     def set_general_verbosity(
             self: Settings, value: VerbosityLevel = DEFAULT_general_verbosity,

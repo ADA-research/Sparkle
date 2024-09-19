@@ -156,119 +156,8 @@ It is possible to redefine these attributes for your specific objective. The pla
 - The classnames are constrained to the format of alphabetical letters followed by numericals
 - If your objective is defined over time, you can indicate this using the `UseTime` enum, see the {ref}`types module <mod-types>`
 
-(settings-details)=
-### Names and possible values
 
-**\[general\]**
-
-`objective`
-> aliases: `objective`
->
-> values: `str`, comma seperated for multiple
-> description: The type of objectives Sparkle considers, see {ref}`Sparkle Objective section <sparkle-objective>` for more. 
-
-`target_cutoff_time`
-> aliases: `smac_each_run_cutoff_time`, `cutoff_time_each_performance_computation`
->
-> values: integer
->
-> description: The time a solver is allowed to run before it is terminated.
-
-`extractor_cutoff_time`
-> aliases: `cutoff_time_each_feature_computation`
->
-> values: integer
->
-> description: The time a feature extractor is allowed to run before it is terminated. In case of multiple feature extractors this budget is divided equally.
-
-`solution_verifier`
-> aliases: N/A
->
-> values: `{NONE, SAT}`
->
-> note: Only available for SAT solving.
-
-**\[configuration\]**
-
-`wallclock_time`
-> aliases: `smac_whole_time_budget`
->
-> values: integer
->
-> description: The wallclock time one configuration run is allowed to use for finding configurations.
-
-`cpu_time`
-> aliases: `smac_cpu_time_budget`
->
-> values: integer
->
-> description: The cpu time one configuration run is allowed to use for finding configurations.
-
-`solver_calls`
-> aliases: `smac_solver_calls_budget`
->
-> values: integer
->
-> description: The number of solver calls one configuration run is allowed to use for finding configurations.
-
-`number_of_runs`
-> aliases: `num_of_smac_runs`
->
-> values: integer
->
-> description: The number of separate configurations runs.
-
-**\[smac\]**
-
-`target_cutoff_length`
-> aliases: `smac_each_run_cutoff_length`
->
-> values: `{max}` (other values: whatever is allowed by SMAC)
-
-**\[ablation\]**
-
-`racing`
-> aliases: `ablation_racing`
->
-> values: boolean
->
-> description: Use racing when performing the ablation analysis between the default and configured parameters
-
-**\[slurm\]**
-
-`number_of_runs_in_parallel`
-> aliases: `smac_run_obj`
->
-> values: integer
->
-> description: The number of configuration runs that can run in parallel. 
-
-`max_parallel_runs_per_node`
-> aliases: `clis_per_node`
->
-> values: integer
->
-> note: Not really a Slurm option, will likely be moved to another section.
->
-> description: The number of parallel processes that can be run on one compute node. In case a node has 32 cores and each solver uses 2 cores, the `max_parallel_runs_per_node` is at most 16.
-
-### Priorities
-
-Sparkle has a large flexibility with passing along settings. Settings provided through different channels have different priorities
-as follows:
-
-- Default –- Default values will be overwritten if a value is given
-  through any other mechanism;
-- File –- Settings form the `Settings/sparkle_settings.ini` overwrite
-  default values, but are overwritten by settings given through the
-  command line;
-- Command line Settings file -– Settings files provided through the command line,
-  overwrite default values and other settings files.
-- Command line –- Settings given through the command line overwrite all
-  other settings, including settings files provided through the command
-  line.
-
-## Slurm
+### Slurm
 
 Slurm settings can be specified in the `Settings/settings.ini` file. Any setting in the Slurm section not internally recognised by Sparkle will be added to the `sbatch` or `srun` calls. It is advised to overwrite the default settings specific to your cluster, such as the option "--partition" with a valid value on your cluster. Also, you might have to adapt the default "--mem-per-cpu" value to your system. For example, your Slurm section in the `settings.ini` could look like:
 
@@ -290,6 +179,207 @@ Currently these settings are inserted *as is* in any Slurm calls done by Sparkle
 The options below are exclusive to `srun` and are thus discouraged:
 
 - `-–label`
+
+(settings-details)=
+### Options and possible values
+
+#### \[general\]
+
+`objective`
+> aliases: `objective`
+>
+> values: `str`, comma seperated for multiple
+>
+> description: The type of objectives Sparkle considers, see {ref}`Sparkle Objective section <sparkle-objective>` for more. 
+
+---
+
+`configurator`
+> aliases: `configurator`
+>
+> values: `SMAC2`
+>
+> description: The name of the Configurator class implementation to use. Currently only supports SMAC2.
+
+---
+
+`selector`
+> aliases: `selector`
+>
+> values: Path.
+>
+> Note: Currently only AutoFolio is supported by Sparkle. This setting is soon to be deprecated for a more flexible solution.
+>
+> Description: The Algorithm selector to use.
+
+---
+
+`solution_verifier`
+> aliases: N/A
+>
+> values: `{NONE, SAT}`
+>
+> note: Only available for SAT solving.
+
+---
+
+`target_cutoff_time`
+> aliases: `cutoff_time_each_solver_call`
+>
+> values: integer
+>
+> description: The time a solver is allowed to run before it is terminated.
+
+---
+
+`extractor_cutoff_time`
+> aliases: `cutoff_time_each_feature_computation`
+>
+> values: integer
+>
+> description: The time a feature extractor is allowed to run before it is terminated. In case of multiple feature extractors this budget is divided equally.
+
+---
+
+`run_on`
+> aliases: `run_on`
+>
+> values: `LOCAL`, `SLURM`
+>
+> description: On which compute to run the jobs on.
+
+---
+
+`verbosity`
+> aliases: `verbosity`
+>
+> values: `QUIET`, `STANDARD`
+>
+> description: The verbosity level of Sparkle when running CLI.
+
+---
+
+`check_interval`
+> aliases: `check_interval`
+>
+> values: int
+>
+> description: Specifically for the Wait command. The amount of seconds to wait in between refreshing the wait information.
+
+---
+
+#### \[configuration\]
+
+`wallclock_time`
+> aliases: `wallclock_time`
+>
+> values: integer
+>
+> description: The wallclock time one configuration run is allowed to use for finding configurations.
+
+---
+
+`cpu_time`
+> aliases: `cpu_time`
+>
+> values: integer
+>
+> description: The cpu time one configuration run is allowed to use for finding configurations.
+
+---
+
+`solver_calls`
+> aliases: `solver_calls`
+>
+> values: integer
+>
+> description: The number of solver calls one configuration run is allowed to use for finding configurations.
+
+---
+
+`number_of_runs`
+> aliases: `number_of_runs`
+>
+> values: integer
+>
+> description: The number of separate configurations runs.
+
+---
+
+`target_cutoff_length`
+> aliases: `smac_each_run_cutoff_length`
+>
+> values: `{max}` (other values: whatever is allowed by SMAC)
+
+---
+
+#### \[slurm\]
+
+`number_of_jobs_in_parallel`
+> aliases: `num_job_in_parallel`
+>
+> values: integer
+>
+> description: The number of jobs runs that can run in parallel. 
+
+---
+
+`max_parallel_runs_per_node`
+> aliases: `clis_per_node`
+>
+> values: integer
+>
+> description: The number of parallel processes that can be run on one compute node. In case a node has 32 cores and each solver uses 2 cores, the `max_parallel_runs_per_node` is at most 16.
+
+---
+
+
+#### \[ablation\]
+
+`racing`
+> aliases: `ablation_racing`
+>
+> values: boolean
+>
+> description: Use racing when performing the ablation analysis between the default and configured parameters
+
+---
+
+#### \[parallel_portfolio\]
+
+`check_interval`
+> aliases: `check_interval`
+>
+> values: int
+>
+> description: How many seconds the parallel portfolio waits to check whether jobs have completed. Decreasing the amount increases the accuracy of the report but also significantly increases computational load.
+
+---
+
+`num_seeds_per_solver`
+> aliases: `num_seeds_per_solver`
+> 
+> values: int
+>
+> description: Only relevant for undeterministic solvers. The amount of solvers that will be started with a random seed.
+
+---
+
+### Priorities
+
+Sparkle has a large flexibility with passing along settings. Settings provided through different channels have different priorities
+as follows:
+
+- Default –- Default values will be overwritten if a value is given
+  through any other mechanism;
+- File –- Settings form the `Settings/sparkle_settings.ini` overwrite
+  default values, but are overwritten by settings given through the
+  command line;
+- Command line Settings file -– Settings files provided through the command line,
+  overwrite default values and other settings files.
+- Command line –- Settings given through the command line overwrite all
+  other settings, including settings files provided through the command
+  line.
 
 ## Required packages
 
