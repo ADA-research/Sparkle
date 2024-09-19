@@ -9,7 +9,6 @@ from typing import Any
 from runrunner.base import Runner
 
 from sparkle.platform.settings_objects import SettingState, Settings
-from sparkle.platform import CommandName
 
 
 class SetByUser(argparse.Action):
@@ -94,10 +93,11 @@ SelectorAblationArgument =\
                               "help": "construct a selector for "
                                       "each solver ablation combination"})
 
-ActualArgument = ArgumentContainer(names=["--actual"],
-                                   kwargs={"action": "store_true",
-                                           "help": "compute the marginal contribution "
-                                                   "for the actual selector"})
+ActualMarginalContributionArgument = \
+    ArgumentContainer(names=["--actual"],
+                      kwargs={"action": "store_true",
+                              "help": "compute the marginal contribution "
+                                      "for the actual selector"})
 
 AlsoConstructSelectorAndReportArgument = \
     ArgumentContainer(names=["--also-construct-selector-and-report"],
@@ -115,14 +115,6 @@ CleanupArgumentRemove = \
                       kwargs={"action": "store_true",
                               "help": "remove all files in the platform, including "
                                       "user data such as InstanceSets and Solvers"})
-
-CommandArgument = \
-    ArgumentContainer(names=["--command"],
-                      kwargs={"required": False,
-                              "choices": CommandName.__members__,
-                              "default": None,
-                              "help": "command you want to run. Sparkle will wait for "
-                                      "dependencies of this command to be completed"})
 
 ConfiguratorArgument = ArgumentContainer(names=["--configurator"],
                                          kwargs={"type": Path,
@@ -248,12 +240,6 @@ NicknamePortfolioArgument = \
                               "help": "Specify a name of the portfolio. "
                                       "If none is given, one will be generated."})
 
-NicknameRemoveExtractor = \
-    ArgumentContainer(names=["--nickname"],
-                      kwargs={"action": "store_true",
-                              "help": "if set to True extractor_path is used as a "
-                                      "nickname for the feature extractor"})
-
 NicknameSolverArgument = \
     ArgumentContainer(names=["--nickname"],
                       kwargs={"type": str,
@@ -281,10 +267,11 @@ NumberOfRunsAblationArgument = \
                               "action": SetByUser,
                               "help": "Number of configuration runs to execute"})
 
-PerfectArgument = ArgumentContainer(names=["--perfect"],
-                                    kwargs={"action": "store_true",
-                                            "help": "compute the marginal contribution "
-                                                    "for the perfect selector"})
+PerfectSelectorMarginalContributionArgument =\
+    ArgumentContainer(names=["--perfect"],
+                      kwargs={"action": "store_true",
+                              "help": "compute the marginal contribution "
+                                      "for the perfect selector"})
 
 RacingArgument = ArgumentContainer(names=["--racing"],
                                    kwargs={"type": bool,
@@ -336,13 +323,6 @@ RunExtractorNowArgument = \
                               "help": "immediately run the feature extractor(s) on all "
                                       "the instances"})
 
-RunExtractorLaterArgument = \
-    ArgumentContainer(names=["--run-extractor-later"],
-                      kwargs={"dest": "run_extractor_now",
-                              "action": "store_false",
-                              "help": "do not immediately run the feature extractor(s) "
-                                      "on all the instances (default)"})
-
 RunOnArgument = ArgumentContainer(names=["--run-on"],
                                   kwargs={"type": Runner,
                                           "choices": [Runner.LOCAL,
@@ -357,13 +337,6 @@ RunSolverNowArgument = ArgumentContainer(names=["--run-solver-now"],
                                                  "action": "store_true",
                                                  "help": "immediately run the solver(s) "
                                                          "on all instances"})
-
-RunSolverLaterArgument = ArgumentContainer(names=["--run-solver-later"],
-                                           kwargs={"dest": "run_solver_now",
-                                                   "action": "store_false",
-                                                   "help": "do not immediately run the "
-                                                           "solver(s) on all instances "
-                                                           "(default)"})
 
 SelectionReportArgument = \
     ArgumentContainer(names=["--selection"],
