@@ -35,7 +35,7 @@ platform
 solver
 ===============
 .. automodule:: sparkle.solver
-    :members: Extractor,Selector,Solver
+    :members: Extractor,SATVerifier,Selector,SolutionVerifier,Solver,Validator
 ```
 
 (mod-structures)=

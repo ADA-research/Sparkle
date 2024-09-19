@@ -17,7 +17,7 @@ from sparkle.platform.cli_types import VerbosityLevel
 
 
 class SettingState(Enum):
-    """Possible setting states."""
+    """Enum of possible setting states."""
 
     NOT_SET = 0
     DEFAULT = 1
@@ -26,7 +26,7 @@ class SettingState(Enum):
 
 
 class Settings:
-    """Read, write, set, and get settings."""
+    """Class to read, write, set, and get settings."""
     # CWD Prefix
     cwd_prefix = Path()  # Empty for now
 

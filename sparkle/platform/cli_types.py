@@ -4,7 +4,7 @@ from typing import Type
 
 
 class VerbosityLevel(Enum):
-    """Possible setting states."""
+    """Enum of possible verbosity states."""
 
     QUIET = 0
     STANDARD = 1
@@ -16,7 +16,7 @@ class VerbosityLevel(Enum):
 
 
 class TEXT(Enum):
-    """ANSI text formatting."""
+    """Class for ANSI text formatting."""
 
     RESET = "\033[0m"
     BOLD = "\033[1m"

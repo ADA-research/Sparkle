@@ -89,7 +89,7 @@ When releasing a new version (including bugfix versions) of Sparkle to the `main
 1. Create a branch with the version number of the release from the `development` branch, named ``release/$VERSION''
 2. Update and commit `CHANGELOG.md` by creating a header with the release number and date; move everything from the `[unreleased]` header to the new release header (leaving the `[unreleased]` header empty for the next release).
 3. Update and commit `sparkle/about.py` by changing the version number.
-4. If there were updates to the CLI and/or the examples.md, make sure to re-compile their files for the Documentation. Run `md_to_sh.py` in the Documentation directory to compile the example .mds to executable .sh files, and run `command_descriptions.py` to automatically re-create the documentation for the CLI commands and their arguments. The documentation itself is after release automatically compiled and deployed to github pages.
+4. If there were updates to the CLI and/or the examples.md, make sure to re-compile their files for the Documentation. Run `md_to_sh.py` in the Documentation directory to compile the example .mds to executable .sh files, and run `command_descriptions.py` to automatically re-create the documentation for the CLI commands and their arguments. Run `mod_descriptions.py` to update the package descriptions. The documentation itself is after release automatically compiled and deployed to github pages.
 5. Merge the new version branch into both `development` and `main`, DO NOT delete the version branch!
 
 ## CHANGELOG
