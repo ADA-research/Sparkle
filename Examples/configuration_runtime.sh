@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.8.6## Algorithm Runtime Configuration
+# Auto-Generated .sh files from the original .md by Sparkle 0.8.6
+
+## Algorithm Runtime Configuration
 
 # These steps can also be found as a Bash script in `Examples/configuration.sh`
 
@@ -26,9 +28,11 @@ sparkle add_solver Examples/Resources/Solvers/PbO-CCSAT-Generic/
 
 ### Configure the solver
 
-# Perform configuration on the solver to obtain a target configuration
+# To perform configuration on the solver to obtain a target configuration we run:
 
 sparkle configure_solver --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/
+
+# This step should take about ~10 minutes, although it is of course very cluster / slurm settings dependant.
 
 ### Validate the configuration
 

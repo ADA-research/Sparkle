@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.8.6## Algorithm selection with multi-file instances
+# Auto-Generated .sh files from the original .md by Sparkle 0.8.6
+
+## Algorithm selection with multi-file instances
 
 # We can also run Sparkle on problems with instances that use multiple files. In this tutorial we will perform algorithm selection on instance sets with multiple files.
 

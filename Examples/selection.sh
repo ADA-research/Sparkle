@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.8.6## Algorithm Selection
+# Auto-Generated .sh files from the original .md by Sparkle 0.8.6
+
+## Algorithm Selection
 
 # Sparkle also offers various tools to apply algorithm selection, where we, given an objective, train another algorithm to determine which solver is best to use based on an instance. 
 

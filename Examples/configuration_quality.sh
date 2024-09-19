@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.8.6## Algorithm Quality Configuration
+# Auto-Generated .sh files from the original .md by Sparkle 0.8.6
+
+## Algorithm Quality Configuration
 # We can configure an algorithm too based on some quality objective, that can be defined by the user. To see all options for defining {ref}`SparkleObjective <sparkle-objective>`
 # These steps can also be found as a Bash script in `Examples/configuration_qualty.sh`
 

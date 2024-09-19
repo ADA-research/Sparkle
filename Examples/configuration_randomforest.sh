@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.8.6## Configuring Random Forest on Iris
+# Auto-Generated .sh files from the original .md by Sparkle 0.8.6
+
+## Configuring Random Forest on Iris
 
 # We can also use Sparkle for Machine Learning approaches, such as Random Forest for the Iris data set. Note that in this case, the entire data set is considered as being one instance.
 

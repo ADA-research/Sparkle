@@ -24,5 +24,5 @@ if __name__ == "__main__":
         with file.with_suffix(".sh").open("w") as f:
             f.write("#!/usr/bin/env bash\n")
             f.write("# Auto-Generated .sh files from the original .md by "
-                    f"Sparkle {about.version}")
+                    f"Sparkle {about.version}\n\n")
             f.writelines(output_lines)
