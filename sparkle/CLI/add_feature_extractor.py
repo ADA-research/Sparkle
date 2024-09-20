@@ -26,8 +26,6 @@ def parser_function() -> argparse.ArgumentParser:
     group_extractor_run = parser.add_mutually_exclusive_group()
     group_extractor_run.add_argument(*ac.RunExtractorNowArgument.names,
                                      **ac.RunExtractorNowArgument.kwargs)
-    group_extractor_run.add_argument(*ac.RunExtractorLaterArgument.names,
-                                     **ac.RunExtractorLaterArgument.kwargs)
     parser.add_argument(*ac.NicknameFeatureExtractorArgument.names,
                         **ac.NicknameFeatureExtractorArgument.kwargs)
     return parser

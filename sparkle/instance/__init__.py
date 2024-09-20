@@ -1,4 +1,4 @@
-"""This package provides instance support for Sparkle."""
+"""This package provides instance set support for Sparkle."""
 from sparkle.instance.instances import \
     MultiFileInstanceSet, FileInstanceSet, IterableFileInstanceSet, InstanceSet
 from pathlib import Path

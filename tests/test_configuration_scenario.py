@@ -9,14 +9,10 @@ from unittest.mock import patch
 from unittest.mock import Mock
 from pathlib import Path
 
-from sparkle.configurator.configuration_scenario import ConfigurationScenario
+from sparkle.configurator.implementations import SMAC2, SMAC2Scenario
 from sparkle.solver import Solver
 from sparkle.instance import instance_set
-from sparkle.platform.settings_objects import Settings
 from sparkle.types.objective import PAR
-
-global settings
-settings = Settings()
 
 
 class TestConfigurationScenario(TestCase):
@@ -40,15 +36,15 @@ class TestConfigurationScenario(TestCase):
         self.cutoff_time = 60
         self.cutoff_length = "max"
         self.sparkle_objective = PAR(10)
-        self.configurator = settings.get_general_sparkle_configurator()
-        self.scenario = ConfigurationScenario(
+        self.configurator = SMAC2([self.sparkle_objective], Path(), Path())
+        self.scenario = SMAC2Scenario(
             solver=self.solver,
             instance_set=self.instance_set,
             number_of_runs=self.run_number,
             wallclock_time=self.wallclock_time,
             cutoff_time=self.cutoff_time,
             cutoff_length=self.cutoff_length,
-            sparkle_objective=self.sparkle_objective,
+            sparkle_objectives=[self.sparkle_objective],
             use_features=False,
             configurator_target=Path(self.configurator.target_algorithm))
 

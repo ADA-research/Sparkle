@@ -63,8 +63,6 @@ def get_dict_instance_to_performance(results: list[list[str]],
 
     Args:
         results: Results from CSV
-        cutoff: Cutoff value
-        penalty: The penalty to assign those cutoff
         objective: The Sparkle Objective we are converting for
     Returns:
         A dictionary containing the performance for each instance
@@ -135,7 +133,6 @@ def get_figure_configure_vs_default(configured_results: list[list[str]],
                                     figure_filename: str,
                                     performance_measure: str,
                                     run_cutoff_time: float,
-                                    penalty_multiplier: int,
                                     objective: SparkleObjective) -> str:
     """Create a figure comparing the configured and default solver.
 
@@ -148,7 +145,6 @@ def get_figure_configure_vs_default(configured_results: list[list[str]],
         target_directory: Directory for the configuration reports
         figure_filename: Filename for the figure
         run_cutoff_time: Cutoff time
-        penalty_multiplier: Penalty factor
 
     Returns:
         A string containing the latex command to include the figure
@@ -170,7 +166,6 @@ def get_figure_configure_vs_default(configured_results: list[list[str]],
         plot_params["limit_min"] = 0.25
         plot_params["limit_max"] = 0.25
         plot_params["limit"] = "magnitude"
-        plot_params["penalty_time"] = run_cutoff_time * penalty_multiplier
         plot_params["replace_zeros"] = True
 
     stex.generate_comparison_plot(points,
@@ -187,7 +182,6 @@ def get_figure_configured_vs_default_on_instance_set(solver: Solver,
                                                      target_directory: Path,
                                                      smac_objective: str,
                                                      run_cutoff_time: float,
-                                                     penalty_multiplier: int,
                                                      objective: SparkleObjective,
                                                      data_type: str = "train") -> str:
     """Create a figure comparing the configured and default solver on the training set.
@@ -201,7 +195,6 @@ def get_figure_configured_vs_default_on_instance_set(solver: Solver,
         instance_set_train_name: Name of the instance set for training
         configuration_reports_directory: Directory to the configuration reports
         run_cutoff_time: Cutoff time
-        penalty_multiplier: Penatly factor
 
     Returns:
         A string containing the latex comand to include the figure
@@ -213,7 +206,6 @@ def get_figure_configured_vs_default_on_instance_set(solver: Solver,
         data_plot_configured_vs_default_on_instance_set_filename,
         smac_objective,
         run_cutoff_time,
-        penalty_multiplier,
         objective)
 
 
@@ -221,12 +213,14 @@ def get_timeouts_instanceset(solver: Solver,
                              instance_set: InstanceSet,
                              configurator: Configurator,
                              validator: Validator,
-                             penalty: float) -> tuple[int, int, int]:
+                             cutoff: float) -> tuple[int, int, int]:
     """Return the number of timeouts by configured, default and both on the testing set.
 
     Args:
         solver: The solver object
-        instance_set_path: Path of the instance set
+        instance_set: Instance Set
+        configurator: Configurator
+        validator: Validator
         cutoff: Cutoff time
 
     Returns:
@@ -247,12 +241,12 @@ def get_timeouts_instanceset(solver: Solver,
         res_default, objective)
 
     return get_timeouts(dict_instance_to_par_configured,
-                        dict_instance_to_par_default, penalty)
+                        dict_instance_to_par_default, cutoff)
 
 
 def get_timeouts(instance_to_par_configured: dict,
                  instance_to_par_default: dict,
-                 timeout_value: float) -> tuple[int, int, int]:
+                 cutoff: float) -> tuple[int, int, int]:
     """Return the number of timeouts for given dicts.
 
     Args:
@@ -271,10 +265,10 @@ def get_timeouts(instance_to_par_configured: dict,
         configured_par = instance_to_par_configured[instance]
         default_par = instance_to_par_default[instance]
         # Count the amount of values that are equal to timeout
-        configured_timeouts += (configured_par == timeout_value)
-        default_timeouts += (default_par == timeout_value)
-        overlapping_timeouts += (configured_par == timeout_value
-                                 and default_par == timeout_value)
+        configured_timeouts += (configured_par > cutoff)
+        default_timeouts += (default_par > cutoff)
+        overlapping_timeouts += (configured_par > cutoff
+                                 and default_par > cutoff)
 
     return configured_timeouts, default_timeouts, overlapping_timeouts
 
@@ -335,7 +329,6 @@ def configuration_report_variables(target_dir: Path,
                                    extractor_dir: Path,
                                    bib_path: Path,
                                    instance_set_train: InstanceSet,
-                                   penalty_multiplier: float,
                                    extractor_cuttoff: int,
                                    instance_set_test: InstanceSet = None,
                                    ablation: AblationScenario = None) -> dict:
@@ -358,8 +351,7 @@ def configuration_report_variables(target_dir: Path,
                                                   ablation,
                                                   bib_path,
                                                   instance_set_train,
-                                                  target_dir,
-                                                  penalty_multiplier)
+                                                  target_dir)
 
     if has_test:
         test_dict = get_dict_variable_to_value_test(target_dir,
@@ -368,8 +360,7 @@ def configuration_report_variables(target_dir: Path,
                                                     validator,
                                                     ablation,
                                                     instance_set_train,
-                                                    instance_set_test,
-                                                    penalty_multiplier)
+                                                    instance_set_test)
         full_dict.update(test_dict)
     full_dict["testBool"] = f"\\test{str(has_test).lower()}"
 
@@ -392,8 +383,7 @@ def get_dict_variable_to_value_common(solver: Solver,
                                       ablation: AblationScenario,
                                       bibliography_path: Path,
                                       train_set: InstanceSet,
-                                      target_directory: Path,
-                                      penalty_multiplier: int) -> dict:
+                                      target_directory: Path) -> dict:
     """Return a dict matching LaTeX variables and values used for all config. reports.
 
     Args:
@@ -429,7 +419,6 @@ def get_dict_variable_to_value_common(solver: Solver,
     latex_dict["numInstanceInTrainingInstanceSet"] = len(instance_names)
 
     run_cutoff_time = configurator.scenario.cutoff_time
-    penalty = penalty_multiplier * run_cutoff_time
     latex_dict["numSmacRuns"] = configurator.scenario.number_of_runs
     latex_dict["smacObjective"] = smac_run_obj
     latex_dict["smacWholeTimeBudget"] = configurator.scenario.wallclock_time
@@ -442,12 +431,13 @@ def get_dict_variable_to_value_common(solver: Solver,
 
     str_value = get_figure_configured_vs_default_on_instance_set(
         solver, train_set.name, res_default, res_conf, target_directory,
-        smac_run_obj, float(run_cutoff_time), penalty_multiplier, objective)
+        smac_run_obj, float(run_cutoff_time), objective)
     latex_dict["figure-configured-vs-default-train"] = str_value
 
     # Retrieve timeout numbers for the training instances
     configured_timeouts_train, default_timeouts_train, overlapping_timeouts_train =\
-        get_timeouts_instanceset(solver, train_set, configurator, validator, penalty)
+        get_timeouts_instanceset(solver, train_set, configurator, validator,
+                                 run_cutoff_time)
 
     latex_dict["timeoutsTrainDefault"] = default_timeouts_train
     latex_dict["timeoutsTrainConfigured"] = configured_timeouts_train
@@ -466,8 +456,7 @@ def get_dict_variable_to_value_test(target_dir: Path,
                                     validator: Validator,
                                     ablation: AblationScenario,
                                     train_set: InstanceSet,
-                                    test_set: InstanceSet,
-                                    penalty_multiplier: int) -> dict:
+                                    test_set: InstanceSet) -> dict:
     """Return a dict matching test set specific latex variables with their values.
 
     Args:
@@ -477,7 +466,6 @@ def get_dict_variable_to_value_test(target_dir: Path,
         validator: Validator that provided the data set results
         train_set: Instance set for training
         test_set: Instance set for testing
-        penalty_multiplier: Penalty factor for TIMEOUT
 
     Returns:
         A dictionary containting the variables and their values
@@ -490,7 +478,6 @@ def get_dict_variable_to_value_test(target_dir: Path,
         solver, test_set, config=config)
     instance_names = set([res[3] for res in res_default])
     run_cutoff_time = configurator.scenario.cutoff_time
-    penalty = run_cutoff_time * penalty_multiplier
     objective = configurator.scenario.sparkle_objective
     test_dict = {"instanceSetTest": test_set.name}
     test_dict["numInstanceInTestingInstanceSet"] = len(instance_names)
@@ -503,7 +490,7 @@ def get_dict_variable_to_value_test(target_dir: Path,
     test_dict["figure-configured-vs-default-test"] =\
         get_figure_configured_vs_default_on_instance_set(
         solver, test_set.name, res_default, res_conf, target_dir, smac_run_obj,
-        float(run_cutoff_time), penalty_multiplier,
+        float(run_cutoff_time),
         configurator.scenario.sparkle_objective, data_type="test")
 
     # Retrieve timeout numbers for the testing instances
@@ -512,7 +499,7 @@ def get_dict_variable_to_value_test(target_dir: Path,
                                  test_set,
                                  configurator,
                                  validator,
-                                 penalty)
+                                 run_cutoff_time)
 
     test_dict["timeoutsTestDefault"] = default_timeouts_test
     test_dict["timeoutsTestConfigured"] = configured_timeouts_test
@@ -530,7 +517,6 @@ def generate_report_for_configuration(solver: Solver,
                                       latex_template_path: Path,
                                       bibliography_path: Path,
                                       train_set: InstanceSet,
-                                      penalty_multiplier: float,
                                       extractor_cuttoff: int,
                                       test_set: InstanceSet = None,
                                       ablation: AblationScenario = None) -> None:
@@ -545,7 +531,6 @@ def generate_report_for_configuration(solver: Solver,
         latex_template_path: Path to the template to use for the report
         bibliography_path: The bib corresponding to the latex template
         train_set: Instance set for training
-        penalty_multiplier: Penalty factor for timeout
         extractor_cuttoff: Cut off for extractor
         test_set: Instance set for testing
         ablation: Whether or not ablation is used. Defaults to True.
@@ -553,7 +538,7 @@ def generate_report_for_configuration(solver: Solver,
     target_path.mkdir(parents=True, exist_ok=True)
     variables_dict = configuration_report_variables(
         target_path, solver, configurator, validator, extractor_dir, bibliography_path,
-        train_set, penalty_multiplier, extractor_cuttoff, test_set,
+        train_set, extractor_cuttoff, test_set,
         ablation)
     stex.generate_report(latex_template_path,
                          "template-Sparkle-for-configuration.tex",

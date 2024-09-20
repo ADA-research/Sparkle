@@ -18,20 +18,20 @@ if __name__ == "__main__":
 
     commands = sorted(commands)
 
-    sphinx_file = Path("source/userguide/commandlist.md").open("w")
+    sphinx_file = Path("source/commandlist.md").open("w")
     for command in commands:
         sphinx_file.write(
             f"- {{ref}}`cmd-{command.replace('.py', '').replace('_', '-')}`\n")
     sphinx_file.close()
 
-    sphinx_file = Path("source/userguide/commandsautoprogram.md").open("w")
+    sphinx_file = Path("source/commandsautoprogram.md").open("w")
     for i, command in enumerate(commands):
         c_name = command.replace(".py", "")
         sphinx_file.write(
             f"""(cmd-{c_name.replace("_", "-")})=\n"""
             f"""\n```{{eval-rst}}\n"""
             f""".. autoprogram:: sparkle.CLI.{c_name}:parser_function()\n"""
-            f"""   :prog: {c_name}.py\n\n"""
+            f"""   :prog: {c_name}\n\n"""
             f"""```\n""")
         if not i == len(commands) - 1:
             sphinx_file.write("\n")

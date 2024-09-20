@@ -4,9 +4,6 @@ import configparser
 from enum import Enum
 from pathlib import Path
 from pathlib import PurePath
-from typing import Callable
-import builtins
-import statistics
 
 from sparkle.types import SparkleObjective, resolve_objective
 from sparkle.types.objective import PAR
@@ -20,7 +17,7 @@ from sparkle.platform.cli_types import VerbosityLevel
 
 
 class SettingState(Enum):
-    """Possible setting states."""
+    """Enum of possible setting states."""
 
     NOT_SET = 0
     DEFAULT = 1
@@ -29,7 +26,7 @@ class SettingState(Enum):
 
 
 class Settings:
-    """Read, write, set, and get settings."""
+    """Class to read, write, set, and get settings."""
     # CWD Prefix
     cwd_prefix = Path()  # Empty for now
 
@@ -119,7 +116,6 @@ class Settings:
     DEFAULT_general_sparkle_configurator = cim.SMAC2.__name__
     DEFAULT_general_solution_verifier = str(None)
     DEFAULT_general_target_cutoff_time = 60
-    DEFAULT_general_penalty_multiplier = 10
     DEFAULT_general_extractor_cutoff_time = 60
     DEFAULT_number_of_jobs_in_parallel = 25
     DEFAULT_general_verbosity = VerbosityLevel.STANDARD
@@ -151,9 +147,6 @@ class Settings:
         self.__general_sparkle_selector_set = SettingState.NOT_SET
         self.__general_solution_verifier_set = SettingState.NOT_SET
         self.__general_target_cutoff_time_set = SettingState.NOT_SET
-        self.__general_cap_value_set = SettingState.NOT_SET
-        self.__general_penalty_multiplier_set = SettingState.NOT_SET
-        self.__general_metric_aggregation_function_set = SettingState.NOT_SET
         self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
         self.__general_verbosity_set = SettingState.NOT_SET
         self.__general_check_interval_set = SettingState.NOT_SET
@@ -193,7 +186,7 @@ class Settings:
         # successfully
         if file_settings.sections() != []:
             section = "general"
-            option_names = ("objective", "smac_run_obj")
+            option_names = ("objective", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = [resolve_objective(obj) for obj in
@@ -202,47 +195,33 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             # Comma so python understands it's a tuple...
-            option_names = ("configurator",)
+            option_names = ("configurator", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
                     self.set_general_sparkle_configurator(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("selector",)
+            option_names = ("selector", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
                     self.set_general_sparkle_selector(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("solution_verifier",)
+            option_names = ("solution_verifier", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option).lower()
                     self.set_general_solution_verifier(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("target_cutoff_time", "smac_each_run_cutoff_time",
-                            "cutoff_time_each_performance_computation")
+            option_names = ("target_cutoff_time",
+                            "cutoff_time_each_solver_call")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_general_target_cutoff_time(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("cap_value",)
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getfloat(section, option)
-                    self.set_general_cap_value(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("penalty_multiplier", "penalty_number")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_general_penalty_multiplier(value, state)
                     file_settings.remove_option(section, option)
 
             option_names = ("extractor_cutoff_time",
@@ -251,13 +230,6 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_general_extractor_cutoff_time(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("number_of_jobs_in_parallel", "num_job_in_parallel")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_number_of_jobs_in_parallel(value, state)
                     file_settings.remove_option(section, option)
 
             option_names = ("run_on", )
@@ -283,28 +255,28 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             section = "configuration"
-            option_names = ("wallclock_time", "smac_whole_time_budget")
+            option_names = ("wallclock_time", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_config_wallclock_time(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("cpu_time", "smac_cpu_time_budget")
+            option_names = ("cpu_time", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_config_cpu_time(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("solver_calls", "smac_solver_calls_budget")
+            option_names = ("solver_calls", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_config_solver_calls(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("number_of_runs", "num_of_smac_runs")
+            option_names = ("number_of_runs", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
@@ -319,7 +291,14 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             section = "slurm"
-            option_names = ("max_parallel_runs_per_node", "clis_per_node", )
+            option_names = ("number_of_jobs_in_parallel", "num_job_in_parallel")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_number_of_jobs_in_parallel(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("max_parallel_runs_per_node", "clis_per_node")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
@@ -505,82 +484,6 @@ class Settings:
         return Selector(Path(self.__settings["general"]["selector"]),
                         self.DEFAULT_selection_output_raw)
 
-    def set_general_cap_value(
-            self: Settings, value: float = None,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the general cap value."""
-        section = "general"
-        name = "cap_value"
-
-        if value is not None and self.__check_setting_state(
-                self.__general_cap_value_set, origin, name):
-            self.__init_section(section)
-            self.__general_cap_value_set = origin
-            self.__settings[section][name] = float(value)
-
-    def get_general_cap_value(self: Settings) -> float:
-        """Get the general cap value."""
-        if self.__general_cap_value_set == SettingState.NOT_SET:
-            self.set_general_cap_value()
-
-        if "cap_value" in self.__settings["general"]:
-            return self.__settings["general"]["cap_value"]
-        return None
-
-    def set_general_penalty_multiplier(
-            self: Settings, value: int = DEFAULT_general_penalty_multiplier,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the penalty multiplier."""
-        section = "general"
-        name = "penalty_multiplier"
-
-        if value is not None and self.__check_setting_state(
-                self.__general_penalty_multiplier_set, origin, name):
-            self.__init_section(section)
-            self.__general_penalty_multiplier_set = origin
-            self.__settings[section][name] = str(value)
-
-    def get_general_penalty_multiplier(self: Settings) -> int:
-        """Return the penalty multiplier."""
-        if self.__general_penalty_multiplier_set == SettingState.NOT_SET:
-            self.set_general_penalty_multiplier()
-
-        return int(self.__settings["general"]["penalty_multiplier"])
-
-    def set_general_metric_aggregation_function(
-            self: Settings, value: str = "mean",
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the general aggregation function of performance measure."""
-        section = "general"
-        name = "metric_aggregation_function"
-
-        if value is not None and self.__check_setting_state(
-                self.__general_metric_aggregation_function_set, origin, name):
-            self.__init_section(section)
-            self.__general_metric_aggregation_function_set = origin
-            self.__settings[section][name] = value
-
-    def get_general_metric_aggregation_function(self: Settings) -> Callable:
-        """Set the general aggregation function of performance measure."""
-        if self.__general_metric_aggregation_function_set == SettingState.NOT_SET:
-            self.set_general_metric_aggregation_function()
-        method = self.__settings["general"]["metric_aggregation_function"]
-        libraries = (builtins, statistics)
-        for lib in libraries:
-            if not isinstance(method, str):
-                break
-            try:
-                method = getattr(lib, method)
-            except AttributeError:
-                continue
-        return method
-
-    def get_penalised_time(self: Settings, custom_cutoff: int = None) -> int:
-        """Return the penalised time associated with the cutoff time."""
-        if custom_cutoff is None:
-            custom_cutoff = self.get_general_target_cutoff_time()
-        return custom_cutoff * self.get_general_penalty_multiplier()
-
     def set_general_solution_verifier(
             self: Settings, value: str = DEFAULT_general_solution_verifier,
             origin: SettingState = SettingState.DEFAULT) -> None:
@@ -645,7 +548,7 @@ class Settings:
             self: Settings, value: int = DEFAULT_number_of_jobs_in_parallel,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the number of runs Sparkle can do in parallel."""
-        section = "general"
+        section = "slurm"
         name = "number_of_jobs_in_parallel"
 
         if value is not None and self.__check_setting_state(
@@ -659,7 +562,7 @@ class Settings:
         if self.__number_of_jobs_in_parallel_set == SettingState.NOT_SET:
             self.set_number_of_jobs_in_parallel()
 
-        return int(self.__settings["general"]["number_of_jobs_in_parallel"])
+        return int(self.__settings["slurm"]["number_of_jobs_in_parallel"])
 
     def set_general_verbosity(
             self: Settings, value: VerbosityLevel = DEFAULT_general_verbosity,

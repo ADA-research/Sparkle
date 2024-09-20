@@ -1,131 +1,147 @@
-# Use Sparkle for algorithm selection
+## Algorithm Selection
+
+Sparkle also offers various tools to apply algorithm selection, where we, given an objective, train another algorithm to determine which solver is best to use based on an instance. 
 
 These steps can also be found as a Bash script in `Examples/selection.sh`
 
-## Initialise the Sparkle platform
+### Initialise the Sparkle platform
 
-`sparkle initialise`
+```bash
+sparkle initialise
+```
 
-## Add instances
+### Add instances
+First, we add instance files (in this case in CNF format) to the platform by specifying the path.
 
-Add instance files (in this case in CNF format) in a given directory, without running solvers or feature extractors yet
+```bash
+sparkle add instances Examples/Resources/Instances/PTN/
+```
 
-`sparkle add_instances Examples/Resources/Instances/PTN/`
+### Add solvers
 
-## Add solvers
+Now we add solvers to the platform as possible options for our selection. Each solver directory should contain the solver wrapper.
 
-Add solvers (here for SAT solving) with a wrapper containing the executable name of the solver and a string of command line parameters, without running the solvers yet
+```bash
+sparkle add solver Examples/Resources/Solvers/CSCCSat/
+sparkle add solver Examples/Resources/Solvers/PbO-CCSAT-Generic/
+sparkle add solver Examples/Resources/Solvers/MiniSAT/
+```
 
-Each solver directory should contain the solver executable and a wrapper
+### Add feature extractor
+To run the selector, we need certain features to represent our instances. To that end, we add a feature extractor to the platform that creates vector representations of our instances.
 
-`sparkle add_solver Examples/Resources/Solvers/CSCCSat/`
 
-`sparkle add_solver Examples/Resources/Solvers/PbO-CCSAT-Generic/`
+```bash
+sparkle add feature extractor Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/
+```
 
-`sparkle add_solver Examples/Resources/Solvers/MiniSAT/`
+### Compute features
+Now we can run our features with the following command:
 
-## Add feature extractor
+```bash
+sparkle compute features
+```
 
-Similarly, add a feature extractor, without immediately running it on the instances
+### Run the solvers
+Similarly, we can now also compute our objective values for our solvers, in this case PAR10. Note that we can at this point still specifiy multiple objectives by separating them with a comma, or denote them in our settings file.
 
-`sparkle add_feature_extractor Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/`
+```bash
+sparkle run solvers --objective PAR10
+```
 
-## Compute features
-
-Compute features for all the instances
-
-`sparkle compute_features`
-
-## Run the solvers
-
-Run the solvers on all instances
-
-`sparkle run_solvers`
-
-## Construct a portfolio selector
-
+### Construct a portfolio selector
 To make sure feature computation and solver performance computation are done before constructing the portfolio use the `wait` command
 
-`sparkle wait`
-
-Construct a portfolio selector, using the previously computed features and the results of running the solvers. Run with --solver-ablation for actual marginal contribution computation.
-
-`sparkle construct_portfolio_selector --selector-timeout 1000 --solver-ablation`
+```bash
+sparkle wait
+```
 
 
-Wait for the constructor to complete its computations
+Now we can construct a portfolio selector, using the previously computed features and the results of running the solvers. The `--selector-timeout` argument determines for how many seconds we will train our selector for. We can set the flag `--solver-ablation` for actual marginal contribution computation later.
 
-`sparkle wait`
+```bash
+sparkle construct portfolio selector --selector-timeout 1000 --solver-ablation
+sparkle wait  # Wait for the constructor to complete its computations
+```
 
-## Generate a report
+### Generate a report
 
-Generate an experimental report detailing the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report.pdf`
+Generate an experimental report detailing the experimental procedure and performance information; this will be located at `Output/Selection/Sparkle_Report.pdf`
 
-`sparkle generate_report`
+```bash
+sparkle generate report
+```
 
-## Run the portfolio selector (e.g. on a test set)
+### Run the portfolio selector
 
-### Run on a single instance
+#### Run on a single instance
 
 Run the portfolio selector on a *single* testing instance; the result will be printed to the command line
 
-`sparkle run_portfolio_selector Examples/Resources/Instances/PTN2/plain7824.cnf`
+```bash
+sparkle run portfolio selector Examples/Resources/Instances/PTN2/plain7824.cnf
+```
 
 ### Run on an instance set
 
 Run the portfolio selector on a testing instance *set*
 
-`sparkle run_portfolio_selector Examples/Resources/Instances/PTN2/`
+```bash
+sparkle run portfolio selector Examples/Resources/Instances/PTN2/
+sparkle wait  # Wait for the portfolio selector to be done running on the testing instance set
+```
 
-## Generate a report including results on the test set
+#### Generate a report including results on the test set
 
-Wait for the portfolio selector to be done running on the testing instance set
+Generate an experimental report that includes the results on the test set, and as before the experimental procedure and performance information; this will be located at `Output/Selection/Sparkle_Report_For_Test.pdf`
 
-`sparkle wait`
-
-Generate an experimental report that includes the results on the test set, and as before the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report_For_Test.pdf`
-
-`sparkle generate_report`
+```bash
+sparkle generate report
+```
 
 By default the `generate_report` command will create a report for the most recent instance set. To generate a report for an older instance set, the desired instance set can be specified with: `--test-case-directory Test_Cases/PTN2/`
 
 
-## Comparing against SATZilla 2024
+### Comparing against SATZilla 2024
 
 If you wish to compare two feature extractors against one another, you need to remove the previous extractor from the platform (Or create a new platform from scratch) by running:
 
-`sparkle remove_feature_extractor SAT-features-competition2012_revised_without_SatELite_sparkle`
+```bash
+sparkle remove feature extractor SAT-features-competition2012_revised_without_SatELite_sparkle
+```
 
 Otherwise, Sparkle will interpret adding the other feature extractor as creating a combined feature vector per instance from all present extractors in Sparkle. Now we can add SATZilla 2024 from the Examples directory
 Note that this feature extractor requires GCC (any version, tested with 13.2.0) to run.
 
 
-`sparkle add_feature_extractor Examples/Resources/Extractors/SAT-features-competition2024`
+```bash
+sparkle add feature extractor Examples/Resources/Extractors/SAT-features-competition2024
+```
 
 We can also investigate a different data set, SAT Competition 2023 for which Sparkle has a subset.
 
-`sparkle remove_instances Examples/Resources/Instances/PTN/`
+```bash
+sparkle remove instances PTN
+sparkle remove instances PTN2
+sparkle add instances Examples/Resources/Instances/SATCOMP2023_SUB
+```
 
-`sparkle remove_instances Examples/Resources/Instances/PTN2/`
+We compute the features for the new extractor and new instances.
 
-`sparkle add_instances Examples/Resources/Instances/SATCOMP2023_SUB`
-
-We compute the features for the new extractor.
-
-`sparkle compute_features`
-
-And wait for it to complete before continuing.
-
-`sparkle wait`
+```bash
+sparkle compute features
+sparkle wait  # Wait for it to complete before continuing
+```
 
 Now we can train a selector based on these features.
 
-`sparkle construct_portfolio_selector --selector-timeout 1000`
-
-Wait for the computation to be done.
-
-`sparkle wait`
+```bash
+sparkle construct portfolio selector --selector-timeout 1000
+sparkle wait  #Wait for the computation to be done
+```
 
 And generate the report. When running on the PTN/PTN2 data sets, you can compare the two to see the impact of different feature extractors.
 
-`sparkle generate_report`
+```bash
+sparkle generate report
+```

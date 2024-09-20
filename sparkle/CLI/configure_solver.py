@@ -18,7 +18,6 @@ from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.structures import FeatureDataFrame
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.configurator.configurator import Configurator
-from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.solver import Solver
 from sparkle.CLI.initialise import check_for_initialise
@@ -213,12 +212,12 @@ if __name__ == "__main__":
     wallclock_time = gv.settings().get_config_wallclock_time()
     cutoff_time = gv.settings().get_general_target_cutoff_time()
     cutoff_length = gv.settings().get_configurator_target_cutoff_length()
-    sparkle_objective =\
-        gv.settings().get_general_sparkle_objectives()[0]
+    sparkle_objectives =\
+        gv.settings().get_general_sparkle_objectives()
     configurator = gv.settings().get_general_sparkle_configurator()
-    config_scenario = ConfigurationScenario(
+    config_scenario = configurator.scenario_class(
         solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
-        wallclock_time, cutoff_time, cutoff_length, sparkle_objective, use_features,
+        wallclock_time, cutoff_time, cutoff_length, sparkle_objectives, use_features,
         configurator.configurator_target, feature_data_df)
 
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)

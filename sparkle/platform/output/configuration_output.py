@@ -7,8 +7,7 @@ from sparkle.platform import \
     generate_report_for_configuration as sgrfch
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
-from sparkle.configurator.configuration_scenario import ConfigurationScenario
-from sparkle.configurator.configurator import Configurator
+from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver.validator import Validator
 from sparkle.platform.output.structures import ValidationResults, ConfigurationResults
 from sparkle.types import SolverStatus
@@ -22,8 +21,7 @@ class ConfigurationOutput:
 
     def __init__(self: ConfigurationOutput, path: Path, solver: Solver,
                  configurator: Configurator, instance_set_train: InstanceSet,
-                 instance_set_test: InstanceSet,
-                 penalty_multiplier: int, output: Path) -> None:
+                 instance_set_test: InstanceSet, output: Path) -> None:
         """Initialize Configurator Output class.
 
         Args:
@@ -32,15 +30,12 @@ class ConfigurationOutput:
             configurator: The configurator that was used
             instance_set_train: Instance set used for training
             instance_set_test: Instance set used for testing
-            penalty_multiplier: penalty multiplier that is applied to the performance
-                [To be Removed]
             output: Path to the output directory
         """
         self.solver = solver
         self.configurator = configurator
         self.instance_set_train = instance_set_train
         self.instance_set_test = instance_set_test
-        self.penalty_multiplier = penalty_multiplier
         self.directory = path
         self.output = output / "configuration.json" if not output.is_file() else output
 
@@ -51,8 +46,8 @@ class ConfigurationOutput:
 
         # Sets scenario on configurator object
         self.configurator.scenario = \
-            ConfigurationScenario.from_file(scenario_file, self.solver,
-                                            self.instance_set_train)
+            configurator.scenario_class.from_file(scenario_file, self.solver,
+                                                  self.instance_set_train)
         self.configurator.scenario._set_paths(self.configurator.output_path)
 
         # Retrieve all configurations

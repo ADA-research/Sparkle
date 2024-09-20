@@ -24,16 +24,10 @@ def parser_function() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(*ac.InstancesPathArgument.names,
                         **ac.InstancesPathArgument.kwargs)
-    group_extractor_run = parser.add_mutually_exclusive_group()
-    group_extractor_run.add_argument(*ac.RunExtractorNowArgument.names,
-                                     **ac.RunExtractorNowArgument.kwargs)
-    group_extractor_run.add_argument(*ac.RunExtractorLaterArgument.names,
-                                     **ac.RunExtractorLaterArgument.kwargs)
-    group_solver = parser.add_mutually_exclusive_group()
-    group_solver.add_argument(*ac.RunSolverNowArgument.names,
-                              **ac.RunSolverNowArgument.kwargs)
-    group_solver.add_argument(*ac.RunSolverLaterArgument.names,
-                              **ac.RunSolverLaterArgument.kwargs)
+    parser.add_argument(*ac.RunExtractorNowArgument.names,
+                        **ac.RunExtractorNowArgument.kwargs)
+    parser.add_argument(*ac.RunSolverNowArgument.names,
+                        **ac.RunSolverNowArgument.kwargs)
     parser.add_argument(*ac.NicknameInstanceSetArgument.names,
                         **ac.NicknameInstanceSetArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,

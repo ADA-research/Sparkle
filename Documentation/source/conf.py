@@ -12,27 +12,36 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+from __future__ import annotations
 import os
 import sys
 
+from pygments.lexer import bygroups
+from pygments.token import Whitespace, Keyword, Name
+import pygments
+from pygments.lexers.shell import BashLexer
+from pygments.formatters.terminal import TerminalFormatter
+
+import sparkle.CLI
+from sparkle.CLI.cli import commands
+
 # Add path to sparkle root
-sys.path.insert(0, os.path.abspath("../.."))
-sys.path.insert(0, os.path.abspath("../../CLI"))
-sys.path.insert(0, os.path.abspath("../../sparkle"))
+sys.path.append(os.path.abspath("../../sparkle"))
+sys.path.append(os.path.abspath("../../sparkle/CLI"))
 print("sys.path: ", sys.path)
 
-from sparkle import about  # noqa: E402
+import sparkle  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
 project = "Sparkle"
-copyright = "2021, ADA Research Group, LIACS"
-author = "ADA Research Group, LIACS"
+copyright = "2024, ADA Research Group, AIM @ RWTH Aachen"
+author = "ADA Research Group, AIM @ RWTH Aachen"
 
 # The short X.Y version
-version = about.version
+version = sparkle.about.version
 # The full version, including alpha/beta/rc tags
-release = about.version
+release = sparkle.about.version
 
 
 # -- General configuration ---------------------------------------------------
@@ -54,6 +63,8 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
     "sphinxcontrib.autoprogram",
+    "sphinx.ext.autodoc",
+    "sphinx_copybutton",
     "myst_parser",
 ]
 
@@ -78,11 +89,35 @@ language = "en-gb"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["userguide/index.md", "userguide/commandsautoprogram.md"]
+exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = None
+pygments_style = "colorful"
 
+
+class SparkleBashLexer(BashLexer):
+    """Extended BashLexer to add sparkle keywords."""
+    def __init__(self: SparkleBashLexer, **options: any) -> None:
+        """Initialize the BashLexer and extend."""
+        super().__init__(**options)
+        self.tokens["basic"][0] =\
+            (r"\b(if|fi|else|while|in|do|done|for|then|return|function|case|"
+             r"select|break|continue|until|esac|elif|sparkle)(\s*)\b",
+             bygroups(Keyword, Whitespace))
+        command_str = "|".join(commands())
+        self.tokens["basic"][1] =\
+            (r"\b(alias|bg|bind|builtin|caller|cd|command|compgen|"
+             r"complete|declare|dirs|disown|echo|enable|eval|exec|exit|"
+             r"export|false|fc|fg|getopts|hash|help|history|jobs|kill|let|"
+             r"local|logout|popd|printf|pushd|pwd|read|readonly|set|shift|"
+             r"shopt|source|suspend|test|time|times|trap|true|type|typeset|"
+             r"ulimit|umask|unalias|unset|wait|"
+             f"{command_str}"
+             r")(?=[\s)`])",
+             Name.Builtin)
+
+
+pygments.highlight(code="bash", lexer=SparkleBashLexer(), formatter=TerminalFormatter())
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -90,6 +125,8 @@ pygments_style = None
 # a list of builtin themes.
 #
 html_theme = "sphinx_rtd_theme"
+html_logo = "sparkle_logo.png"
+html_favicon = "sparkle_favicon.ico"
 html_theme_options = {
     "navigation_depth": 3,  # Adjust the depth as needed
 }
@@ -103,7 +140,8 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ["_static"]
+html_static_path = ["_static"]
+html_css_files = ["custom.css"]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -156,7 +194,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, "sparkle.tex", "Sparkle Documentation",
-     "ADA Research Group, LIACS", "manual"),
+     "ADA Research Group, AIM @ RWTH Aachen", "manual"),
 ]
 
 # Manually installed sty files not easily available from conda

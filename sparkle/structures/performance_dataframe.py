@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Module to manage performance data CSV files and common operations on them."""
+"""Module to manage performance data files and common operations on them."""
 from __future__ import annotations
 from pathlib import Path
 import sys

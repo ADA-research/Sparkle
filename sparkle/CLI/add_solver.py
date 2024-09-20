@@ -28,11 +28,8 @@ def parser_function() -> argparse.ArgumentParser:
         epilog="")
     parser.add_argument(*ac.DeterministicArgument.names,
                         **ac.DeterministicArgument.kwargs)
-    group_solver_run = parser.add_mutually_exclusive_group()
-    group_solver_run.add_argument(*ac.RunSolverNowArgument.names,
-                                  **ac.RunSolverNowArgument.kwargs)
-    group_solver_run.add_argument(*ac.RunExtractorLaterArgument.names,
-                                  **ac.RunSolverLaterArgument.kwargs)
+    parser.add_argument(*ac.RunSolverNowArgument.names,
+                        **ac.RunSolverNowArgument.kwargs)
     parser.add_argument(*ac.NicknameSolverArgument.names,
                         **ac.NicknameSolverArgument.kwargs)
     parser.add_argument(*ac.SolverPathArgument.names,

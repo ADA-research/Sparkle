@@ -20,6 +20,7 @@ Examples/Resources/CVRP/Solvers/VRP_SISRs/src/
 
 # Generated documentation 
 Documentation/source/_generated/
+Documentation/build
 
 # Common IDE
 .idea

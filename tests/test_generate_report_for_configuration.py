@@ -8,7 +8,6 @@ from pytest_mock import MockFixture
 from sparkle.solver.ablation import AblationScenario
 from sparkle.platform import generate_report_for_configuration as sgrch
 from sparkle.platform.settings_objects import Settings
-from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.validator import Validator
 from sparkle.types.objective import SparkleObjective, PAR
 from sparkle.solver import Solver
@@ -25,7 +24,7 @@ train_instance = "train-instance"
 test_instance = "test-instance"
 configurator_path = configurator.configurator_path
 configurator.scenario =\
-    ConfigurationScenario(solver, Path(train_instance))
+    configurator.scenario_class(solver, Path(train_instance))
 configurator.scenario._set_paths(configurator_path)
 ablation_scenario = AblationScenario(
     solver, Path(train_instance), Path(test_instance), Path(""))
@@ -168,7 +167,6 @@ def test_get_figure_configure_vs_default(mocker: MockFixture) -> None:
                                                           filename,
                                                           performance_measure,
                                                           cutoff,
-                                                          1,
                                                           test_objective_runtime)
 
     mock_data.assert_called_once_with(configured_dir, default_dir,
@@ -197,7 +195,6 @@ def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
                    "limit_min": 0.25,
                    "limit_max": 0.25,
                    "limit": "magnitude",
-                   "penalty_time": 10,
                    "replace_zeros": True,
                    "output_dir": reports_dir
                    }
@@ -212,7 +209,6 @@ def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
                                                           filename,
                                                           performance_measure,
                                                           cutoff,
-                                                          10,
                                                           test_objective_runtime)
 
     mock_data.assert_called_once_with(configured_dir, default_dir,
@@ -236,10 +232,9 @@ def test_get_timeouts(mocker: MockFixture) -> None:
         "instance-4.cnf": 100.0,
     }
     cutoff = 10
-    penalty_factor = 10
 
     configured, default, overlap = sgrch.get_timeouts(
-        conf_dict, default_dict, cutoff * penalty_factor)
+        conf_dict, default_dict, cutoff)
 
     assert configured == 2
     assert default == 3
@@ -298,13 +293,13 @@ def test_get_dict_variable_to_value_with_test(mocker: MockFixture) -> None:
 
     full_dict = sgrch.configuration_report_variables(
         Path("configuration/report"), solver, configurator, validator, Path(),
-        Path(), train_instance, 1, 1, test_instance, None)
+        Path(), train_instance, 1, test_instance, None)
 
     mock_common.assert_called_once_with(solver, configurator, validator,
                                         None, Path(), train_instance,
-                                        output_dir, 1)
+                                        output_dir)
     mock_test.assert_called_once_with(output_dir, solver, configurator, validator,
-                                      None, train_instance, test_instance, 1)
+                                      None, train_instance, test_instance)
     assert full_dict == {
         "testBool": r"\testtrue",
         "ablationBool": r"\ablationfalse"
@@ -331,10 +326,10 @@ def test_configuration_report_variables_without_test(mocker: MockFixture) -> Non
 
     full_dict = sgrch.configuration_report_variables(
         output_dir, solver, configurator, validator, Path(),
-        Path(), train_instance, 1, 1, test_instance, None)
+        Path(), train_instance, 1, test_instance, None)
 
     mock_common.assert_called_once_with(solver, configurator, validator, None, Path(),
-                                        train_instance, output_dir, 1)
+                                        train_instance, output_dir)
     assert full_dict == {
         "testBool": r"\testfalse",
         "ablationBool": r"\ablationfalse"
@@ -368,14 +363,14 @@ def test_configuration_report_variables_with_ablation(mocker: MockFixture) -> No
 
     full_dict = sgrch.configuration_report_variables(
         output_dir, solver, configurator, validator, Path(),
-        Path(), train_instance, 1, 1, test_instance, ablation_scenario)
+        Path(), train_instance, 1, test_instance, ablation_scenario)
 
     mock_common.assert_called_once_with(
         solver, configurator, validator, ablation_scenario,
-        Path(), train_instance, output_dir, 1)
+        Path(), train_instance, output_dir)
     mock_test.assert_called_once_with(
         output_dir, solver, configurator, validator,
-        ablation_scenario, train_instance, test_instance, 1)
+        ablation_scenario, train_instance, test_instance)
     assert full_dict == {
         "testBool": r"\testtrue"
     } | common_dict | test_dict
@@ -412,14 +407,14 @@ def test_configuration_report_variables_with_features(mocker: MockFixture) -> No
     extractor_dir = Path("extract/dir")
     full_dict = sgrch.configuration_report_variables(
         output_dir, solver, configurator, validator, extractor_dir,
-        Path(), train_instance, 1, 1, test_instance, ablation_scenario)
+        Path(), train_instance, 1, test_instance, ablation_scenario)
 
     mock_common.assert_called_once_with(
         solver, configurator, validator, ablation_scenario, Path(), train_instance,
-        output_dir, 1)
+        output_dir)
     mock_test.assert_called_once_with(
         output_dir, solver, configurator, validator, ablation_scenario, train_instance,
-        test_instance, 1)
+        test_instance)
     assert full_dict == {
         "testBool": r"\testtrue",
         "numFeatureExtractors": "2",
@@ -439,7 +434,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
         ["SolverName", "{}", "InstanceSetName", "InstanceName", "STATUS", "0", "25.323"]]
     report_dir = "reports/directory"
     cutoff = 60
-    configurator.scenario.cutoff_time = 60
+    configurator.scenario.cutoff_time = cutoff
     configurator.scenario.number_of_runs = 25
     configurator.scenario.wallclock_time = 600
     configurator.scenario.sparkle_objective = test_objective_quality
@@ -477,11 +472,11 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     bib_path = Path("tex/bib.bib")
     common_dict = sgrch.get_dict_variable_to_value_common(
         solver, configurator, validator, ablation_scenario, bib_path, train_instance,
-        report_dir, 1)
+        report_dir)
 
     mock_figure.assert_called_once_with(solver, train_instance.name, validation_data,
                                         validation_data, report_dir, "QUALITY",
-                                        float(cutoff), 1, test_objective_quality)
+                                        float(cutoff), test_objective_quality)
     mock_timeouts.assert_called_once_with(
         solver, train_instance, configurator, validator, 60)
     mock_ablation_bool.assert_called_once_with(ablation_scenario)
@@ -558,12 +553,11 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                                       validator,
                                                       ablation_scenario,
                                                       train_set,
-                                                      test_set,
-                                                      1)
+                                                      test_set)
 
     mock_figure.assert_called_once_with(
         solver, test_set.name, validation_data, validation_data,
-        Path("configuration/report"), "QUALITY", float(cutoff), 1,
+        Path("configuration/report"), "QUALITY", float(cutoff),
         test_objective_quality, data_type="test")
     mock_timeouts.assert_called_once_with(
         solver, test_set, configurator, validator, 60)
@@ -613,12 +607,11 @@ def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:
                                             Path(),
                                             Path(),
                                             1.0,
-                                            1,
                                             train_instance,
                                             ablation=True)
     mock_dict.assert_called_once_with(report_dir, solver,
                                       configurator, validator, Path(),
-                                      Path(), 1.0, 1, train_instance, None, True)
+                                      Path(), 1.0, train_instance, None, True)
     mock_generate_report.assert_called_once()
 
 
@@ -653,11 +646,10 @@ def test_generate_report_for_configuration(mocker: MockFixture) -> None:
                                             Path(),
                                             Path(),
                                             1.0,
-                                            1,
                                             train_instance,
                                             test_instance, ablation)
 
     mock_dict.assert_called_once_with(
         report_dir, solver, configurator, validator,
-        Path(), Path(), 1.0, 1, train_instance, test_instance, ablation)
+        Path(), Path(), 1.0, train_instance, test_instance, ablation)
     mock_generate_report.assert_called_once()

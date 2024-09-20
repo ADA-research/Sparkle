@@ -3,7 +3,8 @@ myst-parser
 Sphinx
 sphinxcontrib-jsmath
 sphinxcontrib-autoprogram
-pandas # Also in environment.yml but needed for readthedocs
+sphinx-copybutton
+sphinx_rtd_theme==2.0.0
+pandas # Also in environment.yml but needed for sphinx
 filelock==3.15.1
 RunRunner==0.1.6.4
-sphinx_rtd_theme==2.0.0

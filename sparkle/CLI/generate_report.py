@@ -20,7 +20,6 @@ from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
 from sparkle.instance import instance_set
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.platform.output.configuration_output import ConfigurationOutput
 from sparkle.platform.output.selection_output import SelectionOutput
 from sparkle.platform.output.parallel_portfolio_output import ParallelPortfolioOutput
@@ -151,12 +150,11 @@ if __name__ == "__main__":
             instance_sets.append(set)
         test_set = None if test_case_dir is None else instance_set(Path(test_case_dir))
         cutoff_time = gv.settings().get_general_target_cutoff_time()
-        penalised_time = gv.settings().get_penalised_time()
         output = gv.settings().DEFAULT_selection_output_analysis
         selection_output = SelectionOutput(
             selection_scenario, train_data, feature_data,
             instance_sets, test_set, objective, cutoff_time,
-            penalised_time, output)
+            output)
         selection_output.write_output()
         print("Machine readable output is placed at: ", selection_output.output)
 
@@ -173,7 +171,6 @@ if __name__ == "__main__":
                 objective,
                 gv.settings().get_general_extractor_cutoff_time(),
                 gv.settings().get_general_target_cutoff_time(),
-                gv.settings().get_penalised_time(),
                 test_data
             )
             if test_case_dir is None:
@@ -185,7 +182,6 @@ if __name__ == "__main__":
         # Reporting for parallel portfolio
         # Machine readable Output
         cutoff_time = gv.settings().get_general_target_cutoff_time()
-        penalised_time = gv.settings().get_penalised_time()
         objective = gv.settings().get_general_sparkle_objectives()[0]
         output = gv.settings().DEFAULT_parallel_portfolio_output_analysis
         parallel_portfolio_output = ParallelPortfolioOutput(parallel_portfolio_path,
@@ -203,7 +199,6 @@ if __name__ == "__main__":
                 gv.settings().DEFAULT_latex_bib,
                 gv.settings().get_general_sparkle_objectives()[0],
                 gv.settings().get_general_target_cutoff_time(),
-                gv.settings().get_penalised_time(),
                 pap_instance_set)
             print("Parallel portfolio report generated ...")
     else:
@@ -249,12 +244,12 @@ if __name__ == "__main__":
         wallclock_time = gv.settings().get_config_wallclock_time()
         cutoff_time = gv.settings().get_general_target_cutoff_time()
         cutoff_length = gv.settings().get_configurator_target_cutoff_length()
-        sparkle_objective =\
-            gv.settings().get_general_sparkle_objectives()[0]
+        sparkle_objectives =\
+            gv.settings().get_general_sparkle_objectives()
         configurator = gv.settings().get_general_sparkle_configurator()
-        configurator.scenario = ConfigurationScenario(
+        configurator.scenario = configurator.scenario_class(
             solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
-            wallclock_time, cutoff_time, cutoff_length, sparkle_objective)
+            wallclock_time, cutoff_time, cutoff_length, sparkle_objectives)
         configurator.scenario._set_paths(configurator.output_path)
         ablation_scenario = None
         if args.flag_ablation:
@@ -265,13 +260,11 @@ if __name__ == "__main__":
         # Create machine readable output
         solver_name = gv.latest_scenario().get_config_solver().name
         instance_set_name = gv.latest_scenario().get_config_instance_set_train().name
-        penalty_multiplier = gv.settings().get_general_penalty_multiplier()
         output = gv.settings().DEFAULT_configuration_output_analysis
         config_output = ConfigurationOutput(configurator.scenario.directory,
                                             solver, configurator,
                                             instance_set_train,
                                             instance_set_test,
-                                            penalty_multiplier,
                                             output)
         config_output.write_output()
         print("Machine readable output is placed at: ", config_output.output)
@@ -286,7 +279,6 @@ if __name__ == "__main__":
                 gv.settings().DEFAULT_latex_source,
                 gv.settings().DEFAULT_latex_bib,
                 instance_set_train,
-                gv.settings().get_general_penalty_multiplier(),
                 gv.settings().get_general_extractor_cutoff_time(),
                 instance_set_test,
                 ablation=ablation_scenario

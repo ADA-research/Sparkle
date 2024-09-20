@@ -20,10 +20,10 @@ from sparkle.types import SparkleObjective
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(*ac.PerfectArgument.names,
-                        **ac.PerfectArgument.kwargs)
-    parser.add_argument(*ac.ActualArgument.names,
-                        **ac.ActualArgument.kwargs)
+    parser.add_argument(*ac.PerfectSelectorMarginalContributionArgument.names,
+                        **ac.PerfectSelectorMarginalContributionArgument.kwargs)
+    parser.add_argument(*ac.ActualMarginalContributionArgument.names,
+                        **ac.ActualMarginalContributionArgument.kwargs)
     parser.add_argument(*ac.SparkleObjectiveArgument.names,
                         **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
