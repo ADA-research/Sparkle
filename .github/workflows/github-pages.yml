@@ -40,7 +40,7 @@ jobs:
         run: |
           conda install -y python=3.9 # https://github.com/conda/conda/issues/13560#issuecomment-1992720842
           conda env update --file dev-env.yml --name base
-          pip install Documentation/requirements.txt
+          pip install -r Documentation/requirements.txt
       - name: Build Documentation
         run: |
           cd Documentation
