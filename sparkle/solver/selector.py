@@ -7,8 +7,6 @@ import ast
 import runrunner as rrr
 from runrunner import Runner, Run
 
-
-from sparkle.platform.cli_types import CommandName
 from sparkle.types import SparkleCallable, SparkleObjective
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 
@@ -111,7 +109,7 @@ class Selector(SparkleCallable):
         construct = rrr.add_to_queue(
             runner=run_on,
             cmd=[cmd_str],
-            name=CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
+            name="construct_selector",
             base_dir=base_dir,
             stdout=Path("normal.log"),
             stderr=Path("error.log"),

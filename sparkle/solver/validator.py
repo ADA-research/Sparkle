@@ -9,7 +9,6 @@ import ast
 import runrunner as rrr
 from runrunner import Runner, Run
 
-from sparkle.platform import CommandName
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.types import SparkleObjective, resolve_objective
@@ -88,7 +87,7 @@ class Validator():
         return rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
-            name=CommandName.VALIDATION,
+            name="validation",
             base_dir=self.tmp_out_dir,
             path=out_paths,
             dependencies=dependency,

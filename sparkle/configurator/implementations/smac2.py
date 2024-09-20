@@ -18,7 +18,6 @@ import runrunner as rrr
 from runrunner import Runner, Run
 
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
-from sparkle.platform import CommandName
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
 from sparkle.instance import InstanceSet
@@ -100,7 +99,7 @@ class SMAC2(Configurator):
         configuration_run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
-            name=CommandName.CONFIGURE_SOLVER,
+            name="configure_solver",
             base_dir=base_dir,
             output_path=output,
             parallel_jobs=parallel_jobs,
