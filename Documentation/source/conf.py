@@ -89,7 +89,7 @@ language = "en-gb"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["userguide/index.md", "userguide/commandsautoprogram.md"]
+exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "colorful"
@@ -126,6 +126,7 @@ pygments.highlight(code="bash", lexer=SparkleBashLexer(), formatter=TerminalForm
 #
 html_theme = "sphinx_rtd_theme"
 html_logo = "sparkle_logo.png"
+html_favicon = "sparkle_favicon.ico"
 html_theme_options = {
     "navigation_depth": 3,  # Adjust the depth as needed
 }
