@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.8.7
+# Auto-Generated .sh files from the original .md by Sparkle 0.8.8
 
 ## Running a Parallel Portfolio
 # In this tutorial we will measure the runtime performance of several algorithms in parallel. The general idea is that we consider the algorithms as a portfolio that we run in parallel (hence the name) and terminate all running algorithms once a solution is found.
