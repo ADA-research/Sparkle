@@ -16,7 +16,6 @@ from runrunner.base import Status, Runner
 from sparkle.tools import runsolver_parsing, general as tg
 from sparkle.tools import pcsparser
 from sparkle.types import SparkleCallable, SolverStatus
-from sparkle.platform import CommandName
 from sparkle.solver.verifier import SolutionVerifier
 from sparkle.instance import InstanceSet
 from sparkle.types import resolve_objective, SparkleObjective, UseTime
@@ -185,7 +184,7 @@ class Solver(SparkleCallable):
             cutoff_time: int = None,
             configuration: dict = None,
             run_on: Runner = Runner.LOCAL,
-            commandname: CommandName = CommandName.RUN_SOLVER,
+            commandname: str = "run_solver",
             sbatch_options: list[str] = None,
             cwd: Path = None) -> SlurmRun | list[dict[str, Any]] | dict[str, Any]:
         """Run the solver on an instance with a certain configuration.

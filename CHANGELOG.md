@@ -2,7 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.8.7] - 2024/09/20
+## [0.8.8] - 2024/09/20
 
 ### Changed
 - ConfiguratorScenario is now a template class that must be implemented by each configurator
