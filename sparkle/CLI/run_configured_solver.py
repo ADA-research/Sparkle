@@ -24,8 +24,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstancePathPositional.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
-    parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
-                        **ac.PerformanceMeasureSimpleArgument.kwargs)
+    parser.add_argument(*ac.SparkleObjectiveArgument.names,
+                        **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
     return parser
@@ -60,9 +60,9 @@ if __name__ == "__main__":
     if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file
         gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
-    if args.performance_measure is not None:
+    if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
-            args.performance_measure, SettingState.CMD_LINE
+            args.objectives, SettingState.CMD_LINE
         )
 
     # Compare current settings to latest.ini
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     configurator = gv.settings().get_general_sparkle_configurator()
     objective = gv.settings().get_general_sparkle_objectives()[0]
     _, config_str = configurator.get_optimal_configuration(
-        solver, train_set, performance=objective.PerformanceMeasure)
+        solver, train_set, objective=objective)
     config = solver.config_str_to_dict(config_str)
     # Call the configured solver
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
@@ -107,7 +107,7 @@ if __name__ == "__main__":
         for i, solver_output in enumerate(run):
             print(f"Execution of {solver.name} on instance "
                   f"{data_set.instance_names[i]} completed with status "
-                  f"{solver_output['status']} in {solver_output['runtime']} seconds.")
+                  f"{solver_output['status']} in {solver_output['cpu_time']} seconds.")
         print("Running configured solver done!")
 
     # Write used settings to file

@@ -11,7 +11,6 @@ from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.platform import \
     generate_report_for_configuration as sgrfch
 from sparkle.CLI.help import logging as sl
-from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.reporting_scenario import Scenario
@@ -53,8 +52,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(*ac.TestCaseDirectoryArgument.names,
                         **ac.TestCaseDirectoryArgument.kwargs)
     # Common arguments
-    parser.add_argument(*ac.PerformanceMeasureArgument.names,
-                        **ac.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*ac.SparkleObjectiveArgument.names,
+                        **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
     parser.add_argument(*ac.GenerateJSONArgument.names,
@@ -65,7 +64,6 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
-    Settings.check_settings_changes(gv.settings(), prev_settings)
 
     # Log command call
     sl.log_command(sys.argv)
@@ -98,10 +96,11 @@ if __name__ == "__main__":
         gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )
-    if ac.set_by_user(args, "performance_measure"):
+    if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
-            args.performance_measure, SettingState.CMD_LINE)
+            args.objectives, SettingState.CMD_LINE)
 
+    Settings.check_settings_changes(gv.settings(), prev_settings)
     # If no arguments are set get the latest scenario
     if not selection and test_case_dir is None and solver is None:
         scenario = gv.latest_scenario().get_latest_scenario()
@@ -122,12 +121,10 @@ if __name__ == "__main__":
 
     # Reporting for algorithm selection
     if selection or test_case_dir is not None:
-        performance_measure =\
-            gv.settings().get_general_sparkle_objectives()[0].PerformanceMeasure
-        if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or \
-           performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-            print("ERROR: The generate_report command is not yet implemented for the"
-                  " QUALITY_ABSOLUTE performance measure! (functionality coming soon)")
+        objective = gv.settings().get_general_sparkle_objectives()[0]
+        if not objective.time:
+            print("ERROR: The selection report is not implemented for "
+                  " non-runtime objectives!")
             sys.exit(-1)
         selection_scenario = gv.latest_scenario().get_selection_scenario_path()
         actual_portfolio_selector_path = selection_scenario / "portfolio_selector"
@@ -140,16 +137,11 @@ if __name__ == "__main__":
         print("Generating report for selection...")
         train_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
         feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
-        train_data.penalise(gv.settings().get_general_target_cutoff_time(),
-                            gv.settings().get_penalised_time())
         test_data = None
         test_case_path = Path(test_case_dir) if test_case_dir is not None else None
         if test_case_dir is not None and (test_case_path
                                           / "performance_data.csv").exists():
             test_data = PerformanceDataFrame(test_case_path / "performance_data.csv")
-            test_data.penalise(gv.settings().get_general_target_cutoff_time(),
-                               gv.settings().get_penalised_time())
-
         # Create machine readable selection output
         instance_folders = set(Path(instance).parent
                                for instance in train_data.instances)
@@ -161,9 +153,10 @@ if __name__ == "__main__":
         cutoff_time = gv.settings().get_general_target_cutoff_time()
         penalised_time = gv.settings().get_penalised_time()
         output = gv.settings().DEFAULT_selection_output_analysis
-        selection_output = SelectionOutput(selection_scenario, train_data, feature_data,
-                                           instance_sets, test_set, cutoff_time,
-                                           penalised_time, output)
+        selection_output = SelectionOutput(
+            selection_scenario, train_data, feature_data,
+            instance_sets, test_set, objective, cutoff_time,
+            penalised_time, output)
         selection_output.write_output()
         print("Machine readable output is placed at: ", selection_output.output)
 
@@ -177,6 +170,7 @@ if __name__ == "__main__":
                 selection_scenario,
                 feature_data,
                 train_data,
+                objective,
                 gv.settings().get_general_extractor_cutoff_time(),
                 gv.settings().get_general_target_cutoff_time(),
                 gv.settings().get_penalised_time(),
@@ -192,11 +186,11 @@ if __name__ == "__main__":
         # Machine readable Output
         cutoff_time = gv.settings().get_general_target_cutoff_time()
         penalised_time = gv.settings().get_penalised_time()
+        objective = gv.settings().get_general_sparkle_objectives()[0]
         output = gv.settings().DEFAULT_parallel_portfolio_output_analysis
         parallel_portfolio_output = ParallelPortfolioOutput(parallel_portfolio_path,
                                                             pap_instance_set,
-                                                            cutoff_time,
-                                                            penalised_time,
+                                                            objective,
                                                             output)
         parallel_portfolio_output.write_output()
         print("Machine readable output is placed at: ", parallel_portfolio_output.output)

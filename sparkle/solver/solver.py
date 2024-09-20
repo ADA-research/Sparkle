@@ -8,18 +8,18 @@ import ast
 import json
 from pathlib import Path
 
-import pcsparser
 import runrunner as rrr
 from runrunner.local import LocalRun
 from runrunner.slurm import SlurmRun
 from runrunner.base import Status, Runner
 
 from sparkle.tools import runsolver_parsing, general as tg
+from sparkle.tools import pcsparser
 from sparkle.types import SparkleCallable, SolverStatus
 from sparkle.platform import CommandName
 from sparkle.solver.verifier import SolutionVerifier
 from sparkle.instance import InstanceSet
-from sparkle.types.objective import SparkleObjective
+from sparkle.types import resolve_objective, SparkleObjective, UseTime
 
 
 class Solver(SparkleCallable):
@@ -296,5 +296,26 @@ class Solver(SparkleCallable):
 
         # cast status attribute from str to Enum
         parsed_output["status"] = SolverStatus(parsed_output["status"])
-
+        # apply objectives to parsed output, runtime based objectives added here
+        for key, value in parsed_output.items():
+            if key == "status":
+                continue
+            objective = resolve_objective(key)
+            if objective is None:
+                continue
+            if objective.use_time == UseTime.NO:
+                if objective.post_process is not None:
+                    parsed_output[objective] = objective.post_process(value)
+            else:
+                if runsolver_configuration is None:
+                    continue
+                if objective.use_time == UseTime.CPU_TIME:
+                    parsed_output[key] = parsed_output["cpu_time"]
+                else:
+                    parsed_output[key] = parsed_output["wall_time"]
+                if objective.post_process is not None:
+                    parsed_output[key] = objective.post_process(
+                        parsed_output[key], parsed_output["cutoff_time"])
+        if "cutoff_time" in parsed_output:
+            del parsed_output["cutoff_time"]
         return parsed_output

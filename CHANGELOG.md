@@ -2,6 +2,11 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.8.6] - 2024/09/16
+
+### Changed
+- SparkleObjectives are now used platform wide to define what metrics should be collected from Solvers and stored, how they should be treated (Minisation, aggregation), and can be easily set by the user. They can be overriden with custom implementations by the user.
+
 ## [0.8.5] - 2024/09/02
 
 ### Changed
@@ -9,6 +14,7 @@ Notable changes to Sparkle will be documented in this file.
 - Solver dict parsing hase been simplified [SPRK-310]
 - InstanceSet object has been expanded to now support ML task based data sets [SPRK-325]
 - RunRunner logging is now forwarded to CLI call log, all RunRunner generated files and logs are placed in the same dir instead of Tmp [SPRK-330]
+- PCSParser has been added to the Sparkle Tools instead of installed from Github [SPRK-334]
 
 ### Added
 - Generating a report now includes a JSON serialised version of all the output data [SPRK-79]

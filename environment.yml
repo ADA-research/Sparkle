@@ -8,8 +8,8 @@ variables: # runsolver compilation
 dependencies:
   - python=3.10
   - swig=4.0.2 # SMAC3 C++ compiler
-  - libnuma # runsolver compilation
-  - numactl # runsolver compilation
+  - libnuma=2.0.18 # runsolver compilation
+  - numactl=2.0.18 # runsolver compilation
   - pip # Sparkle installation
-  pip:
+  - pip:
     - SparkleAI
