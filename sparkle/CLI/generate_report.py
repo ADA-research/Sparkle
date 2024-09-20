@@ -20,7 +20,6 @@ from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
 from sparkle.instance import instance_set
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.platform.output.configuration_output import ConfigurationOutput
 from sparkle.platform.output.selection_output import SelectionOutput
 from sparkle.platform.output.parallel_portfolio_output import ParallelPortfolioOutput
@@ -245,12 +244,12 @@ if __name__ == "__main__":
         wallclock_time = gv.settings().get_config_wallclock_time()
         cutoff_time = gv.settings().get_general_target_cutoff_time()
         cutoff_length = gv.settings().get_configurator_target_cutoff_length()
-        sparkle_objective =\
-            gv.settings().get_general_sparkle_objectives()[0]
+        sparkle_objectives =\
+            gv.settings().get_general_sparkle_objectives()
         configurator = gv.settings().get_general_sparkle_configurator()
-        configurator.scenario = ConfigurationScenario(
+        configurator.scenario = configurator.scenario_class(
             solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
-            wallclock_time, cutoff_time, cutoff_length, sparkle_objective)
+            wallclock_time, cutoff_time, cutoff_length, sparkle_objectives)
         configurator.scenario._set_paths(configurator.output_path)
         ablation_scenario = None
         if args.flag_ablation:

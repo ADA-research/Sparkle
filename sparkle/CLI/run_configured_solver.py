@@ -79,16 +79,16 @@ if __name__ == "__main__":
         sys.exit(-1)
     # Get optimised configuration
     configurator = gv.settings().get_general_sparkle_configurator()
-    objective = gv.settings().get_general_sparkle_objectives()[0]
+    objectives = gv.settings().get_general_sparkle_objectives()
     _, config_str = configurator.get_optimal_configuration(
-        solver, train_set, objective=objective)
+        solver, train_set, objective=objectives[0])
     config = solver.config_str_to_dict(config_str)
     # Call the configured solver
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     if run_on == Runner.LOCAL:
         print(f"Start running solver on {data_set.size} instances...")
     run = solver.run(instance=data_set,
-                     objectives=gv.settings().get_general_sparkle_objectives(),
+                     objectives=objectives,
                      seed=gv.get_seed(),
                      cutoff_time=custom_cutoff,
                      configuration=config,

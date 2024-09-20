@@ -7,8 +7,7 @@ from sparkle.platform import \
     generate_report_for_configuration as sgrfch
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
-from sparkle.configurator.configuration_scenario import ConfigurationScenario
-from sparkle.configurator.configurator import Configurator
+from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver.validator import Validator
 from sparkle.platform.output.structures import ValidationResults, ConfigurationResults
 from sparkle.types import SolverStatus
@@ -47,8 +46,8 @@ class ConfigurationOutput:
 
         # Sets scenario on configurator object
         self.configurator.scenario = \
-            ConfigurationScenario.from_file(scenario_file, self.solver,
-                                            self.instance_set_train)
+            configurator.scenario_class.from_file(scenario_file, self.solver,
+                                                  self.instance_set_train)
         self.configurator.scenario._set_paths(self.configurator.output_path)
 
         # Retrieve all configurations

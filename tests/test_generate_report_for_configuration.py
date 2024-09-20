@@ -8,7 +8,6 @@ from pytest_mock import MockFixture
 from sparkle.solver.ablation import AblationScenario
 from sparkle.platform import generate_report_for_configuration as sgrch
 from sparkle.platform.settings_objects import Settings
-from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.validator import Validator
 from sparkle.types.objective import SparkleObjective, PAR
 from sparkle.solver import Solver
@@ -25,7 +24,7 @@ train_instance = "train-instance"
 test_instance = "test-instance"
 configurator_path = configurator.configurator_path
 configurator.scenario =\
-    ConfigurationScenario(solver, Path(train_instance))
+    configurator.scenario_class(solver, Path(train_instance))
 configurator.scenario._set_paths(configurator_path)
 ablation_scenario = AblationScenario(
     solver, Path(train_instance), Path(test_instance), Path(""))
