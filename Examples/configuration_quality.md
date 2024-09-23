@@ -10,7 +10,7 @@ sparkle initialise
 
 ### Add instances
 
-Add train, and optionally test, instances (in this case for the VRP) in a given directory, without running solvers or feature extractors yet
+Now we add train, and optionally test, instances for configuring our algorithm (in this case for the VRP). The instance sets are placed in a given directory.
 
 ```bash
 sparkle add_instances Examples/Resources/CVRP/Instances/X-1-10/
