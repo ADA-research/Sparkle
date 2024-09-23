@@ -32,7 +32,7 @@ and run:
 conda env create -f environment.yml
 ```
 
-The installation of the environment may take a few minutes depending on your internet connection.
+The installation of the environment may up to five minutes depending on your internet connection.
 Once the environment has been created it can be activated by:
 
 ```
