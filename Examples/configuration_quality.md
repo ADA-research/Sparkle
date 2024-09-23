@@ -1,5 +1,5 @@
 ## Algorithm Quality Configuration
-We can configure an algorithm too based on some quality objective, that can be defined by the user. To see all options for defining {ref}`SparkleObjective <sparkle-objective>`
+We can configure an algorithm too based on some quality objective, that can be defined by the user. See the {ref}`SparkleObjective <sparkle-objective>` page for all options regarding objective defintions.
 These steps can also be found as a Bash script in `Examples/configuration_qualty.sh`
 
 ### Initialise the Sparkle platform
