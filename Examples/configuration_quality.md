@@ -19,15 +19,15 @@ sparkle add_instances Examples/Resources/CVRP/Instances/X-11-20/
 
 ### Add a configurable solver
 
-Add a configurable solver (here for vehicle routing) with a wrapper containing the executable name of the solver and a string of command line parameters, without running the solver yet
+Add a configurable solver (In this tutorial its an algorithm for vehicle routing) with a wrapper containing the executable name of the solver and a string of command line parameters.
 
-The solver directory should contain the solver executable, the `sparkle_solver_wrapper.py` wrapper, and a `.pcs` file describing the configurable parameters
+The solver directory should contain the `sparkle_solver_wrapper.py` wrapper, and a `.pcs` file describing the configurable parameters.
 
 ```bash
 sparkle add_solver Examples/Resources/CVRP/Solvers/VRP_SISRs/
 ```
 
-If needed solvers can also include additional files or scripts in their directory, but keeping additional files to a minimum speeds up copying.
+In this case the source directory also contains an executable, as the algorithm has been compiled from another programming language (`C++`). If needed solvers can also include additional files or scripts in their directory, but keeping additional files to a minimum speeds up copying.
 
 ### Configure the solver
 

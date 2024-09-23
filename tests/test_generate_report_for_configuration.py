@@ -145,7 +145,7 @@ def test_get_figure_configure_vs_default(mocker: MockFixture) -> None:
     reports_dir = Path("configuration/report")
     filename = "figure.jpg"
     cutoff = 0
-    points = [[1.0, 0.1]]
+    points = [[1.0, 1.4], [2.3, 2.2]]
     performance_measure = "PERF_MEASURE"
     plot_params = {"xlabel": f"Default parameters [{performance_measure}]",
                    "ylabel": f"Configured parameters [{performance_measure}]",
@@ -153,7 +153,6 @@ def test_get_figure_configure_vs_default(mocker: MockFixture) -> None:
                    "scale": "linear",
                    "limit_min": 1.5,
                    "limit_max": 1.5,
-                   "limit": "relative",
                    "replace_zeros": False,
                    }
     mock_data = mocker.patch("sparkle.platform.generate_report_for_configuration."
@@ -187,14 +186,13 @@ def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
     filename = "figure.jpg"
     cutoff = 1
 
-    points = [[1.0, 0.1]]
+    points = [[25.0, 35.0], [1.0, 600.0]]
     performance_measure = "PAR12"
     plot_params = {"xlabel": f"Default parameters [{performance_measure}]",
                    "ylabel": f"Configured parameters [{performance_measure}]",
                    "scale": "log",
-                   "limit_min": 0.25,
-                   "limit_max": 0.25,
-                   "limit": "magnitude",
+                   "limit_min": 1.5,
+                   "limit_max": 1.5,
                    "replace_zeros": True,
                    "output_dir": reports_dir
                    }
@@ -493,7 +491,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
         "smacObjective": "QUALITY",
         "smacWholeTimeBudget": 600,
         "smacEachRunCutoffTime": cutoff,
-        "optimisedConfiguration": "123",
+        "optimisedConfiguration": "\\item",
         "optimisedConfigurationTrainingPerformancePAR": 42.1,
         "defaultConfigurationTrainingPerformancePAR": 42.2,
         "figure-configured-vs-default-train": "figure-string",

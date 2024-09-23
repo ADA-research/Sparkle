@@ -260,10 +260,11 @@ class Solver(SparkleCallable):
         """Parse a configuration string to a dictionary."""
         # First we filter the configuration of unwanted characters
         config_str = config_str.strip().replace("-", "")
-        if config_str == "" or config_str == r"{}":
-            return {}
         # Then we split the string by spaces, but conserve substrings
         config_list = shlex.split(config_str)
+        # We return empty for empty input OR uneven input
+        if config_str == "" or config_str == r"{}" or len(config_list) & 1:
+            return {}
         config_dict = {}
         for index in range(0, len(config_list), 2):
             # As the value will already be a string object, no quotes are allowed in it
