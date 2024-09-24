@@ -104,11 +104,9 @@ Sparkle has a variety of tests to make sure our changes impact the code base in 
 
 ### Unit tests
 
-Sparkle aims to have an extensive test coverage of the functionalities.
-We use the `pytest` platform to automate the testing.
-When writing new code you should create relevant tests in the `tests` directory.
-To see a simple example of the tests, you can check the file `tests/test_about.py`.
-You should also read the [pytest documentation](https://docs.pytest.org).
+Sparkle aims to have an extensive test coverage of the functionalities. We use the `pytest` platform to automate the testing. The unit tests are considered "Golden master tests", as they give a specific input to a unit of code and expect a specific output.
+
+When writing new code you should create relevant tests in the `tests` directory. To see a simple example of the tests, you can check the file `tests/test_about.py`. You should also read the [pytest documentation](https://docs.pytest.org).
 
 To run the test you can simply run
 ```
@@ -116,8 +114,7 @@ $ pytest
 ```
 pytest is installed with the base requirements of Sparkle and is run automatically on pull request.
 
-### Integration tests
+### End-to-end tests
 
-In addition to the unit tests, Sparkle also has a series of integration tests verifying that the commands run without errors.
-These tests are in `tests/CLI/*`. In general these have been designed to run on a Slurm cluster, however some have been made available to run locally on Linux/MacOS. It is imperative that it functions on Slurm, and ideally has the same behaviour locally/without Slurm.
+In addition to the unit tests, Sparkle also has a series of end-to-end smoke tests that verify the commands to run without errors. These tests are in `tests/CLI/*`. In general these have been designed to run on a Slurm cluster, however some have been made available to run locally on Linux. It is imperative that it functions on Slurm, and ideally has the same behaviour locally/without Slurm.
 
