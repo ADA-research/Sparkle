@@ -31,4 +31,7 @@ If applicable, add screenshots to help explain your problem. If the output is te
  - Version [e.g. 22]
 
 **Additional context**
-Add any other context about the problem here.
+Add any other context about the problem here, such as:
+- The Solver wrapper script for your algorithm
+- An link to your data set, or, if impossible, a description of your data set and preferably a dummy version for reproduction
+- A copy of your `Output/Logs/` directory
