@@ -1,4 +1,4 @@
-"""Test public methods of configurator class."""
+"""Test public methods of SMAC2 configurator class."""
 
 from __future__ import annotations
 
@@ -38,10 +38,10 @@ conf_scenario = SMAC2Scenario(
         SMAC2.configurator_path / SMAC2.target_algorithm))
 
 
-class TestConfigurator():
-    """Class bundling all tests regarding Configurator."""
+class TestConfiguratorSMAC2():
+    """Class bundling all tests regarding SMAC2 Configurator."""
 
-    def test_init(self: TestConfigurator) -> None:
+    def test_init(self: TestConfiguratorSMAC2) -> None:
         """Test that Configurator initialization calls create_scenario() correctly."""
         exec_path = Path("dir/exec.exe")
         configurator = Configurator(
@@ -55,7 +55,7 @@ class TestConfigurator():
 
         assert configurator.executable_path == exec_path
 
-    def test_smac2_init(self: TestConfigurator) -> None:
+    def test_smac2_init(self: TestConfiguratorSMAC2) -> None:
         """Testing SMAC2 configurator initialisation."""
         conf = SMAC2(objectives, base_dir, output)
         assert conf.base_dir == base_dir
@@ -64,7 +64,7 @@ class TestConfigurator():
         assert conf.multiobjective is False
         assert conf.tmp_path == output / SMAC2.__name__ / "tmp"
 
-    def test_smac2_configure(self: TestConfigurator,
+    def test_smac2_configure(self: TestConfiguratorSMAC2,
                              monkeypatch: pytest.fixture) -> None:
         """Testing configure call of SMAC2."""
         # Testing without validation afterwards
@@ -91,7 +91,7 @@ class TestConfigurator():
 
         # TODO: Test with validation_after=True
 
-    def test_smac2_get_optimal_configuration(self: TestConfigurator,
+    def test_smac2_get_optimal_configuration(self: TestConfiguratorSMAC2,
                                              mocker: Mock) -> None:
         """Tests the retrieval of the optimal configuration from SMAC2 run."""
         # Mock the validator call
@@ -112,7 +112,7 @@ class TestConfigurator():
                        "'32'")
         assert opt_conf == expect_conf
 
-    def test_smac2_organise_output(self: TestConfigurator) -> None:
+    def test_smac2_organise_output(self: TestConfiguratorSMAC2) -> None:
         """Testing SMAC2 ability to retrieve output from raw file."""
         raw_out = test_files / "Configuration/PbO-CCSAT-Generic_PTN_seed_3_smac.txt"
         # By not specifiying an output file, the result is returned to us
@@ -125,7 +125,7 @@ class TestConfigurator():
             "-sel_var_break_tie_greedy '4' -sel_var_div '2' -threshold_swt '32'")
         assert SMAC2.organise_output(raw_out) == expected
 
-    def test_smac2_get_status_from_logs(self: TestConfigurator) -> None:
+    def test_smac2_get_status_from_logs(self: TestConfiguratorSMAC2) -> None:
         """Testing status retrievel from logs."""
         # TODO: Write test
         return
