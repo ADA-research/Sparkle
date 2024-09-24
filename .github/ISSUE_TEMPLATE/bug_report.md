@@ -12,6 +12,7 @@ A clear and concise description of what the bug is. What were you trying to acco
 
 **To Reproduce**
 What is the result you get? Explain step wise a minimal reproducible example e.g.:
+*Please include your sparkle_settings.ini file here*
 
 Steps to reproduce the behavior:
 1. Go to '...'

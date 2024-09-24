@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-*Description*
+**Description**
 Give a general description of your problem. *If you're having issues with running Sparkle's code, consider submitting a BUG report instead*. Don't forget to introduce your context of the situation.
 
 - Please add visuals to your issue description if possible, such as screenshots or drawings
