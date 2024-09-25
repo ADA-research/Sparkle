@@ -1,6 +1,8 @@
 name: CodeCoverage
 
-on: [push]
+on: # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
 
 jobs:
   Code-Coverage:
