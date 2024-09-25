@@ -1,4 +1,4 @@
-name: TestCodeCoverage
+name: CodeCoverage
 
 on: [push]
 
@@ -24,7 +24,6 @@ jobs:
       run: |
         conda install -y python=3.10.14 # https://github.com/conda/conda/issues/13560#issuecomment-1992720842
         conda env update --file dev-env.yml --name base
-      run: |
         pip install genbadge[coverage]
     - name: Run Code Coverage report
       run: pytest --cov sparkle/ --cov-report=xml
