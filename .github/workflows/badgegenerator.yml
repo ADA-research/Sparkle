@@ -1,8 +1,10 @@
-name: CodeCoverage
+name: Badge Generator
 
-on: # Runs on pushes targeting the default branch
-  push:
-    branches: ["main"]
+#on: # Runs on pushes targeting the default branch
+#  push:
+#    branches: ["main"]
+
+on: [push]
 
 jobs:
   Code-Coverage:
@@ -30,17 +32,20 @@ jobs:
         conda env update --file dev-env.yml --name base
         pip install genbadge[coverage]
     - name: Run Code Coverage report
-      run: pytest --cov sparkle/ --cov-report=xml
-    - name: Run badge generator
-      run: genbadge coverage -i coverage.xml -o .reports/coverage/coverage-badge.svg
+      run:  pytest --cov sparkle/ --cov-report=xml:.reports/coverage/coverage.xml
+    - name: Run badge generator coverage
+      run: genbadge coverage -i .reports/coverage/coverage.xml -o .reports/coverage/coverage-badge.svg
+    - name: Run tests report
+      run: pytest --junitxml .reports/junit/junit.xml
+    - name: Create tests badge
+      run: genbadge tests -i .reports/junit/junit.xml -o .reports/junit/junit-badge.svg
     - name: Commit to branch
       run: |
-        git diff --quiet .reports/coverage/coverage-badge.svg || {
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com";
-          git config --global user.name "github-actions[bot]";
-          git add .reports/coverage;
-          git commit -m "Update badge";
-          git push; }
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com";
+        git config --global user.name "github-actions[bot]";
+        git diff --quiet .reports/coverage || git add .reports/coverage
+        git diff --quiet .reports/junit || git add .reports/junit
+        git diff --quiet .reports/ || { git commit -m "Update badge"; git push; }
 
     - name: Archive outputs
       uses: actions/upload-artifact@v4

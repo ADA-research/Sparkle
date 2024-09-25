@@ -1,6 +1,7 @@
 # _Sparkle_
 
-![tests](https://github.com/ada-research/sparkle/actions/workflows/unittest.yml/badge.svg?event=push)
+![tests](.reports/junit/junit-badge.svg)
+![tests status](https://github.com/ada-research/sparkle/actions/workflows/unittest.yml/badge.svg?event=push)
 ![Coverage Status](.reports/coverage/coverage-badge.svg)
 ![linter](https://github.com/ada-research/sparkle/actions/workflows/linter.yml/badge.svg?event=push)
 
