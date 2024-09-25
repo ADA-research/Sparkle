@@ -1,6 +1,6 @@
 name: CodeCoverage
 
-on: [push]
+on: ["push"]
 
 jobs:
   Code-Coverage:
@@ -31,13 +31,14 @@ jobs:
       run: pytest --cov sparkle/ --cov-report=xml
     - name: Run badge generator
       run: genbadge coverage -i coverage.xml -o .reports/coverage/coverage-badge.svg
+    if: ${{ git diff .reports/coverage/coverage-badge.svg }}
     - name: Commit badge
-      run: |
-        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git config --global user.name "github-actions[bot]"
-        git add .reports/coverage
-        git commit -m "Update badge"
-        git push
+        run: |
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add .reports/coverage
+          git commit -m "Update badge"
+          git push
 
     - name: Archive outputs
       uses: actions/upload-artifact@v4
