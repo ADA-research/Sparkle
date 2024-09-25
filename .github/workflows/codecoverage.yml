@@ -33,11 +33,11 @@ jobs:
       run: genbadge coverage -i coverage.xml -o .reports/coverage/coverage-badge.svg
     - name: Commit to branch
       run: |
-        git diff-index --quiet HEAD || git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git diff-index --quiet HEAD || git config --global user.name "github-actions[bot]"
-        git diff-index --quiet HEAD || git add .reports/coverage
-        git diff-index --quiet HEAD || git commit -m "Update badge"
-        git diff-index --quiet HEAD || git push
+        git diff-index --quiet HEAD || { git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com";
+                                         git config --global user.name "github-actions[bot]";
+                                         git add .reports/coverage;
+                                         git commit -m "Update badge";
+                                         git push; }
 
     - name: Archive outputs
       uses: actions/upload-artifact@v4
