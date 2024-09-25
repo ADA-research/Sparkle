@@ -1,10 +1,8 @@
 name: Badge Generator
 
-#on: # Runs on pushes targeting the default branch
-#  push:
-#    branches: ["main"]
-
-on: [push]
+on: # Runs on pushes targeting the main branch
+  push:
+    branches: ["main"]
 
 jobs:
   Code-Coverage:
