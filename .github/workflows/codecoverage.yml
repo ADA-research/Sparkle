@@ -1,6 +1,6 @@
 name: CodeCoverage
 
-on: ["push"]
+on: [push]
 
 jobs:
   Code-Coverage:
