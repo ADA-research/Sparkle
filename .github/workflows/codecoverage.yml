@@ -31,7 +31,9 @@ jobs:
       run: pytest --cov sparkle/ --cov-report=xml
     - name: Run badge generator
       run: genbadge coverage -i coverage.xml -o .reports/coverage/coverage-badge.svg
+
   Commit-Badge:
+    needs: Code-Coverage
     if: git diff .reports/coverage/coverage-badge.svg
     - name: Commit to branch
         run: |
