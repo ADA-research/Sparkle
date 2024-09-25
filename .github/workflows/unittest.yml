@@ -3,7 +3,7 @@ name: Unittest
 on: [pull_request]
 
 jobs:
-  build-linux:
+  pytest:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5

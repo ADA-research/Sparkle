@@ -3,7 +3,7 @@ name: Lint
 on: [pull_request]
 
 jobs:
-  build-linux:
+  flake8:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
