@@ -1,6 +1,8 @@
 # _Sparkle_
 
 ![tests](https://github.com/ada-research/sparkle/actions/workflows/unittest.yml/badge.svg?event=push)
+![tests](https://github.com/ada-research/sparkle/actions/workflows/linter.yml/badge.svg?event=push)
+![tests](https://github.com/ada-research/sparkle/actions/workflows/documentation.yml/badge.svg?branch=main)
 
 > A Programming by Optimisation (PbO)-based problem-solving platform designed to enable the widespread and effective use of PbO techniques for improving the state-of-the-art in solving a broad range of prominent AI problems, including SAT and AI Planning.
 
