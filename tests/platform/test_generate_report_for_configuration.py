@@ -19,8 +19,11 @@ import csv
 class TestGenerateConfigurationReport(TestCase):
     """Tests function of generate_report_for_configuration."""
 
-    def setUp(self: TestGenerateConfigurationReport) -> None:
+    @patch("pathlib.Path.mkdir")
+    def setUp(self: TestGenerateConfigurationReport,
+              mock_mkdir: Mock) -> None:
         """Setup executed before each test."""
+        mock_mkdir.return_value = None
         self.test_objective_runtime = PAR(10)
         self.test_objective_quality = SparkleObjective("ACCURACY")
         self.configurator = SMAC2([self.test_objective_runtime], Path(), Path())
