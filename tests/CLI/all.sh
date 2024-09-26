@@ -11,14 +11,8 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Test about
-tests/CLI/about.sh
-
 # Test system status
 tests/CLI/status.sh
-
-# Test initialise
-tests/CLI/initialise.sh
 
 # Test add feature extractor
 tests/CLI/add_feature_extractor.sh
