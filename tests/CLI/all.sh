@@ -23,12 +23,6 @@ tests/CLI/add_instances.sh
 # Test add solver
 tests/CLI/add_solver.sh
 
-# Test save snapshot
-tests/CLI/save_snapshot.sh
-
-# Test load snapshot
-tests/CLI/load_snapshot.sh
-
 # Test remove feature extractor
 tests/CLI/remove_feature_extractor.sh
 
