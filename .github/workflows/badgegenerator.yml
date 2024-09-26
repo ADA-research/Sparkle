@@ -30,11 +30,11 @@ jobs:
         conda env update --file dev-env.yml --name base
         pip install genbadge[coverage]
     - name: Run Code Coverage report
-      run:  pytest --all --cov sparkle/ --cov-report=xml:.reports/coverage/coverage.xml
+      run:  pytest --all --cov sparkle/ --cov-report=xml:.reports/coverage/coverage.xml --cov-report=html:.reports/coverage/
     - name: Run badge generator coverage
       run: genbadge coverage -i .reports/coverage/coverage.xml -o .reports/coverage/coverage-badge.svg
     - name: Run tests report
-      run: pytest --junitxml .reports/junit/junit.xml
+      run: pytest --all --junitxml=.reports/junit/junit.xml --html=.reports/junit/junit.html
     - name: Create tests badge
       run: genbadge tests -i .reports/junit/junit.xml -o .reports/junit/junit-badge.svg
     - name: Commit to branch

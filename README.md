@@ -1,8 +1,8 @@
 # _Sparkle_
 
-![tests](.reports/junit/junit-badge.svg)
 ![tests status](https://github.com/ada-research/sparkle/actions/workflows/unittest.yml/badge.svg?event=push)
-![Coverage Status](.reports/coverage/coverage-badge.svg)
+[![tests](.reports/junit/junit-badge.svg)](.reports/junit/junit.html)
+[![Coverage Status](.reports/coverage/coverage-badge.svg)](.reports/coverage/class_index.html)
 ![linter](https://github.com/ada-research/sparkle/actions/workflows/linter.yml/badge.svg?event=push)
 ![docs](https://github.com/ada-research/sparkle/actions/workflows/documentation.yml/badge.svg?event=push)
 
@@ -38,7 +38,7 @@ and run:
 conda env create -f environment.yml
 ```
 
-The installation of the environment may up to five minutes depending on your internet connection.
+The installation of the environment may take up to five minutes depending on your internet connection.
 Once the environment has been created it can be activated by:
 
 ```
