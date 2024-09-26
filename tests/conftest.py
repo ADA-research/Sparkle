@@ -4,15 +4,17 @@ import pytest
 
 def pytest_addoption(parser: pytest.Parser) -> None:
     """Adding options to the Pytest args."""
-    parser.addoption("--cli", "--CLI", action="store_true", dest="CLI",
-                     default=False, help="enable CLI decorated tests")
-    parser.addoption("--only-cli", "--only-CLI", action="store_true", dest="only_cli",
-                     default=False, help="only run CLI decorated tests")
+    parser.addoption("--integration", "--cli", "--CLI", action="store_true", dest="CLI",
+                     default=False, help="enable integration (e.g. CLI) decorated tests")
+    parser.addoption("--all", action="store_true", dest="all",
+                     default=False, help="run all tests")
 
 
 def pytest_configure(config: pytest.Parser) -> None:
     """Handling custom Pytest args."""
-    if not config.option.CLI and not config.option.only_cli:
-        setattr(config.option, "markexpr", "not CLI")
-    elif config.option.only_cli:
-        setattr(config.option, "markexpr", "CLI")
+    if config.option.all:
+        return
+    if config.option.CLI:
+        setattr(config.option, "markexpr", "integration")
+    else:
+        setattr(config.option, "markexpr", "not integration")
