@@ -1,5 +1,7 @@
 # _Sparkle_
 
+[![Tests Status](.reports/junit/junit-badge.svg)](.reports/junit/junit.html)
+
 ![tests status](https://github.com/ada-research/sparkle/actions/workflows/unittest.yml/badge.svg?event=push)
 [![tests](.reports/junit/junit-badge.svg)](.reports/junit/junit.html)
 [![Coverage Status](.reports/coverage/coverage-badge.svg)](.reports/coverage/class_index.html)
