@@ -5,11 +5,9 @@
 
 # _Sparkle_
 
-```{eval-rst}
-just `click here <_static/.reports/junit/junit.html>`_ now!
-```
-
-[![Coverage Status](../../.reports/coverage/coverage-badge.svg)](../../.reports/coverage/class_index.html)
+![Tests](../../.reports/junit/junit-badge.svg)
+![tests status](https://github.com/ada-research/sparkle/actions/workflows/unittest.yml/badge.svg?event=push)
+![Coverage Status](../../.reports/coverage/coverage-badge.svg)
 ![linter](https://github.com/ada-research/sparkle/actions/workflows/linter.yml/badge.svg?event=push)
 ![docs](https://github.com/ada-research/sparkle/actions/workflows/documentation.yml/badge.svg?event=push)
 
