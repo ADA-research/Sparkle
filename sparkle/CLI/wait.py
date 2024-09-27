@@ -6,11 +6,11 @@ import time
 import argparse
 from pathlib import Path
 
-from runrunner.slurm import SlurmRun
 from runrunner.base import Status
 from tabulate import tabulate
 
 from sparkle.platform.cli_types import VerbosityLevel, TEXT
+from sparkle.CLI.help import jobs as jobs_help
 from sparkle.CLI.help import logging
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help import global_variables as gv
@@ -27,29 +27,6 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-def get_runs_from_file(path: Path, print_error: bool = False) -> list[SlurmRun]:
-    """Retrieve all run objects from file storage.
-
-    Args:
-        path: Path object where to look recursively for the files.
-
-    Returns:
-        List of all found SlumRun objects.
-    """
-    runs = []
-    for file in path.rglob("*.json"):
-        # TODO: RunRunner should be adapted to have more general methods for runs
-        # So this method can work for both local and slurm
-        try:
-            run_obj = SlurmRun.from_file(file)
-            runs.append(run_obj)
-        except Exception as ex:
-            # Not a (correct) RunRunner JSON file
-            if print_error:
-                print(f"[WARNING] Could not load file: {file}. Exception: {ex}")
-    return runs
-
-
 def wait_for_jobs(path: Path,
                   check_interval: int,
                   verbosity: VerbosityLevel = VerbosityLevel.STANDARD,
@@ -64,7 +41,7 @@ def wait_for_jobs(path: Path,
         filter: If present, only show the given job ids.
     """
     # Filter jobs on relevant status
-    jobs = [run for run in get_runs_from_file(path)
+    jobs = [run for run in jobs_help.get_runs_from_file(path)
             if run.status == Status.WAITING or run.status == Status.RUNNING]
 
     if filter is not None:
@@ -138,7 +115,8 @@ def wait_for_jobs(path: Path,
     print("All jobs done!")
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the wait command."""
     # Log command call
     logging.log_command(sys.argv)
 
@@ -146,7 +124,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     check_interval = gv.settings().get_general_check_interval()
     verbosity = gv.settings().get_general_verbosity()
@@ -155,3 +133,7 @@ if __name__ == "__main__":
                   check_interval=check_interval,
                   verbosity=verbosity,
                   filter=args.job_ids)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
