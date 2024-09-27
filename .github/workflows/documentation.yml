@@ -1,5 +1,5 @@
 # Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+name: Deploy Documentation
 
 on: # Runs on pushes targeting the default branch
   push:
@@ -39,10 +39,11 @@ jobs:
         run: |
           conda install -y python=3.9 # https://github.com/conda/conda/issues/13560#issuecomment-1992720842
           conda env update --file dev-env.yml --name base
-          pip install sphinx sphinx_rtd_theme myst_parser sphinxcontrib-autoprogram
-      - name: Compile code reports
-        run: pytest --all --cov sparkle/ --cov-report=html:Documentation/source/_static/coverage
-             pytest --all --html=Documentation/source/_static/junit/index.html
+          pip install -r Documentation/requirements.txt
+      - name: Run Code Coverage report
+        run:  pytest --all --cov sparkle/ --cov-report=html:Documentation/source/_static/coverage
+      - name: Run tests report
+        run: pytest --all --html=Documentation/source/_static/junit/index.html
       - name: Build Documentation
         run: |
           cd Documentation
