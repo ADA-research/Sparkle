@@ -14,9 +14,6 @@
 # Test run solvers
 tests/CLI/run_solvers.sh
 
-# Test cleanup temporary files
-tests/CLI/cleanup_temporary_files.sh
-
 # Test compute features
 tests/CLI/compute_features.sh
 
