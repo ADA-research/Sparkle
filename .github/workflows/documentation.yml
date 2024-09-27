@@ -40,10 +40,11 @@ jobs:
           conda install -y python=3.9 # https://github.com/conda/conda/issues/13560#issuecomment-1992720842
           conda env update --file dev-env.yml --name base
           pip install -r Documentation/requirements.txt
+          pip install genbadge[tests,coverage]
       - name: Run Code Coverage report
-        run:  pytest --all --cov sparkle/ --cov-report=html:Documentation/source/_static/coverage
+        run:  pytest --all --cov sparkle/ --cov-report=xml:Documentation/source/_static/coverage/coverage.xml --cov-report=html:Documentation/source/_static/coverage
       - name: Run tests report
-        run: pytest --all --html=Documentation/source/_static/junit/index.html
+        run: pytest --all --junitxml=Documentation/source/_static/junit/junit.xml --html=Documentation/source/_static/junit/index.html
       - name: Build Documentation
         run: |
           cd Documentation

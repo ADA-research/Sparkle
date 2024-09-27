@@ -5,10 +5,10 @@
 
 # _Sparkle_
 ```{eval-rst}
-.. image:: ../../.reports/junit/junit-badge.svg
+.. image:: _static/junit/junit-badge.svg
    :target: _static/junit/index.html
    :alt: Unit tests
-.. image:: ../../.reports/coverage/coverage-badge.svg
+.. image:: _static/coverage/coverage-badge.svg
    :target: _static/coverage/index.html
    :alt: Test Coverage
 .. image:: https://github.com/ada-research/sparkle/actions/workflows/unittest.yml/badge.svg?event=push
