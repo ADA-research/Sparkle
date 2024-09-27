@@ -19,6 +19,7 @@ def test_add_remove_solver_command(tmp_path: Path,
         remove_solver.main([solver_path.name])
         assert pytest_wrapped_e.type is SystemExit
         assert pytest_wrapped_e.value.code == 0
-        # TODO: Test removing with solver directory path
-        # TODO: Test adding / removing with nicknames
-        # TODO: Test removing with non solver name/paths for failure
+
+# TODO: Test removing with solver directory path
+# TODO: Test adding / removing with nicknames
+# TODO: Test removing with non solver name/paths for failure

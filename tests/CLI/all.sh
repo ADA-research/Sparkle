@@ -14,18 +14,6 @@
 # Test system status
 tests/CLI/status.sh
 
-# Test add feature extractor
-tests/CLI/add_feature_extractor.sh
-
-# Test add instances
-tests/CLI/add_instances.sh
-
-# Test remove feature extractor
-tests/CLI/remove_feature_extractor.sh
-
-# Test remove instances
-tests/CLI/remove_instances.sh
-
 # Test run solvers
 tests/CLI/run_solvers.sh
 

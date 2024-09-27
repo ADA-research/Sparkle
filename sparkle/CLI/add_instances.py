@@ -36,7 +36,8 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the add instances command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -106,3 +107,7 @@ if __name__ == "__main__":
 
     # Write used settings to file
     gv.settings().write_used_settings()
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
