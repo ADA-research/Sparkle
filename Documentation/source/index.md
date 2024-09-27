@@ -5,7 +5,7 @@
 
 # _Sparkle_
 
-![Tests](../../.reports/junit/junit-badge.svg)
+[![Tests](../../.reports/junit/junit-badge.svg)](_static/coverage/index.html)
 ![tests status](https://github.com/ada-research/sparkle/actions/workflows/unittest.yml/badge.svg?event=push)
 ![Coverage Status](../../.reports/coverage/coverage-badge.svg)
 ![linter](https://github.com/ada-research/sparkle/actions/workflows/linter.yml/badge.svg?event=push)
