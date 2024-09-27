@@ -1,9 +1,7 @@
 # _Sparkle_
 
-[![Tests Status](.reports/junit/junit-badge.svg)](.reports/junit/junit.html)
-
+[![Tests](.reports/junit/junit-badge.svg)](.reports/junit/junit.html)
 ![tests status](https://github.com/ada-research/sparkle/actions/workflows/unittest.yml/badge.svg?event=push)
-[![tests](.reports/junit/junit-badge.svg)](.reports/junit/junit.html)
 [![Coverage Status](.reports/coverage/coverage-badge.svg)](.reports/coverage/class_index.html)
 ![linter](https://github.com/ada-research/sparkle/actions/workflows/linter.yml/badge.svg?event=push)
 ![docs](https://github.com/ada-research/sparkle/actions/workflows/documentation.yml/badge.svg?event=push)
@@ -21,8 +19,6 @@ Furthermore, Sparkle handles various tasks for the user such as:
  * Instance/Data Set management and feature extraction
  * Compute cluster job submission and monitoring
  * Log file collection
-
-(quick-install)=
 
 ## Installation
 
