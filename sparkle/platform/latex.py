@@ -51,6 +51,8 @@ def list_to_latex(content: list | list[tuple]) -> str:
     Returns:
         The list as LaTeX str.
     """
+    if len(content) == 0:
+        return "\\item"
     if isinstance(content[0], tuple):
         return "".join(f"\\item \\textbf{{{item[0]}}}{item[1]}" for item in content)
     return "".join(f"\\item {item}\n" for item in content)
@@ -99,9 +101,8 @@ def generate_comparison_plot(points: list,
 
     df = pd.DataFrame(points, columns=[xlabel, ylabel])
     if replace_zeros and (df < 0).any(axis=None):
-        print("WARNING: Negative valued performance values detected. Setting"
-              f" these values to {0.0}.")
-        df[df < 0] = 0.0
+        # Log scale cannot deal with negative and zero values, set to smallest non zero
+        df[df < 0] = np.nextafter(0, 1)
 
     # process range values
     min_point_value = df.min(numeric_only=True).min()

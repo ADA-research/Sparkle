@@ -90,7 +90,7 @@ When releasing a new version (including bugfix versions) of Sparkle to the `main
 2. Update and commit `CHANGELOG.md` by creating a header with the release number and date; move everything from the `[unreleased]` header to the new release header (leaving the `[unreleased]` header empty for the next release).
 3. Update and commit `sparkle/about.py` by changing the version number.
 4. If there were updates to the CLI and/or the examples.md, make sure to re-compile their files for the Documentation. Run `md_to_sh.py` in the Documentation directory to compile the example .mds to executable .sh files, and run `command_descriptions.py` to automatically re-create the documentation for the CLI commands and their arguments. Run `mod_descriptions.py` to update the package descriptions. The documentation itself is after release automatically compiled and deployed to github pages.
-4. Create the compiled zip for PyPi by running `python setup.py sdist bdist_wheel`. Delete build directory and the wheel file, and commit it.
+4. Create the compiled zip for PyPi by running `python setup.py sdist` and commit it.
 5. Merge the new version branch into both `development` and `main`, DO NOT delete the version branch!
 6. Upload the zip to PyPi with `twine upload $ZIPFILE_PATH`
 
@@ -104,11 +104,9 @@ Sparkle has a variety of tests to make sure our changes impact the code base in 
 
 ### Unit tests
 
-Sparkle aims to have an extensive test coverage of the functionalities.
-We use the `pytest` platform to automate the testing.
-When writing new code you should create relevant tests in the `tests` directory.
-To see a simple example of the tests, you can check the file `tests/test_about.py`.
-You should also read the [pytest documentation](https://docs.pytest.org).
+Sparkle aims to have an extensive test coverage of the functionalities. We use the `pytest` platform to automate the testing. The unit tests are considered "Golden master tests", as they give a specific input to a unit of code and expect a specific output.
+
+When writing new code you should create relevant tests in the `tests` directory. To see a simple example of the tests, you can check the file `tests/test_about.py`. You should also read the [pytest documentation](https://docs.pytest.org).
 
 To run the test you can simply run
 ```
@@ -116,8 +114,7 @@ $ pytest
 ```
 pytest is installed with the base requirements of Sparkle and is run automatically on pull request.
 
-### Integration tests
+### End-to-end tests
 
-In addition to the unit tests, Sparkle also has a series of integration tests verifying that the commands run without errors.
-These tests are in `tests/CLI/*`. In general these have been designed to run on a Slurm cluster, however some have been made available to run locally on Linux/MacOS. It is imperative that it functions on Slurm, and ideally has the same behaviour locally/without Slurm.
+In addition to the unit tests, Sparkle also has a series of end-to-end smoke tests that verify the commands to run without errors. These tests are in `tests/CLI/*`. In general these have been designed to run on a Slurm cluster, however some have been made available to run locally on Linux. It is imperative that it functions on Slurm, and ideally has the same behaviour locally/without Slurm.
 

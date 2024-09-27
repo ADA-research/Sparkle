@@ -6,6 +6,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from scipy.stats import linregress
+
 from sparkle.platform import latex as stex
 from sparkle.solver.ablation import AblationScenario
 from sparkle.solver.validator import Validator
@@ -157,15 +159,14 @@ def get_figure_configure_vs_default(configured_results: list[list[str]],
                    "scale": "linear",
                    "limit_min": 1.5,
                    "limit_max": 1.5,
-                   "limit": "relative",
                    "replace_zeros": False,
                    "output_dir": target_directory
                    }
-    if performance_measure[0:3] == "PAR":
+    # Check if the scale of the axis can be considered linear
+    linearity_x = linregress([p[0] for p in points], range(len(points))).rvalue > 0.5
+    linearity_y = linregress([p[1] for p in points], range(len(points))).rvalue > 0.5
+    if not linearity_x or not linearity_y:
         plot_params["scale"] = "log"
-        plot_params["limit_min"] = 0.25
-        plot_params["limit_max"] = 0.25
-        plot_params["limit"] = "magnitude"
         plot_params["replace_zeros"] = True
 
     stex.generate_comparison_plot(points,
@@ -403,6 +404,8 @@ def get_dict_variable_to_value_common(solver: Solver,
     res_conf = validator.get_validation_results(
         solver, train_set, config=opt_config)
     instance_names = set([res[3] for res in res_default])
+    opt_config_list = [f"{key}: {value}" for key, value in
+                       Solver.config_str_to_dict(opt_config).items()]
 
     latex_dict = {"bibliographypath": bibliography_path.absolute()}
     latex_dict["performanceMeasure"] = objective.name
@@ -423,7 +426,7 @@ def get_dict_variable_to_value_common(solver: Solver,
     latex_dict["smacObjective"] = smac_run_obj
     latex_dict["smacWholeTimeBudget"] = configurator.scenario.wallclock_time
     latex_dict["smacEachRunCutoffTime"] = run_cutoff_time
-    latex_dict["optimisedConfiguration"] = opt_config
+    latex_dict["optimisedConfiguration"] = stex.list_to_latex(opt_config_list)
     latex_dict["optimisedConfigurationTrainingPerformancePAR"] =\
         get_average_performance(res_conf, objective)
     latex_dict["defaultConfigurationTrainingPerformancePAR"] =\

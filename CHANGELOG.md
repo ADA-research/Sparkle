@@ -2,6 +2,12 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.8.9] - 2024/09/27
+- Various updates to Documentation, automated testing and CI pipelines
+
+### Fixed
+- Bugfix for generating figures in report generation for 'configuration_quality' tutorial
+
 ## [0.8.8] - 2024/09/20
 
 ### Changed

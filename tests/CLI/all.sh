@@ -11,14 +11,8 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Test about
-tests/CLI/about.sh
-
 # Test system status
 tests/CLI/status.sh
-
-# Test initialise
-tests/CLI/initialise.sh
 
 # Test add feature extractor
 tests/CLI/add_feature_extractor.sh
@@ -28,12 +22,6 @@ tests/CLI/add_instances.sh
 
 # Test add solver
 tests/CLI/add_solver.sh
-
-# Test save snapshot
-tests/CLI/save_snapshot.sh
-
-# Test load snapshot
-tests/CLI/load_snapshot.sh
 
 # Test remove feature extractor
 tests/CLI/remove_feature_extractor.sh

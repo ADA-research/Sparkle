@@ -1,5 +1,7 @@
 *.pyc
 *.egg-info
+.coverage
+.xml
 Reference_Lists/*
 Solvers/*
 Extractors/*
