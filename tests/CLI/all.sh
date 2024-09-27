@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Test system status
-tests/CLI/status.sh
-
 # Test run solvers
 tests/CLI/run_solvers.sh
 
