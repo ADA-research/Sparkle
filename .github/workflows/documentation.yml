@@ -45,6 +45,10 @@ jobs:
         run:  pytest --all --cov sparkle/ --cov-report=xml:Documentation/source/_static/coverage/coverage.xml --cov-report=html:Documentation/source/_static/coverage
       - name: Run tests report
         run: pytest --all --junitxml=Documentation/source/_static/junit/junit.xml --html=Documentation/source/_static/junit/index.html
+      - name: Generate coverage badge
+        run: genbadge coverage -i Documentation/source/_static/coverage/coverage.xml -o Documentation/source/_static/coverage/coverage-badge.svg
+      - name: Generate tests badge
+        run: genbadge tests -i Documentation/source/_static/junit/junit.xml -o Documentation/source/_static/junit/junit-badge.svg
       - name: Build Documentation
         run: |
           cd Documentation
