@@ -41,7 +41,8 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -49,7 +50,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     solver_source = Path(args.solver_path)
     deterministic = args.deterministic
 
@@ -140,7 +141,7 @@ if __name__ == "__main__":
 
         dependency_run_list.append(run_construct_portfolio_selector)
 
-        run_generate_report = rrr.add_to_queue(
+        rrr.add_to_queue(
             cmd="sparkle/CLI/generate_report.py",
             name=CommandName.GENERATE_REPORT,
             dependencies=dependency_run_list,
@@ -150,3 +151,8 @@ if __name__ == "__main__":
 
     # Write used settings to file
     gv.settings().write_used_settings()
+    sys.exit()
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

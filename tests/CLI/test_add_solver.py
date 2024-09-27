@@ -1,14 +1,18 @@
 """Test the add solver CLI entry point."""
 import pytest
 from pathlib import Path
-import subprocess
+
+from sparkle.CLI import add_solver
 
 
 @pytest.mark.integration
-def test_add_solver_command(tmp_path: Path) -> None:
+def test_add_solver_command(tmp_path: Path,
+                            monkeypatch: pytest.MonkeyPatch) -> None:
     """Test initialise command."""
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     # Smoke test
-    solver_path = Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic"
-    call = subprocess.run(["sparkle", "add", "solver", solver_path.absolute()],
-                          cwd=tmp_path)
-    assert call.returncode == 0
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        solver_path = Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic"
+        add_solver.main([str(solver_path.absolute())])
+        assert pytest_wrapped_e.type is SystemExit
+        assert pytest_wrapped_e.value.code == 0
