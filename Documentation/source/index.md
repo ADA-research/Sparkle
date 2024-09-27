@@ -4,12 +4,20 @@
 % contain the root `toctree` directive.
 
 # _Sparkle_
-
-[![Tests](../../.reports/junit/junit-badge.svg)](_static/coverage/index.html)
-![tests status](https://github.com/ada-research/sparkle/actions/workflows/unittest.yml/badge.svg?event=push)
-![Coverage Status](../../.reports/coverage/coverage-badge.svg)
-![linter](https://github.com/ada-research/sparkle/actions/workflows/linter.yml/badge.svg?event=push)
-![docs](https://github.com/ada-research/sparkle/actions/workflows/documentation.yml/badge.svg?event=push)
+```{eval-rst}
+.. image:: ../../.reports/junit/junit-badge.svg
+   :target: _static/junit/index.html
+   :alt: Unit tests
+.. image:: ../../.reports/coverage/coverage-badge.svg
+   :target: _static/coverage/index.html
+   :alt: Test Coverage
+.. image:: https://github.com/ada-research/sparkle/actions/workflows/unittest.yml/badge.svg?event=push
+   :alt: Tests passing
+.. image:: https://github.com/ada-research/sparkle/actions/workflows/linter.yml/badge.svg?event=push
+   :alt: Linter
+.. image:: https://github.com/ada-research/sparkle/actions/workflows/documentation.yml/badge.svg?event=push
+   :alt: Documentation
+```
 
 > A Programming by Optimisation (PbO)-based problem-solving platform designed to enable the widespread and effective use of PbO techniques for improving the state-of-the-art in solving a broad range of prominent AI problems, including SAT and AI Planning.
 
