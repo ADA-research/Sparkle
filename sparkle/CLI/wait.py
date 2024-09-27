@@ -7,9 +7,8 @@ import argparse
 from pathlib import Path
 
 from runrunner.base import Status
-from tabulate import tabulate
 
-from sparkle.platform.cli_types import VerbosityLevel, TEXT
+from sparkle.platform.cli_types import VerbosityLevel
 from sparkle.CLI.help import jobs as jobs_help
 from sparkle.CLI.help import logging
 from sparkle.CLI.help import argparse_custom as ac
@@ -52,9 +51,9 @@ def wait_for_jobs(path: Path,
     def signal_handler(num: int, _: any) -> None:
         """Create clean exit for CTRL + C."""
         if num == signal.SIGINT:
-            sys.exit(0)
-
+            sys.exit()
     signal.signal(signal.SIGINT, signal_handler)
+
     # If verbosity is quiet there is no need for further information
     if verbosity == VerbosityLevel.QUIET:
         prev_jobs = len(running_jobs) + 1
@@ -72,35 +71,12 @@ def wait_for_jobs(path: Path,
         # Order in which to display the jobs
         status_order = {Status.COMPLETED: 0, Status.RUNNING: 1, Status.WAITING: 2}
         while len(running_jobs) > 0:
-            # Information to be printed to the table
-            information = [["RunId", "Name", "Partition", "Status",
-                            "Dependencies", "Finished Jobs", "Run Time"]]
             running_jobs = [run for run in running_jobs
                             if run.status == Status.WAITING
                             or run.status == Status.RUNNING]
             sorted_jobs = sorted(
                 jobs, key=lambda job: (status_order.get(job.status, 4), job.run_id))
-            for job in sorted_jobs:
-                # Count number of jobs that have finished
-                finished_jobs_count = sum(1 for status in job.all_status
-                                          if status == Status.COMPLETED)
-                # Format job.status
-                status_text = \
-                    TEXT.format_text([TEXT.BOLD], job.status) \
-                    if job.status == Status.RUNNING else \
-                    (TEXT.format_text([TEXT.ITALIC], job.status)
-                        if job.status == Status.COMPLETED else job.status)
-                information.append(
-                    [job.run_id,
-                     job.name,
-                     job.partition,
-                     status_text,
-                     "None" if len(job.dependencies) == 0
-                        else ", ".join(job.dependencies),
-                     f"{finished_jobs_count}/{len(job.all_status)}",
-                     job.runtime])
-            # Print the table
-            table = tabulate(information, headers="firstrow", tablefmt="grid")
+            table = jobs_help.create_jobs_table(sorted_jobs)
             print(table)
             time.sleep(check_interval)
 
