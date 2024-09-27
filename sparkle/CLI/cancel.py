@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Command to cancel async jobs."""
 import sys
 import argparse
