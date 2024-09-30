@@ -59,11 +59,12 @@ def create_jobs_table(jobs: list[SlurmRun], markup: bool = True) -> str:
             status_text = job.status
         information.append(
             [job.run_id,
-                job.name,
-                job.partition,
-                status_text,
-                "None" if len(job.dependencies) == 0
-                else ", ".join(job.dependencies),
-                f"{finished_jobs_count}/{len(job.all_status)}",
-                job.runtime])
-    return tabulate(information, headers="firstrow", tablefmt="grid")
+             job.name,
+             job.partition,
+             status_text,
+             "None" if len(job.dependencies) == 0 else ", ".join(job.dependencies),
+             f"{finished_jobs_count}/{len(job.all_status)}",
+             job.runtime])
+    if markup:
+        return tabulate(information, headers="firstrow", tablefmt="grid")
+    return information
