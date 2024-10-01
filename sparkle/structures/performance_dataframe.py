@@ -246,10 +246,10 @@ class PerformanceDataFrame():
                 print(f"WARNING: Tried adding already existing instance {instance_name} "
                       f"to Performance DataFrame: {self.csv_filepath}")
                 return
-            # Create the missing indices
-            levels = [self.dataframe.index.levels[0].tolist(),
-                      [instance_name],
-                      self.dataframe.index.levels[2].tolist()]
+            # Create the missing indices, casting them to the correct sizes
+            levels = [self.dataframe.index.levels[0].tolist() * self.num_runs,
+                      [instance_name] * self.num_objectives * self.num_runs,
+                      self.dataframe.index.levels[2].tolist() * self.num_objectives]
             # NOTE: Did this fix Jeroen's bug? .from_arrays instead of direct constructor
             emidx = pd.MultiIndex.from_arrays(levels,
                                               names=PerformanceDataFrame.multi_dim_names)
