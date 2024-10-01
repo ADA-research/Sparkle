@@ -70,9 +70,8 @@ def running_solvers_performance_data(
     jobs = performance_dataframe.get_job_list(rerun=rerun)
     num_jobs = len(jobs)
 
-    cutoff_time_str = str(gv.settings().get_general_target_cutoff_time())
-
-    print(f"Cutoff time for each solver run: {cutoff_time_str} seconds")
+    print("Cutoff time for each solver run: "
+          f"{gv.settings().get_general_target_cutoff_time()} seconds")
     print(f"Total number of jobs to run: {num_jobs}")
 
     # If there are no jobs, stop
@@ -219,6 +218,7 @@ def main(argv: list[str]) -> None:
         recompute=args.recompute,
         also_construct_selector_and_report=args.also_construct_selector_and_report,
         run_on=run_on)
+    sys.exit(0)
 
 
 if __name__ == "__main__":
