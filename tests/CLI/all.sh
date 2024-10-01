@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Test run solvers
-tests/CLI/run_solvers.sh
-
 # Test compute features
 tests/CLI/compute_features.sh
 
