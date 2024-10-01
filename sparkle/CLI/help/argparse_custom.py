@@ -364,6 +364,11 @@ SnapshotArgument = ArgumentContainer(names=["snapshot_file_path"],
                                              "type": str,
                                              "help": "path to the snapshot file"})
 
+SnapshotNameArgument = ArgumentContainer(names=["--name"],
+                                         kwargs={"required": False,
+                                                 "type": str,
+                                                 "help": "name of the snapshot"})
+
 SolverArgument = ArgumentContainer(names=["--solver"],
                                    kwargs={"required": True,
                                            "type": Path,

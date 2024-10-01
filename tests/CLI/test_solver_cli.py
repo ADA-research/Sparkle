@@ -1,11 +1,10 @@
 """Test the solver CLI entry points."""
-import os
 import pytest
 from pathlib import Path
 
 from sparkle.CLI import add_solver, remove_solver, run_solvers
 from sparkle.CLI import add_instances
-from sparkle.CLI import wait
+from tests.CLI import tools as cli_tools
 
 
 @pytest.mark.integration
@@ -67,9 +66,4 @@ def test_run_solvers(tmp_path: Path,
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
-    # TODO: Cancel slurm jobs with Sparkle command
-    command_log_dir = sorted([p for p in (Path("Output") / "Log").iterdir()],
-                             key=lambda p: os.stat(p).st_mtime)[-1]
-    jobs = wait.get_runs_from_file(command_log_dir)
-    for j in jobs:
-        j.kill()
+    cli_tools.kill_slurm_jobs()

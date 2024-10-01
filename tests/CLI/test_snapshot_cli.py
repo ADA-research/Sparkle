@@ -34,3 +34,4 @@ def test_save_command(tmp_path: Path,
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
     # TODO: Check if the saved snapshot exists
+    # TODO: Test with name argument

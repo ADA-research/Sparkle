@@ -46,14 +46,15 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Run the validate configured vs default command."""
     # Log command call
     sl.log_command(sys.argv)
 
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     solver = resolve_object_name(args.solver,
                                  gv.solver_nickname_mapping,
                                  gv.settings().DEFAULT_solver_dir,
@@ -139,3 +140,8 @@ if __name__ == "__main__":
     gv.settings().write_used_settings()
     # Write used scenario to file
     gv.latest_scenario().write_scenario_ini()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

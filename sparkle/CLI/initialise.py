@@ -89,7 +89,7 @@ def initialise_sparkle(download_examples: bool = False) -> None:
 
     gv.settings().DEFAULT_snapshot_dir.mkdir(exist_ok=True)
     if detect_sparkle_platform_exists(check=any):
-        snh.save_current_sparkle_platform()
+        snh.save_current_platform()
         snh.remove_current_platform()
 
         print("Current Sparkle platform found!")

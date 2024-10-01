@@ -12,11 +12,11 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.tools.general import get_time_pid_random_string
 
 
-def save_current_sparkle_platform() -> None:
+def save_current_platform(name: str = None) -> None:
     """Store the current Sparkle platform in a .zip file."""
     time_stamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
-    snapshot_tmp_path = gv.settings().DEFAULT_snapshot_dir /\
-        f"Snapshot_{os.getlogin()}_{time_stamp}"
+    name = f"Snapshot_{os.getlogin()}_{time_stamp}" if name is None else name
+    snapshot_tmp_path = gv.settings().DEFAULT_snapshot_dir / name
     snapshot_tmp_path.mkdir(parents=True)  # Create temporary directory for zip
     for working_dir in gv.settings().DEFAULT_working_dirs:
         if working_dir.exists():
