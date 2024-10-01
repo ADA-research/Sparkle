@@ -163,7 +163,9 @@ Brian Schiller
 ### Contact
 sparkle@aim.rwth-aachen.de
 
+### Sponsors
 
+The development of Sparkle is partially sponsored by the [Alexander von Humboldt foundation](https://www.humboldt-foundation.de/en/).
 
 
 ```{toctree}
