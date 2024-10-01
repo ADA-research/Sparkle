@@ -45,7 +45,7 @@ def main(argv: list[str]) -> None:
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     instances_source = Path(args.instances_path)
     instances_target = gv.settings().DEFAULT_instance_dir / instances_source.name
 
@@ -107,6 +107,7 @@ def main(argv: list[str]) -> None:
 
     # Write used settings to file
     gv.settings().write_used_settings()
+    sys.exit(0)
 
 
 if __name__ == "__main__":

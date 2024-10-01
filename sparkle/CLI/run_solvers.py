@@ -175,7 +175,8 @@ def run_solvers_on_instances(
               f'{",".join(r.run_id for r in runs if r is not None)}')
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the run solvers command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -183,7 +184,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file
@@ -218,3 +219,7 @@ if __name__ == "__main__":
         recompute=args.recompute,
         also_construct_selector_and_report=args.also_construct_selector_and_report,
         run_on=run_on)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

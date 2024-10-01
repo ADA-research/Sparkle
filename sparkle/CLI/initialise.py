@@ -159,7 +159,7 @@ def main(argv: list[str]) -> None:
     args = parser.parse_args(argv)
     download = False if args.download_examples is None else args.download_examples
     initialise_sparkle(download_examples=download)
-    sys.exit()
+    sys.exit(0)
 
 
 if __name__ == "__main__":

@@ -120,6 +120,7 @@ class Settings:
     DEFAULT_number_of_jobs_in_parallel = 25
     DEFAULT_general_verbosity = VerbosityLevel.STANDARD
     DEFAULT_general_check_interval = 10
+    DEFAULT_general_run_on = "local"
 
     DEFAULT_config_wallclock_time = 600
     DEFAULT_config_cpu_time = None
@@ -830,7 +831,7 @@ class Settings:
         return int(
             self.__settings["parallel_portfolio"]["num_seeds_per_solver"])
 
-    def set_run_on(self: Settings, value: Runner = str,
+    def set_run_on(self: Settings, value: Runner = DEFAULT_general_run_on,
                    origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the compute on which to run."""
         section = "general"
@@ -844,6 +845,9 @@ class Settings:
 
     def get_run_on(self: Settings) -> Runner:
         """Return the compute on which to run."""
+        if self.__parallel_portfolio_num_seeds_per_solver_set == SettingState.NOT_SET:
+            self.set_run_on()
+
         return Runner(self.__settings["general"]["run_on"])
 
     @staticmethod
