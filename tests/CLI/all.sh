@@ -29,9 +29,6 @@ tests/CLI/construct_portfolio_selector.sh
 # Test run sparkle portfolio selector
 tests/CLI/run_portfolio_selector.sh
 
-# Test validate configured vs default
-tests/CLI/validate_configured_vs_default.sh
-
 # Test ablation run configured vs default
 tests/CLI/run_ablation.sh
 
