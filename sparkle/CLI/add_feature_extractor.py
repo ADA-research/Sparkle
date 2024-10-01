@@ -88,6 +88,7 @@ def main(argv: list[str]) -> None:
 
     # Write used settings to file
     gv.settings().write_used_settings()
+    sys.exit(0)
 
 
 if __name__ == "__main__":

@@ -25,8 +25,9 @@ def main(argv: list[str]) -> None:
     # Define command line arguments
     parser = parser_function()
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     snapshot_help.load_snapshot(Path(args.snapshot_file_path))
+    sys.exit(0)
 
 
 if __name__ == "__main__":

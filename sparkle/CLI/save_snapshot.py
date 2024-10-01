@@ -17,6 +17,7 @@ def main(argv: list[str]) -> None:
     # Log command call
     sl.log_command(sys.argv)
     snapshot_help.save_current_sparkle_platform()
+    sys.exit(0)
 
 
 if __name__ == "__main__":

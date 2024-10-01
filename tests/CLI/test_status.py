@@ -13,5 +13,5 @@ def test_status_command(tmp_path: Path,
     # Smoke test
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         status.main([])
-        assert pytest_wrapped_e.type is SystemExit
-        assert pytest_wrapped_e.value.code == 0
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
