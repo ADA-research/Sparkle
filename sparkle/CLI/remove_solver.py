@@ -71,6 +71,7 @@ def main(argv: list[str]) -> None:
     shutil.rmtree(solver_path)
 
     print(f"Removing solver {solver_path.name} done!")
+    sys.exit(0)
 
 
 if __name__ == "__main__":
