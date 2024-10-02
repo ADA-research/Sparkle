@@ -22,8 +22,6 @@ def parser_function() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(*ac.RecomputePortfolioSelectorArgument.names,
                         **ac.RecomputePortfolioSelectorArgument.kwargs)
-    parser.add_argument(*ac.RecomputeMarginalContributionForSelectorArgument.names,
-                        **ac.RecomputeMarginalContributionForSelectorArgument.kwargs)
     parser.add_argument(*ac.SelectorTimeoutArgument.names,
                         **ac.SelectorTimeoutArgument.kwargs)
     parser.add_argument(*ac.SparkleObjectiveArgument.names,
@@ -45,7 +43,8 @@ def judge_exist_remaining_jobs(feature_data_csv: Path,
     return performance_data.has_missing_values
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main method of construct portfolio selector."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -53,10 +52,9 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     selector_timeout = args.selector_timeout
     flag_recompute_portfolio = args.recompute_portfolio_selector
-    flag_recompute_marg_cont = args.recompute_marginal_contribution
     solver_ablation = args.solver_ablation
 
     check_for_initialise(
@@ -168,7 +166,6 @@ if __name__ == "__main__":
     with_actual = "--actual" if solver_ablation else ""
     cmd = (f"sparkle/CLI/compute_marginal_contribution.py --perfect {with_actual} "
            f"{ac.SparkleObjectiveArgument.names[0]} {objective}")
-    print(cmd)
     marginal_contribution = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd,
@@ -188,3 +185,7 @@ if __name__ == "__main__":
     gv.settings().write_used_settings()
     # Write used scenario to file
     gv.latest_scenario().write_scenario_ini()
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
