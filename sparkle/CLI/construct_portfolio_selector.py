@@ -168,7 +168,7 @@ if __name__ == "__main__":
     with_actual = "--actual" if solver_ablation else ""
     cmd = (f"sparkle/CLI/compute_marginal_contribution.py --perfect {with_actual} "
            f"{ac.SparkleObjectiveArgument.names[0]} {objective}")
-
+    print(cmd)
     marginal_contribution = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd,

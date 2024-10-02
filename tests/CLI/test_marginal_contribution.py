@@ -1,15 +1,15 @@
 """Test functionalities related to the compute marginal contribution help module."""
-
 from __future__ import annotations
+import pytest
 from unittest import TestCase
 from pathlib import Path
+from unittest.mock import patch
+from unittest.mock import MagicMock
 
+from sparkle.CLI import add_instances, add_solver, load_snapshot
 from sparkle.CLI import compute_marginal_contribution as cmc
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from sparkle.types.objective import PAR
-
-from unittest.mock import patch
-from unittest.mock import MagicMock
 
 
 class TestMarginalContribution(TestCase):
@@ -59,3 +59,41 @@ class TestMarginalContribution(TestCase):
         """Test for method compute_marginal_contribution. Could be irrelevant."""
         # TODO: Write test
         pass
+
+
+@pytest.mark.integration
+def test_marginal_contribution_command(tmp_path: Path,
+                                       monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test for CLI entry point marginal_contribution."""
+    solver_a = Path("Examples/Resources/Solvers/CSCCSat").absolute()
+    solver_b = Path("Examples/Resources/Solvers/MiniSAT").absolute()
+    instance_set = Path("Examples/Resources/Instances/PTN").absolute()
+    snapshot = Path("tests/CLI/test_files/"
+                    "snapshot_CSCCSat_MiniSAT_PTN_marginal_contribution.zip").absolute()
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+
+    # Setup Platform
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        load_snapshot.main([str(snapshot)])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        add_solver.main([str(solver_a)])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        add_solver.main([str(solver_b)])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        add_instances.main([str(instance_set)])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        cmc.main(["--perfect", "--actual", "--objectives", "PAR10"])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0

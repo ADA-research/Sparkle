@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Test compute marginal contribution
-tests/CLI/compute_marginal_contribution.sh
-
 # Test configure solver
 tests/CLI/configure_solver.sh
 

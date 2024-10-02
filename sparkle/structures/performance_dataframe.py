@@ -537,7 +537,7 @@ class PerformanceDataFrame():
             objective = resolve_objective(objective)
         sub_df = self.dataframe.loc(axis=0)[objective.name, :, :]
         # Reduce Runs Dimension
-        sub_df = sub_df.droplevel("Run")
+        sub_df = sub_df.droplevel("Run").astype(float)
         sub_df = sub_df.groupby(sub_df.index).agg(func=objective.run_aggregator)
         solver_ranking = [(solver, objective.instance_aggregator(
             sub_df[solver].astype(float))) for solver in self.solvers]
