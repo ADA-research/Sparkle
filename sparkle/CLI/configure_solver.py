@@ -139,14 +139,15 @@ def run_after(solver: Path,
     return run
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the configure solver command."""
     # Log command call
     sl.log_command(sys.argv)
 
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     apply_settings_from_args(args)
 
@@ -265,3 +266,7 @@ if __name__ == "__main__":
     gv.settings().write_used_settings()
     # Write used scenario to file
     gv.latest_scenario().write_scenario_ini()
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
