@@ -233,7 +233,7 @@ class PerformanceDataFrame():
                      instance_name: str,
                      initial_value: float | list[float] = None) -> None:
         """Add and instance to the DataFrame."""
-        if self.dataframe.index.size == 0 or self.dataframe.columns.size == 0:
+        if self.num_instances == 0 or self.num_solvers == 0:
             # First instance or no Solvers yet
             solvers = self.dataframe.columns.to_list()
             instances = self.dataframe.index.levels[1].to_list() + [instance_name]
