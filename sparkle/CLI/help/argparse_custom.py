@@ -86,18 +86,17 @@ AblationArgument = ArgumentContainer(names=["--ablation"],
                                      kwargs={"required": False,
                                              "action": "store_true",
                                              "help": "run ablation after configuration"})
-SelectorAblationArgument =\
-    ArgumentContainer(names=["--solver-ablation"],
-                      kwargs={"required": False,
-                              "action": "store_true",
-                              "help": "construct a selector for "
-                                      "each solver ablation combination"})
 
 ActualMarginalContributionArgument = \
     ArgumentContainer(names=["--actual"],
                       kwargs={"action": "store_true",
                               "help": "compute the marginal contribution "
                                       "for the actual selector"})
+
+AllJobsArgument = \
+    ArgumentContainer(names=["--all"],
+                      kwargs={"action": "store_true",
+                              "help": "use all known job ID(s) for the command"})
 
 AlsoConstructSelectorAndReportArgument = \
     ArgumentContainer(names=["--also-construct-selector-and-report"],
@@ -222,7 +221,7 @@ JobIDsArgument = ArgumentContainer(names=["--job-ids"],
                                            "nargs": "+",
                                            "type": str,
                                            "default": None,
-                                           "help": "job ID to wait for"})
+                                           "help": "job ID(s) to use for the command"})
 
 NicknameFeatureExtractorArgument = \
     ArgumentContainer(names=["--nickname"],
@@ -342,6 +341,13 @@ SelectionReportArgument = \
     ArgumentContainer(names=["--selection"],
                       kwargs={"action": "store_true",
                               "help": "set to generate a normal selection report"})
+
+SelectorAblationArgument =\
+    ArgumentContainer(names=["--solver-ablation"],
+                      kwargs={"required": False,
+                              "action": "store_true",
+                              "help": "construct a selector for "
+                                      "each solver ablation combination"})
 
 SettingsFileArgument = \
     ArgumentContainer(names=["--settings-file"],

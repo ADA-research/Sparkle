@@ -115,7 +115,8 @@ def log_command(argv: list[str]) -> None:
         log_str = log_header + log_str
 
     # Write to log file
-    log_path.open("a").write(log_str)
+    with log_path.open("a") as log_file:
+        log_file.write(log_str)
 
     # Pipe RunRunner log to the caller log
     RunRunnerLog.set_log_file(caller_log_path)
