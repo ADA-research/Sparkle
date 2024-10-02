@@ -5,12 +5,10 @@
 
 # _Sparkle_
 ```{eval-rst}
-.. image:: https://github.com/ada-research/sparkle/actions/workflows/unittest.yml/badge.svg?event=push
-   :alt: PyTests passing
-.. image:: ../../.reports/junit/junit-badge.svg
+.. image:: _static/junit/junit-badge.svg
    :target: _static/junit/index.html
-   :alt: PyTests
-.. image:: ../../.reports/coverage/coverage-badge.svg
+   :alt: Unit tests
+.. image:: _static/coverage/coverage-badge.svg
    :target: _static/coverage/index.html
    :alt: PyTest Coverage
 .. image:: https://github.com/ada-research/sparkle/actions/workflows/linter.yml/badge.svg?event=push
