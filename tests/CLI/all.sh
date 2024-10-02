@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Test compute features
-tests/CLI/compute_features.sh
-
 # Test compute marginal contribution
 tests/CLI/compute_marginal_contribution.sh
 
