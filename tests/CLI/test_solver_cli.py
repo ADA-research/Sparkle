@@ -63,7 +63,6 @@ def test_run_solvers(tmp_path: Path,
         run_solvers.main(["--run-on=slurm",
                           "--settings-file",
                           str(settings_path)])
+    cli_tools.kill_slurm_jobs()
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
-
-    cli_tools.kill_slurm_jobs()

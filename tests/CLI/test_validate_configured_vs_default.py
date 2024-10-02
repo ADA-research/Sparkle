@@ -51,15 +51,15 @@ def test_validate_configured_vs_default_command(
                                              "--instance-set-train", train_set_path.name,
                                              "--instance-set-test", test_set_path.name,
                                              "--run-on", "slurm"])
+    cli_tools.kill_slurm_jobs()
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
-    cli_tools.kill_slurm_jobs()
 
     # Smoke test for configured vs default SLURM with only a train set argument
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         validate_configured_vs_default.main(["--solver", solver_path.name,
                                              "--instance-set-train", train_set_path.name,
                                              "--run-on", "slurm"])
+    cli_tools.kill_slurm_jobs()
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
-    cli_tools.kill_slurm_jobs()
