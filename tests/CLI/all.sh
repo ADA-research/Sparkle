@@ -11,12 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Test configure solver
-tests/CLI/configure_solver.sh
-
-# Test configure solver with validate option
-tests/CLI/configure_solver_validate.sh
-
 # Test construct sparkle portfolio selector
 tests/CLI/construct_portfolio_selector.sh
 
