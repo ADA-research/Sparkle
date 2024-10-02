@@ -18,7 +18,10 @@ def save_current_platform(name: str = None) -> None:
     name = f"Snapshot_{os.getlogin()}_{time_stamp}" if name is None else name
     snapshot_tmp_path = gv.settings().DEFAULT_snapshot_dir / name
     snapshot_tmp_path.mkdir(parents=True)  # Create temporary directory for zip
-    for working_dir in gv.settings().DEFAULT_working_dirs:
+    available_dirs = [p.name for p in Path.cwd().iterdir()]
+    root_working_dirs = [p for p in gv.settings().DEFAULT_working_dirs
+                         if p.name in available_dirs]
+    for working_dir in root_working_dirs:
         if working_dir.exists():
             shutil.copytree(working_dir, snapshot_tmp_path / working_dir.name)
     shutil.make_archive(snapshot_tmp_path, "zip", snapshot_tmp_path)
@@ -70,4 +73,8 @@ def load_snapshot(snapshot_file: Path) -> None:
 
     print(f"Loading snapshot file {snapshot_file} ...")
     extract_snapshot(snapshot_file)
+    if any([not wd.exists() for wd in gv.settings().DEFAULT_working_dirs]):
+        print("ERROR: Failed to load Sparkle platform! "
+              "The snapshot may be outdated or corrupted.")
+        sys.exit(-1)
     print(f"Snapshot file {snapshot_file} loaded successfully!")
