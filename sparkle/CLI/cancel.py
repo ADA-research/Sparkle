@@ -45,7 +45,7 @@ def main(argv: list[str]) -> None:
         if len(killed_jobs) == 0:
             if args.all:
                 print("No jobs to cancel.")
-                sys.exit()
+                sys.exit(0)
             else:
                 print(f"ERROR: No jobs with ids {args.job_ids} to cancel.")
                 # NOTE: Should we raise an error here instead?
@@ -97,7 +97,7 @@ def main(argv: list[str]) -> None:
 
             manager.add(window)
 
-    sys.exit()
+    sys.exit(0)
 
 
 if __name__ == "__main__":

@@ -43,8 +43,8 @@ def create_jobs_table(jobs: list[SlurmRun], markup: bool = True) -> str:
     Returns:
         A table of jobs as a string.
     """
-    information = [["RunId", "Name", "Partition", "Status",
-                    "Dependencies", "Finished Jobs", "Run Time"]]
+    job_table = [["RunId", "Name", "Partition", "Status",
+                  "Dependencies", "Finished Jobs", "Run Time"]]
     for job in jobs:
         # Count number of jobs that have finished
         finished_jobs_count = sum(1 for status in job.all_status
@@ -57,7 +57,7 @@ def create_jobs_table(jobs: list[SlurmRun], markup: bool = True) -> str:
                     if job.status == Status.COMPLETED else job.status)
         else:
             status_text = job.status
-        information.append(
+        job_table.append(
             [job.run_id,
              job.name,
              job.partition,
@@ -66,5 +66,5 @@ def create_jobs_table(jobs: list[SlurmRun], markup: bool = True) -> str:
              f"{finished_jobs_count}/{len(job.all_status)}",
              job.runtime])
     if markup:
-        return tabulate(information, headers="firstrow", tablefmt="grid")
-    return information
+        return tabulate(job_table, headers="firstrow", tablefmt="grid")
+    return job_table
