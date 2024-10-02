@@ -12,7 +12,12 @@ def parser_function() -> argparse.ArgumentParser:
     return argparse.ArgumentParser()
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the command."""
     # Log command call
     sl.log_command(sys.argv)
     snapshot_help.save_current_sparkle_platform()
+
+
+if __name__ == "__main__":
+    main(sys.argv)

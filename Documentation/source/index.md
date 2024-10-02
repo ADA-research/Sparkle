@@ -10,9 +10,7 @@
    :alt: Unit tests
 .. image:: _static/coverage/coverage-badge.svg
    :target: _static/coverage/index.html
-   :alt: Test Coverage
-.. image:: https://github.com/ada-research/sparkle/actions/workflows/unittest.yml/badge.svg?event=push
-   :alt: Tests passing
+   :alt: PyTest Coverage
 .. image:: https://github.com/ada-research/sparkle/actions/workflows/linter.yml/badge.svg?event=push
    :alt: Linter
 .. image:: https://github.com/ada-research/sparkle/actions/workflows/documentation.yml/badge.svg?event=push

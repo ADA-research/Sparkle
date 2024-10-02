@@ -4,6 +4,7 @@ import subprocess
 import argparse
 import shutil
 import os
+import sys
 from pathlib import Path
 
 from sparkle.platform import CommandName
@@ -150,10 +151,16 @@ def initialise_sparkle(download_examples: bool = False) -> None:
     print("New Sparkle platform initialised!")
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the command."""
     # Define command line arguments
     parser = parser_function()
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     download = False if args.download_examples is None else args.download_examples
     initialise_sparkle(download_examples=download)
+    sys.exit()
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

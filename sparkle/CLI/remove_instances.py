@@ -24,7 +24,8 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the remove instances command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -69,3 +70,7 @@ if __name__ == "__main__":
     shutil.rmtree(instances_path)
 
     print(f"Removing instances in directory {instances_path} done!")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

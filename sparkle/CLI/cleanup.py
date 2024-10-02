@@ -25,7 +25,8 @@ def remove_temporary_files() -> None:
     gv.settings().DEFAULT_log_output.mkdir()
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the cleanup command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -45,3 +46,8 @@ if __name__ == "__main__":
     else:
         remove_temporary_files()
         print("Cleaned platform of temporary files!")
+    sys.exit()
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

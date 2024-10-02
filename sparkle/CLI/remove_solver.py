@@ -23,7 +23,8 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the remove solver command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -31,7 +32,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     solver_path = resolve_object_name(args.solver,
                                       gv.solver_nickname_mapping,
                                       gv.settings().DEFAULT_solver_dir)
@@ -70,3 +71,7 @@ if __name__ == "__main__":
     shutil.rmtree(solver_path)
 
     print(f"Removing solver {solver_path.name} done!")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

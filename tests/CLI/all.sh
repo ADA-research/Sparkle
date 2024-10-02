@@ -11,32 +11,8 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Test system status
-tests/CLI/status.sh
-
-# Test add feature extractor
-tests/CLI/add_feature_extractor.sh
-
-# Test add instances
-tests/CLI/add_instances.sh
-
-# Test add solver
-tests/CLI/add_solver.sh
-
-# Test remove feature extractor
-tests/CLI/remove_feature_extractor.sh
-
-# Test remove instances
-tests/CLI/remove_instances.sh
-
-# Test remove solver
-tests/CLI/remove_solver.sh
-
 # Test run solvers
 tests/CLI/run_solvers.sh
-
-# Test cleanup temporary files
-tests/CLI/cleanup_temporary_files.sh
 
 # Test compute features
 tests/CLI/compute_features.sh
