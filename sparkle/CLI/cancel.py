@@ -35,7 +35,6 @@ def main(argv: list[str]) -> None:
     path = gv.settings().DEFAULT_log_output
     jobs = [run for run in jobs_help.get_runs_from_file(path)
             if run.status == Status.WAITING or run.status == Status.RUNNING]
-
     if args.all or args.job_ids:
         killed_jobs = []
         for j in jobs:
@@ -50,9 +49,8 @@ def main(argv: list[str]) -> None:
                 print(f"ERROR: No jobs with ids {args.job_ids} to cancel.")
                 # NOTE: Should we raise an error here instead?
                 sys.exit(-1)
-        else:
-            print(f"Canceled {len(killed_jobs)} jobs with IDs: "
-                  f"{', '.join([j.run_id for j in killed_jobs])}.")
+        print(f"Canceled {len(killed_jobs)} jobs with IDs: "
+              f"{', '.join([j.run_id for j in killed_jobs])}.")
     elif len(jobs) == 0:
         print("No jobs available to cancel.")
     else:
