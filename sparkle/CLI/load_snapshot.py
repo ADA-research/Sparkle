@@ -7,6 +7,7 @@ from pathlib import Path
 from sparkle.CLI.help import snapshot_help
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
+from sparkle.CLI.help import global_variables as gv
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -27,6 +28,9 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
     snapshot_help.load_snapshot(Path(args.snapshot_file_path))
+    # Reset Global variables as they should be re-read from snapshot
+    gv.__settings = None
+    gv.__latest_scenario = None
     sys.exit(0)
 
 
