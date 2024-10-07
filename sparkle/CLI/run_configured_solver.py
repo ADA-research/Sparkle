@@ -31,7 +31,8 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the run configured solver command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -39,7 +40,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     # Try to resolve the instance path (Dir or list instance paths)
     data_set = resolve_object_name(
@@ -112,3 +113,8 @@ if __name__ == "__main__":
 
     # Write used settings to file
     gv.settings().write_used_settings()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

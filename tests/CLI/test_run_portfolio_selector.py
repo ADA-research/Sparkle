@@ -18,8 +18,6 @@ def test_run_portfolio_selector_command(
         / "snapshot_constructed_portfolio_selector_csccsat_minisat_ptn.zip").absolute()
     example_file_path = (Path("Examples") / "Resources"
                          / "Instances" / "PTN2" / "Ptn-7824-b20.cnf").absolute()
-    # TODO: Re add feature extractor for execution rights
-    # TODO: Re add solvers for execution rights
     extractor_path = (
         Path("Examples") / "Resources" / "Extractors"
         / "SAT-features-competition2012_revised_without_SatELite_sparkle").absolute()
