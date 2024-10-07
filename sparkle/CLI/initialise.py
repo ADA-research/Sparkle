@@ -81,22 +81,19 @@ def initialise_sparkle(download_examples: bool = False) -> None:
             WARNING: May take a some time to complete due to the large amount of data.
     """
     print("Start initialising Sparkle platform ...")
+    if detect_sparkle_platform_exists(check=all):
+        print("Current Sparkle platform found! Saving as snapshot.")
+        snh.save_current_platform()
+        snh.remove_current_platform()
+
+    for working_dir in gv.settings().DEFAULT_working_dirs:
+        working_dir.mkdir(exist_ok=True)
+
     # Check if Settings file exists, otherwise initialise a default one
     if not Path(Settings.DEFAULT_settings_path).exists():
         print("Settings file does not exist, initializing default settings ...")
         gv.__settings = Settings(Settings.DEFAULT_example_settings_path)
         gv.settings().write_settings_ini(Path(Settings.DEFAULT_settings_path))
-
-    gv.settings().DEFAULT_snapshot_dir.mkdir(exist_ok=True)
-    if detect_sparkle_platform_exists(check=any):
-        snh.save_current_platform()
-        snh.remove_current_platform()
-
-        print("Current Sparkle platform found!")
-        print("Current Sparkle platform recorded!")
-
-    for working_dir in gv.settings().DEFAULT_working_dirs:
-        working_dir.mkdir(exist_ok=True)
 
     # Initialise the FeatureDataFrame
     FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
