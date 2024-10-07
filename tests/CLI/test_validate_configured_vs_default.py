@@ -12,8 +12,9 @@ def test_validate_configured_vs_default_command(
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch) -> None:
     """Test initialise command."""
-    configured_snapshot = Path(
-        "tests/CLI/test_files/snapshot_configured_PbO-CCSAT-Generic_PTN.zip").absolute()
+    configured_snapshot = (
+        Path("tests") / "CLI" / "test_files"
+        / "snapshot_configured_solver_Pb0-CCSAT-Generic_PTN.zip").absolute()
     # The Solver and data sets are not in the snapshot to reduce snapshot size
     solver_path = Path("Examples/Resources/Solvers/PbO-CCSAT-Generic").absolute()
     train_set_path = Path("Examples/Resources/Instances/PTN").absolute()
