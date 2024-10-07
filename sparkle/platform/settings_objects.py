@@ -844,7 +844,7 @@ class Settings:
 
     def get_run_on(self: Settings) -> Runner:
         """Return the compute on which to run."""
-        if self.__parallel_portfolio_num_seeds_per_solver_set == SettingState.NOT_SET:
+        if self.__run_on_set == SettingState.NOT_SET:
             self.set_run_on()
 
         return Runner(self.__settings["general"]["run_on"])
