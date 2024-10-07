@@ -74,7 +74,10 @@ def load_snapshot(snapshot_file: Path) -> None:
     print(f"Loading snapshot file {snapshot_file} ...")
     extract_snapshot(snapshot_file)
     if any([not wd.exists() for wd in gv.settings().DEFAULT_working_dirs]):
-        print("ERROR: Failed to load Sparkle platform! "
-              "The snapshot may be outdated or corrupted.")
+        missing_dirs = [wd.name for wd in gv.settings().DEFAULT_working_dirs
+                        if not wd.exists()]
+        print("ERROR: Failed to load Sparkle platform! The snapshot file may be outdated"
+              " or corrupted. Missing the following directories: "
+              f"{', '.join(missing_dirs)}")
         sys.exit(-1)
     print(f"Snapshot file {snapshot_file} loaded successfully!")

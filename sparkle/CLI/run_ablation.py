@@ -50,14 +50,15 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function to run ablation analysis."""
     sl.log_command(sys.argv)
 
     # Define command line arguments
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     solver_path = resolve_object_name(args.solver,
                                       gv.solver_nickname_mapping,
@@ -109,14 +110,10 @@ if __name__ == "__main__":
     prev_settings = Settings(PurePath("Settings/latest.ini"))
     Settings.check_settings_changes(gv.settings(), prev_settings)
 
-    instance_set_train_name = instance_set_train.name
     configurator = gv.settings().get_general_sparkle_configurator()
     configurator.set_scenario_dirs(solver, instance_set_train)
-    if instance_set_test is not None:
-        instance_set_test_name = instance_set_test.name
-    else:
+    if instance_set_test is None:
         instance_set_test = instance_set_train
-        instance_set_test_name = instance_set_train.name
 
     if not configurator.scenario.result_directory.is_dir():
         print("Error: No configuration results found for the given solver and training"
@@ -147,3 +144,8 @@ if __name__ == "__main__":
         job_id_str = ",".join([run.run_id for run in runs])
         print(f"Ablation analysis running. Waiting for Slurm job(s) with id(s): "
               f"{job_id_str}")
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

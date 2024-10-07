@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Test ablation run configured vs default
-tests/CLI/run_ablation.sh
-
 # Test run parallel portfolio
 tests/CLI/run_parallel_portfolio.sh
 
