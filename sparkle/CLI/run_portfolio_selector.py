@@ -36,7 +36,8 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the run portfolio selector command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -44,7 +45,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.run_on is not None:
         gv.settings().set_run_on(args.run_on.value, SettingState.CMD_LINE)
@@ -54,6 +55,11 @@ if __name__ == "__main__":
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings().DEFAULT_instance_dir, instance_set)
+
+    if data_set is None:
+        print("ERROR: The instance (set) could not be found. Please make sure the "
+              "path is correct.")
+        sys.exit(-1)
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_PORTFOLIO_SELECTOR])
 
@@ -142,3 +148,8 @@ if __name__ == "__main__":
 
     # Write used settings to file
     gv.settings().write_used_settings()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Test run sparkle portfolio selector
-tests/CLI/run_portfolio_selector.sh
-
 # Test ablation run configured vs default
 tests/CLI/run_ablation.sh
 
