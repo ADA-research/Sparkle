@@ -2,8 +2,7 @@
 import pytest
 from pathlib import Path
 
-from sparkle.CLI import (load_snapshot, add_solver, add_instances,
-                         construct_portfolio_selector)
+from sparkle.CLI import load_snapshot, construct_portfolio_selector
 
 from tests.CLI import tools as cli_tools
 
@@ -13,10 +12,6 @@ def test_construct_portfolio_selector_command(
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch) -> None:
     """Test initialise command."""
-    csccsat_path = (Path("Examples") / "Resources" / "Solvers" / "CSCCSat").absolute()
-    minisat_path = (Path("Examples") / "Resources" / "Solvers" / "MiniSat").absolute()
-    ptn_path = (Path("Examples") / "Resources" / "Instances" / "PTN").absolute()
-    # TODO: Create the snapshot
     snapshot_path = (
         Path("tests") / "CLI" / "test_files"
         / "snapshot_computed_features_run_solvers_csccsat_minisat_ptn.zip").absolute()
@@ -25,21 +20,6 @@ def test_construct_portfolio_selector_command(
     # Set up platform
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         load_snapshot.main([str(snapshot_path)])
-    assert pytest_wrapped_e.type is SystemExit
-    assert pytest_wrapped_e.value.code == 0
-
-    with pytest.raises(SystemExit) as pytest_wrapped_e:
-        add_solver.main([str(csccsat_path)])
-    assert pytest_wrapped_e.type is SystemExit
-    assert pytest_wrapped_e.value.code == 0
-
-    with pytest.raises(SystemExit) as pytest_wrapped_e:
-        add_solver.main([str(minisat_path)])
-    assert pytest_wrapped_e.type is SystemExit
-    assert pytest_wrapped_e.value.code == 0
-
-    with pytest.raises(SystemExit) as pytest_wrapped_e:
-        add_instances.main([str(ptn_path)])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 

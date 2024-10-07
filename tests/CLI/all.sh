@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Test construct sparkle portfolio selector
-tests/CLI/construct_portfolio_selector.sh
-
 # Test run sparkle portfolio selector
 tests/CLI/run_portfolio_selector.sh
 

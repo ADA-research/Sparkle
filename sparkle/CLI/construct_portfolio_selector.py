@@ -185,6 +185,7 @@ def main(argv: list[str]) -> None:
     gv.settings().write_used_settings()
     # Write used scenario to file
     gv.latest_scenario().write_scenario_ini()
+    sys.exit(0)
 
 
 if __name__ == "__main__":
