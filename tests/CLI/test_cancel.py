@@ -45,6 +45,9 @@ def test_cancel_command_configuration(tmp_path: Path,
         (Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic").absolute()
     instance_set_path =\
         (Path("Examples") / "Resources" / "Instances" / "PTN").absolute()
+    settings_file =\
+        (Path("tests") / "CLI" / "test_files" / "Settings"
+         / "sparkle_settings.ini").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
 
     # Add solver
@@ -62,7 +65,8 @@ def test_cancel_command_configuration(tmp_path: Path,
     # Submit configure solver job and validation job
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         configure_solver.main(["--solver", solver_path.name,
-                               "--instance-set-train", instance_set_path.name])
+                               "--instance-set-train", instance_set_path.name,
+                               "--settings-file", str(settings_file)])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 

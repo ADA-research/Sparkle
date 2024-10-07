@@ -36,11 +36,11 @@ class Settings:
     # Default directory names
     rawdata_dir = Path("Raw_Data")
     analysis_dir = Path("Analysis")
-    __settings_dir = Path("Settings")
+    DEFAULT_settings_dir = Path("Settings")
     __settings_file = Path("sparkle_settings.ini")
 
     # Default settings path
-    DEFAULT_settings_path = PurePath(cwd_prefix / __settings_dir / __settings_file)
+    DEFAULT_settings_path = PurePath(cwd_prefix / DEFAULT_settings_dir / __settings_file)
 
     # Default library pathing
     DEFAULT_components = lib_prefix / "Components"
@@ -98,11 +98,10 @@ class Settings:
     DEFAULT_working_dirs = [
         DEFAULT_output, DEFAULT_configuration_output,
         DEFAULT_selection_output, DEFAULT_validation_output,
-        DEFAULT_tmp_output,
-        DEFAULT_log_output,
+        DEFAULT_tmp_output, DEFAULT_log_output,
         DEFAULT_solver_dir, DEFAULT_instance_dir,
         DEFAULT_feature_data, DEFAULT_performance_data,
-        DEFAULT_extractor_dir,
+        DEFAULT_extractor_dir, DEFAULT_settings_dir
     ]
 
     # Old default file paths from GV which should be turned into variables
@@ -351,7 +350,7 @@ class Settings:
     def write_used_settings(self: Settings) -> None:
         """Write the used settings to the default locations."""
         # Write to latest settings file
-        self.write_settings_ini(self.__settings_dir / "latest.ini")
+        self.write_settings_ini(self.DEFAULT_settings_dir / "latest.ini")
 
     def write_settings_ini(self: Settings, file_path: Path) -> None:
         """Write the settings to an INI file."""
