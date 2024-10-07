@@ -236,7 +236,8 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main method of run parallel portfolio command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -244,7 +245,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if args.solvers is not None:
         solver_paths = [resolve_object_name("".join(s),
                                             target_dir=gv.settings().DEFAULT_solver_dir)
@@ -291,6 +292,7 @@ if __name__ == "__main__":
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings().DEFAULT_instance_dir,
         instance_set)
+
     print(f"Running on {data_set.size} instance(s)...")
 
     if args.cutoff_time is not None:
@@ -332,3 +334,8 @@ if __name__ == "__main__":
     # Write used settings to file
     gv.settings().write_used_settings()
     print("Running Sparkle parallel portfolio is done!")
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

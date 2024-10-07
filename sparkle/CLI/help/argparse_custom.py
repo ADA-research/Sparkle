@@ -164,7 +164,8 @@ InstancePathPositional = ArgumentContainer(names=["instance_path"],
                                                    "help": "Path to an instance (set)"})
 
 InstancePath = ArgumentContainer(names=["--instance-path"],
-                                 kwargs={"type": Path,
+                                 kwargs={"required": True,
+                                         "type": Path,
                                          "help": "Path to an instance (set)"})
 
 InstanceSetTestArgument = \

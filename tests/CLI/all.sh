@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Test run parallel portfolio
-tests/CLI/run_parallel_portfolio.sh
-
 # Test generate report (selection)
 tests/CLI/generate_report_for_selection.sh
 
