@@ -13,6 +13,7 @@ def test_run_portfolio_selector_command(
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch) -> None:
     """Test run portfolio command."""
+    settings_path = cli_tools.get_settings_path()
     snapshot_path = (
         Path("tests") / "CLI" / "test_files"
         / "snapshot_constructed_portfolio_selector_csccsat_minisat_ptn.zip").absolute()
@@ -54,7 +55,8 @@ def test_run_portfolio_selector_command(
     # Smoke test
     # Run set test slurm
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        run_portfolio_selector.main([str(example_test_set_path)])
+        run_portfolio_selector.main([str(example_test_set_path),
+                                     "--settings-file", str(settings_path)])
     cli_tools.kill_slurm_jobs()
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0

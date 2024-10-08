@@ -12,6 +12,7 @@ def test_validate_configured_vs_default_command(
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch) -> None:
     """Test initialise command."""
+    settings_path = cli_tools.get_settings_path()
     configured_snapshot = (
         Path("tests") / "CLI" / "test_files"
         / "snapshot_configured_solver_Pb0-CCSAT-Generic_PTN.zip").absolute()
@@ -51,6 +52,7 @@ def test_validate_configured_vs_default_command(
         validate_configured_vs_default.main(["--solver", solver_path.name,
                                              "--instance-set-train", train_set_path.name,
                                              "--instance-set-test", test_set_path.name,
+                                             "--settings-file", str(settings_path),
                                              "--run-on", "slurm"])
     cli_tools.kill_slurm_jobs()
     assert pytest_wrapped_e.type is SystemExit
@@ -60,6 +62,7 @@ def test_validate_configured_vs_default_command(
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         validate_configured_vs_default.main(["--solver", solver_path.name,
                                              "--instance-set-train", train_set_path.name,
+                                             "--settings-file", str(settings_path),
                                              "--run-on", "slurm"])
     cli_tools.kill_slurm_jobs()
     assert pytest_wrapped_e.type is SystemExit

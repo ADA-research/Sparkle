@@ -12,6 +12,7 @@ def test_run_ablation_command(
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch) -> None:
     """Test run ablation command."""
+    settings_path = cli_tools.get_settings_path()
     snapshot_path = (
         Path("tests") / "CLI" / "test_files"
         / "snapshot_configured_validated_solver_Pb0-CCSAT-Generic_PTN.zip").absolute()
@@ -51,7 +52,8 @@ def test_run_ablation_command(
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         run_ablation.main(["--solver", solver_pbo_path.name,
                            "--instance-set-train", train_set_path.name,
-                           "--instance-set-test", test_set_path.name])
+                           "--instance-set-test", test_set_path.name,
+                           "--settings-file", str(settings_path)])
     cli_tools.kill_slurm_jobs()
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0

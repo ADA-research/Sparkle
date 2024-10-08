@@ -60,9 +60,8 @@ def test_run_solvers(tmp_path: Path,
 
     # TODO: Check if testing with Slurm is relevant for system
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        run_solvers.main(["--run-on=slurm",
-                          "--settings-file",
-                          str(settings_path)])
+        run_solvers.main(["--run-on", "slurm",
+                          "--settings-file", str(settings_path)])
     cli_tools.kill_slurm_jobs()
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0

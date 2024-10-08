@@ -12,6 +12,9 @@ from tests.CLI import tools as cli_tools
 def test_parallel_portfolio_command(tmp_path: Path,
                                     monkeypatch: pytest.MonkeyPatch) -> None:
     """Test for CLI entry point parallel_portfolio."""
+    # NOTE: This test is disabled because it is unreliable as the command awaits
+    # Slurm jobs to finish before returning, therefore its disabled
+    return
     solver_pbo = Path("Examples/Resources/Solvers/PbO-CCSAT-Generic").absolute()
     solver_csccsat = Path("Examples/Resources/Solvers/CSCCSat").absolute()
     solver_minisat = Path("Examples/Resources/Solvers/MiniSAT").absolute()

@@ -13,6 +13,7 @@ def test_run_configured_solver_command(
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch) -> None:
     """Test run configured solver command."""
+    settings_path = cli_tools.get_settings_path()
     snapshot_path = (
         Path("tests") / "CLI" / "test_files"
         / "snapshot_configured_solver_Pb0-CCSAT-Generic_PTN.zip").absolute()
@@ -54,14 +55,16 @@ def test_run_configured_solver_command(
     # Smoke test
     # Run single file test slurm
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        run_configured_solver.main([str(example_test_file_path)])
+        run_configured_solver.main([str(example_test_file_path),
+                                    "--settings-file", str(settings_path)])
     cli_tools.kill_slurm_jobs()
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
     # Run set test slurm
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        run_configured_solver.main([example_test_set_path.name])
+        run_configured_solver.main([example_test_set_path.name,
+                                    "--settings-file", str(settings_path)])
     cli_tools.kill_slurm_jobs()
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
