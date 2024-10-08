@@ -30,11 +30,22 @@ def get_settings_path() -> Path:
     global __cluster_name
     settings_dir = Path("tests") / "CLI" / "test_files" / "Settings"
     if __cluster_name is None:
-        output = subprocess.run(["sacctmgr", "show", "Cluster", "--json"],
-                                capture_output=True).stdout.decode()
-        cluster_info = ast.literal_eval(output)
-        __cluster_name = cluster_info["clusters"][0]["name"].lower()
+        get_cluster_name()
     if __cluster_name == "kathleen":  # AIM
         return (settings_dir / "sparkle_settings_kathleen.ini").absolute()
     # TODO: Add Grace (LIACS)
     return (settings_dir / "sparkle_settings_default.ini").absolute()
+
+
+def get_cluster_name() -> str:
+    """Get the cluster name."""
+    global __cluster_name
+    if __cluster_name is None:
+        output = subprocess.run(["sacctmgr", "show", "Cluster", "--json"],
+                                capture_output=True).stdout.decode()
+        try:
+            cluster_info = ast.literal_eval(output)
+            __cluster_name = cluster_info["clusters"][0]["name"].lower()
+        except Exception:
+            __cluster_name = "default"
+    return __cluster_name
