@@ -28,15 +28,14 @@ class TestMarginalContribution(TestCase):
         """Test for method compute_actual_selector_performance."""
         pth = Path("tests/CLI/test_files/Output/Selection/autofolio/PTN/"
                    "portfolio_selector")
-        perf_path = Path("tests/CLI/test_files/Performance_Data/"
-                         "test_construct_portfolio_selector.csv")
-        feature_csv_path = Path("tests/CLI/test_files/Feature_Data/"
-                                "test_construct_portfolio_selector.csv")
+        perf_path = Path("tests/test_files/Selector/selector_train_performance_data.csv")
+        feature_csv_path = Path("tests/test_files/Selector/"
+                                "selector_train_feature_data.csv")
 
         objective = PAR(10)
         performance_df = PerformanceDataFrame(perf_path)
         feature_df = FeatureDataFrame(feature_csv_path)
-        result = 351.7557405833333
+        result = 401.42862399999996
 
         patch_exists.return_value = False  # Block loading from file
         patch_mkdir.return_value = None  # Stop creating unnecesarry dir
@@ -46,7 +45,6 @@ class TestMarginalContribution(TestCase):
                                                   performance_df,
                                                   feature_df,
                                                   objective)
-
         assert output == result
 
     def test_compute_actual_selector_marginal_contribution(self: TestCase
