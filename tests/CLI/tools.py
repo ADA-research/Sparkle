@@ -25,18 +25,6 @@ def kill_slurm_jobs(command_log_dir: Path = None) -> None:
         j.kill()
 
 
-def get_settings_path() -> Path:
-    """Get the absolute settings path corresponding to the compute cluster."""
-    global __cluster_name
-    settings_dir = Path("tests") / "CLI" / "test_files" / "Settings"
-    if __cluster_name is None:
-        get_cluster_name()
-    if __cluster_name == "kathleen":  # AIM
-        return (settings_dir / "sparkle_settings_kathleen.ini").absolute()
-    # TODO: Add Grace (LIACS)
-    return (settings_dir / "sparkle_settings_default.ini").absolute()
-
-
 def get_cluster_name() -> str:
     """Get the cluster name."""
     global __cluster_name
@@ -49,3 +37,13 @@ def get_cluster_name() -> str:
         except Exception:
             __cluster_name = "default"
     return __cluster_name
+
+
+def get_settings_path() -> Path:
+    """Get the absolute settings path corresponding to the compute cluster."""
+    settings_dir = Path("tests") / "CLI" / "test_files" / "Settings"
+    cluster_name = get_cluster_name()
+    if cluster_name == "kathleen":  # AIM
+        return (settings_dir / "sparkle_settings_kathleen.ini").absolute()
+    # TODO: Add Grace (LIACS)
+    return (settings_dir / "sparkle_settings_default.ini").absolute()
