@@ -57,11 +57,11 @@ runs:
                 slurm_create_user: yes
                 #slurm_munge_key: "../../../munge.key"
                 slurm_nodes:
-                    - name: localhost
+                    - name: "cpu01-04"
                       State: UNKNOWN
-                      Sockets: 1
-                      CoresPerSocket: 2
-                      RealMemory: 2000
+                      Sockets: 2
+                      CoresPerSocket: 4
+                      RealMemory: 5000
                 slurm_user:
                     comment: "Slurm Workload Manager"
                     gid: 1002
