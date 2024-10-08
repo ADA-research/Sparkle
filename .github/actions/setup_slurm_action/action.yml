@@ -59,8 +59,8 @@ runs:
                 slurm_nodes:
                     - name: localhost
                       State: UNKNOWN
-                      Sockets: 2
-                      CoresPerSocket: 4
+                      Sockets: 1
+                      CoresPerSocket: 2
                       RealMemory: 3500
                 slurm_user:
                     comment: "Slurm Workload Manager"
