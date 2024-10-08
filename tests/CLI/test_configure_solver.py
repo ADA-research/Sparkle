@@ -16,8 +16,7 @@ def test_configure_solver_command(tmp_path: Path,
         (Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic").absolute()
     instance_set_path =\
         (Path("Examples") / "Resources" / "Instances" / "PTN").absolute()
-    test_settings_path = (Path("tests") / "CLI" / "test_files"
-                          / "Settings" / "sparkle_settings.ini").absolute()
+    test_settings_path = tools.get_settings_path()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
 
     # Add solver

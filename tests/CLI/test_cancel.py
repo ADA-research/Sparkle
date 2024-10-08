@@ -7,6 +7,8 @@ from sparkle.CLI import initialise, cancel, add_solver, add_instances, configure
 from sparkle.CLI.help import jobs as jobs_help
 from sparkle.CLI.help import global_variables as gv
 
+from tests.CLI import tools
+
 from runrunner.base import Status
 
 
@@ -45,9 +47,7 @@ def test_cancel_command_configuration(tmp_path: Path,
         (Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic").absolute()
     instance_set_path =\
         (Path("Examples") / "Resources" / "Instances" / "PTN").absolute()
-    settings_file =\
-        (Path("tests") / "CLI" / "test_files" / "Settings"
-         / "sparkle_settings.ini").absolute()
+    settings_file = tools.get_settings_path()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
 
     # Add solver

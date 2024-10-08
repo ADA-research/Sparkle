@@ -34,8 +34,7 @@ def test_run_solvers(tmp_path: Path,
     """Test run solvers command."""
     solver_path = (Path("Examples") / "Resources" / "Solvers" / "CSCCSat").absolute()
     instances_path = (Path("Examples") / "Resources" / "Instances" / "PTN").absolute()
-    settings_path = (Path("tests") / "CLI" / "test_files" / "Settings"
-                     / "sparkle_settings.ini").absolute()
+    settings_path = cli_tools.get_settings_path()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
 
     # Smoke test

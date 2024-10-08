@@ -5,6 +5,8 @@ import shutil
 
 from sparkle.CLI import run_parallel_portfolio, add_solver, add_instances
 
+from tests.CLI import tools as cli_tools
+
 
 @pytest.mark.integration
 def test_parallel_portfolio_command(tmp_path: Path,
@@ -14,8 +16,7 @@ def test_parallel_portfolio_command(tmp_path: Path,
     solver_csccsat = Path("Examples/Resources/Solvers/CSCCSat").absolute()
     solver_minisat = Path("Examples/Resources/Solvers/MiniSAT").absolute()
     single_instance_ptn = Path("Examples/Resources/Instances/PTN/bce7824.cnf").absolute()
-    settings_path = (Path("tests") / "CLI" / "test_files" / "Settings"
-                     / "sparkle_settings.ini").absolute()
+    settings_path = cli_tools.get_settings_path()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     # Create single instance data set for speed up
     tmp_ptn = Path("PTN")

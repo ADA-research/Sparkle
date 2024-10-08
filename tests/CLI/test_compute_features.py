@@ -10,8 +10,7 @@ from tests.CLI import tools as cli_tools
 def test_compute_features_command(tmp_path: Path,
                                   monkeypatch: pytest.MonkeyPatch) -> None:
     """Test compute features command."""
-    settings_path = (Path("tests") / "CLI" / "test_files" / "Settings"
-                     / "sparkle_settings.ini").absolute()
+    settings_path = cli_tools.get_settings_path()
     extractor_path = (Path("Examples") / "Resources" / "Extractors"
                       / "SAT-features-competition2012_"
                         "revised_without_SatELite_sparkle").absolute()

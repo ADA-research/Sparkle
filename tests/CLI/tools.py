@@ -1,8 +1,13 @@
 """Tools for testing Sparkle CLI."""
 import os
+import ast
+import subprocess
 from pathlib import Path
 
 from sparkle.CLI.help import jobs as jobs_help
+
+
+__cluster_name = None
 
 
 def kill_slurm_jobs(command_log_dir: Path = None) -> None:
@@ -18,3 +23,18 @@ def kill_slurm_jobs(command_log_dir: Path = None) -> None:
     jobs = jobs_help.get_runs_from_file(command_log_dir)
     for j in jobs:
         j.kill()
+
+
+def get_settings_path() -> Path:
+    """Get the absolute settings path corresponding to the compute cluster."""
+    global __cluster_name
+    settings_dir = Path("tests") / "CLI" / "test_files" / "Settings"
+    if __cluster_name is None:
+        output = subprocess.run(["sacctmgr", "show", "Cluster", "--json"],
+                                capture_output=True).stdout.decode()
+        cluster_info = ast.literal_eval(output)
+        __cluster_name = cluster_info["clusters"][0]["name"].lower()
+    if __cluster_name == "kathleen":  # AIM
+        return (settings_dir / "sparkle_settings_kathleen.ini").absolute()
+    # TODO: Add Grace (LIACS)
+    return (settings_dir / "sparkle_settings_default.ini").absolute()
