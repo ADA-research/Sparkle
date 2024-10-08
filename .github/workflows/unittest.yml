@@ -19,7 +19,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: true
-    - uses: koesterlab/setup-slurm-action@v1  # Set up small slurm cluster
+    - uses: setup-slurm-action@v1  # Set up medium slurm cluster
     - name: Set up Python 3.10.14
       uses: actions/setup-python@v3
       with:
