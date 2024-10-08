@@ -65,8 +65,37 @@ def test_generate_report_selection(
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch) -> None:
     """Test generate report for selection."""
-    # TODO: Write test
-    pass
+    snapshot_no_testset_path = (
+        Path("tests") / "CLI" / "test_files"
+        / "snapshot_selection_"
+          "pbo_csccsat_minisat_PTN_satzilla2012_no_test.zip").absolute()
+    snapshot_testset_ptn2_path = (
+        Path("tests") / "CLI" / "test_files"
+        / "snapshot_selection_"
+          "pbo_csccsat_minisat_PTN_satzilla2012_with_test_PTN2.zip").absolute()
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+
+    # Set up platform for no test set snapshot
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        load_snapshot.main([str(snapshot_no_testset_path)])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        generate_report.main([])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+
+    # Set up platform with test set
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        load_snapshot.main([str(snapshot_testset_ptn2_path)])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        generate_report.main([])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
 
 
 @pytest.mark.integration
