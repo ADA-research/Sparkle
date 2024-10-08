@@ -36,6 +36,8 @@ jobs:
       run: |
         sudo apt-get install libnuma-dev
         sudo apt-get install numactl
+    - name: Install pdflatex
+      run: sudo apt-get install texlive-latex-base
     - name: Run Unittest
       run: |
         pytest --all
