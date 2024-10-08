@@ -19,7 +19,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: true
-    - uses: setup_slurm.yml  # Set up medium slurm cluster
+    - uses: ./.github/actions/setup_slurm_action  # Set up medium slurm cluster
     - name: Set up Python 3.10.14
       uses: actions/setup-python@v3
       with:

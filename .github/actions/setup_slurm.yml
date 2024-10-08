@@ -1,3 +1,5 @@
+# From: https://github.com/marketplace/actions/setup-slurm-action
+# Modified to suit our needs regarding cluster scale
 name: 'setup-slurm-action'
 description: 'Setup slurm cluster on GitHub Actions using https://github.com/galaxyproject/ansible-slurm'
 branding:
@@ -34,7 +36,7 @@ runs:
                 slurm_roles: ['controller', 'exec', 'dbd']
                 slurm_config_dir: /etc/slurm
                 slurm_config:
-                    ClusterName: githubactions
+                    ClusterName: cluster
                     SlurmctldLogFile: /var/log/slurm/slurmctld.log
                     SlurmctldPidFile: /run/slurmctld.pid
                     SlurmdLogFile: /var/log/slurm/slurmd.log
@@ -55,11 +57,11 @@ runs:
                 slurm_create_user: yes
                 #slurm_munge_key: "../../../munge.key"
                 slurm_nodes:
-                    - name: cpu1
+                    - name: localhost
                       State: UNKNOWN
-                      Sockets: 2
-                      CoresPerSocket: 4
-                      RealMemory: 5000
+                      Sockets: 1
+                      CoresPerSocket: 2
+                      RealMemory: 2000
                 slurm_user:
                     comment: "Slurm Workload Manager"
                     gid: 1002
