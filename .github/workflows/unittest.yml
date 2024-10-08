@@ -34,8 +34,8 @@ jobs:
         conda env update --file dev-env.yml --name base
     - name: Install RunSolver dependencies
       run: |
-        sudo apt-get install libnuma-dev=2.0.14
-        sudo apt-get install numactl=2.0.12
+        sudo apt-get install libnuma-dev
+        sudo apt-get install numactl
     - name: Run Unittest
       run: |
         pytest --all
