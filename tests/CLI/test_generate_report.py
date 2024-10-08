@@ -103,5 +103,19 @@ def test_generate_report_parallel_portfolio(
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch) -> None:
     """Test generate report for parallel portfolio."""
-    # TODO: Write test
-    pass
+    snapshot_parallel_portfolio = (
+        Path("tests") / "CLI" / "test_files"
+        / "snapshot_parallel_portfolio_"
+          "pbo_csccsat_minisat_ptn.zip").absolute()
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+
+    # Set up platform
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        load_snapshot.main([str(snapshot_parallel_portfolio)])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        generate_report.main([])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
