@@ -52,9 +52,8 @@ def test_run_solvers(tmp_path: Path,
     # Second we test the command twice, once with local and once with slurm
     # NOTE: Expensive local test
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        run_solvers.main(["--run-on=local",
-                          "--settings-file",
-                          str(settings_path)])
+        run_solvers.main(["--run-on", "local",
+                          "--settings-file", str(settings_path)])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
