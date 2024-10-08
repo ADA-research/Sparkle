@@ -7,11 +7,19 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
-
+    services:  # Required for Slurm cluster
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - "8888:3306"
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: true
+    - uses: koesterlab/setup-slurm-action@v1  # Set up small slurm cluster
     - name: Set up Python 3.10.14
       uses: actions/setup-python@v3
       with:
@@ -26,7 +34,7 @@ jobs:
         conda env update --file dev-env.yml --name base
     - name: Run Unittest
       run: |
-        pytest
+        pytest --all
     - name: Archive outputs
       uses: actions/upload-artifact@v4
       if: failure()
