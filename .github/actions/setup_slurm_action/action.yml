@@ -57,7 +57,7 @@ runs:
                 slurm_create_user: yes
                 #slurm_munge_key: "../../../munge.key"
                 slurm_nodes:
-                    - name: cpu01
+                    - name: localhost
                       State: UNKNOWN
                       Sockets: 1
                       CoresPerSocket: 2
