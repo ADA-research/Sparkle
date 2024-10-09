@@ -47,16 +47,6 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
 
-    data_set = resolve_object_name(
-        args.instance_path,
-        gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
-
-    if data_set is None:
-        print("ERROR: The instance (set) could not be found. Please make sure the "
-              "path is correct.")
-        sys.exit(-1)
-
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_PORTFOLIO_SELECTOR])
 
     if ac.set_by_user(args, "settings_file"):
@@ -68,11 +58,22 @@ def main(argv: list[str]) -> None:
                                                      SettingState.CMD_LINE)
     if args.run_on is not None:
         gv.settings().set_run_on(args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
     Settings.check_settings_changes(gv.settings(), prev_settings)
+
+    data_set = resolve_object_name(
+        args.instance_path,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.settings().DEFAULT_instance_dir, instance_set)
+
+    if data_set is None:
+        print("ERROR: The instance (set) could not be found. Please make sure the "
+              "path is correct.")
+        sys.exit(-1)
+
+    run_on = gv.settings().get_run_on()
     objectives = gv.settings().get_general_sparkle_objectives()
     # NOTE: Is this still relevant?
     if not objectives[0].time:

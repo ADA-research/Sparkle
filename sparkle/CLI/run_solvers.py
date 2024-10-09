@@ -21,7 +21,6 @@ from sparkle.CLI.help import argparse_custom as ac
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-
     parser.add_argument(*ac.RecomputeRunSolversArgument.names,
                         **ac.RecomputeRunSolversArgument.kwargs)
     parser.add_argument(*ac.SparkleObjectiveArgument.names,
@@ -34,7 +33,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
-
     return parser
 
 
@@ -188,20 +186,16 @@ def main(argv: list[str]) -> None:
     if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file
         gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
-
     if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
             args.objectives, SettingState.CMD_LINE
         )
-
     if args.target_cutoff_time is not None:
         gv.settings().set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
-
     if args.run_on is not None:
         gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_SOLVERS])
 
@@ -214,6 +208,7 @@ def main(argv: list[str]) -> None:
     # Write settings to file before starting, since they are used in callback scripts
     gv.settings().write_used_settings()
 
+    run_on = gv.settings().get_run_on()
     run_solvers_on_instances(
         recompute=args.recompute,
         also_construct_selector_and_report=args.also_construct_selector_and_report,

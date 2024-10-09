@@ -60,19 +60,6 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
 
-    solver_path = resolve_object_name(args.solver,
-                                      gv.solver_nickname_mapping,
-                                      gv.settings().DEFAULT_solver_dir)
-    solver = Solver(solver_path)
-    instance_set_train = resolve_object_name(
-        args.instance_set_train,
-        gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
-    instance_set_test = resolve_object_name(
-        args.instance_set_test,
-        gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
-
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_ABLATION])
 
     if ac.set_by_user(args, "settings_file"):
@@ -103,11 +90,24 @@ def main(argv: list[str]) -> None:
     if args.run_on is not None:
         gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
     Settings.check_settings_changes(gv.settings(), prev_settings)
+
+    run_on = gv.settings().get_run_on()
+    solver_path = resolve_object_name(args.solver,
+                                      gv.solver_nickname_mapping,
+                                      gv.settings().DEFAULT_solver_dir)
+    solver = Solver(solver_path)
+    instance_set_train = resolve_object_name(
+        args.instance_set_train,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.settings().DEFAULT_instance_dir, instance_set)
+    instance_set_test = resolve_object_name(
+        args.instance_set_test,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.settings().DEFAULT_instance_dir, instance_set)
 
     configurator = gv.settings().get_general_sparkle_configurator()
     configurator.set_scenario_dirs(solver, instance_set_train)

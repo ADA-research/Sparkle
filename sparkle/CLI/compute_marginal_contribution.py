@@ -211,7 +211,6 @@ def main(argv: list[str]) -> None:
             args.objectives, SettingState.CMD_LINE
         )
     selection_scenario = gv.latest_scenario().get_selection_scenario_path()
-    print(selection_scenario)
 
     if not (args.perfect | args.actual):
         print("ERROR: compute_marginal_contribution called without a flag set to"

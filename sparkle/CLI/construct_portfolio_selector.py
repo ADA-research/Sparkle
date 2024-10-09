@@ -30,6 +30,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.SelectorAblationArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
     return parser
 
 
@@ -60,7 +62,10 @@ def main(argv: list[str]) -> None:
     check_for_initialise(
         COMMAND_DEPENDENCIES[CommandName.CONSTRUCT_PORTFOLIO_SELECTOR]
     )
-
+    if ac.set_by_user(args, "settings_file"):
+        gv.settings().read_settings_ini(
+            args.settings_file, SettingState.CMD_LINE
+        )  # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "objectives"):
         gv.settings().set_general_sparkle_objectives(
             args.objectives, SettingState.CMD_LINE
