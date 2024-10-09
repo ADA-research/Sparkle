@@ -74,7 +74,9 @@ def test_cancel_command_configuration(tmp_path: Path,
     time.sleep(20)  # Wait to allow slurmDB to update
     jobs = jobs_help.get_runs_from_file(gv.settings().DEFAULT_log_output,
                                         print_error=True)
-
+    print(jobs)
+    print([file for file in gv.settings().DEFAULT_log_output.rglob("*.json")])
+    print([file for file in Path.cwd().rglob("*.json")])
     # Cancel configuration jobs
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         cancel.main(["--job-ids"] + [str(job.run_id) for job in jobs])
