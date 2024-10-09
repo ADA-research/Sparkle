@@ -42,15 +42,6 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
 
-    # Try to resolve the instance path (Dir or list instance paths)
-    data_set = resolve_object_name(
-        args.instance_path,
-        gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
-    if data_set is None:
-        print(f"Could not resolve instance (set): {args.instance_path}! Exiting...")
-        sys.exit(-1)
-
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_CONFIGURED_SOLVER])
 
     if args.settings_file is not None:
@@ -63,12 +54,21 @@ def main(argv: list[str]) -> None:
     if args.run_on is not None:
         gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
     Settings.check_settings_changes(gv.settings(), prev_settings)
 
+    # Try to resolve the instance path (Dir or list instance paths)
+    data_set = resolve_object_name(
+        args.instance_path,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.settings().DEFAULT_instance_dir, instance_set)
+    if data_set is None:
+        print(f"Could not resolve instance (set): {args.instance_path}! Exiting...")
+        sys.exit(-1)
+
+    run_on = gv.settings().get_run_on()
     # Get the name of the configured solver and the training set
     solver = gv.latest_scenario().get_config_solver()
     train_set = gv.latest_scenario().get_config_instance_set_train()

@@ -14,8 +14,13 @@ from sparkle.tools.general import get_time_pid_random_string
 
 def save_current_platform(name: str = None) -> None:
     """Store the current Sparkle platform in a .zip file."""
-    time_stamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
-    name = f"Snapshot_{os.getlogin()}_{time_stamp}" if name is None else name
+    if name is None:
+        time_stamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
+        try:
+            login = os.getlogin()
+        except Exception:  # Can fail on for example CI pipelines
+            login = "unknown"
+        name = f"Snapshot_{login}_{time_stamp}"
     snapshot_tmp_path = gv.settings().DEFAULT_snapshot_dir / name
     snapshot_tmp_path.mkdir(parents=True)  # Create temporary directory for zip
     available_dirs = [p.name for p in Path.cwd().iterdir()]
