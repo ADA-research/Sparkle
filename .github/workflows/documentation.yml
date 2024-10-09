@@ -27,9 +27,18 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    services:  # Required for Slurm cluster
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - "8888:3306"
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - uses: ./.github/actions/setup_slurm_action  # Set up medium slurm cluster
       - uses: actions/setup-python@v5
       - name: Add conda to system path
         run: |
@@ -41,6 +50,12 @@ jobs:
           conda env update --file dev-env.yml --name base
           pip install -r Documentation/requirements.txt
           pip install genbadge[tests,coverage]
+      - name: Install RunSolver dependencies
+        run: |
+          sudo apt-get install libnuma-dev
+          sudo apt-get install numactl
+      - name: Install pdflatex for report generation dependency
+        run: sudo apt-get install texlive-latex-base
       - name: Run Code Coverage report
         run:  pytest --all --cov sparkle/ --cov-report=xml:Documentation/source/_static/coverage/coverage.xml --cov-report=html:Documentation/source/_static/coverage
       - name: Run tests report

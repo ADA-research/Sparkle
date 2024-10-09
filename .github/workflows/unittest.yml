@@ -20,10 +20,6 @@ jobs:
       with:
         submodules: true
     - uses: ./.github/actions/setup_slurm_action  # Set up medium slurm cluster
-    - name: Set up Python 3.10.14
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.10.14'
     - name: Add conda to system path
       run: |
         # $CONDA is an environment variable pointing to the root of the miniconda directory
