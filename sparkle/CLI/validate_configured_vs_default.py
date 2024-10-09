@@ -55,6 +55,37 @@ def main(argv: list[str]) -> None:
 
     # Process command line arguments
     args = parser.parse_args(argv)
+
+    check_for_initialise(
+        COMMAND_DEPENDENCIES[CommandName.VALIDATE_CONFIGURED_VS_DEFAULT]
+    )
+
+    if ac.set_by_user(args, "settings_file"):
+        gv.settings().read_settings_ini(
+            args.settings_file, SettingState.CMD_LINE
+        )  # Do first, so other command line options can override settings from the file
+    if args.configurator is not None:
+        gv.settings().set_general_sparkle_configurator(
+            value=getattr(Configurator, args.configurator),
+            origin=SettingState.CMD_LINE)
+    if args.objectives is not None:
+        gv.settings().set_general_sparkle_objectives(
+            args.objectives, SettingState.CMD_LINE
+        )
+    if ac.set_by_user(args, "target_cutoff_time"):
+        gv.settings().set_general_target_cutoff_time(
+            args.target_cutoff_time, SettingState.CMD_LINE
+        )
+    if args.run_on is not None:
+        gv.settings().set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
+
+    # Compare current settings to latest.ini
+    prev_settings = Settings(PurePath("Settings/latest.ini"))
+    Settings.check_settings_changes(gv.settings(), prev_settings)
+
+    run_on = gv.settings().get_run_on()
+
     solver = resolve_object_name(args.solver,
                                  gv.solver_nickname_mapping,
                                  gv.settings().DEFAULT_solver_dir,
@@ -67,35 +98,6 @@ def main(argv: list[str]) -> None:
         args.instance_set_test,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings().DEFAULT_instance_dir, instance_set)
-
-    if args.run_on is not None:
-        gv.settings().set_run_on(
-            args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
-
-    check_for_initialise(
-        COMMAND_DEPENDENCIES[CommandName.VALIDATE_CONFIGURED_VS_DEFAULT]
-    )
-    if args.configurator is not None:
-        gv.settings().set_general_sparkle_configurator(
-            value=getattr(Configurator, args.configurator),
-            origin=SettingState.CMD_LINE)
-    if ac.set_by_user(args, "settings_file"):
-        gv.settings().read_settings_ini(
-            args.settings_file, SettingState.CMD_LINE
-        )  # Do first, so other command line options can override settings from the file
-
-    if args.objectives is not None:
-        gv.settings().set_general_sparkle_objectives(
-            args.objectives, SettingState.CMD_LINE
-        )
-    if ac.set_by_user(args, "target_cutoff_time"):
-        gv.settings().set_general_target_cutoff_time(
-            args.target_cutoff_time, SettingState.CMD_LINE
-        )
-    # Compare current settings to latest.ini
-    prev_settings = Settings(PurePath("Settings/latest.ini"))
-    Settings.check_settings_changes(gv.settings(), prev_settings)
 
     # Make sure configuration results exist before trying to work with them
     configurator = gv.settings().get_general_sparkle_configurator()

@@ -13,7 +13,6 @@ def test_run_ablation_command(
         monkeypatch: pytest.MonkeyPatch) -> None:
     """Test run ablation command."""
     settings_path = cli_tools.get_settings_path()
-    print("[!] Using settings file:", settings_path)
     snapshot_path = (
         Path("tests") / "CLI" / "test_files"
         / "snapshot_configured_validated_solver_Pb0-CCSAT-Generic_PTN.zip").absolute()

@@ -73,11 +73,6 @@ def main(argv: list[str]) -> None:
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings().DEFAULT_instance_dir, instance_set)
 
-    if args.run_on is not None:
-        gv.settings().set_run_on(
-            args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
-
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_ABLATION])
 
     if ac.set_by_user(args, "settings_file"):
@@ -105,6 +100,10 @@ def main(argv: list[str]) -> None:
         gv.settings().set_ablation_racing_flag(
             args.number_of_runs, SettingState.CMD_LINE
         )
+    if args.run_on is not None:
+        gv.settings().set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
+    run_on = gv.settings().get_run_on()
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))

@@ -97,6 +97,8 @@ def test_generate_report_selection(
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
+    # TODO: Add test with ablation results (Need a snapshot for that)
+
 
 @pytest.mark.integration
 def test_generate_report_parallel_portfolio(

@@ -47,10 +47,6 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
 
-    if args.run_on is not None:
-        gv.settings().set_run_on(args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
-
     data_set = resolve_object_name(
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
@@ -70,6 +66,9 @@ def main(argv: list[str]) -> None:
     if ac.set_by_user(args, "objectives"):
         gv.settings().set_general_sparkle_objectives(args.objectives,
                                                      SettingState.CMD_LINE)
+    if args.run_on is not None:
+        gv.settings().set_run_on(args.run_on.value, SettingState.CMD_LINE)
+    run_on = gv.settings().get_run_on()
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))

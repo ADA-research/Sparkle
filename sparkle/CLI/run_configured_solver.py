@@ -51,11 +51,6 @@ def main(argv: list[str]) -> None:
         print(f"Could not resolve instance (set): {args.instance_path}! Exiting...")
         sys.exit(-1)
 
-    if args.run_on is not None:
-        gv.settings().set_run_on(
-            args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
-
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_CONFIGURED_SOLVER])
 
     if args.settings_file is not None:
@@ -65,6 +60,10 @@ def main(argv: list[str]) -> None:
         gv.settings().set_general_sparkle_objectives(
             args.objectives, SettingState.CMD_LINE
         )
+    if args.run_on is not None:
+        gv.settings().set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
+    run_on = gv.settings().get_run_on()
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
