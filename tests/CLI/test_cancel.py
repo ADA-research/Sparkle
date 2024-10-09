@@ -73,7 +73,7 @@ def test_cancel_command_configuration(tmp_path: Path,
     # Extract job IDs from Sparkle
     time.sleep(1)  # Wait to allow slurmDB to update
     jobs = jobs_help.get_runs_from_file(gv.settings().DEFAULT_log_output,
-                                        print_errors=True)
+                                        print_error=True)
 
     # Cancel configuration jobs
     with pytest.raises(SystemExit) as pytest_wrapped_e:
