@@ -36,7 +36,7 @@ def test_cancel_command_no_jobs(tmp_path: Path,
 @pytest.mark.integration
 def test_cancel_command_configuration(tmp_path: Path,
                                       monkeypatch: pytest.MonkeyPatch,
-                                      capsys) -> None:
+                                      capsys: pytest.LogCaptureFixture) -> None:
     """Test cancel command on configuration jobs."""
     # Submit configuration jobs and cancel it by ID
     solver_path =\
