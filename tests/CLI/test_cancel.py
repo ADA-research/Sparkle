@@ -3,8 +3,12 @@ import pytest
 from pathlib import Path
 
 from sparkle.CLI import initialise, cancel, add_solver, add_instances, configure_solver
+from sparkle.CLI.help import jobs as jobs_help
+from sparkle.CLI.help import global_variables as gv
 
 from tests.CLI import tools
+
+from runrunner.base import Status
 
 
 @pytest.mark.integration
@@ -35,9 +39,11 @@ def test_cancel_command_no_jobs(tmp_path: Path,
 
 @pytest.mark.integration
 def test_cancel_command_configuration(tmp_path: Path,
-                                      monkeypatch: pytest.MonkeyPatch,
-                                      capsys: pytest.LogCaptureFixture) -> None:
+                                      monkeypatch: pytest.MonkeyPatch) -> None:
     """Test cancel command on configuration jobs."""
+    if tools.get_cluster_name == "default":
+        # Test currently does not work on Github Actions due to truncating
+        return
     # Submit configuration jobs and cancel it by ID
     solver_path =\
         (Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic").absolute()
@@ -67,16 +73,25 @@ def test_cancel_command_configuration(tmp_path: Path,
     assert pytest_wrapped_e.value.code == 0
 
     # Extract job IDs from Sparkle
-    # TODO: need to read from terminal as Github CI truncates Log files
-    # Would be better if we could just use the RunRunner object rep instead
-    out, _ = capsys.readouterr()
-    job_ids = out.splitlines()[-1].split(":")[1].split(",")
+    jobs = jobs_help.get_runs_from_file(gv.settings().DEFAULT_log_output,
+                                        print_error=True)
+    files = [file for file in gv.settings().DEFAULT_log_output.rglob("*.json")]
+
+    for file in files:
+        print("------")
+        print(file.open().read())
+        print("------")
 
     # Cancel configuration jobs
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        cancel.main(["--job-ids"] + [run_id.strip() for run_id in job_ids])
+        cancel.main(["--job-ids"] + [str(job.run_id) for job in jobs])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
     # Property checks
-    assert len(job_ids) == 2  # Configuration should submit have 2 jobs
+    assert len(jobs) == 2  # Configuration should submit have 2 jobs
+
+    # NOTE: Here we check for killed and completed because we're not fast enough
+    # TODO: Start a different job to cancel that wont be able to finish before we cancel
+    for job in jobs:  # All jobs have been cancelled
+        assert job.status in [Status.KILLED, Status.COMPLETED]
