@@ -1,7 +1,6 @@
 """Test the cancel CLI entry point."""
 import pytest
 from pathlib import Path
-import time
 
 from sparkle.CLI import initialise, cancel, add_solver, add_instances, configure_solver
 from sparkle.CLI.help import jobs as jobs_help
@@ -71,12 +70,15 @@ def test_cancel_command_configuration(tmp_path: Path,
     assert pytest_wrapped_e.value.code == 0
 
     # Extract job IDs from Sparkle
-    time.sleep(20)  # Wait to allow slurmDB to update
     jobs = jobs_help.get_runs_from_file(gv.settings().DEFAULT_log_output,
                                         print_error=True)
-    print(jobs)
-    print([file for file in gv.settings().DEFAULT_log_output.rglob("*.json")])
-    print([file for file in Path.cwd().rglob("*.json")])
+    files = [file for file in gv.settings().DEFAULT_log_output.rglob("*.json")]
+
+    for file in files:
+        print("------")
+        print(file.open().read())
+        print("------")
+
     # Cancel configuration jobs
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         cancel.main(["--job-ids"] + [str(job.run_id) for job in jobs])
@@ -86,7 +88,6 @@ def test_cancel_command_configuration(tmp_path: Path,
     # Property checks
     assert len(jobs) == 2  # Configuration should submit have 2 jobs
 
-    time.sleep(10)  # Wait to allow slurmDB to update, could be reduced in the future
     # NOTE: Here we check for killed and completed because we're not fast enough
     # TODO: Start a different job to cancel that wont be able to finish before we cancel
     for job in jobs:  # All jobs have been cancelled
