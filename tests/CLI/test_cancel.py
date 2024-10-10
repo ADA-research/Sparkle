@@ -41,7 +41,7 @@ def test_cancel_command_no_jobs(tmp_path: Path,
 def test_cancel_command_configuration(tmp_path: Path,
                                       monkeypatch: pytest.MonkeyPatch) -> None:
     """Test cancel command on configuration jobs."""
-    if tools.get_cluster_name == "default":
+    if tools.get_cluster_name == "githubactionscluster":
         # Test currently does not work on Github Actions due to truncating
         return
     # Submit configuration jobs and cancel it by ID

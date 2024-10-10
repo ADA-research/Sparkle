@@ -36,7 +36,7 @@ runs:
                 slurm_roles: ['controller', 'exec', 'dbd']
                 slurm_config_dir: /etc/slurm
                 slurm_config:
-                    ClusterName: cluster
+                    ClusterName: githubactionscluster
                     SlurmctldLogFile: /var/log/slurm/slurmctld.log
                     SlurmctldPidFile: /run/slurmctld.pid
                     SlurmdLogFile: /var/log/slurm/slurmd.log
