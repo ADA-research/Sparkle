@@ -51,7 +51,7 @@ def main(argv: list[str]) -> None:
     configurator.get_status_from_logs()
 
     print("\nCurrent system status of Sparkle reported!")
-    sys.exit()
+    sys.exit(0)
 
 
 if __name__ == "__main__":

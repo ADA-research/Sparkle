@@ -15,6 +15,6 @@ def test_initialise_command(tmp_path: Path,
         # Call the command
         initialise.main([])
         # Check the exit status
-        assert pytest_wrapped_e.type is SystemExit
-        assert pytest_wrapped_e.value.code == 0
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
     # TODO: Check with/without specific error messages

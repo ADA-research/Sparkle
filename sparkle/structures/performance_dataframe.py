@@ -233,7 +233,7 @@ class PerformanceDataFrame():
                      instance_name: str,
                      initial_value: float | list[float] = None) -> None:
         """Add and instance to the DataFrame."""
-        if self.dataframe.index.size == 0 or self.dataframe.columns.size == 0:
+        if self.num_instances == 0 or self.num_solvers == 0:
             # First instance or no Solvers yet
             solvers = self.dataframe.columns.to_list()
             instances = self.dataframe.index.levels[1].to_list() + [instance_name]
@@ -246,10 +246,10 @@ class PerformanceDataFrame():
                 print(f"WARNING: Tried adding already existing instance {instance_name} "
                       f"to Performance DataFrame: {self.csv_filepath}")
                 return
-            # Create the missing indices
-            levels = [self.dataframe.index.levels[0].tolist(),
-                      [instance_name],
-                      self.dataframe.index.levels[2].tolist()]
+            # Create the missing indices, casting them to the correct sizes
+            levels = [self.dataframe.index.levels[0].tolist() * self.num_runs,
+                      [instance_name] * self.num_objectives * self.num_runs,
+                      self.dataframe.index.levels[2].tolist() * self.num_objectives]
             # NOTE: Did this fix Jeroen's bug? .from_arrays instead of direct constructor
             emidx = pd.MultiIndex.from_arrays(levels,
                                               names=PerformanceDataFrame.multi_dim_names)
@@ -537,7 +537,7 @@ class PerformanceDataFrame():
             objective = resolve_objective(objective)
         sub_df = self.dataframe.loc(axis=0)[objective.name, :, :]
         # Reduce Runs Dimension
-        sub_df = sub_df.droplevel("Run")
+        sub_df = sub_df.droplevel("Run").astype(float)
         sub_df = sub_df.groupby(sub_df.index).agg(func=objective.run_aggregator)
         solver_ranking = [(solver, objective.instance_aggregator(
             sub_df[solver].astype(float))) for solver in self.solvers]

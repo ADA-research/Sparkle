@@ -114,7 +114,8 @@ def compute_features(
     return run
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the compute features command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -122,12 +123,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
-
-    if args.run_on is not None:
-        gv.settings().set_run_on(
-            args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
+    args = parser.parse_args(argv)
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.COMPUTE_FEATURES])
 
@@ -135,6 +131,10 @@ if __name__ == "__main__":
         gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
+    if args.run_on is not None:
+        gv.settings().set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
+    run_on = gv.settings().get_run_on()
 
     # Check if there are any feature extractors registered
     if not any([p.is_dir() for p in gv.settings().DEFAULT_extractor_dir.iterdir()]):
@@ -148,3 +148,8 @@ if __name__ == "__main__":
 
     # Write used settings to file
     gv.settings().write_used_settings()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

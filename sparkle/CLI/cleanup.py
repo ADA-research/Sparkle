@@ -34,7 +34,7 @@ def main(argv: list[str]) -> None:
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if args.all:
         shutil.rmtree(gv.settings().DEFAULT_output, ignore_errors=True)
         snh.create_working_dirs()
@@ -46,7 +46,7 @@ def main(argv: list[str]) -> None:
     else:
         remove_temporary_files()
         print("Cleaned platform of temporary files!")
-    sys.exit()
+    sys.exit(0)
 
 
 if __name__ == "__main__":

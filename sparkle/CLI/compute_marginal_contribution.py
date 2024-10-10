@@ -52,7 +52,8 @@ def compute_selector_performance(
     if performance_path.exists():
         selector_performance_data = PerformanceDataFrame(performance_path)
         return objective.instance_aggregator(
-            selector_performance_data.get_values("portfolio_selector"))
+            selector_performance_data.get_values("portfolio_selector",
+                                                 objective=str(objective)))
     selector_performance_data = performance_data.copy()
 
     selector_performance_data.add_solver("portfolio_selector")
@@ -146,8 +147,7 @@ def compute_selector_marginal_contribution(
 
 
 def compute_marginal_contribution(
-        scenario: Path,
-        compute_perfect: bool, compute_actual: bool) -> None:
+        scenario: Path, compute_perfect: bool, compute_actual: bool) -> None:
     """Compute the marginal contribution.
 
     Args:
@@ -187,7 +187,8 @@ def compute_marginal_contribution(
         print("Marginal contribution (actual selector) computing done!")
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the marginal contribution command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -195,7 +196,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     check_for_initialise(
         COMMAND_DEPENDENCIES[CommandName.COMPUTE_MARGINAL_CONTRIBUTION]
@@ -220,3 +221,8 @@ if __name__ == "__main__":
 
     # Write used settings to file
     gv.settings().write_used_settings()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

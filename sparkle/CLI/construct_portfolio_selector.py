@@ -22,8 +22,6 @@ def parser_function() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(*ac.RecomputePortfolioSelectorArgument.names,
                         **ac.RecomputePortfolioSelectorArgument.kwargs)
-    parser.add_argument(*ac.RecomputeMarginalContributionForSelectorArgument.names,
-                        **ac.RecomputeMarginalContributionForSelectorArgument.kwargs)
     parser.add_argument(*ac.SelectorTimeoutArgument.names,
                         **ac.SelectorTimeoutArgument.kwargs)
     parser.add_argument(*ac.SparkleObjectiveArgument.names,
@@ -32,6 +30,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.SelectorAblationArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
     return parser
 
 
@@ -45,7 +45,8 @@ def judge_exist_remaining_jobs(feature_data_csv: Path,
     return performance_data.has_missing_values
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main method of construct portfolio selector."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -53,16 +54,18 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     selector_timeout = args.selector_timeout
     flag_recompute_portfolio = args.recompute_portfolio_selector
-    flag_recompute_marg_cont = args.recompute_marginal_contribution
     solver_ablation = args.solver_ablation
 
     check_for_initialise(
         COMMAND_DEPENDENCIES[CommandName.CONSTRUCT_PORTFOLIO_SELECTOR]
     )
-
+    if ac.set_by_user(args, "settings_file"):
+        gv.settings().read_settings_ini(
+            args.settings_file, SettingState.CMD_LINE
+        )  # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "objectives"):
         gv.settings().set_general_sparkle_objectives(
             args.objectives, SettingState.CMD_LINE
@@ -168,7 +171,6 @@ if __name__ == "__main__":
     with_actual = "--actual" if solver_ablation else ""
     cmd = (f"sparkle/CLI/compute_marginal_contribution.py --perfect {with_actual} "
            f"{ac.SparkleObjectiveArgument.names[0]} {objective}")
-
     marginal_contribution = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd,
@@ -188,3 +190,8 @@ if __name__ == "__main__":
     gv.settings().write_used_settings()
     # Write used scenario to file
     gv.latest_scenario().write_scenario_ini()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

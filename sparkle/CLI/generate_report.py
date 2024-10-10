@@ -60,8 +60,8 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
-    # Compare current settings to latest.ini
+def main(argv: list[str]) -> None:
+    """Generate a report for an executed experiment."""
     prev_settings = Settings(PurePath("Settings/latest.ini"))
 
     # Log command call
@@ -71,7 +71,18 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+
+    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.GENERATE_REPORT])
+
+    # Do first, so other command line options can override settings from the file
+    if ac.set_by_user(args, "settings_file"):
+        gv.settings().read_settings_ini(
+            args.settings_file, SettingState.CMD_LINE
+        )
+    if args.objectives is not None:
+        gv.settings().set_general_sparkle_objectives(
+            args.objectives, SettingState.CMD_LINE)
     selection = args.selection
     test_case_dir = args.test_case_directory
     only_json = args.only_json
@@ -87,17 +98,6 @@ if __name__ == "__main__":
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings().DEFAULT_instance_dir, instance_set)
-
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.GENERATE_REPORT])
-
-    # Do first, so other command line options can override settings from the file
-    if ac.set_by_user(args, "settings_file"):
-        gv.settings().read_settings_ini(
-            args.settings_file, SettingState.CMD_LINE
-        )
-    if args.objectives is not None:
-        gv.settings().set_general_sparkle_objectives(
-            args.objectives, SettingState.CMD_LINE)
 
     Settings.check_settings_changes(gv.settings(), prev_settings)
     # If no arguments are set get the latest scenario
@@ -142,12 +142,10 @@ if __name__ == "__main__":
                                           / "performance_data.csv").exists():
             test_data = PerformanceDataFrame(test_case_path / "performance_data.csv")
         # Create machine readable selection output
-        instance_folders = set(Path(instance).parent
-                               for instance in train_data.instances)
+        instance_dirs = set(Path(instance).parent for instance in train_data.instances)
         instance_sets = []
-        for dir in instance_folders:
-            set = instance_set(dir)
-            instance_sets.append(set)
+        for dir in instance_dirs:
+            instance_sets.append(instance_set(dir))
         test_set = None if test_case_dir is None else instance_set(Path(test_case_dir))
         cutoff_time = gv.settings().get_general_target_cutoff_time()
         output = gv.settings().DEFAULT_selection_output_analysis
@@ -214,7 +212,6 @@ if __name__ == "__main__":
             print(f"Usage: {sys.argv[0]} --solver <solver> [--instance-set-train "
                   "<instance-set-train>] [--instance-set-test <instance-set-test>]")
             sys.exit(-1)
-        instance_set_train_name = instance_set_train.name
         gv.settings().get_general_sparkle_configurator()\
             .set_scenario_dirs(solver, instance_set_train)
         # Generate a report depending on which instance sets are provided
@@ -258,8 +255,6 @@ if __name__ == "__main__":
                 gv.settings().DEFAULT_ablation_output)
 
         # Create machine readable output
-        solver_name = gv.latest_scenario().get_config_solver().name
-        instance_set_name = gv.latest_scenario().get_config_instance_set_train().name
         output = gv.settings().DEFAULT_configuration_output_analysis
         config_output = ConfigurationOutput(configurator.scenario.directory,
                                             solver, configurator,
@@ -286,3 +281,8 @@ if __name__ == "__main__":
 
     # Write used settings to file
     gv.settings().write_used_settings()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

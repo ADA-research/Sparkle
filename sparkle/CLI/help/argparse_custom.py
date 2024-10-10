@@ -164,7 +164,8 @@ InstancePathPositional = ArgumentContainer(names=["instance_path"],
                                                    "help": "Path to an instance (set)"})
 
 InstancePath = ArgumentContainer(names=["--instance-path"],
-                                 kwargs={"type": Path,
+                                 kwargs={"required": True,
+                                         "type": Path,
                                          "help": "Path to an instance (set)"})
 
 InstanceSetTestArgument = \
@@ -369,6 +370,11 @@ SnapshotArgument = ArgumentContainer(names=["snapshot_file_path"],
                                      kwargs={"metavar": "snapshot-file-path",
                                              "type": str,
                                              "help": "path to the snapshot file"})
+
+SnapshotNameArgument = ArgumentContainer(names=["--name"],
+                                         kwargs={"required": False,
+                                                 "type": str,
+                                                 "help": "name of the snapshot"})
 
 SolverArgument = ArgumentContainer(names=["--solver"],
                                    kwargs={"required": True,

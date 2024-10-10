@@ -33,7 +33,7 @@ def main(argv: list[str]) -> None:
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     instances_path = resolve_object_name(args.instances_path,
                                          target_dir=gv.settings().DEFAULT_instance_dir)
 
@@ -70,6 +70,7 @@ def main(argv: list[str]) -> None:
     shutil.rmtree(instances_path)
 
     print(f"Removing instances in directory {instances_path} done!")
+    sys.exit(0)
 
 
 if __name__ == "__main__":

@@ -13,8 +13,8 @@ def test_cleanup_command(tmp_path: Path,
     # Smoke test
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         cleanup.main([])
-        assert pytest_wrapped_e.type is SystemExit
-        assert pytest_wrapped_e.value.code == 0
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
     # TODO: Check if correct files are removed
 
 # TODO: Add more tests for --all option and --remove command

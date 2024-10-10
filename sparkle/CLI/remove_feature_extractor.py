@@ -66,6 +66,7 @@ def main(argv: list[str]) -> None:
     shutil.rmtree(extractor.directory)
 
     print(f"Removing feature extractor {extractor.name} done!")
+    sys.exit(0)
 
 
 if __name__ == "__main__":

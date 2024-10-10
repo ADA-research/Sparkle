@@ -50,32 +50,15 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function to run ablation analysis."""
     sl.log_command(sys.argv)
 
     # Define command line arguments
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
-
-    solver_path = resolve_object_name(args.solver,
-                                      gv.solver_nickname_mapping,
-                                      gv.settings().DEFAULT_solver_dir)
-    solver = Solver(solver_path)
-    instance_set_train = resolve_object_name(
-        args.instance_set_train,
-        gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
-    instance_set_test = resolve_object_name(
-        args.instance_set_test,
-        gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
-
-    if args.run_on is not None:
-        gv.settings().set_run_on(
-            args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
+    args = parser.parse_args(argv)
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_ABLATION])
 
@@ -104,19 +87,32 @@ if __name__ == "__main__":
         gv.settings().set_ablation_racing_flag(
             args.number_of_runs, SettingState.CMD_LINE
         )
+    if args.run_on is not None:
+        gv.settings().set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
     Settings.check_settings_changes(gv.settings(), prev_settings)
 
-    instance_set_train_name = instance_set_train.name
+    run_on = gv.settings().get_run_on()
+    solver_path = resolve_object_name(args.solver,
+                                      gv.solver_nickname_mapping,
+                                      gv.settings().DEFAULT_solver_dir)
+    solver = Solver(solver_path)
+    instance_set_train = resolve_object_name(
+        args.instance_set_train,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.settings().DEFAULT_instance_dir, instance_set)
+    instance_set_test = resolve_object_name(
+        args.instance_set_test,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.settings().DEFAULT_instance_dir, instance_set)
+
     configurator = gv.settings().get_general_sparkle_configurator()
     configurator.set_scenario_dirs(solver, instance_set_train)
-    if instance_set_test is not None:
-        instance_set_test_name = instance_set_test.name
-    else:
+    if instance_set_test is None:
         instance_set_test = instance_set_train
-        instance_set_test_name = instance_set_train.name
 
     if not configurator.scenario.result_directory.is_dir():
         print("Error: No configuration results found for the given solver and training"
@@ -147,3 +143,8 @@ if __name__ == "__main__":
         job_id_str = ",".join([run.run_id for run in runs])
         print(f"Ablation analysis running. Waiting for Slurm job(s) with id(s): "
               f"{job_id_str}")
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
