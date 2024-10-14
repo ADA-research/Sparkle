@@ -112,7 +112,7 @@ class SMAC2(Configurator):
             self.validator.tmp_out_dir = base_dir
             validate_run = self.validator.validate(
                 [scenario.solver] * self.scenario.number_of_runs,
-                Path(output_csv.name),
+                output_csv,
                 [scenario.instance_set],
                 [self.scenario.sparkle_objective],
                 scenario.cutoff_time,

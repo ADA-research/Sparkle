@@ -95,7 +95,7 @@ def main(argv: list[str]) -> None:
                      run_on=run_on,
                      commandname=CommandName.RUN_CONFIGURED_SOLVER,
                      sbatch_options=sbatch_options,
-                     cwd=sl.caller_log_dir)
+                     log_dir=sl.caller_log_dir)
 
     # Print result
     if run_on == Runner.SLURM:

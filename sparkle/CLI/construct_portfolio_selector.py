@@ -168,6 +168,8 @@ def main(argv: list[str]) -> None:
                 print(f"Portfolio selector without {solver_name} constructed!")
             else:
                 print(f"Portfolio selector without {solver_name} constructor running...")
+
+    # Compute the marginal contribution
     with_actual = "--actual" if solver_ablation else ""
     cmd = (f"sparkle/CLI/compute_marginal_contribution.py --perfect {with_actual} "
            f"{ac.SparkleObjectiveArgument.names[0]} {objective}")

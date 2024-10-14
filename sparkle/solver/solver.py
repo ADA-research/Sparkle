@@ -13,8 +13,7 @@ from runrunner.local import LocalRun
 from runrunner.slurm import SlurmRun
 from runrunner.base import Status, Runner
 
-from sparkle.tools import runsolver_parsing, general as tg
-from sparkle.tools import pcsparser
+from sparkle.tools import pcsparser, RunSolver
 from sparkle.types import SparkleCallable, SolverStatus
 from sparkle.solver.verifier import SolutionVerifier
 from sparkle.instance import InstanceSet
@@ -37,7 +36,6 @@ class Solver(SparkleCallable):
         Args:
             directory: Directory of the solver.
             raw_output_directory: Directory where solver will write its raw output.
-                Defaults to directory / tmp
             runsolver_exec: Path to the runsolver executable.
                 By default, runsolver in directory.
             deterministic: Bool indicating determinism of the algorithm.
@@ -49,9 +47,6 @@ class Solver(SparkleCallable):
         self.verifier = verifier
         self.meta_data_file = self.directory / Solver.meta_data
 
-        if self.raw_output_directory is None:
-            self.raw_output_directory = self.directory / "tmp"
-            self.raw_output_directory.mkdir(exist_ok=True)
         if self.runsolver_exec is None:
             self.runsolver_exec = self.directory / "runsolver"
         if not self.meta_data_file.exists():
@@ -110,7 +105,8 @@ class Solver(SparkleCallable):
                   objectives: list[SparkleObjective],
                   seed: int,
                   cutoff_time: int = None,
-                  configuration: dict = None) -> list[str]:
+                  configuration: dict = None,
+                  log_dir: Path = None) -> list[str]:
         """Build the solver call on an instance with a configuration.
 
         Args:
@@ -129,52 +125,21 @@ class Solver(SparkleCallable):
         configuration["instance"] = instance
         configuration["seed"] = seed
         configuration["objectives"] = ",".join([str(obj) for obj in objectives])
-        if cutoff_time is not None:  # Use RunSolver
-            configuration["cutoff_time"] = cutoff_time
-            # Create RunSolver Logs
-            # --timestamp
-            #  instructs to timestamp each line of the solver standard output and
-            #  error files (which are then redirected to stdout)
-
-            # --use-pty
-            # use a pseudo-terminal to collect the solver output. Currently only
-            # available when lines are timestamped. Some I/O libraries (including
-            # the C library) automatically flushes the output after each line when
-            # the standard output is a terminal. There's no automatic flush when
-            # the standard output is a pipe or a plain file. See setlinebuf() for
-            # some details. This option instructs runsolver to use a
-            # pseudo-terminal instead of a pipe/file to collect the solver
-            # output. This fools the solver which will line-buffer its output.
-
-            # -w filename or --watcher-data filename
-            # sends the watcher informations to filename
-
-            # -v filename or --var filename
-            # save the most relevant information (times,...)
-            # in an easy to parse VAR=VALUE file
-
-            # -o filename or --solver-data filename
-            # redirects the solver output (both stdout and stderr) to filename
-            inst_name = Path(instance).name
-            raw_result_path =\
-                Path(f"{self.name}_{inst_name}_{tg.get_time_pid_random_string()}.rawres")
-            runsolver_watch_data_path = raw_result_path.with_suffix(".log")
-            runsolver_values_path = raw_result_path.with_suffix(".val")
-
-            solver_cmd = [str(self.runsolver_exec.absolute()),
-                          "--timestamp", "--use-pty",
-                          "--cpu-limit", str(cutoff_time),
-                          "-w", str(runsolver_watch_data_path),
-                          "-v", str(runsolver_values_path),
-                          "-o", str(raw_result_path)]
-        else:
-            configuration["cutoff_time"] = sys.maxsize
-            solver_cmd = []
-
+        configuration["cutoff_time"] =\
+            cutoff_time if cutoff_time is not None else sys.maxsize
         # Ensure stringification of dictionary will go correctly for key value pairs
         configuration = {key: str(configuration[key]) for key in configuration}
-        solver_cmd += [str((self.directory / Solver.wrapper).absolute()),
-                       f"'{json.dumps(configuration)}'"]
+        solver_cmd = [str((self.directory / Solver.wrapper)),
+                      f"'{json.dumps(configuration)}'"]
+        if log_dir is None:
+            log_dir = Path()
+        if cutoff_time is not None:  # Use RunSolver
+            log_name_base = f"{Path(instance).name}_{self.name}"
+            return RunSolver.wrap_command(self.runsolver_exec,
+                                          solver_cmd,
+                                          cutoff_time,
+                                          log_dir,
+                                          log_name_base=log_name_base)
         return solver_cmd
 
     def run(self: Solver,
@@ -186,7 +151,7 @@ class Solver(SparkleCallable):
             run_on: Runner = Runner.LOCAL,
             commandname: str = "run_solver",
             sbatch_options: list[str] = None,
-            cwd: Path = None) -> SlurmRun | list[dict[str, Any]] | dict[str, Any]:
+            log_dir: Path = None) -> SlurmRun | list[dict[str, Any]] | dict[str, Any]:
         """Run the solver on an instance with a certain configuration.
 
         Args:
@@ -197,13 +162,14 @@ class Solver(SparkleCallable):
             cutoff_time: The cutoff time for the solver, measured through RunSolver.
                 If None, will be executed without RunSolver.
             configuration: The solver configuration to use. Can be empty.
-            cwd: Path where to execute. Defaults to self.raw_output_directory.
+            log_dir: Path where to place output files. Defaults to
+                self.raw_output_directory.
 
         Returns:
             Solver output dict possibly with runsolver values.
         """
-        if cwd is None:
-            cwd = self.raw_output_directory
+        if log_dir is None:
+            log_dir = self.raw_output_directory
         cmds = []
         if isinstance(instance, InstanceSet):
             for inst in instance.instance_paths:
@@ -211,20 +177,22 @@ class Solver(SparkleCallable):
                                             objectives=objectives,
                                             seed=seed,
                                             cutoff_time=cutoff_time,
-                                            configuration=configuration)
+                                            configuration=configuration,
+                                            log_dir=log_dir)
                 cmds.append(" ".join(solver_cmd))
         else:
             solver_cmd = self.build_cmd(instance,
                                         objectives=objectives,
                                         seed=seed,
                                         cutoff_time=cutoff_time,
-                                        configuration=configuration)
+                                        configuration=configuration,
+                                        log_dir=log_dir)
             cmds.append(" ".join(solver_cmd))
+        print(cmds)
         run = rrr.add_to_queue(runner=run_on,
                                cmd=cmds,
                                name=commandname,
-                               base_dir=cwd,
-                               path=cwd,
+                               base_dir=log_dir,
                                sbatch_options=sbatch_options)
 
         if isinstance(run, LocalRun):
@@ -246,8 +214,7 @@ class Solver(SparkleCallable):
                 if solver_cmd[0] == str(self.runsolver_exec.absolute()):
                     runsolver_configuration = solver_cmd[:11]
                 solver_output = Solver.parse_solver_output(run.jobs[i].stdout,
-                                                           runsolver_configuration,
-                                                           cwd)
+                                                           runsolver_configuration)
                 if self.verifier is not None:
                     solver_output["status"] = self.verifier.verifiy(
                         instance, Path(runsolver_configuration[-1]))
@@ -273,9 +240,9 @@ class Solver(SparkleCallable):
         return config_dict
 
     @staticmethod
-    def parse_solver_output(solver_output: str,
-                            runsolver_configuration: list[str] = None,
-                            cwd: Path = None) -> dict[str, Any]:
+    def parse_solver_output(
+            solver_output: str,
+            runsolver_configuration: list[str | Path] = None) -> dict[str, Any]:
         """Parse the output of the solver.
 
         Args:
@@ -288,12 +255,10 @@ class Solver(SparkleCallable):
             Dictionary representing the parsed solver output
         """
         if runsolver_configuration is not None:
-            parsed_output = runsolver_parsing.get_solver_output(runsolver_configuration,
-                                                                solver_output,
-                                                                cwd)
+            parsed_output = RunSolver.get_solver_output(runsolver_configuration,
+                                                        solver_output)
         else:
             parsed_output = ast.literal_eval(solver_output)
-
         # cast status attribute from str to Enum
         parsed_output["status"] = SolverStatus(parsed_output["status"])
         # apply objectives to parsed output, runtime based objectives added here
