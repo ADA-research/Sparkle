@@ -5,7 +5,7 @@ import ast
 import subprocess
 from sparkle.types import SparkleCallable, SolverStatus
 from sparkle.structures import FeatureDataFrame
-from sparkle.tools.runsolver_parsing import get_status
+from sparkle.tools import RunSolver
 
 
 class Extractor(SparkleCallable):
@@ -143,8 +143,8 @@ class Extractor(SparkleCallable):
         Returns:
             A list of features. Vector of missing values upon failure.
         """
-        if result.exists() and get_status(runsolver_values,
-                                          None) != SolverStatus.TIMEOUT:
+        if result.exists() and RunSolver.get_status(runsolver_values,
+                                                    None) != SolverStatus.TIMEOUT:
             feature_values = ast.literal_eval(result.read_text())
             return [str(value) for _, _, value in feature_values]
         return [FeatureDataFrame.missing_value] * self.output_dimension

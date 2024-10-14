@@ -38,7 +38,7 @@ def call_solver_solve_instance(
         objectives=objectives,
         seed=gv.get_seed(),
         cutoff_time=cutoff_time,
-        cwd=cwd,
+        log_dir=cwd,
         run_on=Runner.LOCAL)
 
     status = solver_output["status"]

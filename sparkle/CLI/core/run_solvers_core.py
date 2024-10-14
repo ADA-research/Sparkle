@@ -31,7 +31,8 @@ if __name__ == "__main__":
                         help="sets the seed used for the solver")
     args = parser.parse_args()
     # Process command line arguments
-    cwd = args.log_dir if args.log_dir is not None else gv.settings().DEFAULT_tmp_output
+    log_dir =\
+        args.log_dir if args.log_dir is not None else gv.settings().DEFAULT_tmp_output
     # Resolve possible multi-file instance
     instance_path = Path(args.instance)
     instance_name = instance_path.name
@@ -53,7 +54,7 @@ if __name__ == "__main__":
         objectives=objectives,
         seed=args.seed if args.seed else 42,
         cutoff_time=cutoff,
-        cwd=cwd,
+        log_dir=log_dir,
         run_on=Runner.LOCAL)
 
     # Now that we have all the results, we can add them to the performance dataframe
