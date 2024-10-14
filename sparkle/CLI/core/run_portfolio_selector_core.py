@@ -18,7 +18,7 @@ def call_solver_solve_instance(
         solver: Solver,
         instance: Path,
         cutoff_time: int,
-        cwd: Path,
+        log_dir: Path,
         performance_data: PerformanceDataFrame = None) -> bool:
     """Call the Sparkle portfolio selector to solve a single instance with a cutoff.
 
@@ -26,7 +26,7 @@ def call_solver_solve_instance(
         solver: The solver to run on the instance
         instance: The path to the instance
         cutoff_time: The cutoff time for the solver
-        cwd: The working directory for the solver
+        log_dir: The log directory for the solver
         performance_data: The dataframe to store the results in
 
     Returns:
@@ -38,7 +38,7 @@ def call_solver_solve_instance(
         objectives=objectives,
         seed=gv.get_seed(),
         cutoff_time=cutoff_time,
-        log_dir=cwd,
+        log_dir=log_dir,
         run_on=Runner.LOCAL)
 
     status = solver_output["status"]
@@ -89,7 +89,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Process command line arguments
-    cwd = args.log_dir if args.log_dir is not None else gv.settings().DEFAULT_tmp_output
+    log_dir =\
+        args.log_dir if args.log_dir is not None else gv.settings().DEFAULT_tmp_output
     feature_data = FeatureDataFrame(Path(args.feature_data_csv))
     performance_data = PerformanceDataFrame(Path(args.performance_data_csv))
 
@@ -108,7 +109,7 @@ if __name__ == "__main__":
         solver = Solver(Path(solver), verifier=verifier)
         print(f"Calling solver {solver.name} with time budget {cutoff_time} ...")
         flag_solved = call_solver_solve_instance(
-            solver, Path(args.instance), cutoff_time, cwd, performance_data)
+            solver, Path(args.instance), cutoff_time, log_dir, performance_data)
         print(f"Calling solver {solver.name} done!")
 
         if flag_solved:
