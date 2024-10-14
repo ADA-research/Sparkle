@@ -99,6 +99,7 @@ class Extractor(SparkleCallable):
                                           cmd_list_extractor,
                                           cutoff_time,
                                           log_dir,
+                                          log_name_base=self.name,
                                           raw_results_file=False)
         return cmd_list_extractor
 

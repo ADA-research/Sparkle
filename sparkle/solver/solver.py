@@ -185,8 +185,10 @@ class Solver(SparkleCallable):
                                         objectives=objectives,
                                         seed=seed,
                                         cutoff_time=cutoff_time,
-                                        configuration=configuration)
+                                        configuration=configuration,
+                                        log_dir=log_dir)
             cmds.append(" ".join(solver_cmd))
+        print(cmds)
         run = rrr.add_to_queue(runner=run_on,
                                cmd=cmds,
                                name=commandname,
