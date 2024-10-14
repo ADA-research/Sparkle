@@ -31,7 +31,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Process command line arguments
-    cwd = args.log_dir if args.log_dir is not None else gv.settings().DEFAULT_tmp_output
+    log_dir =\
+        args.log_dir if args.log_dir is not None else gv.settings().DEFAULT_tmp_output
     instance_path = Path(args.instance)
     instance_name = instance_path
     if not instance_path.exists():
@@ -51,14 +52,11 @@ if __name__ == "__main__":
 
     extractor = Extractor(extractor_path,
                           gv.settings().DEFAULT_runsolver_exec,
-                          cwd)
-    # We are not interested in the runsolver log, but create the file to filter it
-    # from the extractor call output
-    runsolver_watch_path = cwd / f"{instance_name}_{extractor_path.name}.wlog"
+                          log_dir)
     features = extractor.run(instance_list,
                              feature_group=args.feature_group,
-                             runsolver_args=["--cpu-limit", cutoff_extractor,
-                                             "-w", runsolver_watch_path])
+                             cutoff_time=cutoff_extractor,
+                             log_dir=log_dir)
 
     # Now that we have our result, we write it to the FeatureDataCSV with a FileLock
     lock = FileLock(f"{feature_data_csv_path}.lock")

@@ -72,7 +72,8 @@ def compute_features(
                f"--instance {instance_path} "
                f"--extractor {extractor_path} "
                f"--feature-csv {feature_data.csv_filepath} "
-               f"--cutoff {cutoff}")
+               f"--cutoff {cutoff} "
+               f"--log-dir {sl.caller_log_dir}")
         if extractor_name in extractors:
             extractor = extractors[extractor_name]
         else:

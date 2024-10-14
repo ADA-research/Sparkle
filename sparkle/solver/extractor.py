@@ -68,7 +68,8 @@ class Extractor(SparkleCallable):
                   instance: Path | list[Path],
                   feature_group: str = None,
                   output_file: Path = None,
-                  runsolver_args: list[str | Path] = None,
+                  cutoff_time: int = None,
+                  log_dir: Path = None,
                   ) -> list[str]:
         """Builds a command line string seperated by space.
 
@@ -85,25 +86,28 @@ class Extractor(SparkleCallable):
         cmd_list_extractor = []
         if not isinstance(instance, list):
             instance = [instance]
-        if runsolver_args is not None:
-            # Ensure stringification of runsolver configuration is done correctly
-            cmd_list_extractor += [str(self.runsolver_exec.absolute())]
-            cmd_list_extractor += [str(runsolver_config) for runsolver_config
-                                   in runsolver_args]
-        cmd_list_extractor += [f"{self.directory / Extractor.wrapper}",
-                               "-extractor_dir", f"{self.directory}/",
-                               "-instance_file"] + [str(file) for file in instance]
+        cmd_list_extractor = [f"{self.directory / Extractor.wrapper}",
+                              "-extractor_dir", f"{self.directory}/",
+                              "-instance_file"] + [str(file) for file in instance]
         if feature_group is not None:
             cmd_list_extractor += ["-feature_group", feature_group]
         if output_file is not None:
             cmd_list_extractor += ["-output_file", str(output_file)]
+        if cutoff_time is not None:
+            # Extractor handles output file itself
+            return RunSolver.wrap_command(self.runsolver_exec,
+                                          cmd_list_extractor,
+                                          cutoff_time,
+                                          log_dir,
+                                          raw_results_file=False)
         return cmd_list_extractor
 
     def run(self: Extractor,
             instance: Path | list[Path],
             feature_group: str = None,
             output_file: Path = None,
-            runsolver_args: list[str | Path] = None) -> list | None:
+            cutoff_time: int = None,
+            log_dir: Path = None) -> list | None:
         """Runs an extractor job with Runrunner.
 
         Args:
@@ -112,20 +116,24 @@ class Extractor(SparkleCallable):
             feature_group: The feature group to compute. Must be supported by the
                 extractor to use.
             output_file: Target output. If None, piped to the RunRunner job.
-            runsolver_args: List of run solver args, each word a seperate item.
+            cutoff_time: CPU cutoff time in seconds
+            log_dir: Directory to write logs. Defaults to self.raw_output_directory.
 
         Returns:
             The features or None if an output file is used, or features can not be found.
         """
+        if log_dir is None:
+            log_dir = self.raw_output_directory
         if feature_group is not None and not self.groupwise_computation:
             # This extractor cannot handle groups, compute all features
             feature_group = None
         cmd_extractor = self.build_cmd(
-            instance, feature_group, output_file, runsolver_args)
+            instance, feature_group, output_file, cutoff_time, log_dir)
         extractor = subprocess.run(cmd_extractor, capture_output=True)
         if output_file is None:
             try:
-                features = ast.literal_eval(extractor.stdout.decode())
+                features = ast.literal_eval(
+                    extractor.stdout.decode().split(maxsplit=1)[1])
                 return features
             except Exception:
                 return None

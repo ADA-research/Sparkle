@@ -25,7 +25,8 @@ class RunSolver:
             command: list[str],
             cutoff_time: int,
             log_directory: Path,
-            log_name_base: str = None) -> list[str]:
+            log_name_base: str = None,
+            raw_results_file: bool = True) -> list[str]:
         """Wrap a command with the RunSolver call and arguments.
 
         Args:
@@ -36,6 +37,7 @@ class RunSolver:
             log_directory: The directory where to write the solver output.
             log_name_base: A user defined name to easily identify the logs.
                 Defaults to "runsolver".
+            raw_results_file: Whether to use the raw results file.
 
         Returns:
             List of commands and arguments to execute the solver.
@@ -74,8 +76,8 @@ class RunSolver:
                 "--timestamp", "--use-pty",
                 "--cpu-limit", str(cutoff_time),
                 "-w", str(watcher_data_path),
-                "-v", str(var_values_path),
-                "-o", str(raw_result_path)] + command
+                "-v", str(var_values_path)] + (
+                    ["-o", str(raw_result_path)] if raw_results_file else []) + command
 
     @staticmethod
     def get_measurements(runsolver_values_path: Path,
