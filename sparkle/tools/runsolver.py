@@ -2,11 +2,11 @@
 from __future__ import annotations
 import sys
 import ast
-import time
 import re
 from pathlib import Path
 
 from sparkle.types import SolverStatus
+from sparkle.tools.general import get_time_pid_random_string
 
 
 class RunSolver:
@@ -65,8 +65,8 @@ class RunSolver:
         # -o filename or --solver-data filename
         # redirects the solver output (both stdout and stderr) to filename
         log_name_base = "runsolver" if log_name_base is None else log_name_base
-        time_stamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
-        raw_result_path = log_directory / Path(f"{log_name_base}_{time_stamp}.rawres")
+        unique_stamp = get_time_pid_random_string()
+        raw_result_path = log_directory / Path(f"{log_name_base}_{unique_stamp}.rawres")
         watcher_data_path = raw_result_path.with_suffix(".log")
         var_values_path = raw_result_path.with_suffix(".val")
 
