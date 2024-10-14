@@ -23,7 +23,7 @@ setup(name="SparkleAI",
           "tabulate==0.9.0",
           "pytermgui==7.7.2",
           "tqdm==4.66.5",
-          "RunRunner==0.1.7",
+          "RunRunner==0.1.7.1",
           # Reporting packages
           "plotly==5.23.0",
           "kaleido==0.2.1",
