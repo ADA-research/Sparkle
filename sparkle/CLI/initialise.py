@@ -141,9 +141,10 @@ def initialise_sparkle(download_examples: bool = False) -> None:
             ["Rscript", "-e",
              f'install.packages("{IRACE.configurator_package.absolute()}",'
              f'lib="{IRACE.configurator_path.absolute()}")'], capture_output=True)
-        if irace_install.returncode != 0:
-            warnings.warn("An error occured during the installation of IRACE:\n",
-                          irace_install.stderr)
+        if irace_install.returncode != 0 or not IRACE.configurator_executable.exists():
+            print("An error occured during the installation of IRACE:\n",
+                  irace_install.stdout.decode(), "\n",
+                  irace_install.stderr.decode())
         else:
             print("IRACE installed!")
 
