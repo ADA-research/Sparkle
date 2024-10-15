@@ -1,1 +1,0 @@
-parameterFile = "parameters.txt"
