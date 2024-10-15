@@ -10,6 +10,7 @@ dependencies:
   - swig=4.0.2 # SMAC3 C++ compiler
   - libnuma=2.0.18 # runsolver compilation
   - numactl=2.0.18 # runsolver compilation
+  - r-base=4.4.1  # R installation for IRACE
   - pip
   - pip:
     - --editable .  # Development mode: self install

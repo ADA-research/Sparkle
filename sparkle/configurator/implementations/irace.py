@@ -12,6 +12,11 @@ from runrunner import Runner, Run
 
 class IRACE(Configurator):
     """Class for IRACE configurator."""
+    configurator_path = Path(__file__).parent.parent.parent.resolve() /\
+        "Components/irace-v3.5"  # Executable: R/main.R -> irace.cmdline ?
+    configurator_package = configurator_path / "irace_3.5.tar.gz"
+    configurator_executable = configurator_path / "irace" / "bin" / "irace"
+    target_algorithm = "smac_target_algorithm.py"
 
     def __init__(self: Configurator, validator: Validator, output_path: Path,
                  executable_path: Path, configurator_target: Path,

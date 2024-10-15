@@ -5,6 +5,7 @@ import argparse
 import shutil
 import os
 import sys
+import warnings
 from pathlib import Path
 
 from sparkle.platform import CommandName
@@ -13,6 +14,7 @@ from sparkle.CLI.help import snapshot_help as snh
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.CLI.help import global_variables as gv
+from sparkle.configurator.implementations.irace import IRACE
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -110,25 +112,40 @@ def initialise_sparkle(download_examples: bool = False) -> None:
     if not gv.settings().DEFAULT_runsolver_exec.exists():
         print("Runsolver does not exist, trying to compile...")
         if not (gv.settings().DEFAULT_runsolver_dir / "Makefile").exists():
-            print("WARNING: Runsolver executable doesn't exist and cannot find makefile."
-                  " Please verify the contents of the directory: "
-                  f"{gv.settings().DEFAULT_runsolver_dir}")
+            warnings.warn("Runsolver executable doesn't exist and cannot find makefile."
+                          " Please verify the contents of the directory: "
+                          f"{gv.settings().DEFAULT_runsolver_dir}")
         else:
             compile_runsolver =\
                 subprocess.run(["make"],
                                cwd=gv.settings().DEFAULT_runsolver_dir,
                                capture_output=True)
             if compile_runsolver.returncode != 0:
-                print("WARNING: Compilation of Runsolver failed with the following msg:"
-                      f"[{compile_runsolver.returncode}] "
-                      f"{compile_runsolver.stderr.decode()}")
+                warnings.warn("Compilation of Runsolver failed with the following msg:"
+                              f"[{compile_runsolver.returncode}] "
+                              f"{compile_runsolver.stderr.decode()}")
             else:
                 print("Runsolver compiled successfully!")
-    # Check that java is available
+    # Check that java is available for SMAC2
     if shutil.which("java") is None:
         # NOTE: An automatic resolution of Java at this point would be good
         # However, loading modules from Python has thusfar not been successfull.
-        print("Could not find Java as an executable!")
+        warnings.warn("Could not find Java as an executable! "
+                      "Java 1.8.0_402 is required to use SMAC2 as a configurator.")
+
+    # Check if IRACE is installed
+    if not IRACE.configurator_executable.exists():
+        # Install IRACE from tarball
+        print("Installing IRACE ...")
+        irace_install = subprocess.run(
+            ["Rscript", "-e",
+             f'install.packages("{IRACE.configurator_package.absolute()}",'
+             f'lib="{IRACE.configurator_path.absolute()}")'], capture_output=True)
+        if irace_install.returncode != 0:
+            warnings.warn("An error occured during the installation of IRACE:\n",
+                          irace_install.stderr)
+        else:
+            print("IRACE installed!")
 
     if download_examples:
         # Download Sparkle examples from Github

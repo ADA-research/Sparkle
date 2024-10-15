@@ -11,6 +11,7 @@ Output/*
 Snapshots/*
 Settings/*
 tests/test_files/tmp
+sparkle/Components/irace-v3.5/irace/
 sparkle/Components/runsolver/src/*.o
 sparkle/Components/runsolver/src/runsolver.d
 sparkle/Components/runsolver/src/runsolver
