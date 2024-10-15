@@ -1,5 +1,6 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+"""Test wrapper for Sparkle integration tests."""
 import sys
 import ast
 import subprocess
@@ -53,10 +54,10 @@ Path(runsolver_watch_data_path).unlink(missing_ok=True)
 status = SolverStatus.CRASHED
 for line in output_list:
     line = line.strip()
-    if (line == r's SATISFIABLE') or (line == r's UNSATISFIABLE'):
+    if (line == r"s SATISFIABLE") or (line == r"s UNSATISFIABLE"):
         status = SolverStatus.SUCCESS
         break
-    elif line == r's UNKNOWN':
+    elif line == r"s UNKNOWN":
         status = SolverStatus.TIMEOUT
         break
 

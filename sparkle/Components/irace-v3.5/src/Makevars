@@ -1,0 +1,5 @@
+# 							-*- mode: makefile -*-
+EXE=
+include Makevars-common
+
+

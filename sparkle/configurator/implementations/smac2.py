@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Configurator class to use different configurators like SMAC."""
+"""Configurator classes to implement SMAC2 in Sparkle."""
 
 from __future__ import annotations
 from typing import Callable
