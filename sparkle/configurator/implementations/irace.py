@@ -349,9 +349,6 @@ class IRACEScenario(ConfigurationScenario):
                   self.scenario_file_path.open("r").read(),
                   stdout_msg, "\n",
                   check_file.stderr.decode())
-        import sys
-        sys.exit(-1)
-        # TODO: If not passing print warning, or raise error
         return self.scenario_file_path
 
     @staticmethod
