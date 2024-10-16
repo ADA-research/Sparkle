@@ -219,7 +219,7 @@ def main(argv: list[str]) -> None:
     config_scenario = configurator.scenario_class(
         solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
         wallclock_time, cutoff_time, cutoff_length, sparkle_objectives, use_features,
-        configurator.configurator_target, feature_data_df)
+        feature_data_df)
 
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     dependency_job_list = configurator.configure(

@@ -234,7 +234,7 @@ class SMAC2Scenario(ConfigurationScenario):
                  wallclock_time: int = None, cutoff_time: int = None,
                  cutoff_length: int = None,
                  sparkle_objectives: list[SparkleObjective] = None,
-                 use_features: bool = None, configurator_target: Path = None,
+                 use_features: bool = None,
                  feature_data_df: pd.DataFrame = None)\
             -> None:
         """Initialize scenario paths and names.
@@ -274,7 +274,6 @@ class SMAC2Scenario(ConfigurationScenario):
         self.cutoff_time = cutoff_time
         self.cutoff_length = cutoff_length
         self.use_features = use_features
-        self.configurator_target = configurator_target
         self.feature_data = feature_data_df
 
         self.parent_directory = Path()
@@ -326,7 +325,7 @@ class SMAC2Scenario(ConfigurationScenario):
         shutil.rmtree(self.result_directory, ignore_errors=True)
         self.result_directory.mkdir(parents=True)
 
-    def _create_scenario_file(self: ConfigurationScenario) -> None:
+    def _create_scenario_file(self: ConfigurationScenario) -> Path:
         """Create a file with the configuration scenario.
 
         Writes supplementary information to the target algorithm (algo =) as:
@@ -334,7 +333,7 @@ class SMAC2Scenario(ConfigurationScenario):
         """
         self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
         with self.scenario_file_path.open("w") as file:
-            file.write(f"algo = {self.configurator_target.absolute()} "
+            file.write(f"algo = {SMAC2.configurator_target.absolute()} "
                        f"{self.solver.directory.absolute()} {self.sparkle_objective} \n"
                        f"execdir = {self.tmp.absolute()}/\n"
                        f"deterministic = {1 if self.solver.deterministic else 0}\n"
@@ -355,6 +354,7 @@ class SMAC2Scenario(ConfigurationScenario):
                 file.write(f"runcount-limit = {self.solver_calls}\n")
             # We don't let SMAC do the validation
             file.write("validation = false" + "\n")
+        return self.scenario_file_path
 
     def _prepare_instances(self: ConfigurationScenario) -> None:
         """Create instance list file without instance specifics."""
