@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+"""Handles SMAC2 calls passing to sparkle solver wrappers."""
 import sys
 from pathlib import Path
 
