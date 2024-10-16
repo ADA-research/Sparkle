@@ -46,6 +46,22 @@ def detect_sparkle_platform_exists(check: callable = all) -> Path:
     return None
 
 
+def initialise_irace() -> None:
+    """Initialise IRACE."""
+    print("Initialising IRACE ...")
+    # Install IRACE from tarball
+    irace_install = subprocess.run(
+        ["Rscript", "-e",
+         f'install.packages("{IRACE.configurator_package.absolute()}",'
+         f'lib="{IRACE.configurator_path.absolute()}")'], capture_output=True)
+    if irace_install.returncode != 0 or not IRACE.configurator_executable.exists():
+        print("An error occured during the installation of IRACE:\n",
+              irace_install.stdout.decode(), "\n",
+              irace_install.stderr.decode())
+    else:
+        print("IRACE installed!")
+
+
 def check_for_initialise(requirements: list[CommandName] = None)\
         -> None:
     """Function to check if initialize command was executed and execute it otherwise.
@@ -135,18 +151,7 @@ def initialise_sparkle(download_examples: bool = False) -> None:
 
     # Check if IRACE is installed
     if not IRACE.configurator_executable.exists():
-        # Install IRACE from tarball
-        print("Installing IRACE ...")
-        irace_install = subprocess.run(
-            ["Rscript", "-e",
-             f'install.packages("{IRACE.configurator_package.absolute()}",'
-             f'lib="{IRACE.configurator_path.absolute()}")'], capture_output=True)
-        if irace_install.returncode != 0 or not IRACE.configurator_executable.exists():
-            print("An error occured during the installation of IRACE:\n",
-                  irace_install.stdout.decode(), "\n",
-                  irace_install.stderr.decode())
-        else:
-            print("IRACE installed!")
+        initialise_irace()
 
     if download_examples:
         # Download Sparkle examples from Github
