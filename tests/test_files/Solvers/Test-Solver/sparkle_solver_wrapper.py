@@ -1,4 +1,4 @@
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Test wrapper for Sparkle integration tests."""
 import sys
