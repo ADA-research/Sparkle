@@ -152,7 +152,7 @@ class ConfigurationOutput:
         output_data = {
             "solver": self.solver.name if self.solver else None,
             "configurator": (
-                str(self.configurator.executable_path) if self.configurator else None
+                str(self.configurator) if self.configurator else None
             ),
             "best_configuration": Solver.config_str_to_dict(self.best_config),
             "configurations": self.configurations,

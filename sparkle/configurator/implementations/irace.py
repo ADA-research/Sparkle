@@ -23,14 +23,17 @@ class IRACE(Configurator):
     target_algorithm = configurator_path / "irace_target_algorithm.py"
 
     def __init__(self: Configurator, validator: Validator, output_path: Path,
-                 executable_path: Path, configurator_target: Path,
                  objectives: list[SparkleObjective], base_dir: Path, tmp_path: Path,
                  ) -> None:
         """Initialize IRACE configurator."""
         output_path = output_path / IRACE.__name__
         output_path.mkdir(parents=True, exist_ok=True)
-        super().__init__(validator, output_path, executable_path, configurator_target,
+        super().__init__(validator, output_path,
                          objectives, base_dir, tmp_path, multi_objective_support=False)
+
+    def __str__(self: IRACE) -> str:
+        """Returns the name of the configurator."""
+        return IRACE.__name__
 
     @property
     def scenario(self: Configurator) -> ConfigurationScenario:
@@ -157,7 +160,7 @@ class IRACE(Configurator):
         output = []  # List of output files for each seed
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{IRACE.__name__} {output[seed]} {output_csv.absolute()} "
-                f"{self.executable_path.absolute()} "
+                f"{IRACE.configurator_executable.absolute()} "
                 f"--scenario-file {scenario_path.absolute()} "
                 f"--parallel {num_parallel_jobs} "
                 for seed in range(self.scenario.number_of_runs)]
@@ -195,7 +198,6 @@ class IRACEScenario(ConfigurationScenario):
                  wallclock_time: int = None, cutoff_time: int = None,
                  cutoff_length: int = None,
                  sparkle_objectives: list[SparkleObjective] = None,
-                 configurator_target: Path = None,
                  feature_data_df: pd.DataFrame = None)\
             -> None:
         """Initialize scenario paths and names.
@@ -217,8 +219,6 @@ class IRACEScenario(ConfigurationScenario):
             sparkle_objectives: SparkleObjectives used for each run of the configuration.
                 Will be simplified to the first objective.
             use_features: Boolean indicating if features should be used.
-            configurator_target: The target Python script to be called.
-                This script standardises Configurator I/O for solver wrappers.
             feature_data_df: If features are used, this contains the feature data.
                 Defaults to None.
         """
@@ -234,7 +234,6 @@ class IRACEScenario(ConfigurationScenario):
         self.wallclock_time = wallclock_time
         self.cutoff_time = cutoff_time
         self.cutoff_length = cutoff_length
-        self.configurator_target = configurator_target
         self.feature_data = feature_data_df
 
         self.parent_directory = Path()

@@ -18,7 +18,6 @@ class Configurator:
     configurator_cli_path = Path(__file__).parent.resolve() / "configurator_cli.py"
 
     def __init__(self: Configurator, validator: Validator, output_path: Path,
-                 executable_path: Path,
                  objectives: list[SparkleObjective], base_dir: Path, tmp_path: Path,
                  multi_objective_support: bool = False) -> None:
         """Initialize Configurator.
@@ -26,7 +25,6 @@ class Configurator:
         Args:
             validator: Validator object to validate configurations runs
             output_path: Output directory of the Configurator.
-            executable_path: Executable of the configurator for Sparkle to call
             objectives: The list of Sparkle Objectives the configurator has to
                 optimize.
             base_dir: Where to execute the configuration
@@ -36,7 +34,6 @@ class Configurator:
         """
         self.validator = validator
         self.output_path = output_path
-        self.executable_path = executable_path
         self.objectives = objectives
         self.base_dir = base_dir
         self.tmp_path = tmp_path

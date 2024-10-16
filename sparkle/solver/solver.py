@@ -69,9 +69,12 @@ class Solver(SparkleCallable):
         """
         pcs_files = [p for p in self.directory.iterdir() if p.suffix == ".pcs"
                      and (port_type is None or port_type in p.name)]
-        if len(pcs_files) != 1:
-            # We only consider one PCS file per solver
+
+        if len(pcs_files) == 0:
             return False
+        if len(pcs_files) != 1:
+            # Generated PCS files present, this is a quick fix to take the original
+            pcs_files = sorted(pcs_files, key=lambda p: len(p.name))
         return pcs_files[0]
 
     def get_pcs_file(self: Solver, port_type: str = None) -> Path:

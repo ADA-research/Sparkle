@@ -47,11 +47,14 @@ class SMAC2(Configurator):
         return super().__init__(
             validator=Validator(out_dir=output_path),
             output_path=output_path,
-            executable_path=SMAC2.configurator_path / "smac",
             objectives=objectives,
             base_dir=base_dir,
             tmp_path=output_path / "tmp",
             multi_objective_support=False)
+
+    def __str__(self: SMAC2) -> str:
+        """Returns the name of the configurator."""
+        return SMAC2.__name__
 
     @property
     def scenario_class(self: Configurator) -> ConfigurationScenario:
@@ -87,7 +90,7 @@ class SMAC2(Configurator):
                   for seed in range(self.scenario.number_of_runs)]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{SMAC2.__name__} {output[seed]} {output_csv.absolute()} "
-                f"{self.executable_path.absolute()} "
+                f"{SMAC2.configurator_target.absolute()} "
                 f"--scenario-file {self.scenario.scenario_file_path.absolute()} "
                 f"--seed {seed} "
                 f"--execdir {self.scenario.tmp.absolute()}"
@@ -256,8 +259,6 @@ class SMAC2Scenario(ConfigurationScenario):
             sparkle_objectives: SparkleObjectives used for each run of the configuration.
                 Will be simplified to the first objective.
             use_features: Boolean indicating if features should be used.
-            configurator_target: The target Python script to be called.
-                This script standardises Configurator I/O for solver wrappers.
             feature_data_df: If features are used, this contains the feature data.
                 Defaults to None.
         """
@@ -333,7 +334,7 @@ class SMAC2Scenario(ConfigurationScenario):
         """
         self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
         with self.scenario_file_path.open("w") as file:
-            file.write(f"algo = {SMAC2.configurator_target.absolute()} "
+            file.write(f"algo = {Configurator.configurator_cli_path.absolute()} "
                        f"{self.solver.directory.absolute()} {self.sparkle_objective} \n"
                        f"execdir = {self.tmp.absolute()}/\n"
                        f"deterministic = {1 if self.solver.deterministic else 0}\n"

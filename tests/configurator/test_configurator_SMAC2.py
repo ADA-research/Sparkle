@@ -39,15 +39,12 @@ class TestConfiguratorSMAC2(TestCase):
             cutoff_time=60,
             cutoff_length=10,
             sparkle_objectives=[sparkle_objective],
-            use_features=False,
-            configurator_target=(SMAC2.configurator_path / SMAC2.target_algorithm))
+            use_features=False)
         assert self.smac2_conf.base_dir == self.base_dir
         assert self.smac2_conf.output_path == output / SMAC2.__name__
         assert self.smac2_conf.objectives == objectives
         assert self.smac2_conf.multiobjective is False
         assert self.smac2_conf.tmp_path == output / SMAC2.__name__ / "tmp"
-        assert str(self.smac2_conf.executable_path).endswith(
-            "Components/smac-v2.10.03-master-778/smac")
 
     @patch("runrunner.add_to_queue")
     def test_smac2_configure(self: TestConfiguratorSMAC2,
@@ -147,8 +144,7 @@ class TestConfigurationScenarioSMAC2(TestCase):
             cutoff_time=self.cutoff_time,
             cutoff_length=self.cutoff_length,
             sparkle_objectives=[self.sparkle_objective],
-            use_features=False,
-            configurator_target=Path(self.configurator.target_algorithm))
+            use_features=False)
 
     def tearDown(self: TestConfigurationScenarioSMAC2) -> None:
         """Cleanup executed after each test."""
