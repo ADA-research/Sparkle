@@ -9,16 +9,18 @@ from sparkle.solver import Solver, Validator
 from sparkle.instance import InstanceSet
 from sparkle.types import SparkleObjective
 
+import runrunner as rrr
 from runrunner import Runner, Run
 
 
 class IRACE(Configurator):
     """Class for IRACE configurator."""
     configurator_path = Path(__file__).parent.parent.parent.resolve() /\
-        "Components/irace-v3.5"  # Executable: R/main.R -> irace.cmdline ?
+        "Components/irace-v3.5"
     configurator_package = configurator_path / "irace_3.5.tar.gz"
     configurator_executable = configurator_path / "irace" / "bin" / "irace"
-    target_algorithm = "smac_target_algorithm.py"
+    configurator_ablation_executable = configurator_path / "irace" / "bin" / "ablation"
+    target_algorithm = configurator_path / "irace_target_algorithm.py"
 
     def __init__(self: Configurator, validator: Validator, output_path: Path,
                  executable_path: Path, configurator_target: Path,
@@ -57,50 +59,16 @@ class IRACE(Configurator):
             A RunRunner Run object.
         """
         # TODO: Create scenario
+        self.scenario = scenario
+        scenario_path = self.scenario.create_scenario(parent_directory=self.output_path)
+        output_csv = self.scenario.validation / "configurations.csv"
+        output_csv.parent.mkdir(exist_ok=True, parents=True)
         # TODO Create command to call IRACE. Create plural ? based on number of runs var
         # NOTE: Possible arguments listed below.
         # Some are also placed in scenario file so can be omitted ?, marked with [sf]
         # Some are not relevant and should be ignored [i]
         # Should be hard defined by Sparkle to work [h]
         """
-        [i]-c,--check               Check scenario.
-        [i]-i,--init                Initialize the working directory with template config
-                                files.
-        [i]--only-test           Only test the configurations given in the file passed
-                                as argument.
-        [h]-s,--scenario            File that describes the configuration scenario setup
-                                and other irace settings. Default: ./scenario.txt.
-        [sf]--exec-dir            Directory where the programs will be run. Default: ./.
-        [sf]-p,--parameter-file      File that contains the description of the parameters
-                                of the target algorithm. Default: ./parameters.txt.
-        [sf]--forbidden-file      File that contains a list of logical expressions that
-                                cannot be TRUE for any evaluated configuration. If
-                                empty or NULL, do not use forbidden expressions.
-        [sf]--configurations-file  File that contains a table of initial configurations.
-                                If empty or NULL, all initial configurations are
-                                randomly generated.
-        [h]-l,--log-file            File to save tuning results as an R dataset, either
-                                absolute path or relative to execDir. Default:
-                                ./irace.Rdata.
-        [i]--recovery-file       Previously saved log file to recover the execution of
-                                irace, either absolute path or relative to the current
-                                directory.  If empty or NULL, recovery is not
-                                performed.
-        [sf]--train-instances-dir  Directory where training instances are located;
-                                either absolute path or relative to current directory.
-                                If no trainInstancesFiles is provided, all the files
-                                in trainInstancesDir will be listed as instances.
-                                Default: ./Instances.
-        [sf]--train-instances-file  File that contains a list of training instances and
-                                optionally additional parameters for them. If
-                                trainInstancesDir is provided, irace will search for
-                                the files in this folder.
-        [i]--sample-instances    Randomly sample the training instances or use them in
-                                the order given. Default: 1.
-        [sf]--test-instances-dir  Directory where testing instances are located, either
-                                absolute or relative to current directory.
-        [sf]--test-instances-file  File containing a list of test instances and
-                                optionally additional parameters for them.
         --test-num-elites     Number of elite configurations returned by irace that
                                 will be tested if test instances are provided.
                                 Default: 1.
@@ -118,28 +86,6 @@ class IRACE(Configurator):
                                 Default: 5.
         --each-test           Number of instances evaluated between elimination
                                 tests. Default: 1.
-        [h]--target-runner       Executable called for each configuration that executes
-                                the target algorithm to be tuned. See the templates
-                                and examples provided. Default: ./target-runner.
-        [h]--target-runner-launcher  Executable that will be used to launch the target
-                                runner, when targetRunner cannot be executed directly
-                                (.e.g, a Python script in Windows).
-        [h]--target-runner-args  Command-line arguments provided to
-                                targetRunnerLauncher. The substrings {targetRunner}
-                                and {targetRunnerArgs} will be replaced by the value
-                                of the option targetRunner and by the arguments
-                                usually passed when calling targetRunner,
-                                respectively. Example: "-m {targetRunner --args
-                                {targetRunnerArgs}"}. Default: {targetRunner}
-                                {targetRunnerArgs}.
-        [i]--target-runner-retries  Number of times to retry a call to targetRunner if
-                                the call failed. Default: 0.
-        [i]--target-evaluator    Optional script or R function that provides a numeric
-                                value for each configuration. See
-                                templates/target-evaluator.tmpl
-        [handled by solver]--deterministic       If the target algorithm is deterministic
-                                configurations will be evaluated only once per
-                                instance. Default: 0.
         --max-experiments     Maximum number of runs (invocations of targetRunner)
                                 that will be performed. It determines the maximum
                                 budget of experiments for the tuning. Default: 0.
@@ -212,9 +158,6 @@ class IRACE(Configurator):
                                 a postselection race of the best configurations of
                                 each iteration after the execution of irace. Default:
                                 0.
-        [i]--aclib               Enable/disable AClib mode. This option enables
-                                compatibility with GenericWrapper4AC as targetRunner
-                                script. Default: 0.
         --iterations          Maximum number of iterations. Default: 0.
         --experiments-per-iteration  Number of runs of the target algorithm per
                                 iteration. Default: 0.
@@ -226,6 +169,13 @@ class IRACE(Configurator):
                                 sampled and evaluated at each iteration. Default: 5.
         --confidence          Confidence level for the elimination test. Default:
                                 0.95."""
+        output = []  # List of output files for each seed
+        cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
+                f"{IRACE.__name__} {output[seed]} {output_csv.absolute()} "
+                f"{self.executable_path.absolute()} "
+                f"--scenario-file {scenario_path.absolute()}"
+                for seed in range(self.scenario.number_of_runs)]
+        return cmds
         raise NotImplementedError
 
     def get_optimal_configuration(self: Configurator,
@@ -316,6 +266,8 @@ class IRACEScenario(ConfigurationScenario):
         Args:
             parent_directory: Directory in which the scenario should be created.
         """
+        # TODO: Set up directories
+        self.create_scenario_file()
         raise NotImplementedError
 
     def create_scenario_file(self: ConfigurationScenario) -> Path:
@@ -324,8 +276,6 @@ class IRACEScenario(ConfigurationScenario):
         Returns:
             Path to the created file.
         """
-        # Needs to produce a [scenario.txt] file that requires:
-
         # File that contains the description of the parameters.
         # parameterFile = "./parameters-acotsp.txt"
 
@@ -356,15 +306,44 @@ class IRACEScenario(ConfigurationScenario):
         # more verbose debug messages.
         # debugLevel = 0 [0, 3] -> Should probably be set to 1
 
-        # features.csv
-        if self.feature_data is not None:
-            self.feature_file_path = self.directory / "features.csv"
-            self.feature_data.to_csv(self.feature_file_path)
-
         # TODO: Write to the file
+        self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
+        with self.scenario_file_path.open("w") as file:
+            file.write(
+                f"execDir = {self.tmp.absolute()}/\n"
+                f"target-runner = {IRACE.target_algorithm.absolute()}\n"
+                f"targer-runner-launcher = python3\n"
+                f"target-runner-args = {self.solver.directory.absolute()} "
+                f"{self.sparkle_objective}\n"
+                f"deterministic = {1 if self.solver.deterministic else 0}\n"
+                f"parameter-file = {self.solver.get_pcs_file().absolute()}\n"
+                f"cutoffTime = {self.cutoff_time}\n"
+                # TODO: forbidden-file = self.solver.get_forbidden_file()
+                # TODO: configurations-file = ?
+                f"cutoff_length = {self.cutoff_length}\n"
+                f"paramfile = {self.solver.get_pcs_file()}\n"
+                f"outdir = {self.outdir_train.absolute()}\n"
+                f"train-instances-dir = {self.instance_set.directory.absolute()}\n"
+                f"train-instances-file = {self.instance_file_path.absolute()}\n"
+                # TODO: This is SMAC2 workflow, is it correct? Can it be ommited?
+                f"test-instances-dir = {self.instance_set.directory.absolute()}\n"
+                f"test-instances-file = {self.instance_file_path.absolute()}\n"
+                # TODO: Log file, or default good enough?
+            )
+            if self.wallclock_time is not None:
+                file.write(f"wallclock-limit = {self.wallclock_time}\n")
+            if self.cpu_time is not None:
+                file.write(f"cputime-limit = {self.cpu_time}\n")
+            if self.solver_calls is not None:
+                file.write(f"runcount-limit = {self.solver_calls}\n")
+            # We don't let SMAC do the validation
+            file.write("validation = false" + "\n")
         # TODO: Call the IRACE --check
+        rrr.add_to_queue(cmd=f"{self.irace_exec.absolute()} "
+                             f"-s {self.scenario_file_path.absolute()} --check",
+                         run_on=Runner.LOCAL)
         # TODO: If not passing print warning, or raise error
-        raise NotImplementedError
+        return self.scenario_file_path
 
     @staticmethod
     def from_file(scenario_file: Path, solver: Solver, instance_set: InstanceSet,

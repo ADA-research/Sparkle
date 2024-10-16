@@ -29,6 +29,7 @@ class SMAC2(Configurator):
     configurator_path = Path(__file__).parent.parent.parent.resolve() /\
         "Components/smac-v2.10.03-master-778"
     target_algorithm = "smac_target_algorithm.py"
+    configurator_target = configurator_path / target_algorithm
 
     def __init__(self: SMAC2,
                  objectives: list[SparkleObjective],
@@ -47,7 +48,6 @@ class SMAC2(Configurator):
             validator=Validator(out_dir=output_path),
             output_path=output_path,
             executable_path=SMAC2.configurator_path / "smac",
-            configurator_target=SMAC2.configurator_path / SMAC2.target_algorithm,
             objectives=objectives,
             base_dir=base_dir,
             tmp_path=output_path / "tmp",
@@ -79,7 +79,7 @@ class SMAC2(Configurator):
             A RunRunner Run object.
         """
         self.scenario = scenario
-        self.scenario.create_scenario(parent_directory=self.output_path)
+        scenario_path = self.scenario.create_scenario(parent_directory=self.output_path)
         output_csv = self.scenario.validation / "configurations.csv"
         output_csv.parent.mkdir(exist_ok=True, parents=True)
         output = [f"{(self.scenario.result_directory).absolute()}/"
@@ -88,7 +88,7 @@ class SMAC2(Configurator):
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{SMAC2.__name__} {output[seed]} {output_csv.absolute()} "
                 f"{self.executable_path.absolute()} "
-                f"--scenario-file {(self.scenario.scenario_file_path).absolute()} "
+                f"--scenario-file {scenario_path.absolute()} "
                 f"--seed {seed} "
                 f"--execdir {self.scenario.tmp.absolute()}"
                 for seed in range(self.scenario.number_of_runs)]
@@ -299,7 +299,7 @@ class SMAC2Scenario(ConfigurationScenario):
         if self.use_features:
             self._create_feature_file()
 
-        self._create_scenario_file()
+        self.create_scenario_file()
 
     def _set_paths(self: ConfigurationScenario, parent_directory: Path) -> None:
         """Set the paths for the scenario based on the specified parent directory."""
@@ -325,7 +325,7 @@ class SMAC2Scenario(ConfigurationScenario):
         shutil.rmtree(self.result_directory, ignore_errors=True)
         self.result_directory.mkdir(parents=True)
 
-    def _create_scenario_file(self: ConfigurationScenario) -> Path:
+    def create_scenario_file(self: ConfigurationScenario) -> Path:
         """Create a file with the configuration scenario.
 
         Writes supplementary information to the target algorithm (algo =) as:

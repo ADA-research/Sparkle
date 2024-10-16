@@ -18,7 +18,7 @@ class Configurator:
     configurator_cli_path = Path(__file__).parent.resolve() / "configurator_cli.py"
 
     def __init__(self: Configurator, validator: Validator, output_path: Path,
-                 executable_path: Path, configurator_target: Path,
+                 executable_path: Path,
                  objectives: list[SparkleObjective], base_dir: Path, tmp_path: Path,
                  multi_objective_support: bool = False) -> None:
         """Initialize Configurator.
@@ -27,8 +27,6 @@ class Configurator:
             validator: Validator object to validate configurations runs
             output_path: Output directory of the Configurator.
             executable_path: Executable of the configurator for Sparkle to call
-            configurator_target: The wrapper algorithm to standardize configurator
-                input/output towards solver wrappers.
             objectives: The list of Sparkle Objectives the configurator has to
                 optimize.
             base_dir: Where to execute the configuration
@@ -39,7 +37,6 @@ class Configurator:
         self.validator = validator
         self.output_path = output_path
         self.executable_path = executable_path
-        self.configurator_target = configurator_target
         self.objectives = objectives
         self.base_dir = base_dir
         self.tmp_path = tmp_path
@@ -130,7 +127,7 @@ class ConfigurationScenario:
         """
         raise NotImplementedError
 
-    def create_scenario_file(self: ConfigurationScenario) -> None:
+    def create_scenario_file(self: ConfigurationScenario) -> Path:
         """Create a file with the configuration scenario.
 
         Writes supplementary information to the target algorithm (algo =) as:

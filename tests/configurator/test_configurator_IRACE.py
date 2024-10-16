@@ -1,4 +1,5 @@
 """Test public methods of IRACE configurator."""
+import pytest
 from pathlib import Path
 
 from sparkle.CLI import initialise
@@ -9,12 +10,14 @@ from sparkle.instance import instance_set
 from sparkle.types import resolve_objective
 
 
-def test_irace_scenario_file() -> None:
+def test_irace_scenario_file(tmp_path: Path,
+                             monkeypatch: pytest.MonkeyPatch) -> None:
     """Test IRACE scenario file creation."""
-    if not IRACE.configurator_executable.exists():
-        initialise.initialise_irace()  # Ensure IRACE is compiled
     solver = Solver("tests/test_files/Solvers/Test-Solver")
     set = instance_set(Path("tests/test_files/Instances/Train-Instance-Set"))
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+    if not IRACE.configurator_executable.exists():
+        initialise.initialise_irace()  # Ensure IRACE is compiled
     obj_par, obj_acc = resolve_objective("PAR10"), resolve_objective("accuray:max")
     scenario = IRACEScenario(solver, set, number_of_runs=5,
                              solver_calls=5, cpu_time=10, wallclock_time=10,

@@ -107,7 +107,7 @@ class AblationScenario:
 
         # Create config file
         config_file = Path(f"{ablation_scenario_dir}/ablation_config.txt")
-        config = (f'algo = "{configurator.configurator_target.absolute()} '
+        config = (f'algo = "{SMAC2.configurator_target.absolute()} '
                   f'{self.solver.directory.absolute()} {objective}"\n'
                   f"execdir = {self.tmp_dir.absolute()}\n"
                   "experimentDir = ./\n"

@@ -144,7 +144,6 @@ class ConfigurationOutput:
             "cutoff_length": scenario.cutoff_length,
             "sparkle_objective": scenario.sparkle_objective.name,
             "use_features": scenario.use_features,
-            "configurator_target": scenario.configurator_target,
             "feature_data": scenario.feature_data,
         }
 
