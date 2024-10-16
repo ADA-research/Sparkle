@@ -79,7 +79,7 @@ class SMAC2(Configurator):
             A RunRunner Run object.
         """
         self.scenario = scenario
-        scenario_path = self.scenario.create_scenario(parent_directory=self.output_path)
+        self.scenario.create_scenario(parent_directory=self.output_path)
         output_csv = self.scenario.validation / "configurations.csv"
         output_csv.parent.mkdir(exist_ok=True, parents=True)
         output = [f"{(self.scenario.result_directory).absolute()}/"
@@ -88,7 +88,7 @@ class SMAC2(Configurator):
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{SMAC2.__name__} {output[seed]} {output_csv.absolute()} "
                 f"{self.executable_path.absolute()} "
-                f"--scenario-file {scenario_path.absolute()} "
+                f"--scenario-file {self.scenario.scenario_file_path.absolute()} "
                 f"--seed {seed} "
                 f"--execdir {self.scenario.tmp.absolute()}"
                 for seed in range(self.scenario.number_of_runs)]

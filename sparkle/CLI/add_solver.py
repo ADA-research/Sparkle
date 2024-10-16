@@ -78,6 +78,7 @@ def main(argv: list[str]) -> None:
             print(f"One pcs file detected: {pcs_file.name}. ", end="")
             if solver.read_pcs_file():
                 print("Can read the pcs file.")
+                solver.port_pcs("IRACE")  # Create PCS file for IRACE
             else:
                 print("WARNING: Can not read the provided pcs file format.")
 

@@ -13,8 +13,8 @@ from sparkle.types import resolve_objective
 def test_irace_scenario_file(tmp_path: Path,
                              monkeypatch: pytest.MonkeyPatch) -> None:
     """Test IRACE scenario file creation."""
-    solver = Solver("tests/test_files/Solvers/Test-Solver")
-    set = instance_set(Path("tests/test_files/Instances/Train-Instance-Set"))
+    solver = Solver(Path("tests/test_files/Solvers/Test-Solver").absolute())
+    set = instance_set(Path("tests/test_files/Instances/Train-Instance-Set").absolute())
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     if not IRACE.configurator_executable.exists():
         initialise.initialise_irace()  # Ensure IRACE is compiled
@@ -23,4 +23,4 @@ def test_irace_scenario_file(tmp_path: Path,
                              solver_calls=5, cpu_time=10, wallclock_time=10,
                              cutoff_time=10, cutoff_length=10,
                              sparkle_objectives=[obj_par, obj_acc], feature_data_df=None)
-    scenario.create_scenario_file()
+    scenario.create_scenario(Path())

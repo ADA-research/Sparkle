@@ -9,7 +9,7 @@ from sparkle.solver import Solver, Validator
 from sparkle.instance import InstanceSet
 from sparkle.types import SparkleObjective
 
-import runrunner as rrr
+# import runrunner as rrr
 from runrunner import Runner, Run
 
 
@@ -89,9 +89,6 @@ class IRACE(Configurator):
         --max-experiments     Maximum number of runs (invocations of targetRunner)
                                 that will be performed. It determines the maximum
                                 budget of experiments for the tuning. Default: 0.
-        --max-time            Maximum total execution time in seconds for the
-                                executions of targetRunner. targetRunner must return
-                                two values: cost and time. Default: 0.
         --budget-estimation   Fraction (smaller than 1) of the budget used to
                                 estimate the mean computation time of a configuration.
                                 Only used when maxTime > 0 Default: 0.02.
@@ -256,8 +253,9 @@ class IRACEScenario(ConfigurationScenario):
             parent_directory: Directory in which the scenario should be created.
         """
         # TODO: Set up directories
+        self.tmp = self.directory / "tmp"
+        self.tmp.mkdir(exist_ok=True)
         self.create_scenario_file()
-        raise NotImplementedError
 
     def create_scenario_file(self: ConfigurationScenario) -> Path:
         """Create a file from the IRACE scenario.
@@ -299,37 +297,48 @@ class IRACEScenario(ConfigurationScenario):
         self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
         with self.scenario_file_path.open("w") as file:
             file.write(
-                f"execDir = {self.tmp.absolute()}/\n"
-                f"target-runner = {IRACE.target_algorithm.absolute()}\n"
-                f"targer-runner-launcher = python3\n"
-                f"target-runner-args = {self.solver.directory.absolute()} "
-                f"{self.sparkle_objective}\n"
+                f'execDir = "{self.tmp.absolute()}"\n'
+                f'targetRunner = "{IRACE.target_algorithm.absolute()}"\n'
+                'targerRunnerLauncher = "python3"\n'
+                f'targetRunnerArgs = "{self.solver.directory.absolute()} '
+                f'{self.sparkle_objective}"\n'
                 f"deterministic = {1 if self.solver.deterministic else 0}\n"
-                f"parameter-file = {self.solver.get_pcs_file().absolute()}\n"
-                f"cutoffTime = {self.cutoff_time}\n"
+                "parameterFile = "
+                f'"{self.solver.get_pcs_file(port_type="""IRACE""").absolute()}"\n'
+                # f'cutoffTime = {self.cutoff_time}\n'
                 # TODO: forbidden-file = self.solver.get_forbidden_file()
                 # TODO: configurations-file = ?
-                f"cutoff_length = {self.cutoff_length}\n"
-                f"paramfile = {self.solver.get_pcs_file()}\n"
-                f"outdir = {self.outdir_train.absolute()}\n"
-                f"train-instances-dir = {self.instance_set.directory.absolute()}\n"
-                f"train-instances-file = {self.instance_file_path.absolute()}\n"
+                # f'cutoff_length = {self.cutoff_length}\n'
+                f'trainInstancesDir = "{self.instance_set.directory.absolute()}"\n'
+                f'trainInstancesFile = "{self.instance_file_path.absolute()}"\n'
                 # TODO: This is SMAC2 workflow, is it correct? Can it be ommited?
-                f"test-instances-dir = {self.instance_set.directory.absolute()}\n"
-                f"test-instances-file = {self.instance_file_path.absolute()}\n"
+                f'testInstancesDir = "{self.instance_set.directory.absolute()}"\n'
+                f'testInstancesFile = "{self.instance_file_path.absolute()}"\n'
                 # TODO: Log file, or default good enough?
-                "debug-level = 1\n"
+                "debugLevel = 1\n"
             )
             # if self.wallclock_time is not None:
             #    file.write(f"wallclock-limit = {self.wallclock_time}\n")
             if self.cpu_time is not None:
-                file.write(f"max-time = {self.cpu_time}\n")
-            if self.solver_calls is not None:
-                file.write(f"runcount-limit = {self.solver_calls}\n")
-        # TODO: Call the IRACE --check
-        rrr.add_to_queue(cmd=f"{self.irace_exec.absolute()} "
-                             f"-s {self.scenario_file_path.absolute()} --check",
-                         run_on=Runner.LOCAL)
+                file.write(f"maxTime = {self.cpu_time}\n")
+            # --max-experiments?
+            # if self.solver_calls is not None:
+            #    file.write(f"runcount-limit = {self.solver_calls}\n")
+        import subprocess
+        check_file = subprocess.run(
+            [f"{IRACE.configurator_executable.absolute()}",
+             "-s", f"{self.scenario_file_path.absolute()}", "--check"],
+            capture_output=True)
+        if check_file.returncode != 0:
+            stdout_msg = "\n".join([
+                line for line in check_file.stdout.decode().splitlines()
+                if not line.startswith("#")])
+            print("An error occured in the IRACE scenario file:\n",
+                  self.scenario_file_path.open("r").read(),
+                  stdout_msg, "\n",
+                  check_file.stderr.decode())
+        import sys
+        sys.exit(-1)
         # TODO: If not passing print warning, or raise error
         return self.scenario_file_path
 
