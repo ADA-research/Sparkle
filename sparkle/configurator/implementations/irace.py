@@ -260,7 +260,7 @@ class IRACEScenario(ConfigurationScenario):
         self.instance_file_path.parent.mkdir(exist_ok=True, parents=True)
         with self.instance_file_path.open("w+") as file:
             for instance_path in self.instance_set._instance_paths:
-                file.write(f"{instance_path.absolute()}\n")
+                file.write(f"{instance_path.name}\n")
         self.create_scenario_file()
 
     def create_scenario_file(self: ConfigurationScenario) -> Path:
@@ -301,35 +301,36 @@ class IRACEScenario(ConfigurationScenario):
 
         # TODO: Write to the file
         self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
+        solver_path = self.solver.directory.absolute()
         with self.scenario_file_path.open("w") as file:
             file.write(
                 f'execDir = "{self.tmp.absolute()}"\n'
                 'targetRunnerLauncher = "python3"\n'
                 f'targetRunner = "{IRACE.target_algorithm.absolute()}"\n'
-                'targetRunnerLauncherArgs = "{targetRunner} {targetRunnerArgs} '
-                f'{self.solver.directory.absolute()} {self.sparkle_objective}"\n'
+                'targetRunnerLauncherArgs = "{targetRunner} '
+                f"{solver_path} {self.sparkle_objective} {self.cutoff_time} "
+                '{targetRunnerArgs}"\n'
                 f"deterministic = {1 if self.solver.deterministic else 0}\n"
                 "parameterFile = "
                 f'"{self.solver.get_pcs_file(port_type="""IRACE""").absolute()}"\n'
-                # f'cutoffTime = {self.cutoff_time}\n'
                 # TODO: forbidden-file = self.solver.get_forbidden_file()
                 # TODO: configurations-file = ?
-                # f'cutoff_length = {self.cutoff_length}\n'
                 f'trainInstancesDir = "{self.instance_set.directory.absolute()}"\n'
                 f'trainInstancesFile = "{self.instance_file_path.absolute()}"\n'
                 # TODO: This is SMAC2 workflow, is it correct? Can it be ommited?
                 f'testInstancesDir = "{self.instance_set.directory.absolute()}"\n'
                 f'testInstancesFile = "{self.instance_file_path.absolute()}"\n'
+                # 'batchmode = "slurm"'  # TODO:  run_on variable to set this
                 # TODO: Log file, or default good enough?
                 "debugLevel = 1\n"
             )
-            # if self.wallclock_time is not None:
-            #    file.write(f"wallclock-limit = {self.wallclock_time}\n")
-            if self.cpu_time is not None:
-                file.write(f"maxTime = {self.cpu_time}\n")
-            # --max-experiments?
-            # if self.solver_calls is not None:
-            #    file.write(f"runcount-limit = {self.solver_calls}\n")
+            if self.cpu_time is not None or self.wallclock_time is not None:
+                # Time specified by user, but IRACE does not differentiate CPU from WALL
+                maxtime = max(self.cpu_time if self.cpu_time is not None else 0,
+                              self.wallclock_time if self.cpu_time is not None else 0)
+                file.write(f"maxTime = {int(maxtime)}\n")
+            if self.solver_calls is not None:
+                file.write(f"maxExperiments = {self.solver_calls}\n")
         import subprocess
         check_file = subprocess.run(
             [f"{IRACE.configurator_executable.absolute()}",
