@@ -298,10 +298,10 @@ class IRACEScenario(ConfigurationScenario):
         with self.scenario_file_path.open("w") as file:
             file.write(
                 f'execDir = "{self.tmp.absolute()}"\n'
+                'targetRunnerLauncher = "python3"\n'
                 f'targetRunner = "{IRACE.target_algorithm.absolute()}"\n'
-                'targerRunnerLauncher = "python3"\n'
-                f'targetRunnerArgs = "{self.solver.directory.absolute()} '
-                f'{self.sparkle_objective}"\n'
+                'targetRunnerLauncherArgs = "{targetRunner} {targetRunnerArgs} '
+                f'{self.solver.directory.absolute()} {self.sparkle_objective}"\n'
                 f"deterministic = {1 if self.solver.deterministic else 0}\n"
                 "parameterFile = "
                 f'"{self.solver.get_pcs_file(port_type="""IRACE""").absolute()}"\n'
