@@ -23,4 +23,4 @@ def test_irace_scenario_file(tmp_path: Path,
                              solver_calls=5, cpu_time=10, wallclock_time=10,
                              cutoff_time=10, cutoff_length=10,
                              sparkle_objectives=[obj_par, obj_acc], feature_data_df=None)
-    scenario.create_scenario(Path())
+    scenario.create_scenario(Path("test_irace_scenario"))

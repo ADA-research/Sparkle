@@ -252,9 +252,15 @@ class IRACEScenario(ConfigurationScenario):
         Args:
             parent_directory: Directory in which the scenario should be created.
         """
-        # TODO: Set up directories
+        # Set up directories
         self.tmp = self.directory / "tmp"
         self.tmp.mkdir(exist_ok=True)
+        # Create instance files
+        self.instance_file_path = self.directory / "instances.txt"
+        self.instance_file_path.parent.mkdir(exist_ok=True, parents=True)
+        with self.instance_file_path.open("w+") as file:
+            for instance_path in self.instance_set._instance_paths:
+                file.write(f"{instance_path.absolute()}\n")
         self.create_scenario_file()
 
     def create_scenario_file(self: ConfigurationScenario) -> Path:
