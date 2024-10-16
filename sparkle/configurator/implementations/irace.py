@@ -324,13 +324,18 @@ class IRACEScenario(ConfigurationScenario):
                 # TODO: Log file, or default good enough?
                 "debugLevel = 1\n"
             )
-            if self.cpu_time is not None or self.wallclock_time is not None:
+            if self.solver_calls is not None:
+                file.write(f"maxExperiments = {self.solver_calls}\n")
+            elif self.cpu_time is not None or self.wallclock_time is not None:
+
                 # Time specified by user, but IRACE does not differentiate CPU from WALL
                 maxtime = max(self.cpu_time if self.cpu_time is not None else 0,
                               self.wallclock_time if self.cpu_time is not None else 0)
                 file.write(f"maxTime = {int(maxtime)}\n")
-            if self.solver_calls is not None:
-                file.write(f"maxExperiments = {self.solver_calls}\n")
+            if self.solver_calls is not None and (
+                    self.cpu_time is not None or self.wallclock_time is not None):
+                print("WARNING: Both solver calls and time limit specified for scenario."
+                      " This is not supported by IRACE, defaulting to solver calls.")
         import subprocess
         check_file = subprocess.run(
             [f"{IRACE.configurator_executable.absolute()}",
