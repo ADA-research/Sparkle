@@ -24,4 +24,4 @@ def test_irace_scenario_file(tmp_path: Path,
                              sparkle_objectives=[obj_par, obj_acc], feature_data_df=None)
     scenario.create_scenario(Path("test_irace_scenario"))
 
-    # TODO: Check file contents
+    # TODO: Check file contents of scenario.txt
