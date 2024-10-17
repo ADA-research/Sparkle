@@ -24,11 +24,10 @@ class TestConfiguratorSMAC2(TestCase):
         """Test that Configurator initialization calls create_scenario() correctly."""
         super(TestConfiguratorSMAC2, self).__init__(*args, **kwargs)
         sparkle_objective = PAR(10)
-        objectives = [sparkle_objective]
         self.test_files = Path("tests", "test_files")
         self.base_dir = self.test_files / "tmp"
         output = Path("Output")
-        self.smac2_conf = SMAC2(objectives, self.base_dir, output)
+        self.smac2_conf = SMAC2(self.base_dir, output)
         self.train_set = instance_set(self.test_files / "Instances/Train-Instance-Set")
         self.solver = Solver(self.test_files / "Solvers/Test-Solver")
         self.conf_scenario = SMAC2Scenario(
@@ -42,7 +41,6 @@ class TestConfiguratorSMAC2(TestCase):
         )
         assert self.smac2_conf.base_dir == self.base_dir
         assert self.smac2_conf.output_path == output / SMAC2.__name__
-        assert self.smac2_conf.objectives == objectives
         assert self.smac2_conf.multiobjective is False
         assert self.smac2_conf.tmp_path == output / SMAC2.__name__ / "tmp"
 
@@ -135,7 +133,7 @@ class TestConfigurationScenarioSMAC2(TestCase):
         self.cutoff_time = 60
         self.cutoff_length = "max"
         self.sparkle_objective = PAR(10)
-        self.configurator = SMAC2([self.sparkle_objective], Path(), Path())
+        self.configurator = SMAC2(Path(), Path())
         self.scenario = SMAC2Scenario(
             solver=self.solver,
             instance_set=self.instance_set,

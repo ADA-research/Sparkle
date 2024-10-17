@@ -21,7 +21,7 @@ def test_irace_scenario_file(tmp_path: Path,
     obj_par, obj_acc = resolve_objective("PAR10"), resolve_objective("accuray:max")
     scenario = IRACEScenario(solver, set, number_of_runs=2,
                              solver_calls=2, cutoff_time=2, cutoff_length=2,
-                             sparkle_objectives=[obj_par, obj_acc], feature_data_df=None)
+                             sparkle_objectives=[obj_par, obj_acc])
     scenario.create_scenario(Path("test_irace_scenario"))
 
     # TODO: Check file contents of scenario.txt

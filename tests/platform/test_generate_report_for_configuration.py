@@ -26,7 +26,7 @@ class TestGenerateConfigurationReport(TestCase):
         mock_mkdir.return_value = None
         self.test_objective_runtime = PAR(10)
         self.test_objective_quality = SparkleObjective("ACCURACY")
-        self.configurator = SMAC2([self.test_objective_runtime], Path(), Path())
+        self.configurator = SMAC2(Path(), Path())
         self.solver_path = Path("tests/test_files/Solvers/Test-Solver")
         self.solver = Solver(self.solver_path, raw_output_directory=Path(""))
         train_instance = "train-instance"
