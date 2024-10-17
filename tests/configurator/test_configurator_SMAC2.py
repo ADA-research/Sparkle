@@ -141,8 +141,7 @@ class TestConfigurationScenarioSMAC2(TestCase):
             wallclock_time=self.wallclock_time,
             cutoff_time=self.cutoff_time,
             target_cutoff_length=self.cutoff_length,
-            sparkle_objectives=[self.sparkle_objective],
-            use_features=False)
+            sparkle_objectives=[self.sparkle_objective])
 
     def tearDown(self: TestConfigurationScenarioSMAC2) -> None:
         """Cleanup executed after each test."""
