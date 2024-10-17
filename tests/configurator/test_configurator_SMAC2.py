@@ -10,7 +10,6 @@ from pathlib import Path
 
 import runrunner as rrr
 
-from sparkle.platform import CommandName
 from sparkle.solver import Solver
 from sparkle.instance import instance_set
 from sparkle.configurator.implementations import SMAC2, SMAC2Scenario
@@ -44,11 +43,15 @@ class TestConfiguratorSMAC2(TestCase):
         assert self.smac2_conf.multiobjective is False
         assert self.smac2_conf.tmp_path == output / SMAC2.__name__ / "tmp"
 
+    @patch("shutil.which")
     @patch("runrunner.add_to_queue")
     def test_smac2_configure(self: TestConfiguratorSMAC2,
-                             mock_add_to_queue: Mock) -> None:
+                             mock_add_to_queue: Mock,
+                             mock_which: Mock) -> None:
         """Testing configure call of SMAC2."""
         # Testing without validation afterwards
+        # Mock shlex to avoid Sparkle throwing an exception because Java is not loaded
+        mock_which.return_value("Java")
         mock_add_to_queue.return_value = None
 
         # We currently cannot test these strings as they are using absolute paths
@@ -62,7 +65,9 @@ class TestConfiguratorSMAC2(TestCase):
             runner=rrr.Runner.SLURM,
             base_dir=self.base_dir,
             cmd=expected_cmds,
-            name=CommandName.CONFIGURE_SOLVER,
+            name=f"{SMAC2.__name__}: {self.conf_scenario.solver.name} on "
+                 f"{self.conf_scenario.instance_set.name}",
+            path=ANY,
             output_path=expected_outputs,
             parallel_jobs=2,
             sbatch_options=[],

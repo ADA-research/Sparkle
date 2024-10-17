@@ -106,9 +106,9 @@ class SMAC2(Configurator):
         runs = [rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
-            name=f"SMAC2: {scenario.solver.name} on {scenario.instance_set.name}",
+            name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
             base_dir=base_dir,
-            path=output,
+            path=self.scenario.result_directory,
             output_path=output,
             parallel_jobs=parallel_jobs,
             sbatch_options=sbatch_options,
