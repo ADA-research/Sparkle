@@ -1,5 +1,6 @@
 """Test the cancel CLI entry point."""
 import pytest
+from unittest.mock import patch, Mock
 from pathlib import Path
 
 from sparkle.CLI import add_solver, add_instances, configure_solver
@@ -8,7 +9,9 @@ from tests.CLI import tools
 
 
 @pytest.mark.integration
-def test_configure_solver_command(tmp_path: Path,
+@patch("shutil.which")
+def test_configure_solver_command(mock_which: Mock,
+                                  tmp_path: Path,
                                   monkeypatch: pytest.MonkeyPatch) -> None:
     """Test cancel command on configuration jobs."""
     # Smoke test: Submit configuration jobs
@@ -30,6 +33,9 @@ def test_configure_solver_command(tmp_path: Path,
         add_instances.main([str(instance_set_path)])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
+
+    # Mock shlex to avoid Sparkle throwing an exception because Java is not loaded
+    mock_which.return_value("Java")
 
     # Submit configure solver job and validation job
     with pytest.raises(SystemExit) as pytest_wrapped_e:
