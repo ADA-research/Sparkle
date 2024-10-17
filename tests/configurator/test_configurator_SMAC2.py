@@ -37,9 +37,9 @@ class TestConfiguratorSMAC2(TestCase):
             solver_calls=25,
             wallclock_time=80,
             cutoff_time=60,
-            cutoff_length=10,
+            target_cutoff_length=10,
             sparkle_objectives=[sparkle_objective],
-            use_features=False)
+        )
         assert self.smac2_conf.base_dir == self.base_dir
         assert self.smac2_conf.output_path == output / SMAC2.__name__
         assert self.smac2_conf.objectives == objectives
@@ -142,7 +142,7 @@ class TestConfigurationScenarioSMAC2(TestCase):
             number_of_runs=self.run_number,
             wallclock_time=self.wallclock_time,
             cutoff_time=self.cutoff_time,
-            cutoff_length=self.cutoff_length,
+            target_cutoff_length=self.cutoff_length,
             sparkle_objectives=[self.sparkle_objective],
             use_features=False)
 
@@ -155,8 +155,7 @@ class TestConfigurationScenarioSMAC2(TestCase):
         self.assertEqual(self.scenario.solver, self.solver)
         self.assertEqual(self.scenario.instance_set.directory,
                          self.instance_set.directory)
-        self.assertFalse(self.scenario.use_features)
-        self.assertEqual(self.scenario.feature_data, None)
+        self.assertIsNone(self.scenario.feature_data)
         self.assertEqual(self.scenario.name,
                          f"{self.solver.name}_{self.instance_set.name}")
 

@@ -121,11 +121,12 @@ class Settings:
     DEFAULT_general_check_interval = 10
     DEFAULT_general_run_on = "local"
 
-    DEFAULT_config_wallclock_time = 600
-    DEFAULT_config_cpu_time = None
-    DEFAULT_config_solver_calls = None
-    DEFAULT_config_number_of_runs = 25
-    DEFAULT_configurator_target_cutoff_length = "max"
+    DEFAULT_configurator_number_of_runs = 25
+    DEFAULT_configurator_solver_calls = 100
+
+    DEFAULT_smac2_wallclock_time = 600
+    DEFAULT_smac2_cpu_time = 600
+    DEFAULT_smac2_target_cutoff_length = "max"
 
     DEFAULT_portfolio_construction_timeout = None
 
@@ -135,6 +136,9 @@ class Settings:
 
     DEFAULT_parallel_portfolio_check_interval = 4
     DEFAULT_parallel_portfolio_num_seeds_per_solver = 1
+
+    # Default IRACE settings
+    DEFAULT_irace_max_time = 1200
 
     def __init__(self: Settings, file_path: PurePath = None) -> None:
         """Initialise a settings object."""
@@ -151,15 +155,15 @@ class Settings:
         self.__general_verbosity_set = SettingState.NOT_SET
         self.__general_check_interval_set = SettingState.NOT_SET
 
-        self.__config_wallclock_time_set = SettingState.NOT_SET
-        self.__config_cpu_time_set = SettingState.NOT_SET
         self.__config_solver_calls_set = SettingState.NOT_SET
         self.__config_number_of_runs_set = SettingState.NOT_SET
+        self.__smac2_wallclock_time_set = SettingState.NOT_SET
+        self.__smac2_cpu_time_set = SettingState.NOT_SET
 
         self.__run_on_set = SettingState.NOT_SET
         self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
         self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
-        self.__configurator_target_cutoff_length_set = SettingState.NOT_SET
+        self.__smac2_target_cutoff_length_set = SettingState.NOT_SET
         self.__slurm_extra_options_set = dict()
         self.__ablation_racing_flag_set = SettingState.NOT_SET
 
@@ -255,39 +259,40 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             section = "configuration"
-            option_names = ("wallclock_time", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_config_wallclock_time(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("cpu_time", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_config_cpu_time(value, state)
-                    file_settings.remove_option(section, option)
-
             option_names = ("solver_calls", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
-                    self.set_config_solver_calls(value, state)
+                    self.set_configurator_solver_calls(value, state)
                     file_settings.remove_option(section, option)
 
             option_names = ("number_of_runs", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
-                    self.set_config_number_of_runs(value, state)
+                    self.set_configurator_number_of_runs(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("target_cutoff_length", "smac_each_run_cutoff_length")
+            section = "smac2"
+            option_names = ("wallclock_time", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_smac2_wallclock_time(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("cpu_time", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_smac2_cpu_time(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("target_cutoff_length", "each_run_cutoff_length")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
-                    self.set_configurator_target_cutoff_length(value, state)
+                    self.set_smac2_target_cutoff_length(value, state)
                     file_settings.remove_option(section, option)
 
             section = "slurm"
@@ -455,11 +460,10 @@ class Settings:
                 cim.resolve_configurator(self.__settings["general"]["configurator"])
             if configurator_subclass is not None:
                 self.__general_sparkle_configurator = configurator_subclass(
-                    objectives=self.get_general_sparkle_objectives(),
-                    base_dir=Settings.DEFAULT_tmp_output,
+                    base_dir=Path(),
                     output_path=Settings.DEFAULT_configuration_output_raw)
             else:
-                print("WARNING: Configurator class name not recognised:"
+                print("WARNING: Configurator class name not recognised: "
                       f'{self.__settings["general"]["configurator"]}. '
                       "Configurator not set.")
         return self.__general_sparkle_configurator
@@ -604,53 +608,34 @@ class Settings:
         if self.__general_check_interval_set == SettingState.NOT_SET:
             self.set_general_check_interval()
 
-        return int(
-            self.__settings["general"]["check_interval"])
+        return int(self.__settings["general"]["check_interval"])
 
-    # Configuration settings ###
+    # Configuration settings General ###
 
-    def set_config_wallclock_time(
-            self: Settings, value: int = DEFAULT_config_wallclock_time,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the budget per configuration run in seconds (wallclock)."""
-        section = "configuration"
-        name = "wallclock_time"
+    def get_configurator_settings(self: Settings,
+                                  configurator_name: str) -> dict[str, any]:
+        """Return the configurator settings."""
+        configurator_settings = {
+            "cutoff_time": self.get_general_target_cutoff_time(),
+            "solver_calls": self.get_configurator_solver_calls(),
+            "number_of_runs": self.get_configurator_number_of_runs(),
+        }
+        if configurator_name == cim.SMAC2.__name__:
+            # Return all settings from the SMAC2 section
+            configurator_settings.update({
+                "cpu_time": self.get_smac2_cpu_time(),
+                "wallclock_time": self.get_smac2_wallclock_time(),
+                "target_cutoff_length": self.get_smac2_target_cutoff_length(),
+            })
+        if configurator_name == cim.IRACE.__name__:
+            # Return all settings from the IRACE section
+            configurator_settings.update({
 
-        if value is not None and self.__check_setting_state(
-                self.__config_wallclock_time_set, origin, name):
-            self.__init_section(section)
-            self.__config_wallclock_time_set = origin
-            self.__settings[section][name] = str(value)
+            })
+        return configurator_settings
 
-    def get_config_wallclock_time(self: Settings) -> int:
-        """Return the budget per configuration run in seconds (wallclock)."""
-        if self.__config_wallclock_time_set == SettingState.NOT_SET:
-            self.set_config_wallclock_time()
-        return int(self.__settings["configuration"]["wallclock_time"])
-
-    def set_config_cpu_time(
-            self: Settings, value: int = DEFAULT_config_cpu_time,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the budget per configuration run in seconds (cpu)."""
-        section = "configuration"
-        name = "cpu_time"
-
-        if value is not None and self.__check_setting_state(
-                self.__config_cpu_time_set, origin, name):
-            self.__init_section(section)
-            self.__config_cpu_time_set = origin
-            self.__settings[section][name] = str(value)
-
-    def get_config_cpu_time(self: Settings) -> int | None:
-        """Return the budget per configuration run in seconds (cpu)."""
-        if self.__config_cpu_time_set == SettingState.NOT_SET:
-            self.set_config_cpu_time()
-            return None
-
-        return int(self.__settings["configuration"]["cpu_time"])
-
-    def set_config_solver_calls(
-            self: Settings, value: int = DEFAULT_config_solver_calls,
+    def set_configurator_solver_calls(
+            self: Settings, value: int = DEFAULT_configurator_solver_calls,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the number of solver calls."""
         section = "configuration"
@@ -662,16 +647,15 @@ class Settings:
             self.__config_solver_calls_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_config_solver_calls(self: Settings) -> int | None:
-        """Return the number of solver calls."""
+    def get_configurator_solver_calls(self: Settings) -> int | None:
+        """Return the maximum number of solver calls the configurator can do."""
         if self.__config_solver_calls_set == SettingState.NOT_SET:
-            self.set_config_solver_calls()
-            return None
+            self.set_configurator_solver_calls()
 
         return int(self.__settings["configuration"]["solver_calls"])
 
-    def set_config_number_of_runs(
-            self: Settings, value: int = DEFAULT_config_number_of_runs,
+    def set_configurator_number_of_runs(
+            self: Settings, value: int = DEFAULT_configurator_number_of_runs,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the number of configuration runs."""
         section = "configuration"
@@ -683,33 +667,99 @@ class Settings:
             self.__config_number_of_runs_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_config_number_of_runs(self: Settings) -> int:
+    def get_configurator_number_of_runs(self: Settings) -> int:
         """Return the number of configuration runs."""
         if self.__config_number_of_runs_set == SettingState.NOT_SET:
-            self.set_config_number_of_runs()
+            self.set_configurator_number_of_runs()
 
         return int(self.__settings["configuration"]["number_of_runs"])
 
     # Configuration: SMAC specific settings ###
 
-    def set_configurator_target_cutoff_length(
-            self: Settings, value: str = DEFAULT_configurator_target_cutoff_length,
+    def set_smac2_wallclock_time(
+            self: Settings, value: int = DEFAULT_smac2_wallclock_time,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the budget per configuration run in seconds (wallclock)."""
+        section = "smac2"
+        name = "wallclock_time"
+
+        if value is not None and self.__check_setting_state(
+                self.__smac2_wallclock_time_set, origin, name):
+            self.__init_section(section)
+            self.__smac2_wallclock_time_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac2_wallclock_time(self: Settings) -> int:
+        """Return the budget per configuration run in seconds (wallclock)."""
+        if self.__smac2_wallclock_time_set == SettingState.NOT_SET:
+            self.set_smac2_wallclock_time()
+        return int(self.__settings["smac2"]["wallclock_time"])
+
+    def set_smac2_cpu_time(
+            self: Settings, value: int = DEFAULT_smac2_cpu_time,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the budget per configuration run in seconds (cpu)."""
+        section = "smac2"
+        name = "cpu_time"
+
+        if value is not None and self.__check_setting_state(
+                self.__smac2_cpu_time_set, origin, name):
+            self.__init_section(section)
+            self.__smac2_cpu_time_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac2_cpu_time(self: Settings) -> int | None:
+        """Return the budget per configuration run in seconds (cpu)."""
+        if self.__smac2_cpu_time_set == SettingState.NOT_SET:
+            self.set_smac2_cpu_time()
+
+        return int(self.__settings["smac2"]["cpu_time"])
+
+    def set_smac2_target_cutoff_length(
+            self: Settings, value: str = DEFAULT_smac2_target_cutoff_length,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the target algorithm cutoff length."""
-        section = "configuration"
+        section = "smac2"
         name = "target_cutoff_length"
 
         if value is not None and self.__check_setting_state(
-                self.__configurator_target_cutoff_length_set, origin, name):
+                self.__smac2_target_cutoff_length_set, origin, name):
             self.__init_section(section)
-            self.__configurator_target_cutoff_length_set = origin
+            self.__smac2_target_cutoff_length_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_configurator_target_cutoff_length(self: Settings) -> str:
-        """Return the target algorithm cutoff length."""
-        if self.__configurator_target_cutoff_length_set == SettingState.NOT_SET:
-            self.set_configurator_target_cutoff_length()
-        return self.__settings["configuration"]["target_cutoff_length"]
+    def get_smac2_target_cutoff_length(self: Settings) -> str:
+        """Return the target algorithm cutoff length.
+
+        'A domain specific measure of when the algorithm should consider itself done.'
+
+        Returns:
+            The target algorithm cutoff length.
+        """
+        if self.__smac2_target_cutoff_length_set == SettingState.NOT_SET:
+            self.set_smac2_target_cutoff_length()
+        return self.__settings["smac2"]["target_cutoff_length"]
+
+    # Configuration: IRACE specific settings ###
+
+    def get_irace_max_time(self: Settings) -> int:
+        """Return the max time in seconds for IRACE."""
+        if self.__irace_max_time_set == SettingState.NOT_SET:
+            self.set_irace_max_time()
+        return int(self.__settings["irace"]["max_time"])
+
+    def set_irace_max_time(
+            self: Settings, value: int = DEFAULT_irace_max_time,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the max time in seconds for IRACE."""
+        section = "irace"
+        name = "max_time"
+
+        if value is not None and self.__check_setting_state(
+                self.__irace_max_time_set, origin, name):
+            self.__init_section(section)
+            self.__irace_max_time_set = origin
+            self.__settings[section][name] = str(value)
 
     # Slurm settings ###
 

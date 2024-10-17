@@ -2,14 +2,12 @@
 from __future__ import annotations
 from pathlib import Path
 
-import pandas as pd
-
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver, Validator
 from sparkle.instance import InstanceSet
 from sparkle.types import SparkleObjective
 
-# import runrunner as rrr
+import runrunner as rrr
 from runrunner import Runner, Run
 
 
@@ -20,27 +18,33 @@ class IRACE(Configurator):
     configurator_package = configurator_path / "irace_3.5.tar.gz"
     configurator_executable = configurator_path / "irace" / "bin" / "irace"
     configurator_ablation_executable = configurator_path / "irace" / "bin" / "ablation"
-    target_algorithm = configurator_path / "irace_target_algorithm.py"
+    configurator_target = configurator_path / "irace_target_algorithm.py"
 
-    def __init__(self: Configurator, validator: Validator, output_path: Path,
-                 objectives: list[SparkleObjective], base_dir: Path, tmp_path: Path,
+    def __init__(self: Configurator,
+                 output_path: Path,
+                 base_dir: Path,
                  ) -> None:
         """Initialize IRACE configurator."""
         output_path = output_path / IRACE.__name__
         output_path.mkdir(parents=True, exist_ok=True)
-        super().__init__(validator, output_path,
-                         objectives, base_dir, tmp_path, multi_objective_support=False)
+        validator = Validator(out_dir=output_path)
+        super().__init__(validator=validator,
+                         output_path=output_path,
+                         base_dir=base_dir,
+                         tmp_path=output_path / "tmp",
+                         multi_objective_support=False)
 
-    def __str__(self: IRACE) -> str:
+    @property
+    def name(self: IRACE) -> str:
         """Returns the name of the configurator."""
         return IRACE.__name__
 
     @property
-    def scenario(self: Configurator) -> ConfigurationScenario:
+    def scenario_class(self: IRACE) -> ConfigurationScenario:
         """Returns the IRACE scenario class."""
         return IRACEScenario
 
-    def configure(self: Configurator,
+    def configure(self: IRACE,
                   scenario: ConfigurationScenario,
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
@@ -71,6 +75,81 @@ class IRACE(Configurator):
         # Some are also placed in scenario file so can be omitted ?, marked with [sf]
         # Some are not relevant and should be ignored [i]
         # Should be hard defined by Sparkle to work [h]
+        # output = []  # List of output files for each seed
+        cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
+                f"{IRACE.__name__} 0 {output_csv.absolute()} "
+                f"{IRACE.configurator_executable.absolute()} "
+                f"--scenario-file {scenario_path.absolute()} "
+                f"--parallel {num_parallel_jobs}"]
+        print(cmds)
+        input()
+        runs = [rrr.add_to_queue(
+            runner=run_on,
+            cmd=cmds,
+            base_dir=base_dir,
+            name=f"SMAC2:{scenario.solver.name} on {scenario.instance_set.name}",
+            sbatch_options=sbatch_options,
+            srun_options=["-N1", "-n1"],
+        )]
+        if validate_after:
+            pass
+        return runs
+        raise NotImplementedError
+
+    def get_optimal_configuration(self: IRACE,
+                                  solver: Solver,
+                                  instance_set: InstanceSet,
+                                  objective: SparkleObjective) -> tuple[float, str]:
+        """Returns the optimal configuration string for a solver on an instance set."""
+        raise NotImplementedError
+
+    @staticmethod
+    def organise_output(output_source: Path, output_target: Path) -> None | str:
+        """Method to restructure and clean up after a single configurator call."""
+        raise NotImplementedError
+
+    def set_scenario_dirs(self: Configurator,
+                          solver: Solver, instance_set: InstanceSet) -> None:
+        """Patching method to allow the rebuilding of configuration scenario."""
+        raise NotImplementedError
+
+    def get_status_from_logs(self: Configurator) -> None:
+        """Method to scan the log files of the configurator for warnings."""
+        raise NotImplementedError
+
+
+class IRACEScenario(ConfigurationScenario):
+    """Class for IRACE scenario."""
+
+    def __init__(self: ConfigurationScenario,
+                 solver: Solver,
+                 instance_set: InstanceSet,
+                 sparkle_objectives: list[SparkleObjective],
+                 number_of_runs: int = None, solver_calls: int = None,
+                 max_time: int = None,
+                 cutoff_time: int = None, cutoff_length: int = None,
+                 )\
+            -> None:
+        """Initialize scenario paths and names.
+
+        Args:
+            solver: Solver that should be configured.
+            instance_set: Instances object for the scenario.
+            sparkle_objectives: SparkleObjectives used for each run of the configuration.
+                Will be simplified to the first objective.
+            number_of_runs: The number of configurator runs to perform
+                for configuring the solver.
+            solver_calls: The number of times the solver is called for each
+                configuration run
+            max_time: The time budget (CPU) allocated for the sum of solver calls
+                done by the configurator in seconds.
+            wallclock_time: The time budget allocated for each configuration run.
+                (wallclock)
+            cutoff_time: The maximum time allowed for each individual run during
+                configuration.
+            cutoff_length: The maximum number of iterations allowed for each
+                individual run during configuration.
+        """
         """
         --test-num-elites     Number of elite configurations returned by irace that
                                 will be tested if test instances are provided.
@@ -157,84 +236,23 @@ class IRACE(Configurator):
                                 sampled and evaluated at each iteration. Default: 5.
         --confidence          Confidence level for the elimination test. Default:
                                 0.95."""
-        output = []  # List of output files for each seed
-        cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
-                f"{IRACE.__name__} {output[seed]} {output_csv.absolute()} "
-                f"{IRACE.configurator_executable.absolute()} "
-                f"--scenario-file {scenario_path.absolute()} "
-                f"--parallel {num_parallel_jobs} "
-                for seed in range(self.scenario.number_of_runs)]
-        return cmds
-        raise NotImplementedError
-
-    def get_optimal_configuration(self: Configurator,
-                                  solver: Solver,
-                                  instance_set: InstanceSet,
-                                  objective: SparkleObjective) -> tuple[float, str]:
-        """Returns the optimal configuration string for a solver on an instance set."""
-        raise NotImplementedError
-
-    @staticmethod
-    def organise_output(output_source: Path, output_target: Path) -> None | str:
-        """Method to restructure and clean up after a single configurator call."""
-        raise NotImplementedError
-
-    def set_scenario_dirs(self: Configurator,
-                          solver: Solver, instance_set: InstanceSet) -> None:
-        """Patching method to allow the rebuilding of configuration scenario."""
-        raise NotImplementedError
-
-    def get_status_from_logs(self: Configurator) -> None:
-        """Method to scan the log files of the configurator for warnings."""
-        raise NotImplementedError
-
-
-class IRACEScenario(ConfigurationScenario):
-    """Class for IRACE scenario."""
-
-    def __init__(self: ConfigurationScenario, solver: Solver,
-                 instance_set: InstanceSet, number_of_runs: int = None,
-                 solver_calls: int = None, cpu_time: int = None,
-                 wallclock_time: int = None, cutoff_time: int = None,
-                 cutoff_length: int = None,
-                 sparkle_objectives: list[SparkleObjective] = None,
-                 feature_data_df: pd.DataFrame = None)\
-            -> None:
-        """Initialize scenario paths and names.
-
-        Args:
-            solver: Solver that should be configured.
-            instance_set: Instances object for the scenario.
-            number_of_runs: The number of configurator runs to perform
-                for configuring the solver.
-            solver_calls: The number of times the solver is called for each
-                configuration run
-            cpu_time: The time budget allocated for each configuration run. (cpu)
-            wallclock_time: The time budget allocated for each configuration run.
-                (wallclock)
-            cutoff_time: The maximum time allowed for each individual run during
-                configuration.
-            cutoff_length: The maximum number of iterations allowed for each
-                individual run during configuration.
-            sparkle_objectives: SparkleObjectives used for each run of the configuration.
-                Will be simplified to the first objective.
-            use_features: Boolean indicating if features should be used.
-            feature_data_df: If features are used, this contains the feature data.
-                Defaults to None.
-        """
         super().__init__(solver, instance_set, sparkle_objectives)
         self.solver = solver
         self.instance_set = instance_set
         self.name = f"{self.solver.name}_{self.instance_set.name}"
-        self.sparkle_objective = sparkle_objectives[0] if sparkle_objectives else None
+        if sparkle_objectives is not None:
+            if len(sparkle_objectives) > 1:
+                print("WARNING: IRACE does not have multi objective support. "
+                      "Only the first objective will be used.")
+            self.sparkle_objective = sparkle_objectives[0]
+        else:
+            self.sparkle_objective = None
 
         self.number_of_runs = number_of_runs
         self.solver_calls = solver_calls
-        self.cpu_time = cpu_time
-        self.wallclock_time = wallclock_time
+        self.max_time = max_time
         self.cutoff_time = cutoff_time
         self.cutoff_length = cutoff_length
-        self.feature_data = feature_data_df
 
         self.parent_directory = Path()
         self.directory = Path()
@@ -305,7 +323,7 @@ class IRACEScenario(ConfigurationScenario):
             file.write(
                 f'execDir = "{self.tmp.absolute()}"\n'
                 'targetRunnerLauncher = "python3"\n'
-                f'targetRunner = "{IRACE.target_algorithm.absolute()}"\n'
+                f'targetRunner = "{IRACE.configurator_target.absolute()}"\n'
                 'targetRunnerLauncherArgs = "{targetRunner} '
                 f"{solver_path} {self.sparkle_objective} {self.cutoff_time} "
                 '{targetRunnerArgs}"\n'
@@ -325,16 +343,11 @@ class IRACEScenario(ConfigurationScenario):
             )
             if self.solver_calls is not None:
                 file.write(f"maxExperiments = {self.solver_calls}\n")
-            elif self.cpu_time is not None or self.wallclock_time is not None:
-
-                # Time specified by user, but IRACE does not differentiate CPU from WALL
-                maxtime = max(self.cpu_time if self.cpu_time is not None else 0,
-                              self.wallclock_time if self.cpu_time is not None else 0)
-                file.write(f"maxTime = {int(maxtime)}\n")
-            if self.solver_calls is not None and (
-                    self.cpu_time is not None or self.wallclock_time is not None):
-                print("WARNING: Both solver calls and time limit specified for scenario."
-                      " This is not supported by IRACE, defaulting to solver calls.")
+            elif self.max_time is not None:
+                file.write(f"maxTime = {self.max_time}\n")
+            if self.solver_calls is not None and self.max_time is not None:
+                print("WARNING: Both solver calls and max time specified for scenario. "
+                      "This is not supported by IRACE, defaulting to solver calls.")
         import subprocess
         check_file = subprocess.run(
             [f"{IRACE.configurator_executable.absolute()}",

@@ -79,16 +79,16 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
         gv.settings().set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
     if args.wallclock_time is not None:
-        gv.settings().set_config_wallclock_time(
+        gv.settings().set_smac2_wallclock_time(
             args.wallclock_time, SettingState.CMD_LINE)
     if args.cpu_time is not None:
-        gv.settings().set_config_cpu_time(
+        gv.settings().set_smac2_cpu_time(
             args.cpu_time, SettingState.CMD_LINE)
     if args.solver_calls is not None:
-        gv.settings().set_config_solver_calls(
+        gv.settings().set_configurator_solver_calls(
             args.solver_calls, SettingState.CMD_LINE)
     if args.number_of_runs is not None:
-        gv.settings().set_config_number_of_runs(
+        gv.settings().set_configurator_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE)
     if args.run_on is not None:
         gv.settings().set_run_on(
@@ -207,19 +207,14 @@ def main(argv: list[str]) -> None:
         for index, column in enumerate(feature_data_df):
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
 
-    number_of_runs = gv.settings().get_config_number_of_runs()
-    solver_calls = gv.settings().get_config_solver_calls()
-    cpu_time = gv.settings().get_config_cpu_time()
-    wallclock_time = gv.settings().get_config_wallclock_time()
-    cutoff_time = gv.settings().get_general_target_cutoff_time()
-    cutoff_length = gv.settings().get_configurator_target_cutoff_length()
     sparkle_objectives =\
         gv.settings().get_general_sparkle_objectives()
     configurator = gv.settings().get_general_sparkle_configurator()
+    configurator_settings = gv.settings().get_configurator_settings(configurator.name)
+    configurator_settings.update({"feature_data_df": feature_data_df})
     config_scenario = configurator.scenario_class(
-        solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
-        wallclock_time, cutoff_time, cutoff_length, sparkle_objectives, use_features,
-        feature_data_df)
+        solver, instance_set_train, sparkle_objectives,
+        **configurator_settings)
 
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     dependency_job_list = configurator.configure(

@@ -76,11 +76,11 @@ def main(argv: list[str]) -> None:
             args.target_cutoff_time, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "wallclock_time"):
-        gv.settings().set_config_wallclock_time(
+        gv.settings().set_smac2_wallclock_time(
             args.wallclock_time, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "number_of_runs"):
-        gv.settings().set_config_number_of_runs(
+        gv.settings().set_configurator_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "racing"):

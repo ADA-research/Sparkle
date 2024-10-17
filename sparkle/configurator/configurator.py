@@ -18,7 +18,7 @@ class Configurator:
     configurator_cli_path = Path(__file__).parent.resolve() / "configurator_cli.py"
 
     def __init__(self: Configurator, validator: Validator, output_path: Path,
-                 objectives: list[SparkleObjective], base_dir: Path, tmp_path: Path,
+                 base_dir: Path, tmp_path: Path,
                  multi_objective_support: bool = False) -> None:
         """Initialize Configurator.
 
@@ -34,15 +34,10 @@ class Configurator:
         """
         self.validator = validator
         self.output_path = output_path
-        self.objectives = objectives
         self.base_dir = base_dir
         self.tmp_path = tmp_path
         self.multiobjective = multi_objective_support
         self.scenario = None
-        if len(self.objectives) > 1 and not self.multiobjective:
-            print("Warning: Multiple objectives specified but current configurator "
-                  f"{self.configurator_path.name} only supports single objective. "
-                  f"Defaulted to first specified objective: {self.objectives[0].name}")
 
     @property
     def scenario_class(self: Configurator) -> ConfigurationScenario:

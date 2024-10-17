@@ -235,18 +235,18 @@ def main(argv: list[str]) -> None:
             sys.exit(-1)
         # Extract config scenario data for report, but this should be read from the
         # scenario file instead as we can't know wether features were used or not now
-        number_of_runs = gv.settings().get_config_number_of_runs()
-        solver_calls = gv.settings().get_config_solver_calls()
-        cpu_time = gv.settings().get_config_cpu_time()
-        wallclock_time = gv.settings().get_config_wallclock_time()
+        number_of_runs = gv.settings().get_configurator_number_of_runs()
+        solver_calls = gv.settings().get_configurator_solver_calls()
+        cpu_time = gv.settings().get_smac2_cpu_time()
+        wallclock_time = gv.settings().get_smac2_wallclock_time()
         cutoff_time = gv.settings().get_general_target_cutoff_time()
-        cutoff_length = gv.settings().get_configurator_target_cutoff_length()
+        cutoff_length = gv.settings().get_smac2_target_cutoff_length()
         sparkle_objectives =\
             gv.settings().get_general_sparkle_objectives()
         configurator = gv.settings().get_general_sparkle_configurator()
         configurator.scenario = configurator.scenario_class(
-            solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
-            wallclock_time, cutoff_time, cutoff_length, sparkle_objectives)
+            solver, instance_set_train, sparkle_objectives, number_of_runs,
+            solver_calls, cpu_time, wallclock_time, cutoff_time, cutoff_length, )
         configurator.scenario._set_paths(configurator.output_path)
         ablation_scenario = None
         if args.flag_ablation:

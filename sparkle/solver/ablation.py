@@ -99,7 +99,7 @@ class AblationScenario:
         smac_run_obj = SMAC2.get_smac_run_obj(objective)
         objective_str = "MEAN10" if smac_run_obj == "RUNTIME" else "MEAN"
         run_cutoff_time = gv.settings().get_general_target_cutoff_time()
-        run_cutoff_length = gv.settings().get_configurator_target_cutoff_length()
+        run_cutoff_length = gv.settings().get_smac2_target_cutoff_length()
         concurrent_clis = gv.settings().get_slurm_max_parallel_runs_per_node()
         ablation_racing = gv.settings().get_ablation_racing_flag()
         configurator = gv.settings().get_general_sparkle_configurator()
