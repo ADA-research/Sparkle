@@ -7,6 +7,8 @@ from enum import Enum
 from abc import ABC
 from pathlib import Path
 
+import tabulate
+
 
 class PCSObject(ABC):
     """General data structure to keep the pcs file in.
@@ -79,6 +81,7 @@ class PCSConvention(Enum):
     unknown = ""
     SMAC = "smac"
     ParamILS = "paramils"
+    IRACE = "irace"
 
 
 class PCSParser(ABC):
@@ -134,6 +137,8 @@ class PCSParser(ABC):
         convention = self._format_string_to_enum(convention)
         if convention == PCSConvention.ParamILS:
             pcs = ParamILSParser(self).compile()
+        elif convention == PCSConvention.IRACE:
+            pcs = IRACEParser(self).compile()
         else:
             raise Exception(f"ERROR: Exporting the pcs convention for {convention.value}"
                             " is not yet implemented.")
@@ -414,3 +419,51 @@ class ParamILSParser(PCSParser):
                     items = ", ".join(condition["items"])
                     line += f"{condition['parameter']} in {{{items}}}"
         return line
+
+
+class IRACEParser(PCSParser):
+    """Base interface object for the parser.
+
+    It loads the IRACE pcs files into the generic pcs object.
+    Once a parameter file is loaded, it can be exported to another file.
+    """
+
+    def __init__(self: IRACEParser, inherit: IRACEParser = None) -> None:
+        """Initialize the IRACEParser."""
+        if inherit is None:
+            self.pcs = PCSObject()
+        else:
+            self.pcs = inherit.pcs
+
+    def parse(self: IRACEParser, lines: list[str]) -> None:
+        """Parse the pcs file."""
+        # TODO implement
+        pass
+
+    def compile(self: IRACEParser) -> str:
+        """Compile the PCS."""
+        # Create pcs table
+        header = ["# name", "switch", "type", "values",
+                  "[conditions (using R syntax)]"]
+        rows = []
+        constraints = [c for c in self.pcs.params if c["type"] == "constraint"]
+        for param in [p for p in self.pcs.params if p["type"] == "parameter"]:
+            # IRACE writes conditions on the same line as param definitions
+            param_constraint = [c for c in constraints
+                                if c["parameter"] == param["name"]]
+            condition_str = "|"
+            for constraint in param_constraint:
+                for operator, condition in constraint["conditions"]:
+                    operator = operator if operator is not None else ""
+                    condition_str +=\
+                        (f" {operator} {condition['parameter']} %in% "
+                            f"{condition['type'][0]}({','.join(condition['items'])})")
+            if condition_str == "|":
+                condition_str = ""
+            rows.append([param["name"],  # Parameter name
+                         f'"--{param["""name"""]} "',  # Parameter argument name
+                         param["structure"][0],  # Parameter type
+                         f"({','.join(param['domain'])})",  # Parameter range/domain
+                         condition_str])  # Parameter conditions
+        return tabulate.tabulate(rows, headers=header, tablefmt="plain",
+                                 numalign="left")

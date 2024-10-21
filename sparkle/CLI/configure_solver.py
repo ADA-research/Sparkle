@@ -177,7 +177,8 @@ def main(argv: list[str]) -> None:
     # Check if Solver and instance sets were resolved
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.CONFIGURE_SOLVER])
 
-    feature_data_df = None
+    configurator = gv.settings().get_general_sparkle_configurator()
+    configurator_settings = gv.settings().get_configurator_settings(configurator.name)
     if use_features:
         feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
 
@@ -206,12 +207,10 @@ def main(argv: list[str]) -> None:
 
         for index, column in enumerate(feature_data_df):
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
+        configurator_settings.update({"feature_data_df": feature_data_df})
 
     sparkle_objectives =\
         gv.settings().get_general_sparkle_objectives()
-    configurator = gv.settings().get_general_sparkle_configurator()
-    configurator_settings = gv.settings().get_configurator_settings(configurator.name)
-    configurator_settings.update({"feature_data_df": feature_data_df})
     config_scenario = configurator.scenario_class(
         solver, instance_set_train, sparkle_objectives,
         **configurator_settings)

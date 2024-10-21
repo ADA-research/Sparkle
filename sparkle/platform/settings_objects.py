@@ -139,6 +139,7 @@ class Settings:
 
     # Default IRACE settings
     DEFAULT_irace_max_time = 1200
+    DEFAULT_irace_max_experiments = 600
 
     def __init__(self: Settings, file_path: PurePath = None) -> None:
         """Initialise a settings object."""
@@ -164,13 +165,17 @@ class Settings:
         self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
         self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
         self.__smac2_target_cutoff_length_set = SettingState.NOT_SET
-        self.__slurm_extra_options_set = dict()
         self.__ablation_racing_flag_set = SettingState.NOT_SET
 
         self.__parallel_portfolio_check_interval_set = SettingState.NOT_SET
         self.__parallel_portfolio_num_seeds_per_solver_set = SettingState.NOT_SET
 
+        self.__irace_max_time_set = SettingState.NOT_SET
+        self.__irace_max_experiments_set = SettingState.NOT_SET
+
         self.__general_sparkle_configurator = None
+
+        self.__slurm_extra_options_set = dict()
 
         if file_path is None:
             # Initialise settings from default file path
@@ -293,6 +298,21 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
                     self.set_smac2_target_cutoff_length(value, state)
+                    file_settings.remove_option(section, option)
+
+            section = "irace"
+            option_names = ("max_time", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_irace_max_time(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("max_experiments", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_irace_max_experiments(value, state)
                     file_settings.remove_option(section, option)
 
             section = "slurm"
@@ -742,6 +762,8 @@ class Settings:
 
     # Configuration: IRACE specific settings ###
 
+    # TODO: Add IRACE settings
+
     def get_irace_max_time(self: Settings) -> int:
         """Return the max time in seconds for IRACE."""
         if self.__irace_max_time_set == SettingState.NOT_SET:
@@ -759,6 +781,25 @@ class Settings:
                 self.__irace_max_time_set, origin, name):
             self.__init_section(section)
             self.__irace_max_time_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_irace_max_experiments(self: Settings) -> int:
+        """Return the max number of experiments for IRACE."""
+        if self.__irace_max_experiments_set == SettingState.NOT_SET:
+            self.set_irace_max_experiments()
+        return int(self.__settings["irace"]["max_experiments"])
+
+    def set_irace_max_experiments(
+            self: Settings, value: int = DEFAULT_irace_max_experiments,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the max number of experiments for IRACE."""
+        section = "irace"
+        name = "max_experiments"
+
+        if value is not None and self.__check_setting_state(
+                self.__irace_max_experiments_set, origin, name):
+            self.__init_section(section)
+            self.__irace_max_experiments_set = origin
             self.__settings[section][name] = str(value)
 
     # Slurm settings ###
