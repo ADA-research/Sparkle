@@ -1,5 +1,7 @@
 """Configurator classes to implement IRACE in Sparkle."""
 from __future__ import annotations
+import shutil
+import subprocess
 from pathlib import Path
 
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
@@ -122,6 +124,8 @@ class IRACE(Configurator):
         # robjects.r['iraceResults'][6] = $RejectedConfigurations?
         # robjects.r['iraceResults'][7] = Something regarding the budget
         # robjects.r['iraceResults'][8] = $allConfigurations
+        # NOTE: Imports happen here because they are only needed once at runtime and
+        # rpy2 specifically is a medium heavy to load yet not required elsewhere.
         import rpy2.robjects as robjects
         from rpy2.rinterface_lib.sexp import (NACharacterType, NAIntegerType,
                                               NALogicalType, NARealType, NAComplexType)
@@ -329,7 +333,6 @@ class IRACEScenario(ConfigurationScenario):
         if self.directory is None:
             self.directory =\
                 parent_directory / f"{self.solver.name}_{self.instance_set.name}"
-        import shutil
         shutil.rmtree(self.directory, ignore_errors=True)  # Clear directory
         self.set_dirs(self.directory)
 
@@ -388,7 +391,6 @@ class IRACEScenario(ConfigurationScenario):
             if self.nb_iterations is not None:
                 file.write(f"nbIterations = {self.nb_iterations}\n")
         print("Verifying contents of IRACE scenario file and testing solver call...")
-        import subprocess
         check_file = subprocess.run(
             [f"{IRACE.configurator_executable.absolute()}",
              "-s", f"{self.scenario_file_path.absolute()}", "--check"],
@@ -406,7 +408,7 @@ class IRACEScenario(ConfigurationScenario):
         return self.scenario_file_path
 
     @staticmethod
-    def from_file(scenario_file: Path, **kwargs) -> IRACEScenario:
+    def from_file(scenario_file: Path) -> IRACEScenario:
         """Reads scenario file and initalises IRACEScenario."""
         scenario_dict = {}
         scenario_dict = {keyvalue[0]: keyvalue[1]
