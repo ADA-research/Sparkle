@@ -304,8 +304,14 @@ class SMAC2Scenario(ConfigurationScenario):
             parent_directory: Directory in which the scenario should be created.
         """
         self._set_paths(parent_directory)
-        self._prepare_scenario_directory()
-        self._prepare_result_directory()
+        # Prepare scenario directory
+        shutil.rmtree(self.directory, ignore_errors=True)
+        self.directory.mkdir(parents=True)
+        # Create empty directories as needed
+        self.outdir_train.mkdir()
+        self.tmp.mkdir()
+        self.result_directory.mkdir(parents=True)  # Prepare results directory
+
         self._prepare_instances()
 
         if self.feature_data is not None:
@@ -322,20 +328,6 @@ class SMAC2Scenario(ConfigurationScenario):
         self.outdir_train = self.directory / "outdir_train_configuration"
         self.tmp = self.directory / "tmp"
         self.validation = self.directory / "validation"
-
-    def _prepare_scenario_directory(self: ConfigurationScenario) -> None:
-        """Delete old scenario dir, recreate it, create empty dirs inside."""
-        shutil.rmtree(self.directory, ignore_errors=True)
-        self.directory.mkdir(parents=True)
-
-        # Create empty directories as needed
-        self.outdir_train.mkdir()
-        self.tmp.mkdir()
-
-    def _prepare_result_directory(self: ConfigurationScenario) -> None:
-        """Delete possible files in result directory."""
-        shutil.rmtree(self.result_directory, ignore_errors=True)
-        self.result_directory.mkdir(parents=True)
 
     def create_scenario_file(self: ConfigurationScenario) -> Path:
         """Create a file with the configuration scenario.

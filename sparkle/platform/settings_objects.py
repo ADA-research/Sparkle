@@ -138,8 +138,11 @@ class Settings:
     DEFAULT_parallel_portfolio_num_seeds_per_solver = 1
 
     # Default IRACE settings
-    DEFAULT_irace_max_time = 1200
-    DEFAULT_irace_max_experiments = 600
+    DEFAULT_irace_max_time = 0  # IRACE equivalent of None in this case
+    DEFAULT_irace_max_experiments = 0
+    DEFAULT_irace_first_test = None
+    DEFAULT_irace_mu = None
+    DEFAULT_irace_nb_iterations = None
 
     def __init__(self: Settings, file_path: PurePath = None) -> None:
         """Initialise a settings object."""
@@ -636,9 +639,9 @@ class Settings:
                                   configurator_name: str) -> dict[str, any]:
         """Return the configurator settings."""
         configurator_settings = {
-            "cutoff_time": self.get_general_target_cutoff_time(),
-            "solver_calls": self.get_configurator_solver_calls(),
             "number_of_runs": self.get_configurator_number_of_runs(),
+            "solver_calls": self.get_configurator_solver_calls(),
+            "cutoff_time": self.get_general_target_cutoff_time(),
         }
         if configurator_name == cim.SMAC2.__name__:
             # Return all settings from the SMAC2 section
@@ -650,8 +653,16 @@ class Settings:
         if configurator_name == cim.IRACE.__name__:
             # Return all settings from the IRACE section
             configurator_settings.update({
-
+                "solver_calls": self.get_irace_max_experiments(),
+                "max_time": self.get_irace_max_time(),
+                "first_test": self.get_irace_first_test(),
+                "mu": self.get_irace_mu(),
+                "nb_iterations": self.get_irace_nb_iterations(),
             })
+            if (configurator_settings["solver_calls"] == 0
+                    and configurator_settings["max_time"] == 0):  # Default to base
+                configurator_settings["solver_calls"] =\
+                    self.get_configurator_solver_calls()
         return configurator_settings
 
     def set_configurator_solver_calls(
@@ -762,8 +773,6 @@ class Settings:
 
     # Configuration: IRACE specific settings ###
 
-    # TODO: Add IRACE settings
-
     def get_irace_max_time(self: Settings) -> int:
         """Return the max time in seconds for IRACE."""
         if self.__irace_max_time_set == SettingState.NOT_SET:
@@ -800,6 +809,80 @@ class Settings:
                 self.__irace_max_experiments_set, origin, name):
             self.__init_section(section)
             self.__irace_max_experiments_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_irace_first_test(self: Settings) -> int:
+        """Return the first test for IRACE.
+
+        Specifies how many instances are evaluated before the first
+        elimination test. IRACE Default: 5. [firstTest]
+        """
+        if self.__irace_first_test_set == SettingState.NOT_SET:
+            self.set_irace_first_test()
+        return int(self.__settings["irace"]["first_test"])
+
+    def set_irace_first_test(
+            self: Settings, value: int = DEFAULT_irace_first_test,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the first test for IRACE."""
+        section = "irace"
+        name = "first_test"
+
+        if self.__check_setting_state(
+                self.__irace_first_test_set, origin, name):
+            self.__init_section(section)
+            self.__irace_first_test_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_irace_mu(self: Settings) -> int:
+        """Return the mu for IRACE.
+
+        Parameter used to define the number of configurations sampled and
+        evaluated at each iteration. IRACE Default: 5. [mu]
+        """
+        if self.__irace_mu_set == SettingState.NOT_SET:
+            self.set_irace_mu()
+        return int(self.__settings["irace"]["mu"])
+
+    def set_irace_mu(
+            self: Settings, value: int = DEFAULT_irace_mu,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the mu for IRACE."""
+        section = "irace"
+        name = "mu"
+
+        if self.__check_setting_state(
+                self.__irace_mu_set, origin, name):
+            self.__init_section(section)
+            self.__irace_mu_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_irace_nb_iterations(self: Settings) -> int:
+        """Return the number of iterations for IRACE."""
+        if self.__irace_nb_iterations_set == SettingState.NOT_SET:
+            self.set_irace_nb_iterations()
+        return int(self.__settings["irace"]["nb_iterations"])
+
+    def set_irace_nb_iterations(
+            self: Settings, value: int = DEFAULT_irace_nb_iterations,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the number of iterations for IRACE.
+
+        Maximum number of iterations to be executed. Each iteration involves the
+        generation of new configurations and the use of racing to select the best
+        configurations. By default (with 0), irace calculates a minimum number of
+        iterations as N^iter = ⌊2 + log2 N param⌋, where N^param is the number of
+        non-fixed parameters to be tuned.
+        Setting this parameter may make irace stop sooner than it should without using
+        all the available budget. IRACE recommends to use the default value (Empty).
+        """
+        section = "irace"
+        name = "nb_iterations"
+
+        if self.__check_setting_state(
+                self.__irace_nb_iterations_set, origin, name):
+            self.__init_section(section)
+            self.__irace_nb_iterations_set = origin
             self.__settings[section][name] = str(value)
 
     # Slurm settings ###

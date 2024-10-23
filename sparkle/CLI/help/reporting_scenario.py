@@ -73,7 +73,7 @@ class ReportingScenario:
 
         # Read file
         file_scenario = configparser.ConfigParser()
-        file_scenario.read(str(file_path))
+        file_scenario.read(file_path)
 
         # Set internal scenario based on data read from FILE if they were read
         # successfully

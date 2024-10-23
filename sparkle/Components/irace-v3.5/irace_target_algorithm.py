@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 """Handles IRACE calls passing to sparkle solver wrappers."""
 import sys
+import warnings
 from pathlib import Path
 
 from runrunner import Runner
@@ -17,6 +18,10 @@ if __name__ == "__main__":
     objective = resolve_objective(sys.argv[2])  # Second is the objective to optimise
     cutoff_time = float(sys.argv[3])  # Third is the cutoff time
     # Argument 4,5 are configuration id and instance id
+    config_id = sys.argv[4]
+    if config_id.lower().startswith("testconfig"):
+        print(0, 0)  # Test call to Solver
+        sys.exit()
     seed = int(sys.argv[6])  # Fifth is the seed
     instance = Path(sys.argv[7])  # Sixth argument is the path to the instance
     argsiter = iter(sys.argv[8:])
@@ -24,14 +29,19 @@ if __name__ == "__main__":
     configuration = {arg.strip("-"): val for arg, val in args}
     runsolver_binary = solver_dir / "runsolver"
     solver = Solver(solver_dir,
-                    raw_output_directory=Path(),
+                    raw_output_directory=(Path.cwd() / "tmp").absolute(),
                     runsolver_exec=runsolver_binary)
     # Call Runsolver with the solver configurator wrapper and its arguments
+    # IRACE cannot deal with printed warnings, we filter out missing RunSolver logs
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
     output = solver.run(instance=instance,
                         objectives=[objective],
                         seed=seed,
                         cutoff_time=cutoff_time,
                         configuration=configuration,
                         run_on=Runner.LOCAL)
-    # Return the objective value and the used CPU time
-    print(f"{output[objective.name]} {output['cpu_time']}")
+    warnings.resetwarnings()
+    objective_value =\
+        output[objective.name] if objective.minimise else -1 * output[objective.name]
+
+    print(f"{objective_value} {output['cpu_time']}")

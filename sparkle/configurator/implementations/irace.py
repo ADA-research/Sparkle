@@ -65,36 +65,31 @@ class IRACE(Configurator):
         Returns:
             A RunRunner Run object.
         """
-        # TODO: Create scenario
         self.scenario = scenario
-        scenario_path = self.scenario.create_scenario(parent_directory=self.output_path)
-        output_csv = self.scenario.validation / "configurations.csv"
+        self.scenario.create_scenario(parent_directory=self.output_path)
+        output_csv = self.scenario.validation_path / "configurations.csv"
         output_csv.parent.mkdir(exist_ok=True, parents=True)
-        # TODO Create command to call IRACE. Create plural ? based on number of runs var
-        # NOTE: Possible arguments listed below.
-        # Some are also placed in scenario file so can be omitted ?, marked with [sf]
-        # Some are not relevant and should be ignored [i]
-        # Should be hard defined by Sparkle to work [h]
-        # output = []  # List of output files for each seed
+
+        # Create command to call IRACE. Create plural based on number of runs var
+        output_files = [f"{self.scenario.results_directory.name}/output_{job_idx}.Rdata"
+                        for job_idx in range(0, scenario.number_of_runs)]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
-                f"{IRACE.__name__} 0 {output_csv.absolute()} "
+                f"{IRACE.__name__} {output_files[job_idx]} {output_csv.absolute()} "
                 f"{IRACE.configurator_executable.absolute()} "
-                f"--scenario-file {scenario_path.absolute()} "
-                f"--parallel {num_parallel_jobs}"]
-        print(cmds)
-        input()
+                f"--scenario {self.scenario.scenario_file_path.absolute()} "
+                f"--log-file {output_files[job_idx]} "
+                f"--seed {job_idx}" for job_idx in range(0, scenario.number_of_runs)]
         runs = [rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
             base_dir=base_dir,
-            name=f"SMAC2:{scenario.solver.name} on {scenario.instance_set.name}",
+            name=f"IRACE: {scenario.solver.name} on {scenario.instance_set.name}",
             sbatch_options=sbatch_options,
-            srun_options=["-N1", "-n1"],
         )]
         if validate_after:
+            # TODO: Validate the configurations created by IRACE
             pass
         return runs
-        raise NotImplementedError
 
     def get_optimal_configuration(self: IRACE,
                                   solver: Solver,
@@ -106,7 +101,35 @@ class IRACE(Configurator):
     @staticmethod
     def organise_output(output_source: Path, output_target: Path) -> None | str:
         """Method to restructure and clean up after a single configurator call."""
-        raise NotImplementedError
+        # robjects.r['iraceResults'][0] = $scenario Scenario Data
+        # robjects.r['iraceResults'][1] = $irace.version: IRACE version
+        # robjects.r['iraceResults'][2] = $parameters: Description of each parameter
+        # robjects.r['iraceResults'][3] = $allElites: Elite configurations per iteration
+        # robjects.r['iraceResults'][4] = Solver call Results ?
+        # robjects.r['iraceResults'][5] = All Solver times?
+        # robjects.r['iraceResults'][6] = $RejectedConfigurations?
+        # robjects.r['iraceResults'][7] = Something regarding the budget
+        # robjects.r['iraceResults'][8] = $allConfigurations
+        import rpy2.robjects as robjects
+        from rpy2.rinterface_lib.sexp import (NACharacterType, NAIntegerType,
+                                              NALogicalType, NARealType, NAComplexType)
+        import math
+        import fcntl
+        na_types =\
+            [NACharacterType, NAIntegerType, NALogicalType, NARealType, NAComplexType]
+        robjects.r["load"](str(output_source))
+        robjects.r["iraceResults"]  # A list of length 11
+        best_index = int(robjects.r["iraceResults"][3][-1][0]) - 1  # Extract the best id
+        column_names = robjects.r["iraceResults"][8].names
+        # Get the best values, but filter nan parameter values and the first (index)
+        best_values = [(column_names[i], v[best_index])
+                       for i, v in enumerate(robjects.r["iraceResults"][8])
+                       if (not type(v[best_index]) in na_types
+                           and not math.isnan(float(v[best_index])))][1:]
+        configuration = " ".join([f"--{name} {value}" for name, value in best_values])
+        with output_target.open("a") as fout:
+            fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
+            fout.write(configuration + "\n")
 
     def set_scenario_dirs(self: Configurator,
                           solver: Solver, instance_set: InstanceSet) -> None:
@@ -126,8 +149,12 @@ class IRACEScenario(ConfigurationScenario):
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
                  number_of_runs: int = None, solver_calls: int = None,
+                 cutoff_time: int = None,
                  max_time: int = None,
-                 cutoff_time: int = None, cutoff_length: int = None,
+                 budget_estimation: float = None,
+                 first_test: int = None,
+                 mu: int = None,
+                 nb_iterations: int = None,
                  )\
             -> None:
         """Initialize scenario paths and names.
@@ -140,17 +167,28 @@ class IRACEScenario(ConfigurationScenario):
             number_of_runs: The number of configurator runs to perform
                 for configuring the solver.
             solver_calls: The number of times the solver is called for each
-                configuration run
-            max_time: The time budget (CPU) allocated for the sum of solver calls
-                done by the configurator in seconds.
-            wallclock_time: The time budget allocated for each configuration run.
-                (wallclock)
+                configuration run. [MaxExperiments]
             cutoff_time: The maximum time allowed for each individual run during
                 configuration.
-            cutoff_length: The maximum number of iterations allowed for each
-                individual run during configuration.
+            max_time: The time budget (CPU) allocated for the sum of solver calls
+                done by the configurator in seconds. [MaxTime]
+            budget_estimation: Fraction (smaller than 1) of the budget used to estimate
+                the mean computation time of a configuration. Only used when maxTime > 0.
+                Default: Computed as cutoff_time / max_time. [BudgetEstimation]
+            first_test: Specifies how many instances are evaluated before the first
+                elimination test. IRACE Default: 5. [firstTest]
+            mu: Parameter used to define the number of configurations sampled and
+                evaluated at each iteration. IRACE Default: 5. [mu]
+            nb_iterations: Maximum number of iterations to be executed. Each iteration
+                involves the generation of new configurations and the use of racing to
+                select the best configurations. By default (with 0), irace calculates a
+                minimum number of iterations as N^iter = ⌊2 + log2 N param⌋, where
+                N^param is the number of non-fixed parameters to be tuned.
+                Setting this parameter may make irace stop sooner than it should without
+                using all the available budget. We recommend to use the default value.
         """
         """
+        Other possible arguments that are not added yet to Sparkle:
         --test-num-elites     Number of elite configurations returned by irace that
                                 will be tested if test instances are provided.
                                 Default: 1.
@@ -163,17 +201,8 @@ class IRACEScenario(ConfigurationScenario):
                                 t-test-bonferroni (t-test with Bonferroni's correction
                                 for multiple comparisons), t-test-holm (t-test with
                                 Holm's correction for multiple comparisons).
-        --first-test          Number of instances evaluated before the first
-                                elimination test. It must be a multiple of eachTest.
-                                Default: 5.
         --each-test           Number of instances evaluated between elimination
                                 tests. Default: 1.
-        --max-experiments     Maximum number of runs (invocations of targetRunner)
-                                that will be performed. It determines the maximum
-                                budget of experiments for the tuning. Default: 0.
-        --budget-estimation   Fraction (smaller than 1) of the budget used to
-                                estimate the mean computation time of a configuration.
-                                Only used when maxTime > 0 Default: 0.02.
         --load-balancing      Enable/disable load-balancing when executing
                                 experiments in parallel. Load-balancing makes better
                                 use of computing resources, but increases
@@ -232,8 +261,6 @@ class IRACEScenario(ConfigurationScenario):
                                 the execution of each race (iteration). Default: 0.
         --num-configurations  Number of configurations to be sampled and evaluated
                                 at each iteration. Default: 0.
-        --mu                  Parameter used to define the number of configurations
-                                sampled and evaluated at each iteration. Default: 5.
         --confidence          Confidence level for the elimination test. Default:
                                 0.95."""
         super().__init__(solver, instance_set, sparkle_objectives)
@@ -249,17 +276,13 @@ class IRACEScenario(ConfigurationScenario):
             self.sparkle_objective = None
 
         self.number_of_runs = number_of_runs
-        self.solver_calls = solver_calls
-        self.max_time = max_time
+        self.solver_calls = solver_calls if solver_calls and solver_calls > 0 else None
+        self.max_time = max_time if max_time and max_time > 0 else None
         self.cutoff_time = cutoff_time
-        self.cutoff_length = cutoff_length
-
-        self.parent_directory = Path()
-        self.directory = Path()
-        self.result_directory = Path()
-        self.scenario_file_path = Path()
-        self.feature_file_path = Path()
-        self.instance_file_path = Path()
+        self.budget_estimation = budget_estimation
+        self.first_test = first_test
+        self.mu = mu
+        self.nb_iterations = nb_iterations
 
     def create_scenario(self: IRACEScenario, parent_directory: Path) -> None:
         """Create scenario with solver and instances in the parent directory.
@@ -270,8 +293,18 @@ class IRACEScenario(ConfigurationScenario):
             parent_directory: Directory in which the scenario should be created.
         """
         # Set up directories
+        self.directory =\
+            parent_directory / f"{self.solver.name}_{self.instance_set.name}"
+        import shutil
+        shutil.rmtree(self.directory, ignore_errors=True)  # Clear directory
+        self.directory.mkdir(parents=True)
         self.tmp = self.directory / "tmp"
-        self.tmp.mkdir(exist_ok=True)
+        self.tmp.mkdir()
+        self.validation_path = self.directory / "validation"
+        self.validation_path.mkdir()
+        self.results_directory = self.directory / "results"
+        self.results_directory.mkdir()
+
         # Create instance files
         self.instance_file_path = self.directory / "instances.txt"
         self.instance_file_path.parent.mkdir(exist_ok=True, parents=True)
@@ -286,42 +319,11 @@ class IRACEScenario(ConfigurationScenario):
         Returns:
             Path to the created file.
         """
-        # File that contains the description of the parameters.
-        # parameterFile = "./parameters-acotsp.txt"
-
-        # Directory where the programs will be run.
-        # execDir = "./acotsp-arena"
-
-        # Directory where tuning instances are located, either absolute path or
-        # relative to current directory.
-        # trainInstancesDir = "./Instances"
-
-        # The maximum number of runs (invocations of targetRunner) that will performed.
-        # It determines the (maximum) budget of experiments for the tuning.
-        # maxExperiments = 5000
-
-        # File that contains a set of initial configurations. If empty or NULL,
-        # all initial configurations are randomly generated.
-        # configurationsFile = ""
-        # File that contains a list of logical expressions that cannot be TRUE
-        # for any evaluated configuration. If empty or NULL, do not use forbidden
-        # expressions.
-        # forbiddenFile = "forbidden.txt"
-
-        # Indicates the number of decimal places to be considered for the
-        # real parameters.
-        # digits = 2
-
-        # A value of 0 silences all debug messages. Higher values provide
-        # more verbose debug messages.
-        # debugLevel = 0 [0, 3] -> Should probably be set to 1
-
-        # TODO: Write to the file
         self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
         solver_path = self.solver.directory.absolute()
         with self.scenario_file_path.open("w") as file:
             file.write(
-                f'execDir = "{self.tmp.absolute()}"\n'
+                f'execDir = "{self.directory.absolute()}"\n'
                 'targetRunnerLauncher = "python3"\n'
                 f'targetRunner = "{IRACE.configurator_target.absolute()}"\n'
                 'targetRunnerLauncherArgs = "{targetRunner} '
@@ -330,16 +332,11 @@ class IRACEScenario(ConfigurationScenario):
                 f"deterministic = {1 if self.solver.deterministic else 0}\n"
                 "parameterFile = "
                 f'"{self.solver.get_pcs_file(port_type="""IRACE""").absolute()}"\n'
-                # TODO: forbidden-file = self.solver.get_forbidden_file()
-                # TODO: configurations-file = ?
+                "forbiddenFile = "
+                f'"{self.solver.get_forbidden(port_type="""IRACE""").absolute()}"\n'
                 f'trainInstancesDir = "{self.instance_set.directory.absolute()}"\n'
                 f'trainInstancesFile = "{self.instance_file_path.absolute()}"\n'
-                # TODO: This is SMAC2 workflow, is it correct? Can it be ommited?
-                f'testInstancesDir = "{self.instance_set.directory.absolute()}"\n'
-                f'testInstancesFile = "{self.instance_file_path.absolute()}"\n'
-                # 'batchmode = "slurm"'  # TODO:  run_on variable to set this
-                # TODO: Log file, or default good enough?
-                "debugLevel = 1\n"
+                "debugLevel = 1\n"  # The verbosity level of IRACE
             )
             if self.solver_calls is not None:
                 file.write(f"maxExperiments = {self.solver_calls}\n")
@@ -348,6 +345,21 @@ class IRACEScenario(ConfigurationScenario):
             if self.solver_calls is not None and self.max_time is not None:
                 print("WARNING: Both solver calls and max time specified for scenario. "
                       "This is not supported by IRACE, defaulting to solver calls.")
+            elif self.solver_calls is None and self.max_time is None:
+                print("WARNING: Neither solver calls nor max time specified. "
+                      "Either budget is required for the IRACE scenario.")
+            if self.max_time is not None and self.budget_estimation is None:
+                # Auto Estimate
+                if self.cutoff_time < self.max_time:
+                    self.budget_estimation = self.cutoff_time / self.max_time
+                    file.write(f"budgetEstimation = {self.budget_estimation}\n")
+            if self.first_test is not None:
+                file.write(f"firstTest = {self.first_test}\n")
+            if self.mu is not None:
+                file.write(f"mu = {self.mu}\n")
+            if self.nb_iterations is not None:
+                file.write(f"nbIterations = {self.nb_iterations}\n")
+        print("Verifying contents of IRACE scenario file and testing solver call...")
         import subprocess
         check_file = subprocess.run(
             [f"{IRACE.configurator_executable.absolute()}",
@@ -361,6 +373,8 @@ class IRACEScenario(ConfigurationScenario):
                   self.scenario_file_path.open("r").read(),
                   stdout_msg, "\n",
                   check_file.stderr.decode())
+        else:
+            print("IRACE scenario file is valid.")
         return self.scenario_file_path
 
     @staticmethod

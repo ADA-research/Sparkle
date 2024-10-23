@@ -23,5 +23,4 @@ def test_irace_scenario_file(tmp_path: Path,
                              solver_calls=2, cutoff_time=2, cutoff_length=2,
                              sparkle_objectives=[obj_par, obj_acc])
     scenario.create_scenario(Path("test_irace_scenario"))
-
-    # TODO: Check file contents of scenario.txt
+    # TODO: Add file comparison, requires variables/regex to match

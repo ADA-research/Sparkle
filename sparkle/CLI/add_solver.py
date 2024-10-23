@@ -78,7 +78,6 @@ def main(argv: list[str]) -> None:
             print(f"One pcs file detected: {pcs_file.name}. ", end="")
             if solver.read_pcs_file():
                 print("Can read the pcs file.")
-                solver.port_pcs("IRACE")  # Create PCS file for IRACE
             else:
                 print("WARNING: Can not read the provided pcs file format.")
 
@@ -122,6 +121,12 @@ def main(argv: list[str]) -> None:
     if nickname is not None:
         sfh.add_remove_platform_item(solver_directory,
                                      gv.solver_nickname_list_path, key=nickname)
+
+    solver = Solver(solver_directory)  # Recreate solver from its new directory
+    if solver.get_pcs_file() is not None:
+        print("Generating missing PCS files...")
+        solver.port_pcs("IRACE")  # Create PCS file for IRACE
+        print("Generating done!")
 
     if args.run_solver_now:
         num_job_in_parallel = gv.settings().get_number_of_jobs_in_parallel()

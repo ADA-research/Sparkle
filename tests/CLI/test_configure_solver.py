@@ -10,9 +10,9 @@ from tests.CLI import tools
 
 @pytest.mark.integration
 @patch("shutil.which")
-def test_configure_solver_command(mock_which: Mock,
-                                  tmp_path: Path,
-                                  monkeypatch: pytest.MonkeyPatch) -> None:
+def test_configure_solver_smac2(mock_which: Mock,
+                                tmp_path: Path,
+                                monkeypatch: pytest.MonkeyPatch) -> None:
     """Test cancel command on configuration jobs."""
     # Smoke test: Submit configuration jobs
     solver_path =\
@@ -100,3 +100,12 @@ def test_configure_solver_command(mock_which: Mock,
     # TODO: Local Test
     # Doesnt work currently as RunRunner cannot handle output paths for local jobs
     # NOTE: Expensive?
+
+
+@pytest.mark.integration
+def test_configure_solver_irace(tmp_path: Path,
+                                monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test configuration command on IRACE."""
+    # TODO:
+    # Smoke test: Submit configuration jobs IRACE
+    pass
