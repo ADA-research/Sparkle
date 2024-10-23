@@ -175,6 +175,9 @@ class Settings:
 
         self.__irace_max_time_set = SettingState.NOT_SET
         self.__irace_max_experiments_set = SettingState.NOT_SET
+        self.__irace_first_test_set = SettingState.NOT_SET
+        self.__irace_mu_set = SettingState.NOT_SET
+        self.__irace_nb_iterations_set = SettingState.NOT_SET
 
         self.__general_sparkle_configurator = None
 
@@ -316,6 +319,27 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_irace_max_experiments(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("first_test", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_irace_first_test(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("mu", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_irace_mu(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("nb_iterations", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_irace_nb_iterations(value, state)
                     file_settings.remove_option(section, option)
 
             section = "slurm"
@@ -819,7 +843,9 @@ class Settings:
         """
         if self.__irace_first_test_set == SettingState.NOT_SET:
             self.set_irace_first_test()
-        return int(self.__settings["irace"]["first_test"])
+        if self.__settings["irace"]["first_test"] is not None:
+            return int(self.__settings["irace"]["first_test"])
+        return None
 
     def set_irace_first_test(
             self: Settings, value: int = DEFAULT_irace_first_test,
@@ -842,7 +868,9 @@ class Settings:
         """
         if self.__irace_mu_set == SettingState.NOT_SET:
             self.set_irace_mu()
-        return int(self.__settings["irace"]["mu"])
+        if self.__settings["irace"]["mu"] is not None:
+            return int(self.__settings["irace"]["mu"])
+        return None
 
     def set_irace_mu(
             self: Settings, value: int = DEFAULT_irace_mu,
@@ -861,7 +889,9 @@ class Settings:
         """Return the number of iterations for IRACE."""
         if self.__irace_nb_iterations_set == SettingState.NOT_SET:
             self.set_irace_nb_iterations()
-        return int(self.__settings["irace"]["nb_iterations"])
+        if self.__settings["irace"]["nb_iterations"] is not None:
+            return int(self.__settings["irace"]["nb_iterations"])
+        return None
 
     def set_irace_nb_iterations(
             self: Settings, value: int = DEFAULT_irace_nb_iterations,

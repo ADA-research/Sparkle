@@ -71,8 +71,9 @@ class IRACE(Configurator):
         output_csv.parent.mkdir(exist_ok=True, parents=True)
 
         # Create command to call IRACE. Create plural based on number of runs var
-        output_files = [f"{self.scenario.results_directory.name}/output_{job_idx}.Rdata"
-                        for job_idx in range(0, scenario.number_of_runs)]
+        output_files = [
+            self.scenario.results_directory.absolute() / f"output_{job_idx}.Rdata"
+            for job_idx in range(0, scenario.number_of_runs)]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{IRACE.__name__} {output_files[job_idx]} {output_csv.absolute()} "
                 f"{IRACE.configurator_executable.absolute()} "
