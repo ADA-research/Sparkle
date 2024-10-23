@@ -12,7 +12,7 @@ from sparkle.solver.validator import Validator
 from sparkle.configurator.implementations import SMAC2
 from sparkle.types.objective import SparkleObjective, PAR
 from sparkle.solver import Solver
-from sparkle.instance import instance_set
+from sparkle.instance import Instance_Set
 import csv
 
 
@@ -553,8 +553,8 @@ class TestGenerateConfigurationReport(TestCase):
         Test that all needed functions are called to retrieve values and that these
         values are added to the common dictionary.
         """
-        train_set = instance_set(Path("tests/test_files/Instances/Train-Instance-Set"))
-        test_set = instance_set(Path("tests/test_files/Instances/Test-Instance-Set"))
+        train_set = Instance_Set(Path("tests/test_files/Instances/Train-Instance-Set"))
+        test_set = Instance_Set(Path("tests/test_files/Instances/Test-Instance-Set"))
         validation_data = [
             ["SolverName", "{}", "InstanceSetName",
              "InstanceName", "STATUS", "0", "25.323"]]

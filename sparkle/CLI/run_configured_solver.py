@@ -10,7 +10,7 @@ from runrunner.base import Runner
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
-from sparkle.instance import instance_set
+from sparkle.instance import Instance_Set
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
@@ -63,7 +63,7 @@ def main(argv: list[str]) -> None:
     data_set = resolve_object_name(
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
+        gv.settings().DEFAULT_instance_dir, Instance_Set)
     if data_set is None:
         print(f"Could not resolve instance (set): {args.instance_path}! Exiting...")
         sys.exit(-1)

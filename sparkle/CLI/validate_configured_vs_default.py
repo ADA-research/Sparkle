@@ -15,7 +15,7 @@ from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.solver.validator import Validator
 from sparkle.solver import Solver
-from sparkle.instance import instance_set
+from sparkle.instance import Instance_Set
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
@@ -93,11 +93,11 @@ def main(argv: list[str]) -> None:
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
+        gv.settings().DEFAULT_instance_dir, Instance_Set)
     instance_set_test = resolve_object_name(
         args.instance_set_test,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
+        gv.settings().DEFAULT_instance_dir, Instance_Set)
 
     # Make sure configuration results exist before trying to work with them
     configurator = gv.settings().get_general_sparkle_configurator()

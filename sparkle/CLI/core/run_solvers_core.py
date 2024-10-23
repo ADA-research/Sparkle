@@ -10,7 +10,7 @@ from runrunner import Runner
 from sparkle.CLI.help import global_variables as gv
 import sparkle.tools.general as tg
 from sparkle.solver import Solver
-from sparkle.instance import instance_set
+from sparkle.instance import Instance_Set
 from sparkle.types import resolve_objective
 from sparkle.structures import PerformanceDataFrame
 
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     instance_key = instance_path
     if not instance_path.exists():
         # If its an instance name (Multi-file instance), retrieve path list
-        data_set = instance_set(instance_path.parent)
+        data_set = Instance_Set(instance_path.parent)
         instance_path = data_set.get_path_by_name(instance_name)
         instance_key = instance_name
 

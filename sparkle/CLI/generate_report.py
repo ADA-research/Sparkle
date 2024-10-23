@@ -18,7 +18,7 @@ from sparkle.platform import \
     generate_report_for_parallel_portfolio as sgrfpph
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
-from sparkle.instance import instance_set
+from sparkle.instance import Instance_Set
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.platform.output.configuration_output import ConfigurationOutput
 from sparkle.platform.output.selection_output import SelectionOutput
@@ -93,11 +93,11 @@ def main(argv: list[str]) -> None:
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
+        gv.settings().DEFAULT_instance_dir, Instance_Set)
     instance_set_test = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
+        gv.settings().DEFAULT_instance_dir, Instance_Set)
 
     Settings.check_settings_changes(gv.settings(), prev_settings)
     # If no arguments are set get the latest scenario
@@ -145,8 +145,8 @@ def main(argv: list[str]) -> None:
         instance_dirs = set(Path(instance).parent for instance in train_data.instances)
         instance_sets = []
         for dir in instance_dirs:
-            instance_sets.append(instance_set(dir))
-        test_set = None if test_case_dir is None else instance_set(Path(test_case_dir))
+            instance_sets.append(Instance_Set(dir))
+        test_set = None if test_case_dir is None else Instance_Set(Path(test_case_dir))
         cutoff_time = gv.settings().get_general_target_cutoff_time()
         output = gv.settings().DEFAULT_selection_output_analysis
         selection_output = SelectionOutput(

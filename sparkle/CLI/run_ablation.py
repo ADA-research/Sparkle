@@ -12,7 +12,7 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
-from sparkle.instance import instance_set
+from sparkle.instance import Instance_Set
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
@@ -103,11 +103,11 @@ def main(argv: list[str]) -> None:
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
+        gv.settings().DEFAULT_instance_dir, Instance_Set)
     instance_set_test = resolve_object_name(
         args.instance_set_test,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
+        gv.settings().DEFAULT_instance_dir, Instance_Set)
 
     configurator = gv.settings().get_general_sparkle_configurator()
     configurator.set_scenario_dirs(solver, instance_set_train)

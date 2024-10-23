@@ -11,7 +11,7 @@ from pathlib import Path
 import runrunner as rrr
 
 from sparkle.solver import Solver
-from sparkle.instance import instance_set
+from sparkle.instance import Instance_Set
 from sparkle.configurator.implementations import SMAC2, SMAC2Scenario
 from sparkle.types.objective import PAR
 
@@ -27,7 +27,7 @@ class TestConfiguratorSMAC2(TestCase):
         self.base_dir = self.test_files / "tmp"
         output = Path("Output")
         self.smac2_conf = SMAC2(self.base_dir, output)
-        self.train_set = instance_set(self.test_files / "Instances/Train-Instance-Set")
+        self.train_set = Instance_Set(self.test_files / "Instances/Train-Instance-Set")
         self.solver = Solver(self.test_files / "Solvers/Test-Solver")
         self.conf_scenario = SMAC2Scenario(
             self.solver, self.train_set,
@@ -124,7 +124,7 @@ class TestConfigurationScenarioSMAC2(TestCase):
         self.solver_path = Path("tests", "test_files", "Solvers", "Test-Solver")
         self.solver = Solver(self.solver_path)
 
-        self.instance_set = instance_set(
+        self.instance_set = Instance_Set(
             Path("tests/test_files/Instances/Test-Instance-Set"))
         self.run_number = 2
 

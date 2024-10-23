@@ -17,7 +17,7 @@ from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
-from sparkle.instance import instance_set
+from sparkle.instance import Instance_Set
 from sparkle.CLI.compute_features import compute_features
 
 
@@ -66,7 +66,7 @@ def main(argv: list[str]) -> None:
     data_set = resolve_object_name(
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
+        gv.settings().DEFAULT_instance_dir, Instance_Set)
 
     if data_set is None:
         print("ERROR: The instance (set) could not be found. Please make sure the "

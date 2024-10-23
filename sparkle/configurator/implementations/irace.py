@@ -4,8 +4,8 @@ from pathlib import Path
 
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver, Validator
-from sparkle.instance import InstanceSet
-from sparkle.types import SparkleObjective
+from sparkle.instance import InstanceSet, Instance_Set
+from sparkle.types import SparkleObjective, resolve_objective
 
 import runrunner as rrr
 from runrunner import Runner, Run
@@ -88,8 +88,19 @@ class IRACE(Configurator):
             sbatch_options=sbatch_options,
         )]
         if validate_after:
-            # TODO: Validate the configurations created by IRACE
-            pass
+            self.validator.out_dir = output_csv.parent
+            self.validator.tmp_out_dir = base_dir
+            validate_run = self.validator.validate(
+                [scenario.solver] * self.scenario.number_of_runs,
+                output_csv,
+                [scenario.instance_set],
+                [self.scenario.sparkle_objective],
+                scenario.cutoff_time,
+                subdir=Path(),
+                dependency=runs,
+                sbatch_options=sbatch_options,
+                run_on=run_on)
+            runs.append(validate_run)
         return runs
 
     def get_optimal_configuration(self: IRACE,
@@ -149,6 +160,7 @@ class IRACEScenario(ConfigurationScenario):
                  solver: Solver,
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
+                 parent_directory: Path = None,
                  number_of_runs: int = None, solver_calls: int = None,
                  cutoff_time: int = None,
                  max_time: int = None,
@@ -165,6 +177,7 @@ class IRACEScenario(ConfigurationScenario):
             instance_set: Instances object for the scenario.
             sparkle_objectives: SparkleObjectives used for each run of the configuration.
                 Will be simplified to the first objective.
+            parent_directory: Path where the scenario files will be placed.
             number_of_runs: The number of configurator runs to perform
                 for configuring the solver.
             solver_calls: The number of times the solver is called for each
@@ -284,27 +297,41 @@ class IRACEScenario(ConfigurationScenario):
         self.first_test = first_test
         self.mu = mu
         self.nb_iterations = nb_iterations
+        if parent_directory is not None:
+            self.directory =\
+                parent_directory / f"{self.solver.name}_{self.instance_set.name}"
+        else:
+            self.directory = None
+        self.set_dirs(self.directory)
+
+    def set_dirs(self: IRACEScenario, directory: Path = None) -> None:
+        """Set the directories of the scenario."""
+        if directory is None:  # Parent directory not known, cannot continue
+            return
+        self.directory.mkdir(exist_ok=True, parents=True)
+        self.tmp = self.directory / "tmp"
+        self.tmp.mkdir(exist_ok=True)
+        self.validation_path = self.directory / "validation"
+        self.validation_path.mkdir(exist_ok=True)
+        self.results_directory = self.directory / "results"
+        self.results_directory.mkdir(exist_ok=True)
 
     def create_scenario(self: IRACEScenario, parent_directory: Path) -> None:
         """Create scenario with solver and instances in the parent directory.
 
         This prepares all the necessary subdirectories related to configuration.
+        Removes any existing directory if it overlaps with the scenario name.
 
         Args:
             parent_directory: Directory in which the scenario should be created.
         """
         # Set up directories
-        self.directory =\
-            parent_directory / f"{self.solver.name}_{self.instance_set.name}"
+        if self.directory is None:
+            self.directory =\
+                parent_directory / f"{self.solver.name}_{self.instance_set.name}"
         import shutil
         shutil.rmtree(self.directory, ignore_errors=True)  # Clear directory
-        self.directory.mkdir(parents=True)
-        self.tmp = self.directory / "tmp"
-        self.tmp.mkdir()
-        self.validation_path = self.directory / "validation"
-        self.validation_path.mkdir()
-        self.results_directory = self.directory / "results"
-        self.results_directory.mkdir()
+        self.set_dirs(self.directory)
 
         # Create instance files
         self.instance_file_path = self.directory / "instances.txt"
@@ -379,7 +406,43 @@ class IRACEScenario(ConfigurationScenario):
         return self.scenario_file_path
 
     @staticmethod
-    def from_file(scenario_file: Path, solver: Solver, instance_set: InstanceSet,
-                  ) -> ConfigurationScenario:
+    def from_file(scenario_file: Path, **kwargs) -> IRACEScenario:
         """Reads scenario file and initalises IRACEScenario."""
-        raise NotImplementedError
+        scenario_dict = {}
+        scenario_dict = {keyvalue[0]: keyvalue[1]
+                         for keyvalue in (line.split(" = ", maxsplit=1)
+                                          for line in scenario_file.open().readlines()
+                                          if line.strip() != "")}
+        _, solver_path, objective, cutoff, _ =\
+            scenario_dict.pop("targetRunnerLauncherArgs").split(" ")
+        scenario_dict["sparkle_objectives"] = [resolve_objective(objective)]
+        scenario_dict["cutoff_time"] = int(cutoff)
+        scenario_dict["parent_directory"] = scenario_file.parent.parent
+        scenario_dict.pop("targetRunner")
+        scenario_dict.pop("execDir")
+        scenario_dict.pop("targetRunnerLauncher")
+        scenario_dict.pop("deterministic")
+        scenario_dict.pop("parameterFile")
+        scenario_dict.pop("forbiddenFile")
+        scenario_dict.pop("debugLevel")
+        instance_set_path =\
+            Path(scenario_dict.pop("trainInstancesDir").strip().strip('"'))
+        instance_set = Instance_Set(instance_set_path)
+        solver = Solver(Path(solver_path.strip()))
+        scenario_dict.pop("trainInstancesFile")
+        # Replace keys with scenario variable names
+        if "budgetEstimation" in scenario_dict:
+            scenario_dict["budget_estimation"] =\
+                float(scenario_dict.pop(("budgetEstimation")))
+        if "firstTest" in scenario_dict:
+            scenario_dict["first_test"] = int(scenario_dict.pop("firstTest"))
+        if "mu" in scenario_dict:
+            scenario_dict["mu"] = int(scenario_dict.pop("mu"))
+        if "nbIterations" in scenario_dict:
+            scenario_dict["nb_iterations"] = int(scenario_dict.pop("nbIterations"))
+        if "maxExperiments" in scenario_dict:
+            scenario_dict["solver_calls"] = int(scenario_dict.pop("maxExperiments"))
+        if "maxTime" in scenario_dict:
+            scenario_dict["max_time"] = int(scenario_dict.pop("maxTime"))
+
+        return IRACEScenario(solver, instance_set, **scenario_dict)
