@@ -24,3 +24,21 @@ def test_irace_scenario_file(tmp_path: Path,
                              sparkle_objectives=[obj_par, obj_acc])
     scenario.create_scenario(Path("test_irace_scenario"))
     # TODO: Add file comparison, requires variables/regex to match
+
+
+def test_irace_scenario_from_file(tmp_path: Path,
+                                  monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test IRACE scenario file creation."""
+    solver = Solver(Path("Examples/Resources/Solvers/PbO-CCSAT-Generic").absolute())
+    set = instance_set(Path("Examples/Resources/Instances/PTN").absolute())
+    scenario_file = Path("tests/test_files/Configuration/"
+                         "PbO-CCSAT-Generic_PTN_scenario_irace.txt").absolute()
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+    scenario = IRACEScenario.from_file(scenario_file, solver, set)
+    assert scenario.solver == solver
+    assert scenario.instance_set == set
+    assert scenario.number_of_runs is None  # not in scenario_file
+    assert scenario.solver_calls is None
+    assert scenario.cutoff_time == 60
+    assert scenario.max_time == 1750
+    assert scenario.sparkle_objective.name == "PAR10"
