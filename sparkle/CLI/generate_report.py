@@ -244,7 +244,7 @@ def main(argv: list[str]) -> None:
 
         # Create machine readable output
         output = gv.settings().DEFAULT_configuration_output_analysis
-        config_output = ConfigurationOutput(configurator.scenario.directory,
+        config_output = ConfigurationOutput(config_scenario.directory,
                                             configurator,
                                             config_scenario,
                                             instance_set_test,
@@ -261,7 +261,6 @@ def main(argv: list[str]) -> None:
                 gv.settings().DEFAULT_configuration_output_analysis,
                 gv.settings().DEFAULT_latex_source,
                 gv.settings().DEFAULT_latex_bib,
-                instance_set_train,
                 gv.settings().get_general_extractor_cutoff_time(),
                 config_scenario,
                 instance_set_test,

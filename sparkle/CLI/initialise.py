@@ -113,6 +113,9 @@ def initialise_sparkle(download_examples: bool = False) -> None:
         gv.__settings = Settings(Settings.DEFAULT_example_settings_path)
         gv.settings().write_settings_ini(Path(Settings.DEFAULT_settings_path))
 
+    # Initialise latest scenario file
+    gv.ReportingScenario.DEFAULT_reporting_scenario_path.open("w+")
+
     # Initialise the FeatureDataFrame
     FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
 

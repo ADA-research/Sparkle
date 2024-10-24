@@ -1071,7 +1071,6 @@ class Settings:
 
         cur_sections_set = set(cur_dict.keys())
         prev_sections_set = set(prev_dict.keys())
-
         sections_removed = prev_sections_set - cur_sections_set
         if sections_removed:
             print("Warning: the following sections have been removed:")
@@ -1093,7 +1092,9 @@ class Settings:
                 # if name is not present in one of the two dicts, get None as placeholder
                 cur_val = cur_dict[section].get(name, None)
                 prev_val = prev_dict[section].get(name, None)
-                if cur_val != prev_val:
+
+                # If cur val is None, it is default
+                if cur_val is not None and cur_val != prev_val:
                     # Have we printed the initial warning?
                     if not option_changed:
                         print("Warning: The following attributes/options have changed:")

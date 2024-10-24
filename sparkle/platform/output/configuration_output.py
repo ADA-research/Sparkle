@@ -33,7 +33,7 @@ class ConfigurationOutput:
         """
         self.solver = config_scenario.solver
         self.configurator = configurator
-        self.instance_set_train = config_scenario.instance_set_train
+        self.instance_set_train = config_scenario.instance_set
         self.instance_set_test = instance_set_test
         self.directory = path
         self.config_scenario = config_scenario

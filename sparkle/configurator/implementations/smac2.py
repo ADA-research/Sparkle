@@ -137,6 +137,7 @@ class SMAC2(Configurator):
             scenario: ConfigurationScenario,
             aggregate_config: Callable = mean) -> tuple[float, str]:
         """Returns optimal value and configuration string of solver on instance set."""
+        self.validator.out_dir = scenario.validation
         results = self.validator.get_validation_results(
             scenario.solver,
             scenario.instance_set,
