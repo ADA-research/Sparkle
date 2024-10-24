@@ -318,7 +318,6 @@ class IRACEScenario(ConfigurationScenario):
         self.tmp.mkdir(exist_ok=True)
         self.validation.mkdir(exist_ok=True)
         self.results_directory.mkdir(exist_ok=True)
-        self.set_dirs()
 
         with self.instance_file_path.open("w+") as file:
             for instance_path in self.instance_set._instance_paths:

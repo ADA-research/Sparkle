@@ -102,7 +102,8 @@ class ConfigurationScenario:
         Args:
             solver: Solver that should be configured.
             instance_set: Instances object for the scenario.
-            sparkle_objectives: SparkleObjectives used for each run of the configuration.
+            sparkle_objectives: Sparkle Objectives to optimize.
+            parent_directory: Directory in which the scenario should be placed.
         """
         self.solver = solver
         self.instance_set = instance_set

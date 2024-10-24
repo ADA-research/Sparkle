@@ -141,7 +141,7 @@ class SMAC2(Configurator):
             scenario.solver,
             scenario.instance_set,
             source_dir=scenario.validation,
-            subdir=scenario.validation.relative_to(self.validator.out_dir))
+            subdir=Path())
         # Group the results per configuration
         objective = scenario.sparkle_objective
         value_column = results[0].index(objective.name)

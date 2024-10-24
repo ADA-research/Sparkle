@@ -234,7 +234,8 @@ def main(argv: list[str]) -> None:
         # Extract config scenario data for report, but this should be read from the
         # scenario file instead as we can't know wether features were used or not now
         configurator = gv.settings().get_general_sparkle_configurator()
-        config_scenario = gv.latest_scenario().get_configuration_scenario()
+        config_scenario = gv.latest_scenario().get_configuration_scenario(
+            configurator.scenario_class)
         ablation_scenario = None
         if args.flag_ablation:
             ablation_scenario = AblationScenario(

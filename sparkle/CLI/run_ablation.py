@@ -111,7 +111,9 @@ def main(argv: list[str]) -> None:
 
     # TODO: Detect the scenario from solver/instance/configurator combination
     # Now we just take the latest scenario
-    config_scenario = gv.latest_scenario().get_configuration_scenario()
+    configurator = gv.settings().get_general_sparkle_configurator()
+    config_scenario = gv.latest_scenario().get_configuration_scenario(
+        configurator.scenario_class)
     if instance_set_test is None:
         instance_set_test = instance_set_train
 

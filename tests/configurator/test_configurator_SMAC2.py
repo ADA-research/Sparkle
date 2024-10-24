@@ -30,13 +30,12 @@ class TestConfiguratorSMAC2(TestCase):
         self.train_set = Instance_Set(self.test_files / "Instances/Train-Instance-Set")
         self.solver = Solver(self.test_files / "Solvers/Test-Solver")
         self.conf_scenario = SMAC2Scenario(
-            self.solver, self.train_set, self.base_dir,
+            self.solver, self.train_set, [sparkle_objective], self.base_dir,
             number_of_runs=2,
             solver_calls=25,
             wallclock_time=80,
             cutoff_time=60,
             target_cutoff_length=10,
-            sparkle_objectives=[sparkle_objective],
         )
         assert self.smac2_conf.base_dir == self.base_dir
         assert self.smac2_conf.output_path == output / SMAC2.__name__
@@ -86,7 +85,7 @@ class TestConfiguratorSMAC2(TestCase):
         csv_lines = [line for line in csv.reader(csv_file.open("r"))]
         validation_mock.return_value = csv_lines
         configuration_scenario = SMAC2Scenario(
-            self.solver, self.train_set, PAR(10), csv_file.parent
+            self.solver, self.train_set, [PAR(10)], csv_file.parent
         )
         opt_conf = self.smac2_conf.get_optimal_configuration(
             configuration_scenario)
@@ -145,12 +144,12 @@ class TestConfigurationScenarioSMAC2(TestCase):
         self.scenario = SMAC2Scenario(
             solver=self.solver,
             instance_set=self.instance_set,
+            sparkle_objectives=[self.sparkle_objective],
             parent_directory=self.parent_directory,
             number_of_runs=self.run_number,
             wallclock_time=self.wallclock_time,
             cutoff_time=self.cutoff_time,
-            target_cutoff_length=self.cutoff_length,
-            sparkle_objectives=[self.sparkle_objective])
+            target_cutoff_length=self.cutoff_length)
 
     def tearDown(self: TestConfigurationScenarioSMAC2) -> None:
         """Cleanup executed after each test."""
