@@ -77,8 +77,10 @@ class AblationScenario:
         ablation_scenario_dir = self.scenario_dir
         objective = gv.settings().get_general_sparkle_objectives()[0]
         configurator = gv.settings().get_general_sparkle_configurator()
+        config_scenario = gv.latest_scenario().get_configuration_scenario(
+            configurator.scenario_class)
         _, opt_config_str = configurator.get_optimal_configuration(
-            self.solver, self.train_set, objective=objective)
+            config_scenario)
 
         # We need to check which params are missing and supplement with default values
         pcs = self.solver.get_pcs()

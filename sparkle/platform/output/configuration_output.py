@@ -19,24 +19,24 @@ from pathlib import Path
 class ConfigurationOutput:
     """Class that collects configuration data and outputs it a JSON format."""
 
-    def __init__(self: ConfigurationOutput, path: Path, solver: Solver,
-                 configurator: Configurator, instance_set_train: InstanceSet,
+    def __init__(self: ConfigurationOutput, path: Path,
+                 configurator: Configurator, config_scenario: ConfigurationScenario,
                  instance_set_test: InstanceSet, output: Path) -> None:
         """Initialize Configurator Output class.
 
         Args:
             path: Path to configuration output directory
-            solver: Solver object
             configurator: The configurator that was used
-            instance_set_train: Instance set used for training
+            config_scenario: The scenario to output
             instance_set_test: Instance set used for testing
             output: Path to the output directory
         """
-        self.solver = solver
+        self.solver = config_scenario.solver
         self.configurator = configurator
-        self.instance_set_train = instance_set_train
+        self.instance_set_train = config_scenario.instance_set_train
         self.instance_set_test = instance_set_test
         self.directory = path
+        self.config_scenario = config_scenario
         self.output = output / "configuration.json" if not output.is_file() else output
 
         solver_dir_name = path.name
@@ -44,20 +44,13 @@ class ConfigurationOutput:
         if not scenario_file.is_file():
             raise Exception("Can't find scenario file")
 
-        # Sets scenario on configurator object
-        self.configurator.scenario = \
-            configurator.scenario_class.from_file(scenario_file, self.solver,
-                                                  self.instance_set_train)
-        self.configurator.scenario._set_paths(self.configurator.output_path)
-
         # Retrieve all configurations
         config_path = path / "validation" / "configurations.csv"
         self.configurations = self.get_configurations(config_path)
 
         # Retrieve best found configuration
-        objective = self.configurator.scenario.sparkle_objective
         _, self.best_config = self.configurator.get_optimal_configuration(
-            self.solver, self.instance_set_train, objective)
+            self.config_scenario)
 
         # Retrieves validation results for all configurations
         self.validation_results = []
@@ -89,11 +82,11 @@ class ConfigurationOutput:
     def get_validation_data(self: ConfigurationOutput, instance_set: InstanceSet,
                             config: dict) -> ConfigurationResults:
         """Returns best config and ConfigurationResults for instance set."""
-        objective = self.configurator.scenario.sparkle_objective
+        objective = self.config_scenario.sparkle_objective
 
         # Retrieve found configuration
         _, best_config = self.configurator.get_optimal_configuration(
-            self.solver, instance_set, objective)
+            self.config_scenario)
 
         # Retrieve validation results
         validator = Validator(self.directory)
@@ -132,20 +125,6 @@ class ConfigurationOutput:
             },
         }
 
-    def serialize_scenario(self: ConfigurationOutput,
-                           scenario: ConfigurationScenario) -> dict:
-        """Transform ConfigurationScenario to dictionary format."""
-        return {
-            "number_of_runs": scenario.number_of_runs,
-            "solver_calls": scenario.solver_calls,
-            "cpu_time": scenario.cpu_time,
-            "wallclock_time": scenario.wallclock_time,
-            "cutoff_time": scenario.cutoff_time,
-            "cutoff_length": scenario.cutoff_length,
-            "sparkle_objective": scenario.sparkle_objective.name,
-            "feature_data": scenario.feature_data,
-        }
-
     def write_output(self: ConfigurationOutput) -> None:
         """Write data into a JSON file."""
         output_data = {
@@ -155,7 +134,7 @@ class ConfigurationOutput:
             ),
             "best_configuration": Solver.config_str_to_dict(self.best_config),
             "configurations": self.configurations,
-            "scenario": self.serialize_scenario(self.configurator.scenario)
+            "scenario": self.config_scenario.serialize()
             if self.configurator.scenario else None,
             "training_results": [
                 self.serialize_configuration_results(validation_result)

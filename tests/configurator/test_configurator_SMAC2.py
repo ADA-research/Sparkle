@@ -85,8 +85,11 @@ class TestConfiguratorSMAC2(TestCase):
         csv_file = Path("tests/test_files/Validator/validation_configuration.csv")
         csv_lines = [line for line in csv.reader(csv_file.open("r"))]
         validation_mock.return_value = csv_lines
+        configuration_scenario = SMAC2Scenario(
+            self.solver, self.train_set, PAR(10), csv_file.parent
+        )
         opt_conf = self.smac2_conf.get_optimal_configuration(
-            self.solver, self.train_set, PAR(10))
+            configuration_scenario)
 
         expect_conf = (11.206219166666667, "-gamma_hscore2 '351' -init_solution '1' "
                        "-p_swt '0.20423712003341465' -perform_aspiration '1' "

@@ -6,6 +6,8 @@ import configparser
 from enum import Enum
 from pathlib import Path
 from pathlib import PurePath
+
+from sparkle.configurator.configurator import ConfigurationScenario
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set, InstanceSet
 
@@ -123,6 +125,13 @@ class ReportingScenario:
                     self.set_config_instance_set_test(value)
                     file_scenario.remove_option(section, option)
 
+            option_names = ("scenario_file_path", )
+            for option in option_names:
+                if file_scenario.has_option(section, option):
+                    value = Path(file_scenario.get(section, option))
+                    self.set_config_scenario(value)
+                    file_scenario.remove_option(section, option)
+
             section = "parallel_portfolio"
             option_names = ("portfolio_path",)  # Comma to make it a tuple
             for option in option_names:
@@ -131,7 +140,6 @@ class ReportingScenario:
                     self.set_parallel_portfolio_path(value)
                     file_scenario.remove_option(section, option)
 
-            section = "parallel_portfolio"
             option_names = ("instance_path",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
@@ -321,6 +329,24 @@ class ReportingScenario:
         if path is None:
             return None
         return Instance_Set(path)
+
+    def set_configuration_scenario(self: ReportingScenario,
+                                   value: Scenario | Path) -> None:
+        """Set the path to the scenario that was used for configuration."""
+        section = "configuration"
+        name = "scenario_file_path"
+        if isinstance(value, ConfigurationScenario):
+            value = value.scenario_file_path
+        self.path_setter(section, name, value)
+
+    def get_configuration_scenario(self: ReportingScenario,
+                                   scenario_class: ConfigurationScenario) -> Scenario:
+        """Return the path to the scenario that was used for configuration."""
+        path = self.none_if_empty_path(
+            Path(self.__scenario["configuration"]["scenario_file_path"]))
+        if path is None:
+            return None
+        return scenario_class.from_file(path)
 
     def set_config_instance_set_test(
             self: ReportingScenario, value: Path = DEFAULT_config_instance_set_test)\

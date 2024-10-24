@@ -67,19 +67,18 @@ class IRACE(Configurator):
         Returns:
             A RunRunner Run object.
         """
-        self.scenario = scenario
-        self.scenario.create_scenario(parent_directory=self.output_path)
-        output_csv = self.scenario.validation_path / "configurations.csv"
+        scenario.create_scenario(parent_directory=self.output_path)
+        output_csv = scenario.validation / "configurations.csv"
         output_csv.parent.mkdir(exist_ok=True, parents=True)
 
         # Create command to call IRACE. Create plural based on number of runs var
         output_files = [
-            self.scenario.results_directory.absolute() / f"output_{job_idx}.Rdata"
+            scenario.results_directory.absolute() / f"output_{job_idx}.Rdata"
             for job_idx in range(0, scenario.number_of_runs)]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{IRACE.__name__} {output_files[job_idx]} {output_csv.absolute()} "
                 f"{IRACE.configurator_executable.absolute()} "
-                f"--scenario {self.scenario.scenario_file_path.absolute()} "
+                f"--scenario {scenario.scenario_file_path.absolute()} "
                 f"--log-file {output_files[job_idx]} "
                 f"--seed {job_idx}" for job_idx in range(0, scenario.number_of_runs)]
         runs = [rrr.add_to_queue(
@@ -93,10 +92,10 @@ class IRACE(Configurator):
             self.validator.out_dir = output_csv.parent
             self.validator.tmp_out_dir = base_dir
             validate_run = self.validator.validate(
-                [scenario.solver] * self.scenario.number_of_runs,
+                [scenario.solver] * scenario.number_of_runs,
                 output_csv,
                 [scenario.instance_set],
-                [self.scenario.sparkle_objective],
+                [scenario.sparkle_objective],
                 scenario.cutoff_time,
                 subdir=Path(),
                 dependency=runs,
@@ -147,11 +146,6 @@ class IRACE(Configurator):
             fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
             fout.write(configuration + "\n")
 
-    def set_scenario_dirs(self: Configurator,
-                          solver: Solver, instance_set: InstanceSet) -> None:
-        """Patching method to allow the rebuilding of configuration scenario."""
-        raise NotImplementedError
-
     def get_status_from_logs(self: Configurator) -> None:
         """Method to scan the log files of the configurator for warnings."""
         raise NotImplementedError
@@ -164,7 +158,7 @@ class IRACEScenario(ConfigurationScenario):
                  solver: Solver,
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
-                 parent_directory: Path = None,
+                 parent_directory: Path,
                  number_of_runs: int = None, solver_calls: int = None,
                  cutoff_time: int = None,
                  max_time: int = None,
@@ -301,26 +295,15 @@ class IRACEScenario(ConfigurationScenario):
         self.first_test = first_test
         self.mu = mu
         self.nb_iterations = nb_iterations
-        if parent_directory is not None:
-            self.directory =\
-                parent_directory / f"{self.solver.name}_{self.instance_set.name}"
-        else:
-            self.directory = None
-        self.set_dirs(self.directory)
-
-    def set_dirs(self: IRACEScenario, directory: Path = None) -> None:
-        """Set the directories of the scenario."""
-        if directory is None:  # Parent directory not known, cannot continue
-            return
-        self.directory.mkdir(exist_ok=True, parents=True)
+        self.directory =\
+            parent_directory / f"{self.solver.name}_{self.instance_set.name}"
+        self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
+        self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
         self.tmp = self.directory / "tmp"
-        self.tmp.mkdir(exist_ok=True)
-        self.validation_path = self.directory / "validation"
-        self.validation_path.mkdir(exist_ok=True)
+        self.validation = self.directory / "validation"
         self.results_directory = self.directory / "results"
-        self.results_directory.mkdir(exist_ok=True)
 
-    def create_scenario(self: IRACEScenario, parent_directory: Path) -> None:
+    def create_scenario(self: IRACEScenario) -> None:
         """Create scenario with solver and instances in the parent directory.
 
         This prepares all the necessary subdirectories related to configuration.
@@ -330,15 +313,13 @@ class IRACEScenario(ConfigurationScenario):
             parent_directory: Directory in which the scenario should be created.
         """
         # Set up directories
-        if self.directory is None:
-            self.directory =\
-                parent_directory / f"{self.solver.name}_{self.instance_set.name}"
         shutil.rmtree(self.directory, ignore_errors=True)  # Clear directory
-        self.set_dirs(self.directory)
+        self.directory.mkdir(exist_ok=True, parents=True)
+        self.tmp.mkdir(exist_ok=True)
+        self.validation.mkdir(exist_ok=True)
+        self.results_directory.mkdir(exist_ok=True)
+        self.set_dirs()
 
-        # Create instance files
-        self.instance_file_path = self.directory / "instances.txt"
-        self.instance_file_path.parent.mkdir(exist_ok=True, parents=True)
         with self.instance_file_path.open("w+") as file:
             for instance_path in self.instance_set._instance_paths:
                 file.write(f"{instance_path.name}\n")
@@ -350,7 +331,6 @@ class IRACEScenario(ConfigurationScenario):
         Returns:
             Path to the created file.
         """
-        self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
         solver_path = self.solver.directory.absolute()
         with self.scenario_file_path.open("w") as file:
             file.write(
@@ -407,10 +387,22 @@ class IRACEScenario(ConfigurationScenario):
             print("IRACE scenario file is valid.")
         return self.scenario_file_path
 
+    def serialize(self: IRACEScenario) -> dict:
+        """Serialize the IRACE scenario."""
+        return {
+            "number_of_runs": self.number_of_runs,
+            "solver_calls": self.solver_calls,
+            "max_time": self.max_time,
+            "cutoff_time": self.cutoff_time,
+            "budget_estimation": self.budget_estimation,
+            "first_test": self.first_test,
+            "mu": self.mu,
+            "nb_iterations": self.nb_iterations,
+        }
+
     @staticmethod
     def from_file(scenario_file: Path) -> IRACEScenario:
         """Reads scenario file and initalises IRACEScenario."""
-        scenario_dict = {}
         scenario_dict = {keyvalue[0]: keyvalue[1]
                          for keyvalue in (line.split(" = ", maxsplit=1)
                                           for line in scenario_file.open().readlines()

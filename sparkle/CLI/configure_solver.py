@@ -226,6 +226,7 @@ def main(argv: list[str]) -> None:
     # Update latest scenario
     gv.latest_scenario().set_config_solver(solver)
     gv.latest_scenario().set_config_instance_set_train(instance_set_train.directory)
+    gv.latest_scenario().set_configuration_scenario(config_scenario.scenario_file_path)
     gv.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
 
     if instance_set_test is not None:

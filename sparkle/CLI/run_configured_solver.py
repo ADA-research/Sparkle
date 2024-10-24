@@ -80,8 +80,9 @@ def main(argv: list[str]) -> None:
     # Get optimised configuration
     configurator = gv.settings().get_general_sparkle_configurator()
     objectives = gv.settings().get_general_sparkle_objectives()
-    _, config_str = configurator.get_optimal_configuration(
-        solver, train_set, objective=objectives[0])
+    configuration_scenario = gv.latest_scenario().get_configuration_scenario(
+        configurator.scenario_class)
+    _, config_str = configurator.get_optimal_configuration(configuration_scenario)
     config = solver.config_str_to_dict(config_str)
     # Call the configured solver
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)

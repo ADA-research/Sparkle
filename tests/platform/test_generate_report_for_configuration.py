@@ -32,11 +32,11 @@ class TestGenerateConfigurationReport(TestCase):
         train_instance = "train-instance"
         test_instance = "test-instance"
         self.configurator_path = self.configurator.configurator_path
-        self.configurator.scenario = self.configurator.scenario_class(
+        self.configuration_scenario = self.configurator.scenario_class(
             self.solver,
             Path(train_instance),
-            [self.test_objective_runtime])
-        self.configurator.scenario._set_paths(self.configurator_path)
+            [self.test_objective_runtime],
+            self.configurator_path)
         self.ablation_scenario = AblationScenario(
             self.solver, Path(train_instance), Path(test_instance), Path(""))
         self.validator = Validator()
@@ -481,10 +481,10 @@ class TestGenerateConfigurationReport(TestCase):
              "InstanceName", "STATUS", "0", "25.323"]]
         report_dir = "reports/directory"
         cutoff = 60
-        self.configurator.scenario.cutoff_time = cutoff
-        self.configurator.scenario.number_of_runs = 25
-        self.configurator.scenario.wallclock_time = 600
-        self.configurator.scenario.sparkle_objective = self.test_objective_quality
+        self.configuration_scenario.cutoff_time = cutoff
+        self.configuration_scenario.number_of_runs = 25
+        self.configuration_scenario.wallclock_time = 600
+        self.configuration_scenario.sparkle_objective = self.test_objective_quality
         mock_performance.side_effect = [42.1, 42.2]
         mock_features_bool.return_value = "\\featuresfalse"
         mock_figure.return_value = "figure-string"
@@ -567,8 +567,8 @@ class TestGenerateConfigurationReport(TestCase):
         mock_ablation_table.return_value = "ablation/path"
         mock_validation_results.return_value = validation_data
         mock_optimal_configuration.return_value = (0.0, "configurino")
-        self.configurator.scenario.cutoff_time = 60
-        self.configurator.scenario.sparkle_objective = self.test_objective_quality
+        self.configuration_scenario.cutoff_time = 60
+        self.configuration_scenario.sparkle_objective = self.test_objective_quality
         test_dict = sgrch.get_dict_variable_to_value_test(Path("configuration/report"),
                                                           self.solver,
                                                           self.configurator,

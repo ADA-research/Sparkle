@@ -214,6 +214,7 @@ def get_timeouts_instanceset(solver: Solver,
                              instance_set: InstanceSet,
                              configurator: Configurator,
                              validator: Validator,
+                             configuration_scenario: ConfigurationScenario,
                              cutoff: float) -> tuple[int, int, int]:
     """Return the number of timeouts by configured, default and both on the testing set.
 
@@ -227,9 +228,8 @@ def get_timeouts_instanceset(solver: Solver,
     Returns:
         A tuple containing the number of timeouts for the different configurations
     """
-    objective = configurator.scenario.sparkle_objective
-    _, config = configurator.get_optimal_configuration(
-        solver, instance_set, objective)
+    objective = configuration_scenario.sparkle_objective
+    _, config = configurator.get_optimal_configuration(configuration_scenario)
     res_default = validator.get_validation_results(solver,
                                                    instance_set,
                                                    config="")
@@ -329,7 +329,7 @@ def configuration_report_variables(target_dir: Path,
                                    validator: Validator,
                                    extractor_dir: Path,
                                    bib_path: Path,
-                                   instance_set_train: InstanceSet,
+                                   config_scenario: ConfigurationScenario,
                                    extractor_cuttoff: int,
                                    instance_set_test: InstanceSet = None,
                                    ablation: AblationScenario = None) -> dict:
@@ -351,7 +351,7 @@ def configuration_report_variables(target_dir: Path,
                                                   validator,
                                                   ablation,
                                                   bib_path,
-                                                  instance_set_train,
+                                                  config_scenario,
                                                   target_dir)
 
     if has_test:
@@ -360,7 +360,7 @@ def configuration_report_variables(target_dir: Path,
                                                     configurator,
                                                     validator,
                                                     ablation,
-                                                    instance_set_train,
+                                                    config_scenario,
                                                     instance_set_test)
         full_dict.update(test_dict)
     full_dict["testBool"] = f"\\test{str(has_test).lower()}"
@@ -383,7 +383,7 @@ def get_dict_variable_to_value_common(solver: Solver,
                                       validator: Validator,
                                       ablation: AblationScenario,
                                       bibliography_path: Path,
-                                      train_set: InstanceSet,
+                                      config_scenario: ConfigurationScenario,
                                       target_directory: Path) -> dict:
     """Return a dict matching LaTeX variables and values used for all config. reports.
 
@@ -396,13 +396,12 @@ def get_dict_variable_to_value_common(solver: Solver,
     Returns:
         A dictionary containing the variables and values
     """
-    objective = configurator.scenario.sparkle_objective
-    _, opt_config = configurator.get_optimal_configuration(
-        solver, train_set, objective)
+    objective = config_scenario.sparkle_objective
+    _, opt_config = configurator.get_optimal_configuration(config_scenario)
     res_default = validator.get_validation_results(
-        solver, train_set, config="")
+        solver, config_scenario.instance_set, config="")
     res_conf = validator.get_validation_results(
-        solver, train_set, config=opt_config)
+        solver, config_scenario.instance_set, config=opt_config)
     instance_names = set([res[3] for res in res_default])
     opt_config_list = [f"{key}: {value}" for key, value in
                        Solver.config_str_to_dict(opt_config).items()]
@@ -417,14 +416,14 @@ def get_dict_variable_to_value_common(solver: Solver,
         latex_dict["runtimeBool"] = "\\runtimefalse"
 
     latex_dict["solver"] = solver.name
-    latex_dict["instanceSetTrain"] = train_set.name
+    latex_dict["instanceSetTrain"] = config_scenario.instance_set.name
     latex_dict["sparkleVersion"] = about.version
     latex_dict["numInstanceInTrainingInstanceSet"] = len(instance_names)
 
-    run_cutoff_time = configurator.scenario.cutoff_time
-    latex_dict["numSmacRuns"] = configurator.scenario.number_of_runs
+    run_cutoff_time = config_scenario.cutoff_time
+    latex_dict["numSmacRuns"] = config_scenario.number_of_runs
     latex_dict["smacObjective"] = smac_run_obj
-    latex_dict["smacWholeTimeBudget"] = configurator.scenario.wallclock_time
+    latex_dict["smacWholeTimeBudget"] = config_scenario.wallclock_time
     latex_dict["smacEachRunCutoffTime"] = run_cutoff_time
     latex_dict["optimisedConfiguration"] = stex.list_to_latex(opt_config_list)
     latex_dict["optimisedConfigurationTrainingPerformancePAR"] =\
@@ -433,14 +432,14 @@ def get_dict_variable_to_value_common(solver: Solver,
         get_average_performance(res_default, objective)
 
     str_value = get_figure_configured_vs_default_on_instance_set(
-        solver, train_set.name, res_default, res_conf, target_directory,
-        smac_run_obj, float(run_cutoff_time), objective)
+        solver, config_scenario.instance_set.name, res_default, res_conf,
+        target_directory, smac_run_obj, float(run_cutoff_time), objective)
     latex_dict["figure-configured-vs-default-train"] = str_value
 
     # Retrieve timeout numbers for the training instances
     configured_timeouts_train, default_timeouts_train, overlapping_timeouts_train =\
-        get_timeouts_instanceset(solver, train_set, configurator, validator,
-                                 run_cutoff_time)
+        get_timeouts_instanceset(solver, config_scenario.instance_set, configurator,
+                                 validator, run_cutoff_time)
 
     latex_dict["timeoutsTrainDefault"] = default_timeouts_train
     latex_dict["timeoutsTrainConfigured"] = configured_timeouts_train
@@ -448,7 +447,7 @@ def get_dict_variable_to_value_common(solver: Solver,
     latex_dict["ablationBool"] = get_ablation_bool(ablation)
     latex_dict["ablationPath"] = get_ablation_table(ablation)
     latex_dict["featuresBool"] = get_features_bool(
-        configurator.scenario, solver.name, train_set)
+        config_scenario, solver.name, config_scenario.instance_set)
 
     return latex_dict
 
@@ -458,7 +457,7 @@ def get_dict_variable_to_value_test(target_dir: Path,
                                     configurator: Configurator,
                                     validator: Validator,
                                     ablation: AblationScenario,
-                                    train_set: InstanceSet,
+                                    configuration_scenario: ConfigurationScenario,
                                     test_set: InstanceSet) -> dict:
     """Return a dict matching test set specific latex variables with their values.
 
@@ -473,15 +472,14 @@ def get_dict_variable_to_value_test(target_dir: Path,
     Returns:
         A dictionary containting the variables and their values
     """
-    _, config = configurator.get_optimal_configuration(
-        solver, train_set, configurator.scenario.sparkle_objective)
+    _, config = configurator.get_optimal_configuration(configuration_scenario)
     res_default = validator.get_validation_results(
         solver, test_set, config="")
     res_conf = validator.get_validation_results(
         solver, test_set, config=config)
     instance_names = set([res[3] for res in res_default])
-    run_cutoff_time = configurator.scenario.cutoff_time
-    objective = configurator.scenario.sparkle_objective
+    run_cutoff_time = configuration_scenario.cutoff_time
+    objective = configuration_scenario.sparkle_objective
     test_dict = {"instanceSetTest": test_set.name}
     test_dict["numInstanceInTestingInstanceSet"] = len(instance_names)
     test_dict["optimisedConfigurationTestingPerformancePAR"] =\
@@ -489,12 +487,12 @@ def get_dict_variable_to_value_test(target_dir: Path,
     test_dict["defaultConfigurationTestingPerformancePAR"] =\
         get_average_performance(res_default, objective)
     smac_run_obj = SMAC2.get_smac_run_obj(
-        configurator.scenario.sparkle_objective)
+        configuration_scenario.sparkle_objective)
     test_dict["figure-configured-vs-default-test"] =\
         get_figure_configured_vs_default_on_instance_set(
         solver, test_set.name, res_default, res_conf, target_dir, smac_run_obj,
         float(run_cutoff_time),
-        configurator.scenario.sparkle_objective, data_type="test")
+        configuration_scenario.sparkle_objective, data_type="test")
 
     # Retrieve timeout numbers for the testing instances
     configured_timeouts_test, default_timeouts_test, overlapping_timeouts_test =\
@@ -519,8 +517,8 @@ def generate_report_for_configuration(solver: Solver,
                                       target_path: Path,
                                       latex_template_path: Path,
                                       bibliography_path: Path,
-                                      train_set: InstanceSet,
                                       extractor_cuttoff: int,
+                                      config_scenario: ConfigurationScenario,
                                       test_set: InstanceSet = None,
                                       ablation: AblationScenario = None) -> None:
     """Generate a report for algorithm configuration.
@@ -533,7 +531,7 @@ def generate_report_for_configuration(solver: Solver,
         target_path: Where the report files will be placed.
         latex_template_path: Path to the template to use for the report
         bibliography_path: The bib corresponding to the latex template
-        train_set: Instance set for training
+        config_scenario: The configuration scenario to report
         extractor_cuttoff: Cut off for extractor
         test_set: Instance set for testing
         ablation: Whether or not ablation is used. Defaults to True.
@@ -541,7 +539,7 @@ def generate_report_for_configuration(solver: Solver,
     target_path.mkdir(parents=True, exist_ok=True)
     variables_dict = configuration_report_variables(
         target_path, solver, configurator, validator, extractor_dir, bibliography_path,
-        train_set, extractor_cuttoff, test_set,
+        config_scenario, extractor_cuttoff, test_set,
         ablation)
     stex.generate_report(latex_template_path,
                          "template-Sparkle-for-configuration.tex",

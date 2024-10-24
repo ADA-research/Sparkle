@@ -70,10 +70,8 @@ class Configurator:
 
     @abstractmethod
     def get_optimal_configuration(self: Configurator,
-                                  solver: Solver,
-                                  instance_set: InstanceSet,
-                                  objective: SparkleObjective) -> tuple[float, str]:
-        """Returns the optimal configuration string for a solver of an instance set."""
+                                  scenario: ConfigurationScenario) -> tuple[float, str]:
+        """Returns the optimal configuration string for a scenario."""
         raise NotImplementedError
 
     @staticmethod
@@ -108,6 +106,10 @@ class ConfigurationScenario:
         self.instance_set = instance_set
         self.sparkle_objectives = sparkle_objectives
         self.name = f"{self.solver.name}_{self.instance_set.name}"
+        self.scenario_file_path: Path = None
+        self.validation: Path = None
+        self.tmp: Path = None
+        self.results_directory: Path = None
 
     def create_scenario(self: ConfigurationScenario, parent_directory: Path) -> None:
         """Create scenario with solver and instances in the parent directory.
@@ -127,8 +129,11 @@ class ConfigurationScenario:
         """
         raise NotImplementedError
 
+    def serialize(self: ConfigurationScenario) -> dict:
+        """Serialize the configuration scenario."""
+        raise NotImplementedError
+
     @staticmethod
-    def from_file(scenario_file: Path, solver: Solver, instance_set: InstanceSet,
-                  ) -> ConfigurationScenario:
+    def from_file(scenario_file: Path) -> ConfigurationScenario:
         """Reads scenario file and initalises ConfigurationScenario."""
         raise NotImplementedError

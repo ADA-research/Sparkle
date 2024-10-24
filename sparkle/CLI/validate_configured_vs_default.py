@@ -101,11 +101,12 @@ def main(argv: list[str]) -> None:
 
     # Make sure configuration results exist before trying to work with them
     configurator = gv.settings().get_general_sparkle_configurator()
-    configurator.set_scenario_dirs(solver, instance_set_train)
-    objectives = gv.settings().get_general_sparkle_objectives()
+    # TODO: Get configuration scenario by specified solver/instanceset/configurator
+    # Now we just get the latest scenario
+    config_scenario = gv.latest_scenario().get_configuration_scenario(
+        configurator.scenario_class)
     # Record optimised configuration
-    _, opt_config_str = configurator.get_optimal_configuration(
-        solver, instance_set_train, objectives[0])
+    _, opt_config_str = configurator.get_optimal_configuration(config_scenario)
     opt_config = Solver.config_str_to_dict(opt_config_str)
 
     validator = Validator(gv.settings().DEFAULT_validation_output, sl.caller_log_dir)
@@ -116,7 +117,7 @@ def main(argv: list[str]) -> None:
         solvers=[solver] * 2,
         configurations=[None, opt_config],
         instance_sets=all_validation_instances,
-        objectives=objectives,
+        objectives=config_scenario.sparkle_objectives,
         cut_off=gv.settings().get_general_target_cutoff_time(),
         sbatch_options=gv.settings().get_slurm_extra_options(as_args=True),
         run_on=run_on)

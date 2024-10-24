@@ -212,8 +212,6 @@ def main(argv: list[str]) -> None:
             print(f"Usage: {sys.argv[0]} --solver <solver> [--instance-set-train "
                   "<instance-set-train>] [--instance-set-test <instance-set-test>]")
             sys.exit(-1)
-        gv.settings().get_general_sparkle_configurator()\
-            .set_scenario_dirs(solver, instance_set_train)
         # Generate a report depending on which instance sets are provided
         if flag_instance_set_train or flag_instance_set_test:
             # Check if there are result to generate a report from
@@ -235,19 +233,8 @@ def main(argv: list[str]) -> None:
             sys.exit(-1)
         # Extract config scenario data for report, but this should be read from the
         # scenario file instead as we can't know wether features were used or not now
-        number_of_runs = gv.settings().get_configurator_number_of_runs()
-        solver_calls = gv.settings().get_configurator_solver_calls()
-        cpu_time = gv.settings().get_smac2_cpu_time()
-        wallclock_time = gv.settings().get_smac2_wallclock_time()
-        cutoff_time = gv.settings().get_general_target_cutoff_time()
-        cutoff_length = gv.settings().get_smac2_target_cutoff_length()
-        sparkle_objectives =\
-            gv.settings().get_general_sparkle_objectives()
         configurator = gv.settings().get_general_sparkle_configurator()
-        configurator.scenario = configurator.scenario_class(
-            solver, instance_set_train, sparkle_objectives, number_of_runs,
-            solver_calls, cpu_time, wallclock_time, cutoff_time, cutoff_length, )
-        configurator.scenario._set_paths(configurator.output_path)
+        config_scenario = gv.latest_scenario().get_configuration_scenario()
         ablation_scenario = None
         if args.flag_ablation:
             ablation_scenario = AblationScenario(
@@ -257,8 +244,8 @@ def main(argv: list[str]) -> None:
         # Create machine readable output
         output = gv.settings().DEFAULT_configuration_output_analysis
         config_output = ConfigurationOutput(configurator.scenario.directory,
-                                            solver, configurator,
-                                            instance_set_train,
+                                            configurator,
+                                            config_scenario,
                                             instance_set_test,
                                             output)
         config_output.write_output()
@@ -275,6 +262,7 @@ def main(argv: list[str]) -> None:
                 gv.settings().DEFAULT_latex_bib,
                 instance_set_train,
                 gv.settings().get_general_extractor_cutoff_time(),
+                config_scenario,
                 instance_set_test,
                 ablation=ablation_scenario
             )
