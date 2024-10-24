@@ -6,11 +6,19 @@ Sparkle offers several configurators to use for Algorithm Configuration. Althoug
 
 Sequantial Model-Based Optimization for General Algorithm Configuration[[1]](#1), or [SMAC]((https://www.cs.ubc.ca/labs/algorithms/Projects/SMAC)) for short is a Java based algorithm configurator. *Note that this the second version, and not SMAC3 the Python version*. The original documentation of the configurator can be found [here](https://www.cs.ubc.ca/labs/algorithms/Projects/SMAC/v2.10.03/manual.pdf).
 
+```{note}
+SMAC2 is written in Java and therefore requires Java to be installed in your environment. The current tested version in Sparkle is 1.8.0_402
+```
+
 ## IRACE
 
 Iterated Racing for Automatic Algorithm Configuration[[2]](#2), or [IRACE](https://mlopez-ibanez.github.io/irace/) for short is an R based algorithm configurator. The full documentation of the configurator can be found [here](https://cran.r-project.org/web/packages/irace/vignettes/irace-package.pdf).
 
 IRACE offers many parameters that can be set, but also automatically computed in accordance with their paper[[2]](#2) and we recommend not deviating from those formulae as it may result in unexpected behaviour.
+
+```Note
+IRACE is written in R and therefore requires R to be installed in your environment. The current tested version in Sparkle is R 4.3.1
+```
 
 ### Budget
 
