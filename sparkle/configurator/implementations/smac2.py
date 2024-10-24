@@ -397,7 +397,7 @@ class SMAC2Scenario(ConfigurationScenario):
     def from_file(scenario_file: Path) -> SMAC2Scenario:
         """Reads scenario file and initalises SMAC2Scenario."""
         config = {keyvalue[0]: keyvalue[1]
-                  for keyvalue in (line.split(" = ", maxsplit=1)
+                  for keyvalue in (line.strip().split(" = ", maxsplit=1)
                                    for line in scenario_file.open().readlines()
                                    if line.strip() != "")}
 
@@ -410,7 +410,7 @@ class SMAC2Scenario(ConfigurationScenario):
 
         _, solver_path, objective_str = config["algo"].split(" ")
         objective = SparkleObjective(objective_str)
-        solver = Solver(Path(solver_path))
+        solver = Solver(Path(solver_path.strip()))
         # Extract the instance set from the instance file
         instance_file_path = Path(config["instance_file"])
         instance_set_path = Path(instance_file_path.open().readline().strip()).parent

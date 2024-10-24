@@ -129,7 +129,7 @@ class ReportingScenario:
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = Path(file_scenario.get(section, option))
-                    self.set_config_scenario(value)
+                    self.set_configuration_scenario(value)
                     file_scenario.remove_option(section, option)
 
             section = "parallel_portfolio"
@@ -156,10 +156,9 @@ class ReportingScenario:
                           f'{option}" in file {file_path} ignored')
 
         # Print error if unable to read the scenario file
-        else:
-            print(f"WARNING: Failed to read latest scenario from {file_path} The "
-                  "file may have been empty, or is in another format than INI. Default "
-                  "values will be used.")
+        elif not file_path.exists():
+            print(f"WARNING: Failed to read latest scenario from {file_path}. "
+                  "Default values will be used.")
 
     def write_scenario_ini(
             self: ReportingScenario, file_path: Path = DEFAULT_reporting_scenario_path)\

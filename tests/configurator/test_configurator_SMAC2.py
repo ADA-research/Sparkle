@@ -102,7 +102,8 @@ class TestConfiguratorSMAC2(TestCase):
 
     def test_smac2_organise_output(self: TestConfiguratorSMAC2) -> None:
         """Testing SMAC2 ability to retrieve output from raw file."""
-        raw_out = self.test_files / "Configuration/PbO-CCSAT-Generic_PTN_seed_3_smac.txt"
+        raw_out = self.test_files / "Configuration" / "results" /\
+            "PbO-CCSAT-Generic_PTN_seed_3_smac.txt"
         # By not specifiying an output file, the result is returned to us
         expected = (
             "-gamma_hscore2 '351' -init_solution '1' -p_swt '0.20423712003341465'"
@@ -177,12 +178,6 @@ class TestConfigurationScenarioSMAC2(TestCase):
         self.assertTrue((self.scenario.directory / "tmp").is_dir())
         self.assertTrue(self.scenario.result_directory.is_dir())
 
-    def test_configuration_scenario_check_result_directory(
-        self: TestConfigurationScenarioSMAC2,
-    ) -> None:
-        """Test if create_scenario() creates the result directory."""
-        self.scenario.create_scenario()
-
     @patch("pathlib.Path.absolute")
     def test_configuration_scenario_check_scenario_file(
         self: TestConfigurationScenarioSMAC2,
@@ -210,3 +205,14 @@ class TestConfigurationScenarioSMAC2(TestCase):
         # Strip the output of the homedirs (Due to absolute paths)
         output = output.replace(str(Path.home()), "")
         self.assertEqual(output, reference_scenario_file.open().read())
+
+    def test_from_file(self: TestConfigurationScenarioSMAC2) -> None:
+        """Test if ConfigurationScenario can be created from file."""
+        file = Path("tests/test_files/Configuration/test_smac2_scenario.txt")
+        scenario = SMAC2Scenario.from_file(file)
+        self.assertEqual(scenario.solver.name, "PbO-CCSAT-Generic")
+        self.assertEqual(scenario.instance_set.name, "PTN")
+        self.assertEqual(scenario.sparkle_objectives[0].name, "PAR10")
+        self.assertEqual(scenario.number_of_runs, 1)
+        self.assertEqual(scenario.wallclock_time, 600)
+        self.assertEqual(scenario.cutoff_time, 60)
