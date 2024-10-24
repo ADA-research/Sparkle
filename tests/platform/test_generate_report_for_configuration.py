@@ -501,21 +501,26 @@ class TestGenerateConfigurationReport(TestCase):
             self.solver, train_instance.name, validation_data, validation_data,
             report_dir, "QUALITY", float(cutoff), self.test_objective_quality)
         mock_timeouts.assert_called_once_with(
-            self.solver, train_instance, self.configurator, self.validator, 60)
+            self.solver, train_instance, self.configurator, self.validator,
+            self.configuration_scenario, 60)
         mock_ablation_bool.assert_called_once_with(self.ablation_scenario)
         mock_ablation_table.assert_called_once_with(self.ablation_scenario)
 
         assert common_dict == {
-            "performanceMeasure": "ACCURACY",
+            "configuratorName": SMAC2.__name__,
+            "configuratorFullName": SMAC2.full_name,
+            "configuratorVersion": SMAC2.version,
+            "objectiveName": "ACCURACY",
+            "minMaxAdjective": "lowest",
             "runtimeBool": "\\runtimefalse",
             "solver": self.solver.name,
             "instanceSetTrain": train_instance.name,
             "sparkleVersion": ANY,
             "numInstanceInTrainingInstanceSet": 1,
-            "numSmacRuns": 25,
-            "smacObjective": "QUALITY",
-            "smacWholeTimeBudget": 600,
-            "smacEachRunCutoffTime": cutoff,
+            "numConfiguratorRuns": 25,
+            "objectiveType": "QUALITY",
+            "wholeTimeBudget": 600,
+            "eachRunCutoffTime": cutoff,
             "optimisedConfiguration": "\\item",
             "optimisedConfigurationTrainingPerformancePAR": 42.1,
             "defaultConfigurationTrainingPerformancePAR": 42.2,
@@ -579,7 +584,8 @@ class TestGenerateConfigurationReport(TestCase):
             Path("configuration/report"), "QUALITY", float(cutoff),
             self.test_objective_quality, data_type="test")
         mock_timeouts.assert_called_once_with(
-            self.solver, test_set, self.configurator, self.validator, 60)
+            self.solver, test_set, self.configurator, self.validator,
+            self.configuration_scenario, 60)
         mock_ablation_bool.assert_called_once_with(self.ablation_scenario)
         mock_ablation_table.assert_called_once_with(self.ablation_scenario)
         assert test_dict == {
