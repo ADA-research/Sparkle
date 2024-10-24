@@ -91,9 +91,11 @@ class Configurator:
 
 class ConfigurationScenario:
     """Template class to handle a configuration scenarios."""
-    def __init__(self: ConfigurationScenario, solver: Solver,
+    def __init__(self: ConfigurationScenario,
+                 solver: Solver,
                  instance_set: InstanceSet,
-                 sparkle_objectives: list[SparkleObjective] = None)\
+                 sparkle_objectives: list[SparkleObjective],
+                 parent_directory: Path)\
             -> None:
         """Initialize scenario paths and names.
 
@@ -106,6 +108,7 @@ class ConfigurationScenario:
         self.instance_set = instance_set
         self.sparkle_objectives = sparkle_objectives
         self.name = f"{self.solver.name}_{self.instance_set.name}"
+        self.directory = parent_directory / self.name
         self.scenario_file_path: Path = None
         self.validation: Path = None
         self.tmp: Path = None

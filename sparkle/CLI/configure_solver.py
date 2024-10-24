@@ -212,7 +212,7 @@ def main(argv: list[str]) -> None:
     sparkle_objectives =\
         gv.settings().get_general_sparkle_objectives()
     config_scenario = configurator.scenario_class(
-        solver, instance_set_train, sparkle_objectives,
+        solver, instance_set_train, sparkle_objectives, configurator.output_path,
         **configurator_settings)
 
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)

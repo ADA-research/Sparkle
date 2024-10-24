@@ -67,7 +67,7 @@ class IRACE(Configurator):
         Returns:
             A RunRunner Run object.
         """
-        scenario.create_scenario(parent_directory=self.output_path)
+        scenario.create_scenario()
         output_csv = scenario.validation / "configurations.csv"
         output_csv.parent.mkdir(exist_ok=True, parents=True)
 
@@ -275,7 +275,7 @@ class IRACEScenario(ConfigurationScenario):
                                 at each iteration. Default: 0.
         --confidence          Confidence level for the elimination test. Default:
                                 0.95."""
-        super().__init__(solver, instance_set, sparkle_objectives)
+        super().__init__(solver, instance_set, sparkle_objectives, parent_directory)
         self.solver = solver
         self.instance_set = instance_set
         self.name = f"{self.solver.name}_{self.instance_set.name}"
@@ -295,8 +295,8 @@ class IRACEScenario(ConfigurationScenario):
         self.first_test = first_test
         self.mu = mu
         self.nb_iterations = nb_iterations
-        self.directory =\
-            parent_directory / f"{self.solver.name}_{self.instance_set.name}"
+
+        # Pathing
         self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
         self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
         self.tmp = self.directory / "tmp"

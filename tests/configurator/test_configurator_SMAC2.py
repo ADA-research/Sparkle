@@ -30,7 +30,7 @@ class TestConfiguratorSMAC2(TestCase):
         self.train_set = Instance_Set(self.test_files / "Instances/Train-Instance-Set")
         self.solver = Solver(self.test_files / "Solvers/Test-Solver")
         self.conf_scenario = SMAC2Scenario(
-            self.solver, self.train_set,
+            self.solver, self.train_set, self.base_dir,
             number_of_runs=2,
             solver_calls=25,
             wallclock_time=80,
@@ -145,6 +145,7 @@ class TestConfigurationScenarioSMAC2(TestCase):
         self.scenario = SMAC2Scenario(
             solver=self.solver,
             instance_set=self.instance_set,
+            parent_directory=self.parent_directory,
             number_of_runs=self.run_number,
             wallclock_time=self.wallclock_time,
             cutoff_time=self.cutoff_time,
@@ -164,32 +165,24 @@ class TestConfigurationScenarioSMAC2(TestCase):
         self.assertEqual(self.scenario.name,
                          f"{self.solver.name}_{self.instance_set.name}")
 
-    def test_configuration_scenario_check_scenario_directory(
+    def test_smac2_scenario_check_scenario_directory(
         self: TestConfigurationScenarioSMAC2
     ) -> None:
-        """Test if create_scenario() correctly creates the scenario directory."""
-        self.scenario.create_scenario(self.parent_directory)
+        """Test if create_scenario() correctly creates the scenario directories."""
+        self.scenario.create_scenario()
 
         self.assertTrue(self.scenario.directory.is_dir())
         self.assertEqual((self.scenario.directory
                           / "outdir_train_configuration").is_dir(),
                          True)
         self.assertTrue((self.scenario.directory / "tmp").is_dir())
+        self.assertTrue(self.scenario.result_directory.is_dir())
 
     def test_configuration_scenario_check_result_directory(
         self: TestConfigurationScenarioSMAC2,
     ) -> None:
         """Test if create_scenario() creates the result directory."""
-        self.scenario.create_scenario(self.parent_directory)
-
-        self.assertTrue(self.scenario.result_directory.is_dir())
-
-    def test_configuration_scenario_check_instance_directory(
-        self: TestConfigurationScenarioSMAC2
-    ) -> None:
-        """Test if create_scenario() creates the instance directory."""
-        self.scenario.create_scenario(self.parent_directory)
-        self.assertTrue(self.scenario.instance_set.directory.is_dir())
+        self.scenario.create_scenario()
 
     @patch("pathlib.Path.absolute")
     def test_configuration_scenario_check_scenario_file(
@@ -206,7 +199,7 @@ class TestConfigurationScenarioSMAC2(TestCase):
                                      inst_list_path,
                                      Path(),
                                      Path()]
-        self.scenario.create_scenario(self.parent_directory)
+        self.scenario.create_scenario()
 
         reference_scenario_file = Path("tests", "test_files", "reference_files",
                                        "scenario_file.txt")

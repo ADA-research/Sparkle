@@ -36,7 +36,7 @@ class TestGenerateConfigurationReport(TestCase):
             self.solver,
             Path(train_instance),
             [self.test_objective_runtime],
-            self.configurator_path)
+            self.configurator.output_path)
         self.ablation_scenario = AblationScenario(
             self.solver, Path(train_instance), Path(test_instance), Path(""))
         self.validator = Validator()

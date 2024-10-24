@@ -85,7 +85,7 @@ class SMAC2(Configurator):
                 "SMAC2 requires Java 1.8.0_402, but Java is not installed. "
                 "Please ensure Java is installed and try again."
             )
-        scenario.create_scenario(parent_directory=self.output_path)
+        scenario.create_scenario()
         output_csv = scenario.validation / "configurations.csv"
         output_csv.parent.mkdir(exist_ok=True, parents=True)
         output = [f"{(scenario.result_directory).absolute()}/"
@@ -256,7 +256,7 @@ class SMAC2Scenario(ConfigurationScenario):
             feature_data_df: If features are used, this contains the feature data.
                 Defaults to None.
         """
-        super().__init__(solver, instance_set, sparkle_objectives)
+        super().__init__(solver, instance_set, sparkle_objectives, parent_directory)
         self.solver = solver
         self.instance_set = instance_set
         self.name = f"{self.solver.name}_{self.instance_set.name}"
@@ -278,7 +278,6 @@ class SMAC2Scenario(ConfigurationScenario):
         self.feature_data = feature_data_df
 
         # Scenario Paths
-        self.directory = parent_directory / self.name
         self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
         self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
         self.tmp = self.directory / "tmp"
