@@ -59,25 +59,29 @@ class Solver(SparkleCallable):
             else:
                 self.deterministic = False
 
-    def _get_pcs_file(self: Solver) -> Path | bool:
+    def _get_pcs_file(self: Solver, port_type: str = None) -> Path | bool:
         """Get path of the parameter file.
 
         Returns:
             Path to the parameter file or False if the parameter file does not exist.
         """
-        pcs_files = [p for p in self.directory.iterdir() if p.suffix == ".pcs"]
-        if len(pcs_files) != 1:
-            # We only consider one PCS file per solver
+        pcs_files = [p for p in self.directory.iterdir() if p.suffix == ".pcs"
+                     and (port_type is None or port_type in p.name)]
+
+        if len(pcs_files) == 0:
             return False
+        if len(pcs_files) != 1:
+            # Generated PCS files present, this is a quick fix to take the original
+            pcs_files = sorted(pcs_files, key=lambda p: len(p.name))
         return pcs_files[0]
 
-    def get_pcs_file(self: Solver) -> Path:
+    def get_pcs_file(self: Solver, port_type: str = None) -> Path:
         """Get path of the parameter file.
 
         Returns:
             Path to the parameter file. None if it can not be resolved.
         """
-        if not (file_path := self._get_pcs_file()):
+        if not (file_path := self._get_pcs_file(port_type)):
             return None
         return file_path
 
@@ -99,6 +103,26 @@ class Solver(SparkleCallable):
         parser = pcsparser.PCSParser()
         parser.load(str(pcs_file), convention="smac")
         return [p for p in parser.pcs.params if p["type"] == "parameter"]
+
+    def port_pcs(self: Solver, port_type: pcsparser.PCSConvention) -> None:
+        """Port the parameter file to the given port type."""
+        pcs_file = self.get_pcs_file()
+        parser = pcsparser.PCSParser()
+        parser.load(str(pcs_file), convention="smac")
+        target_pcs_file = pcs_file.parent / f"{pcs_file.stem}_{port_type}.pcs"
+        if target_pcs_file.exists():  # Already exists, possibly user defined
+            return
+        parser.export(convention=port_type,
+                      destination=target_pcs_file)
+
+    def get_forbidden(self: Solver, port_type: pcsparser.PCSConvention) -> Path:
+        """Get the path to the file containing forbidden parameter combinations."""
+        if port_type == "IRACE":
+            forbidden = [p for p in self.directory.iterdir()
+                         if p.name.endswith("forbidden.txt")]
+            if len(forbidden) > 0:
+                return forbidden[0]
+        return None
 
     def build_cmd(self: Solver,
                   instance: str | list[str],
@@ -188,7 +212,6 @@ class Solver(SparkleCallable):
                                         configuration=configuration,
                                         log_dir=log_dir)
             cmds.append(" ".join(solver_cmd))
-        print(cmds)
         run = rrr.add_to_queue(runner=run_on,
                                cmd=cmds,
                                name=commandname,

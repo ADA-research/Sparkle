@@ -26,7 +26,7 @@ from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
-from sparkle.instance import instance_set, InstanceSet
+from sparkle.instance import Instance_Set, InstanceSet
 from sparkle.types import SolverStatus, resolve_objective, UseTime
 
 
@@ -291,7 +291,7 @@ def main(argv: list[str]) -> None:
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings().DEFAULT_instance_dir,
-        instance_set)
+        Instance_Set)
 
     print(f"Running on {data_set.size} instance(s)...")
 

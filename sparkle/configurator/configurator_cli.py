@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Configurator CLI wrapper class to standardise I/O of Configurators."""
 
 import sys

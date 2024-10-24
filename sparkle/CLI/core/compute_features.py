@@ -7,7 +7,7 @@ from filelock import FileLock
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import FeatureDataFrame
-from sparkle.instance import instance_set
+from sparkle.instance import Instance_Set
 from sparkle.solver import Extractor
 
 
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     instance_name = instance_path
     if not instance_path.exists():
         # If its an instance name (Multi-file instance), retrieve path list
-        data_set = instance_set(instance_path.parent)
+        data_set = Instance_Set(instance_path.parent)
         instance_path = data_set.get_path_by_name(Path(instance_name).name)
 
     extractor_path = Path(args.extractor)

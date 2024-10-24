@@ -12,7 +12,7 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
-from sparkle.instance import instance_set
+from sparkle.instance import Instance_Set
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
@@ -76,11 +76,11 @@ def main(argv: list[str]) -> None:
             args.target_cutoff_time, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "wallclock_time"):
-        gv.settings().set_config_wallclock_time(
+        gv.settings().set_smac2_wallclock_time(
             args.wallclock_time, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "number_of_runs"):
-        gv.settings().set_config_number_of_runs(
+        gv.settings().set_configurator_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "racing"):
@@ -103,18 +103,21 @@ def main(argv: list[str]) -> None:
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
+        gv.settings().DEFAULT_instance_dir, Instance_Set)
     instance_set_test = resolve_object_name(
         args.instance_set_test,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
+        gv.settings().DEFAULT_instance_dir, Instance_Set)
 
+    # TODO: Detect the scenario from solver/instance/configurator combination
+    # Now we just take the latest scenario
     configurator = gv.settings().get_general_sparkle_configurator()
-    configurator.set_scenario_dirs(solver, instance_set_train)
+    config_scenario = gv.latest_scenario().get_configuration_scenario(
+        configurator.scenario_class)
     if instance_set_test is None:
         instance_set_test = instance_set_train
 
-    if not configurator.scenario.result_directory.is_dir():
+    if not config_scenario.result_directory.is_dir():
         print("Error: No configuration results found for the given solver and training"
               " instance set. Ablation needs to have a target configuration.")
         print("Please run configuration first")

@@ -43,11 +43,11 @@ class TestSolver(TestCase):
 
     def test_pcs_file_multiple(self: TestSolver) -> None:
         """Test for SystemExit if get_pcs_file() is called, but multiple files exist."""
-        (self.solver_path / "paramfile1.pcs").open("a").close()
-        (self.solver_path / "paramfile2.pcs").open("a").close()
+        (self.solver_path / "paramfile.pcs").open("a").close()
+        (self.solver_path / "paramfile_PORTED.pcs").open("a").close()
 
         solver = Solver(self.solver_path)
-        assert solver.get_pcs_file() is None
+        assert solver.get_pcs_file() == self.solver_path / "paramfile.pcs"
 
     def test_is_deterministic_false(self: TestSolver) -> None:
         """Test if is_deterministic() correctly returns False."""

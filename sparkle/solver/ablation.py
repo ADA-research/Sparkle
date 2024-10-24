@@ -77,8 +77,10 @@ class AblationScenario:
         ablation_scenario_dir = self.scenario_dir
         objective = gv.settings().get_general_sparkle_objectives()[0]
         configurator = gv.settings().get_general_sparkle_configurator()
+        config_scenario = gv.latest_scenario().get_configuration_scenario(
+            configurator.scenario_class)
         _, opt_config_str = configurator.get_optimal_configuration(
-            self.solver, self.train_set, objective=objective)
+            config_scenario)
 
         # We need to check which params are missing and supplement with default values
         pcs = self.solver.get_pcs()
@@ -99,7 +101,7 @@ class AblationScenario:
         smac_run_obj = SMAC2.get_smac_run_obj(objective)
         objective_str = "MEAN10" if smac_run_obj == "RUNTIME" else "MEAN"
         run_cutoff_time = gv.settings().get_general_target_cutoff_time()
-        run_cutoff_length = gv.settings().get_configurator_target_cutoff_length()
+        run_cutoff_length = gv.settings().get_smac2_target_cutoff_length()
         concurrent_clis = gv.settings().get_slurm_max_parallel_runs_per_node()
         ablation_racing = gv.settings().get_ablation_racing_flag()
         configurator = gv.settings().get_general_sparkle_configurator()
@@ -107,7 +109,7 @@ class AblationScenario:
 
         # Create config file
         config_file = Path(f"{ablation_scenario_dir}/ablation_config.txt")
-        config = (f'algo = "{configurator.configurator_target.absolute()} '
+        config = (f'algo = "{SMAC2.configurator_target.absolute()} '
                   f'{self.solver.directory.absolute()} {objective}"\n'
                   f"execdir = {self.tmp_dir.absolute()}\n"
                   "experimentDir = ./\n"

@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import ast
 import re
+import warnings
 from pathlib import Path
 
 from sparkle.types import SolverStatus
@@ -180,8 +181,9 @@ class RunSolver:
             output_dict = ast.literal_eval(solver_regex_filter)
         except Exception:
             config_str = " ".join([str(c) for c in runsolver_configuration])
-            print("WARNING: Solver output decoding failed from RunSolver configuration: "
-                  f"'{config_str}'. Setting status to 'UNKNOWN'.")
+            warnings.warn("Solver output decoding failed from RunSolver configuration: "
+                          f"'{config_str}'. Setting status to 'UNKNOWN'.",
+                          category=RuntimeWarning)
             output_dict = {"status": SolverStatus.UNKNOWN}
 
         output_dict["cutoff_time"] = cutoff_time
