@@ -14,7 +14,6 @@ from sparkle.solver.validator import Validator
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
-from sparkle.configurator.implementations import SMAC2
 from sparkle.types import SparkleObjective
 from sparkle import about
 
@@ -181,7 +180,7 @@ def get_figure_configured_vs_default_on_instance_set(solver: Solver,
                                                      res_default: list[list[str]],
                                                      res_conf: list[list[str]],
                                                      target_directory: Path,
-                                                     smac_objective: str,
+                                                     objective_type: str,
                                                      run_cutoff_time: float,
                                                      objective: SparkleObjective,
                                                      data_type: str = "train") -> str:
@@ -205,7 +204,7 @@ def get_figure_configured_vs_default_on_instance_set(solver: Solver,
     return get_figure_configure_vs_default(
         res_conf, res_default, target_directory,
         data_plot_configured_vs_default_on_instance_set_filename,
-        smac_objective,
+        objective_type,
         run_cutoff_time,
         objective)
 
@@ -406,25 +405,35 @@ def get_dict_variable_to_value_common(solver: Solver,
     opt_config_list = [f"{key}: {value}" for key, value in
                        Solver.config_str_to_dict(opt_config).items()]
 
-    latex_dict = {"bibliographypath": bibliography_path.absolute()}
-    latex_dict["performanceMeasure"] = objective.name
-    smac_run_obj = SMAC2.get_smac_run_obj(objective)
+    latex_dict = {"bibliographypath": bibliography_path.absolute(),
+                  "objectiveName": objective.name,
+                  "configuratorName": configurator.name,
+                  "configuratorVersion": configurator.version,
+                  "configuratorFullName": configurator.full_name,
+                  }
 
-    if smac_run_obj == "RUNTIME":
+    if objective.time:
         latex_dict["runtimeBool"] = "\\runtimetrue"
-    elif smac_run_obj == "QUALITY":
+        latex_dict["objectiveType"] = "RUNTIME"
+    else:
         latex_dict["runtimeBool"] = "\\runtimefalse"
+        latex_dict["objectiveType"] = "QUALITY"
+    if objective.minimise:
+        latex_dict["minMaxAdjective"] = "lowest"
+    else:
+        latex_dict["minMaxAdjective"] = "highest"
 
     latex_dict["solver"] = solver.name
     latex_dict["instanceSetTrain"] = config_scenario.instance_set.name
     latex_dict["sparkleVersion"] = about.version
     latex_dict["numInstanceInTrainingInstanceSet"] = len(instance_names)
 
-    run_cutoff_time = config_scenario.cutoff_time
-    latex_dict["numSmacRuns"] = config_scenario.number_of_runs
-    latex_dict["smacObjective"] = smac_run_obj
-    latex_dict["smacWholeTimeBudget"] = config_scenario.wallclock_time
-    latex_dict["smacEachRunCutoffTime"] = run_cutoff_time
+    latex_dict["numConfiguratorRuns"] = config_scenario.number_of_runs
+    if hasattr(config_scenario, "wallclock_time"):
+        latex_dict["wholeTimeBudget"] = config_scenario.wallclock_time
+    else:
+        latex_dict["wholeTimeBudget"] = config_scenario.max_time
+    latex_dict["eachRunCutoffTime"] = config_scenario.cutoff_time
     latex_dict["optimisedConfiguration"] = stex.list_to_latex(opt_config_list)
     latex_dict["optimisedConfigurationTrainingPerformancePAR"] =\
         get_average_performance(res_conf, objective)
@@ -433,13 +442,14 @@ def get_dict_variable_to_value_common(solver: Solver,
 
     str_value = get_figure_configured_vs_default_on_instance_set(
         solver, config_scenario.instance_set.name, res_default, res_conf,
-        target_directory, smac_run_obj, float(run_cutoff_time), objective)
+        target_directory, latex_dict["objectiveType"],
+        float(config_scenario.cutoff_time), objective)
     latex_dict["figure-configured-vs-default-train"] = str_value
 
     # Retrieve timeout numbers for the training instances
     configured_timeouts_train, default_timeouts_train, overlapping_timeouts_train =\
         get_timeouts_instanceset(solver, config_scenario.instance_set, configurator,
-                                 validator, config_scenario, run_cutoff_time)
+                                 validator, config_scenario, config_scenario.cutoff_time)
 
     latex_dict["timeoutsTrainDefault"] = default_timeouts_train
     latex_dict["timeoutsTrainConfigured"] = configured_timeouts_train
@@ -486,11 +496,11 @@ def get_dict_variable_to_value_test(target_dir: Path,
         get_average_performance(res_conf, objective)
     test_dict["defaultConfigurationTestingPerformancePAR"] =\
         get_average_performance(res_default, objective)
-    smac_run_obj = SMAC2.get_smac_run_obj(
-        configuration_scenario.sparkle_objective)
+
+    objective_type = "RUNTIME" if objective.time else "QUALITY"
     test_dict["figure-configured-vs-default-test"] =\
         get_figure_configured_vs_default_on_instance_set(
-        solver, test_set.name, res_default, res_conf, target_dir, smac_run_obj,
+        solver, test_set.name, res_default, res_conf, target_dir, objective_type,
         float(run_cutoff_time),
         configuration_scenario.sparkle_objective, data_type="test")
 

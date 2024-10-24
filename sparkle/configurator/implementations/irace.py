@@ -22,6 +22,9 @@ class IRACE(Configurator):
     configurator_ablation_executable = configurator_path / "irace" / "bin" / "ablation"
     configurator_target = configurator_path / "irace_target_algorithm.py"
 
+    version = "3.5"
+    full_name = "Iterated Racing for Automatic Algorithm Configuration"
+
     def __init__(self: Configurator,
                  output_path: Path,
                  base_dir: Path,
@@ -103,13 +106,6 @@ class IRACE(Configurator):
                 run_on=run_on)
             runs.append(validate_run)
         return runs
-
-    def get_optimal_configuration(self: IRACE,
-                                  solver: Solver,
-                                  instance_set: InstanceSet,
-                                  objective: SparkleObjective) -> tuple[float, str]:
-        """Returns the optimal configuration string for a solver on an instance set."""
-        raise NotImplementedError
 
     @staticmethod
     def organise_output(output_source: Path, output_target: Path) -> None | str:
@@ -411,6 +407,8 @@ class IRACEScenario(ConfigurationScenario):
         scenario_dict["sparkle_objectives"] = [resolve_objective(objective)]
         scenario_dict["cutoff_time"] = int(cutoff)
         scenario_dict["parent_directory"] = scenario_file.parent.parent
+        scenario_dict["number_of_runs"] =\
+            len([p for p in (scenario_file.parent / "results").iterdir()])
         scenario_dict.pop("targetRunner")
         scenario_dict.pop("execDir")
         scenario_dict.pop("targetRunnerLauncher")
