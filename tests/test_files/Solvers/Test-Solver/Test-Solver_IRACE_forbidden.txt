@@ -1,0 +1,1 @@
+(sel_clause_div = 2) & (perform_clause_weight = 0)

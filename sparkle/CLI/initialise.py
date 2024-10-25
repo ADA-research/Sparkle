@@ -5,6 +5,7 @@ import argparse
 import shutil
 import os
 import sys
+import warnings
 from pathlib import Path
 
 from sparkle.platform import CommandName
@@ -13,6 +14,7 @@ from sparkle.CLI.help import snapshot_help as snh
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.CLI.help import global_variables as gv
+from sparkle.configurator.implementations.irace import IRACE
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -42,6 +44,45 @@ def detect_sparkle_platform_exists(check: callable = all) -> Path:
             return cwd
         cwd = cwd.parent
     return None
+
+
+def initialise_irace() -> None:
+    """Initialise IRACE."""
+    if shutil.which("R") is None:
+        warnings.warn("R is not installed, which is required for the IRACE"
+                      "configurator. Make sure R is installed and try again.")
+        return
+    print("Initialising IRACE ...")
+    r6_package_check = subprocess.run(["Rscript", "-e",
+                                      'library("R6")'], capture_output=True)
+    if r6_package_check.returncode != 0:  # R6 is not installed
+        print("Installing R6 package (IRACE dependency) ...")
+        r6_install = subprocess.run([
+            "Rscript", "-e",
+            f'install.packages("{IRACE.r6_dependency_package.absolute()}",'
+            f'lib="{IRACE.configurator_path.absolute()}")'], capture_output=True)
+        if r6_install.returncode != 0:
+            print("An error occured during the installation of R6:\n",
+                  r6_install.stdout.decode(), "\n",
+                  r6_install.stderr.decode(), "\n"
+                  "IRACE installation failed!")
+            return
+    else:
+        print(f"[{r6_package_check.returncode}] "
+              "R6 package (IRACE dependency) was already installed: "
+              f"{r6_package_check.stdout.decode()}\n"
+              f"{r6_package_check.stderr.decode()}")
+    # Install IRACE from tarball
+    irace_install = subprocess.run(
+        ["Rscript", "-e",
+         f'install.packages("{IRACE.configurator_package.absolute()}",'
+         f'lib="{IRACE.configurator_path.absolute()}")'], capture_output=True)
+    if irace_install.returncode != 0 or not IRACE.configurator_executable.exists():
+        print("An error occured during the installation of IRACE:\n",
+              irace_install.stdout.decode(), "\n",
+              irace_install.stderr.decode())
+    else:
+        print("IRACE installed!")
 
 
 def check_for_initialise(requirements: list[CommandName] = None)\
@@ -95,6 +136,9 @@ def initialise_sparkle(download_examples: bool = False) -> None:
         gv.__settings = Settings(Settings.DEFAULT_example_settings_path)
         gv.settings().write_settings_ini(Path(Settings.DEFAULT_settings_path))
 
+    # Initialise latest scenario file
+    gv.ReportingScenario.DEFAULT_reporting_scenario_path.open("w+")
+
     # Initialise the FeatureDataFrame
     FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
 
@@ -110,25 +154,30 @@ def initialise_sparkle(download_examples: bool = False) -> None:
     if not gv.settings().DEFAULT_runsolver_exec.exists():
         print("Runsolver does not exist, trying to compile...")
         if not (gv.settings().DEFAULT_runsolver_dir / "Makefile").exists():
-            print("WARNING: Runsolver executable doesn't exist and cannot find makefile."
-                  " Please verify the contents of the directory: "
-                  f"{gv.settings().DEFAULT_runsolver_dir}")
+            warnings.warn("Runsolver executable doesn't exist and cannot find makefile."
+                          " Please verify the contents of the directory: "
+                          f"{gv.settings().DEFAULT_runsolver_dir}")
         else:
             compile_runsolver =\
                 subprocess.run(["make"],
                                cwd=gv.settings().DEFAULT_runsolver_dir,
                                capture_output=True)
             if compile_runsolver.returncode != 0:
-                print("WARNING: Compilation of Runsolver failed with the following msg:"
-                      f"[{compile_runsolver.returncode}] "
-                      f"{compile_runsolver.stderr.decode()}")
+                warnings.warn("Compilation of Runsolver failed with the following msg:"
+                              f"[{compile_runsolver.returncode}] "
+                              f"{compile_runsolver.stderr.decode()}")
             else:
                 print("Runsolver compiled successfully!")
-    # Check that java is available
+    # Check that java is available for SMAC2
     if shutil.which("java") is None:
         # NOTE: An automatic resolution of Java at this point would be good
         # However, loading modules from Python has thusfar not been successfull.
-        print("Could not find Java as an executable!")
+        warnings.warn("Could not find Java as an executable! "
+                      "Java 1.8.0_402 is required to use SMAC2 as a configurator.")
+
+    # Check if IRACE is installed
+    if not IRACE.configurator_executable.exists():
+        initialise_irace()
 
     if download_examples:
         # Download Sparkle examples from Github

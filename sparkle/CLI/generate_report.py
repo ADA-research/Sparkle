@@ -18,7 +18,7 @@ from sparkle.platform import \
     generate_report_for_parallel_portfolio as sgrfpph
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
-from sparkle.instance import instance_set
+from sparkle.instance import Instance_Set
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.platform.output.configuration_output import ConfigurationOutput
 from sparkle.platform.output.selection_output import SelectionOutput
@@ -93,11 +93,11 @@ def main(argv: list[str]) -> None:
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
+        gv.settings().DEFAULT_instance_dir, Instance_Set)
     instance_set_test = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
+        gv.settings().DEFAULT_instance_dir, Instance_Set)
 
     Settings.check_settings_changes(gv.settings(), prev_settings)
     # If no arguments are set get the latest scenario
@@ -145,8 +145,8 @@ def main(argv: list[str]) -> None:
         instance_dirs = set(Path(instance).parent for instance in train_data.instances)
         instance_sets = []
         for dir in instance_dirs:
-            instance_sets.append(instance_set(dir))
-        test_set = None if test_case_dir is None else instance_set(Path(test_case_dir))
+            instance_sets.append(Instance_Set(dir))
+        test_set = None if test_case_dir is None else Instance_Set(Path(test_case_dir))
         cutoff_time = gv.settings().get_general_target_cutoff_time()
         output = gv.settings().DEFAULT_selection_output_analysis
         selection_output = SelectionOutput(
@@ -212,8 +212,6 @@ def main(argv: list[str]) -> None:
             print(f"Usage: {sys.argv[0]} --solver <solver> [--instance-set-train "
                   "<instance-set-train>] [--instance-set-test <instance-set-test>]")
             sys.exit(-1)
-        gv.settings().get_general_sparkle_configurator()\
-            .set_scenario_dirs(solver, instance_set_train)
         # Generate a report depending on which instance sets are provided
         if flag_instance_set_train or flag_instance_set_test:
             # Check if there are result to generate a report from
@@ -235,19 +233,9 @@ def main(argv: list[str]) -> None:
             sys.exit(-1)
         # Extract config scenario data for report, but this should be read from the
         # scenario file instead as we can't know wether features were used or not now
-        number_of_runs = gv.settings().get_config_number_of_runs()
-        solver_calls = gv.settings().get_config_solver_calls()
-        cpu_time = gv.settings().get_config_cpu_time()
-        wallclock_time = gv.settings().get_config_wallclock_time()
-        cutoff_time = gv.settings().get_general_target_cutoff_time()
-        cutoff_length = gv.settings().get_configurator_target_cutoff_length()
-        sparkle_objectives =\
-            gv.settings().get_general_sparkle_objectives()
         configurator = gv.settings().get_general_sparkle_configurator()
-        configurator.scenario = configurator.scenario_class(
-            solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
-            wallclock_time, cutoff_time, cutoff_length, sparkle_objectives)
-        configurator.scenario._set_paths(configurator.output_path)
+        config_scenario = gv.latest_scenario().get_configuration_scenario(
+            configurator.scenario_class)
         ablation_scenario = None
         if args.flag_ablation:
             ablation_scenario = AblationScenario(
@@ -256,9 +244,9 @@ def main(argv: list[str]) -> None:
 
         # Create machine readable output
         output = gv.settings().DEFAULT_configuration_output_analysis
-        config_output = ConfigurationOutput(configurator.scenario.directory,
-                                            solver, configurator,
-                                            instance_set_train,
+        config_output = ConfigurationOutput(config_scenario.directory,
+                                            configurator,
+                                            config_scenario,
                                             instance_set_test,
                                             output)
         config_output.write_output()
@@ -273,8 +261,8 @@ def main(argv: list[str]) -> None:
                 gv.settings().DEFAULT_configuration_output_analysis,
                 gv.settings().DEFAULT_latex_source,
                 gv.settings().DEFAULT_latex_bib,
-                instance_set_train,
                 gv.settings().get_general_extractor_cutoff_time(),
+                config_scenario,
                 instance_set_test,
                 ablation=ablation_scenario
             )

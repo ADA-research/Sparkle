@@ -3,6 +3,9 @@ import pytest
 from pathlib import Path
 
 from sparkle.CLI import initialise
+from sparkle.CLI.help import global_variables as gv
+
+from sparkle.configurator.implementations import IRACE
 
 
 @pytest.mark.integration
@@ -17,4 +20,9 @@ def test_initialise_command(tmp_path: Path,
         # Check the exit status
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
+
+    # Check RunSolver is compiled
+    assert gv.settings().DEFAULT_runsolver_exec.exists()
+    # Check IRACE is compiled
+    assert IRACE.configurator_executable.exists()
     # TODO: Check with/without specific error messages

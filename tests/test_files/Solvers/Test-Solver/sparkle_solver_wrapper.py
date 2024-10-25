@@ -1,67 +1,55 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+"""Sparkle solver wrapper for testing purposes."""
 import sys
-import ast
 import subprocess
 from pathlib import Path
 from sparkle.types import SolverStatus
-from sparkle.tools.general import get_time_pid_random_string
+from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args, \
+    get_solver_call_params
 
 
-# Convert the argument of the target_algorithm script to dictionary
-args = ast.literal_eval(sys.argv[1])
+# Parse the arguments of the solver wrapper
+args_dict = parse_solver_wrapper_args(sys.argv[1:])
 
-# Extract and delete data that needs specific formatting
-instance = args["instance"]
-cutoff_time = int(args["cutoff_time"]) + 1
-seed = args["seed"]
+# Extract certain args from the above dict for use further below
+solver_dir = args_dict["solver_dir"]
+instance = args_dict["instance"]
+seed = args_dict["seed"]
 
-del args["instance"]
-del args["cutoff_time"]
-del args["seed"]
+# Construct the base solver call
+solver_name = "PbO-CCSAT"
+solver_exec = f"{solver_dir / solver_name}" if solver_dir != Path(".") else "./" + \
+    solver_name
+solver_cmd = [solver_exec,
+              "-inst", str(instance),
+              "-seed", str(seed)]
 
-runsolver_binary = "./runsolver"
-solver_binary = "./PbO-CCSAT"
+# Get further params for the solver call
+params = get_solver_call_params(args_dict)
 
-tmp_directory = Path("tmp/")
-tmp_directory.mkdir(exist_ok=True)
+# Execute the solver call
+try:
+    solver_call = subprocess.run(solver_cmd + params,
+                                 capture_output=True)
+except Exception as ex:
+    print(f"Solver call failed with exception:\n{ex}")
 
-instance_name = Path(instance).name
-solver_name = Path(solver_binary).name
-runsolver_watch_data_path = tmp_directory / (solver_name + "_" + instance_name + "_"
-                                             + get_time_pid_random_string() + ".log")
-
-runsolver_call = [runsolver_binary,
-                  "-w", str(runsolver_watch_data_path),
-                  "--cpu-limit", str(cutoff_time),
-                  solver_binary,
-                  "-inst", instance,
-                  "-seed", str(seed)]
-
-params = []
-for key in args:
-    if args[key] is not None:
-        params.extend(["-" + str(key), str(args[key])])
-
-solver_call = subprocess.run(runsolver_call + params,
-                             capture_output=True)
-
-output_list = solver_call.stdout.decode().splitlines()
-
-Path(runsolver_watch_data_path).unlink(missing_ok=True)
+# Convert Solver output to dictionary for configurator target algorithm script
+output_str = solver_call.stdout.decode()
 
 status = SolverStatus.CRASHED
-for line in output_list:
+for line in output_str.splitlines():
     line = line.strip()
-    if (line == r's SATISFIABLE') or (line == r's UNSATISFIABLE'):
+    if (line == r"s SATISFIABLE") or (line == r"s UNSATISFIABLE"):
         status = SolverStatus.SUCCESS
         break
-    elif line == r's UNKNOWN':
+    elif line == r"s UNKNOWN":
         status = SolverStatus.TIMEOUT
         break
 
 outdir = {"status": status.value,
-          "solver_call": runsolver_call + params,
-          "raw_output": output_list}
+          "quality": 0,
+          "solver_call": solver_cmd + params}
 
 print(outdir)

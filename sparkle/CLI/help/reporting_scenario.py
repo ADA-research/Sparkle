@@ -6,8 +6,10 @@ import configparser
 from enum import Enum
 from pathlib import Path
 from pathlib import PurePath
+
+from sparkle.configurator.configurator import ConfigurationScenario
 from sparkle.solver import Solver
-from sparkle.instance import instance_set, InstanceSet
+from sparkle.instance import Instance_Set, InstanceSet
 
 
 class Scenario(str, Enum):
@@ -73,7 +75,7 @@ class ReportingScenario:
 
         # Read file
         file_scenario = configparser.ConfigParser()
-        file_scenario.read(str(file_path))
+        file_scenario.read(file_path)
 
         # Set internal scenario based on data read from FILE if they were read
         # successfully
@@ -123,6 +125,13 @@ class ReportingScenario:
                     self.set_config_instance_set_test(value)
                     file_scenario.remove_option(section, option)
 
+            option_names = ("scenario_file_path", )
+            for option in option_names:
+                if file_scenario.has_option(section, option):
+                    value = Path(file_scenario.get(section, option))
+                    self.set_configuration_scenario(value)
+                    file_scenario.remove_option(section, option)
+
             section = "parallel_portfolio"
             option_names = ("portfolio_path",)  # Comma to make it a tuple
             for option in option_names:
@@ -131,7 +140,6 @@ class ReportingScenario:
                     self.set_parallel_portfolio_path(value)
                     file_scenario.remove_option(section, option)
 
-            section = "parallel_portfolio"
             option_names = ("instance_path",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
@@ -148,10 +156,9 @@ class ReportingScenario:
                           f'{option}" in file {file_path} ignored')
 
         # Print error if unable to read the scenario file
-        else:
-            print(f"WARNING: Failed to read latest scenario from {file_path} The "
-                  "file may have been empty, or is in another format than INI. Default "
-                  "values will be used.")
+        elif not file_path.exists():
+            print(f"WARNING: Failed to read latest scenario from {file_path}. "
+                  "Default values will be used.")
 
     def write_scenario_ini(
             self: ReportingScenario, file_path: Path = DEFAULT_reporting_scenario_path)\
@@ -286,7 +293,7 @@ class ReportingScenario:
         """
         if self.__scenario["parallel_portfolio"]["instance_path"] is None:
             return None
-        return instance_set(Path(self.__scenario["parallel_portfolio"]["instance_path"]))
+        return Instance_Set(Path(self.__scenario["parallel_portfolio"]["instance_path"]))
 
     # Configuration settings ###
 
@@ -320,7 +327,25 @@ class ReportingScenario:
             Path(self.__scenario["configuration"]["instance_set_train"]))
         if path is None:
             return None
-        return instance_set(path)
+        return Instance_Set(path)
+
+    def set_configuration_scenario(self: ReportingScenario,
+                                   value: Scenario | Path) -> None:
+        """Set the path to the scenario that was used for configuration."""
+        section = "configuration"
+        name = "scenario_file_path"
+        if isinstance(value, ConfigurationScenario):
+            value = value.scenario_file_path
+        self.path_setter(section, name, value)
+
+    def get_configuration_scenario(self: ReportingScenario,
+                                   scenario_class: ConfigurationScenario) -> Scenario:
+        """Return the path to the scenario that was used for configuration."""
+        path = self.none_if_empty_path(
+            Path(self.__scenario["configuration"]["scenario_file_path"]))
+        if path is None:
+            return None
+        return scenario_class.from_file(path)
 
     def set_config_instance_set_test(
             self: ReportingScenario, value: Path = DEFAULT_config_instance_set_test)\
@@ -336,4 +361,4 @@ class ReportingScenario:
             Path(self.__scenario["configuration"]["instance_set_test"]))
         if path is None:
             return None
-        return instance_set(path)
+        return Instance_Set(path)

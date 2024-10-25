@@ -22,7 +22,7 @@ from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.solver import Solver
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.instance import instance_set, InstanceSet
+from sparkle.instance import Instance_Set, InstanceSet
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -79,16 +79,16 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
         gv.settings().set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
     if args.wallclock_time is not None:
-        gv.settings().set_config_wallclock_time(
+        gv.settings().set_smac2_wallclock_time(
             args.wallclock_time, SettingState.CMD_LINE)
     if args.cpu_time is not None:
-        gv.settings().set_config_cpu_time(
+        gv.settings().set_smac2_cpu_time(
             args.cpu_time, SettingState.CMD_LINE)
     if args.solver_calls is not None:
-        gv.settings().set_config_solver_calls(
+        gv.settings().set_configurator_solver_calls(
             args.solver_calls, SettingState.CMD_LINE)
     if args.number_of_runs is not None:
-        gv.settings().set_config_number_of_runs(
+        gv.settings().set_configurator_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE)
     if args.run_on is not None:
         gv.settings().set_run_on(
@@ -160,13 +160,13 @@ def main(argv: list[str]) -> None:
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
+        gv.settings().DEFAULT_instance_dir, Instance_Set)
     instance_set_test = args.instance_set_test
     if instance_set_test is not None:
         instance_set_test = resolve_object_name(
             args.instance_set_test,
             gv.file_storage_data_mapping[gv.instances_nickname_path],
-            gv.settings().DEFAULT_instance_dir, instance_set)
+            gv.settings().DEFAULT_instance_dir, Instance_Set)
     use_features = args.use_features
     run_on = gv.settings().get_run_on()
     if args.configurator is not None:
@@ -177,7 +177,8 @@ def main(argv: list[str]) -> None:
     # Check if Solver and instance sets were resolved
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.CONFIGURE_SOLVER])
 
-    feature_data_df = None
+    configurator = gv.settings().get_general_sparkle_configurator()
+    configurator_settings = gv.settings().get_configurator_settings(configurator.name)
     if use_features:
         feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
 
@@ -206,20 +207,13 @@ def main(argv: list[str]) -> None:
 
         for index, column in enumerate(feature_data_df):
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
+        configurator_settings.update({"feature_data_df": feature_data_df})
 
-    number_of_runs = gv.settings().get_config_number_of_runs()
-    solver_calls = gv.settings().get_config_solver_calls()
-    cpu_time = gv.settings().get_config_cpu_time()
-    wallclock_time = gv.settings().get_config_wallclock_time()
-    cutoff_time = gv.settings().get_general_target_cutoff_time()
-    cutoff_length = gv.settings().get_configurator_target_cutoff_length()
     sparkle_objectives =\
         gv.settings().get_general_sparkle_objectives()
-    configurator = gv.settings().get_general_sparkle_configurator()
     config_scenario = configurator.scenario_class(
-        solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
-        wallclock_time, cutoff_time, cutoff_length, sparkle_objectives, use_features,
-        configurator.configurator_target, feature_data_df)
+        solver, instance_set_train, sparkle_objectives, configurator.output_path,
+        **configurator_settings)
 
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     dependency_job_list = configurator.configure(
@@ -232,6 +226,7 @@ def main(argv: list[str]) -> None:
     # Update latest scenario
     gv.latest_scenario().set_config_solver(solver)
     gv.latest_scenario().set_config_instance_set_train(instance_set_train.directory)
+    gv.latest_scenario().set_configuration_scenario(config_scenario.scenario_file_path)
     gv.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
 
     if instance_set_test is not None:

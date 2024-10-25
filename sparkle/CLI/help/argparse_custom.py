@@ -263,7 +263,7 @@ NumberOfRunsConfigurationArgument = \
 NumberOfRunsAblationArgument = \
     ArgumentContainer(names=["--number-of-runs"],
                       kwargs={"type": int,
-                              "default": Settings.DEFAULT_config_number_of_runs,
+                              "default": Settings.DEFAULT_configurator_number_of_runs,
                               "action": SetByUser,
                               "help": "Number of configuration runs to execute"})
 

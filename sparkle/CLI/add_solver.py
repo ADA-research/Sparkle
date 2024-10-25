@@ -122,6 +122,12 @@ def main(argv: list[str]) -> None:
         sfh.add_remove_platform_item(solver_directory,
                                      gv.solver_nickname_list_path, key=nickname)
 
+    solver = Solver(solver_directory)  # Recreate solver from its new directory
+    if solver.get_pcs_file() is not None:
+        print("Generating missing PCS files...")
+        solver.port_pcs("IRACE")  # Create PCS file for IRACE
+        print("Generating done!")
+
     if args.run_solver_now:
         num_job_in_parallel = gv.settings().get_number_of_jobs_in_parallel()
         dependency_run_list = [running_solvers_performance_data(
