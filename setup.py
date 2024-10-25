@@ -32,8 +32,6 @@ setup(name="SparkleAI",
           "scikit-learn==1.3.2",
           "liac-arff==2.5.0",
           "smac==2.2.0",
-          # IRACE packages
-          "rpy2==3.5.16",
       ],
       include_package_data=True,
       entry_points={"console_scripts": ["sparkle=sparkle.CLI.cli:main"], },)

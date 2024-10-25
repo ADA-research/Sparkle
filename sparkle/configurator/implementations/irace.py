@@ -111,34 +111,35 @@ class IRACE(Configurator):
     @staticmethod
     def organise_output(output_source: Path, output_target: Path) -> None | str:
         """Method to restructure and clean up after a single configurator call."""
-        # robjects.r['iraceResults'][0] = $scenario Scenario Data
-        # robjects.r['iraceResults'][1] = $irace.version: IRACE version
-        # robjects.r['iraceResults'][2] = $parameters: Description of each parameter
-        # robjects.r['iraceResults'][3] = $allElites: Elite configurations per iteration
-        # robjects.r['iraceResults'][4] = Solver call Results ?
-        # robjects.r['iraceResults'][5] = All Solver times?
-        # robjects.r['iraceResults'][6] = $RejectedConfigurations?
-        # robjects.r['iraceResults'][7] = Something regarding the budget
-        # robjects.r['iraceResults'][8] = $allConfigurations
-        # NOTE: Imports happen here because they are only needed once at runtime and
-        # rpy2 specifically is a medium heavy to load yet not required elsewhere.
-        import rpy2.robjects as robjects
-        from rpy2.rinterface_lib.sexp import (NACharacterType, NAIntegerType,
-                                              NALogicalType, NARealType, NAComplexType)
-        import math
         import fcntl
-        na_types =\
-            [NACharacterType, NAIntegerType, NALogicalType, NARealType, NAComplexType]
-        robjects.r["load"](str(output_source))
-        robjects.r["iraceResults"]  # A list of length 11
-        best_index = int(robjects.r["iraceResults"][3][-1][0]) - 1  # Extract the best id
-        column_names = robjects.r["iraceResults"][8].names
-        # Get the best values, but filter nan parameter values and the first (index)
-        best_values = [(column_names[i], v[best_index])
-                       for i, v in enumerate(robjects.r["iraceResults"][8])
-                       if (not type(v[best_index]) in na_types
-                           and not math.isnan(float(v[best_index])))][1:]
-        configuration = " ".join([f"--{name} {value}" for name, value in best_values])
+        get_config = subprocess.run(
+            ["Rscript", "-e",
+             'library("irace"); '
+             f'load("{output_source}"); '
+             "last <- length(iraceResults$iterationElites); "
+             "id <- iraceResults$iterationElites[last]; "
+             "print(getConfigurationById(iraceResults, ids = id))"],
+            capture_output=True)
+        r_table = get_config.stdout.decode()
+
+        # Join the table header and content together
+        header = ""
+        content = ""
+        for i, line in enumerate(r_table.splitlines()):
+            if i & 1 == 0:  # Even lines are headers
+                header += line
+            else:  # Odd lines are parameter values
+                # First element is the ID
+                line = " ".join(line.split(" ")[1:])
+                content += line
+        # First header item is the ID
+        header = [x for x in header.split(" ") if x != ""][1:]
+        content = [x for x in content.split(" ") if x != ""][1:]
+        configuration = ""
+        for parameter, value in zip(header, content):
+            if not parameter == ".PARENT." and value != "NA" and value != "<NA>":
+                configuration += f"--{parameter} {value} "
+
         with output_target.open("a") as fout:
             fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
             fout.write(configuration + "\n")
