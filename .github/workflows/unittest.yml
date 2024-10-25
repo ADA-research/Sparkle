@@ -21,6 +21,12 @@ jobs:
         submodules: true
     - uses: ./.github/actions/setup_slurm_action  # Set up medium slurm cluster
     - uses: r-lib/actions/setup-r@v2
+    - uses: r-lib/actions/setup-r-dependencies@v2
+      with:
+          cache-version: 1
+          extra-packages: |
+            any::r6
+            any::irace
     - name: Add conda to system path
       run: |
         # $CONDA is an environment variable pointing to the root of the miniconda directory
