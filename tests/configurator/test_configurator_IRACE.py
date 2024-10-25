@@ -9,6 +9,8 @@ from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
 from sparkle.types import resolve_objective
 
+from tests.CLI import tools as cli_tools
+
 
 def test_irace_organise_output(tmp_path: Path,
                                monkeypatch: pytest.MonkeyPatch) -> None:
@@ -31,6 +33,8 @@ def test_irace_organise_output(tmp_path: Path,
 def test_irace_scenario_file(tmp_path: Path,
                              monkeypatch: pytest.MonkeyPatch) -> None:
     """Test IRACE scenario file creation."""
+    if cli_tools.get_cluster_name() != "kathleen":
+        return  # Test does not work on Github because it can't find IRACE package
     solver = Solver(Path("tests/test_files/Solvers/Test-Solver").absolute())
     set = Instance_Set(Path("tests/test_files/Instances/Train-Instance-Set").absolute())
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
