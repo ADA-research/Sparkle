@@ -17,6 +17,8 @@ def test_irace_organise_output(tmp_path: Path,
                        "test_output_irace.Rdata").absolute()
     target_path = Path("tmp.csv")
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+    if not IRACE.configurator_executable.exists():
+        initialise.initialise_irace()  # Ensure IRACE is compiled
     IRACE.organise_output(source_path, target_path)
     assert target_path.exists()
     assert target_path.open().read().strip() == (
