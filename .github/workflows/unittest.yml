@@ -25,7 +25,7 @@ jobs:
       with:
           cache-version: 1
           extra-packages: |
-            any::r6
+            any::R6
             any::irace
     - name: Add conda to system path
       run: |
