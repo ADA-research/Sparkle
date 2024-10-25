@@ -48,7 +48,25 @@ def detect_sparkle_platform_exists(check: callable = all) -> Path:
 
 def initialise_irace() -> None:
     """Initialise IRACE."""
+    if shutil.which("R") is None:
+        warnings.warn("R is not installed, which is required for the IRACE"
+                      "configurator. Make sure R is installed and try again.")
+        return
     print("Initialising IRACE ...")
+    r6_package_check = subprocess.run(["Rscript", "-e",
+                                      'library("R6")'], capture_output=True)
+    if r6_package_check.returncode != 0:  # R6 is not installed
+        print("Installing R6 package (IRACE dependency) ...")
+        r6_install = subprocess.run([
+            "Rscript", "-e",
+            f'install.packages("{IRACE.r6_dependency_package.absolute()}",'
+            f'lib="{IRACE.configurator_path.absolute()}")'], capture_output=True)
+        if r6_install.returncode != 0:
+            print("An error occured during the installation of R6:\n",
+                  r6_install.stdout.decode(), "\n",
+                  r6_install.stderr.decode(), "\n"
+                  "IRACE installation failed!")
+            return
     # Install IRACE from tarball
     irace_install = subprocess.run(
         ["Rscript", "-e",
