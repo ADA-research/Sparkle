@@ -121,6 +121,11 @@ class IRACE(Configurator):
              "print(getConfigurationById(iraceResults, ids = id))"],
             capture_output=True)
         r_table = get_config.stdout.decode()
+        if get_config.returncode != 0 or r_table.strip() == "":
+            raise RuntimeError("Failed to get configuration from IRACE file "
+                               f"{output_source}:\n"
+                               f"{get_config.stdout.decode()}\n"
+                               f"{get_config.stderr.decode()}")
 
         # Join the table header and content together
         header = ""
