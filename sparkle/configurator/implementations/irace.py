@@ -275,7 +275,6 @@ class IRACEScenario(ConfigurationScenario):
         super().__init__(solver, instance_set, sparkle_objectives, parent_directory)
         self.solver = solver
         self.instance_set = instance_set
-        self.name = f"{self.solver.name}_{self.instance_set.name}"
         if sparkle_objectives is not None:
             if len(sparkle_objectives) > 1:
                 print("WARNING: IRACE does not have multi objective support. "
@@ -294,7 +293,6 @@ class IRACEScenario(ConfigurationScenario):
         self.nb_iterations = nb_iterations
 
         # Pathing
-        self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
         self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
         self.tmp = self.directory / "tmp"
         self.validation = self.directory / "validation"

@@ -101,10 +101,14 @@ def main(argv: list[str]) -> None:
 
     # Make sure configuration results exist before trying to work with them
     configurator = gv.settings().get_general_sparkle_configurator()
-    # TODO: Get configuration scenario by specified solver/instanceset/configurator
-    # Now we just get the latest scenario
-    config_scenario = gv.latest_scenario().get_configuration_scenario(
-        configurator.scenario_class)
+    config_scenario = configurator.scenario_class.find_scenario(
+        configurator.output_path, solver, instance_set_train)
+
+    if config_scenario is None:
+        print("No configuration scenario found for combination:\n"
+              f"{configurator.name} {solver.name} {instance_set_train.name}")
+        sys.exit(-1)
+
     # Record optimised configuration
     _, opt_config_str = configurator.get_optimal_configuration(config_scenario)
     opt_config = Solver.config_str_to_dict(opt_config_str)

@@ -239,7 +239,6 @@ class SMAC2Scenario(ConfigurationScenario):
         self.feature_data = feature_data_df
 
         # Scenario Paths
-        self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
         self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
         self.tmp = self.directory / "tmp"
         self.validation = self.directory / "validation"

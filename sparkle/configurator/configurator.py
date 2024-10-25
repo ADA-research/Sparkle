@@ -144,8 +144,9 @@ class ConfigurationScenario:
         self.instance_set = instance_set
         self.sparkle_objectives = sparkle_objectives
         self.name = f"{self.solver.name}_{self.instance_set.name}"
+
         self.directory = parent_directory / self.name
-        self.scenario_file_path: Path = None
+        self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
         self.validation: Path = None
         self.tmp: Path = None
         self.results_directory: Path = None
@@ -171,6 +172,18 @@ class ConfigurationScenario:
     def serialize(self: ConfigurationScenario) -> dict:
         """Serialize the configuration scenario."""
         raise NotImplementedError
+
+    @classmethod
+    def find_scenario(cls: ConfigurationScenario,
+                      directory: Path,
+                      solver: Solver,
+                      instance_set: InstanceSet) -> ConfigurationScenario | None:
+        """Resolve a scenario from a directory and Solver / Training set."""
+        scenario_name = f"{solver.name}_{instance_set.name}"
+        path = directory / f"{scenario_name}" / f"{scenario_name}_scenario.txt"
+        if not path.exists():
+            return None
+        return cls.from_file(path)
 
     @staticmethod
     def from_file(scenario_file: Path) -> ConfigurationScenario:

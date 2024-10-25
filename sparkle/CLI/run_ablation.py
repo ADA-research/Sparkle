@@ -109,18 +109,20 @@ def main(argv: list[str]) -> None:
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings().DEFAULT_instance_dir, Instance_Set)
 
-    # TODO: Detect the scenario from solver/instance/configurator combination
-    # Now we just take the latest scenario
     configurator = gv.settings().get_general_sparkle_configurator()
-    config_scenario = gv.latest_scenario().get_configuration_scenario(
-        configurator.scenario_class)
+    config_scenario = configurator.scenario_class.find_scenario(
+        configurator.output_path, solver, instance_set_train)
+    if config_scenario is None:
+        print("No configuration scenario found for combination:\n"
+              f"{configurator.name} {solver.name} {instance_set_train.name}")
+        sys.exit(-1)
     if instance_set_test is None:
         instance_set_test = instance_set_train
 
     if not config_scenario.result_directory.is_dir():
         print("Error: No configuration results found for the given solver and training"
-              " instance set. Ablation needs to have a target configuration.")
-        print("Please run configuration first")
+              " instance set. Ablation needs to have a target configuration. "
+              "Please finish configuration first.")
         sys.exit(-1)
     else:
         print("Configuration exists!")
