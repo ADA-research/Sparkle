@@ -59,7 +59,7 @@ def wait_for_jobs(path: Path,
         prev_jobs = len(running_jobs) + 1
         while len(running_jobs) > 0:
             if len(running_jobs) < prev_jobs:
-                print(f"Waiting for {len(running_jobs)} jobs...", flush=True)
+                print(f"Waiting for {len(running_jobs)} jobs...", flush=False)
             time.sleep(check_interval)
             prev_jobs = len(running_jobs)
             running_jobs = [run for run in running_jobs
@@ -71,6 +71,8 @@ def wait_for_jobs(path: Path,
         # Order in which to display the jobs
         status_order = {Status.COMPLETED: 0, Status.RUNNING: 1, Status.WAITING: 2}
         while len(running_jobs) > 0:
+            for job in running_jobs:
+                job.get_latest_job_details()
             running_jobs = [run for run in running_jobs
                             if run.status == Status.WAITING
                             or run.status == Status.RUNNING]
