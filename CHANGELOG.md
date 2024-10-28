@@ -4,7 +4,7 @@ Notable changes to Sparkle will be documented in this file.
 
 ## [0.9.0] - 2024/??/??
 - Added cancel command to Sparkle to cancel Slurm jobs including interactive table to make your selection [SPRK-338]
-- Added the IRACE configurator to Sparkle, which works 'out of the box' with the Conda Environment
+- Added the IRACE configurator to Sparkle, which works 'out of the box' with the Conda Environment (Only R is user supplied) [SPRK-290]
 
 ## [0.8.9] - 2024/09/27
 - Various updates to Documentation, automated testing and CI pipelines
