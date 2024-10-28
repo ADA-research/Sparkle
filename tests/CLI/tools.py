@@ -1,6 +1,6 @@
 """Tools for testing Sparkle CLI."""
 import os
-import ast
+import json
 import subprocess
 from pathlib import Path
 
@@ -32,7 +32,7 @@ def get_cluster_name() -> str:
         output = subprocess.run(["sacctmgr", "show", "Cluster", "--json"],
                                 capture_output=True).stdout.decode()
         try:
-            cluster_info = ast.literal_eval(output)
+            cluster_info = json.loads(output)
             __cluster_name = cluster_info["clusters"][0]["name"].lower()
         except Exception:
             __cluster_name = "default"
