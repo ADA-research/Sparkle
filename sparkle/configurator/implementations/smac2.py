@@ -193,6 +193,7 @@ class SMAC2Scenario(ConfigurationScenario):
                  wallclock_time: int = None,
                  cutoff_time: int = None,
                  target_cutoff_length: str = None,
+                 use_cpu_time_in_tunertime: bool = None,
                  feature_data_df: pd.DataFrame = None)\
             -> None:
         """Initialize scenario paths and names.
@@ -214,6 +215,8 @@ class SMAC2Scenario(ConfigurationScenario):
                 configuration.
             target_cutoff_length: A domain specific measure of when the algorithm
                 should consider itself done.
+            use_cpu_time_in_tunertime: Whether to calculate SMAC2's own used time for
+                budget deduction. Defaults in SMAC2 to True.
             feature_data_df: If features are used, this contains the feature data.
                 Defaults to None.
         """
@@ -236,6 +239,7 @@ class SMAC2Scenario(ConfigurationScenario):
         self.wallclock_time = wallclock_time
         self.cutoff_time = cutoff_time
         self.cutoff_length = target_cutoff_length
+        self.use_cpu_time_in_tunertime = use_cpu_time_in_tunertime
         self.feature_data = feature_data_df
 
         # Scenario Paths
@@ -296,6 +300,9 @@ class SMAC2Scenario(ConfigurationScenario):
                 file.write(f"cputime-limit = {self.cpu_time}\n")
             if self.solver_calls is not None:
                 file.write(f"runcount-limit = {self.solver_calls}\n")
+            if self.use_cpu_time_in_tunertime is not None:
+                file.write("use-cputime-in-tunertime = "
+                           f"{self.use_cpu_time_in_tunertime}\n")
             # We don't let SMAC do the validation
             file.write("validation = false" + "\n")
         return self.scenario_file_path
@@ -351,6 +358,7 @@ class SMAC2Scenario(ConfigurationScenario):
             "cutoff_length": self.cutoff_length,
             "sparkle_objective": self.sparkle_objective.name,
             "feature_data": self.feature_data,
+            "use_cpu_time_in_tunertime": self.use_cpu_time_in_tunertime
         }
 
     @staticmethod

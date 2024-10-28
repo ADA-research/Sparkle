@@ -127,6 +127,7 @@ class Settings:
     DEFAULT_smac2_wallclock_time = 600
     DEFAULT_smac2_cpu_time = 600
     DEFAULT_smac2_target_cutoff_length = "max"
+    DEFAULT_smac2_use_cpu_time_in_tunertime = True
 
     DEFAULT_portfolio_construction_timeout = None
 
@@ -163,6 +164,7 @@ class Settings:
         self.__config_number_of_runs_set = SettingState.NOT_SET
         self.__smac2_wallclock_time_set = SettingState.NOT_SET
         self.__smac2_cpu_time_set = SettingState.NOT_SET
+        self.__smac2_use_cpu_time_in_tunertime_set = SettingState.NOT_SET
 
         self.__run_on_set = SettingState.NOT_SET
         self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
@@ -304,6 +306,13 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
                     self.set_smac2_target_cutoff_length(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("use_cpu_time_in_tunertime", "countSMACTimeAsTunerTime")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_smac2_use_cpu_time_in_tunertime(value, state)
                     file_settings.remove_option(section, option)
 
             section = "irace"
@@ -673,6 +682,7 @@ class Settings:
                 "cpu_time": self.get_smac2_cpu_time(),
                 "wallclock_time": self.get_smac2_wallclock_time(),
                 "target_cutoff_length": self.get_smac2_target_cutoff_length(),
+                "use_cpu_time_in_tunertime": self.get_smac2_use_cpu_time_in_tunertime(),
             })
         if configurator_name == cim.IRACE.__name__:
             # Return all settings from the IRACE section
@@ -794,6 +804,25 @@ class Settings:
         if self.__smac2_target_cutoff_length_set == SettingState.NOT_SET:
             self.set_smac2_target_cutoff_length()
         return self.__settings["smac2"]["target_cutoff_length"]
+
+    def set_smac2_use_cpu_time_in_tunertime(
+            self: Settings, value: bool = DEFAULT_smac2_use_cpu_time_in_tunertime,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set whether to use CPU time in tunertime."""
+        section = "smac2"
+        name = "use_cpu_time_in_tunertime"
+
+        if value is not None and self.__check_setting_state(
+                self.__smac2_use_cpu_time_in_tunertime_set, origin, name):
+            self.__init_section(section)
+            self.__smac2_use_cpu_time_in_tunertime_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac2_use_cpu_time_in_tunertime(self: Settings) -> bool:
+        """Return whether to use CPU time in tunertime."""
+        if self.__smac2_use_cpu_time_in_tunertime_set == SettingState.NOT_SET:
+            self.set_smac2_use_cpu_time_in_tunertime()
+        return bool(self.__settings["smac2"]["use_cpu_time_in_tunertime"])
 
     # Configuration: IRACE specific settings ###
 

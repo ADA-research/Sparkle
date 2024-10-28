@@ -64,10 +64,12 @@ def compute_features(
     cutoff = gv.settings().get_general_extractor_cutoff_time()
     cmd_list = []
     extractors = {}
+    instance_paths = set()
     features_core = Path(__file__).parent.resolve() / "core" / "compute_features.py"
     # We create a job for each instance/extractor combination
     for instance_path, extractor_name, feature_group in jobs:
         extractor_path = gv.settings().DEFAULT_extractor_dir / extractor_name
+        instance_paths.add(instance_path)
         cmd = (f"{features_core} "
                f"--instance {instance_path} "
                f"--extractor {extractor_path} "
@@ -93,7 +95,8 @@ def compute_features(
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
-        name=CommandName.COMPUTE_FEATURES,
+        name=f"Compute Features: {len(extractors)} Extractors on "
+             f"{len(instance_paths)} instances",
         parallel_jobs=parallel_jobs,
         base_dir=sl.caller_log_dir,
         sbatch_options=sbatch_options,

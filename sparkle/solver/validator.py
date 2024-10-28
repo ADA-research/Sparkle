@@ -86,7 +86,8 @@ class Validator():
         return rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
-            name="validation",
+            name=f"Validation: {','.join(set([s.name for s in solvers]))} on "
+                 f"{','.join([i.name for i in instance_sets])}",
             base_dir=self.tmp_out_dir,
             dependencies=dependency,
             sbatch_options=sbatch_options,
