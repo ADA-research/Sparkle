@@ -25,7 +25,7 @@ setup(name="SparkleAI",
           "tqdm==4.66.5",
           "RunRunner==0.1.7.1",
           # Reporting packages
-          "plotly==5.23.0",
+          "plotly==5.24.1",
           "kaleido==0.2.1",
           # Autofolio packages
           "xgboost==2.0.3",
