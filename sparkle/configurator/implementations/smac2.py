@@ -189,6 +189,7 @@ class SMAC2Scenario(ConfigurationScenario):
                  parent_directory: Path,
                  number_of_runs: int = None,
                  solver_calls: int = None,
+                 max_iterations: int = None,
                  cpu_time: int = None,
                  wallclock_time: int = None,
                  cutoff_time: int = None,
@@ -208,6 +209,8 @@ class SMAC2Scenario(ConfigurationScenario):
                 for configuring the solver.
             solver_calls: The number of times the solver is called for each
                 configuration run
+            max_iterations: The maximum number of iterations allowed for each
+                configuration run. [iteration-limit, numIterations, numberOfIterations]
             cpu_time: The time budget allocated for each configuration run. (cpu)
             wallclock_time: The time budget allocated for each configuration run.
                 (wallclock)
@@ -239,6 +242,7 @@ class SMAC2Scenario(ConfigurationScenario):
         self.wallclock_time = wallclock_time
         self.cutoff_time = cutoff_time
         self.cutoff_length = target_cutoff_length
+        self.max_iterations = max_iterations
         self.use_cpu_time_in_tunertime = use_cpu_time_in_tunertime
         self.feature_data = feature_data_df
 
@@ -292,14 +296,16 @@ class SMAC2Scenario(ConfigurationScenario):
                        f"outdir = {self.outdir_train.absolute()}\n"
                        f"instance_file = {self.instance_file_path.absolute()}\n"
                        f"test_instance_file = {self.instance_file_path.absolute()}\n")
-            if self.feature_data is not None:
-                file.write(f"feature_file = {self.feature_file_path}\n")
+            if self.max_iterations is not None:
+                file.write(f"iteration-limit = {self.max_iterations}\n")
             if self.wallclock_time is not None:
                 file.write(f"wallclock-limit = {self.wallclock_time}\n")
             if self.cpu_time is not None:
                 file.write(f"cputime-limit = {self.cpu_time}\n")
             if self.solver_calls is not None:
                 file.write(f"runcount-limit = {self.solver_calls}\n")
+            if self.feature_data is not None:
+                file.write(f"feature_file = {self.feature_file_path}\n")
             if self.use_cpu_time_in_tunertime is not None:
                 file.write("use-cputime-in-tunertime = "
                            f"{self.use_cpu_time_in_tunertime}\n")
@@ -356,6 +362,7 @@ class SMAC2Scenario(ConfigurationScenario):
             "wallclock_time": self.wallclock_time,
             "cutoff_time": self.cutoff_time,
             "cutoff_length": self.cutoff_length,
+            "max_iterations": self.max_iterations,
             "sparkle_objective": self.sparkle_objective.name,
             "feature_data": self.feature_data,
             "use_cpu_time_in_tunertime": self.use_cpu_time_in_tunertime
@@ -375,6 +382,10 @@ class SMAC2Scenario(ConfigurationScenario):
             else None
         solver_calls = int(config["runcount-limit"]) if "runcount-limit" in config \
             else None
+        max_iterations = int(config["iteration-limit"]) if "iteration-limit" in config \
+            else None
+        use_cpu_time_in_tunertime = config["use-cputime-in-tunertime"]\
+            if "use-cputime-in-tunertime" in config else None
 
         _, solver_path, objective_str = config["algo"].split(" ")
         objective = SparkleObjective(objective_str)
@@ -392,7 +403,9 @@ class SMAC2Scenario(ConfigurationScenario):
                              instance_file_path.parent.parent,
                              number_of_runs,
                              solver_calls,
+                             max_iterations,
                              cpu_time,
                              wallclock_limit,
                              int(config["cutoffTime"]),
-                             config["cutoff_length"])
+                             config["cutoff_length"],
+                             use_cpu_time_in_tunertime)

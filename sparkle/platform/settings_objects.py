@@ -123,11 +123,13 @@ class Settings:
 
     DEFAULT_configurator_number_of_runs = 25
     DEFAULT_configurator_solver_calls = 100
+    DEFAULT_configurator_maximum_iterations = 1
 
     DEFAULT_smac2_wallclock_time = 600
     DEFAULT_smac2_cpu_time = 600
     DEFAULT_smac2_target_cutoff_length = "max"
     DEFAULT_smac2_use_cpu_time_in_tunertime = True
+    DEFAULT_smac2_max_iterations = None
 
     DEFAULT_portfolio_construction_timeout = None
 
@@ -143,7 +145,7 @@ class Settings:
     DEFAULT_irace_max_experiments = 0
     DEFAULT_irace_first_test = None
     DEFAULT_irace_mu = None
-    DEFAULT_irace_nb_iterations = None
+    DEFAULT_irace_max_iterations = None
 
     def __init__(self: Settings, file_path: PurePath = None) -> None:
         """Initialise a settings object."""
@@ -179,7 +181,7 @@ class Settings:
         self.__irace_max_experiments_set = SettingState.NOT_SET
         self.__irace_first_test_set = SettingState.NOT_SET
         self.__irace_mu_set = SettingState.NOT_SET
-        self.__irace_nb_iterations_set = SettingState.NOT_SET
+        self.__irace_max_iterations_set = SettingState.NOT_SET
 
         self.__general_sparkle_configurator = None
 
@@ -315,6 +317,13 @@ class Settings:
                     self.set_smac2_use_cpu_time_in_tunertime(value, state)
                     file_settings.remove_option(section, option)
 
+            options_names = ("iteration-limit", "numIterations", "numberOfIterations")
+            for option in options_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_smac2_max_iterations(value, state)
+                    file_settings.remove_option(section, option)
+
             section = "irace"
             option_names = ("max_time", )
             for option in option_names:
@@ -344,11 +353,11 @@ class Settings:
                     self.set_irace_mu(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("nb_iterations", )
+            option_names = ("nb_iterations", "iterations")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
-                    self.set_irace_nb_iterations(value, state)
+                    self.set_irace_max_iterations(value, state)
                     file_settings.remove_option(section, option)
 
             section = "slurm"
@@ -677,7 +686,10 @@ class Settings:
             "number_of_runs": self.get_configurator_number_of_runs(),
             "solver_calls": self.get_configurator_solver_calls(),
             "cutoff_time": self.get_general_target_cutoff_time(),
+            "max_iterations": self.get_configurator_max_iterations()
         }
+        # In the settings below, we default to the configurator general settings if no
+        # specific configurator settings are given, by using the [None] or [Value]
         if configurator_name == cim.SMAC2.__name__:
             # Return all settings from the SMAC2 section
             configurator_settings.update({
@@ -685,6 +697,8 @@ class Settings:
                 "wallclock_time": self.get_smac2_wallclock_time(),
                 "target_cutoff_length": self.get_smac2_target_cutoff_length(),
                 "use_cpu_time_in_tunertime": self.get_smac2_use_cpu_time_in_tunertime(),
+                "max_iterations": self.get_smac2_max_iterations()
+                or configurator_settings["max_iterations"],
             })
         if configurator_name == cim.IRACE.__name__:
             # Return all settings from the IRACE section
@@ -693,7 +707,8 @@ class Settings:
                 "max_time": self.get_irace_max_time(),
                 "first_test": self.get_irace_first_test(),
                 "mu": self.get_irace_mu(),
-                "nb_iterations": self.get_irace_nb_iterations(),
+                "max_iterations": self.get_irace_max_iterations()
+                or configurator_settings["max_iterations"],
             })
             if (configurator_settings["solver_calls"] == 0
                     and configurator_settings["max_time"] == 0):  # Default to base
@@ -740,6 +755,25 @@ class Settings:
             self.set_configurator_number_of_runs()
 
         return int(self.__settings["configuration"]["number_of_runs"])
+
+    def set_configurator_max_iterations(
+            self: Settings, value: int = DEFAULT_configurator_maximum_iterations,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the number of configuration runs."""
+        section = "configuration"
+        name = "max_iterations"
+
+        if value is not None and self.__check_setting_state(
+                self.__config_max_iterations_set, origin, name):
+            self.__init_section(section)
+            self.__config_min_iterations_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_configurator_max_iterations(self: Settings) -> int:
+        """Get the maximum number of configurator iterations."""
+        if self.__config_min_iterations_set == SettingState.NOT_SET:
+            self.set_configurator_max_iterations()
+        return int(self.__settings["configuration"]["max_iterations"])
 
     # Configuration: SMAC specific settings ###
 
@@ -825,6 +859,26 @@ class Settings:
         if self.__smac2_use_cpu_time_in_tunertime_set == SettingState.NOT_SET:
             self.set_smac2_use_cpu_time_in_tunertime()
         return bool(self.__settings["smac2"]["use_cpu_time_in_tunertime"])
+
+    def set_smac2_max_iterations(
+            self: Settings, value: int = DEFAULT_smac2_max_iterations,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the maximum number of SMAC2 iterations."""
+        section = "smac2"
+        name = "iteration_limit"
+
+        if value is not None and self.__check_setting_state(
+                self.__smac2_max_iterations_set, origin, name):
+            self.__init_section(section)
+            self.__smac2_max_iterations_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac2_max_iterations(self: Settings) -> int | None:
+        """Get the maximum number of SMAC2 iterations."""
+        if self.__smac2_max_iterations_set == SettingState.NOT_SET:
+            self.set_smac2_max_iterations()
+        max_iterations = self.__settings["smac2"]["max_iterations"]
+        return int(max_iterations) if max_iterations is not None else None
 
     # Configuration: IRACE specific settings ###
 
@@ -916,16 +970,15 @@ class Settings:
             self.__irace_mu_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_irace_nb_iterations(self: Settings) -> int:
+    def get_irace_max_iterations(self: Settings) -> int:
         """Return the number of iterations for IRACE."""
-        if self.__irace_nb_iterations_set == SettingState.NOT_SET:
-            self.set_irace_nb_iterations()
-        if self.__settings["irace"]["nb_iterations"] is not None:
-            return int(self.__settings["irace"]["nb_iterations"])
-        return None
+        if self.__irace_max_iterations_set == SettingState.NOT_SET:
+            self.set_irace_max_iterations()
+        max_iterations = self.__settings["irace"]["max_iterations"]
+        return int(max_iterations) if max_iterations is not None else None
 
-    def set_irace_nb_iterations(
-            self: Settings, value: int = DEFAULT_irace_nb_iterations,
+    def set_irace_max_iterations(
+            self: Settings, value: int = DEFAULT_irace_max_iterations,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the number of iterations for IRACE.
 
@@ -938,12 +991,12 @@ class Settings:
         all the available budget. IRACE recommends to use the default value (Empty).
         """
         section = "irace"
-        name = "nb_iterations"
+        name = "max_iterations"
 
         if self.__check_setting_state(
-                self.__irace_nb_iterations_set, origin, name):
+                self.__irace_max_iterations_set, origin, name):
             self.__init_section(section)
-            self.__irace_nb_iterations_set = origin
+            self.__irace_max_iterations_set = origin
             self.__settings[section][name] = str(value)
 
     # Slurm settings ###

@@ -168,7 +168,7 @@ class IRACEScenario(ConfigurationScenario):
                  budget_estimation: float = None,
                  first_test: int = None,
                  mu: int = None,
-                 nb_iterations: int = None,
+                 max_iterations: int = None,
                  )\
             -> None:
         """Initialize scenario paths and names.
@@ -194,7 +194,7 @@ class IRACEScenario(ConfigurationScenario):
                 elimination test. IRACE Default: 5. [firstTest]
             mu: Parameter used to define the number of configurations sampled and
                 evaluated at each iteration. IRACE Default: 5. [mu]
-            nb_iterations: Maximum number of iterations to be executed. Each iteration
+            max_iterations: Maximum number of iterations to be executed. Each iteration
                 involves the generation of new configurations and the use of racing to
                 select the best configurations. By default (with 0), irace calculates a
                 minimum number of iterations as N^iter = ⌊2 + log2 N param⌋, where
@@ -296,7 +296,7 @@ class IRACEScenario(ConfigurationScenario):
         self.budget_estimation = budget_estimation
         self.first_test = first_test
         self.mu = mu
-        self.nb_iterations = nb_iterations
+        self.max_iterations = max_iterations
 
         # Pathing
         self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
@@ -368,8 +368,8 @@ class IRACEScenario(ConfigurationScenario):
                 file.write(f"firstTest = {self.first_test}\n")
             if self.mu is not None:
                 file.write(f"mu = {self.mu}\n")
-            if self.nb_iterations is not None:
-                file.write(f"nbIterations = {self.nb_iterations}\n")
+            if self.max_iterations is not None:
+                file.write(f"nbIterations = {self.max_iterations}\n")
         print("Verifying contents of IRACE scenario file and testing solver call...")
         check_file = subprocess.run(
             [f"{IRACE.configurator_executable.absolute()}",
@@ -397,7 +397,7 @@ class IRACEScenario(ConfigurationScenario):
             "budget_estimation": self.budget_estimation,
             "first_test": self.first_test,
             "mu": self.mu,
-            "nb_iterations": self.nb_iterations,
+            "max_iterations": self.max_iterations,
         }
 
     @staticmethod
@@ -435,7 +435,7 @@ class IRACEScenario(ConfigurationScenario):
         if "mu" in scenario_dict:
             scenario_dict["mu"] = int(scenario_dict.pop("mu"))
         if "nbIterations" in scenario_dict:
-            scenario_dict["nb_iterations"] = int(scenario_dict.pop("nbIterations"))
+            scenario_dict["max_iterations"] = int(scenario_dict.pop("nbIterations"))
         if "maxExperiments" in scenario_dict:
             scenario_dict["solver_calls"] = int(scenario_dict.pop("maxExperiments"))
         if "maxTime" in scenario_dict:
