@@ -128,7 +128,7 @@ class Settings:
     DEFAULT_smac2_wallclock_time = 600
     DEFAULT_smac2_cpu_time = 600
     DEFAULT_smac2_target_cutoff_length = "max"
-    DEFAULT_smac2_use_cpu_time_in_tunertime = True
+    DEFAULT_smac2_use_cpu_time_in_tunertime = None
     DEFAULT_smac2_max_iterations = None
 
     DEFAULT_portfolio_construction_timeout = None
@@ -164,9 +164,12 @@ class Settings:
 
         self.__config_solver_calls_set = SettingState.NOT_SET
         self.__config_number_of_runs_set = SettingState.NOT_SET
+        self.__config_max_iterations_set = SettingState.NOT_SET
+
         self.__smac2_wallclock_time_set = SettingState.NOT_SET
         self.__smac2_cpu_time_set = SettingState.NOT_SET
         self.__smac2_use_cpu_time_in_tunertime_set = SettingState.NOT_SET
+        self.__smac2_max_iterations_set = SettingState.NOT_SET
 
         self.__run_on_set = SettingState.NOT_SET
         self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
@@ -766,12 +769,12 @@ class Settings:
         if value is not None and self.__check_setting_state(
                 self.__config_max_iterations_set, origin, name):
             self.__init_section(section)
-            self.__config_min_iterations_set = origin
+            self.__config_max_iterations_set = origin
             self.__settings[section][name] = str(value)
 
     def get_configurator_max_iterations(self: Settings) -> int:
         """Get the maximum number of configurator iterations."""
-        if self.__config_min_iterations_set == SettingState.NOT_SET:
+        if self.__config_max_iterations_set == SettingState.NOT_SET:
             self.set_configurator_max_iterations()
         return int(self.__settings["configuration"]["max_iterations"])
 
@@ -848,7 +851,7 @@ class Settings:
         section = "smac2"
         name = "use_cpu_time_in_tunertime"
 
-        if value is not None and self.__check_setting_state(
+        if self.__check_setting_state(
                 self.__smac2_use_cpu_time_in_tunertime_set, origin, name):
             self.__init_section(section)
             self.__smac2_use_cpu_time_in_tunertime_set = origin
@@ -858,16 +861,17 @@ class Settings:
         """Return whether to use CPU time in tunertime."""
         if self.__smac2_use_cpu_time_in_tunertime_set == SettingState.NOT_SET:
             self.set_smac2_use_cpu_time_in_tunertime()
-        return bool(self.__settings["smac2"]["use_cpu_time_in_tunertime"])
+        use_tunertime = self.__settings["smac2"]["use_cpu_time_in_tunertime"]
+        return bool(use_tunertime) if use_tunertime != "None" else None
 
     def set_smac2_max_iterations(
             self: Settings, value: int = DEFAULT_smac2_max_iterations,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the maximum number of SMAC2 iterations."""
         section = "smac2"
-        name = "iteration_limit"
+        name = "max_iterations"
 
-        if value is not None and self.__check_setting_state(
+        if self.__check_setting_state(
                 self.__smac2_max_iterations_set, origin, name):
             self.__init_section(section)
             self.__smac2_max_iterations_set = origin
@@ -878,7 +882,7 @@ class Settings:
         if self.__smac2_max_iterations_set == SettingState.NOT_SET:
             self.set_smac2_max_iterations()
         max_iterations = self.__settings["smac2"]["max_iterations"]
-        return int(max_iterations) if max_iterations is not None else None
+        return int(max_iterations) if max_iterations.isdigit() else None
 
     # Configuration: IRACE specific settings ###
 
@@ -920,7 +924,7 @@ class Settings:
             self.__irace_max_experiments_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_irace_first_test(self: Settings) -> int:
+    def get_irace_first_test(self: Settings) -> int | None:
         """Return the first test for IRACE.
 
         Specifies how many instances are evaluated before the first
@@ -928,9 +932,8 @@ class Settings:
         """
         if self.__irace_first_test_set == SettingState.NOT_SET:
             self.set_irace_first_test()
-        if self.__settings["irace"]["first_test"] is not None:
-            return int(self.__settings["irace"]["first_test"])
-        return None
+        first_test = self.__settings["irace"]["first_test"]
+        return int(first_test) if first_test.isdigit() else None
 
     def set_irace_first_test(
             self: Settings, value: int = DEFAULT_irace_first_test,
@@ -945,7 +948,7 @@ class Settings:
             self.__irace_first_test_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_irace_mu(self: Settings) -> int:
+    def get_irace_mu(self: Settings) -> int | None:
         """Return the mu for IRACE.
 
         Parameter used to define the number of configurations sampled and
@@ -953,9 +956,8 @@ class Settings:
         """
         if self.__irace_mu_set == SettingState.NOT_SET:
             self.set_irace_mu()
-        if self.__settings["irace"]["mu"] is not None:
-            return int(self.__settings["irace"]["mu"])
-        return None
+        mu = self.__settings["irace"]["mu"]
+        return int(mu) if mu.isdigit() else None
 
     def set_irace_mu(
             self: Settings, value: int = DEFAULT_irace_mu,
@@ -975,7 +977,7 @@ class Settings:
         if self.__irace_max_iterations_set == SettingState.NOT_SET:
             self.set_irace_max_iterations()
         max_iterations = self.__settings["irace"]["max_iterations"]
-        return int(max_iterations) if max_iterations is not None else None
+        return int(max_iterations) if max_iterations.isdigit() else None
 
     def set_irace_max_iterations(
             self: Settings, value: int = DEFAULT_irace_max_iterations,
