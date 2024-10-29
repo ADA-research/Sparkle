@@ -17,7 +17,7 @@ from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.structures import FeatureDataFrame
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
-from sparkle.configurator.configurator import Configurator
+from sparkle.configurator import implementations as configurator_implementations
 from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.solver import Solver
 from sparkle.CLI.initialise import check_for_initialise
@@ -162,17 +162,13 @@ def main(argv: list[str]) -> None:
             gv.settings().DEFAULT_instance_dir, Instance_Set)
     use_features = args.use_features
     run_on = gv.settings().get_run_on()
-    if args.configurator is not None:
-        gv.settings().set_general_sparkle_configurator(
-            value=getattr(Configurator, args.configurator),
-            origin=SettingState.CMD_LINE)
 
     # Check if Solver and instance sets were resolved
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.CONFIGURE_SOLVER])
 
     configurator = gv.settings().get_general_sparkle_configurator()
     configurator_settings = gv.settings().get_configurator_settings(configurator.name)
-    if use_features:
+    if use_features and configurator.name == configurator_implementations.SMAC2.__name__:
         feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
 
         data_dict = {}

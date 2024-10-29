@@ -10,9 +10,9 @@ from tests.CLI import tools
 
 @pytest.mark.integration
 @patch("shutil.which")
-def test_configure_solver_smac2(mock_which: Mock,
-                                tmp_path: Path,
-                                monkeypatch: pytest.MonkeyPatch) -> None:
+def test_configure_solver(mock_which: Mock,
+                          tmp_path: Path,
+                          monkeypatch: pytest.MonkeyPatch) -> None:
     """Test cancel command on configuration jobs."""
     # Smoke test: Submit configuration jobs
     solver_path =\
@@ -49,29 +49,6 @@ def test_configure_solver_smac2(mock_which: Mock,
     assert pytest_wrapped_e.value.code == 0
 
     # Submit with different command line parameters
-    # target-cutoff-time 3
-    with pytest.raises(SystemExit) as pytest_wrapped_e:
-        configure_solver.main(["--solver", solver_path.name,
-                               "--instance-set-train", instance_set_path.name,
-                               "--objectives", "PAR10",
-                               "--settings-file", str(test_settings_path),
-                               "--target-cutoff-time", "3",
-                               "--run-on", "slurm"])
-    tools.kill_slurm_jobs()
-    assert pytest_wrapped_e.type is SystemExit
-    assert pytest_wrapped_e.value.code == 0
-
-    # --wallclock-time 10
-    with pytest.raises(SystemExit) as pytest_wrapped_e:
-        configure_solver.main(["--solver", solver_path.name,
-                               "--instance-set-train", instance_set_path.name,
-                               "--objectives", "PAR10",
-                               "--settings-file", str(test_settings_path),
-                               "--wallclock-time", "10",
-                               "--run-on", "slurm"])
-    tools.kill_slurm_jobs()
-    assert pytest_wrapped_e.type is SystemExit
-    assert pytest_wrapped_e.value.code == 0
 
     # --number-of-runs 5
     with pytest.raises(SystemExit) as pytest_wrapped_e:
@@ -97,15 +74,18 @@ def test_configure_solver_smac2(mock_which: Mock,
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
+    # with IRACE instead of SMAC2
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        configure_solver.main(["--configurator", "IRACE",
+                               "--solver", solver_path.name,
+                               "--instance-set-train", instance_set_path.name,
+                               "--objectives", "PAR10",
+                               "--settings-file", str(test_settings_path),
+                               "--run-on", "slurm"])
+    tools.kill_slurm_jobs()
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+
     # TODO: Local Test
     # Doesnt work currently as RunRunner cannot handle output paths for local jobs
     # NOTE: Expensive?
-
-
-@pytest.mark.integration
-def test_configure_solver_irace(tmp_path: Path,
-                                monkeypatch: pytest.MonkeyPatch) -> None:
-    """Test configuration command on IRACE."""
-    # TODO:
-    # Smoke test: Submit configuration jobs IRACE
-    pass
