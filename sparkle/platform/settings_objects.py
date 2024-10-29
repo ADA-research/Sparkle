@@ -511,7 +511,9 @@ class Settings:
         """Return the configurator init method."""
         if self.__general_sparkle_configurator_set == SettingState.NOT_SET:
             self.set_general_sparkle_configurator()
-        if self.__general_sparkle_configurator is None:
+        configurator_var = self.__settings["general"]["configurator"]
+        if (self.__general_sparkle_configurator is None
+                or self.__general_sparkle_configurator.name != configurator_var):
             configurator_subclass =\
                 cim.resolve_configurator(self.__settings["general"]["configurator"])
             if configurator_subclass is not None:

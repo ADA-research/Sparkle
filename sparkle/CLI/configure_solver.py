@@ -43,10 +43,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeConfigurationArgument.names,
                         **ac.TargetCutOffTimeConfigurationArgument.kwargs)
-    parser.add_argument(*ac.WallClockTimeArgument.names,
-                        **ac.WallClockTimeArgument.kwargs)
-    parser.add_argument(*ac.CPUTimeArgument.names,
-                        **ac.CPUTimeArgument.kwargs)
     parser.add_argument(*ac.SolverCallsArgument.names,
                         **ac.SolverCallsArgument.kwargs)
     parser.add_argument(*ac.NumberOfRunsConfigurationArgument.names,
@@ -72,18 +68,15 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
     """
     if args.settings_file is not None:
         gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
+    if args.configurator is not None:
+        gv.settings().set_general_sparkle_configurator(
+            args.configurator, SettingState.CMD_LINE)
     if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
             args.objectives, SettingState.CMD_LINE)
     if args.target_cutoff_time is not None:
         gv.settings().set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
-    if args.wallclock_time is not None:
-        gv.settings().set_smac2_wallclock_time(
-            args.wallclock_time, SettingState.CMD_LINE)
-    if args.cpu_time is not None:
-        gv.settings().set_smac2_cpu_time(
-            args.cpu_time, SettingState.CMD_LINE)
     if args.solver_calls is not None:
         gv.settings().set_configurator_solver_calls(
             args.solver_calls, SettingState.CMD_LINE)

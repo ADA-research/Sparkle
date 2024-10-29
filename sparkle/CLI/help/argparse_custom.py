@@ -116,8 +116,8 @@ CleanupArgumentRemove = \
                                       "user data such as InstanceSets and Solvers"})
 
 ConfiguratorArgument = ArgumentContainer(names=["--configurator"],
-                                         kwargs={"type": Path,
-                                                 "help": "path to configurator"})
+                                         kwargs={"type": str,
+                                                 "help": "name of the configurator"})
 
 CPUTimeArgument = \
     ArgumentContainer(names=["--cpu-time"],
