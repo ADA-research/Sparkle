@@ -177,6 +177,7 @@ tutorials
 wrappers
 commands
 platform
+configurators
 ```
 
 ```{toctree}
