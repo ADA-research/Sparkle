@@ -86,7 +86,7 @@ class SMAC2(Configurator):
         scenario.create_scenario()
         output_csv = scenario.validation / "configurations.csv"
         output_csv.parent.mkdir(exist_ok=True, parents=True)
-        output = [f"{(scenario.result_directory).absolute()}/"
+        output = [f"{(scenario.results_directory).absolute()}/"
                   f"{scenario.name}_seed_{seed}_smac.txt"
                   for seed in range(scenario.number_of_runs)]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
@@ -104,7 +104,7 @@ class SMAC2(Configurator):
             cmd=cmds,
             name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
             base_dir=base_dir,
-            path=scenario.result_directory,
+            path=scenario.results_directory,
             output_path=output,
             parallel_jobs=parallel_jobs,
             sbatch_options=sbatch_options,
@@ -246,7 +246,7 @@ class SMAC2Scenario(ConfigurationScenario):
         self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
         self.tmp = self.directory / "tmp"
         self.validation = self.directory / "validation"
-        self.result_directory = self.directory / "results"
+        self.results_directory = self.directory / "results"
 
         # SMAC2 Specific
         self.outdir_train = self.directory / "outdir_train_configuration"
@@ -265,7 +265,7 @@ class SMAC2Scenario(ConfigurationScenario):
         # Create empty directories as needed
         self.outdir_train.mkdir()
         self.tmp.mkdir()
-        self.result_directory.mkdir(parents=True)  # Prepare results directory
+        self.results_directory.mkdir(parents=True)  # Prepare results directory
 
         self._prepare_instances()
 

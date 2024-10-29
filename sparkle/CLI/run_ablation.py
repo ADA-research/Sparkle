@@ -119,7 +119,7 @@ def main(argv: list[str]) -> None:
     if instance_set_test is None:
         instance_set_test = instance_set_train
 
-    if not config_scenario.result_directory.is_dir():
+    if not config_scenario.results_directory.is_dir():
         print("Error: No configuration results found for the given solver and training"
               " instance set. Ablation needs to have a target configuration. "
               "Please finish configuration first.")

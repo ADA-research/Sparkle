@@ -176,7 +176,7 @@ class TestConfigurationScenarioSMAC2(TestCase):
                           / "outdir_train_configuration").is_dir(),
                          True)
         self.assertTrue((self.scenario.directory / "tmp").is_dir())
-        self.assertTrue(self.scenario.result_directory.is_dir())
+        self.assertTrue(self.scenario.results_directory.is_dir())
 
     @patch("pathlib.Path.absolute")
     def test_configuration_scenario_check_scenario_file(
