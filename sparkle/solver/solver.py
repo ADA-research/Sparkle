@@ -272,7 +272,6 @@ class Solver(SparkleCallable):
             solver_output: The output of the solver run which needs to be parsed
             runsolver_configuration: The runsolver configuration to wrap the solver
                 with. If runsolver was not used this should be None.
-            cwd: Path where to execute. Defaults to self.raw_output_directory.
 
         Returns:
             Dictionary representing the parsed solver output

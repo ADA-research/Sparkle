@@ -63,7 +63,8 @@ def run_parallel_portfolio(instances_set: InstanceSet,
                 instance.absolute(),
                 objectives=objectives,
                 seed=seed,
-                cutoff_time=cutoff)
+                cutoff_time=cutoff,
+                log_dir=portfolio_path)
             cmd_list.append((" ".join(solver_call_list)).replace("'", '"'))
     # Jobs are added in to the runrunner object in the same order they are provided
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
@@ -72,7 +73,6 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         cmd=cmd_list,
         name=CommandName.RUN_PARALLEL_PORTFOLIO,
         parallel_jobs=parallel_jobs,
-        path=portfolio_path,
         base_dir=sl.caller_log_dir,
         srun_options=["-N1", "-n1"] + sbatch_options,
         sbatch_options=sbatch_options
@@ -131,7 +131,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
     # Attempt to verify that all logs have been written (Slurm I/O latency)
     for index, cmd in enumerate(cmd_list):
         runsolver_configuration = cmd.split(" ")[:11]
-        logs = [portfolio_path / p for p in runsolver_configuration
+        logs = [Path(p) for p in runsolver_configuration
                 if Path(p).suffix in [".log", ".val", ".rawres"]]
         if not all([p.exists() for p in logs]):
             time.sleep(check_interval)
@@ -140,8 +140,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
     for index, cmd in enumerate(cmd_list):
         runsolver_configuration = cmd.split(" ")[:11]
         solver_output = Solver.parse_solver_output(run.jobs[i].stdout,
-                                                   runsolver_configuration,
-                                                   portfolio_path)
+                                                   runsolver_configuration)
         solver_index = int((index % n_instance_jobs) / seeds_per_solver)
         solver_name = solvers[solver_index].name
         instance_name = instances_set._instance_names[int(index / n_instance_jobs)]
