@@ -18,6 +18,7 @@ per-file-ignores = __init__.py:F401
                  = setup.py   :E501
                  = tests/*    :S101 
                  = test/*     :S101
+                 = sparkle/platform/settings_objects.py :S110
                  = sparkle/types/__init__.py :S110,S307,F401
                  = sparkle/instance/__init__.py :N802
                  = sparkle/CLI/run_parallel_portfolio.py            :FS001

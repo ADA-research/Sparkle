@@ -445,6 +445,16 @@ class Settings:
                 self.__settings["slurm"][key] = self.__settings["slurm_extra"][key]
                 slurm_extra_section_options[key] = self.__settings["slurm_extra"][key]
             self.__settings.remove_section("slurm_extra")
+        # We do not write None values
+        removed = []
+        for section in self.__settings.sections():
+            for option in self.__settings[section]:
+                try:
+                    if ast.literal_eval(str(self.__settings[section][option])) is None:
+                        del self.__settings[section][option]
+                        removed.append((section, option))
+                except Exception:
+                    pass
         # Write the settings to file
         with file_path.open("w") as settings_file:
             self.__settings.write(settings_file)
@@ -453,6 +463,9 @@ class Settings:
             self.__settings.add_section("slurm_extra")
             for key in slurm_extra_section_options:
                 self.__settings["slurm_extra"][key] = slurm_extra_section_options[key]
+        # Rebuild None if needed
+        for section, option in removed:
+            self.__settings[section][option] = "None"
 
     def __init_section(self: Settings, section: str) -> None:
         if section not in self.__settings:
