@@ -47,6 +47,11 @@ class Configurator:
         """Return the scenario class of the configurator."""
         return ConfigurationScenario
 
+    @property
+    def scenario_class(self: Configurator) -> ConfigurationScenario:
+        """Return the scenario class of the configurator."""
+        return ConfigurationScenario
+
     @abstractmethod
     def configure(self: Configurator,
                   scenario: ConfigurationScenario,
