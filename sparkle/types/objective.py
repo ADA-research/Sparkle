@@ -6,7 +6,7 @@ import numpy as np
 
 
 class UseTime(str, Enum):
-    """Use time or not."""
+    """Enum describing what type of time to use."""
     WALL_TIME = "WALL_TIME"
     CPU_TIME = "CPU_TIME"
     NO = "NO"

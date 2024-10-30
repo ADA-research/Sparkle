@@ -11,8 +11,7 @@ Within this template a number of `TODO`s are indicated where you are likely to n
 
 ## Solver Wrapper Python script
 
-The `sparkle_solver_wrapper.py` uses a commandline dictionary to receive it inputs. This can be easily parsed using a Sparkle tool: `from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args`.
-After parsing it with the Sparkle tools, the dictionary should always have the following values:
+The `sparkle_solver_wrapper.py` receives via commandline a dictionary as its inputs. This can be easily parsed using a Sparkle tool: `from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args`. After parsing it with the Sparkle tools, the dictionary should always have the following values:
 
 ```
 solver_dir: Path
@@ -22,7 +21,7 @@ cutoff_time: float,
 seed: int
 ```
 
-The solver_dir specifies the Path to the Solver directory of your algorithm, where your optional additional files can be found. This can be empty, e.g. the cwd contains your executable. The instance is the path to the instance we are going to run on. Cutoff time is the maximum amount of time your algorithm is allowed to run. Seed is the seed for this run.
+The solver_dir specifies the Path to the Solver directory of your algorithm, where your optional additional files can be found. This can be empty, e.g. the cwd contains all your extra files. This can be useful when your algorithm is an executable that you need to run from the wrapper. The instance is the path to the instance we are going to run on. Cutoff time is the maximum amount of time your algorithm is allowed to run, which you set yourself in the `sparkle_settings.ini` under section `general` as option `target_cutoff_time`. Seed is the seed for this run.
 
 When using Sparkle for algorithm configuration, this dictionary will also contain the (hyper)parameter values for your solver to use. These will all be in string format. See {ref}`Parameter configuration space <pcs-file>` for more information.
 
@@ -35,7 +34,7 @@ objective: any,
 solver_call: str (optional)
 ```
 
-Status can hold the following various values such as `{SUCCESS, TIMEOUT, CRASHED}`, see {ref}`SolverStatus <mod-types>` for a descriptin of the Enum. If the status is not known, reporting `SUCCESS` will allow Sparkle to continue, but may mean that Sparkle does not know when the algorithm crashed, and continues with faulty results.
+Status can hold the following various values such as `{SUCCESS, TIMEOUT, CRASHED}`, see {ref}`SolverStatus <mod-types>` for a description of the Enum. If the status is not known, reporting `SUCCESS` will allow Sparkle to continue, but may mean that Sparkle does not know when the algorithm crashed, and continues with faulty results.
 To return the values of your objectives, make sure to specify them with the exact same key string as they are specified in your Settings. This key is used to map it into the platform. If you have multiple objectives, simply place each key value pair in the dictionary.
 The solver_call is only used for logging purposes, to allow for easy inspection of the solver wrapper's subprocess.
 
@@ -55,5 +54,5 @@ In this file you should enter all configurable parameters of your algorithm. Not
 algorithm should not be configured and therefore should also not be included in the PCS file.
 
 ```{warning}
-Although you can specify _default_ values for your parameters, it is not guaranteed each parameter will always be present in the input dictionary. It is therefore strongly encouraged to have the default values available for each parameter in your wrapper.
+Although you can specify _default_ values for your parameters, it is not guaranteed each parameter will always be present in the input dictionary. It is therefore strongly encouraged to have the default/back up values available for each parameter in your wrapper.
 ```
