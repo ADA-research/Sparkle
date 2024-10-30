@@ -68,7 +68,7 @@ sparkle construct_portfolio_selector --objectives quality
 
 #### Run on a single instance
 
-Run the portfolio selector on a *single* testing instance; the result will be printed to the command line. We again set the objective to quality.
+Run the portfolio selector on a *single* testing instance; the result will be printed to the command line if you add `--run-on local` to the command. We again set the objective to quality.
 
 ```bash
 sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/Banking2.model Examples/Resources/CCAG/Instances/CCAG2/Banking2.constraints --objectives quality
