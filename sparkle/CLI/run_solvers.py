@@ -20,8 +20,8 @@ from sparkle.CLI.help import argparse_custom as ac
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
-
+    parser = argparse.ArgumentParser(
+        description="Run all solvers on all instances to get their performance data.")
     parser.add_argument(*ac.RecomputeRunSolversArgument.names,
                         **ac.RecomputeRunSolversArgument.kwargs)
     parser.add_argument(*ac.SparkleObjectiveArgument.names,
@@ -34,7 +34,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
-
     return parser
 
 
@@ -70,9 +69,8 @@ def running_solvers_performance_data(
     jobs = performance_dataframe.get_job_list(rerun=rerun)
     num_jobs = len(jobs)
 
-    cutoff_time_str = str(gv.settings().get_general_target_cutoff_time())
-
-    print(f"Cutoff time for each solver run: {cutoff_time_str} seconds")
+    print("Cutoff time for each solver run: "
+          f"{gv.settings().get_general_target_cutoff_time()} seconds")
     print(f"Total number of jobs to run: {num_jobs}")
 
     # If there are no jobs, stop
@@ -175,7 +173,8 @@ def run_solvers_on_instances(
               f'{",".join(r.run_id for r in runs if r is not None)}')
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the run solvers command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -183,25 +182,21 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file
         gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
-
     if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
             args.objectives, SettingState.CMD_LINE
         )
-
     if args.target_cutoff_time is not None:
         gv.settings().set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
-
     if args.run_on is not None:
         gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_SOLVERS])
 
@@ -214,7 +209,13 @@ if __name__ == "__main__":
     # Write settings to file before starting, since they are used in callback scripts
     gv.settings().write_used_settings()
 
+    run_on = gv.settings().get_run_on()
     run_solvers_on_instances(
         recompute=args.recompute,
         also_construct_selector_and_report=args.also_construct_selector_and_report,
         run_on=run_on)
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

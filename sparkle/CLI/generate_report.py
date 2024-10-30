@@ -18,7 +18,7 @@ from sparkle.platform import \
     generate_report_for_parallel_portfolio as sgrfpph
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
-from sparkle.instance import instance_set
+from sparkle.instance import Instance_Set
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.platform.output.configuration_output import ConfigurationOutput
 from sparkle.platform.output.selection_output import SelectionOutput
@@ -32,10 +32,10 @@ from sparkle.CLI.help.nicknames import resolve_object_name
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
-        description=("Without any arguments a report for the most recent algorithm "
-                     "selection or algorithm configuration procedure is generated."),
-        epilog=("Note that if a test instance set is given, the training instance set "
-                "must also be given."))
+        description="Without any arguments a report for the most recent algorithm "
+                    "selection or algorithm configuration procedure is generated.",
+        epilog="Note that if a test instance set is given, the training instance set "
+               "must also be given.")
     # Configuration arguments
     parser.add_argument(*ac.SolverReportArgument.names,
                         **ac.SolverReportArgument.kwargs)
@@ -60,8 +60,8 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
-    # Compare current settings to latest.ini
+def main(argv: list[str]) -> None:
+    """Generate a report for an executed experiment."""
     prev_settings = Settings(PurePath("Settings/latest.ini"))
 
     # Log command call
@@ -71,22 +71,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
-    selection = args.selection
-    test_case_dir = args.test_case_directory
-    only_json = args.only_json
-
-    solver = resolve_object_name(args.solver,
-                                 gv.solver_nickname_mapping,
-                                 gv.settings().DEFAULT_solver_dir, Solver)
-    instance_set_train = resolve_object_name(
-        args.instance_set_train,
-        gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
-    instance_set_test = resolve_object_name(
-        args.instance_set_train,
-        gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
+    args = parser.parse_args(argv)
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.GENERATE_REPORT])
 
@@ -98,6 +83,21 @@ if __name__ == "__main__":
     if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
             args.objectives, SettingState.CMD_LINE)
+    selection = args.selection
+    test_case_dir = args.test_case_directory
+    only_json = args.only_json
+
+    solver = resolve_object_name(args.solver,
+                                 gv.solver_nickname_mapping,
+                                 gv.settings().DEFAULT_solver_dir, Solver)
+    instance_set_train = resolve_object_name(
+        args.instance_set_train,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.settings().DEFAULT_instance_dir, Instance_Set)
+    instance_set_test = resolve_object_name(
+        args.instance_set_train,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.settings().DEFAULT_instance_dir, Instance_Set)
 
     Settings.check_settings_changes(gv.settings(), prev_settings)
     # If no arguments are set get the latest scenario
@@ -142,13 +142,11 @@ if __name__ == "__main__":
                                           / "performance_data.csv").exists():
             test_data = PerformanceDataFrame(test_case_path / "performance_data.csv")
         # Create machine readable selection output
-        instance_folders = set(Path(instance).parent
-                               for instance in train_data.instances)
+        instance_dirs = set(Path(instance).parent for instance in train_data.instances)
         instance_sets = []
-        for dir in instance_folders:
-            set = instance_set(dir)
-            instance_sets.append(set)
-        test_set = None if test_case_dir is None else instance_set(Path(test_case_dir))
+        for dir in instance_dirs:
+            instance_sets.append(Instance_Set(dir))
+        test_set = None if test_case_dir is None else Instance_Set(Path(test_case_dir))
         cutoff_time = gv.settings().get_general_target_cutoff_time()
         output = gv.settings().DEFAULT_selection_output_analysis
         selection_output = SelectionOutput(
@@ -214,9 +212,6 @@ if __name__ == "__main__":
             print(f"Usage: {sys.argv[0]} --solver <solver> [--instance-set-train "
                   "<instance-set-train>] [--instance-set-test <instance-set-test>]")
             sys.exit(-1)
-        instance_set_train_name = instance_set_train.name
-        gv.settings().get_general_sparkle_configurator()\
-            .set_scenario_dirs(solver, instance_set_train)
         # Generate a report depending on which instance sets are provided
         if flag_instance_set_train or flag_instance_set_test:
             # Check if there are result to generate a report from
@@ -238,19 +233,9 @@ if __name__ == "__main__":
             sys.exit(-1)
         # Extract config scenario data for report, but this should be read from the
         # scenario file instead as we can't know wether features were used or not now
-        number_of_runs = gv.settings().get_config_number_of_runs()
-        solver_calls = gv.settings().get_config_solver_calls()
-        cpu_time = gv.settings().get_config_cpu_time()
-        wallclock_time = gv.settings().get_config_wallclock_time()
-        cutoff_time = gv.settings().get_general_target_cutoff_time()
-        cutoff_length = gv.settings().get_configurator_target_cutoff_length()
-        sparkle_objectives =\
-            gv.settings().get_general_sparkle_objectives()
         configurator = gv.settings().get_general_sparkle_configurator()
-        configurator.scenario = configurator.scenario_class(
-            solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
-            wallclock_time, cutoff_time, cutoff_length, sparkle_objectives)
-        configurator.scenario._set_paths(configurator.output_path)
+        config_scenario = gv.latest_scenario().get_configuration_scenario(
+            configurator.scenario_class)
         ablation_scenario = None
         if args.flag_ablation:
             ablation_scenario = AblationScenario(
@@ -258,12 +243,10 @@ if __name__ == "__main__":
                 gv.settings().DEFAULT_ablation_output)
 
         # Create machine readable output
-        solver_name = gv.latest_scenario().get_config_solver().name
-        instance_set_name = gv.latest_scenario().get_config_instance_set_train().name
         output = gv.settings().DEFAULT_configuration_output_analysis
-        config_output = ConfigurationOutput(configurator.scenario.directory,
-                                            solver, configurator,
-                                            instance_set_train,
+        config_output = ConfigurationOutput(config_scenario.directory,
+                                            configurator,
+                                            config_scenario,
                                             instance_set_test,
                                             output)
         config_output.write_output()
@@ -278,11 +261,16 @@ if __name__ == "__main__":
                 gv.settings().DEFAULT_configuration_output_analysis,
                 gv.settings().DEFAULT_latex_source,
                 gv.settings().DEFAULT_latex_bib,
-                instance_set_train,
                 gv.settings().get_general_extractor_cutoff_time(),
+                config_scenario,
                 instance_set_test,
                 ablation=ablation_scenario
             )
 
     # Write used settings to file
     gv.settings().write_used_settings()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

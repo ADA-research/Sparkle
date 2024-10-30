@@ -10,9 +10,7 @@
    :alt: Unit tests
 .. image:: _static/coverage/coverage-badge.svg
    :target: _static/coverage/index.html
-   :alt: Test Coverage
-.. image:: https://github.com/ada-research/sparkle/actions/workflows/unittest.yml/badge.svg?event=push
-   :alt: Tests passing
+   :alt: PyTest Coverage
 .. image:: https://github.com/ada-research/sparkle/actions/workflows/linter.yml/badge.svg?event=push
    :alt: Linter
 .. image:: https://github.com/ada-research/sparkle/actions/workflows/documentation.yml/badge.svg?event=push
@@ -78,6 +76,7 @@ Note that a direct installation through Pip does not handle certain dependencies
 Asside from several package dependencies, Sparkle's package / CLI relies on a few user supplied executables:
 - `LaTex` compiler ([pdflatex](https://gist.github.com/rain1024/98dd5e2c6c8c28f9ea9d)) for report generation
 - `Java`, tested with version 1.8.0_402, in order to use SMAC2
+- `R` 4.3.1, in order to use IRACE
 
 Other dependencies are handled by the Conda environment, but if that is not an option for you please ensure you have the following:
 
@@ -163,7 +162,9 @@ Brian Schiller
 ### Contact
 sparkle@aim.rwth-aachen.de
 
+### Sponsors
 
+The development of Sparkle is partially sponsored by the [Alexander von Humboldt foundation](https://www.humboldt-foundation.de/en/).
 
 
 ```{toctree}
@@ -176,6 +177,7 @@ tutorials
 wrappers
 commands
 platform
+configurators
 ```
 
 ```{toctree}

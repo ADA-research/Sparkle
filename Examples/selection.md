@@ -56,7 +56,6 @@ To make sure feature computation and solver performance computation are done bef
 sparkle wait
 ```
 
-
 Now we can construct a portfolio selector, using the previously computed features and the results of running the solvers. The `--selector-timeout` argument determines for how many seconds we will train our selector for. We can set the flag `--solver-ablation` for actual marginal contribution computation later.
 
 ```bash
@@ -76,7 +75,7 @@ sparkle generate report
 
 #### Run on a single instance
 
-Run the portfolio selector on a *single* testing instance; the result will be printed to the command line
+Run the portfolio selector on a *single* testing instance; the result will be printed to the command line if you add `--run-on local` to the command.
 
 ```bash
 sparkle run portfolio selector Examples/Resources/Instances/PTN2/plain7824.cnf
@@ -101,7 +100,6 @@ sparkle generate report
 
 By default the `generate_report` command will create a report for the most recent instance set. To generate a report for an older instance set, the desired instance set can be specified with: `--test-case-directory Test_Cases/PTN2/`
 
-
 ### Comparing against SATZilla 2024
 
 If you wish to compare two feature extractors against one another, you need to remove the previous extractor from the platform (Or create a new platform from scratch) by running:
@@ -122,7 +120,6 @@ We can also investigate a different data set, SAT Competition 2023 for which Spa
 
 ```bash
 sparkle remove instances PTN
-sparkle remove instances PTN2
 sparkle add instances Examples/Resources/Instances/SATCOMP2023_SUB
 ```
 
@@ -131,6 +128,13 @@ We compute the features for the new extractor and new instances.
 ```bash
 sparkle compute features
 sparkle wait  # Wait for it to complete before continuing
+```
+
+And run the solvers on the new data set.
+
+```bash
+sparkle run solvers
+sparkle wait
 ```
 
 Now we can train a selector based on these features.

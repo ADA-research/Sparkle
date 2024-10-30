@@ -1,11 +1,17 @@
 """Test the about CLI entry point."""
 import pytest
-import subprocess
+from pathlib import Path
+
+from sparkle.CLI import about
 
 
 @pytest.mark.integration
-def test_about_command() -> None:
+def test_about_command(tmp_path: Path,
+                       monkeypatch: pytest.MonkeyPatch) -> None:
     """Test about command."""
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     # Smoke test
-    call = subprocess.run(["sparkle", "about"])
-    assert call.returncode == 0
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        about.main([])
+        assert pytest_wrapped_e.type is SystemExit
+        assert pytest_wrapped_e.value.code == 0

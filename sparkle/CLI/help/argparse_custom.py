@@ -86,18 +86,17 @@ AblationArgument = ArgumentContainer(names=["--ablation"],
                                      kwargs={"required": False,
                                              "action": "store_true",
                                              "help": "run ablation after configuration"})
-SelectorAblationArgument =\
-    ArgumentContainer(names=["--solver-ablation"],
-                      kwargs={"required": False,
-                              "action": "store_true",
-                              "help": "construct a selector for "
-                                      "each solver ablation combination"})
 
 ActualMarginalContributionArgument = \
     ArgumentContainer(names=["--actual"],
                       kwargs={"action": "store_true",
                               "help": "compute the marginal contribution "
                                       "for the actual selector"})
+
+AllJobsArgument = \
+    ArgumentContainer(names=["--all"],
+                      kwargs={"action": "store_true",
+                              "help": "use all known job ID(s) for the command"})
 
 AlsoConstructSelectorAndReportArgument = \
     ArgumentContainer(names=["--also-construct-selector-and-report"],
@@ -117,8 +116,8 @@ CleanupArgumentRemove = \
                                       "user data such as InstanceSets and Solvers"})
 
 ConfiguratorArgument = ArgumentContainer(names=["--configurator"],
-                                         kwargs={"type": Path,
-                                                 "help": "path to configurator"})
+                                         kwargs={"type": str,
+                                                 "help": "name of the configurator"})
 
 CPUTimeArgument = \
     ArgumentContainer(names=["--cpu-time"],
@@ -165,7 +164,8 @@ InstancePathPositional = ArgumentContainer(names=["instance_path"],
                                                    "help": "Path to an instance (set)"})
 
 InstancePath = ArgumentContainer(names=["--instance-path"],
-                                 kwargs={"type": Path,
+                                 kwargs={"required": True,
+                                         "type": Path,
                                          "help": "Path to an instance (set)"})
 
 InstanceSetTestArgument = \
@@ -222,7 +222,7 @@ JobIDsArgument = ArgumentContainer(names=["--job-ids"],
                                            "nargs": "+",
                                            "type": str,
                                            "default": None,
-                                           "help": "job ID to wait for"})
+                                           "help": "job ID(s) to use for the command"})
 
 NicknameFeatureExtractorArgument = \
     ArgumentContainer(names=["--nickname"],
@@ -263,7 +263,7 @@ NumberOfRunsConfigurationArgument = \
 NumberOfRunsAblationArgument = \
     ArgumentContainer(names=["--number-of-runs"],
                       kwargs={"type": int,
-                              "default": Settings.DEFAULT_config_number_of_runs,
+                              "default": Settings.DEFAULT_configurator_number_of_runs,
                               "action": SetByUser,
                               "help": "Number of configuration runs to execute"})
 
@@ -343,6 +343,13 @@ SelectionReportArgument = \
                       kwargs={"action": "store_true",
                               "help": "set to generate a normal selection report"})
 
+SelectorAblationArgument =\
+    ArgumentContainer(names=["--solver-ablation"],
+                      kwargs={"required": False,
+                              "action": "store_true",
+                              "help": "construct a selector for "
+                                      "each solver ablation combination"})
+
 SettingsFileArgument = \
     ArgumentContainer(names=["--settings-file"],
                       kwargs={"type": Path,
@@ -363,6 +370,11 @@ SnapshotArgument = ArgumentContainer(names=["snapshot_file_path"],
                                      kwargs={"metavar": "snapshot-file-path",
                                              "type": str,
                                              "help": "path to the snapshot file"})
+
+SnapshotNameArgument = ArgumentContainer(names=["--name"],
+                                         kwargs={"required": False,
+                                                 "type": str,
+                                                 "help": "name of the snapshot"})
 
 SolverArgument = ArgumentContainer(names=["--solver"],
                                    kwargs={"required": True,

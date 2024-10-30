@@ -20,7 +20,8 @@ from sparkle.solver import Extractor
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     # Define command line arguments
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Add a feature extractor to the platform.")
     parser.add_argument(*ac.ExtractorPathArgument.names,
                         **ac.ExtractorPathArgument.kwargs)
     group_extractor_run = parser.add_mutually_exclusive_group()
@@ -31,14 +32,15 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the add feature extractor command."""
     # Log command call
     sl.log_command(sys.argv)
 
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.ADD_FEATURE_EXTRACTOR])
 
@@ -87,3 +89,8 @@ if __name__ == "__main__":
 
     # Write used settings to file
     gv.settings().write_used_settings()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

@@ -137,7 +137,7 @@ To define an objective for your algorithms, you can define them in the `general`
 objective = PAR10,loss,accuracy:max
 ```
 
-In the above example we have defined three objectives: Penalised Average Runtime, the loss function value of our algorithm on the task, and the accuracy of our algorithm on the task. Note that objectives are by default assumed to be _minimised_ and we must therefore specify **accuracy_:max_** to clarifiy this. The platform predefines for the user three objectives: cpu time, wallclock time and memory. These objectives will always recorded next to whatever the user may choose.
+In the above example we have defined three objectives: Penalised Average Runtime, the loss function value of our algorithm on the task, and the accuracy of our algorithm on the task. Note that objectives are by default assumed to be _minimised_ and we must therefore specify `accuracy`_`:max`_ to clarifiy this. The platform predefines for the user three objectives: cpu time, wallclock time and memory. These objectives will always recorded next to whatever the user may choose.
 
 ```{note}
 Although the Platform supports multiple objectives to be registered for any Solver, not all used components, such as SMAC and Ablation Analysis, support Multi-Objective optimisation. In any such case, the first defined objective is considered the most important and used in these situations
@@ -149,11 +149,11 @@ Moreover, when aggregating an objective over various dimensions, Sparkle assumes
 - When aggregating multiple runs on the same instances, we aggregate by taking the mean.
 - When aggregating multiple instances, we aggregate by taking the mean.
 
-It is possible to redefine these attributes for your specific objective. The platform looks for a file called `objective.py` in your Settings directory of the platform, and reads your own object definitions, which can overwrite existing definitions in the library. E.g. when creating an objective definition that already exists in the library, the user definiton simply overrules the library definition. Note that there are a few constraints and details:
+It is possible to redefine these attributes for your specific objective. The platform looks for a file called `objective.py` in your Settings directory of the platform, and reads your own object definitions. These definitions can either add new objectives to the platform, but also can overwrite existing definitions in the library. E.g. when creating an objective definition with the same name of one that already exists in the library, the user definiton simply overrules the library definition. Note that there are a few constraints and details:
 
 - The objective must inherit from the `SparkleObjective` class
-- The objective can be parametrised by an integer, such as `PAR` followed by `10` is interpreted as instantiating the `PAR` class with argument `10`
 - The classnames are constrained to the format of alphabetical letters followed by numericals
+- The objective can be parametrised by an integer, such as `PAR` followed by `10` is interpreted as instantiating the `PAR` class with argument `10`
 - If your objective is defined over time, you can indicate this using the `UseTime` enum, see the {ref}`types module <mod-types>`
 
 
@@ -370,20 +370,21 @@ The options below are exclusive to `srun` and are thus discouraged:
 Sparkle has a large flexibility with passing along settings. Settings provided through different channels have different priorities
 as follows:
 
-- Default –- Default values will be overwritten if a value is given
+- Default - Default values will be overwritten if a value is given
   through any other mechanism;
-- File –- Settings form the `Settings/sparkle_settings.ini` overwrite
+- File – Settings form the `Settings/sparkle_settings.ini` overwrite
   default values, but are overwritten by settings given through the
   command line;
-- Command line Settings file -– Settings files provided through the command line,
+- Command line Settings file – Settings files provided through the command line,
   overwrite default values and other settings files.
-- Command line –- Settings given through the command line overwrite all
+- Command line - Settings given through the command line overwrite all
   other settings, including settings files provided through the command
   line.
+- Configurators - Each configurator has its own option section and these values will take precedence of any value set in the general configurator section.
 
-## Required packages
+## Reporting packages
 
-Other software used by Sparkle:
+The platform depends on the following user supplied packages to generate its reports:
 
 - `pdflatex`
 - `latex`

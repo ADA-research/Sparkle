@@ -26,7 +26,7 @@ from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
-from sparkle.instance import instance_set, InstanceSet
+from sparkle.instance import Instance_Set, InstanceSet
 from sparkle.types import SolverStatus, resolve_objective, UseTime
 
 
@@ -63,7 +63,8 @@ def run_parallel_portfolio(instances_set: InstanceSet,
                 instance.absolute(),
                 objectives=objectives,
                 seed=seed,
-                cutoff_time=cutoff)
+                cutoff_time=cutoff,
+                log_dir=portfolio_path)
             cmd_list.append((" ".join(solver_call_list)).replace("'", '"'))
     # Jobs are added in to the runrunner object in the same order they are provided
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
@@ -72,7 +73,6 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         cmd=cmd_list,
         name=CommandName.RUN_PARALLEL_PORTFOLIO,
         parallel_jobs=parallel_jobs,
-        path=portfolio_path,
         base_dir=sl.caller_log_dir,
         srun_options=["-N1", "-n1"] + sbatch_options,
         sbatch_options=sbatch_options
@@ -131,7 +131,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
     # Attempt to verify that all logs have been written (Slurm I/O latency)
     for index, cmd in enumerate(cmd_list):
         runsolver_configuration = cmd.split(" ")[:11]
-        logs = [portfolio_path / p for p in runsolver_configuration
+        logs = [Path(p) for p in runsolver_configuration
                 if Path(p).suffix in [".log", ".val", ".rawres"]]
         if not all([p.exists() for p in logs]):
             time.sleep(check_interval)
@@ -140,8 +140,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
     for index, cmd in enumerate(cmd_list):
         runsolver_configuration = cmd.split(" ")[:11]
         solver_output = Solver.parse_solver_output(run.jobs[i].stdout,
-                                                   runsolver_configuration,
-                                                   portfolio_path)
+                                                   runsolver_configuration)
         solver_index = int((index % n_instance_jobs) / seeds_per_solver)
         solver_name = solvers[solver_index].name
         instance_name = instances_set._instance_names[int(index / n_instance_jobs)]
@@ -216,7 +215,8 @@ def parser_function() -> argparse.ArgumentParser:
     Returns:
         parser: The parser with the parsed command line arguments
     """
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Run a portfolio of solvers on an "
+                                                 "instance set in parallel.")
     parser.add_argument(*ac.InstancePath.names,
                         **ac.InstancePath.kwargs)
     parser.add_argument(*ac.NicknamePortfolioArgument.names,
@@ -236,7 +236,8 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main method of run parallel portfolio command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -244,7 +245,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if args.solvers is not None:
         solver_paths = [resolve_object_name("".join(s),
                                             target_dir=gv.settings().DEFAULT_solver_dir)
@@ -290,7 +291,8 @@ if __name__ == "__main__":
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings().DEFAULT_instance_dir,
-        instance_set)
+        Instance_Set)
+
     print(f"Running on {data_set.size} instance(s)...")
 
     if args.cutoff_time is not None:
@@ -332,3 +334,8 @@ if __name__ == "__main__":
     # Write used settings to file
     gv.settings().write_used_settings()
     print("Running Sparkle parallel portfolio is done!")
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

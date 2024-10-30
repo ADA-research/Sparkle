@@ -71,7 +71,7 @@ The coding style consistency is a work in progress, and existing code may not ad
 
 ### Testing
 1. Make sure the unit tests pass by running `pytest`.
-2. Make sure the integration tests (see `tests/CLI/`) relevant for the commands affected by the changes pass by running them. Optionally run all of them with `tests/CLI/all.sh`.
+2. Make sure the integration tests (see `tests/CLI/`) relevant for the commands affected by the changes pass by running them. You can execute the integration tests with `pytest --integration`. Optionally run all of the pytests with `pytest --all`.
 3. Make sure the examples relevant to the changes execute correctly (see the `.sh` files in `Examples/`).
 
 ## Release protocol
@@ -80,8 +80,8 @@ When releasing a new version (including bugfix versions) of Sparkle to the `main
 ### Checks
 1. Freshly install the conda environment. Remove the old one with `conda env remove -n sparkle` and create it again with `conda env create -f environment.yml` or with `conda env create -f dev-env.yml`. In principle, these environments are equal except that the dev-env has a few extra libs to run pytests and flake8.
 2. Make sure the code style rules pass by running `flake8` (make sure the `sparkle` conda environment is installed and active).
-3. Make sure the unit tests pass by running `pytest` (make sure the `sparkle` conda environment is installed and active).
-4. Make sure the integration tests pass by running `tests/CLI/all.sh` (make sure the `sparkle` conda environment is installed and active).
+3. Make sure the unit tests pass by running `pytest` (make sure the `sparkle` conda environment is installed and active). You can combine this step and the next step by running `pytest --all`.
+4. Make sure the integration tests pass by running `pytest --integration` (make sure the `sparkle` conda environment is installed and active).
 5. Make sure the examples in `Examples/` execute correctly (all `.sh` files).
 6. Only if all checks were passed successfully, move on to the steps for release. Otherwise, first fix what is failing and then re-do all the checks.
 

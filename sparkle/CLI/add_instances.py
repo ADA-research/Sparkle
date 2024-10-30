@@ -9,7 +9,7 @@ import shutil
 from sparkle.CLI.help import global_variables as gv
 from sparkle.platform import file_help as sfh
 from sparkle.platform.settings_objects import SettingState
-from sparkle.instance import instance_set
+from sparkle.instance import Instance_Set
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from sparkle.CLI.compute_features import compute_features
 from sparkle.CLI.run_solvers import running_solvers_performance_data
@@ -21,7 +21,7 @@ from sparkle.CLI.help import argparse_custom as ac
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Add instances to the platform.")
     parser.add_argument(*ac.InstancesPathArgument.names,
                         **ac.InstancesPathArgument.kwargs)
     parser.add_argument(*ac.RunExtractorNowArgument.names,
@@ -36,7 +36,8 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the add instances command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -44,7 +45,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     instances_source = Path(args.instances_path)
     instances_target = gv.settings().DEFAULT_instance_dir / instances_source.name
 
@@ -67,7 +68,7 @@ if __name__ == "__main__":
                                      gv.instances_nickname_path, key=args.nickname)
 
     print(f"Start adding all instances in directory {instances_source} ...")
-    new_instance_set = instance_set(instances_source)
+    new_instance_set = Instance_Set(instances_source)
 
     instances_target.mkdir(parents=True)
     print("Copying files...")
@@ -76,7 +77,7 @@ if __name__ == "__main__":
         shutil.copy(instance_path_source, instances_target)
     print("\nCopying done!")
     # Refresh the instance set as the target instance set
-    new_instance_set = instance_set(instances_target)
+    new_instance_set = Instance_Set(instances_target)
 
     # Add the instances to the Feature Data / Performance Data
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
@@ -106,3 +107,8 @@ if __name__ == "__main__":
 
     # Write used settings to file
     gv.settings().write_used_settings()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

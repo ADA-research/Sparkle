@@ -2,6 +2,22 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.9.0] - 2024/10/30
+
+### Added
+- Added cancel command to Sparkle to cancel Slurm jobs including interactive table to make your selection [SPRK-338]
+- Added the IRACE configurator to Sparkle, which works 'out of the box' with the Conda Environment (Only R is user supplied) [SPRK-290]
+
+### Changed
+- RunSolver logging paths are now passed as a parameter instead of placed in CWD [SPRK-344]
+- Most commands are no longer using a specific WD and instead are executed from the platform dir
+- ConfigurationScenarios can now be re-created from file and be detected based on Configurator/Solver/Instance set combination [SPRK-201]
+- Updated various package dependencies to their latest versions
+
+### Fixed
+- Reporting changes when default settings were used [SPRK-319]
+- Bug when generating configuration report for quality [SPRK-298]
+
 ## [0.8.9] - 2024/09/27
 - Various updates to Documentation, automated testing and CI pipelines
 

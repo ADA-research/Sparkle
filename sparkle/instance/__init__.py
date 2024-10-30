@@ -4,7 +4,7 @@ from sparkle.instance.instances import \
 from pathlib import Path
 
 
-def instance_set(target: any) -> InstanceSet:
+def Instance_Set(target: any) -> InstanceSet:
     """The combined interface for all instance set types."""
     if ((isinstance(target, Path)
             and (target / MultiFileInstanceSet.instance_csv).exists())

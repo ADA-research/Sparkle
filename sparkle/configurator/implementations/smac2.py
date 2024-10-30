@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Configurator class to use different configurators like SMAC."""
-
+"""Configurator classes to implement SMAC2 in Sparkle."""
 from __future__ import annotations
-from typing import Callable
 from pathlib import Path
-import ast
-from statistics import mean
-import operator
 import fcntl
 import glob
 import shutil
@@ -20,7 +15,7 @@ from runrunner import Runner, Run
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
-from sparkle.instance import InstanceSet
+from sparkle.instance import InstanceSet, Instance_Set
 from sparkle.types import SparkleObjective
 
 
@@ -28,10 +23,13 @@ class SMAC2(Configurator):
     """Class for SMAC2 (Java) configurator."""
     configurator_path = Path(__file__).parent.parent.parent.resolve() /\
         "Components/smac-v2.10.03-master-778"
-    target_algorithm = "smac_target_algorithm.py"
+    configurator_executable = configurator_path / "smac"
+    configurator_target = configurator_path / "smac_target_algorithm.py"
+
+    version = "2.10.03"
+    full_name = "Sequential Model-based Algorithm Configuration"
 
     def __init__(self: SMAC2,
-                 objectives: list[SparkleObjective],
                  base_dir: Path,
                  output_path: Path) -> None:
         """Returns the SMAC configurator, Java SMAC V2.10.03.
@@ -46,12 +44,14 @@ class SMAC2(Configurator):
         return super().__init__(
             validator=Validator(out_dir=output_path),
             output_path=output_path,
-            executable_path=SMAC2.configurator_path / "smac",
-            configurator_target=SMAC2.configurator_path / SMAC2.target_algorithm,
-            objectives=objectives,
             base_dir=base_dir,
             tmp_path=output_path / "tmp",
             multi_objective_support=False)
+
+    @property
+    def name(self: SMAC2) -> str:
+        """Returns the name of the configurator."""
+        return SMAC2.__name__
 
     @property
     def scenario_class(self: Configurator) -> ConfigurationScenario:
@@ -78,46 +78,49 @@ class SMAC2(Configurator):
         Returns:
             A RunRunner Run object.
         """
-        self.scenario = scenario
-        self.scenario.create_scenario(parent_directory=self.output_path)
-        output_csv = self.scenario.validation / "configurations.csv"
+        if shutil.which("java") is None:
+            raise RuntimeError(
+                "SMAC2 requires Java 1.8.0_402, but Java is not installed. "
+                "Please ensure Java is installed and try again."
+            )
+        scenario.create_scenario()
+        output_csv = scenario.validation / "configurations.csv"
         output_csv.parent.mkdir(exist_ok=True, parents=True)
-        output = [f"{(self.scenario.result_directory).absolute()}/"
-                  f"{self.scenario.name}_seed_{seed}_smac.txt"
-                  for seed in range(self.scenario.number_of_runs)]
+        output = [f"{(scenario.results_directory).absolute()}/"
+                  f"{scenario.name}_seed_{seed}_smac.txt"
+                  for seed in range(scenario.number_of_runs)]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{SMAC2.__name__} {output[seed]} {output_csv.absolute()} "
-                f"{self.executable_path.absolute()} "
-                f"--scenario-file {(self.scenario.scenario_file_path).absolute()} "
+                f"{SMAC2.configurator_executable.absolute()} "
+                f"--scenario-file {scenario.scenario_file_path.absolute()} "
                 f"--seed {seed} "
-                f"--execdir {self.scenario.tmp.absolute()}"
-                for seed in range(self.scenario.number_of_runs)]
-        parallel_jobs = self.scenario.number_of_runs
+                f"--execdir {scenario.tmp.absolute()}"
+                for seed in range(scenario.number_of_runs)]
+        parallel_jobs = scenario.number_of_runs
         if num_parallel_jobs is not None:
-            parallel_jobs = max(num_parallel_jobs,
-                                self.scenario.number_of_runs)
-        configuration_run = rrr.add_to_queue(
+            parallel_jobs = max(num_parallel_jobs, scenario.number_of_runs)
+        runs = [rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
-            name="configure_solver",
+            name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
             base_dir=base_dir,
+            path=scenario.results_directory,
             output_path=output,
             parallel_jobs=parallel_jobs,
             sbatch_options=sbatch_options,
-            srun_options=["-N1", "-n1"])
-        runs = [configuration_run]
+            srun_options=["-N1", "-n1"])]
 
         if validate_after:
             self.validator.out_dir = output_csv.parent
             self.validator.tmp_out_dir = base_dir
             validate_run = self.validator.validate(
-                [scenario.solver] * self.scenario.number_of_runs,
-                output_csv.absolute(),
+                [scenario.solver] * scenario.number_of_runs,
+                output_csv,
                 [scenario.instance_set],
-                [self.scenario.sparkle_objective],
+                [scenario.sparkle_objective],
                 scenario.cutoff_time,
                 subdir=Path(),
-                dependency=configuration_run,
+                dependency=runs,
                 sbatch_options=sbatch_options,
                 run_on=run_on)
             runs.append(validate_run)
@@ -127,52 +130,10 @@ class SMAC2(Configurator):
                 run.wait()
         return runs
 
-    def get_optimal_configuration(
-            self: Configurator,
-            solver: Solver,
-            instance_set: InstanceSet,
-            objective: SparkleObjective = None,
-            aggregate_config: Callable = mean) -> tuple[float, str]:
-        """Returns optimal value and configuration string of solver on instance set."""
-        if self.scenario is None:
-            self.set_scenario_dirs(solver, instance_set)
-        results = self.validator.get_validation_results(
-            solver,
-            instance_set,
-            source_dir=self.scenario.validation,
-            subdir=self.scenario.validation.relative_to(self.validator.out_dir))
-        # Group the results per configuration
-        if objective is None:
-            objective = self.objectives[0]
-        value_column = results[0].index(objective.name)
-        config_column = results[0].index("Configuration")
-        configurations = list(set(row[config_column] for row in results[1:]))
-        config_scores = []
-        for config in configurations:
-            values = [float(row[value_column])
-                      for row in results[1:] if row[1] == config]
-            config_scores.append(aggregate_config(values))
-
-        comparison = operator.lt if objective.minimise else operator.gt
-
-        # Return optimal value
-        min_index = 0
-        current_optimal = config_scores[min_index]
-        for i, score in enumerate(config_scores):
-            if comparison(score, current_optimal):
-                min_index, current_optimal = i, score
-
-        # Return the optimal configuration dictionary as commandline args
-        config_str = configurations[min_index].strip(" ")
-        if config_str.startswith("{"):
-            config = ast.literal_eval(config_str)
-            config_str = " ".join([f"-{key} '{config[key]}'" for key in config])
-        return current_optimal, config_str
-
     @staticmethod
     def organise_output(output_source: Path, output_target: Path = None) -> None | str:
         """Retrieves configurations from SMAC files and places them in output."""
-        call_key = SMAC2.target_algorithm
+        call_key = SMAC2.configurator_target.name
         # Last line describing a call is the best found configuration
         for line in reversed(output_source.open("r").readlines()):
             if call_key in line:
@@ -185,12 +146,6 @@ class SMAC2(Configurator):
                     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
                     fout.write(configuration + "\n")
                 break
-
-    def set_scenario_dirs(self: Configurator,
-                          solver: Solver, instance_set: InstanceSet) -> None:
-        """Patching method to allow the rebuilding of configuratio scenario."""
-        self.scenario = self.scenario_class(solver, instance_set)
-        self.scenario._set_paths(self.output_path)
 
     @staticmethod
     def get_smac_run_obj(objective: SparkleObjective) -> str:
@@ -228,13 +183,18 @@ class SMAC2(Configurator):
 
 class SMAC2Scenario(ConfigurationScenario):
     """Class to handle SMAC2 configuration scenarios."""
-    def __init__(self: ConfigurationScenario, solver: Solver,
-                 instance_set: InstanceSet, number_of_runs: int = None,
-                 solver_calls: int = None, cpu_time: int = None,
-                 wallclock_time: int = None, cutoff_time: int = None,
-                 cutoff_length: int = None,
-                 sparkle_objectives: list[SparkleObjective] = None,
-                 use_features: bool = None, configurator_target: Path = None,
+    def __init__(self: SMAC2Scenario, solver: Solver,
+                 instance_set: InstanceSet,
+                 sparkle_objectives: list[SparkleObjective],
+                 parent_directory: Path,
+                 number_of_runs: int = None,
+                 solver_calls: int = None,
+                 max_iterations: int = None,
+                 cpu_time: int = None,
+                 wallclock_time: int = None,
+                 cutoff_time: int = None,
+                 target_cutoff_length: str = None,
+                 use_cpu_time_in_tunertime: bool = None,
                  feature_data_df: pd.DataFrame = None)\
             -> None:
         """Initialize scenario paths and names.
@@ -242,49 +202,60 @@ class SMAC2Scenario(ConfigurationScenario):
         Args:
             solver: Solver that should be configured.
             instance_set: Instances object for the scenario.
+            sparkle_objectives: SparkleObjectives used for each run of the configuration.
+                Will be simplified to the first objective.
+            parent_directory: Directory in which the scenario should be created.
             number_of_runs: The number of configurator runs to perform
                 for configuring the solver.
             solver_calls: The number of times the solver is called for each
                 configuration run
+            max_iterations: The maximum number of iterations allowed for each
+                configuration run. [iteration-limit, numIterations, numberOfIterations]
             cpu_time: The time budget allocated for each configuration run. (cpu)
             wallclock_time: The time budget allocated for each configuration run.
                 (wallclock)
             cutoff_time: The maximum time allowed for each individual run during
                 configuration.
-            cutoff_length: The maximum number of iterations allowed for each
-                individual run during configuration.
-            sparkle_objectives: SparkleObjectives used for each run of the configuration.
-                Will be simplified to the first objective.
-            use_features: Boolean indicating if features should be used.
-            configurator_target: The target Python script to be called.
-                This script standardises Configurator I/O for solver wrappers.
+            target_cutoff_length: A domain specific measure of when the algorithm
+                should consider itself done.
+            use_cpu_time_in_tunertime: Whether to calculate SMAC2's own used time for
+                budget deduction. Defaults in SMAC2 to True.
             feature_data_df: If features are used, this contains the feature data.
                 Defaults to None.
         """
-        super().__init__(solver, instance_set, sparkle_objectives)
+        super().__init__(solver, instance_set, sparkle_objectives, parent_directory)
         self.solver = solver
         self.instance_set = instance_set
         self.name = f"{self.solver.name}_{self.instance_set.name}"
-        self.sparkle_objective = sparkle_objectives[0] if sparkle_objectives else None
+
+        if sparkle_objectives is not None:
+            if len(sparkle_objectives) > 1:
+                print("WARNING: SMAC2 does not have multi objective support. "
+                      "Only the first objective will be used.")
+            self.sparkle_objective = sparkle_objectives[0]
+        else:
+            self.sparkle_objective = None
 
         self.number_of_runs = number_of_runs
         self.solver_calls = solver_calls
         self.cpu_time = cpu_time
         self.wallclock_time = wallclock_time
         self.cutoff_time = cutoff_time
-        self.cutoff_length = cutoff_length
-        self.use_features = use_features
-        self.configurator_target = configurator_target
+        self.cutoff_length = target_cutoff_length
+        self.max_iterations = max_iterations
+        self.use_cpu_time_in_tunertime = use_cpu_time_in_tunertime
         self.feature_data = feature_data_df
 
-        self.parent_directory = Path()
-        self.directory = Path()
-        self.result_directory = Path()
-        self.scenario_file_path = Path()
-        self.feature_file_path = Path()
-        self.instance_file_path = Path()
+        # Scenario Paths
+        self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
+        self.tmp = self.directory / "tmp"
+        self.validation = self.directory / "validation"
+        self.results_directory = self.directory / "results"
 
-    def create_scenario(self: ConfigurationScenario, parent_directory: Path) -> None:
+        # SMAC2 Specific
+        self.outdir_train = self.directory / "outdir_train_configuration"
+
+    def create_scenario(self: SMAC2Scenario) -> None:
         """Create scenario with solver and instances in the parent directory.
 
         This prepares all the necessary subdirectories related to configuration.
@@ -292,49 +263,29 @@ class SMAC2Scenario(ConfigurationScenario):
         Args:
             parent_directory: Directory in which the scenario should be created.
         """
-        self._set_paths(parent_directory)
-        self._prepare_scenario_directory()
-        self._prepare_result_directory()
-        self._prepare_instances()
-
-        if self.use_features:
-            self._create_feature_file()
-
-        self._create_scenario_file()
-
-    def _set_paths(self: ConfigurationScenario, parent_directory: Path) -> None:
-        """Set the paths for the scenario based on the specified parent directory."""
-        self.parent_directory = parent_directory
-        self.directory = self.parent_directory / "scenarios" / self.name
-        self.result_directory = self.directory / "results"
-        self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
-        self.outdir_train = self.directory / "outdir_train_configuration"
-        self.tmp = self.directory / "tmp"
-        self.validation = self.directory / "validation"
-
-    def _prepare_scenario_directory(self: ConfigurationScenario) -> None:
-        """Delete old scenario dir, recreate it, create empty dirs inside."""
+        # Prepare scenario directory
         shutil.rmtree(self.directory, ignore_errors=True)
         self.directory.mkdir(parents=True)
-
         # Create empty directories as needed
         self.outdir_train.mkdir()
         self.tmp.mkdir()
+        self.results_directory.mkdir(parents=True)  # Prepare results directory
 
-    def _prepare_result_directory(self: ConfigurationScenario) -> None:
-        """Delete possible files in result directory."""
-        shutil.rmtree(self.result_directory, ignore_errors=True)
-        self.result_directory.mkdir(parents=True)
+        self._prepare_instances()
 
-    def _create_scenario_file(self: ConfigurationScenario) -> None:
+        if self.feature_data is not None:
+            self._create_feature_file()
+
+        self.create_scenario_file()
+
+    def create_scenario_file(self: SMAC2Scenario) -> Path:
         """Create a file with the configuration scenario.
 
         Writes supplementary information to the target algorithm (algo =) as:
         algo = {configurator_target} {solver_directory} {sparkle_objective}
         """
-        self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
         with self.scenario_file_path.open("w") as file:
-            file.write(f"algo = {self.configurator_target.absolute()} "
+            file.write(f"algo = {SMAC2.configurator_target.absolute()} "
                        f"{self.solver.directory.absolute()} {self.sparkle_objective} \n"
                        f"execdir = {self.tmp.absolute()}/\n"
                        f"deterministic = {1 if self.solver.deterministic else 0}\n"
@@ -345,25 +296,31 @@ class SMAC2Scenario(ConfigurationScenario):
                        f"outdir = {self.outdir_train.absolute()}\n"
                        f"instance_file = {self.instance_file_path.absolute()}\n"
                        f"test_instance_file = {self.instance_file_path.absolute()}\n")
-            if self.use_features:
-                file.write(f"feature_file = {self.feature_file_path}\n")
+            if self.max_iterations is not None:
+                file.write(f"iteration-limit = {self.max_iterations}\n")
             if self.wallclock_time is not None:
                 file.write(f"wallclock-limit = {self.wallclock_time}\n")
             if self.cpu_time is not None:
                 file.write(f"cputime-limit = {self.cpu_time}\n")
             if self.solver_calls is not None:
                 file.write(f"runcount-limit = {self.solver_calls}\n")
+            if self.feature_data is not None:
+                file.write(f"feature_file = {self.feature_file_path}\n")
+            if self.use_cpu_time_in_tunertime is not None:
+                file.write("use-cpu-time-in-tunertime = "
+                           f"{self.use_cpu_time_in_tunertime}\n")
             # We don't let SMAC do the validation
             file.write("validation = false" + "\n")
+        return self.scenario_file_path
 
-    def _prepare_instances(self: ConfigurationScenario) -> None:
+    def _prepare_instances(self: SMAC2Scenario) -> None:
         """Create instance list file without instance specifics."""
         self.instance_file_path.parent.mkdir(exist_ok=True, parents=True)
         with self.instance_file_path.open("w+") as file:
             for instance_path in self.instance_set._instance_paths:
                 file.write(f"{instance_path.absolute()}\n")
 
-    def _get_performance_measure(self: ConfigurationScenario) -> str:
+    def _get_performance_measure(self: SMAC2Scenario) -> str:
         """Retrieve the performance measure of the SparkleObjective.
 
         Returns:
@@ -373,14 +330,14 @@ class SMAC2Scenario(ConfigurationScenario):
             return "RUNTIME"
         return "QUALITY"
 
-    def _create_feature_file(self: ConfigurationScenario) -> None:
+    def _create_feature_file(self: SMAC2Scenario) -> None:
         """Create CSV file from feature data."""
         self.feature_file_path = Path(self.directory
                                       / f"{self.instance_set.name}_features.csv")
         self.feature_data.to_csv(self.directory
                                  / self.feature_file_path, index_label="INSTANCE_NAME")
 
-    def _clean_up_scenario_dirs(self: ConfigurationScenario,
+    def _clean_up_scenario_dirs(self: SMAC2Scenario,
                                 configurator_path: Path,) -> list[Path]:
         """Yield directories to clean up after configuration scenario is done.
 
@@ -396,15 +353,28 @@ class SMAC2Scenario(ConfigurationScenario):
             result.append(dir)
         return result
 
+    def serialize_scenario(self: SMAC2Scenario) -> dict:
+        """Transform ConfigurationScenario to dictionary format."""
+        return {
+            "number_of_runs": self.number_of_runs,
+            "solver_calls": self.solver_calls,
+            "cpu_time": self.cpu_time,
+            "wallclock_time": self.wallclock_time,
+            "cutoff_time": self.cutoff_time,
+            "cutoff_length": self.cutoff_length,
+            "max_iterations": self.max_iterations,
+            "sparkle_objective": self.sparkle_objective.name,
+            "feature_data": self.feature_data,
+            "use_cpu_time_in_tunertime": self.use_cpu_time_in_tunertime
+        }
+
     @staticmethod
-    def from_file(scenario_file: Path, solver: Solver, instance_set: InstanceSet,
-                  ) -> ConfigurationScenario:
-        """Reads scenario file and initalises ConfigurationScenario."""
-        config = {}
-        with scenario_file.open() as file:
-            for line in file:
-                key, value = line.strip().split(" = ")
-                config[key] = value
+    def from_file(scenario_file: Path) -> SMAC2Scenario:
+        """Reads scenario file and initalises SMAC2Scenario."""
+        config = {keyvalue[0]: keyvalue[1]
+                  for keyvalue in (line.strip().split(" = ", maxsplit=1)
+                                   for line in scenario_file.open().readlines()
+                                   if line.strip() != "")}
 
         # Collect relevant settings
         cpu_time = int(config["cpu_time"]) if "cpu_time" in config else None
@@ -412,21 +382,30 @@ class SMAC2Scenario(ConfigurationScenario):
             else None
         solver_calls = int(config["runcount-limit"]) if "runcount-limit" in config \
             else None
-        use_features = bool(config["feature_file"]) if "feature_file" in config \
+        max_iterations = int(config["iteration-limit"]) if "iteration-limit" in config \
             else None
+        use_cpu_time_in_tunertime = config["use-cputime-in-tunertime"]\
+            if "use-cputime-in-tunertime" in config else None
 
-        objective_str = config["algo"].split(" ")[-1]
+        _, solver_path, objective_str = config["algo"].split(" ")
         objective = SparkleObjective(objective_str)
+        solver = Solver(Path(solver_path.strip()))
+        # Extract the instance set from the instance file
+        instance_file_path = Path(config["instance_file"])
+        instance_set_path = Path(instance_file_path.open().readline().strip()).parent
+        instance_set = Instance_Set(Path(instance_set_path))
         results_folder = scenario_file.parent / "results"
         state_run_dirs = [p for p in results_folder.iterdir() if p.is_file()]
         number_of_runs = len(state_run_dirs)
         return SMAC2Scenario(solver,
                              instance_set,
+                             [objective],
+                             instance_file_path.parent.parent,
                              number_of_runs,
                              solver_calls,
+                             max_iterations,
                              cpu_time,
                              wallclock_limit,
                              int(config["cutoffTime"]),
                              config["cutoff_length"],
-                             [objective],
-                             use_features)
+                             use_cpu_time_in_tunertime)

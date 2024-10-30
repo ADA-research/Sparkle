@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+"""Handles SMAC2 calls passing to sparkle solver wrappers."""
 import sys
-import time
 from pathlib import Path
 
 from runrunner import Runner
@@ -29,14 +29,12 @@ if __name__ == "__main__":
                     raw_output_directory=Path(),
                     runsolver_exec=runsolver_binary)
     # Call Runsolver with the solver configurator wrapper and its arguments
-    start_t = time.time()
     output = solver.run(instance=instance,
                         objectives=[objective],
                         seed=seed,
                         cutoff_time=cutoff_time,
                         configuration=configuration,
                         run_on=Runner.LOCAL)
-    run_time = min(time.time() - start_t, cutoff_time)
 
     # Return values to SMAC
     # SMAC2 does not accept nan values etc for quality

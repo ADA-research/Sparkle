@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Command to display the status of the platform."""
-
 import sys
 import argparse
 
@@ -13,13 +12,14 @@ from sparkle.CLI.help import argparse_custom as ac
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Display the status of the platform.")
     parser.add_argument(*ac.VerboseArgument.names,
                         **ac.VerboseArgument.kwargs)
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the status command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     check_for_initialise()
 
@@ -51,3 +51,8 @@ if __name__ == "__main__":
     configurator.get_status_from_logs()
 
     print("\nCurrent system status of Sparkle reported!")
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

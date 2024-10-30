@@ -12,7 +12,7 @@ from sparkle.solver.validator import Validator
 from sparkle.configurator.implementations import SMAC2
 from sparkle.types.objective import SparkleObjective, PAR
 from sparkle.solver import Solver
-from sparkle.instance import instance_set
+from sparkle.instance import Instance_Set
 import csv
 
 
@@ -26,15 +26,17 @@ class TestGenerateConfigurationReport(TestCase):
         mock_mkdir.return_value = None
         self.test_objective_runtime = PAR(10)
         self.test_objective_quality = SparkleObjective("ACCURACY")
-        self.configurator = SMAC2([self.test_objective_runtime], Path(), Path())
+        self.configurator = SMAC2(Path(), Path())
         self.solver_path = Path("tests/test_files/Solvers/Test-Solver")
         self.solver = Solver(self.solver_path, raw_output_directory=Path(""))
         train_instance = "train-instance"
         test_instance = "test-instance"
         self.configurator_path = self.configurator.configurator_path
-        self.configurator.scenario =\
-            self.configurator.scenario_class(self.solver, Path(train_instance))
-        self.configurator.scenario._set_paths(self.configurator_path)
+        self.configuration_scenario = self.configurator.scenario_class(
+            self.solver,
+            Path(train_instance),
+            [self.test_objective_runtime],
+            self.configurator.output_path)
         self.ablation_scenario = AblationScenario(
             self.solver, Path(train_instance), Path(test_instance), Path(""))
         self.validator = Validator()
@@ -292,7 +294,6 @@ class TestGenerateConfigurationReport(TestCase):
         If a test instance is present, the function should add the corresponding entry
         to the dictionary.
         """
-        train_instance = "train-instance"
         test_instance = "test-instance"
         output_dir = Path("configuration/report")
         common_dict = {
@@ -309,14 +310,14 @@ class TestGenerateConfigurationReport(TestCase):
 
         full_dict = sgrch.configuration_report_variables(
             Path("configuration/report"), self.solver, self.configurator, self.validator,
-            Path(), Path(), train_instance, 1, test_instance, None)
+            Path(), Path(), self.configuration_scenario, 1, test_instance, None)
 
         mock_common.assert_called_once_with(
-            self.solver, self.configurator, self.validator, None, Path(), train_instance,
-            output_dir)
+            self.solver, self.configurator, self.validator, None, Path(),
+            self.configuration_scenario, output_dir)
         mock_test.assert_called_once_with(
             output_dir, self.solver, self.configurator, self.validator,
-            None, train_instance, test_instance)
+            None, self.configuration_scenario, test_instance)
         assert full_dict == {
             "testBool": r"\testtrue",
             "ablationBool": r"\ablationfalse"
@@ -332,7 +333,6 @@ class TestGenerateConfigurationReport(TestCase):
         If no test instance is present, the function should add the corresponding entry
         to the dictionary.
         """
-        train_instance = "train-instance"
         test_instance = None
         output_dir = Path("configuration/report")
         common_dict = {
@@ -344,11 +344,11 @@ class TestGenerateConfigurationReport(TestCase):
 
         full_dict = sgrch.configuration_report_variables(
             output_dir, self.solver, self.configurator, self.validator, Path(),
-            Path(), train_instance, 1, test_instance, None)
+            Path(), self.configuration_scenario, 1, test_instance, None)
 
         mock_common.assert_called_once_with(
             self.solver, self.configurator, self.validator, None, Path(),
-            train_instance, output_dir)
+            self.configuration_scenario, output_dir)
         assert full_dict == {
             "testBool": r"\testfalse",
             "ablationBool": r"\ablationfalse"
@@ -366,7 +366,6 @@ class TestGenerateConfigurationReport(TestCase):
         If `ablation` is set to True, the key `ablationBool` should not be set in the
         dictionary.
         """
-        train_instance = "train-instance"
         test_instance = "test-instance"
         output_dir = Path("configuration/report")
         common_dict = {
@@ -383,14 +382,15 @@ class TestGenerateConfigurationReport(TestCase):
 
         full_dict = sgrch.configuration_report_variables(
             output_dir, self.solver, self.configurator, self.validator, Path(),
-            Path(), train_instance, 1, test_instance, self.ablation_scenario)
+            Path(), self.configuration_scenario, 1, test_instance,
+            self.ablation_scenario)
 
         mock_common.assert_called_once_with(
             self.solver, self.configurator, self.validator, self.ablation_scenario,
-            Path(), train_instance, output_dir)
+            Path(), self.configuration_scenario, output_dir)
         mock_test.assert_called_once_with(
             output_dir, self.solver, self.configurator, self.validator,
-            self.ablation_scenario, train_instance, test_instance)
+            self.ablation_scenario, self.configuration_scenario, test_instance)
         assert full_dict == {
             "testBool": r"\testtrue"
         } | common_dict | test_dict
@@ -411,7 +411,6 @@ class TestGenerateConfigurationReport(TestCase):
         If the key `featuresBool` in the common dictionary is found and set to true,
         the corresponding other keys should be added to the final dictionary.
         """
-        train_instance = "train-instance"
         test_instance = "test-instance"
         output_dir = Path("configuration/report")
         common_dict = {
@@ -431,14 +430,15 @@ class TestGenerateConfigurationReport(TestCase):
         extractor_dir = Path("extract/dir")
         full_dict = sgrch.configuration_report_variables(
             output_dir, self.solver, self.configurator, self.validator, extractor_dir,
-            Path(), train_instance, 1, test_instance, self.ablation_scenario)
+            Path(), self.configuration_scenario, 1, test_instance,
+            self.ablation_scenario)
 
         mock_common.assert_called_once_with(
             self.solver, self.configurator, self.validator, self.ablation_scenario,
-            Path(), train_instance, output_dir)
+            Path(), self.configuration_scenario, output_dir)
         mock_test.assert_called_once_with(
             output_dir, self.solver, self.configurator, self.validator,
-            self.ablation_scenario, train_instance, test_instance)
+            self.ablation_scenario, self.configuration_scenario, test_instance)
         assert full_dict == {
             "testBool": r"\testtrue",
             "numFeatureExtractors": "2",
@@ -479,10 +479,10 @@ class TestGenerateConfigurationReport(TestCase):
              "InstanceName", "STATUS", "0", "25.323"]]
         report_dir = "reports/directory"
         cutoff = 60
-        self.configurator.scenario.cutoff_time = cutoff
-        self.configurator.scenario.number_of_runs = 25
-        self.configurator.scenario.wallclock_time = 600
-        self.configurator.scenario.sparkle_objective = self.test_objective_quality
+        self.configuration_scenario.cutoff_time = cutoff
+        self.configuration_scenario.number_of_runs = 25
+        self.configuration_scenario.wallclock_time = 600
+        self.configuration_scenario.sparkle_objective = self.test_objective_quality
         mock_performance.side_effect = [42.1, 42.2]
         mock_features_bool.return_value = "\\featuresfalse"
         mock_figure.return_value = "figure-string"
@@ -495,27 +495,32 @@ class TestGenerateConfigurationReport(TestCase):
         bib_path = Path("tex/bib.bib")
         common_dict = sgrch.get_dict_variable_to_value_common(
             self.solver, self.configurator, self.validator, self.ablation_scenario,
-            bib_path, train_instance, report_dir)
+            bib_path, self.configuration_scenario, report_dir)
 
         mock_figure.assert_called_once_with(
             self.solver, train_instance.name, validation_data, validation_data,
             report_dir, "QUALITY", float(cutoff), self.test_objective_quality)
         mock_timeouts.assert_called_once_with(
-            self.solver, train_instance, self.configurator, self.validator, 60)
+            self.solver, train_instance, self.configurator, self.validator,
+            self.configuration_scenario, 60)
         mock_ablation_bool.assert_called_once_with(self.ablation_scenario)
         mock_ablation_table.assert_called_once_with(self.ablation_scenario)
 
         assert common_dict == {
-            "performanceMeasure": "ACCURACY",
+            "configuratorName": SMAC2.__name__,
+            "configuratorFullName": SMAC2.full_name,
+            "configuratorVersion": SMAC2.version,
+            "objectiveName": "ACCURACY",
+            "minMaxAdjective": "lowest",
             "runtimeBool": "\\runtimefalse",
             "solver": self.solver.name,
             "instanceSetTrain": train_instance.name,
             "sparkleVersion": ANY,
             "numInstanceInTrainingInstanceSet": 1,
-            "numSmacRuns": 25,
-            "smacObjective": "QUALITY",
-            "smacWholeTimeBudget": 600,
-            "smacEachRunCutoffTime": cutoff,
+            "numConfiguratorRuns": 25,
+            "objectiveType": "QUALITY",
+            "wholeTimeBudget": 600,
+            "eachRunCutoffTime": cutoff,
             "optimisedConfiguration": "\\item",
             "optimisedConfigurationTrainingPerformancePAR": 42.1,
             "defaultConfigurationTrainingPerformancePAR": 42.2,
@@ -551,8 +556,7 @@ class TestGenerateConfigurationReport(TestCase):
         Test that all needed functions are called to retrieve values and that these
         values are added to the common dictionary.
         """
-        train_set = instance_set(Path("tests/test_files/Instances/Train-Instance-Set"))
-        test_set = instance_set(Path("tests/test_files/Instances/Test-Instance-Set"))
+        test_set = Instance_Set(Path("tests/test_files/Instances/Test-Instance-Set"))
         validation_data = [
             ["SolverName", "{}", "InstanceSetName",
              "InstanceName", "STATUS", "0", "25.323"]]
@@ -565,14 +569,14 @@ class TestGenerateConfigurationReport(TestCase):
         mock_ablation_table.return_value = "ablation/path"
         mock_validation_results.return_value = validation_data
         mock_optimal_configuration.return_value = (0.0, "configurino")
-        self.configurator.scenario.cutoff_time = 60
-        self.configurator.scenario.sparkle_objective = self.test_objective_quality
+        self.configuration_scenario.cutoff_time = 60
+        self.configuration_scenario.sparkle_objective = self.test_objective_quality
         test_dict = sgrch.get_dict_variable_to_value_test(Path("configuration/report"),
                                                           self.solver,
                                                           self.configurator,
                                                           self.validator,
                                                           self.ablation_scenario,
-                                                          train_set,
+                                                          self.configuration_scenario,
                                                           test_set)
 
         mock_figure.assert_called_once_with(
@@ -580,7 +584,8 @@ class TestGenerateConfigurationReport(TestCase):
             Path("configuration/report"), "QUALITY", float(cutoff),
             self.test_objective_quality, data_type="test")
         mock_timeouts.assert_called_once_with(
-            self.solver, test_set, self.configurator, self.validator, 60)
+            self.solver, test_set, self.configurator, self.validator,
+            self.configuration_scenario, 60)
         mock_ablation_bool.assert_called_once_with(self.ablation_scenario)
         mock_ablation_table.assert_called_once_with(self.ablation_scenario)
         assert test_dict == {
@@ -608,8 +613,6 @@ class TestGenerateConfigurationReport(TestCase):
         The function should call functions to prepare report generation and call
         `generate_report_for_configuration_common` with the right parameters.
         """
-        train_instance = "train-instance"
-
         value_dict = {
             "key-1": "value-1",
             "key-2": "value-2",
@@ -629,11 +632,11 @@ class TestGenerateConfigurationReport(TestCase):
                                                 Path(),
                                                 Path(),
                                                 1.0,
-                                                train_instance,
+                                                self.configuration_scenario,
                                                 ablation=True)
         mock_dict.assert_called_once_with(
             report_dir, self.solver, self.configurator, self.validator, Path(),
-            Path(), 1.0, train_instance, None, True)
+            Path(), self.configuration_scenario, 1.0, None, True)
         mock_generate_report.assert_called_once()
 
     @patch("sparkle.platform.latex.generate_report")
@@ -648,7 +651,6 @@ class TestGenerateConfigurationReport(TestCase):
         The function should call functions to prepare report generation and call
         `generate_report_for_configuration_common` with the right parameters.
         """
-        train_instance = "train-instance"
         test_instance = "test-instance"
         ablation = True
 
@@ -670,10 +672,10 @@ class TestGenerateConfigurationReport(TestCase):
                                                 Path(),
                                                 Path(),
                                                 1.0,
-                                                train_instance,
+                                                self.configuration_scenario,
                                                 test_instance, ablation)
 
         mock_dict.assert_called_once_with(
             report_dir, self.solver, self.configurator, self.validator,
-            Path(), Path(), 1.0, train_instance, test_instance, ablation)
+            Path(), Path(), self.configuration_scenario, 1.0, test_instance, ablation)
         mock_generate_report.assert_called_once()

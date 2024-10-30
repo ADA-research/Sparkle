@@ -24,8 +24,7 @@ from sparkle.platform.settings_objects import SettingState
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Add a solver to the Sparkle platform.",
-        epilog="")
+        description="Add a solver to the Sparkle platform.")
     parser.add_argument(*ac.DeterministicArgument.names,
                         **ac.DeterministicArgument.kwargs)
     parser.add_argument(*ac.RunSolverNowArgument.names,
@@ -41,7 +40,8 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     solver_source = Path(args.solver_path)
     deterministic = args.deterministic
 
@@ -121,6 +121,12 @@ if __name__ == "__main__":
         sfh.add_remove_platform_item(solver_directory,
                                      gv.solver_nickname_list_path, key=nickname)
 
+    solver = Solver(solver_directory)  # Recreate solver from its new directory
+    if solver.get_pcs_file() is not None:
+        print("Generating missing PCS files...")
+        solver.port_pcs("IRACE")  # Create PCS file for IRACE
+        print("Generating done!")
+
     if args.run_solver_now:
         num_job_in_parallel = gv.settings().get_number_of_jobs_in_parallel()
         dependency_run_list = [running_solvers_performance_data(
@@ -140,7 +146,7 @@ if __name__ == "__main__":
 
         dependency_run_list.append(run_construct_portfolio_selector)
 
-        run_generate_report = rrr.add_to_queue(
+        rrr.add_to_queue(
             cmd="sparkle/CLI/generate_report.py",
             name=CommandName.GENERATE_REPORT,
             dependencies=dependency_run_list,
@@ -150,3 +156,8 @@ if __name__ == "__main__":
 
     # Write used settings to file
     gv.settings().write_used_settings()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

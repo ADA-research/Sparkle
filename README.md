@@ -63,6 +63,7 @@ Note that a direct installation through Pip does not handle certain dependencies
 Asside from several package dependencies, Sparkle's package / CLI relies on a few user supplied executables:
 - `LaTex` compiler ([pdflatex](https://gist.github.com/rain1024/98dd5e2c6c8c28f9ea9d)) for report generation
 - `Java`, tested with version 1.8.0_402, in order to use SMAC2
+- `R`, tested with version 4.3.1 in order to use IRACE
 
 Other dependencies are handled by the Conda environment, but if that is not an option for you please ensure you have the following:
 
@@ -148,3 +149,7 @@ Brian Schiller
 ### Contact
 sparkle@aim.rwth-aachen.de
 
+
+### Sponsors
+
+The development of Sparkle is partially sponsored by the [Alexander von Humboldt foundation](https://www.humboldt-foundation.de/en/).

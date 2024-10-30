@@ -18,13 +18,15 @@ from sparkle.solver import Extractor
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Remove a feature extractor "
+                                                 "from the platform.")
     parser.add_argument(*ac.ExtractorPathArgument.names,
                         **ac.ExtractorPathArgument.kwargs)
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the remove feature extractor command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -32,7 +34,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     extractor_nicknames = gv.file_storage_data_mapping[gv.extractor_nickname_list_path]
     extractor = resolve_object_name(
         args.extractor_path,
@@ -65,3 +67,8 @@ if __name__ == "__main__":
     shutil.rmtree(extractor.directory)
 
     print(f"Removing feature extractor {extractor.name} done!")
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

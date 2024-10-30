@@ -12,7 +12,8 @@ from sparkle.CLI.help import snapshot_help as snh
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Command to clean files from the "
+                                                 "platform.")
     parser.add_argument(*ac.CleanupArgumentAll.names, **ac.CleanupArgumentAll.kwargs)
     parser.add_argument(*ac.CleanupArgumentRemove.names,
                         **ac.CleanupArgumentRemove.kwargs)
@@ -25,7 +26,8 @@ def remove_temporary_files() -> None:
     gv.settings().DEFAULT_log_output.mkdir()
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the cleanup command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -33,7 +35,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if args.all:
         shutil.rmtree(gv.settings().DEFAULT_output, ignore_errors=True)
         snh.create_working_dirs()
@@ -45,3 +47,8 @@ if __name__ == "__main__":
     else:
         remove_temporary_files()
         print("Cleaned platform of temporary files!")
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

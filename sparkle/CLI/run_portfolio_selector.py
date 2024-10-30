@@ -17,13 +17,15 @@ from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
-from sparkle.instance import instance_set
+from sparkle.instance import Instance_Set
 from sparkle.CLI.compute_features import compute_features
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Run a portfolio selector on instance (set), determine which solver "
+                    "is most likely to perform well and run it on the instance (set).")
     parser.add_argument(*ac.InstancePathPositional.names,
                         **ac.InstancePathPositional.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
@@ -36,7 +38,8 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the run portfolio selector command."""
     # Log command call
     sl.log_command(sys.argv)
 
@@ -44,16 +47,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
-
-    if args.run_on is not None:
-        gv.settings().set_run_on(args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
-
-    data_set = resolve_object_name(
-        args.instance_path,
-        gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, instance_set)
+    args = parser.parse_args(argv)
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_PORTFOLIO_SELECTOR])
 
@@ -64,10 +58,24 @@ if __name__ == "__main__":
     if ac.set_by_user(args, "objectives"):
         gv.settings().set_general_sparkle_objectives(args.objectives,
                                                      SettingState.CMD_LINE)
+    if args.run_on is not None:
+        gv.settings().set_run_on(args.run_on.value, SettingState.CMD_LINE)
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
     Settings.check_settings_changes(gv.settings(), prev_settings)
+
+    data_set = resolve_object_name(
+        args.instance_path,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.settings().DEFAULT_instance_dir, Instance_Set)
+
+    if data_set is None:
+        print("ERROR: The instance (set) could not be found. Please make sure the "
+              "path is correct.")
+        sys.exit(-1)
+
+    run_on = gv.settings().get_run_on()
     objectives = gv.settings().get_general_sparkle_objectives()
     # NOTE: Is this still relevant?
     if not objectives[0].time:
@@ -142,3 +150,8 @@ if __name__ == "__main__":
 
     # Write used settings to file
     gv.settings().write_used_settings()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

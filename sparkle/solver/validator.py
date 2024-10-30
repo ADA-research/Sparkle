@@ -12,7 +12,7 @@ from runrunner import Runner, Run
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.types import SparkleObjective, resolve_objective
-from sparkle.tools.runsolver_parsing import get_solver_args
+from sparkle.tools import RunSolver
 
 
 class Validator():
@@ -63,7 +63,6 @@ class Validator():
         # Ensure we have the object representation of solvers
         solvers = [Solver(s) if isinstance(s, Path) else s for s in solvers]
         cmds = []
-        out_paths = []
         for index, (solver, config) in enumerate(zip(solvers, configurations)):
             if config is None:
                 config = {}
@@ -82,14 +81,14 @@ class Validator():
                                          objectives=objectives,
                                          seed=index,
                                          cutoff_time=cut_off,
-                                         configuration=config)))
-                out_paths.extend([out_path] * len(instance_set._instance_paths))
+                                         configuration=config,
+                                         log_dir=out_path)))
         return rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
-            name="validation",
+            name=f"Validation: {','.join(set([s.name for s in solvers]))} on "
+                 f"{','.join([i.name for i in instance_sets])}",
             base_dir=self.tmp_out_dir,
-            path=out_paths,
             dependencies=dependency,
             sbatch_options=sbatch_options,
         )
@@ -118,7 +117,7 @@ class Validator():
         for res in log_dir.iterdir():
             if res.suffix != ".rawres":
                 continue
-            solver_args = get_solver_args(res.with_suffix(".log"))
+            solver_args = RunSolver.get_solver_args(res.with_suffix(".log"))
             solver_args = ast.literal_eval(solver_args)
             instance_path = Path(solver_args["instance"])
             # Remove default args
@@ -141,10 +140,9 @@ class Validator():
                 if instance_path.name in instance_set._instance_names:
                     out_dict = Solver.parse_solver_output(
                         "",
-                        ["-o", res.name,
-                         "-v", res.with_suffix(".val").name,
-                         "-w", res.with_suffix(".log").name],
-                        log_dir)
+                        ["-o", res,
+                         "-v", res.with_suffix(".val"),
+                         "-w", res.with_suffix(".log")])
                     self.append_entry_to_csv(solver.name,
                                              solver_args,
                                              instance_set,
