@@ -307,7 +307,7 @@ class SMAC2Scenario(ConfigurationScenario):
             if self.feature_data is not None:
                 file.write(f"feature_file = {self.feature_file_path}\n")
             if self.use_cpu_time_in_tunertime is not None:
-                file.write("use-cputime-in-tunertime = "
+                file.write("use-cpu-time-in-tunertime = "
                            f"{self.use_cpu_time_in_tunertime}\n")
             # We don't let SMAC do the validation
             file.write("validation = false" + "\n")

@@ -2,6 +2,7 @@
 from __future__ import annotations
 import configparser
 from enum import Enum
+import ast
 from pathlib import Path
 from pathlib import PurePath
 
@@ -123,10 +124,10 @@ class Settings:
 
     DEFAULT_configurator_number_of_runs = 25
     DEFAULT_configurator_solver_calls = 100
-    DEFAULT_configurator_maximum_iterations = 1
+    DEFAULT_configurator_maximum_iterations = None
 
-    DEFAULT_smac2_wallclock_time = 600
-    DEFAULT_smac2_cpu_time = 600
+    DEFAULT_smac2_wallclock_time = None
+    DEFAULT_smac2_cpu_time = None
     DEFAULT_smac2_target_cutoff_length = "max"
     DEFAULT_smac2_use_cpu_time_in_tunertime = None
     DEFAULT_smac2_max_iterations = None
@@ -291,6 +292,12 @@ class Settings:
                     self.set_configurator_number_of_runs(value, state)
                     file_settings.remove_option(section, option)
 
+            option_name = "max_iterations"
+            if file_settings.has_option(section, option_name):
+                value = file_settings.getint(section, option_name)
+                self.set_configurator_max_iterations(value, state)
+                file_settings.remove_option(section, option_name)
+
             section = "smac2"
             option_names = ("wallclock_time", )
             for option in option_names:
@@ -316,11 +323,12 @@ class Settings:
             option_names = ("use_cpu_time_in_tunertime", "countSMACTimeAsTunerTime")
             for option in option_names:
                 if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
+                    value = file_settings.getboolean(section, option)
                     self.set_smac2_use_cpu_time_in_tunertime(value, state)
                     file_settings.remove_option(section, option)
 
-            options_names = ("iteration-limit", "numIterations", "numberOfIterations")
+            options_names = ("iteration_limit", "numIterations", "numberOfIterations",
+                             "max_iterations")
             for option in options_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
@@ -356,7 +364,7 @@ class Settings:
                     self.set_irace_mu(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("nb_iterations", "iterations")
+            option_names = ("nb_iterations", "iterations", "max_iterations")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
@@ -766,17 +774,18 @@ class Settings:
         section = "configuration"
         name = "max_iterations"
 
-        if value is not None and self.__check_setting_state(
+        if self.__check_setting_state(
                 self.__config_max_iterations_set, origin, name):
             self.__init_section(section)
             self.__config_max_iterations_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_configurator_max_iterations(self: Settings) -> int:
+    def get_configurator_max_iterations(self: Settings) -> int | None:
         """Get the maximum number of configurator iterations."""
         if self.__config_max_iterations_set == SettingState.NOT_SET:
             self.set_configurator_max_iterations()
-        return int(self.__settings["configuration"]["max_iterations"])
+        max_iterations = self.__settings["configuration"]["max_iterations"]
+        return int(max_iterations) if max_iterations.isdigit() else None
 
     # Configuration: SMAC specific settings ###
 
@@ -787,17 +796,18 @@ class Settings:
         section = "smac2"
         name = "wallclock_time"
 
-        if value is not None and self.__check_setting_state(
+        if self.__check_setting_state(
                 self.__smac2_wallclock_time_set, origin, name):
             self.__init_section(section)
             self.__smac2_wallclock_time_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_smac2_wallclock_time(self: Settings) -> int:
+    def get_smac2_wallclock_time(self: Settings) -> int | None:
         """Return the budget per configuration run in seconds (wallclock)."""
         if self.__smac2_wallclock_time_set == SettingState.NOT_SET:
             self.set_smac2_wallclock_time()
-        return int(self.__settings["smac2"]["wallclock_time"])
+        wallclock_time = self.__settings["smac2"]["wallclock_time"]
+        return int(wallclock_time) if wallclock_time.isdigit() else None
 
     def set_smac2_cpu_time(
             self: Settings, value: int = DEFAULT_smac2_cpu_time,
@@ -806,7 +816,7 @@ class Settings:
         section = "smac2"
         name = "cpu_time"
 
-        if value is not None and self.__check_setting_state(
+        if self.__check_setting_state(
                 self.__smac2_cpu_time_set, origin, name):
             self.__init_section(section)
             self.__smac2_cpu_time_set = origin
@@ -816,8 +826,8 @@ class Settings:
         """Return the budget per configuration run in seconds (cpu)."""
         if self.__smac2_cpu_time_set == SettingState.NOT_SET:
             self.set_smac2_cpu_time()
-
-        return int(self.__settings["smac2"]["cpu_time"])
+        cpu_time = self.__settings["smac2"]["cpu_time"]
+        return int(cpu_time) if cpu_time.isdigit() else None
 
     def set_smac2_target_cutoff_length(
             self: Settings, value: str = DEFAULT_smac2_target_cutoff_length,
@@ -861,8 +871,7 @@ class Settings:
         """Return whether to use CPU time in tunertime."""
         if self.__smac2_use_cpu_time_in_tunertime_set == SettingState.NOT_SET:
             self.set_smac2_use_cpu_time_in_tunertime()
-        use_tunertime = self.__settings["smac2"]["use_cpu_time_in_tunertime"]
-        return bool(use_tunertime) if use_tunertime != "None" else None
+        return ast.literal_eval(self.__settings["smac2"]["use_cpu_time_in_tunertime"])
 
     def set_smac2_max_iterations(
             self: Settings, value: int = DEFAULT_smac2_max_iterations,

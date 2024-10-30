@@ -150,10 +150,14 @@ def main(argv: list[str]) -> None:
         args.solver,
         gv.file_storage_data_mapping[gv.solver_nickname_list_path],
         gv.settings().DEFAULT_solver_dir, class_name=Solver)
+    if solver is None:
+        raise ValueError(f"Solver {args.solver} not found.")
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings().DEFAULT_instance_dir, Instance_Set)
+    if instance_set_train is None:
+        raise ValueError(f"Instance set {args.instance_set_train} not found.")
     instance_set_test = args.instance_set_test
     if instance_set_test is not None:
         instance_set_test = resolve_object_name(
