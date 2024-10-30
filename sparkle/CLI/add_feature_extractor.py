@@ -20,8 +20,8 @@ from sparkle.solver import Extractor
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     # Define command line arguments
-    parser = argparse.ArgumentParser(description=
-                                     "Add a feature extractor to the platform.")
+    parser = argparse.ArgumentParser(
+        description="Add a feature extractor to the platform.")
     parser.add_argument(*ac.ExtractorPathArgument.names,
                         **ac.ExtractorPathArgument.kwargs)
     group_extractor_run = parser.add_mutually_exclusive_group()

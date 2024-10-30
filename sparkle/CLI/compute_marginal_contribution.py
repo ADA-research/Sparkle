@@ -19,9 +19,9 @@ from sparkle.types import SparkleObjective
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser(description=
-                                     "Command to compute the marginal contribution "
-                                     "of solvers to the portfolio.")
+    parser = argparse.ArgumentParser(
+        description="Command to compute the marginal contribution of solvers to the "
+                    "portfolio.")
     parser.add_argument(*ac.PerfectSelectorMarginalContributionArgument.names,
                         **ac.PerfectSelectorMarginalContributionArgument.kwargs)
     parser.add_argument(*ac.ActualMarginalContributionArgument.names,

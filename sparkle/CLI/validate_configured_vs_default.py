@@ -25,8 +25,8 @@ def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
         description="Test the performance of the configured solver and the default "
-                     "solver by doing validation experiments on the training and test "
-                     "sets.")
+                    "solver by doing validation experiments on the training and test "
+                    "sets.")
     parser.add_argument(*ac.SolverArgument.names,
                         **ac.SolverArgument.kwargs)
     parser.add_argument(*ac.InstanceSetTrainArgument.names,
