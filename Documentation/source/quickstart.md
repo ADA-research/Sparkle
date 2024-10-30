@@ -21,4 +21,5 @@ sparkle initialise --download-examples
 Due to the examples containing various algorithms and their executables, but also entire datasets, it is about 300MB large. Now you might receive a few warnings during the inialisation, lets go through a few of them:
 
 * _"Could not find Java as an executable"_: One of the algorithm configurators Sparkle has to offer (SMAC2) is build on Java. Make sure your system has Java version 1.8.0_402 installed.
+* _"R is not installed, which is required for the IRACE"_: Sparkle offers the algorithm configurator IRACE for its users, but as this runs in R, the user needs to supply this in their environment. The currently tested version is 4.3.1 ("Beagle Scouts")
 * _"RunSolver was not compiled succesfully"_: Sparkle uses RunSolver to monitor algorithms and their meta statistics, such as CPU and Wallclock time. RunSolver needs various libraries to be compiled. You can run the make file in the Sparkle package components section (sparkle/Components/runsolver/src/Makefile) to inspect what your system is missing for the compilation to work.

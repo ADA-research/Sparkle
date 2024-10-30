@@ -32,10 +32,10 @@ from sparkle.CLI.help.nicknames import resolve_object_name
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
-        description=("Without any arguments a report for the most recent algorithm "
-                     "selection or algorithm configuration procedure is generated."),
-        epilog=("Note that if a test instance set is given, the training instance set "
-                "must also be given."))
+        description="Without any arguments a report for the most recent algorithm "
+                     "selection or algorithm configuration procedure is generated.",
+        epilog="Note that if a test instance set is given, the training instance set "
+                "must also be given.")
     # Configuration arguments
     parser.add_argument(*ac.SolverReportArgument.names,
                         **ac.SolverReportArgument.kwargs)

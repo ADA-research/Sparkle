@@ -14,7 +14,7 @@ from sparkle.CLI.help import global_variables as gv
 
 def parser_function() -> argparse.ArgumentParser:
     """Create parser for the cancel command."""
-    parser = argparse.ArgumentParser(description="Sparkle cancel command.")
+    parser = argparse.ArgumentParser(description="Command to cancel running jobs.")
     parser.add_argument(*ac.JobIDsArgument.names, **ac.JobIDsArgument.kwargs)
     parser.add_argument(*ac.AllJobsArgument.names, **ac.AllJobsArgument.kwargs)
     return parser

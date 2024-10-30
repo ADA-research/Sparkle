@@ -11,7 +11,7 @@ def parser_function() -> argparse.ArgumentParser:
     Returns:
       The argument parser.
     """
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser("Show information about Sparkle.")
     return parser
 
 

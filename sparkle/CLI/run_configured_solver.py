@@ -19,7 +19,8 @@ from sparkle.CLI.help.nicknames import resolve_object_name
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Command to run a configured solver on an instance (set).")
     parser.add_argument(*ac.InstancePathPositional.names,
                         **ac.InstancePathPositional.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,

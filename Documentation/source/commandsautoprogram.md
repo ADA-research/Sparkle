@@ -30,6 +30,14 @@
 
 ```
 
+(cmd-cancel)=
+
+```{eval-rst}
+.. autoprogram:: sparkle.CLI.cancel:parser_function()
+   :prog: cancel
+
+```
+
 (cmd-cleanup)=
 
 ```{eval-rst}

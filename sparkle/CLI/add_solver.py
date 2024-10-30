@@ -24,8 +24,7 @@ from sparkle.platform.settings_objects import SettingState
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Add a solver to the Sparkle platform.",
-        epilog="")
+        description="Add a solver to the Sparkle platform.")
     parser.add_argument(*ac.DeterministicArgument.names,
                         **ac.DeterministicArgument.kwargs)
     parser.add_argument(*ac.RunSolverNowArgument.names,

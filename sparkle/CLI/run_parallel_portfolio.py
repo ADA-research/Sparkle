@@ -215,7 +215,8 @@ def parser_function() -> argparse.ArgumentParser:
     Returns:
         parser: The parser with the parsed command line arguments
     """
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Run a portfolio of solvers on an "
+                                                 "instance set in parallel.")
     parser.add_argument(*ac.InstancePath.names,
                         **ac.InstancePath.kwargs)
     parser.add_argument(*ac.NicknamePortfolioArgument.names,

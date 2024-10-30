@@ -20,7 +20,9 @@ from sparkle.structures import FeatureDataFrame
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Sparkle command to Compute features "
+                                                 "for instances using added extractors "
+                                                 "and instances.")
     parser.add_argument(*ac.RecomputeFeaturesArgument.names,
                         **ac.RecomputeFeaturesArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,

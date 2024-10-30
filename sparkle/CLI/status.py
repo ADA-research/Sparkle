@@ -12,7 +12,7 @@ from sparkle.CLI.help import argparse_custom as ac
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Display the status of the platform.")
     parser.add_argument(*ac.VerboseArgument.names,
                         **ac.VerboseArgument.kwargs)
     return parser

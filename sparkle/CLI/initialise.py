@@ -20,7 +20,7 @@ from sparkle.configurator.implementations.irace import IRACE
 def parser_function() -> argparse.ArgumentParser:
     """Parse CLI arguments for the initialise command."""
     parser = argparse.ArgumentParser(
-        description=("Initialise the Sparkle platform in the current directory."))
+        description="Initialise the Sparkle platform in the current directory.")
     parser.add_argument(*DownloadExamplesArgument.names,
                         **DownloadExamplesArgument.kwargs)
     return parser

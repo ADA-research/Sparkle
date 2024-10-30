@@ -12,7 +12,8 @@ from sparkle.CLI.help import snapshot_help as snh
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Command to clean files from the "
+                                                 "platform.")
     parser.add_argument(*ac.CleanupArgumentAll.names, **ac.CleanupArgumentAll.kwargs)
     parser.add_argument(*ac.CleanupArgumentRemove.names,
                         **ac.CleanupArgumentRemove.kwargs)

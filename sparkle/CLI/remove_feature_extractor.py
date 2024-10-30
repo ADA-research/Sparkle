@@ -18,7 +18,8 @@ from sparkle.solver import Extractor
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Remove a feature extractor "
+                                                 "from the platform.")
     parser.add_argument(*ac.ExtractorPathArgument.names,
                         **ac.ExtractorPathArgument.kwargs)
     return parser

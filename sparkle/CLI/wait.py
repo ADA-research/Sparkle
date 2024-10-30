@@ -21,7 +21,9 @@ def parser_function() -> argparse.ArgumentParser:
     Returns:
       The argument parser.
     """
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Wait for async jobs to finish. Gives periodic updates in table "
+                    " format about each job.")
     parser.add_argument(*ac.JobIDsArgument.names, **ac.JobIDsArgument.kwargs)
     return parser
 

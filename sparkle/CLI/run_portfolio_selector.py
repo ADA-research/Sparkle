@@ -23,7 +23,9 @@ from sparkle.CLI.compute_features import compute_features
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Run a portfolio selector on instance (set), determine which solver "
+                    "is most likely to perform well and run it on the instance (set).")
     parser.add_argument(*ac.InstancePathPositional.names,
                         **ac.InstancePathPositional.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,

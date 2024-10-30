@@ -22,11 +22,11 @@ from sparkle.CLI.help.nicknames import resolve_object_name
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
-        description=("Runs parameter importance between the default and configured "
+        description="Runs parameter importance between the default and configured "
                      "parameters with ablation. This command requires a finished "
-                     "configuration for the solver instance pair."),
-        epilog=("Note that if no test instance set is given, the validation is performed"
-                " on the training set."))
+                     "configuration for the solver instance pair.",
+        epilog="Note that if no test instance set is given, the validation is performed"
+                " on the training set.")
     parser.add_argument("--solver", required=False, type=str, help="path to solver")
     parser.add_argument(*ac.InstanceSetTrainAblationArgument.names,
                         **ac.InstanceSetTrainAblationArgument.kwargs)

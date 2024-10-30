@@ -20,7 +20,8 @@ from sparkle.CLI.help import argparse_custom as ac
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Run all solvers on all instances to get their performance data.")
     parser.add_argument(*ac.RecomputeRunSolversArgument.names,
                         **ac.RecomputeRunSolversArgument.kwargs)
     parser.add_argument(*ac.SparkleObjectiveArgument.names,

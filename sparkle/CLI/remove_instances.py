@@ -18,7 +18,7 @@ from sparkle.CLI.help.nicknames import resolve_object_name
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Remove instances from the platform.")
     parser.add_argument(*ac.InstancesPathRemoveArgument.names,
                         **ac.InstancesPathRemoveArgument.kwargs)
     return parser

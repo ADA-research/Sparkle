@@ -19,7 +19,9 @@ from sparkle.CLI.initialise import check_for_initialise
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=
+                                     "Command to construct a portfolio selector over "
+                                     " all known features and solver performances.")
     parser.add_argument(*ac.RecomputePortfolioSelectorArgument.names,
                         **ac.RecomputePortfolioSelectorArgument.kwargs)
     parser.add_argument(*ac.SelectorTimeoutArgument.names,

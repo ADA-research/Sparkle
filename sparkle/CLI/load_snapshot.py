@@ -12,7 +12,7 @@ from sparkle.CLI.help import global_variables as gv
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Load a platform from a zip file.")
     parser.add_argument(*ac.SnapshotArgument.names,
                         **ac.SnapshotArgument.kwargs)
     return parser

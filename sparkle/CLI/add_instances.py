@@ -21,7 +21,7 @@ from sparkle.CLI.help import argparse_custom as ac
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Add instances to the platform.")
     parser.add_argument(*ac.InstancesPathArgument.names,
                         **ac.InstancesPathArgument.kwargs)
     parser.add_argument(*ac.RunExtractorNowArgument.names,

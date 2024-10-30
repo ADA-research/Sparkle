@@ -28,7 +28,7 @@ from sparkle.instance import Instance_Set, InstanceSet
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Configure a solver in the Sparkle platform.",
+        description="Configure a solver in the platform.",
         epilog=("Note that the test instance set is only used if the ``--ablation``"
                 " or ``--validation`` flags are given"))
     parser.add_argument(*ac.ConfiguratorArgument.names,

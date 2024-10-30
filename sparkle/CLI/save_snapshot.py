@@ -10,7 +10,9 @@ import argparse
 
 def parser_function() -> argparse.ArgumentParser:
     """Parser for save_snapshot."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Save the current platform in a .zip file.",
+        epilog="Can be loaded later with the load snapshot command.")
     parser.add_argument(*ac.SnapshotNameArgument.names,
                         **ac.SnapshotNameArgument.kwargs)
     return parser
