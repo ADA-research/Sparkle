@@ -8,7 +8,6 @@ import shutil
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.platform import file_help as sfh
-from sparkle.platform.settings_objects import SettingState
 from sparkle.instance import Instance_Set
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from sparkle.CLI.help import logging as sl
@@ -39,10 +38,6 @@ def main(argv: list[str]) -> None:
     args = parser.parse_args(argv)
     instances_source = Path(args.instances_path)
     instances_target = gv.settings().DEFAULT_instance_dir / instances_source.name
-
-    if args.run_on is not None:
-        gv.settings().set_run_on(
-            args.run_on.value, SettingState.CMD_LINE)
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.ADD_INSTANCES])
 
