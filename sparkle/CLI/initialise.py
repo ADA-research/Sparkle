@@ -67,11 +67,6 @@ def initialise_irace() -> None:
                   r6_install.stderr.decode(), "\n"
                   "IRACE installation failed!")
             return
-    else:
-        print(f"[{r6_package_check.returncode}] "
-              "R6 package (IRACE dependency) was already installed: "
-              f"{r6_package_check.stdout.decode()}\n"
-              f"{r6_package_check.stderr.decode()}")
     # Install IRACE from tarball
     irace_install = subprocess.run(
         ["Rscript", "-e",
