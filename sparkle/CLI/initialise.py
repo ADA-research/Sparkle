@@ -168,6 +168,17 @@ def initialise_sparkle(download_examples: bool = False) -> None:
                               f"{compile_runsolver.stderr.decode()}")
             else:
                 print("Runsolver compiled successfully!")
+
+    # If Runsolver is compiled, check that it can be executed
+    if gv.settings().DEFAULT_runsolver_exec.exists():
+        runsolver_check = subprocess.run([gv.settings().DEFAULT_runsolver_exec,
+                                          "--version"],
+                                         capture_output=True)
+        if runsolver_check.returncode != 0:
+            print("WARNING: Runsolver executable cannot be run successfully. "
+                  "Please verify the following error messages:\n"
+                  f"{runsolver_check.stderr.decode()}")
+
     # Check that java is available for SMAC2
     if shutil.which("java") is None:
         # NOTE: An automatic resolution of Java at this point would be good
