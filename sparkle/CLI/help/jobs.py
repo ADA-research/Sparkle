@@ -9,11 +9,16 @@ from runrunner.slurm import SlurmRun
 from sparkle.platform.cli_types import TEXT
 
 
-def get_runs_from_file(path: Path, print_error: bool = False) -> list[SlurmRun]:
+def get_runs_from_file(path: Path,
+                       print_error: bool = False,
+                       filter: list[Status] = None) -> list[SlurmRun]:
     """Retrieve all run objects from file storage.
 
     Args:
         path: Path object where to look recursively for the files.
+        print_error: Whether to print errors.
+        filter: If not None, only runs with the given statuses will be
+            returned.
 
     Returns:
         List of all found SlumRun objects.
@@ -24,7 +29,8 @@ def get_runs_from_file(path: Path, print_error: bool = False) -> list[SlurmRun]:
         # So this method can work for both local and slurm
         try:
             run_obj = SlurmRun.from_file(file)
-            runs.append(run_obj)
+            if filter is None or run_obj.status in filter:
+                runs.append(run_obj)
         except Exception as ex:
             # Not a (correct) RunRunner JSON file
             if print_error:
