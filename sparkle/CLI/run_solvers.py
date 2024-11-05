@@ -95,8 +95,8 @@ def running_solvers_performance_data(
         runner=run_on,
         cmd=cmd_list,
         parallel_jobs=num_job_in_parallel,
-        name=f"Run Solvers: {len(solver_paths)} solvers and "
-             f"{len(instance_paths)} instances",
+        name=f"Run Solvers: {len(set(solver_paths))} solvers and "
+             f"{len(set(instance_paths))} instances",
         base_dir=sl.caller_log_dir,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
