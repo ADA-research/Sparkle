@@ -82,11 +82,6 @@ class ArgumentContainer():
         self.kwargs = kwargs
 
 
-AblationArgument = ArgumentContainer(names=["--ablation"],
-                                     kwargs={"required": False,
-                                             "action": "store_true",
-                                             "help": "run ablation after configuration"})
-
 ActualMarginalContributionArgument = \
     ArgumentContainer(names=["--actual"],
                       kwargs={"action": "store_true",
@@ -434,11 +429,6 @@ UseFeaturesArgument = ArgumentContainer(names=["--use-features"],
                                                 "action": "store_true",
                                                 "help": "use the training set's features"
                                                         " for configuration"})
-
-ValidateArgument = ArgumentContainer(names=["--validate"],
-                                     kwargs={"required": False,
-                                             "action": "store_true",
-                                             "help": "validate after configuration"})
 
 VerboseArgument = ArgumentContainer(names=["--verbose", "-v"],
                                     kwargs={"action": "store_true",
