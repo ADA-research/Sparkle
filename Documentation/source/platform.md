@@ -159,7 +159,7 @@ It is possible to redefine these attributes for your specific objective. The pla
 
 ### Slurm
 
-Slurm settings can be specified in the `Settings/settings.ini` file. Any setting in the Slurm section not internally recognised by Sparkle will be added to the `sbatch` or `srun` calls. It is advised to overwrite the default settings specific to your cluster, such as the option "--partition" with a valid value on your cluster. Also, you might have to adapt the default "--mem-per-cpu" value to your system. For example, your Slurm section in the `settings.ini` could look like:
+Slurm settings can be specified in the `Settings/sparkle_settings.ini` file. Any setting in the Slurm section not internally recognised by Sparkle will be added to the `sbatch` or `srun` calls. It is advised to overwrite the default settings specific to your cluster, such as the option "--partition" with a valid value on your cluster. Also, you might have to adapt the default "--mem-per-cpu" value to your system. For example, your Slurm section in the `settings.ini` could look like:
 
 ```
 [slurm]
