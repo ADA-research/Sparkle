@@ -18,7 +18,6 @@ from sparkle.CLI.help import argparse_custom as ac
 
 from sparkle.platform.settings_objects import SettingState
 from sparkle.structures import FeatureDataFrame
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.configurator import implementations as configurator_implementations
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
@@ -117,7 +116,7 @@ def main(argv: list[str]) -> None:
     run_on = gv.settings().get_run_on()
 
     # Check if Solver and instance sets were resolved
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.CONFIGURE_SOLVER])
+    check_for_initialise()
 
     configurator = gv.settings().get_general_sparkle_configurator()
     configurator_settings = gv.settings().get_configurator_settings(configurator.name)

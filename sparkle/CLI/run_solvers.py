@@ -13,7 +13,6 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 
@@ -178,7 +177,7 @@ def main(argv: list[str]) -> None:
         gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
 
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_SOLVERS])
+    check_for_initialise()
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))

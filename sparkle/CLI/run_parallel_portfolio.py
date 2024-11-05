@@ -20,7 +20,6 @@ from runrunner.slurm import Status
 from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import global_variables as gv
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
@@ -68,10 +67,11 @@ def run_parallel_portfolio(instances_set: InstanceSet,
             cmd_list.append((" ".join(solver_call_list)).replace("'", '"'))
     # Jobs are added in to the runrunner object in the same order they are provided
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
+    solver_names = ", ".join([s.name for s in solvers])
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
-        name=CommandName.RUN_PARALLEL_PORTFOLIO,
+        name=f"Parallel Portfolio: {solver_names}",
         parallel_jobs=parallel_jobs,
         base_dir=sl.caller_log_dir,
         srun_options=["-N1", "-n1"] + sbatch_options,
@@ -261,7 +261,7 @@ def main(argv: list[str]) -> None:
         solvers = [Solver(p) for p in
                    gv.settings().DEFAULT_solver_dir.iterdir() if p.is_dir()]
 
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_PARALLEL_PORTFOLIO])
+    check_for_initialise()
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))

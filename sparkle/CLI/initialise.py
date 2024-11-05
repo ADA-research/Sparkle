@@ -8,7 +8,6 @@ import sys
 import warnings
 from pathlib import Path
 
-from sparkle.platform import CommandName
 from sparkle.CLI.help.argparse_custom import DownloadExamplesArgument
 from sparkle.CLI.help import snapshot_help as snh
 from sparkle.platform.settings_objects import Settings
@@ -80,8 +79,7 @@ def initialise_irace() -> None:
         print("IRACE installed!")
 
 
-def check_for_initialise(requirements: list[CommandName] = None)\
-        -> None:
+def check_for_initialise() -> None:
     """Function to check if initialize command was executed and execute it otherwise.
 
     Args:
@@ -93,14 +91,7 @@ def check_for_initialise(requirements: list[CommandName] = None)\
     if platform_path is None:
         print("-----------------------------------------------")
         print("No Sparkle platform found; "
-              + "The platform will now be initialized automatically")
-        if requirements is not None:
-            if len(requirements) == 1:
-                print(f"The command {requirements[0]} has \
-                      to be executed before executing this command.")
-            else:
-                print(f"""The commands {", ".join(requirements)} \
-                      have to be executed before executing this command.""")
+              "The platform will now be initialized automatically.")
         print("-----------------------------------------------")
         initialise_sparkle()
     elif platform_path != Path.cwd():

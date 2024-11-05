@@ -89,7 +89,7 @@ class IRACE(Configurator):
             runner=run_on,
             cmd=cmds,
             base_dir=base_dir,
-            name=f"IRACE: {scenario.solver.name} on {scenario.instance_set.name}",
+            name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
             sbatch_options=sbatch_options,
         )]
         if validate_after:

@@ -13,7 +13,6 @@ from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.reporting_scenario import Scenario
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 
 
@@ -61,9 +60,8 @@ def main(argv: list[str]) -> None:
     flag_recompute_portfolio = args.recompute_portfolio_selector
     solver_ablation = args.solver_ablation
 
-    check_for_initialise(
-        COMMAND_DEPENDENCIES[CommandName.CONSTRUCT_PORTFOLIO_SELECTOR]
-    )
+    check_for_initialise()
+
     if ac.set_by_user(args, "settings_file"):
         gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE

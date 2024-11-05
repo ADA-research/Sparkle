@@ -11,7 +11,7 @@ from sparkle.platform import file_help as sfh
 from sparkle.instance import Instance_Set
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from sparkle.CLI.help import logging as sl
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
+
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 
@@ -39,7 +39,7 @@ def main(argv: list[str]) -> None:
     instances_source = Path(args.instances_path)
     instances_target = gv.settings().DEFAULT_instance_dir / instances_source.name
 
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.ADD_INSTANCES])
+    check_for_initialise()
 
     if not instances_source.exists():
         print(f'Instance set path "{instances_source}" does not exist!')

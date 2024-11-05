@@ -24,7 +24,6 @@ from sparkle.platform.output.configuration_output import ConfigurationOutput
 from sparkle.platform.output.selection_output import SelectionOutput
 from sparkle.platform.output.parallel_portfolio_output import ParallelPortfolioOutput
 
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
 
@@ -73,7 +72,7 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
 
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.GENERATE_REPORT])
+    check_for_initialise()
 
     # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "settings_file"):
