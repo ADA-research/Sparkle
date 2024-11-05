@@ -98,12 +98,6 @@ AllJobsArgument = \
                       kwargs={"action": "store_true",
                               "help": "use all known job ID(s) for the command"})
 
-AlsoConstructSelectorAndReportArgument = \
-    ArgumentContainer(names=["--also-construct-selector-and-report"],
-                      kwargs={"action": "store_true",
-                              "help": "after running the solvers also construct the "
-                                      "selector and generate the report"})
-
 CleanupArgumentAll = \
     ArgumentContainer(names=["--all"],
                       kwargs={"action": "store_true",
@@ -316,13 +310,6 @@ RecomputeRunSolversArgument = \
                               "help": "recompute the performance of all solvers on all "
                                       "instances"})
 
-RunExtractorNowArgument = \
-    ArgumentContainer(names=["--run-extractor-now"],
-                      kwargs={"default": False,
-                              "action": "store_true",
-                              "help": "immediately run the feature extractor(s) on all "
-                                      "the instances"})
-
 RunOnArgument = ArgumentContainer(names=["--run-on"],
                                   kwargs={"type": Runner,
                                           "choices": [Runner.LOCAL,
@@ -331,12 +318,6 @@ RunOnArgument = ArgumentContainer(names=["--run-on"],
                                           "help": "On which computer or cluster "
                                                   "environment to execute the "
                                                   "calculation."})
-
-RunSolverNowArgument = ArgumentContainer(names=["--run-solver-now"],
-                                         kwargs={"default": False,
-                                                 "action": "store_true",
-                                                 "help": "immediately run the solver(s) "
-                                                         "on all instances"})
 
 SelectionReportArgument = \
     ArgumentContainer(names=["--selection"],

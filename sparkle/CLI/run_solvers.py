@@ -28,8 +28,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeRunSolversArgument.names,
                         **ac.TargetCutOffTimeRunSolversArgument.kwargs)
-    parser.add_argument(*ac.AlsoConstructSelectorAndReportArgument.names,
-                        **ac.AlsoConstructSelectorAndReportArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
@@ -111,8 +109,7 @@ def running_solvers_performance_data(
 
 def run_solvers_on_instances(
         recompute: bool = False,
-        run_on: Runner = Runner.SLURM,
-        also_construct_selector_and_report: bool = False) -> None:
+        run_on: Runner = Runner.SLURM) -> None:
     """Run all the solvers on all the instances that were not not previously run.
 
     If recompute is True, rerun everything even if previously run. Where the solvers are
@@ -126,8 +123,6 @@ def run_solvers_on_instances(
     run_on: Runner
         On which computer or cluster environment to run the solvers.
         Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
-    also_construct_selector_and_report: bool
-        If True, the selector will be constructed and a report will be produced.
     """
     if recompute:
         PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path).clean_csv()
@@ -143,24 +138,6 @@ def run_solvers_on_instances(
     if all(run is None for run in runs):
         print("Running solvers done!")
         return
-
-    sbatch_user_options = gv.settings().get_slurm_extra_options(as_args=True)
-    if also_construct_selector_and_report:
-        runs.append(rrr.add_to_queue(
-            runner=run_on,
-            cmd="sparkle/CLI/construct_portfolio_selector.py",
-            name=CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
-            dependencies=runs[-1],
-            base_dir=sl.caller_log_dir,
-            sbatch_options=sbatch_user_options))
-
-        runs.append(rrr.add_to_queue(
-            runner=run_on,
-            cmd="sparkle/CLI/generate_report.py",
-            name=CommandName.GENERATE_REPORT,
-            dependencies=runs[-1],
-            base_dir=sl.caller_log_dir,
-            sbatch_options=sbatch_user_options))
 
     if run_on == Runner.LOCAL:
         print("Waiting for the local calculations to finish.")
@@ -212,7 +189,6 @@ def main(argv: list[str]) -> None:
     run_on = gv.settings().get_run_on()
     run_solvers_on_instances(
         recompute=args.recompute,
-        also_construct_selector_and_report=args.also_construct_selector_and_report,
         run_on=run_on)
     sys.exit(0)
 

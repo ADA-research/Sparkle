@@ -11,8 +11,6 @@ from sparkle.platform import file_help as sfh
 from sparkle.platform.settings_objects import SettingState
 from sparkle.instance import Instance_Set
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
-from sparkle.CLI.compute_features import compute_features
-from sparkle.CLI.run_solvers import running_solvers_performance_data
 from sparkle.CLI.help import logging as sl
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
@@ -24,15 +22,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Add instances to the platform.")
     parser.add_argument(*ac.InstancesPathArgument.names,
                         **ac.InstancesPathArgument.kwargs)
-    parser.add_argument(*ac.RunExtractorNowArgument.names,
-                        **ac.RunExtractorNowArgument.kwargs)
-    parser.add_argument(*ac.RunSolverNowArgument.names,
-                        **ac.RunSolverNowArgument.kwargs)
     parser.add_argument(*ac.NicknameInstanceSetArgument.names,
                         **ac.NicknameInstanceSetArgument.kwargs)
-    parser.add_argument(*ac.RunOnArgument.names,
-                        **ac.RunOnArgument.kwargs)
-
     return parser
 
 
@@ -52,7 +43,6 @@ def main(argv: list[str]) -> None:
     if args.run_on is not None:
         gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
 
     check_for_initialise(COMMAND_DEPENDENCIES[CommandName.ADD_INSTANCES])
 
@@ -93,17 +83,6 @@ def main(argv: list[str]) -> None:
     performance_data.save_csv()
 
     print(f"\nAdding instance set {new_instance_set.name} done!")
-
-    if args.run_extractor_now:
-        print("Start computing features ...")
-        compute_features(gv.settings().DEFAULT_feature_data_path, False)
-
-    if args.run_solver_now:
-        num_job_in_parallel = gv.settings().get_number_of_jobs_in_parallel()
-        running_solvers_performance_data(gv.settings().DEFAULT_performance_data_path,
-                                         num_job_in_parallel,
-                                         rerun=False, run_on=run_on)
-        print("Running solvers...")
 
     # Write used settings to file
     gv.settings().write_used_settings()

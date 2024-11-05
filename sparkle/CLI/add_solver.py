@@ -7,18 +7,14 @@ import argparse
 import shutil
 from pathlib import Path
 
-import runrunner as rrr
-
 from sparkle.platform import file_help as sfh
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
-from sparkle.CLI.run_solvers import running_solvers_performance_data
 from sparkle.solver import Solver
 from sparkle.CLI.help import logging as sl
 from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.platform.settings_objects import SettingState
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -27,14 +23,10 @@ def parser_function() -> argparse.ArgumentParser:
         description="Add a solver to the Sparkle platform.")
     parser.add_argument(*ac.DeterministicArgument.names,
                         **ac.DeterministicArgument.kwargs)
-    parser.add_argument(*ac.RunSolverNowArgument.names,
-                        **ac.RunSolverNowArgument.kwargs)
     parser.add_argument(*ac.NicknameSolverArgument.names,
                         **ac.NicknameSolverArgument.kwargs)
     parser.add_argument(*ac.SolverPathArgument.names,
                         **ac.SolverPathArgument.kwargs)
-    parser.add_argument(*ac.RunOnArgument.names,
-                        **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SkipChecksArgument.names,
                         **ac.SkipChecksArgument.kwargs)
     return parser
@@ -61,11 +53,6 @@ def main(argv: list[str]) -> None:
 
     nickname = args.nickname
 
-    if args.run_on is not None:
-        gv.settings().set_run_on(
-            args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
-
     if args.run_checks:
         print("Running checks...")
         solver = Solver(Path(solver_source))
@@ -88,12 +75,11 @@ def main(argv: list[str]) -> None:
 
     # Start add solver
     solver_directory = gv.settings().DEFAULT_solver_dir / solver_source.name
-    if not solver_directory.exists():
-        solver_directory.mkdir(parents=True, exist_ok=True)
-    else:
+    if solver_directory.exists():
         print(f"ERROR: Solver {solver_source.name} already exists! "
               "Can not add new solver.")
         sys.exit(-1)
+    solver_directory.mkdir(parents=True)
     shutil.copytree(solver_source, solver_directory, dirs_exist_ok=True)
     # Save the deterministic bool in the solver
     with (solver_directory / Solver.meta_data).open("w+") as fout:
@@ -126,33 +112,6 @@ def main(argv: list[str]) -> None:
         print("Generating missing PCS files...")
         solver.port_pcs("IRACE")  # Create PCS file for IRACE
         print("Generating done!")
-
-    if args.run_solver_now:
-        num_job_in_parallel = gv.settings().get_number_of_jobs_in_parallel()
-        dependency_run_list = [running_solvers_performance_data(
-            gv.settings().DEFAULT_performance_data_path, num_job_in_parallel,
-            rerun=False, run_on=run_on
-        )]
-
-        sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
-        srun_options = ["-N1", "-n1"] + sbatch_options
-        run_construct_portfolio_selector = rrr.add_to_queue(
-            cmd="sparkle/CLI/construct_portfolio_selector.py",
-            name=CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
-            dependencies=dependency_run_list,
-            base_dir=sl.caller_log_dir,
-            sbatch_options=sbatch_options,
-            srun_options=srun_options)
-
-        dependency_run_list.append(run_construct_portfolio_selector)
-
-        rrr.add_to_queue(
-            cmd="sparkle/CLI/generate_report.py",
-            name=CommandName.GENERATE_REPORT,
-            dependencies=dependency_run_list,
-            base_dir=sl.caller_log_dir,
-            sbatch_options=sbatch_options,
-            srun_options=srun_options)
 
     # Write used settings to file
     gv.settings().write_used_settings()
