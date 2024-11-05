@@ -84,17 +84,20 @@ def running_solvers_performance_data(
     srun_options = ["-N1", "-n1"] + sbatch_options
     objectives = gv.settings().get_general_sparkle_objectives()
     run_solvers_core = Path(__file__).parent.resolve() / "core" / "run_solvers_core.py"
+    instance_paths, _, solver_paths = zip(*jobs)
     cmd_list = [f"{run_solvers_core} "
                 f"--performance-data {performance_data_csv_path} "
                 f"--instance {inst_p} --solver {solver_p} "
                 f"--objectives {','.join([str(o) for o in objectives])} "
-                f"--log-dir {sl.caller_log_dir}" for inst_p, _, solver_p in jobs]
+                f"--log-dir {sl.caller_log_dir}"
+                for inst_p, solver_p in zip(instance_paths, solver_paths)]
 
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
         parallel_jobs=num_job_in_parallel,
-        name=CommandName.RUN_SOLVERS,
+        name=f"Run Solvers: {len(solver_paths)} solvers and "
+             f"{len(instance_paths)} instances",
         base_dir=sl.caller_log_dir,
         sbatch_options=sbatch_options,
         srun_options=srun_options)

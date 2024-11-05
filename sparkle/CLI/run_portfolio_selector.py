@@ -134,7 +134,7 @@ def main(argv: list[str]) -> None:
     selector_run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
-        name=CommandName.RUN_PORTFOLIO_SELECTOR,
+        name=f"Portfolio Selector: {selector_path.name} on {data_set.name}",
         base_dir=sl.caller_log_dir,
         stdout=None,
         dependencies=feature_run if run_on == Runner.SLURM else None,

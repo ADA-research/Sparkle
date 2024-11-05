@@ -175,10 +175,11 @@ def main(argv: list[str]) -> None:
     with_actual = "--actual" if solver_ablation else ""
     cmd = (f"sparkle/CLI/compute_marginal_contribution.py --perfect {with_actual} "
            f"{ac.SparkleObjectiveArgument.names[0]} {objective}")
+    solver_names = ", ".join([Path(s).name for s in performance_data.solvers])
     marginal_contribution = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd,
-        name=CommandName.COMPUTE_MARGINAL_CONTRIBUTION,
+        name=f"Marginal Contribution computation: {solver_names}",
         base_dir=sl.caller_log_dir,
         dependencies=dependencies,
         sbatch_options=sbatch_options)
