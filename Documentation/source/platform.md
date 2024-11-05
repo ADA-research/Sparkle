@@ -126,7 +126,7 @@ number_of_runs = 25
 number_of_runs_in_parallel = 25
 ```
 
-When initialising a new platform, the user is provided with a default settings.ini, which can be viewed [here](https://raw.githubusercontent.com/ADA-research/Sparkle/main/sparkle/Components/sparkle_settings.ini).
+When initialising a new platform, the user is provided with a default settings file, which can be viewed [here](https://raw.githubusercontent.com/ADA-research/Sparkle/main/sparkle/Components/sparkle_settings.ini).
 
 (sparkle-objective)=
 ### Sparkle Objectives
@@ -159,7 +159,7 @@ It is possible to redefine these attributes for your specific objective. The pla
 
 ### Slurm
 
-Slurm settings can be specified in the `Settings/sparkle_settings.ini` file. Any setting in the Slurm section not internally recognised by Sparkle will be added to the `sbatch` or `srun` calls. It is advised to overwrite the default settings specific to your cluster, such as the option "--partition" with a valid value on your cluster. Also, you might have to adapt the default "--mem-per-cpu" value to your system. For example, your Slurm section in the `settings.ini` could look like:
+Slurm settings can be specified in the `Settings/sparkle_settings.ini` file. Any setting in the Slurm section not internally recognised by Sparkle will be added to the `sbatch` or `srun` calls. It is advised to overwrite the default settings specific to your cluster, such as the option "--partition" with a valid value on your cluster. Also, you might have to adapt the default "--mem-per-cpu" value to your system. For example, your Slurm section in the `sparkle_settings.ini` could look like:
 
 ```
 [slurm]
