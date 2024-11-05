@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: UTF-8 -*-
 """Configurator classes to implement SMAC2 in Sparkle."""
 from __future__ import annotations
 from pathlib import Path
@@ -22,9 +20,9 @@ from sparkle.types import SparkleObjective
 class SMAC2(Configurator):
     """Class for SMAC2 (Java) configurator."""
     configurator_path = Path(__file__).parent.parent.parent.resolve() /\
-        "Components/smac-v2.10.03-master-778"
+        "Components/smac2-v2.10.03-master-778"
     configurator_executable = configurator_path / "smac"
-    configurator_target = configurator_path / "smac_target_algorithm.py"
+    configurator_target = configurator_path / "smac2_target_algorithm.py"
 
     version = "2.10.03"
     full_name = "Sequential Model-based Algorithm Configuration"
@@ -32,7 +30,7 @@ class SMAC2(Configurator):
     def __init__(self: SMAC2,
                  base_dir: Path,
                  output_path: Path) -> None:
-        """Returns the SMAC configurator, Java SMAC V2.10.03.
+        """Returns the SMAC2 configurator, Java SMAC V2.10.03.
 
         Args:
             objectives: The objectives to optimize. Only supports one objective.
