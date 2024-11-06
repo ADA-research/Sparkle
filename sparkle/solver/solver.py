@@ -1,5 +1,4 @@
 """File to handle a solver and its directories."""
-
 from __future__ import annotations
 import sys
 from typing import Any
@@ -7,6 +6,8 @@ import shlex
 import ast
 import json
 from pathlib import Path
+
+from ConfigSpace import ConfigurationSpace
 
 import runrunner as rrr
 from runrunner.local import LocalRun
@@ -114,6 +115,14 @@ class Solver(SparkleCallable):
             return
         parser.export(convention=port_type,
                       destination=target_pcs_file)
+
+    def get_configspace(self: Solver) -> ConfigurationSpace:
+        """Get the parameter content of the PCS file."""
+        if not (pcs_file := self.get_pcs_file()):
+            return None
+        parser = pcsparser.PCSParser()
+        parser.load(str(pcs_file), convention="smac")
+        return parser.get_configspace()
 
     def get_forbidden(self: Solver, port_type: pcsparser.PCSConvention) -> Path:
         """Get the path to the file containing forbidden parameter combinations."""

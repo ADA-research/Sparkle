@@ -332,24 +332,8 @@ class SMAC2Scenario(ConfigurationScenario):
         """Create CSV file from feature data."""
         self.feature_file_path = Path(self.directory
                                       / f"{self.instance_set.name}_features.csv")
-        self.feature_data.to_csv(self.directory
-                                 / self.feature_file_path, index_label="INSTANCE_NAME")
-
-    def _clean_up_scenario_dirs(self: SMAC2Scenario,
-                                configurator_path: Path,) -> list[Path]:
-        """Yield directories to clean up after configuration scenario is done.
-
-        Returns:
-            list[str]: Full paths to directories that can be removed
-        """
-        result = []
-        configurator_solver_path = configurator_path / "scenarios"\
-            / f"{self.solver.name}_{self.instance_set.name}"
-
-        for index in range(self.number_of_runs):
-            dir = configurator_solver_path / str(index)
-            result.append(dir)
-        return result
+        self.feature_data.to_csv(self.directory / self.feature_file_path,
+                                 index_label="INSTANCE_NAME")
 
     def serialize_scenario(self: SMAC2Scenario) -> dict:
         """Transform ConfigurationScenario to dictionary format."""

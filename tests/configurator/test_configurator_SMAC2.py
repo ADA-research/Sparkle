@@ -1,4 +1,4 @@
-"""Test public methods of SMAC2 configurator."""
+"""Test methods of SMAC2 configurator."""
 from __future__ import annotations
 
 import shutil
