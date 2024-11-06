@@ -1,0 +1,17 @@
+solver = tests/test_files/Solvers/Test-Solver
+instance_set = tests/test_files/Instances/Train-Instance-Set
+sparkle_objectives = PAR10,accuray:min
+parent_directory = Test-Solver_Train-Instance-Set/smac3_output
+crash_cost = 15.0
+termination_cost_threshold = 24.0
+walltime_limit = 10.0
+cputime_limit = 20.0
+trial_walltime_limit = 30.0
+trial_memory_limit = 40.0
+n_trials = 5
+use_default_config = False
+instance_features = None
+min_budget = 50.0
+max_budget = 60.0
+seed = 42
+n_workers = 2

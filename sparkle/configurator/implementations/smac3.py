@@ -92,7 +92,7 @@ class SMAC3Scenario(ConfigurationScenario):
                  trial_memory_limit: int | None = None,
                  n_trials: int = 100,
                  use_default_config: bool = False,
-                 instance_features: FeatureDataFrame | dict[str, list[float]] = None,
+                 instance_features: FeatureDataFrame = None,
                  min_budget: float | int | None = None,
                  max_budget: float | int | None = None,
                  seed: int = -1,
@@ -161,18 +161,18 @@ class SMAC3Scenario(ConfigurationScenario):
         """
         super().__init__(solver, instance_set, sparkle_objectives, parent_directory)
         # The files are saved in `./output_directory/name/seed`.
-        self.results_directory = self.parent_directory / "smac3_output"
+        self.results_directory = self.directory / "smac3_output"
+        self.feature_dataframe = instance_features
 
-        if isinstance(instance_features, FeatureDataFrame):
+        if instance_features is not None:
             instance_features =\
-                {instance_name: instance_features.get_instance(instance_name)
-                 for instance_name in instance_features.instances}
+                {instance_name: self.feature_dataframe.get_instance(instance_name)
+                    for instance_name in self.feature_dataframe.instances}
 
-        configspace = solver.get_config_space()  # TODO: Extract config space from solver
-        self.smac3_scenario: smac.scenario = smac.scenario(
-            configspace=configspace,
+        self.smac3_scenario = smac.scenario.Scenario(
+            configspace=solver.get_configspace(),
             name=self.name,
-            output_dir=self.directory,
+            output_directory=self.directory,
             deterministic=solver.deterministic,
             objectives=[o.name for o in sparkle_objectives],
             crash_cost=crash_cost,
@@ -183,7 +183,7 @@ class SMAC3Scenario(ConfigurationScenario):
             trial_memory_limit=trial_memory_limit,
             n_trials=n_trials,
             use_default_config=use_default_config,
-            instances=instance_set,  # Correct?
+            instances=instance_set.instance_paths,  # Correct?
             instance_features=instance_features,
             min_budget=min_budget,
             max_budget=max_budget,
@@ -203,6 +203,7 @@ class SMAC3Scenario(ConfigurationScenario):
         self.directory.mkdir(parents=True)
         # Create empty directories as needed
         self.results_directory.mkdir(parents=True)  # Prepare results directory
+        self.create_scenario_file()
 
     def create_scenario_file(self: ConfigurationScenario) -> Path:
         """Create a file with the configuration scenario.
@@ -216,12 +217,13 @@ class SMAC3Scenario(ConfigurationScenario):
 
     def serialize(self: ConfigurationScenario) -> dict:
         """Serialize the configuration scenario."""
+        feature_data =\
+            self.feature_dataframe.csv_filepath if self.feature_dataframe else None
         return {
             "solver": self.solver.directory,
             "instance_set": self.instance_set.directory,
             "sparkle_objectives": ",".join(self.smac3_scenario.objectives),
             "parent_directory": self.results_directory,
-            "deterministic": self.smac3_scenario.deterministic,
             "crash_cost": self.smac3_scenario.crash_cost,
             "termination_cost_threshold": self.smac3_scenario.termination_cost_threshold,
             "walltime_limit": self.smac3_scenario.walltime_limit,
@@ -230,7 +232,7 @@ class SMAC3Scenario(ConfigurationScenario):
             "trial_memory_limit": self.smac3_scenario.trial_memory_limit,
             "n_trials": self.smac3_scenario.n_trials,
             "use_default_config": self.smac3_scenario.use_default_config,
-            "instance_features": self.smac3_scenario.instance_features,
+            "instance_features": feature_data,
             "min_budget": self.smac3_scenario.min_budget,
             "max_budget": self.smac3_scenario.max_budget,
             "seed": self.smac3_scenario.seed,
@@ -241,15 +243,16 @@ class SMAC3Scenario(ConfigurationScenario):
     def from_file(scenario_file: Path) -> ConfigurationScenario:
         """Reads scenario file and initalises ConfigurationScenario."""
         import ast
-        variables = {key: value for line in scenario_file.read_text().splitlines()
-                     for key, value in line.split(" = ")}
+        variables = {keyvalue[0]: keyvalue[1].strip()
+                     for keyvalue in (line.split(" = ", maxsplit=1)
+                                      for line in scenario_file.open().readlines()
+                                      if line.strip() != "")}
         variables["solver"] = Solver(Path(variables["solver"]))
         variables["instance_set"] = InstanceSet(Path(variables["instance_set"]))
         variables["sparkle_objectives"] = [
             resolve_objective(o)
             for o in variables["sparkle_objectives"].split(",")]
         variables["parent_directory"] = Path(variables["parent_directory"])
-        variables["deterministic"] = bool(variables["deterministic"])
         variables["crash_cost"] = float(variables["crash_cost"])
         # We need to support both lists of floats and single float (np.inf is fine)
         if variables["termination_cost_threshold"].startswith("["):  # Hacky test
@@ -264,7 +267,12 @@ class SMAC3Scenario(ConfigurationScenario):
         variables["trial_memory_limit"] = float(variables["trial_memory_limit"])
         variables["n_trials"] = int(variables["n_trials"])
         variables["use_default_config"] = bool(variables["use_default_config"])
-        # variables["instance_features"] =
+
+        if variables["instance_features"] != "None":
+            variables["instance_features"] = Path(variables["instance_features"])
+        else:
+            variables["instance_features"] = None
+
         variables["min_budget"] = float(variables["min_budget"])  # NOTE: Can also be int
         variables["max_budget"] = float(variables["max_budget"])  # NOTE: Can also be int
         variables["seed"] = int(variables["seed"])
