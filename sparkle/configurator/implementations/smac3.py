@@ -223,7 +223,6 @@ class SMAC3Scenario(ConfigurationScenario):
             "solver": self.solver.directory,
             "instance_set": self.instance_set.directory,
             "sparkle_objectives": ",".join(self.smac3_scenario.objectives),
-            "parent_directory": self.results_directory,
             "crash_cost": self.smac3_scenario.crash_cost,
             "termination_cost_threshold": self.smac3_scenario.termination_cost_threshold,
             "walltime_limit": self.smac3_scenario.walltime_limit,
@@ -252,7 +251,7 @@ class SMAC3Scenario(ConfigurationScenario):
         variables["sparkle_objectives"] = [
             resolve_objective(o)
             for o in variables["sparkle_objectives"].split(",")]
-        variables["parent_directory"] = Path(variables["parent_directory"])
+        variables["parent_directory"] = scenario_file.parent
         variables["crash_cost"] = float(variables["crash_cost"])
         # We need to support both lists of floats and single float (np.inf is fine)
         if variables["termination_cost_threshold"].startswith("["):  # Hacky test
@@ -266,7 +265,8 @@ class SMAC3Scenario(ConfigurationScenario):
         variables["trial_walltime_limit"] = float(variables["trial_walltime_limit"])
         variables["trial_memory_limit"] = float(variables["trial_memory_limit"])
         variables["n_trials"] = int(variables["n_trials"])
-        variables["use_default_config"] = bool(variables["use_default_config"])
+        variables["use_default_config"] =\
+            ast.literal_eval(variables["use_default_config"])
 
         if variables["instance_features"] != "None":
             variables["instance_features"] = Path(variables["instance_features"])

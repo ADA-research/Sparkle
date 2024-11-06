@@ -42,4 +42,23 @@ def test_smac3_scenario_from_file() -> None:
     source = Path("tests/test_files/Configuration/test_smac3_scenario.txt")
     scenario = SMAC3Scenario.from_file(source)
     assert scenario.name == "Test-Solver_Train-Instance-Set"
-    # TODO: Check all other variable values
+    assert scenario.solver.directory == Path("tests/test_files/Solvers/Test-Solver")
+    assert scenario.instance_set.directory ==\
+        Path("tests/test_files/Instances/Train-Instance-Set")
+    assert scenario.smac3_scenario.name == scenario.name
+    assert len(scenario.smac3_scenario.objectives) == len(scenario.sparkle_objectives)
+    assert scenario.directory == source.parent / scenario.name
+    assert scenario.feature_dataframe is None
+    assert scenario.smac3_scenario.crash_cost == 15.0
+    assert scenario.smac3_scenario.termination_cost_threshold == 24.0
+    assert scenario.smac3_scenario.walltime_limit == 10.0
+    assert scenario.smac3_scenario.cputime_limit == 20.0
+    assert scenario.smac3_scenario.trial_walltime_limit == 30.0
+    assert scenario.smac3_scenario.trial_memory_limit == 40.0
+    assert scenario.smac3_scenario.n_trials == 5
+    assert scenario.smac3_scenario.use_default_config is False
+    assert scenario.smac3_scenario.instance_features is None
+    assert scenario.smac3_scenario.min_budget == 50.0
+    assert scenario.smac3_scenario.max_budget == 60.0
+    assert scenario.smac3_scenario.seed == 42
+    assert scenario.smac3_scenario.n_workers == 2

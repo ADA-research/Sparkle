@@ -4,6 +4,14 @@ from pathlib import Path
 from sparkle.tools.pcsparser import PCSParser
 
 
+def test_from_configspace_file() -> None:
+    """Test reading a ConfigSpace file with PCSParser."""
+    configspace_file = Path("tests/test_files/pcs/test_pcs_hd.json")
+    parser = PCSParser()
+    parser.load(str(configspace_file), convention="configspace")
+    assert len(parser.pcs) == 17
+
+
 def test_pcs_to_configspace() -> None:
     """Test converting a SMAC2 pcs file to ConfigSpace."""
     smac2_file = Path("tests/test_files/pcs/Test-Solver.pcs")
