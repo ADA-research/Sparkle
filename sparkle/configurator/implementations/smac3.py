@@ -78,6 +78,8 @@ class SMAC3(Configurator):
         cmds = [f"python3 {self.configurator_executable.absolute()} "
                 f"{scenario.scenario_file_path.absolute()} {seed}"
                 for seed in range(scenario.number_of_runs)]
+        print(cmds[0])
+        input()
         smac3_configure = [rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
@@ -117,7 +119,7 @@ class SMAC3Scenario(ConfigurationScenario):
                  termination_cost_threshold: float = np.inf,
                  walltime_limit: float = np.inf,
                  cputime_limit: float = np.inf,
-                 n_trials: int = 100,
+                 solver_calls: int = 100,
                  use_default_config: bool = False,
                  instance_features: FeatureDataFrame = None,
                  min_budget: float | int | None = None,
@@ -154,7 +156,7 @@ class SMAC3Scenario(ConfigurationScenario):
                 The maximum time in seconds that SMAC is allowed to run.
             cputime_limit : float, defaults to np.inf
                 The maximum CPU time in seconds that SMAC is allowed to run.
-            n_trials : int, defaults to 100
+            solver_calls : int, defaults to 100 [n_trials]
                 The maximum number of trials (combination of configuration, seed, budget,
                 and instance, depending on the task) to run.
             use_default_config: bool, defaults to False.
@@ -211,7 +213,7 @@ class SMAC3Scenario(ConfigurationScenario):
             termination_cost_threshold=termination_cost_threshold,
             walltime_limit=walltime_limit,
             cputime_limit=cputime_limit,
-            n_trials=n_trials,
+            n_trials=solver_calls,
             use_default_config=use_default_config,
             instances=instance_set.instance_paths,  # Correct?
             instance_features=instance_features,
@@ -236,11 +238,7 @@ class SMAC3Scenario(ConfigurationScenario):
         self.create_scenario_file()
 
     def create_scenario_file(self: ConfigurationScenario) -> Path:
-        """Create a file with the configuration scenario.
-
-        Writes supplementary information to the target algorithm (algo =) as:
-        algo = {configurator_target} {solver_directory} {sparkle_objective}
-        """
+        """Create a file with the configuration scenario."""
         with self.scenario_file_path.open("w") as file:
             for key, value in self.serialize().items():
                 file.write(f"{key} = {value}\n")
@@ -260,7 +258,7 @@ class SMAC3Scenario(ConfigurationScenario):
             "termination_cost_threshold": self.smac3_scenario.termination_cost_threshold,
             "walltime_limit": self.smac3_scenario.walltime_limit,
             "cputime_limit": self.smac3_scenario.cputime_limit,
-            "n_trials": self.smac3_scenario.n_trials,
+            "solver_calls": self.smac3_scenario.n_trials,
             "use_default_config": self.smac3_scenario.use_default_config,
             "instance_features": feature_data,
             "min_budget": self.smac3_scenario.min_budget,
@@ -296,7 +294,7 @@ class SMAC3Scenario(ConfigurationScenario):
                 float(variables["termination_cost_threshold"])
         variables["walltime_limit"] = float(variables["walltime_limit"])
         variables["cputime_limit"] = float(variables["cputime_limit"])
-        variables["n_trials"] = int(variables["n_trials"])
+        variables["solver_calls"] = int(variables["solver_calls"])
         variables["use_default_config"] =\
             ast.literal_eval(variables["use_default_config"])
 

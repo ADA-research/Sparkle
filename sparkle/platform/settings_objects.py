@@ -335,6 +335,10 @@ class Settings:
                     self.set_smac2_max_iterations(value, state)
                     file_settings.remove_option(section, option)
 
+            section = "smac3"
+
+            # TODO: Add smac3 specific options
+
             section = "irace"
             option_names = ("max_time", )
             for option in option_names:
@@ -724,7 +728,12 @@ class Settings:
                 "max_iterations": self.get_smac2_max_iterations()
                 or configurator_settings["max_iterations"],
             })
-        if configurator_name == cim.IRACE.__name__:
+        elif configurator_name == cim.SMAC3.__name__:
+            # Return all settings from the SMAC3 section
+            del configurator_settings["max_iterations"]  # SMAC3 does not have this
+            configurator_settings.update({
+            })
+        elif configurator_name == cim.IRACE.__name__:
             # Return all settings from the IRACE section
             configurator_settings.update({
                 "solver_calls": self.get_irace_max_experiments(),
