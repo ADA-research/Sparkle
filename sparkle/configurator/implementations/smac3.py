@@ -10,7 +10,7 @@ from smac.facade import AbstractFacade, HyperparameterOptimizationFacade
 # import pandas as pd
 import numpy as np
 
-# import runrunner as rrr
+import runrunner as rrr
 from runrunner import Runner, Run
 
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
@@ -25,8 +25,7 @@ class SMAC3(Configurator):
     """Class for SMAC3 (Python) configurator."""
     configurator_path = Path(__file__).parent.parent.parent.resolve() /\
         "Components/smac3-v2.20.0"
-    configurator_executable = configurator_path / "smac"
-    configurator_target = configurator_path / "smac_target_algorithm.py"
+    configurator_executable = configurator_path / "smac_target_algorithm.py"
 
     version = smac.version
     full_name = "Sequential Model-based Algorithm Configuration"
@@ -73,7 +72,25 @@ class SMAC3(Configurator):
         Returns:
             A RunRunner Run object.
         """
-        raise NotImplementedError
+        parallel_jobs = scenario.number_of_runs
+        if num_parallel_jobs is not None:
+            parallel_jobs = max(num_parallel_jobs, scenario.number_of_runs)
+        cmds = [f"python3 {self.configurator_executable.absolute()} "
+                f"{scenario.scenario_file_path.absolute()} {seed}"
+                for seed in range(scenario.number_of_runs)]
+        smac3_configure = [rrr.add_to_queue(
+            runner=run_on,
+            cmd=cmds,
+            name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
+            parallel_jobs=parallel_jobs,
+            sbatch_options=sbatch_options,
+            base_dir=base_dir,
+        )]
+        if validate_after:
+            smac3_configure.append(
+                rrr.add_to_queue()
+            )
+        raise smac3_configure
 
     @staticmethod
     def organise_output(output_source: Path, output_target: Path) -> None | str:
@@ -94,6 +111,7 @@ class SMAC3Scenario(ConfigurationScenario):
                  sparkle_objectives: list[SparkleObjective],
                  parent_directory: Path,
                  cutoff_time: int,
+                 number_of_runs: int,
                  smac_facade: AbstractFacade = HyperparameterOptimizationFacade,
                  crash_cost: float = np.inf,
                  termination_cost_threshold: float = np.inf,
@@ -121,6 +139,8 @@ class SMAC3Scenario(ConfigurationScenario):
             cutoff_time : int
                 Maximum CPU runtime in seconds that each solver call (trial)
                 is allowed to run. Is managed by RunSolver, not pynisher.
+            number_of_runs : int
+                The number of times this scenario will be executed with different seeds.
             smac_facade: AbstractFacade, defaults to HyperparameterOptimizationFacade
                 The SMAC facade to use for Optimisation.
             crash_cost : float | list[float], defaults to np.inf
@@ -169,8 +189,9 @@ class SMAC3Scenario(ConfigurationScenario):
         super().__init__(solver, instance_set, sparkle_objectives, parent_directory)
         # The files are saved in `./output_directory/name/seed`.
         self.results_directory = self.directory / "smac3_output"
-        self.feature_dataframe = instance_features
+        self.number_of_runs = number_of_runs
         self.smac_facade = smac_facade
+        self.feature_dataframe = instance_features
 
         if instance_features is not None:
             instance_features =\
@@ -233,6 +254,7 @@ class SMAC3Scenario(ConfigurationScenario):
             "instance_set": self.instance_set.directory,
             "sparkle_objectives": ",".join(self.smac3_scenario.objectives),
             "cutoff_time": self.cutoff_time,
+            "number_of_runs": self.number_of_runs,
             "smac_facade": self.smac_facade.__name__,
             "crash_cost": self.smac3_scenario.crash_cost,
             "termination_cost_threshold": self.smac3_scenario.termination_cost_threshold,
@@ -262,6 +284,7 @@ class SMAC3Scenario(ConfigurationScenario):
             for o in variables["sparkle_objectives"].split(",")]
         variables["parent_directory"] = scenario_file.parent
         variables["cutoff_time"] = int(variables["cutoff_time"])
+        variables["number_of_runs"] = int(variables["number_of_runs"])
         variables["smac_facade"] = getattr(smac.facade, variables["smac_facade"])
         variables["crash_cost"] = float(variables["crash_cost"])
         # We need to support both lists of floats and single float (np.inf is fine)

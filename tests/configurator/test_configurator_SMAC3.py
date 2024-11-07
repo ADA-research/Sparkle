@@ -21,6 +21,7 @@ def test_smac3_scenario_to_file(tmp_path: Path,
     scenario = SMAC3Scenario(
         solver, instance_set, objectives, Path(),
         cutoff_time=60,
+        number_of_runs=1,
         crash_cost=15.0,
         termination_cost_threshold=24.0,
         walltime_limit=10.0,
@@ -48,6 +49,7 @@ def test_smac3_scenario_from_file() -> None:
     assert len(scenario.smac3_scenario.objectives) == len(scenario.sparkle_objectives)
     assert scenario.directory == source.parent / scenario.name
     assert scenario.cutoff_time == 60
+    assert scenario.number_of_runs == 5
     assert scenario.feature_dataframe is None
     assert scenario.smac3_scenario.crash_cost == 15.0
     assert scenario.smac3_scenario.termination_cost_threshold == 24.0

@@ -3,6 +3,7 @@ instance_set = tests/test_files/Instances/Train-Instance-Set
 sparkle_objectives = PAR10,accuray:min
 smac_facade = HyperparameterOptimizationFacade
 cutoff_time = 60
+number_of_runs = 5
 crash_cost = 15.0
 termination_cost_threshold = 24.0
 walltime_limit = 10.0
