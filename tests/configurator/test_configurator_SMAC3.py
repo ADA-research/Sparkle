@@ -5,7 +5,7 @@ import pytest
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
 from sparkle.types import resolve_objective
-from sparkle.configurator.implementations import SMAC3Scenario
+from sparkle.configurator.implementations import SMAC3, SMAC3Scenario
 
 
 def test_smac3_scenario_to_file(tmp_path: Path,
@@ -26,7 +26,7 @@ def test_smac3_scenario_to_file(tmp_path: Path,
         termination_cost_threshold=24.0,
         walltime_limit=10.0,
         cputime_limit=20.0,
-        n_trials=5,
+        solver_calls=5,
         use_default_config=False,
         instance_features=None,
         min_budget=50.0,
@@ -64,13 +64,36 @@ def test_smac3_scenario_from_file() -> None:
     assert scenario.smac3_scenario.n_workers == 2
 
 
-def test_smac3_configure() -> None:
+def test_smac3_configure(tmp_path: Path,
+                         monkeypatch: pytest.MonkeyPatch,
+                         ) -> None:
     """Test SMAC3 scenario configuration."""
-    return
-    # solver = Solver(Path("tests/test_files/Solvers/Test-Solver").absolute())
-    # instance_set = Instance_Set(
-    #     Path("tests/test_files/Instances/Train-Instance-Set").absolute())
-    # objectives = [resolve_objective("PAR10"), resolve_objective("accuray:min")]
+    solver = Solver(Path("tests/test_files/Solvers/Test-Solver").absolute())
+    instance_set = Instance_Set(
+        Path("tests/test_files/Instances/Train-Instance-Set").absolute())
+    objectives = [resolve_objective("PAR10"), resolve_objective("accuray:min")]
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+    monkeypatch.setitem(globals(), "add_to_queue", None)
+
+    scenario = SMAC3Scenario(
+        solver, instance_set, objectives, Path(),
+        cutoff_time=60,
+        number_of_runs=2,
+        crash_cost=15.0,
+        termination_cost_threshold=24.0,
+        walltime_limit=10.0,
+        cputime_limit=20.0,
+        solver_calls=5,
+        use_default_config=False,
+        instance_features=None,
+        min_budget=50.0,
+        max_budget=60.0,
+        seed=42,
+        n_workers=2)
+    scenario.create_scenario()
+    smac_configurator = SMAC3(Path(), Path())
+    runs = smac_configurator.configure(scenario)
+    assert runs == [None, None]
 
 
 def test_organise_output() -> None:

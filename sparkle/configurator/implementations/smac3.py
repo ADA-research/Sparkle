@@ -15,7 +15,7 @@ from runrunner import Runner, Run
 
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
-# from sparkle.solver.validator import Validator
+from sparkle.solver.validator import Validator
 from sparkle.structures import FeatureDataFrame
 from sparkle.instance import InstanceSet  # , Instance_Set
 from sparkle.types import SparkleObjective, resolve_objective
@@ -24,8 +24,8 @@ from sparkle.types import SparkleObjective, resolve_objective
 class SMAC3(Configurator):
     """Class for SMAC3 (Python) configurator."""
     configurator_path = Path(__file__).parent.parent.parent.resolve() /\
-        "Components/smac3-v2.20.0"
-    configurator_executable = configurator_path / "smac_target_algorithm.py"
+        "Components/smac3-v2.2.0"
+    configurator_executable = configurator_path / "smac3_target_algorithm.py"
 
     version = smac.version
     full_name = "Sequential Model-based Algorithm Configuration"
@@ -33,14 +33,21 @@ class SMAC3(Configurator):
     def __init__(self: SMAC3,
                  base_dir: Path,
                  output_path: Path) -> None:
-        """Returns the SMAC3 configurator, Python SMAC V2.20.0.
+        """Returns the SMAC3 configurator, Python SMAC V2.2.0.
 
         Args:
             objectives: The objectives to optimize. Only supports one objective.
             base_dir: The path where the configurator will be executed in.
             output_path: The path where the output will be placed.
         """
-        raise NotImplementedError
+        output_path = output_path / SMAC3.__name__
+        output_path.mkdir(parents=True, exist_ok=True)
+        return super().__init__(
+            validator=Validator(out_dir=output_path),
+            output_path=output_path,
+            base_dir=base_dir,
+            tmp_path=output_path / "tmp",
+            multi_objective_support=False)
 
     @property
     def name(self: SMAC3) -> str:
@@ -79,7 +86,7 @@ class SMAC3(Configurator):
                 f"{scenario.scenario_file_path.absolute()} {seed}"
                 for seed in range(scenario.number_of_runs)]
         print(cmds[0])
-        input()
+        return
         smac3_configure = [rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
