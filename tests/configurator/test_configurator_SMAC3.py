@@ -20,12 +20,11 @@ def test_smac3_scenario_to_file(tmp_path: Path,
 
     scenario = SMAC3Scenario(
         solver, instance_set, objectives, Path(),
+        cutoff_time=60,
         crash_cost=15.0,
         termination_cost_threshold=24.0,
         walltime_limit=10.0,
         cputime_limit=20.0,
-        trial_walltime_limit=30.0,
-        trial_memory_limit=40.0,
         n_trials=5,
         use_default_config=False,
         instance_features=None,
@@ -48,13 +47,12 @@ def test_smac3_scenario_from_file() -> None:
     assert scenario.smac3_scenario.name == scenario.name
     assert len(scenario.smac3_scenario.objectives) == len(scenario.sparkle_objectives)
     assert scenario.directory == source.parent / scenario.name
+    assert scenario.cutoff_time == 60
     assert scenario.feature_dataframe is None
     assert scenario.smac3_scenario.crash_cost == 15.0
     assert scenario.smac3_scenario.termination_cost_threshold == 24.0
     assert scenario.smac3_scenario.walltime_limit == 10.0
     assert scenario.smac3_scenario.cputime_limit == 20.0
-    assert scenario.smac3_scenario.trial_walltime_limit == 30.0
-    assert scenario.smac3_scenario.trial_memory_limit == 40.0
     assert scenario.smac3_scenario.n_trials == 5
     assert scenario.smac3_scenario.use_default_config is False
     assert scenario.smac3_scenario.instance_features is None
