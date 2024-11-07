@@ -6,12 +6,12 @@ from pathlib import Path
 import shutil
 
 import smac
+from smac.facade import AbstractFacade, HyperparameterOptimizationFacade
 # import pandas as pd
 import numpy as np
 
 # import runrunner as rrr
 from runrunner import Runner, Run
-import smac.scenario
 
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
@@ -49,12 +49,12 @@ class SMAC3(Configurator):
         return SMAC3.__name__
 
     @property
-    def scenario_class(self: Configurator) -> ConfigurationScenario:
+    def scenario_class(self: SMAC3) -> ConfigurationScenario:
         """Returns the SMAC3 scenario class."""
         return SMAC3Scenario
 
-    def configure(self: Configurator,
-                  scenario: ConfigurationScenario,
+    def configure(self: SMAC3,
+                  scenario: SMAC3Scenario,
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
                   num_parallel_jobs: int = None,
@@ -75,6 +75,15 @@ class SMAC3(Configurator):
         """
         raise NotImplementedError
 
+    @staticmethod
+    def organise_output(output_source: Path, output_target: Path) -> None | str:
+        """Method to restructure and clean up after a single configurator call."""
+        raise NotImplementedError
+
+    def get_status_from_logs(self: SMAC3) -> None:
+        """Method to scan the log files of the configurator for warnings."""
+        raise NotImplementedError
+
 
 class SMAC3Scenario(ConfigurationScenario):
     """Class to handle SMAC3 configuration scenarios."""
@@ -84,12 +93,12 @@ class SMAC3Scenario(ConfigurationScenario):
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
                  parent_directory: Path,
+                 cutoff_time: int,
+                 smac_facade: AbstractFacade = HyperparameterOptimizationFacade,
                  crash_cost: float = np.inf,
                  termination_cost_threshold: float = np.inf,
                  walltime_limit: float = np.inf,
                  cputime_limit: float = np.inf,
-                 trial_walltime_limit: float | None = None,
-                 trial_memory_limit: int | None = None,
                  n_trials: int = 100,
                  use_default_config: bool = False,
                  instance_features: FeatureDataFrame = None,
@@ -109,6 +118,11 @@ class SMAC3Scenario(ConfigurationScenario):
                 The objectives to optimize.
             parent_directory : Path
                 The parent directory where the configuration files will be stored.
+            cutoff_time : int
+                Maximum CPU runtime in seconds that each solver call (trial)
+                is allowed to run. Is managed by RunSolver, not pynisher.
+            smac_facade: AbstractFacade, defaults to HyperparameterOptimizationFacade
+                The SMAC facade to use for Optimisation.
             crash_cost : float | list[float], defaults to np.inf
                 Defines the cost for a failed trial. In case of multi-objective,
                 each objective can be associated with a different cost.
@@ -120,13 +134,6 @@ class SMAC3Scenario(ConfigurationScenario):
                 The maximum time in seconds that SMAC is allowed to run.
             cputime_limit : float, defaults to np.inf
                 The maximum CPU time in seconds that SMAC is allowed to run.
-            trial_walltime_limit : float | None, defaults to None
-                The maximum time in seconds that a trial is allowed to run.
-                If not specified, no constraints are enforced. Otherwise,
-                the process will be spawned by pynisher.
-            trial_memory_limit : int | None, defaults to None
-                The maximum memory in MB that a trial is allowed to use. If not specified
-                no constraints are enforced.
             n_trials : int, defaults to 100
                 The maximum number of trials (combination of configuration, seed, budget,
                 and instance, depending on the task) to run.
@@ -163,12 +170,16 @@ class SMAC3Scenario(ConfigurationScenario):
         # The files are saved in `./output_directory/name/seed`.
         self.results_directory = self.directory / "smac3_output"
         self.feature_dataframe = instance_features
+        self.smac_facade = smac_facade
 
         if instance_features is not None:
             instance_features =\
                 {instance_name: self.feature_dataframe.get_instance(instance_name)
                     for instance_name in self.feature_dataframe.instances}
-
+        # NOTE: We don't use trial_walltime_limit as a way of managing resources
+        # As it uses pynisher to do it (python based) and our targets are maybe not
+        # RunSolver is the better option for accuracy.
+        self.cutoff_time = cutoff_time
         self.smac3_scenario = smac.scenario.Scenario(
             configspace=solver.get_configspace(),
             name=self.name,
@@ -179,8 +190,6 @@ class SMAC3Scenario(ConfigurationScenario):
             termination_cost_threshold=termination_cost_threshold,
             walltime_limit=walltime_limit,
             cputime_limit=cputime_limit,
-            trial_walltime_limit=trial_walltime_limit,
-            trial_memory_limit=trial_memory_limit,
             n_trials=n_trials,
             use_default_config=use_default_config,
             instances=instance_set.instance_paths,  # Correct?
@@ -223,12 +232,12 @@ class SMAC3Scenario(ConfigurationScenario):
             "solver": self.solver.directory,
             "instance_set": self.instance_set.directory,
             "sparkle_objectives": ",".join(self.smac3_scenario.objectives),
+            "cutoff_time": self.cutoff_time,
+            "smac_facade": self.smac_facade.__name__,
             "crash_cost": self.smac3_scenario.crash_cost,
             "termination_cost_threshold": self.smac3_scenario.termination_cost_threshold,
             "walltime_limit": self.smac3_scenario.walltime_limit,
             "cputime_limit": self.smac3_scenario.cputime_limit,
-            "trial_walltime_limit": self.smac3_scenario.trial_walltime_limit,
-            "trial_memory_limit": self.smac3_scenario.trial_memory_limit,
             "n_trials": self.smac3_scenario.n_trials,
             "use_default_config": self.smac3_scenario.use_default_config,
             "instance_features": feature_data,
@@ -252,6 +261,8 @@ class SMAC3Scenario(ConfigurationScenario):
             resolve_objective(o)
             for o in variables["sparkle_objectives"].split(",")]
         variables["parent_directory"] = scenario_file.parent
+        variables["cutoff_time"] = int(variables["cutoff_time"])
+        variables["smac_facade"] = getattr(smac.facade, variables["smac_facade"])
         variables["crash_cost"] = float(variables["crash_cost"])
         # We need to support both lists of floats and single float (np.inf is fine)
         if variables["termination_cost_threshold"].startswith("["):  # Hacky test
@@ -262,8 +273,6 @@ class SMAC3Scenario(ConfigurationScenario):
                 float(variables["termination_cost_threshold"])
         variables["walltime_limit"] = float(variables["walltime_limit"])
         variables["cputime_limit"] = float(variables["cputime_limit"])
-        variables["trial_walltime_limit"] = float(variables["trial_walltime_limit"])
-        variables["trial_memory_limit"] = float(variables["trial_memory_limit"])
         variables["n_trials"] = int(variables["n_trials"])
         variables["use_default_config"] =\
             ast.literal_eval(variables["use_default_config"])

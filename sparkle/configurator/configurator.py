@@ -114,11 +114,6 @@ class Configurator:
         """Method to restructure and clean up after a single configurator call."""
         raise NotImplementedError
 
-    def set_scenario_dirs(self: Configurator,
-                          solver: Solver, instance_set: InstanceSet) -> None:
-        """Patching method to allow the rebuilding of configuration scenario."""
-        raise NotImplementedError
-
     def get_status_from_logs(self: Configurator) -> None:
         """Method to scan the log files of the configurator for warnings."""
         raise NotImplementedError

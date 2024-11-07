@@ -160,7 +160,6 @@ class PCSParser(ABC):
         else:
             raise Exception(f"ERROR: Exporting the pcs convention for {convention.value}"
                             " is not yet implemented.")
-        
 
     def get_configspace(self: PCSObject) -> ConfigSpace.ConfigurationSpace:
         """Get the ConfigurationSpace representationof the PCS file."""

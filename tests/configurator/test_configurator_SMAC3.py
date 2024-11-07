@@ -62,3 +62,17 @@ def test_smac3_scenario_from_file() -> None:
     assert scenario.smac3_scenario.max_budget == 60.0
     assert scenario.smac3_scenario.seed == 42
     assert scenario.smac3_scenario.n_workers == 2
+
+
+def test_smac3_configure() -> None:
+    """Test SMAC3 scenario configuration."""
+    return
+    # solver = Solver(Path("tests/test_files/Solvers/Test-Solver").absolute())
+    # instance_set = Instance_Set(
+    #     Path("tests/test_files/Instances/Train-Instance-Set").absolute())
+    # objectives = [resolve_objective("PAR10"), resolve_objective("accuray:min")]
+
+
+def test_organise_output() -> None:
+    """Test SMAC3 configuration output organisation."""
+    pass
