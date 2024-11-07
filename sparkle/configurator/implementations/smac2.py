@@ -132,11 +132,8 @@ class SMAC2(Configurator):
     def organise_output(output_source: Path, output_target: Path = None) -> None | str:
         """Retrieves configurations from SMAC files and places them in output."""
         call_key = SMAC2.configurator_target.name
-        print(call_key)
-        print()
         # Last line describing a call is the best found configuration
         for line in reversed(output_source.open("r").readlines()):
-            print(f"[{call_key in line}]", line)
             if call_key in line:
                 call_str = line.split(call_key, maxsplit=1)[1].strip()
                 # The Configuration appears after the first 6 arguments
