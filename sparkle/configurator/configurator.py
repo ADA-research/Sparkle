@@ -177,7 +177,7 @@ class ConfigurationScenario:
     def find_scenario(cls: ConfigurationScenario,
                       directory: Path,
                       solver: Solver,
-                      instance_set: InstanceSet) -> ConfigurationScenario | None:
+                      instance_set: InstanceSet) -> ConfigurationScenario:
         """Resolve a scenario from a directory and Solver / Training set."""
         scenario_name = f"{solver.name}_{instance_set.name}"
         path = directory / f"{scenario_name}" / f"{scenario_name}_scenario.txt"

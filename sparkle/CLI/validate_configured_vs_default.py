@@ -5,19 +5,21 @@ import sys
 import argparse
 from pathlib import PurePath
 
-from runrunner.base import Runner
+from runrunner.base import Runner, Status
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
-from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.reporting_scenario import Scenario
+from sparkle.CLI.initialise import check_for_initialise
+from sparkle.CLI.help.nicknames import resolve_object_name
+from sparkle.CLI.help import jobs as jobs_help
+
+from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.configurator.configurator import Configurator
 from sparkle.solver.validator import Validator
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
-from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help.nicknames import resolve_object_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -102,9 +104,20 @@ def main(argv: list[str]) -> None:
         configurator.output_path, solver, instance_set_train)
 
     if config_scenario is None:
-        print("No configuration scenario found for combination:\n"
-              f"{configurator.name} {solver.name} {instance_set_train.name}")
+        print("No configuration scenario found for:\n"
+              f"{configurator.name}: {solver.name} on {instance_set_train.name}")
         sys.exit(-1)
+
+    # Check if any jobs are still in the queue for this scenario
+    running_runs = jobs_help.get_runs_from_file(gv.settings().DEFAULT_log_output,
+                                                filter=[Status.WAITING, Status.RUNNING])
+    for run in running_runs:
+        # Bit of a hack to check if the job is still in the queue
+        if any([str(config_scenario.scenario_file_path) in job.cmd
+                for job in run.jobs]):
+            print("ERROR: Cannot validate the configuration, as the configurator job "
+                  f"{run.run_id} is still in the queue with status {run.status}.")
+            sys.exit(-1)
 
     # Record optimised configuration
     _, opt_config_str = configurator.get_optimal_configuration(config_scenario)
