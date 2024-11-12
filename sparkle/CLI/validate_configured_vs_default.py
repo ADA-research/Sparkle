@@ -20,7 +20,6 @@ from sparkle.configurator.configurator import Configurator
 from sparkle.solver.validator import Validator
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -58,9 +57,7 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
 
-    check_for_initialise(
-        COMMAND_DEPENDENCIES[CommandName.VALIDATE_CONFIGURED_VS_DEFAULT]
-    )
+    check_for_initialise()
 
     if ac.set_by_user(args, "settings_file"):
         gv.settings().read_settings_ini(

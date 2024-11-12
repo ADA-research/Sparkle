@@ -13,7 +13,6 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 
@@ -28,8 +27,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeRunSolversArgument.names,
                         **ac.TargetCutOffTimeRunSolversArgument.kwargs)
-    parser.add_argument(*ac.AlsoConstructSelectorAndReportArgument.names,
-                        **ac.AlsoConstructSelectorAndReportArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
@@ -86,17 +83,20 @@ def running_solvers_performance_data(
     srun_options = ["-N1", "-n1"] + sbatch_options
     objectives = gv.settings().get_general_sparkle_objectives()
     run_solvers_core = Path(__file__).parent.resolve() / "core" / "run_solvers_core.py"
+    instance_paths, _, solver_paths = zip(*jobs)
     cmd_list = [f"{run_solvers_core} "
                 f"--performance-data {performance_data_csv_path} "
                 f"--instance {inst_p} --solver {solver_p} "
                 f"--objectives {','.join([str(o) for o in objectives])} "
-                f"--log-dir {sl.caller_log_dir}" for inst_p, _, solver_p in jobs]
+                f"--log-dir {sl.caller_log_dir}"
+                for inst_p, solver_p in zip(instance_paths, solver_paths)]
 
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
         parallel_jobs=num_job_in_parallel,
-        name=CommandName.RUN_SOLVERS,
+        name=f"Run Solvers: {len(set(solver_paths))} solvers and "
+             f"{len(set(instance_paths))} instances",
         base_dir=sl.caller_log_dir,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
@@ -111,8 +111,7 @@ def running_solvers_performance_data(
 
 def run_solvers_on_instances(
         recompute: bool = False,
-        run_on: Runner = Runner.SLURM,
-        also_construct_selector_and_report: bool = False) -> None:
+        run_on: Runner = Runner.SLURM) -> None:
     """Run all the solvers on all the instances that were not not previously run.
 
     If recompute is True, rerun everything even if previously run. Where the solvers are
@@ -126,8 +125,6 @@ def run_solvers_on_instances(
     run_on: Runner
         On which computer or cluster environment to run the solvers.
         Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
-    also_construct_selector_and_report: bool
-        If True, the selector will be constructed and a report will be produced.
     """
     if recompute:
         PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path).clean_csv()
@@ -143,24 +140,6 @@ def run_solvers_on_instances(
     if all(run is None for run in runs):
         print("Running solvers done!")
         return
-
-    sbatch_user_options = gv.settings().get_slurm_extra_options(as_args=True)
-    if also_construct_selector_and_report:
-        runs.append(rrr.add_to_queue(
-            runner=run_on,
-            cmd="sparkle/CLI/construct_portfolio_selector.py",
-            name=CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
-            dependencies=runs[-1],
-            base_dir=sl.caller_log_dir,
-            sbatch_options=sbatch_user_options))
-
-        runs.append(rrr.add_to_queue(
-            runner=run_on,
-            cmd="sparkle/CLI/generate_report.py",
-            name=CommandName.GENERATE_REPORT,
-            dependencies=runs[-1],
-            base_dir=sl.caller_log_dir,
-            sbatch_options=sbatch_user_options))
 
     if run_on == Runner.LOCAL:
         print("Waiting for the local calculations to finish.")
@@ -198,7 +177,7 @@ def main(argv: list[str]) -> None:
         gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
 
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_SOLVERS])
+    check_for_initialise()
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
@@ -212,7 +191,6 @@ def main(argv: list[str]) -> None:
     run_on = gv.settings().get_run_on()
     run_solvers_on_instances(
         recompute=args.recompute,
-        also_construct_selector_and_report=args.also_construct_selector_and_report,
         run_on=run_on)
     sys.exit(0)
 

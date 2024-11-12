@@ -9,9 +9,7 @@ from pathlib import Path
 from sparkle.platform import file_help as sfh
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import FeatureDataFrame
-from sparkle.CLI.compute_features import compute_features
 from sparkle.CLI.help import logging as sl
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.solver import Extractor
@@ -24,9 +22,6 @@ def parser_function() -> argparse.ArgumentParser:
         description="Add a feature extractor to the platform.")
     parser.add_argument(*ac.ExtractorPathArgument.names,
                         **ac.ExtractorPathArgument.kwargs)
-    group_extractor_run = parser.add_mutually_exclusive_group()
-    group_extractor_run.add_argument(*ac.RunExtractorNowArgument.names,
-                                     **ac.RunExtractorNowArgument.kwargs)
     parser.add_argument(*ac.NicknameFeatureExtractorArgument.names,
                         **ac.NicknameFeatureExtractorArgument.kwargs)
     return parser
@@ -42,7 +37,7 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
 
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.ADD_FEATURE_EXTRACTOR])
+    check_for_initialise()
 
     extractor_source = Path(args.extractor_path)
     if not extractor_source.exists():
@@ -82,10 +77,6 @@ def main(argv: list[str]) -> None:
             gv.extractor_nickname_list_path,
             gv.file_storage_data_mapping[gv.extractor_nickname_list_path],
             key=nickname_str)
-
-    if args.run_extractor_now:
-        print("Start computing features ...")
-        compute_features(gv.settings().DEFAULT_feature_data_path, False)
 
     # Write used settings to file
     gv.settings().write_used_settings()

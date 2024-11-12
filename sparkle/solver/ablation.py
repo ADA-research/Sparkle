@@ -14,7 +14,6 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 
 from sparkle.configurator.implementations import SMAC2
-from sparkle.platform import CommandName
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 
@@ -203,7 +202,7 @@ class AblationScenario:
         run_ablation = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
-            name=CommandName.RUN_ABLATION,
+            name=f"Ablation analysis: {self.solver.name} on {self.train_set.name}",
             base_dir=sl.caller_log_dir,
             path=self.scenario_dir,
             sbatch_options=sbatch_options,
@@ -225,7 +224,7 @@ class AblationScenario:
             run_ablation_validation = rrr.add_to_queue(
                 runner=run_on,
                 cmd=cmd,
-                name=CommandName.RUN_ABLATION_VALIDATION,
+                name=f"Ablation validation: Test set {self.test_set.name}",
                 path=self.validation_dir,
                 base_dir=sl.caller_log_dir,
                 dependencies=run_ablation,

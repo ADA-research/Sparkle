@@ -44,6 +44,10 @@ class InstanceSet:
         """Get instance set name."""
         return self.directory.name
 
+    def __str__(self: InstanceSet) -> str:
+        """Get the string representation of an Instance Set."""
+        return self.name
+
     def get_path_by_name(self: InstanceSet, name: str) -> Path | list[Path]:
         """Retrieves an instance paths by its name. Returns None upon failure."""
         for idx, instance_name in enumerate(self._instance_names):
