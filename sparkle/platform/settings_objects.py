@@ -730,8 +730,51 @@ class Settings:
             })
         elif configurator_name == cim.SMAC3.__name__:
             # Return all settings from the SMAC3 section
-            del configurator_settings["max_iterations"]  # SMAC3 does not have this
+            del configurator_settings["max_iterations"]  # SMAC3 does not have this?
+            # TODO: add the following
+            """smac_facade: AbstractFacade, defaults to HyperparameterOptimizationFacade
+                The SMAC facade to use for Optimisation.
+            crash_cost : float | list[float], defaults to np.inf
+                Defines the cost for a failed trial. In case of multi-objective,
+                each objective can be associated with a different cost.
+            termination_cost_threshold : float | list[float], defaults to np.inf
+                Defines a cost threshold when the optimization should stop. In case of
+                multi-objective, each objective *must* be associated with a cost.
+                The optimization stops when all objectives crossed the threshold.
+            walltime_limit : float, defaults to np.inf
+                The maximum time in seconds that SMAC is allowed to run.
+            cputime_limit : float, defaults to np.inf
+                The maximum CPU time in seconds that SMAC is allowed to run.
+            solver_calls : int, defaults to 100 [n_trials]
+                The maximum number of trials (combination of configuration, seed, budget,
+                and instance, depending on the task) to run.
+            use_default_config: bool, defaults to False.
+                If True, the configspace's default configuration is evaluated in the
+                initial design. For historic benchmark reasons, this is False by default.
+                Notice, that this will result in n_configs + 1 for the initial design.
+                Respecting n_trials, this will result in one fewer evaluated
+                configuration in the optimization.
+            min_budget : float | int | None, defaults to None
+                The minimum budget (epochs, subset size, number of instances, ...) that
+                is used for the optimization. Use this argument if you use multi-fidelity
+                or instance optimization.
+            max_budget : float | int | None, defaults to None
+                The maximum budget (epochs, subset size, number of instances, ...) that
+                is used for the optimization. Use this argument if you use multi-fidelity
+                or instance optimization."""
             configurator_settings.update({
+                "smac_facade": self.get_smac3_smac_facade(),
+                "crash_cost": self.get_smac3_crash_cost(),
+                "termination_cost_threshold": self.get_smac3_termination_cost_thresh(),
+                "walltime_limit": self.get_smac3_walltime_limit(),
+                "cputime_limit": self.get_smac3_cputime_limit(),
+                "use_default_config": self.get_smac3_use_default_config(),
+                "instances": self.get_smac3_instances(),
+                "instance_features": self.get_smac3_instance_features(),
+                "min_budget": self.get_smac3_min_budget(),
+                "max_budget": self.get_smac3_max_budget(),
+                "solver_calls": self.get_smac3_number_of_trials()
+                or configurator_settings["solver_calls"],
             })
         elif configurator_name == cim.IRACE.__name__:
             # Return all settings from the IRACE section
