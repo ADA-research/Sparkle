@@ -137,7 +137,7 @@ class Settings:
 
     # Default SMAC3 settings
     DEFAULT_smac3_number_of_runs = None
-    DEFAULT_smac3_smac_facade = None
+    DEFAULT_smac3_facade = smac_facades.HyperparameterOptimizationFacade.__name__
     DEFAULT_smac3_crash_cost = None
     DEFAULT_smac3_termination_cost_threshold = None
     DEFAULT_smac3_walltime_limit = None
@@ -389,7 +389,7 @@ class Settings:
                     self.set_smac3_termination_cost_threshold(value, state)
                     file_settings.remove_option(section, option)
 
-            options_names = ("walltime_limit", )
+            options_names = ("walltime_limit", "wallclock_time")
             for option in options_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getfloat(section, option)
@@ -1038,7 +1038,7 @@ class Settings:
         return int(number_of_runs) if number_of_runs.isdigit() else None
 
     def set_smac3_smac_facade(
-            self: Settings, value: str = DEFAULT_smac3_smac_facade,
+            self: Settings, value: str = DEFAULT_smac3_facade,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the SMAC3 facade."""
         section = "smac3"
@@ -1133,9 +1133,9 @@ class Settings:
         section = "smac3"
         name = "cputime_limit"
 
-        if self.__check_setting_state(self.__smac3_walltime_limit_set, origin, name):
+        if self.__check_setting_state(self.__smac3_cputime_limit_set, origin, name):
             self.__init_section(section)
-            self.__smac3_walltime_limit_set = origin
+            self.__smac3_cputime_limit_set = origin
             self.__settings[section][name] = str(value)
 
     def get_smac3_cputime_limit(self: Settings) -> float:
