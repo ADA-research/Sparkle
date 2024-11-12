@@ -94,27 +94,6 @@ sparkle generate_report
 
 The ablation section can be suppressed with `--no-ablation` 
 
-#### Immediate ablation and validation after configuration
-
-By adding `--ablation` and/or `--validate` to the `configure_solver` command, ablation and respectively validation will run directly after the configuration is finished.
-
-There is no need to execute `run_ablation` and/or `validate_configured_vs_default` when these flags are given with the `configure_solver` command
-
-#### Training set only
-
-```bash
-sparkle configure_solver --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --ablation --validate
-```
-
-#### Training and testing sets
-
-Wait for the previous example to be completed
-
-```bash
-sparkle wait
-sparkle configure_solver --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/ --ablation --validate
-```
-
 ### Run configured solver
 
 #### Run configured solver on a single instance

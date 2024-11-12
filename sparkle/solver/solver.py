@@ -173,7 +173,6 @@ class Solver(SparkleCallable):
             cutoff_time: int = None,
             configuration: dict = None,
             run_on: Runner = Runner.LOCAL,
-            commandname: str = "run_solver",
             sbatch_options: list[str] = None,
             log_dir: Path = None) -> SlurmRun | list[dict[str, Any]] | dict[str, Any]:
         """Run the solver on an instance with a certain configuration.
@@ -212,6 +211,7 @@ class Solver(SparkleCallable):
                                         configuration=configuration,
                                         log_dir=log_dir)
             cmds.append(" ".join(solver_cmd))
+        commandname = f"Run Solver: {self.name} on {instance}"
         run = rrr.add_to_queue(runner=run_on,
                                cmd=cmds,
                                name=commandname,
