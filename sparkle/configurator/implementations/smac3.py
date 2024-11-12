@@ -206,6 +206,12 @@ class SMAC3Scenario(ConfigurationScenario):
             instance_features =\
                 {instance_name: self.feature_dataframe.get_instance(instance_name)
                     for instance_name in self.feature_dataframe.instances}
+        else:
+            # 'If no instance features are passed, the runhistory encoder can not
+            # distinguish between different instances and therefore returns the same data
+            # points with different values, all of which are used to train the surrogate
+            # model. Consider using instance indices as features.'
+            instance_features = [i for i in range(instance_set.size)]
         # NOTE: We don't use trial_walltime_limit as a way of managing resources
         # As it uses pynisher to do it (python based) and our targets are maybe not
         # RunSolver is the better option for accuracy.

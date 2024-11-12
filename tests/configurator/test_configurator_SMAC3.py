@@ -65,8 +65,7 @@ def test_smac3_scenario_from_file() -> None:
 
 
 def test_smac3_configure(tmp_path: Path,
-                         monkeypatch: pytest.MonkeyPatch,
-                         ) -> None:
+                         monkeypatch: pytest.MonkeyPatch) -> None:
     """Test SMAC3 scenario configuration."""
     solver = Solver(Path("tests/test_files/Solvers/Test-Solver").absolute())
     instance_set = Instance_Set(

@@ -14,7 +14,7 @@ def smac3_solver_call(config: Configuration, instance: str, seed: int) -> list[f
     """Wrapper function to translate solver call to Solver call."""
     # TODO: config to config dict
     output = solver.run(
-        instance,  # Correct? Or does the call tell us which one?
+        instance,  # Correct?
         objectives,
         seed,
         cutoff_time=cutoff,
@@ -28,13 +28,12 @@ if __name__ == "__main__":
     # Incoming call from Sparkle:
     args = sys.argv[1:]
     scenario = SMAC3Scenario.from_file(Path(args[0]))  # From File?
-    global solver, instance_set, objectives, cutoff
+    global solver, objectives, cutoff
     solver = scenario.solver
-    instance_set = scenario.instance_set
     cutoff = scenario.cutoff_time
     objectives = scenario.sparkle_objectives
 
-    # Facade Configurable or not?
+    # Facade Configurable
     smac_facade = scenario.smac_facade(scenario.smac3_scenario, smac3_solver_call)
     incumbent = smac_facade.optimize()
     SMAC3.organise_output(scenario.results_directory, scenario.directory)
