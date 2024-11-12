@@ -132,6 +132,8 @@ class Settings:
     DEFAULT_smac2_use_cpu_time_in_tunertime = None
     DEFAULT_smac2_max_iterations = None
 
+    DEFAULT_smac3_number_of_runs = None
+
     DEFAULT_portfolio_construction_timeout = None
 
     DEFAULT_slurm_max_parallel_runs_per_node = 8
@@ -338,6 +340,12 @@ class Settings:
             section = "smac3"
 
             # TODO: Add smac3 specific options
+            option_names = ("n_trials", "number_of_trials", "solver_calls")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_smac3_number_of_trials(value, state)
+                    file_settings.remove_option(section, option)
 
             section = "irace"
             option_names = ("max_time", )
@@ -745,9 +753,6 @@ class Settings:
                 The maximum time in seconds that SMAC is allowed to run.
             cputime_limit : float, defaults to np.inf
                 The maximum CPU time in seconds that SMAC is allowed to run.
-            solver_calls : int, defaults to 100 [n_trials]
-                The maximum number of trials (combination of configuration, seed, budget,
-                and instance, depending on the task) to run.
             use_default_config: bool, defaults to False.
                 If True, the configspace's default configuration is evaluated in the
                 initial design. For historic benchmark reasons, this is False by default.
@@ -852,7 +857,7 @@ class Settings:
         max_iterations = self.__settings["configuration"]["max_iterations"]
         return int(max_iterations) if max_iterations.isdigit() else None
 
-    # Configuration: SMAC specific settings ###
+    # Configuration: SMAC2 specific settings ###
 
     def set_smac2_wallclock_time(
             self: Settings, value: int = DEFAULT_smac2_wallclock_time,
@@ -957,6 +962,32 @@ class Settings:
             self.set_smac2_max_iterations()
         max_iterations = self.__settings["smac2"]["max_iterations"]
         return int(max_iterations) if max_iterations.isdigit() else None
+
+    # Configuration: SMAC3 specific settings ###
+
+    def set_smac3_number_of_trials(
+            self: Settings, value: int = DEFAULT_smac3_number_of_runs,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the number of SMAC3 trials."""
+        section = "smac3"
+        name = "number_of_runs"
+
+        if self.__check_setting_state(
+                self.__smac3_number_of_runs_set, origin, name):
+            self.__init_section(section)
+            self.__smac3_number_of_runs_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac3_number_of_trials(self: Settings) -> int | None:
+        """Return the number of SMAC3 trials (Solver calls).
+
+        'The maximum number of trials (combination of configuration, seed, budget,
+        and instance, depending on the task) to run.'
+        """
+        if self.__smac3_number_of_runs_set == SettingState.NOT_SET:
+            self.set_smac3_number_of_trials()
+        number_of_runs = self.__settings["smac3"]["number_of_runs"]
+        return int(number_of_runs) if number_of_runs.isdigit() else None
 
     # Configuration: IRACE specific settings ###
 
