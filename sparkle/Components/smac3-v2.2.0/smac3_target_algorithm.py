@@ -15,7 +15,8 @@ def smac3_solver_call(config: Configuration, instance: str, seed: int) -> list[f
         seed,
         cutoff_time=cutoff,
         configuration=dict(config),  # Does this need corrections?
-        commandname=f"SMAC3 configuration evaluation {config.config_id}"
+        commandname=f"SMAC3 configuration evaluation {config.config_id}",
+        log_dir=log_dir
     )
     return [float(output[objective.name]) for objective in objectives]
 
@@ -24,10 +25,11 @@ if __name__ == "__main__":
     # Incoming call from Sparkle:
     args = sys.argv[1:]
     scenario = SMAC3Scenario.from_file(Path(args[0]))  # From File?
-    global solver, objectives, cutoff
+    global solver, objectives, cutoff, log_dir
     solver = scenario.solver
     cutoff = scenario.cutoff_time
     objectives = scenario.sparkle_objectives
+    log_dir = scenario.log_dir
 
     # Facade Configurable
     smac_facade = scenario.smac_facade(scenario.smac3_scenario, smac3_solver_call)

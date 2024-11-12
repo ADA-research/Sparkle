@@ -79,14 +79,13 @@ class SMAC3(Configurator):
         Returns:
             A RunRunner Run object.
         """
+        scenario.create_scenario()
         parallel_jobs = scenario.number_of_runs
         if num_parallel_jobs is not None:
             parallel_jobs = max(num_parallel_jobs, scenario.number_of_runs)
         cmds = [f"python3 {self.configurator_executable.absolute()} "
                 f"{scenario.scenario_file_path.absolute()} {seed}"
                 for seed in range(scenario.number_of_runs)]
-        print(cmds[0])
-        return
         smac3_configure = [rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
@@ -96,10 +95,11 @@ class SMAC3(Configurator):
             base_dir=base_dir,
         )]
         if validate_after:
-            smac3_configure.append(
-                rrr.add_to_queue()
-            )
-        raise smac3_configure
+            pass
+            # smac3_configure.append(
+            #     rrr.add_to_queue()
+            # )
+        return smac3_configure
 
     @staticmethod
     def organise_output(output_source: Path, output_target: Path) -> None | str:
@@ -198,6 +198,7 @@ class SMAC3Scenario(ConfigurationScenario):
         super().__init__(solver, instance_set, sparkle_objectives, parent_directory)
         # The files are saved in `./output_directory/name/seed`.
         self.results_directory = self.directory / "smac3_output"
+        self.log_dir = self.directory / "logs"
         self.number_of_runs = number_of_runs
         self.smac_facade = smac_facade
         self.feature_dataframe = instance_features
@@ -214,6 +215,10 @@ class SMAC3Scenario(ConfigurationScenario):
             instance_features = {name: [index] for index, name
                                  in enumerate(instance_set.instance_paths)}
 
+        # NOTE: Patchfix; SMAC3 can handle MO but Sparkle also gives non-user specified
+        # objectives here too, default to the first one for now
+        self.patch_objective = sparkle_objectives[0]
+
         # NOTE: We don't use trial_walltime_limit as a way of managing resources
         # As it uses pynisher to do it (python based) and our targets are maybe not
         # RunSolver is the better option for accuracy.
@@ -223,7 +228,7 @@ class SMAC3Scenario(ConfigurationScenario):
             name=self.name,
             output_directory=self.directory,
             deterministic=solver.deterministic,
-            objectives=[o.name for o in sparkle_objectives],
+            objectives=[o.name for o in [self.patch_objective]],
             crash_cost=crash_cost,
             termination_cost_threshold=termination_cost_threshold,
             walltime_limit=walltime_limit,
@@ -250,6 +255,7 @@ class SMAC3Scenario(ConfigurationScenario):
         self.directory.mkdir(parents=True)
         # Create empty directories as needed
         self.results_directory.mkdir(parents=True)  # Prepare results directory
+        self.log_dir.mkdir(parents=True)
         self.create_scenario_file()
 
     def create_scenario_file(self: ConfigurationScenario) -> Path:
@@ -318,8 +324,22 @@ class SMAC3Scenario(ConfigurationScenario):
         else:
             variables["instance_features"] = None
 
-        variables["min_budget"] = float(variables["min_budget"])  # NOTE: Can also be int
-        variables["max_budget"] = float(variables["max_budget"])  # NOTE: Can also be int
+        if variables["min_budget"] != "None":
+            if variables["min_budget"].isdigit():
+                variables["min_budget"] = int(variables["min_budget"])
+            else:
+                variables["min_budget"] = float(variables["min_budget"])
+        else:
+            variables["min_budget"] = None
+
+        if variables["max_budget"] != "None":
+            if variables["max_budget"].isdigit():
+                variables["max_budget"] = int(variables["max_budget"])
+            else:
+                variables["max_budget"] = float(variables["max_budget"])
+        else:
+            variables["max_budget"] = None
+
         variables["seed"] = int(variables["seed"])
         variables["n_workers"] = int(variables["n_workers"])
         return SMAC3Scenario(**variables)
