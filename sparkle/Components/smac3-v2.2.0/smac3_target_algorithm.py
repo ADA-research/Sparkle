@@ -3,10 +3,6 @@ import sys
 from pathlib import Path
 
 from ConfigSpace import Configuration
-# import smac
-
-# from sparkle.solver import Solver
-# from sparkle.instance import Instance
 from sparkle.configurator.implementations import SMAC3, SMAC3Scenario
 
 

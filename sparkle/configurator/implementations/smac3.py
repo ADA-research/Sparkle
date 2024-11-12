@@ -230,7 +230,7 @@ class SMAC3Scenario(ConfigurationScenario):
             cputime_limit=cputime_limit,
             n_trials=solver_calls,
             use_default_config=use_default_config,
-            instances=instance_set.instance_paths,  # Correct?
+            instances=instance_set.instance_paths,
             instance_features=instance_features,
             min_budget=min_budget,
             max_budget=max_budget,
