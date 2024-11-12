@@ -17,7 +17,7 @@ from sparkle.configurator.configurator import Configurator, ConfigurationScenari
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
 from sparkle.structures import FeatureDataFrame
-from sparkle.instance import InstanceSet  # , Instance_Set
+from sparkle.instance import InstanceSet, Instance_Set
 from sparkle.types import SparkleObjective, resolve_objective
 
 
@@ -211,7 +211,9 @@ class SMAC3Scenario(ConfigurationScenario):
             # distinguish between different instances and therefore returns the same data
             # points with different values, all of which are used to train the surrogate
             # model. Consider using instance indices as features.'
-            instance_features = [i for i in range(instance_set.size)]
+            instance_features = {name: [index] for index, name
+                                 in enumerate(instance_set.instance_paths)}
+
         # NOTE: We don't use trial_walltime_limit as a way of managing resources
         # As it uses pynisher to do it (python based) and our targets are maybe not
         # RunSolver is the better option for accuracy.
@@ -289,7 +291,7 @@ class SMAC3Scenario(ConfigurationScenario):
                                       for line in scenario_file.open().readlines()
                                       if line.strip() != "")}
         variables["solver"] = Solver(Path(variables["solver"]))
-        variables["instance_set"] = InstanceSet(Path(variables["instance_set"]))
+        variables["instance_set"] = Instance_Set(Path(variables["instance_set"]))
         variables["sparkle_objectives"] = [
             resolve_objective(o)
             for o in variables["sparkle_objectives"].split(",")]

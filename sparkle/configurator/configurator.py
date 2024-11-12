@@ -140,6 +140,10 @@ class ConfigurationScenario:
         self.sparkle_objectives = sparkle_objectives
         self.name = f"{self.solver.name}_{self.instance_set.name}"
 
+        if self.instance_set.size == 0:
+            raise Exception("Cannot configure on an empty instance set "
+                            f"('{instance_set.name}').")
+
         self.directory = parent_directory / self.name
         self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
         self.validation: Path = None
