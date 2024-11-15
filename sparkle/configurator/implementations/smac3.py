@@ -5,9 +5,10 @@ from pathlib import Path
 # import glob
 import shutil
 
-import smac
-from smac.facade import AbstractFacade, HyperparameterOptimizationFacade
-# import pandas as pd
+from smac import version as smac_version
+from smac import Scenario as SmacScenario
+from smac import facade as smacfacades
+from smac.runhistory.enumerations import StatusType as SmacStatusType
 import numpy as np
 
 import runrunner as rrr
@@ -18,7 +19,7 @@ from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
 from sparkle.structures import FeatureDataFrame
 from sparkle.instance import InstanceSet, Instance_Set
-from sparkle.types import SparkleObjective, resolve_objective
+from sparkle.types import SparkleObjective, resolve_objective, SolverStatus
 
 
 class SMAC3(Configurator):
@@ -27,7 +28,7 @@ class SMAC3(Configurator):
         "Components/smac3-v2.2.0"
     configurator_executable = configurator_path / "smac3_target_algorithm.py"
 
-    version = smac.version
+    version = smac_version
     full_name = "Sequential Model-based Algorithm Configuration"
 
     def __init__(self: SMAC3,
@@ -81,12 +82,15 @@ class SMAC3(Configurator):
         """
         scenario.create_scenario()
         parallel_jobs = scenario.number_of_runs
+        output_csv = scenario.validation / "configurations.csv"
+        output_csv.parent.mkdir(exist_ok=True, parents=True)
         if num_parallel_jobs is not None:
             parallel_jobs = max(num_parallel_jobs, scenario.number_of_runs)
         cmds = [f"python3 {self.configurator_executable.absolute()} "
-                f"{scenario.scenario_file_path.absolute()} {seed}"
+                f"{scenario.scenario_file_path.absolute()} {seed} "
+                f"{output_csv.absolute()}"
                 for seed in range(scenario.number_of_runs)]
-        smac3_configure = [rrr.add_to_queue(
+        runs = [rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
             name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
@@ -95,20 +99,68 @@ class SMAC3(Configurator):
             base_dir=base_dir,
         )]
         if validate_after:
-            pass
-            # smac3_configure.append(
-            #     rrr.add_to_queue()
-            # )
-        return smac3_configure
+            self.validator.out_dir = output_csv.parent
+            self.validator.tmp_out_dir = base_dir
+            validate_run = self.validator.validate(
+                [scenario.solver] * scenario.number_of_runs,
+                output_csv,
+                [scenario.instance_set],
+                scenario.sparkle_objectives,
+                scenario.cutoff_time,
+                subdir=Path(),
+                dependency=runs,
+                sbatch_options=sbatch_options,
+                run_on=run_on)
+            runs.append(validate_run)
+
+        if run_on == Runner.LOCAL:
+            for run in runs:
+                run.wait()
+        return runs
 
     @staticmethod
-    def organise_output(output_source: Path, output_target: Path) -> None | str:
+    def organise_output(output_source: Path, output_target: Path,
+                        objective: SparkleObjective) -> None | str:
         """Method to restructure and clean up after a single configurator call."""
-        raise NotImplementedError
+        import json
+        from filelock import FileLock
+        if not output_source.exists():
+            print(f"SMAC3 ERROR: Output source file does not exist! [{output_source}]")
+            return
+        results_dict = json.load(output_source.open("r"))
+        configurations = [value for _, value in results_dict["configs"].items()]
+        config_evals = [[] for _ in range(len(configurations))]
+        for entry in results_dict["data"]:
+            config_id, _, _, _, score, _, _, _, _, _ = entry
+            # SMAC3 configuration ids start at 1
+            config_evals[config_id - 1].append(score)
+        config_evals = [objective.instance_aggregator(evaluations)
+                        for evaluations in config_evals]
+        best_config = configurations[
+            config_evals.index(objective.solver_aggregator(config_evals))]
+        lock = FileLock(f"{output_target}.lock")
+        with lock.acquire(timeout=60):
+            with output_target.open("a") as fout:
+                fout.write(f"{best_config}\n")
+        lock.release()
 
     def get_status_from_logs(self: SMAC3) -> None:
         """Method to scan the log files of the configurator for warnings."""
         raise NotImplementedError
+
+    @staticmethod
+    def convert_status(status: SolverStatus) -> SmacStatusType:
+        """Converts Sparkle Solver status to SMAC3 target status."""
+        mapping = {
+            SolverStatus.SUCCESS: SmacStatusType.SUCCESS,
+            SolverStatus.CRASHED: SmacStatusType.CRASHED,
+            SolverStatus.TIMEOUT: SmacStatusType.TIMEOUT,
+            SolverStatus.WRONG: SmacStatusType.CRASHED,
+            SolverStatus.UNKNOWN: SmacStatusType.CRASHED,
+            SolverStatus.ERROR: SmacStatusType.CRASHED,
+            SolverStatus.KILLED: SmacStatusType.TIMEOUT,
+        }
+        return mapping[status]
 
 
 class SMAC3Scenario(ConfigurationScenario):
@@ -121,87 +173,104 @@ class SMAC3Scenario(ConfigurationScenario):
                  parent_directory: Path,
                  cutoff_time: int,
                  number_of_runs: int,
-                 smac_facade: AbstractFacade = HyperparameterOptimizationFacade,
-                 crash_cost: float = np.inf,
-                 termination_cost_threshold: float = np.inf,
+                 smac_facade: smacfacades.AbstractFacade =
+                 smacfacades.HyperparameterOptimizationFacade,
+                 crash_cost: float | list[float] = np.inf,
+                 termination_cost_threshold: float | list[float] = np.inf,
                  walltime_limit: float = np.inf,
                  cputime_limit: float = np.inf,
-                 solver_calls: int = 100,
+                 solver_calls: int = None,
                  use_default_config: bool = False,
                  instance_features: FeatureDataFrame = None,
                  min_budget: float | int | None = None,
                  max_budget: float | int | None = None,
                  seed: int = -1,
                  n_workers: int = 1,
+                 max_ratio: float = 0.25,
+                 smac3_output_directory: Path = Path(),
                  ) -> None:
         """Initialize scenario paths and names.
 
         Args:
-            solver : Solver
+            solver: Solver
                 The solver to use for configuration.
-            instance_set : InstanceSet
+            instance_set: InstanceSet
                 The instance set to use for configuration.
-            sparkle_objectives : list[SparkleObjective]
+            sparkle_objectives: list[SparkleObjective]
                 The objectives to optimize.
-            parent_directory : Path
+            parent_directory: Path
                 The parent directory where the configuration files will be stored.
-            cutoff_time : int
+            cutoff_time: int
                 Maximum CPU runtime in seconds that each solver call (trial)
                 is allowed to run. Is managed by RunSolver, not pynisher.
-            number_of_runs : int
+            number_of_runs: int
                 The number of times this scenario will be executed with different seeds.
             smac_facade: AbstractFacade, defaults to HyperparameterOptimizationFacade
                 The SMAC facade to use for Optimisation.
-            crash_cost : float | list[float], defaults to np.inf
+            crash_cost: float | list[float], defaults to np.inf
                 Defines the cost for a failed trial. In case of multi-objective,
                 each objective can be associated with a different cost.
-            termination_cost_threshold : float | list[float], defaults to np.inf
+            termination_cost_threshold: float | list[float], defaults to np.inf
                 Defines a cost threshold when the optimization should stop. In case of
                 multi-objective, each objective *must* be associated with a cost.
                 The optimization stops when all objectives crossed the threshold.
-            walltime_limit : float, defaults to np.inf
-                The maximum time in seconds that SMAC is allowed to run.
-            cputime_limit : float, defaults to np.inf
-                The maximum CPU time in seconds that SMAC is allowed to run.
-            solver_calls : int, defaults to 100 [n_trials]
+            walltime_limit: float, defaults to np.inf
+                The maximum time in seconds that SMAC is allowed to run. Only counts
+                solver time.
+            cputime_limit: float, defaults to np.inf
+                The maximum CPU time in seconds that SMAC is allowed to run. Only counts
+                solver time. WARNING: SMAC3 uses "runtime" (walltime) for CPU time
+                when determining cputime budget.
+            solver_calls: int, defaults to None
                 The maximum number of trials (combination of configuration, seed, budget,
-                and instance, depending on the task) to run.
-            use_default_config: bool, defaults to False.
+                and instance, depending on the task) to run. If left as None, will be
+                calculated as int(cutoff time / cputime or walltime limit)
+            use_default_config: bool, defaults to False
                 If True, the configspace's default configuration is evaluated in the
                 initial design. For historic benchmark reasons, this is False by default.
                 Notice, that this will result in n_configs + 1 for the initial design.
                 Respecting n_trials, this will result in one fewer evaluated
                 configuration in the optimization.
-            instances : list[str] | None, defaults to None
+            instances: list[str] | None, defaults to None
                 Names of the instances to use. If None, no instances are used. Instances
                 could be dataset names, seeds, subsets, etc.
-            instance_features : dict[str, list[float]] | None, defaults to None
+            instance_features: FeatureDataFrame, defaults to None
                 Instances can be associated with features. For example, meta data of
                 the dataset (mean, var, ...) can be incorporated which are then further
-                used to expand the training data of the surrogate model.
-            min_budget : float | int | None, defaults to None
+                used to expand the training data of the surrogate model. When no features
+                are given, will use index as instance features.
+            min_budget: float | int | None, defaults to None
                 The minimum budget (epochs, subset size, number of instances, ...) that
                 is used for the optimization. Use this argument if you use multi-fidelity
                 or instance optimization.
-            max_budget : float | int | None, defaults to None
+            max_budget: float | int | None, defaults to None
                 The maximum budget (epochs, subset size, number of instances, ...) that
                 is used for the optimization. Use this argument if you use multi-fidelity
                 or instance optimization.
-            seed : int, defaults to 0
+            seed: int, defaults to -1
                 The seed is used to make results reproducible.
                 If seed is -1, SMAC will generate a random seed.
-            n_workers : int, defaults to 1
+            n_workers: int, defaults to 1
                 The number of workers to use for parallelization.
                 If `n_workers` is greather than 1, SMAC will use DASK to parallelize the
                 optimization.
+            max_ratio: float, defaults to 0.25
+                Facade uses at most scenario.n_trials * max_ratio number of
+                configurations in the initial design. Additional configurations are not
+                affected by this parameter.
+            smac3_output_directory: Path, defaults to Path()
+                The output subdirectory for the SMAC3 scenario. Defaults to the scenario
+                results directory.
         """
         super().__init__(solver, instance_set, sparkle_objectives, parent_directory)
         # The files are saved in `./output_directory/name/seed`.
-        self.results_directory = self.directory / "smac3_output"
         self.log_dir = self.directory / "logs"
         self.number_of_runs = number_of_runs
-        self.smac_facade = smac_facade
         self.feature_dataframe = instance_features
+
+        # Facade parameters
+        self.smac_facade = smac_facade
+        self.max_ratio = max_ratio
 
         if instance_features is not None:
             instance_features =\
@@ -217,23 +286,24 @@ class SMAC3Scenario(ConfigurationScenario):
 
         # NOTE: Patchfix; SMAC3 can handle MO but Sparkle also gives non-user specified
         # objectives here too, default to the first one for now
-        self.patch_objective = sparkle_objectives[0]
+        self.sparkle_objective = sparkle_objectives[0]
 
         # NOTE: We don't use trial_walltime_limit as a way of managing resources
         # As it uses pynisher to do it (python based) and our targets are maybe not
         # RunSolver is the better option for accuracy.
         self.cutoff_time = cutoff_time
-        self.smac3_scenario = smac.scenario.Scenario(
+        self.smac3_scenario = SmacScenario(
             configspace=solver.get_configspace(),
             name=self.name,
-            output_directory=self.directory,
+            output_directory=self.results_directory / smac3_output_directory,
             deterministic=solver.deterministic,
-            objectives=[o.name for o in [self.patch_objective]],
+            objectives=[self.sparkle_objective.name],
             crash_cost=crash_cost,
             termination_cost_threshold=termination_cost_threshold,
             walltime_limit=walltime_limit,
             cputime_limit=cputime_limit,
-            n_trials=solver_calls,
+            n_trials=solver_calls or int(
+                self.cutoff_time / cputime_limit or walltime_limit),
             use_default_config=use_default_config,
             instances=instance_set.instance_paths,
             instance_features=instance_features,
@@ -289,8 +359,18 @@ class SMAC3Scenario(ConfigurationScenario):
         }
 
     @staticmethod
-    def from_file(scenario_file: Path) -> ConfigurationScenario:
-        """Reads scenario file and initalises ConfigurationScenario."""
+    def from_file(scenario_file: Path,
+                  run_index: int = None) -> ConfigurationScenario:
+        """Reads scenario file and initalises ConfigurationScenario.
+
+        Args:
+            scenario_file: Path to scenario file.
+            run_index: If given, reads as the scenario with run_index for offset
+                in output directory and seed.
+
+        Returns:
+            ConfigurationScenario.
+        """
         import ast
         variables = {keyvalue[0]: keyvalue[1].strip()
                      for keyvalue in (line.split(" = ", maxsplit=1)
@@ -301,21 +381,28 @@ class SMAC3Scenario(ConfigurationScenario):
         variables["sparkle_objectives"] = [
             resolve_objective(o)
             for o in variables["sparkle_objectives"].split(",")]
-        variables["parent_directory"] = scenario_file.parent
+        variables["parent_directory"] = scenario_file.parent.parent
         variables["cutoff_time"] = int(variables["cutoff_time"])
         variables["number_of_runs"] = int(variables["number_of_runs"])
-        variables["smac_facade"] = getattr(smac.facade, variables["smac_facade"])
-        variables["crash_cost"] = float(variables["crash_cost"])
+        variables["smac_facade"] = getattr(smacfacades, variables["smac_facade"])
+
         # We need to support both lists of floats and single float (np.inf is fine)
-        if variables["termination_cost_threshold"].startswith("["):  # Hacky test
-            tct = ast.literal_eval(variables["termination_cost_threshold"])
-            variables["termination_cost_threshold"] = [float(i) for i in tct]
+        if variables["crash_cost"].startswith("["):
+            variables["crash_cost"] =\
+                [float(v) for v in ast.literal_eval(variables["crash_cost"])]
+        else:
+            variables["crash_cost"] = float(variables["crash_cost"])
+        if variables["termination_cost_threshold"].startswith("["):
+            variables["termination_cost_threshold"] =\
+                [float(v) for v in ast.literal_eval(
+                    variables["termination_cost_threshold"])]
         else:
             variables["termination_cost_threshold"] =\
                 float(variables["termination_cost_threshold"])
+
         variables["walltime_limit"] = float(variables["walltime_limit"])
         variables["cputime_limit"] = float(variables["cputime_limit"])
-        variables["solver_calls"] = int(variables["solver_calls"])
+        variables["solver_calls"] = ast.literal_eval(variables["solver_calls"])
         variables["use_default_config"] =\
             ast.literal_eval(variables["use_default_config"])
 
@@ -324,22 +411,13 @@ class SMAC3Scenario(ConfigurationScenario):
         else:
             variables["instance_features"] = None
 
-        if variables["min_budget"] != "None":
-            if variables["min_budget"].isdigit():
-                variables["min_budget"] = int(variables["min_budget"])
-            else:
-                variables["min_budget"] = float(variables["min_budget"])
-        else:
-            variables["min_budget"] = None
+        variables["min_budget"] = ast.literal_eval(variables["min_budget"])
+        variables["max_budget"] = ast.literal_eval(variables["max_budget"])
 
-        if variables["max_budget"] != "None":
-            if variables["max_budget"].isdigit():
-                variables["max_budget"] = int(variables["max_budget"])
-            else:
-                variables["max_budget"] = float(variables["max_budget"])
-        else:
-            variables["max_budget"] = None
+        variables["seed"] = ast.literal_eval(variables["seed"])
+        variables["n_workers"] = ast.literal_eval(variables["n_workers"])
+        if run_index is not None:  # Offset
+            variables["seed"] += run_index
+            variables["smac3_output_directory"] = Path(f"run_{run_index}")
 
-        variables["seed"] = int(variables["seed"])
-        variables["n_workers"] = int(variables["n_workers"])
         return SMAC3Scenario(**variables)

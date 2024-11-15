@@ -29,16 +29,18 @@ class TestGenerateConfigurationReport(TestCase):
         self.configurator = SMAC2(Path(), Path())
         self.solver_path = Path("tests/test_files/Solvers/Test-Solver")
         self.solver = Solver(self.solver_path, raw_output_directory=Path(""))
-        train_instance = "train-instance"
-        test_instance = "test-instance"
+        self.train_instance_set = Instance_Set(Path("tests/test_files/Instances/"
+                                                    "Train-Instance-Set"))
+        self.test_instance_set = Instance_Set(Path("tests/test_files/Instances/"
+                                                   "Test-Instance-Set"))
         self.configurator_path = self.configurator.configurator_path
         self.configuration_scenario = self.configurator.scenario_class(
             self.solver,
-            Path(train_instance),
+            self.train_instance_set,
             [self.test_objective_runtime],
             self.configurator.output_path)
         self.ablation_scenario = AblationScenario(
-            self.solver, Path(train_instance), Path(test_instance), Path(""))
+            self.solver, self.test_instance_set, self.test_instance_set, Path(""))
         self.validator = Validator()
 
     @patch("sparkle.platform.generate_report_for_configuration."
@@ -473,7 +475,6 @@ class TestGenerateConfigurationReport(TestCase):
         Test that all needed functions are called to retrieve values and that these
         values are added to the common dictionary.
         """
-        train_instance = Path("train-instance")
         validation_data = [
             ["SolverName", "{}", "InstanceSetName",
              "InstanceName", "STATUS", "0", "25.323"]]
@@ -498,10 +499,10 @@ class TestGenerateConfigurationReport(TestCase):
             bib_path, self.configuration_scenario, report_dir)
 
         mock_figure.assert_called_once_with(
-            self.solver, train_instance.name, validation_data, validation_data,
+            self.solver, self.train_instance_set.name, validation_data, validation_data,
             report_dir, "QUALITY", float(cutoff), self.test_objective_quality)
         mock_timeouts.assert_called_once_with(
-            self.solver, train_instance, self.configurator, self.validator,
+            self.solver, self.train_instance_set, self.configurator, self.validator,
             self.configuration_scenario, 60)
         mock_ablation_bool.assert_called_once_with(self.ablation_scenario)
         mock_ablation_table.assert_called_once_with(self.ablation_scenario)
@@ -514,7 +515,7 @@ class TestGenerateConfigurationReport(TestCase):
             "minMaxAdjective": "lowest",
             "runtimeBool": "\\runtimefalse",
             "solver": self.solver.name,
-            "instanceSetTrain": train_instance.name,
+            "instanceSetTrain": self.train_instance_set.name,
             "sparkleVersion": ANY,
             "numInstanceInTrainingInstanceSet": 1,
             "numConfiguratorRuns": 25,

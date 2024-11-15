@@ -138,6 +138,7 @@ class Settings:
     # Default SMAC3 settings
     DEFAULT_smac3_number_of_runs = None
     DEFAULT_smac3_facade = smac_facades.HyperparameterOptimizationFacade.__name__
+    DEFAULT_smac3_facade_max_ratio = None
     DEFAULT_smac3_crash_cost = None
     DEFAULT_smac3_termination_cost_threshold = None
     DEFAULT_smac3_walltime_limit = None
@@ -188,6 +189,7 @@ class Settings:
 
         self.__smac3_number_of_trials_set = SettingState.NOT_SET
         self.__smac3_smac_facade_set = SettingState.NOT_SET
+        self.__smac3_facade_max_ratio_set = SettingState.NOT_SET
         self.__smac3_crash_cost_set = SettingState.NOT_SET
         self.__smac3_termination_cost_threshold_set = SettingState.NOT_SET
         self.__smac3_walltime_limit_set = SettingState.NOT_SET
@@ -373,6 +375,13 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
                     self.set_smac3_smac_facade(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("max_ratio", "facade_max_ratio", "initial_trials_max_ratio")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getfloat(section, option)
+                    self.set_smac3_facade_max_ratio(value, state)
                     file_settings.remove_option(section, option)
 
             options_names = ("crash_cost", )
@@ -818,6 +827,7 @@ class Settings:
             del configurator_settings["max_iterations"]  # SMAC3 does not have this?
             configurator_settings.update({
                 "smac_facade": self.get_smac3_smac_facade(),
+                "max_ratio": self.get_smac3_facade_max_ratio(),
                 "crash_cost": self.get_smac3_crash_cost(),
                 "termination_cost_threshold":
                 self.get_smac3_termination_cost_threshold(),
@@ -829,6 +839,10 @@ class Settings:
                 "solver_calls": self.get_smac3_number_of_trials()
                 or configurator_settings["solver_calls"],
             })
+            # Do not pass None values to SMAC3, it Scenario resolves default settings
+            configurator_settings = {key: value
+                                     for key, value in configurator_settings.items()
+                                     if value is not None}
         elif configurator_name == cim.IRACE.__name__:
             # Return all settings from the IRACE section
             configurator_settings.update({
@@ -1057,6 +1071,25 @@ class Settings:
         if facade_name == "None":
             return None
         return getattr(smac_facades, facade_name)
+
+    def set_smac3_facade_max_ratio(
+            self: Settings, value: float = DEFAULT_smac3_facade_max_ratio,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the SMAC3 facade max ratio."""
+        section = "smac3"
+        name = "facade_max_ratio"
+
+        if self.__check_setting_state(
+                self.__smac3_facade_max_ratio_set, origin, name):
+            self.__init_section(section)
+            self.__smac3_facade_max_ratio_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac3_facade_max_ratio(self: Settings) -> float:
+        """Return the SMAC3 facade max ratio."""
+        if self.__smac3_facade_max_ratio_set == SettingState.NOT_SET:
+            self.set_smac3_facade_max_ratio()
+        return ast.literal_eval(self.__settings["smac3"]["facade_max_ratio"])
 
     def set_smac3_crash_cost(self: Settings, value: float = DEFAULT_smac3_crash_cost,
                              origin: SettingState = SettingState.DEFAULT) -> None:

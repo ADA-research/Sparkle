@@ -146,9 +146,9 @@ class ConfigurationScenario:
 
         self.directory = parent_directory / self.name
         self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
-        self.validation: Path = None
-        self.tmp: Path = None
-        self.results_directory: Path = None
+        self.validation: Path = self.directory / "validation"
+        self.tmp: Path = self.directory / "tmp"
+        self.results_directory: Path = self.directory / "results"
 
     def create_scenario(self: ConfigurationScenario, parent_directory: Path) -> None:
         """Create scenario with solver and instances in the parent directory.

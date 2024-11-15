@@ -246,9 +246,6 @@ class SMAC2Scenario(ConfigurationScenario):
 
         # Scenario Paths
         self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
-        self.tmp = self.directory / "tmp"
-        self.validation = self.directory / "validation"
-        self.results_directory = self.directory / "results"
 
         # SMAC2 Specific
         self.outdir_train = self.directory / "outdir_train_configuration"

@@ -1,6 +1,7 @@
 """Test methods of SMAC3 configurator."""
 from pathlib import Path
 import pytest
+from unittest.mock import patch
 
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
@@ -46,8 +47,9 @@ def test_smac3_scenario_from_file() -> None:
     assert scenario.instance_set.directory ==\
         Path("tests/test_files/Instances/Train-Instance-Set")
     assert scenario.smac3_scenario.name == scenario.name
-    assert len(scenario.smac3_scenario.objectives) == len(scenario.sparkle_objectives)
-    assert scenario.directory == source.parent / scenario.name
+    # assert len(scenario.smac3_scenario.objectives) == len(scenario.sparkle_objectives)
+    assert len(scenario.smac3_scenario.objectives) == 1  # MO disabled for now
+    assert scenario.directory == source.parent.parent / scenario.name
     assert scenario.cutoff_time == 60
     assert scenario.number_of_runs == 5
     assert scenario.feature_dataframe is None
@@ -57,7 +59,8 @@ def test_smac3_scenario_from_file() -> None:
     assert scenario.smac3_scenario.cputime_limit == 20.0
     assert scenario.smac3_scenario.n_trials == 5
     assert scenario.smac3_scenario.use_default_config is False
-    assert scenario.smac3_scenario.instance_features is None
+    assert scenario.smac3_scenario.instance_features ==\
+        {"tests/test_files/Instances/Train-Instance-Set/train_instance_1.cnf": [0]}
     assert scenario.smac3_scenario.min_budget == 50.0
     assert scenario.smac3_scenario.max_budget == 60.0
     assert scenario.smac3_scenario.seed == 42
@@ -72,7 +75,6 @@ def test_smac3_configure(tmp_path: Path,
         Path("tests/test_files/Instances/Train-Instance-Set").absolute())
     objectives = [resolve_objective("PAR10"), resolve_objective("accuray:min")]
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
-    monkeypatch.setitem(globals(), "add_to_queue", None)
 
     scenario = SMAC3Scenario(
         solver, instance_set, objectives, Path(),
@@ -91,7 +93,8 @@ def test_smac3_configure(tmp_path: Path,
         n_workers=2)
     scenario.create_scenario()
     smac_configurator = SMAC3(Path(), Path())
-    runs = smac_configurator.configure(scenario)
+    with patch("runrunner.add_to_queue", new=lambda *args, **kwargs: None):
+        runs = smac_configurator.configure(scenario)
     assert runs == [None, None]
 
 

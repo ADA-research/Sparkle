@@ -431,6 +431,8 @@ def get_dict_variable_to_value_common(solver: Solver,
     latex_dict["numConfiguratorRuns"] = config_scenario.number_of_runs
     if hasattr(config_scenario, "wallclock_time"):
         latex_dict["wholeTimeBudget"] = config_scenario.wallclock_time
+    elif hasattr(config_scenario, "smac3_scenario"):  # SMAC3
+        latex_dict["wholeTimeBudget"] = config_scenario.smac3_scenario.walltime_limit
     else:
         latex_dict["wholeTimeBudget"] = config_scenario.max_time
     latex_dict["eachRunCutoffTime"] = config_scenario.cutoff_time
