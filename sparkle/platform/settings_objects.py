@@ -370,7 +370,7 @@ class Settings:
                     self.set_smac3_number_of_trials(value, state)
                     file_settings.remove_option(section, option)
 
-            options_names = ("smac_facade", )
+            options_names = ("facade", "smac_facade", )
             for option in options_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
