@@ -287,19 +287,20 @@ class SMAC3Scenario(ConfigurationScenario):
                                  in enumerate(instance_set.instance_paths)}
 
         # NOTE: Patchfix; SMAC3 can handle MO but Sparkle also gives non-user specified
-        # objectives here too, default to the first one for now
+        # objectives but not all class methods can handle it here yet
         self.sparkle_objective = sparkle_objectives[0]
 
         # NOTE: We don't use trial_walltime_limit as a way of managing resources
         # As it uses pynisher to do it (python based) and our targets are maybe not
         # RunSolver is the better option for accuracy.
+        print(sparkle_objectives)
         self.cutoff_time = cutoff_time
         self.smac3_scenario = SmacScenario(
             configspace=solver.get_configspace(),
             name=self.name,
             output_directory=self.results_directory / smac3_output_directory,
             deterministic=solver.deterministic,
-            objectives=[self.sparkle_objective.name],
+            objectives=[o.name for o in self.sparkle_objectives],
             crash_cost=crash_cost,
             termination_cost_threshold=termination_cost_threshold,
             walltime_limit=walltime_limit,

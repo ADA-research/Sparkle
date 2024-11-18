@@ -116,7 +116,7 @@ This is a short example to show the format.
 
 ```
 [general]
-objective = RUNTIME
+objective = PAR10
 target_cutoff_time = 60
 
 [configuration]
@@ -134,10 +134,10 @@ To define an objective for your algorithms, you can define them in the `general`
 
 ```
 [general]
-objective = PAR10,loss,accuracy:max
+objective = PAR10,loss,accuracy:max,train_loss:metric
 ```
 
-In the above example we have defined three objectives: Penalised Average Runtime, the loss function value of our algorithm on the task, and the accuracy of our algorithm on the task. Note that objectives are by default assumed to be _minimised_ and we must therefore specify `accuracy`_`:max`_ to clarifiy this. The platform predefines for the user three objectives: cpu time, wallclock time and memory. These objectives will always recorded next to whatever the user may choose.
+In the above example we have defined three objectives: Penalised Average Runtime, the loss function value of our algorithm on the task, and the accuracy of our algorithm on the task. Note that objectives are by default assumed to be _minimised_ and we must therefore specify `accuracy`_`:max`_ to clarifiy this. Furthermore, you may have certain objectives that you wish to record, but not actually have configurators and algorithms use as an objective. For this we can specificy `train_loss`_`:metric`_, letting the platform now this value will be present but must not be passed as an optimisable objective. The platform predefines for the user three objectives: cpu time, wallclock time and memory. These objectives will always recorded next to whatever the user may choose.
 
 ```{note}
 Although the Platform supports multiple objectives to be registered for any Solver, not all used components, such as SMAC and Ablation Analysis, support Multi-Objective optimisation. In any such case, the first defined objective is considered the most important and used in these situations

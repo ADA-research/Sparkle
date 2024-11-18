@@ -235,7 +235,7 @@ class Settings:
         # successfully
         if file_settings.sections() != []:
             section = "general"
-            option_names = ("objective", )
+            option_names = ("objectives", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = [resolve_objective(obj) for obj in
@@ -597,33 +597,43 @@ class Settings:
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the sparkle objective."""
         section = "general"
-        name = "objective"
+        name = "objectives"
+
         if value is not None and self.__check_setting_state(
                 self.__general_sparkle_objective_set, origin, name):
             if isinstance(value, list):
                 value = ",".join([str(obj) for obj in value])
             else:
                 value = str(value)
+
             # Append standard Sparkle Objectives
             if "status" not in value:
-                value += ",status"
+                value += ",status:metric"
             if "cpu_time" not in value:
-                value += ",cpu_time"
+                value += ",cpu_time:metric"
             if "wall_time" not in value:
-                value += ",wall_time"
+                value += ",wall_time:metric"
             if "memory" not in value:
-                value += ",memory"
+                value += ",memory:metric"
+
             self.__init_section(section)
             self.__general_sparkle_objective_set = origin
             self.__settings[section][name] = value
 
-    def get_general_sparkle_objectives(self: Settings) -> list[SparkleObjective]:
-        """Return the performance measure."""
+    def get_general_sparkle_objectives(
+            self: Settings,
+            filter_metric: bool = False) -> list[SparkleObjective]:
+        """Return the Sparkle objectives."""
         if self.__general_sparkle_objective_set == SettingState.NOT_SET:
             self.set_general_sparkle_objectives()
 
-        return [resolve_objective(obj)
-                for obj in self.__settings["general"]["objective"].split(",")]
+        objectives = [resolve_objective(obj)
+                      for obj in self.__settings["general"]["objectives"].split(",")]
+
+        if filter_metric:
+            return [obj for obj in objectives if not obj.metric]
+
+        return objectives
 
     def set_general_sparkle_configurator(
             self: Settings,

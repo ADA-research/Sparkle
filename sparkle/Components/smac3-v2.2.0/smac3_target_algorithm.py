@@ -279,6 +279,8 @@ if __name__ == "__main__":
     smac_facade._optimizer = smac_facade._get_optimizer()
 
     incumbent = smac_facade.optimize()
+    # TODO: Fix taking first objective, how do we determine 'best configuration' from
+    # a multi objective run?
     SMAC3.organise_output(scenario.smac3_scenario.output_directory / "runhistory.json",
                           output_csv,
-                          scenario.sparkle_objectives[0])  # TODO: fix taking objective
+                          scenario.sparkle_objectives[0])

@@ -202,8 +202,9 @@ def main(argv: list[str]) -> None:
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
         configurator_settings.update({"feature_data_df": feature_data_df})
 
+    # Only get objectives that should be optimised
     sparkle_objectives =\
-        gv.settings().get_general_sparkle_objectives()
+        gv.settings().get_general_sparkle_objectives(filter_metric=True)
     config_scenario = configurator.scenario_class(
         solver, instance_set_train, sparkle_objectives, configurator.output_path,
         **configurator_settings)

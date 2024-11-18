@@ -36,6 +36,17 @@ class TestResolveObjective(unittest.TestCase):
             self.assertEqual(objective.name, input_name)
             self.assertEqual(objective.minimise, minimise)
 
+    def test_metric_suffix(self: TestResolveObjective) -> None:
+        """Test the metric suffix."""
+        for name, metric in itertools.product(self.test_names_good, [True, False]):
+            input_name = name
+            input_name += ":metric" if metric else ":objective"
+            print(input_name)
+            objective = resolve_objective(input_name)
+            self.assertIsInstance(objective, SparkleObjective)
+            self.assertEqual(objective.name, input_name)
+            self.assertEqual(objective.metric, metric)
+
     def test_failing_strings(self: TestResolveObjective) -> None:
         """Test object names that should fail and return None."""
         for name in self.test_names_bad:
@@ -43,18 +54,21 @@ class TestResolveObjective(unittest.TestCase):
 
     def test_par(self: TestResolveObjective) -> None:
         """Test PAR objects that should successfully initialize."""
-        for name, k, oname in [("PAR", 10, "PAR10"),
-                               ("PAR10", 10, "PAR10"),
-                               ("PAR2", 2, "PAR2"),
-                               ("PAR100", 100, "PAR100"),
-                               ("PAR10:max", 10, "PAR10"),
-                               ("PAR10:min", 10, "PAR10"), ]:
+        for name, k, oname, minimise, metric in [
+                ("PAR", 10, "PAR10", True, False),
+                ("PAR10", 10, "PAR10", True, False),
+                ("PAR2", 2, "PAR2", True, False),
+                ("PAR100", 100, "PAR100", True, False),
+                ("PAR10:max", 10, "PAR10", False, False),
+                ("PAR10:min", 10, "PAR10", True, False),
+                ("PAR10:min:metric", 10, "PAR10", True, True)]:
             objective = resolve_objective(name)
             self.assertIsInstance(objective, SparkleObjective)
             self.assertIsInstance(objective, PAR)
             self.assertEqual(objective.name, oname)
             self.assertEqual(objective.k, k)
-            self.assertTrue(objective.minimise)
+            self.assertEqual(objective.minimise, minimise)
+            self.assertEqual(objective.metric, metric)
 
     def test_failing_par(self: TestResolveObjective) -> None:
         """Test PAR objects names with k<0."""
