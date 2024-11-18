@@ -162,11 +162,14 @@ def get_figure_configure_vs_default(configured_results: list[list[str]],
                    "output_dir": target_directory
                    }
     # Check if the scale of the axis can be considered linear
-    linearity_x = linregress([p[0] for p in points], range(len(points))).rvalue > 0.5
-    linearity_y = linregress([p[1] for p in points], range(len(points))).rvalue > 0.5
-    if not linearity_x or not linearity_y:
-        plot_params["scale"] = "log"
-        plot_params["replace_zeros"] = True
+    x_points = [p[0] for p in points]
+    y_points = [p[1] for p in points]
+    if not len(set(x_points)) == 1 and not len(set(y_points)) == 1:
+        linearity_x = linregress(x_points, range(len(points))).rvalue > 0.5
+        linearity_y = linregress(y_points, range(len(points))).rvalue > 0.5
+        if not linearity_x or not linearity_y:
+            plot_params["scale"] = "log"
+            plot_params["replace_zeros"] = True
 
     stex.generate_comparison_plot(points,
                                   figure_filename,
