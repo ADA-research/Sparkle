@@ -1,6 +1,7 @@
 """Test the solver CLI entry points."""
 import pytest
 from pathlib import Path
+import shutil
 
 from sparkle.CLI import add_solver, remove_solver, run_solvers
 from sparkle.CLI import add_instances
@@ -11,9 +12,13 @@ from tests.CLI import tools as cli_tools
 def test_add_remove_solver_command(tmp_path: Path,
                                    monkeypatch: pytest.MonkeyPatch) -> None:
     """Test initialise command."""
-    solver_path = (Path("Examples") / "Resources" / "Solvers"
+    source_path = (Path("Examples") / "Resources" / "Solvers"
                    / "PbO-CCSAT-Generic").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+    # Copy solver to tmp dir for no-copy test
+    solver_path = Path("test") / "PbO-CCSAT-Generic"
+    shutil.copytree(source_path, solver_path)
+
     expected_target = Path("Solvers") / solver_path.name
     # Smoke test
     with pytest.raises(SystemExit) as pytest_wrapped_e:
