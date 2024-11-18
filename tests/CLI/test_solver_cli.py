@@ -14,15 +14,33 @@ def test_add_remove_solver_command(tmp_path: Path,
     solver_path = (Path("Examples") / "Resources" / "Solvers"
                    / "PbO-CCSAT-Generic").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+    expected_target = Path("Solvers") / solver_path.name
     # Smoke test
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         add_solver.main([str(solver_path)])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
+    assert expected_target.exists()
+
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         remove_solver.main([solver_path.name])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
+    assert not expected_target.exists()
+
+    # Symlink test
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        add_solver.main([str(solver_path.absolute()),
+                         "--no-copy"])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+    assert expected_target.is_symlink()
+
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        remove_solver.main([solver_path.name])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+    assert not expected_target.exists()
     # TODO: Test removing with solver directory path
     # TODO: Test adding / removing with nicknames
     # TODO: Test removing with non solver name/paths for failure
