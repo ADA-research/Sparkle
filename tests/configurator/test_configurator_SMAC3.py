@@ -47,8 +47,7 @@ def test_smac3_scenario_from_file() -> None:
     assert scenario.instance_set.directory ==\
         Path("tests/test_files/Instances/Train-Instance-Set")
     assert scenario.smac3_scenario.name == scenario.name
-    # assert len(scenario.smac3_scenario.objectives) == len(scenario.sparkle_objectives)
-    assert len(scenario.smac3_scenario.objectives) == 1  # MO disabled for now
+    assert len(scenario.smac3_scenario.objectives) == len(scenario.sparkle_objectives)
     assert scenario.directory == source.parent.parent / scenario.name
     assert scenario.cutoff_time == 60
     assert scenario.number_of_runs == 5
