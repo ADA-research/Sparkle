@@ -13,15 +13,34 @@ def test_add_remove_instances_iterable_file_instance_set(
     """Test adding/removing command for a set of files."""
     instances_path = (Path("Examples") / "Resources" / "Instances" / "PTN").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+
     # Smoke test
+    expected_target_path = Path("Instances") / instances_path.name
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         add_instances.main([str(instances_path.absolute())])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
+    assert expected_target_path.exists()
+
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         remove_instances.main([instances_path.name])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
+    assert not expected_target_path.exists()
+
+    # Test with symbolic link
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        add_instances.main([str(instances_path.absolute()),
+                            "--no-copy"])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+    assert expected_target_path.is_symlink()
+
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        remove_instances.main([instances_path.name])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+    assert not expected_target_path.exists()
 
 
 @pytest.mark.integration

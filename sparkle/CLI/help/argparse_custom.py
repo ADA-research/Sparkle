@@ -244,6 +244,13 @@ NoAblationReportArgument = ArgumentContainer(names=["--no-ablation"],
                                                              "ablation for an algorithm "
                                                              "configuration report"})
 
+NoCopyArgument = ArgumentContainer(names=["--no-copy"],
+                                   kwargs={"action": "store_true",
+                                           "required": False,
+                                           "help": "do not copy the source directory to "
+                                                   "the platform directory, but create a"
+                                                   " symbolic link instead"})
+
 NumberOfRunsConfigurationArgument = \
     ArgumentContainer(names=["--number-of-runs"],
                       kwargs={"type": int,
