@@ -1,0 +1,3 @@
+Call: /usr/bin/ruby ../scripts/param_ils_2_3_run.rb "-numRun" "0" "-scenariofile" "example_saps/scenario-Saps-SWGCP-sat-small-train-small-test.txt" "-validN" "100"
+
+
