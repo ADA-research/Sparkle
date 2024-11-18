@@ -109,7 +109,7 @@ def main(argv: list[str]) -> None:
               f"{configurator.name} {solver.name} {instance_set_train.name}")
         sys.exit(-1)
 
-    # Record optimised configuration
+    # Extract optimised configuration
     _, opt_config_str = configurator.get_optimal_configuration(config_scenario)
     opt_config = Solver.config_str_to_dict(opt_config_str)
 
