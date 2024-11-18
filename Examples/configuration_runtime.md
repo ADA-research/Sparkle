@@ -37,7 +37,7 @@ To perform configuration on the solver to obtain a target configuration we run:
 sparkle configure_solver --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/
 ```
 
-This step should take about ~10 minutes, although it is of course very cluster / slurm settings dependant.
+This step should take about ~10 minutes, although it is of course very cluster / slurm settings dependant. If you are using the default settings, this will use SMAC2 as configurator. If you wish to run with a different configurator, we also supply default settings for the other configurators for this scenario. You can simply change the configurator name in `sparkle_settings.ini` under the `general` section.
 
 ### Validate the configuration
 
