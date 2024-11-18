@@ -11,7 +11,6 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.types import SparkleObjective
@@ -200,9 +199,7 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
 
-    check_for_initialise(
-        COMMAND_DEPENDENCIES[CommandName.COMPUTE_MARGINAL_CONTRIBUTION]
-    )
+    check_for_initialise()
 
     if ac.set_by_user(args, "settings_file"):
         gv.settings().read_settings_ini(

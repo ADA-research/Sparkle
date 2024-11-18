@@ -78,7 +78,7 @@ sparkle generate report
 Run the portfolio selector on a *single* testing instance; the result will be printed to the command line if you add `--run-on local` to the command.
 
 ```bash
-sparkle run portfolio selector Examples/Resources/Instances/PTN2/plain7824.cnf
+sparkle run portfolio selector Examples/Resources/Instances/PTN2/plain7824.cnf --run-on local
 ```
 
 ### Run on an instance set
@@ -110,7 +110,6 @@ sparkle remove feature extractor SAT-features-competition2012_revised_without_Sa
 
 Otherwise, Sparkle will interpret adding the other feature extractor as creating a combined feature vector per instance from all present extractors in Sparkle. Now we can add SATZilla 2024 from the Examples directory
 Note that this feature extractor requires GCC (any version, tested with 13.2.0) to run.
-
 
 ```bash
 sparkle add feature extractor Examples/Resources/Extractors/SAT-features-competition2024

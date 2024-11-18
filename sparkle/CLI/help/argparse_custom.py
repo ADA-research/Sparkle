@@ -82,11 +82,6 @@ class ArgumentContainer():
         self.kwargs = kwargs
 
 
-AblationArgument = ArgumentContainer(names=["--ablation"],
-                                     kwargs={"required": False,
-                                             "action": "store_true",
-                                             "help": "run ablation after configuration"})
-
 ActualMarginalContributionArgument = \
     ArgumentContainer(names=["--actual"],
                       kwargs={"action": "store_true",
@@ -97,12 +92,6 @@ AllJobsArgument = \
     ArgumentContainer(names=["--all"],
                       kwargs={"action": "store_true",
                               "help": "use all known job ID(s) for the command"})
-
-AlsoConstructSelectorAndReportArgument = \
-    ArgumentContainer(names=["--also-construct-selector-and-report"],
-                      kwargs={"action": "store_true",
-                              "help": "after running the solvers also construct the "
-                                      "selector and generate the report"})
 
 CleanupArgumentAll = \
     ArgumentContainer(names=["--all"],
@@ -316,13 +305,6 @@ RecomputeRunSolversArgument = \
                               "help": "recompute the performance of all solvers on all "
                                       "instances"})
 
-RunExtractorNowArgument = \
-    ArgumentContainer(names=["--run-extractor-now"],
-                      kwargs={"default": False,
-                              "action": "store_true",
-                              "help": "immediately run the feature extractor(s) on all "
-                                      "the instances"})
-
 RunOnArgument = ArgumentContainer(names=["--run-on"],
                                   kwargs={"type": Runner,
                                           "choices": [Runner.LOCAL,
@@ -331,12 +313,6 @@ RunOnArgument = ArgumentContainer(names=["--run-on"],
                                           "help": "On which computer or cluster "
                                                   "environment to execute the "
                                                   "calculation."})
-
-RunSolverNowArgument = ArgumentContainer(names=["--run-solver-now"],
-                                         kwargs={"default": False,
-                                                 "action": "store_true",
-                                                 "help": "immediately run the solver(s) "
-                                                         "on all instances"})
 
 SelectionReportArgument = \
     ArgumentContainer(names=["--selection"],
@@ -453,11 +429,6 @@ UseFeaturesArgument = ArgumentContainer(names=["--use-features"],
                                                 "action": "store_true",
                                                 "help": "use the training set's features"
                                                         " for configuration"})
-
-ValidateArgument = ArgumentContainer(names=["--validate"],
-                                     kwargs={"required": False,
-                                             "action": "store_true",
-                                             "help": "validate after configuration"})
 
 VerboseArgument = ArgumentContainer(names=["--verbose", "-v"],
                                     kwargs={"action": "store_true",

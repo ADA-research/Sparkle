@@ -9,7 +9,6 @@ from sparkle.platform import file_help as sfh
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import FeatureDataFrame
 from sparkle.CLI.help import logging as sl
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
@@ -42,7 +41,7 @@ def main(argv: list[str]) -> None:
         gv.settings().DEFAULT_extractor_dir,
         class_name=Extractor)
 
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.REMOVE_FEATURE_EXTRACTOR])
+    check_for_initialise()
 
     if extractor is None:
         print(f'Feature extractor path "{args.extractor_path}" does not exist!')
