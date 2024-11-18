@@ -26,6 +26,7 @@ def test_add_remove_solver_command(tmp_path: Path,
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
     assert expected_target.exists()
+    assert expected_target.is_dir()
 
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         remove_solver.main([solver_path.name])
@@ -40,6 +41,7 @@ def test_add_remove_solver_command(tmp_path: Path,
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
     assert expected_target.is_symlink()
+    assert expected_target.is_dir()
 
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         remove_solver.main([solver_path.name])

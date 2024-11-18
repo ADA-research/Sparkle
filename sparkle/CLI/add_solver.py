@@ -80,7 +80,7 @@ def main(argv: list[str]) -> None:
     if args.no_copy:
         print(f"Creating symbolic link from {solver_source} "
               f"to {solver_directory}...")
-        solver_directory.symlink_to(solver_source)
+        solver_directory.symlink_to(solver_source.absolute())
     else:
         print(f"Copying {solver_source.name} to platform...")
         solver_directory.mkdir(parents=True)

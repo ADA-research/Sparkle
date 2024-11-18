@@ -58,7 +58,7 @@ def main(argv: list[str]) -> None:
     if args.no_copy:
         print(f"Creating symbolic link from {extractor_source} "
               f"to {extractor_target_path}...")
-        extractor_target_path.symlink_to(extractor_source)
+        extractor_target_path.symlink_to(extractor_source.absolute())
     else:
         print(f"Copying feature extractor {extractor_source.name} ...")
         extractor_target_path.mkdir()

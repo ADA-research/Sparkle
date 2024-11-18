@@ -59,7 +59,7 @@ def main(argv: list[str]) -> None:
 
     if args.no_copy:
         print(f"Creating symbolic link from {instances_source} to {instances_target}...")
-        instances_target.symlink_to(instances_source)
+        instances_target.symlink_to(instances_source.absolute())
     else:
         instances_target.mkdir(parents=True)
         print("Copying files...")

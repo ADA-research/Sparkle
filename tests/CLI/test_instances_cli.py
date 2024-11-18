@@ -21,6 +21,7 @@ def test_add_remove_instances_iterable_file_instance_set(
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
     assert expected_target_path.exists()
+    assert expected_target_path.is_dir()
 
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         remove_instances.main([instances_path.name])
@@ -35,6 +36,7 @@ def test_add_remove_instances_iterable_file_instance_set(
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
     assert expected_target_path.is_symlink()
+    assert expected_target_path.is_dir()
 
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         remove_instances.main([instances_path.name])
