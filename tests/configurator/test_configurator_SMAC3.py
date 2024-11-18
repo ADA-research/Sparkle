@@ -98,6 +98,19 @@ def test_smac3_configure(tmp_path: Path,
     assert runs == [None, None]
 
 
-def test_organise_output() -> None:
+def test_organise_output(tmp_path: Path,
+                         monkeypatch: pytest.MonkeyPatch) -> None:
     """Test SMAC3 configuration output organisation."""
-    pass
+    file = Path("tests/test_files/Configuration/results/"
+                "runhistory_PbO-CCSAT-Generic_PTN_SMAC3.json").absolute()
+    out = Path("outtest.csv")
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+    SMAC3.organise_output(file, out, resolve_objective("PAR10"))
+    expected = ("-init_solution 2 -perform_aspiration 1 -perform_clause_weight 1 "
+                "-perform_double_cc 0 -perform_first_div 0 -perform_pac 1 "
+                "-sel_clause_div 2 -sel_var_break_tie_greedy 2 -sel_var_div 4 "
+                "-beta_hscore 2688 -d_hscore 9 -prob_pac 0.0028671877126 "
+                "-sel_clause_weight_scheme 1 -p_swt 0.7162626739591 "
+                "-q_swt 0.2213662965223 -threshold_swt 665\n")
+    assert out.exists()
+    assert out.open().readlines()[-1] == expected

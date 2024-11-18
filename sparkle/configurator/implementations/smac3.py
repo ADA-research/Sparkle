@@ -138,10 +138,12 @@ class SMAC3(Configurator):
                         for evaluations in config_evals]
         best_config = configurations[
             config_evals.index(objective.solver_aggregator(config_evals))]
+        best_config_str = " ".join([f"-{key} {value}" for key, value in
+                                    best_config.items()])
         lock = FileLock(f"{output_target}.lock")
         with lock.acquire(timeout=60):
             with output_target.open("a") as fout:
-                fout.write(f"{best_config}\n")
+                fout.write(f"{best_config_str}\n")
         lock.release()
 
     def get_status_from_logs(self: SMAC3) -> None:
