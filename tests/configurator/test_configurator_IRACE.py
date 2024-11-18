@@ -56,7 +56,7 @@ def test_irace_scenario_from_file() -> None:
     scenario = IRACEScenario.from_file(scenario_file)
     assert scenario.solver.name == solver.name
     assert scenario.instance_set.name == set.name
-    assert scenario.number_of_runs == 1
+    assert scenario.number_of_runs == 2
     assert scenario.solver_calls is None
     assert scenario.cutoff_time == 60
     assert scenario.max_time == 1750
