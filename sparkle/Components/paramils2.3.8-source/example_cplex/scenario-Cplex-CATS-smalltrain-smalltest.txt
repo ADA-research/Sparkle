@@ -1,0 +1,12 @@
+algo = ruby example_cplex/cplex_wrapper.rb
+execdir = .
+deterministic = 1
+run_obj = runtime
+overall_obj = mean
+cutoff_time = 5
+cutoff_length = max
+tunerTimeout = 30
+paramfile = example_cplex/cplex-params.txt
+outdir = example_cplex/paramils-out
+instance_file = example_data/CATS100-small-train.txt
+test_instance_file = example_data/CATS100-small-test.txt

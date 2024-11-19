@@ -1,0 +1,2 @@
+Calling: ubcsat.exe -alg saps -alpha 1.189 -wp 0.03 -rho 0.5 -ps 0.1 -inst C:/ParamILS/paramils2.3.2-source/paramils2.3.2-source/example_data/SWGCP-satisfiable-instances/SWlin2006.4072.cnf -cutoff 2147483647 -timeout 5.0 -target 0 -seed 524453158 -r stats stdout default,best > ubcsat_output0.365904820908691.txt
+Result for ParamILS: TIMEOUT, 5.0150001049, 1068773, 1, 524453158
