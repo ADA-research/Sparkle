@@ -63,8 +63,8 @@ def main(argv: list[str]) -> None:
     if gv.settings().DEFAULT_performance_data_path.exists():
         performance_data = PerformanceDataFrame(
             gv.settings().DEFAULT_performance_data_path)
-        if solver_path.name in performance_data.dataframe.columns:
-            performance_data.remove_solver(solver_path.name)
+        if str(solver_path) in performance_data.solvers:
+            performance_data.remove_solver(str(solver_path))
         performance_data.save_csv()
 
     shutil.rmtree(solver_path)

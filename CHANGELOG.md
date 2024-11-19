@@ -2,6 +2,12 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.9.1] - 2024/??/??
+
+### Changed
+
+- PerformanceDataFrame now directly subclasses from Pandas DataFrame instead of functioning as a container class [SPRK-278]
+
 ## [0.9.0] - 2024/10/30
 
 ### Added
