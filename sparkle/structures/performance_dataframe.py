@@ -48,8 +48,12 @@ class PerformanceDataFrame(pd.DataFrame):
             if (PerformanceDataFrame.multi_dim_names[0] not in df.columns
                     or not has_rows):
                 # No objective present, force into column
-                self[PerformanceDataFrame.multi_dim_names[0]] =\
-                    PerformanceDataFrame.missing_objective
+                if objectives is None:
+                    self[PerformanceDataFrame.multi_dim_names[0]] =\
+                        PerformanceDataFrame.missing_objective
+                else:
+                    self[PerformanceDataFrame.multi_dim_names[0]] =\
+                        [str(o) for o in objectives]
 
             if (PerformanceDataFrame.multi_dim_names[2] not in df.columns
                     or not has_rows):
@@ -78,7 +82,10 @@ class PerformanceDataFrame(pd.DataFrame):
                              index=midx, columns=solvers)
             self.csv_filepath = csv_filepath
             self.save_csv()
-
+        # Remove 'nan' index if possible
+        if self.num_instances > 0 and any(not isinstance(i[1], str)
+                                          and math.isnan(i[1]) for i in self.index):
+            self.remove_instance(PerformanceDataFrame.missing_value)
         # Sort the index to optimize lookup speed
         self.sort_index()
 
@@ -218,29 +225,27 @@ class PerformanceDataFrame(pd.DataFrame):
 
     def add_instance(self: PerformanceDataFrame,
                      instance_name: str,
-                     initial_value: float | list[float] = None) -> None:
+                     initial_value: float = None) -> None:
         """Add and instance to the DataFrame."""
         initial_value = initial_value or self.missing_value
-        initial_value =\
-            [initial_value] if not isinstance(initial_value, list) else initial_value
 
         if instance_name in self.instances:
             print(f"WARNING: Tried adding already existing instance {instance_name} "
                   f"to Performance DataFrame: {self.csv_filepath}")
             return
         # Create the missing indices, casting them to the correct sizes
-        levels = [self.objective_names * self.num_runs,  # Objective
+        levels = [self.objective_names * max(1, self.num_runs),  # Objective
                   [instance_name] * max(1, self.num_objectives * self.num_runs),
                   self.run_ids * self.num_objectives]  # Runs
         emidx = pd.MultiIndex.from_arrays(levels,
                                           names=PerformanceDataFrame.multi_dim_names)
-
         if self.num_solvers == 0:  # Patch for no columns
             self.add_solver(str(None))
-        for index, value in zip(emidx, initial_value):
-            self.loc[index] = value
+        for index in emidx:
+            self.loc[index] = initial_value
         if self.solvers == [str(None)]:
             self.remove_solver(str(None))
+        self.sort_index(inplace=True)
 
     def remove_solver(self: PerformanceDataFrame, solver_name: str | list[str]) -> None:
         """Drop one or more solvers from the Dataframe."""
@@ -248,6 +253,9 @@ class PerformanceDataFrame(pd.DataFrame):
 
     def remove_instance(self: PerformanceDataFrame, instance_name: str) -> None:
         """Drop an instance from the Dataframe."""
+        # To make sure objectives / runs are saved when no instances are present
+        if self.num_instances == 1:
+            self.add_instance(PerformanceDataFrame.missing_value)
         self.drop(instance_name, axis=0, level="Instance", inplace=True)
         self.reset_index(inplace=True)
         self.set_index(PerformanceDataFrame.multi_dim_names, inplace=True)
@@ -352,11 +360,8 @@ class PerformanceDataFrame(pd.DataFrame):
         if self.num_solvers == 0 or self.num_instances == 0:
             return remaining_jobs
         null_df = self.isnull()
-        print(self.solvers)
-        print(self.instances)
         for row in self.index:
             instance = row[1]
-            print(row)
             for solver in self.columns:
                 if null_df.at[row, solver]:
                     if instance not in remaining_jobs:
@@ -520,6 +525,10 @@ class PerformanceDataFrame(pd.DataFrame):
             csv_filepath: String path to the csv file. Defaults to self.csv_filepath.
         """
         csv_filepath = self.csv_filepath if csv_filepath is None else csv_filepath
+        # Remove 'nan' index if possible
+        if self.num_instances > 0 and any(not isinstance(i[1], str)
+                                          and math.isnan(i[1]) for i in self.index):
+            self.remove_instance(PerformanceDataFrame.missing_value)
         self.to_csv(csv_filepath)
 
     def clone(self: PerformanceDataFrame,
