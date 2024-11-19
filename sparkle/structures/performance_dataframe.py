@@ -540,12 +540,12 @@ class PerformanceDataFrame(pd.DataFrame):
             csv_filepath: The new filepath to use for saving the object to.
                 Warning: If the original path is used, it could lead to dataloss!
         """
+        csv_filepath = csv_filepath or self.csv_filepath
         if self.csv_filepath.exists():
-            pd_copy = PerformanceDataFrame(self.csv_filepath)
-            pd_copy.csv_filepath = csv_filepath
+            pd_copy = PerformanceDataFrame(csv_filepath)
         else:
             pd_copy = PerformanceDataFrame(
-                csv_filepath=self.csv_filepath,
+                csv_filepath=csv_filepath,
                 solvers=self.solvers,
                 objectives=self.objectives,
                 instances=self.instances,
