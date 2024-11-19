@@ -73,6 +73,8 @@ class PerformanceDataFrame(pd.DataFrame):
         else:
             if objectives is None:
                 objectives = [PerformanceDataFrame.missing_objective]
+            else:
+                objectives = [str(o) for o in objectives]
             # Initialize empty DataFrame
             run_ids = list(range(1, n_runs + 1))  # We count runs from 1
             midx = pd.MultiIndex.from_product(
@@ -237,6 +239,7 @@ class PerformanceDataFrame(pd.DataFrame):
         levels = [self.objective_names * max(1, self.num_runs),  # Objective
                   [instance_name] * max(1, self.num_objectives * self.num_runs),
                   self.run_ids * self.num_objectives]  # Runs
+
         emidx = pd.MultiIndex.from_arrays(levels,
                                           names=PerformanceDataFrame.multi_dim_names)
         if self.num_solvers == 0:  # Patch for no columns
@@ -444,7 +447,6 @@ class PerformanceDataFrame(pd.DataFrame):
         Returns:
             The performance of the schedule over the instances in the dictionary.
         """
-        print(self)
         objective = self.verify_objective(objective)
         if isinstance(objective, str):
             objective = resolve_objective(objective)
