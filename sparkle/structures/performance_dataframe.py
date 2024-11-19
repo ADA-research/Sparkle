@@ -170,7 +170,7 @@ class PerformanceDataFrame(pd.DataFrame):
             run_id: the run as specified by the user.
         """
         if run_id is None:
-            if self.n_runs > 1:
+            if self.num_runs > 1:
                 raise ValueError("Error: Multiple run performance data, "
                                  "but run not specified")
             else:
@@ -543,7 +543,7 @@ class PerformanceDataFrame(pd.DataFrame):
                      objective: SparkleObjective = None,
                      target: Path = None) -> Path:
         """Port the data to a format acceptable for AutoFolio."""
-        if (objective is None and self.multi_objective or self.n_runs > 1):
+        if (objective is None and self.multi_objective or self.num_runs > 1):
             print(f"ERROR: Currently no porting available for {self.csv_filepath} "
                   "to Autofolio due to multi objective or number of runs.")
             return
