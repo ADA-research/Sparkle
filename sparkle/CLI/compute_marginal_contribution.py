@@ -68,6 +68,7 @@ def compute_selector_performance(
         # for the instance.
         feature_vector = feature_data.get_instance(instance)
         schedule[instance] = selector.run(actual_portfolio_selector, feature_vector)
+
     schedule_performance = selector_performance_data.schedule_performance(
         schedule, target_solver="portfolio_selector", objective=objective)
     # Remove solvers from the dataframe

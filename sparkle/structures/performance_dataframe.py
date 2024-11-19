@@ -444,6 +444,7 @@ class PerformanceDataFrame(pd.DataFrame):
         Returns:
             The performance of the schedule over the instances in the dictionary.
         """
+        print(self)
         objective = self.verify_objective(objective)
         if isinstance(objective, str):
             objective = resolve_objective(objective)
@@ -539,8 +540,19 @@ class PerformanceDataFrame(pd.DataFrame):
             csv_filepath: The new filepath to use for saving the object to.
                 Warning: If the original path is used, it could lead to dataloss!
         """
-        pd_copy = PerformanceDataFrame(self.csv_filepath)
-        pd_copy.csv_filepath = csv_filepath
+        if self.csv_filepath.exists():
+            pd_copy = PerformanceDataFrame(self.csv_filepath)
+            pd_copy.csv_filepath = csv_filepath
+        else:
+            pd_copy = PerformanceDataFrame(
+                csv_filepath=self.csv_filepath,
+                solvers=self.solvers,
+                objectives=self.objectives,
+                instances=self.instances,
+                n_runs=self.num_runs)
+            for solver in self.solvers:
+                for index in self.index:
+                    pd_copy.loc[index, solver] = self.loc[index, solver]
         return pd_copy
 
     def clean_csv(self: PerformanceDataFrame) -> None:
