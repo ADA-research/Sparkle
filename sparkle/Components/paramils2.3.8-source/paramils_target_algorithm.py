@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+"""Handles ParamILS calls passing to sparkle solver wrappers."""
 import sys
 import time
 from pathlib import Path
@@ -11,7 +12,7 @@ from sparkle.types import resolve_objective
 
 
 if __name__ == "__main__":
-    # Incoming call from SMAC:
+    # Incoming call from ParamILS:
     # Translate input to Solver object input
     argsiter = iter(sys.argv[8:])
     args = zip(argsiter, argsiter)
@@ -38,7 +39,7 @@ if __name__ == "__main__":
                         run_on=Runner.LOCAL)
     run_time = min(time.time() - start_t, cutoff_time)
 
-    # Return values to SMAC
+    # Return values to ParamILS
     # SMAC2 does not accept nan values etc for quality
     quality = "0"
     if not objective.time and objective.name in output.keys():

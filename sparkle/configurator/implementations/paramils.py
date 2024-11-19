@@ -3,16 +3,16 @@
 """Configurator class to use different configurators like SMAC."""
 
 from __future__ import annotations
-from typing import Callable
+# from typing import Callable
 from pathlib import Path
-import ast
-from statistics import mean
-import operator
+# import ast
+# from statistics import mean
+# import operator
 import fcntl
-import glob
+# import glob
 import shutil
 
-import pandas as pd
+# import pandas as pd
 
 import runrunner as rrr
 from runrunner import Runner, Run
@@ -34,7 +34,7 @@ class ParamILS(Configurator):
                  objectives: list[SparkleObjective],
                  base_dir: Path,
                  output_path: Path) -> None:
-        """Returns the SMAC configurator, Java SMAC V2.10.03.
+        """Returns the ParamILS (Ruby) configurator, V2.3.8.
 
         Args:
             objectives: The objectives to optimize. Only supports one objective.
@@ -85,13 +85,14 @@ class ParamILS(Configurator):
         output = [f"{(self.scenario.result_directory).absolute()}/"
                   f"{self.scenario.name}_seed_{seed}_paramils.txt"
                   for seed in range(self.scenario.number_of_runs)]
+        # execdir timeout should go to another place
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{ParamILS.__name__} {output[seed]} {output_csv.absolute()} "
                 f"{self.executable_path.absolute()} "
                 f"-scenariofile {(self.scenario.scenario_file_path).absolute()} "
                 f"-numRun {seed} "
                 f"-outdir {output[seed]}"
-                for seed in range(self.scenario.number_of_runs)] # execdir timeout should go to another place
+                for seed in range(self.scenario.number_of_runs)]
         parallel_jobs = self.scenario.number_of_runs
         if num_parallel_jobs is not None:
             parallel_jobs = max(num_parallel_jobs,
@@ -99,7 +100,7 @@ class ParamILS(Configurator):
         configuration_run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
-            name="configure_solver",
+            name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
             base_dir=base_dir,
             output_path=output,
             parallel_jobs=parallel_jobs,
@@ -127,48 +128,6 @@ class ParamILS(Configurator):
                 run.wait()
         return runs
 
-    def get_optimal_configuration(
-            self: Configurator,
-            solver: Solver,
-            instance_set: InstanceSet,
-            objective: SparkleObjective = None,
-            aggregate_config: Callable = mean) -> tuple[float, str]:
-        """Returns optimal value and configuration string of solver on instance set."""
-        if self.scenario is None:
-            self.set_scenario_dirs(solver, instance_set)
-        results = self.validator.get_validation_results(
-            solver,
-            instance_set,
-            source_dir=self.scenario.validation,
-            subdir=self.scenario.validation.relative_to(self.validator.out_dir))
-        # Group the results per configuration
-        if objective is None:
-            objective = self.objectives[0]
-        value_column = results[0].index(objective.name)
-        config_column = results[0].index("Configuration")
-        configurations = list(set(row[config_column] for row in results[1:]))
-        config_scores = []
-        for config in configurations:
-            values = [float(row[value_column])
-                      for row in results[1:] if row[1] == config]
-            config_scores.append(aggregate_config(values))
-
-        comparison = operator.lt if objective.minimise else operator.gt
-
-        # Return optimal value
-        min_index = 0
-        current_optimal = config_scores[min_index]
-        for i, score in enumerate(config_scores):
-            if comparison(score, current_optimal):
-                min_index, current_optimal = i, score
-
-        # Return the optimal configuration dictionary as commandline args
-        config_str = configurations[min_index].strip(" ")
-        if config_str.startswith("{"):
-            config = ast.literal_eval(config_str)
-            config_str = " ".join([f"-{key} '{config[key]}'" for key in config])
-        return current_optimal, config_str
-
     @staticmethod
     def organise_output(output_source: Path, output_target: Path = None) -> None | str:
         """Retrieves configurations from SMAC files and places them in output."""
@@ -186,51 +145,28 @@ class ParamILS(Configurator):
                     fout.write(configuration + "\n")
                 break
 
-    def set_scenario_dirs(self: Configurator,
-                          solver: Solver, instance_set: InstanceSet) -> None:
-        """Patching method to allow the rebuilding of configuratio scenario."""
-        self.scenario = self.scenario_class(solver, instance_set)
-        self.scenario._set_paths(self.output_path)
-
     def get_status_from_logs(self: ParamILS) -> None:
         """Method to scan the log files of the configurator for warnings."""
-        base_dir = self.output_path / "scenarios"
-        if not base_dir.exists():
-            return
-        print(f"Checking the log files of configurator {type(self).__name__} for "
-              "warnings...")
-        scenarios = [f for f in base_dir.iterdir() if f.is_dir()]
-        for scenario in scenarios:
-            log_dir = scenario / "outdir_train_configuration" \
-                / (scenario.name + "_scenario")
-            warn_files = glob.glob(str(log_dir) + "/log-warn*")
-            non_empty = [log_file for log_file in warn_files
-                         if Path(log_file).stat().st_size > 0]
-            if len(non_empty) > 0:
-                print(f"Scenario {scenario.name} has {len(non_empty)} warning(s), see "
-                      "the following log file(s) for more information:")
-                for log_file in non_empty:
-                    print(f"\t-{log_file}")
-            else:
-                print(f"Scenario {scenario.name} has no warnings.")
+        return
 
 
 class ParamILSScenario(ConfigurationScenario):
     """Class to handle ParamILS configuration scenarios."""
+
     def __init__(self: ConfigurationScenario, solver: Solver,
                  instance_set: InstanceSet,
-                 tunerTimeout: int = None, cutoff_time: int = None,
+                 tuner_timeout: int = None, cutoff_time: int = None,
                  cutoff_length: int = None,
                  sparkle_objectives: list[SparkleObjective] = None)\
             -> None:
         """Initialize scenario paths and names.
 
         Args:
-            algo: Solver that should be configured.
+            solver: Solver that should be configured.
             execdir: The execution directroy.
             outdir: Output directory.
             instance_set: Instances object for the scenario.
-            tunerTimeout: The time budget allocated for each configuration run. (cpu)
+            tuner_timeout: The time budget allocated for each configuration run. (cpu)
             cutoff_time: The maximum time allowed for each individual run during
                 configuration.
             cutoff_length: The maximum number of iterations allowed for each
@@ -244,7 +180,7 @@ class ParamILSScenario(ConfigurationScenario):
         self.name = f"{self.solver.name}_{self.instance_set.name}"
         self.sparkle_objective = sparkle_objectives[0] if sparkle_objectives else None
 
-        self.tunerTimeout = tunerTimeout
+        self.tuner_timeout = tuner_timeout
         self.cutoff_time = cutoff_time
         self.cutoff_length = cutoff_length
 
@@ -309,7 +245,7 @@ class ParamILSScenario(ConfigurationScenario):
                        f"run_obj = {self._get_performance_measure()}\n"
                        f"cutoffTime = {self.cutoff_time}\n"
                        f"cutoff_length = {self.cutoff_length}\n"
-                       f"tunerTimeout = {self.tunerTimeout}\n"
+                       f"tunerTimeout = {self.tuner_timeout}\n"
                        f"paramfile = {self.solver.get_pcs_file()}\n"
                        f"outdir = {self.outdir_train.absolute()}\n"
                        f"instance_file = {self.instance_file_path.absolute()}\n"
@@ -325,32 +261,14 @@ class ParamILSScenario(ConfigurationScenario):
                 file.write(f"{instance_path.absolute()}\n")
 
     def _get_performance_measure(self: ConfigurationScenario) -> str:
-        """Retrieve the performance measure of the SparkleObjective.
+        """Retrieve the ParamILS performance measure of the SparkleObjective.
 
         Returns:
             Performance measure of the sparkle objective
         """
         if self.sparkle_objective.time:
             return "runtime"
-        
         return "approx"
-
-
-    def _clean_up_scenario_dirs(self: ConfigurationScenario,
-                                configurator_path: Path,) -> list[Path]:
-        """Yield directories to clean up after configuration scenario is done.
-
-        Returns:
-            list[str]: Full paths to directories that can be removed
-        """
-        result = []
-        configurator_solver_path = configurator_path / "scenarios"\
-            / f"{self.solver.name}_{self.instance_set.name}"
-
-        for index in range(self.number_of_runs):
-            dir = configurator_solver_path / str(index)
-            result.append(dir)
-        return result
 
     @staticmethod
     def from_file(scenario_file: Path, solver: Solver, instance_set: InstanceSet,
@@ -369,9 +287,8 @@ class ParamILSScenario(ConfigurationScenario):
         objective_str = config["algo"].split(" ")[-1]
         objective = SparkleObjective(objective_str)
         return ParamILSScenario(solver,
-                             instance_set,
-                             wallclock_limit,
-                             int(config["cutoffTime"]),
-                             config["cutoff_length"],
-                             [objective],
-)
+                                instance_set,
+                                wallclock_limit,
+                                int(config["cutoffTime"]),
+                                config["cutoff_length"],
+                                [objective])
