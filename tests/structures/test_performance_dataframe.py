@@ -274,13 +274,20 @@ def test_save_csv() -> None:
     pass
 
 
-def test_clean_csv() -> None:
-    """Test for method clean_csv."""
-    # TODO: Write test
-    pass
-
-
-def test_copy() -> None:
-    """Test for method copy."""
-    copy_nan = pd_nan.copy()
+def test_clone() -> None:
+    """Test for method clone."""
+    copy_nan = pd_nan.clone()
     assert copy_nan.csv_filepath is None
+    assert isinstance(copy_nan, PerformanceDataFrame)
+
+
+@pytest.mark.filterwarnings("ignore::FutureWarning")
+def test_clean_csv(tmp_path: Path,
+                   monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test for method clean_csv."""
+    copy_pd = pd.clone()
+    assert copy_pd.csv_filepath is None
+    monkeypatch.chdir(tmp_path)
+    copy_pd.csv_filepath = Path("test.csv")
+    copy_pd.clean_csv()
+    assert copy_pd.isnull().all().all()

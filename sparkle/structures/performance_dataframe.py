@@ -522,24 +522,22 @@ class PerformanceDataFrame(pd.DataFrame):
         csv_filepath = self.csv_filepath if csv_filepath is None else csv_filepath
         self.to_csv(csv_filepath)
 
-    def clean_csv(self: PerformanceDataFrame) -> None:
-        """Set all values in Performance Data to None."""
-        self[:] = PerformanceDataFrame.missing_value
-        self.save_csv()
-
-    def copy(self: PerformanceDataFrame,
-             csv_filepath: Path = None,
-             deep: bool = True) -> PerformanceDataFrame:
+    def clone(self: PerformanceDataFrame,
+              csv_filepath: Path = None) -> PerformanceDataFrame:
         """Create a copy of this object.
 
         Args:
             csv_filepath: The new filepath to use for saving the object to.
                 Warning: If the original path is used, it could lead to dataloss!
-            deep: deep copy or not
         """
-        pd_copy = pd.DataFrame.copy(self, deep=deep)
+        pd_copy = PerformanceDataFrame(self.csv_filepath)
         pd_copy.csv_filepath = csv_filepath
         return pd_copy
+
+    def clean_csv(self: PerformanceDataFrame) -> None:
+        """Set all values in Performance Data to None."""
+        self[:] = PerformanceDataFrame.missing_value
+        self.save_csv()
 
     def to_autofolio(self: PerformanceDataFrame,
                      objective: SparkleObjective = None,
@@ -549,7 +547,7 @@ class PerformanceDataFrame(pd.DataFrame):
             print(f"ERROR: Currently no porting available for {self.csv_filepath} "
                   "to Autofolio due to multi objective or number of runs.")
             return
-        autofolio_df = self.copy()
+        autofolio_df = super().copy()
         if objective is not None:
             autofolio_df = autofolio_df.loc[objective.name]
             autofolio_df.index = autofolio_df.index.droplevel("Run")
