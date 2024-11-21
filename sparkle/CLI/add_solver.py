@@ -80,7 +80,7 @@ def main(argv: list[str]) -> None:
     if args.no_copy:
         print(f"Creating symbolic link from {solver_source} "
               f"to {solver_directory}...")
-        if not os.access('/path/to/folder', os.W_OK):
+        if not os.access(solver_source, os.W_OK):
             raise PermissionError("Sparkle does not have the right to write to the "
                                   "destination folder.")
         solver_directory.symlink_to(solver_source.absolute())
