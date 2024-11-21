@@ -4,8 +4,13 @@ Notable changes to Sparkle will be documented in this file.
 
 ## [0.9.1] - 2024/??/??
 
+### Added
+
+- Added no-copy argument to all CLI add commands so the user can create symbolic links to their files instead of copying [SPRK-356]
+
 ### Changed
 
+- Validate command now checks whether there are still jobs running it needs completed before allowing the user to start this command [SPRK-328]
 - PerformanceDataFrame now directly subclasses from Pandas DataFrame instead of functioning as a container class [SPRK-278]
 
 ## [0.9.0] - 2024/10/30

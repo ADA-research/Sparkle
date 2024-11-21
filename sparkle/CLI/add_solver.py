@@ -24,10 +24,9 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.DeterministicArgument.kwargs)
     parser.add_argument(*ac.NicknameSolverArgument.names,
                         **ac.NicknameSolverArgument.kwargs)
-    parser.add_argument(*ac.SolverPathArgument.names,
-                        **ac.SolverPathArgument.kwargs)
-    parser.add_argument(*ac.SkipChecksArgument.names,
-                        **ac.SkipChecksArgument.kwargs)
+    parser.add_argument(*ac.SolverPathArgument.names, **ac.SolverPathArgument.kwargs)
+    parser.add_argument(*ac.SkipChecksArgument.names, **ac.SkipChecksArgument.kwargs)
+    parser.add_argument(*ac.NoCopyArgument.names, **ac.NoCopyArgument.kwargs)
     return parser
 
 
@@ -78,8 +77,18 @@ def main(argv: list[str]) -> None:
         print(f"ERROR: Solver {solver_source.name} already exists! "
               "Can not add new solver.")
         sys.exit(-1)
-    solver_directory.mkdir(parents=True)
-    shutil.copytree(solver_source, solver_directory, dirs_exist_ok=True)
+    if args.no_copy:
+        print(f"Creating symbolic link from {solver_source} "
+              f"to {solver_directory}...")
+        if not os.access(solver_source, os.W_OK):
+            raise PermissionError("Sparkle does not have the right to write to the "
+                                  "destination folder.")
+        solver_directory.symlink_to(solver_source.absolute())
+    else:
+        print(f"Copying {solver_source.name} to platform...")
+        solver_directory.mkdir(parents=True)
+        shutil.copytree(solver_source, solver_directory, dirs_exist_ok=True)
+
     # Save the deterministic bool in the solver
     with (solver_directory / Solver.meta_data).open("w+") as fout:
         fout.write(str({"deterministic": deterministic}))

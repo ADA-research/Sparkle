@@ -23,6 +23,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstancesPathArgument.kwargs)
     parser.add_argument(*ac.NicknameInstanceSetArgument.names,
                         **ac.NicknameInstanceSetArgument.kwargs)
+    parser.add_argument(*ac.NoCopyArgument.names,
+                        **ac.NoCopyArgument.kwargs)
     return parser
 
 
@@ -55,12 +57,16 @@ def main(argv: list[str]) -> None:
     print(f"Start adding all instances in directory {instances_source} ...")
     new_instance_set = Instance_Set(instances_source)
 
-    instances_target.mkdir(parents=True)
-    print("Copying files...")
-    for instance_path_source in new_instance_set.all_paths:
-        print(f"Copying {instance_path_source} to {instances_target}...", end="\r")
-        shutil.copy(instance_path_source, instances_target)
-    print("\nCopying done!")
+    if args.no_copy:
+        print(f"Creating symbolic link from {instances_source} to {instances_target}...")
+        instances_target.symlink_to(instances_source.absolute())
+    else:
+        instances_target.mkdir(parents=True)
+        print("Copying files...")
+        for instance_path_source in new_instance_set.all_paths:
+            print(f"Copying {instance_path_source} to {instances_target}...", end="\r")
+            shutil.copy(instance_path_source, instances_target)
+        print("\nCopying done!")
     # Refresh the instance set as the target instance set
     new_instance_set = Instance_Set(instances_target)
 

@@ -65,10 +65,14 @@ def main(argv: list[str]) -> None:
                                          key=key, remove=True)
             break
 
-    # Remove the directory and all its files
-    shutil.rmtree(instances_path)
+    # We unlink symbolics links, erase copies
+    if instances_path.is_symlink():
+        instances_path.unlink()
+    else:
+        # Remove the directory and all its files
+        shutil.rmtree(instances_path)
 
-    print(f"Removing instances in directory {instances_path} done!")
+    print(f"Removing instances set {instances_path.name} done!")
     sys.exit(0)
 
 

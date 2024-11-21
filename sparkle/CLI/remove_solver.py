@@ -67,7 +67,12 @@ def main(argv: list[str]) -> None:
             performance_data.remove_solver(str(solver_path))
         performance_data.save_csv()
 
-    shutil.rmtree(solver_path)
+    # We unlink symbolics links, erase copies
+    if solver_path.is_symlink():
+        solver_path.unlink()
+    else:
+        # Remove the directory and all its files
+        shutil.rmtree(solver_path)
 
     print(f"Removing solver {solver_path.name} done!")
     sys.exit(0)
