@@ -55,7 +55,7 @@ def compute_selector_performance(
         return objective.instance_aggregator(
             selector_performance_data.get_values("portfolio_selector",
                                                  objective=str(objective)))
-    selector_performance_data = performance_data.copy()
+    selector_performance_data = performance_data.clone()
 
     selector_performance_data.add_solver("portfolio_selector")
     selector_performance_data.csv_filepath =\
@@ -68,6 +68,7 @@ def compute_selector_performance(
         # for the instance.
         feature_vector = feature_data.get_instance(instance)
         schedule[instance] = selector.run(actual_portfolio_selector, feature_vector)
+
     schedule_performance = selector_performance_data.schedule_performance(
         schedule, target_solver="portfolio_selector", objective=objective)
     # Remove solvers from the dataframe
@@ -112,7 +113,7 @@ def compute_selector_marginal_contribution(
     for solver in performance_data.solvers:
         solver_name = Path(solver).name
         # 1. Copy the dataframe original df
-        tmp_performance_df = performance_data.copy()
+        tmp_performance_df = performance_data.clone()
         # 2. Remove the solver from this copy
         tmp_performance_df.remove_solver(solver)
         ablated_actual_portfolio_selector =\

@@ -11,6 +11,7 @@ Notable changes to Sparkle will be documented in this file.
 ### Changed
 
 - Validate command now checks whether there are still jobs running it needs completed before allowing the user to start this command [SPRK-328]
+- PerformanceDataFrame now directly subclasses from Pandas DataFrame instead of functioning as a container class [SPRK-278]
 
 ## [0.9.0] - 2024/10/30
 

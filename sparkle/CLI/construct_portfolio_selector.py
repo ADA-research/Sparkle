@@ -152,7 +152,7 @@ def main(argv: list[str]) -> None:
                       "Set the recompute flag to re-create.")
                 continue
             ablate_solver_dir.mkdir(exist_ok=True, parents=True)
-            ablated_performance_data = performance_data.copy()
+            ablated_performance_data = performance_data.clone()
             ablated_performance_data.remove_solver(solver)
             ablated_run = selector.construct(ablate_solver_selector,
                                              ablated_performance_data,
