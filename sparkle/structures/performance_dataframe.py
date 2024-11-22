@@ -605,7 +605,9 @@ class PerformanceDataFrame(pd.DataFrame):
                 n_runs=self.num_runs)
             for solver in self.solvers:
                 for index in self.index:
-                    pd_copy.loc[index, solver] = self.loc[index, solver]
+                    for field in PerformanceDataFrame.multi_column_names:
+                        pd_copy.at[index, (solver, field)] =\
+                            self.loc[index, solver][field]
         return pd_copy
 
     def clean_csv(self: PerformanceDataFrame) -> None:
