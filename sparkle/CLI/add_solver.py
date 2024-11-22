@@ -106,7 +106,7 @@ def main(argv: list[str]) -> None:
     performance_data = PerformanceDataFrame(
         gv.settings().DEFAULT_performance_data_path,
         objectives=gv.settings().get_general_sparkle_objectives())
-    performance_data.add_solver(solver_directory)
+    performance_data.add_solver(str(solver_directory))
     performance_data.save_csv()
 
     print(f"Adding solver {solver_source.name} done!")

@@ -81,7 +81,7 @@ class PerformanceDataFrame(pd.DataFrame):
             self.save_csv()
 
         # Sort the index to optimize lookup speed
-        self.sort_index(inplace=True)
+        self.sort_index(axis=0, inplace=True)
 
     # Properties
 
@@ -226,11 +226,9 @@ class PerformanceDataFrame(pd.DataFrame):
             self[solver_name, field] = value
         if self.num_solvers == 2:  # Remove nan solver
             for solver in self.solvers:
-                if not isinstance(solver, str) and math.isnan(solver):
+                if str(solver) == str(PerformanceDataFrame.missing_value):
                     self.remove_solver(solver)
                     break
-        # Sort the index to optimize lookup speed
-        self.sort_index(axis=1, inplace=True)
 
     def add_instance(self: PerformanceDataFrame,
                      instance_name: str,
@@ -257,23 +255,23 @@ class PerformanceDataFrame(pd.DataFrame):
         """Drop one or more solvers from the Dataframe."""
         # To make sure objectives / runs are saved when no solvers are present
         if self.num_solvers == 1:
-            self.add_solver(PerformanceDataFrame.missing_value)
-        self.drop(columns=solver_name, axis=1, inplace=True)
-        # Sort the index to optimize lookup speed
-        self.sort_index(axis=1, inplace=True)
+            for field in PerformanceDataFrame.multi_column_names:
+                self[PerformanceDataFrame.missing_value, field] =\
+                    PerformanceDataFrame.missing_value
+        self.drop(columns=solver_name, level=0, axis=1, inplace=True)
 
     def remove_instance(self: PerformanceDataFrame, instance_name: str) -> None:
         """Drop an instance from the Dataframe."""
         # To make sure objectives / runs are saved when no instances are present
         if self.num_instances == 1:
-            self.add_instance(PerformanceDataFrame.missing_value)
+            for objective, run in itertools.product(self.objective_names, self.run_ids):
+                self.loc[(objective, PerformanceDataFrame.missing_value, run)] =\
+                    PerformanceDataFrame.missing_value
         self.drop(instance_name,
                   axis=0,
                   level=PerformanceDataFrame.index_instance, inplace=True)
         # Sort the index to optimize lookup speed
         self.sort_index(axis=0, inplace=True)
-        # self.reset_index(inplace=True)
-        # self.set_index(PerformanceDataFrame.multi_index_names, inplace=True)
 
     def correct_dimensions(self: PerformanceDataFrame) -> None:
         """Add/remove nan instance/solver if necessary."""
@@ -325,6 +323,9 @@ class PerformanceDataFrame(pd.DataFrame):
         """Index a value of the DataFrame and return it."""
         objective, run = self.verify_indexing(objective, run)
         target = list(self.loc[(objective, instance, run), solver][solver_fields])
+        if PerformanceDataFrame.column_value in solver_fields:
+            value_index = solver_fields.index(PerformanceDataFrame.column_value)
+            target[value_index] = float(target[value_index])
         if len(target) == 1:
             return target[0]
         return target
@@ -621,6 +622,10 @@ class PerformanceDataFrame(pd.DataFrame):
                   "to Autofolio due to multi objective or number of runs.")
             return
         autofolio_df = super().copy()
+        # Drop Seed/Configuration, then drop the level
+        autofolio_df = autofolio_df.drop([PerformanceDataFrame.column_seed,
+                                          PerformanceDataFrame.column_configuration],
+                                         axis=1, level=1).droplevel(level=1, axis=1)
         if objective is not None:
             autofolio_df = autofolio_df.loc[objective.name]
             autofolio_df.index = autofolio_df.index.droplevel("Run")
