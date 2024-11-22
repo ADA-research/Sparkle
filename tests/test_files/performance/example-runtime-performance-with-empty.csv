@@ -1,6 +1,8 @@
-AlgorithmA,AlgorithmB,AlgorithmC,AlgorithmD,AlgorithmE
-Instance1,nan,30,38,64,50
-Instance2,nan,16,5,20,87
-Instance3,nan,87,nan,55,3
-Instance4,nan,8,40,49,nan
-Instance5,nan,64,54,86,41
+,,,AlgorithmA,AlgorithmA,AlgorithmA,AlgorithmB,AlgorithmB,AlgorithmB,AlgorithmC,AlgorithmC,AlgorithmC,AlgorithmD,AlgorithmD,AlgorithmD,AlgorithmE,AlgorithmE,AlgorithmE
+,,,Value,Seed,Configuration,Value,Seed,Configuration,Value,Seed,Configuration,Value,Seed,Configuration,Value,Seed,Configuration
+Objective,Instance,Run,,,,,,
+UNKNOWN,Instance1,1,nan,1,{},30,1,{},38,1,{},64,1,{},50,1,{}
+UNKNOWN,Instance2,1,nan,1,{},16,1,{},5,1,{},20,1,{},87,1,{}
+UNKNOWN,Instance3,1,nan,1,{},87,1,{},nan,1,{},55,1,{},3,1,{}
+UNKNOWN,Instance4,1,nan,1,{},8,1,{},40,1,{},1,{},49,nan,1,{}
+UNKNOWN,Instance5,1,nan,1,{},64,1,{},54,1,{},86,1,{},41,1,{}

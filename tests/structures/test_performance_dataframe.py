@@ -25,11 +25,11 @@ def test_from_scratch(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     empty_df.add_instance("Instance1")
     empty_df.add_instance("Instance2")
     empty_df.add_instance("Instance3")
-    assert empty_df.instances == ["Instance1", "Instance2", "Instance3"]
+    assert set(empty_df.instances) == set(["Instance3", "Instance1", "Instance2"])
     empty_df.add_solver("AlgorithmA")
     empty_df.add_solver("AlgorithmB")
     empty_df.add_solver("AlgorithmC")
-    assert empty_df.solvers == ["AlgorithmA", "AlgorithmB", "AlgorithmC"]
+    assert set(empty_df.solvers) == set(["AlgorithmA", "AlgorithmB", "AlgorithmC"])
 
 
 def test_full_init() -> None:
@@ -63,6 +63,7 @@ def test_get_job_list() -> None:
 def test_num_objectives() -> None:
     """Test the number of objectives getter method."""
     num_objectives = 1
+    print(pd)
     assert pd.num_objectives == num_objectives
     assert pd_nan.num_objectives == num_objectives
     num_objectives = 3
@@ -135,6 +136,14 @@ def test_has_missing_values() -> None:
     assert not pd.has_missing_values
     assert pd_nan.has_missing_values
     assert not pd_mo.has_missing_values
+    # Seed or config should not be included as 'missing value'
+    copy_pd = pd.clone()
+    copy_pd.set_value(PerformanceDataFrame.missing_value,
+                      "AlgorithmA", "Instance1", solver_fields=["Seed"])
+    assert not copy_pd.has_missing_values
+    copy_pd.set_value(PerformanceDataFrame.missing_value,
+                      "AlgorithmA", "Instance1", solver_fields=["Configuration"])
+    assert not copy_pd.has_missing_values
 
 
 def test_verify_objective() -> None:
@@ -159,6 +168,7 @@ def test_add_remove_solver() -> None:
     assert pd_nan.get_values("AlgorithmTmp") == [None] * 5
 
     pd_nan.remove_solver("AlgorithmTmp")
+    print(pd_nan.solvers)
     assert "AlgorithmTmp" not in pd_nan.solvers
 
 
@@ -172,17 +182,16 @@ def test_add_remove_instance() -> None:
     assert "InstanceTmp" not in pd_nan.instances
 
 
-def test_get_list_remaining_performance_computation_job()\
+def test_get_list_remaining_jobs()\
         -> None:
     """Test get remaining performance computation job getter."""
     remaining = {}
     result = pd.remaining_jobs()
     assert result == remaining
-
-    remaining = {"Instance1": {"AlgorithmA"}, "Instance2": {"AlgorithmA"},
-                 "Instance3": {"AlgorithmC", "AlgorithmA"},
-                 "Instance4": {"AlgorithmA", "AlgorithmE"},
-                 "Instance5": {"AlgorithmA"}}
+    remaining = {"Instance1": ["AlgorithmA"], "Instance2": ["AlgorithmA"],
+                 "Instance3": ["AlgorithmA", "AlgorithmC"],
+                 "Instance4": ["AlgorithmA", "AlgorithmE"],
+                 "Instance5": ["AlgorithmA"]}
     result = pd_nan.remaining_jobs()
     assert result == remaining
     remaining = {}
@@ -190,8 +199,7 @@ def test_get_list_remaining_performance_computation_job()\
     assert result == remaining
 
 
-def test_best_instance_performance()\
-        -> None:
+def test_best_instance_performance() -> None:
     """Test calculating best score on instance."""
     bp_instance_runtime = [30.0, 5.0, 3.0, 8.0, 41.0]
     result_min = pd.best_instance_performance()
