@@ -192,6 +192,16 @@ def test_add_remove_runs() -> None:
     assert pd_nan.num_runs == 1
 
     # TODO: add tests for varying number of runs per instance
+    instance_subset = pd_nan.instances[:2]
+    pd_nan.add_runs(2, instance_names=instance_subset)
+    assert pd_nan.num_runs == 3
+    for instance in pd_nan.instances:
+        if instance in instance_subset:
+            assert pd_nan.get_instance_num_runs(instance) == 3
+        else:
+            assert pd_nan.get_instance_num_runs(instance) == 1
+    pd_nan.remove_runs(2, instance_names=instance_subset)
+    assert pd_nan.num_runs == 1
 
 
 def test_get_list_remaining_jobs()\
