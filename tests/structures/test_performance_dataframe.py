@@ -182,6 +182,16 @@ def test_add_remove_instance() -> None:
     assert "InstanceTmp" not in pd_nan.instances
 
 
+def test_add_remove_runs() -> None:
+    """Test adding and removing runs."""
+    pd_nan.add_runs(5)
+    assert pd_nan.num_runs == 6
+    pd_nan.remove_runs(3)
+    assert pd_nan.num_runs == 3
+    pd_nan.remove_runs(2)
+    assert pd_nan.num_runs == 1
+
+
 def test_get_list_remaining_jobs()\
         -> None:
     """Test get remaining performance computation job getter."""

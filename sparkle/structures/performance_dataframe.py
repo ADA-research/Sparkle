@@ -97,7 +97,7 @@ class PerformanceDataFrame(pd.DataFrame):
 
     @property
     def num_runs(self: PerformanceDataFrame) -> int:
-        """Return the number of runs."""
+        """Return the maximum number of runs of each instance."""
         return self.index.get_level_values(2).unique().size
 
     @property
@@ -251,6 +251,25 @@ class PerformanceDataFrame(pd.DataFrame):
         # Sort the index to optimize lookup speed
         self.sort_index(axis=0, inplace=True)
 
+    def add_runs(self: PerformanceDataFrame,
+                 num_extra_runs: int,
+                 instance_names: list[str] = None) -> None:
+        """Add runs to the DataFrame.
+
+        Args:
+            num_extra_runs: The number of runs to be added.
+            instance_names: The instances for which runs are to be added.
+              By default None, which means runs are added to all instances.
+        """
+        instance_names = self.instances if instance_names is None else instance_names
+        for instance in instance_names:
+            for objective in self.objective_names:
+                index_runs_start = len(self.loc[(objective, instance)].index) + 1
+                for run in range(index_runs_start, index_runs_start + num_extra_runs):
+                    self.loc[(objective, instance, run)] = self.missing_value
+        # Sort the index to optimize lookup speed
+        self.sort_index(axis=0, inplace=True)
+
     def remove_solver(self: PerformanceDataFrame, solver_name: str | list[str]) -> None:
         """Drop one or more solvers from the Dataframe."""
         # To make sure objectives / runs are saved when no solvers are present
@@ -270,6 +289,28 @@ class PerformanceDataFrame(pd.DataFrame):
         self.drop(instance_name,
                   axis=0,
                   level=PerformanceDataFrame.index_instance, inplace=True)
+        # Sort the index to optimize lookup speed
+        self.sort_index(axis=0, inplace=True)
+
+    def remove_runs(self: PerformanceDataFrame,
+                    runs: int | list[int],
+                    instance_names: list[str] = None) -> None:
+        """Drop one or more runs from the Dataframe.
+
+        Args:
+            runs: The run indices to be removed. If its an int,
+              the last n runs are removed. NOTE: If each instance has a different
+              number of runs, the amount of removed runs is not uniform.
+            instance_names: The instances for which runs are to be removed.
+              By default None, which means runs are removed from all instances.
+        """
+        instance_names = self.instances if instance_names is None else instance_names
+        runs = list(range((self.num_runs + 1) - runs, (self.num_runs + 1)))\
+            if isinstance(runs, int) else runs
+        self.drop(runs,
+                  axis=0,
+                  level=PerformanceDataFrame.index_run,
+                  inplace=True)
         # Sort the index to optimize lookup speed
         self.sort_index(axis=0, inplace=True)
 
@@ -352,6 +393,11 @@ class PerformanceDataFrame(pd.DataFrame):
         if len(result) == 1:
             return result[0]
         return result
+
+    def get_instance_num_runs(self: PerformanceDataFrame,
+                              instance: str) -> int:
+        """Return the number of runs for an instance."""
+        return self.xs(instance, level=1).shape[0]
 
     # Calculables
 
