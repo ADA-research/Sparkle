@@ -80,10 +80,10 @@ def get_figure_portfolio_selector_vs_sbs(
     """
     # We create a point of x,y form (SBS performance, portfolio performance)
     selector = portfolio_selector_performance.solvers[0]
-    points = [[train_data.get_value(sbs_solver, instance, objective.name),
-               portfolio_selector_performance.get_value(selector,
-                                                        instance,
-                                                        objective.name)]
+    points = [[float(train_data.get_value(sbs_solver, instance, objective.name)),
+               float(portfolio_selector_performance.get_value(selector,
+                                                              instance,
+                                                              objective.name))]
               for instance in portfolio_selector_performance.instances]
 
     figure_filename = "figure_portfolio_selector_sparkle_vs_sbs"
