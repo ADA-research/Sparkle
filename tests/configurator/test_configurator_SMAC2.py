@@ -12,6 +12,7 @@ import runrunner as rrr
 
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
+from sparkle.structures import PerformanceDataFrame
 from sparkle.configurator.implementations import SMAC2, SMAC2Scenario
 from sparkle.types.objective import PAR
 
@@ -56,8 +57,11 @@ class TestConfiguratorSMAC2(TestCase):
         # We currently cannot test these strings as they are using absolute paths
         expected_cmds = ANY
         expected_outputs = ANY
+        data_target = PerformanceDataFrame(
+            Path("tests/test_files/performance/example_data_MO.csv"))
 
         runs = self.smac2_conf.configure(self.conf_scenario,
+                                         data_target=data_target,
                                          validate_after=False,
                                          base_dir=self.base_dir)
         mock_add_to_queue.assert_called_once_with(
@@ -105,14 +109,13 @@ class TestConfiguratorSMAC2(TestCase):
         raw_out = self.test_files / "Configuration" / "results" /\
             "PbO-CCSAT-Generic_PTN_seed_3_smac.txt"
         # By not specifiying an output file, the result is returned to us
-        expected = (
-            "-gamma_hscore2 '351' -init_solution '1' -p_swt '0.20423712003341465'"
-            " -perform_aspiration '1' -perform_clause_weight '1' "
-            "-perform_double_cc '0' -perform_first_div '0' -perform_pac '1' "
-            "-prob_pac '0.005730374136488115' -q_swt '0.6807207179674418' "
-            "-sel_clause_div '1' -sel_clause_weight_scheme '1' "
-            "-sel_var_break_tie_greedy '4' -sel_var_div '2' -threshold_swt '32'")
-        assert SMAC2.organise_output(raw_out) == expected
+        assert SMAC2.organise_output(raw_out, None, None, 1) == {
+            "gamma_hscore2": "351", "init_solution": "1", "p_swt": "0.20423712003341465",
+            "perform_aspiration": "1", "perform_clause_weight": "1",
+            "perform_double_cc": "0", "perform_first_div": "0", "perform_pac": "1",
+            "prob_pac": "0.005730374136488115", "q_swt": "0.6807207179674418",
+            "sel_clause_div": "1", "sel_clause_weight_scheme": "1",
+            "sel_var_break_tie_greedy": "4", "sel_var_div": "2", "threshold_swt": "32"}
 
     def test_smac2_get_status_from_logs(self: TestConfiguratorSMAC2) -> None:
         """Testing status retrievel from logs."""

@@ -19,17 +19,15 @@ def test_irace_organise_output(tmp_path: Path,
         return  # Test does not work on Github because it can't find IRACE package
     source_path = Path("tests/test_files/Configuration/"
                        "test_output_irace.Rdata").absolute()
-    target_path = Path("tmp.csv")
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     if not IRACE.configurator_executable.exists():
         initialise.initialise_irace()  # Ensure IRACE is compiled
-    IRACE.organise_output(source_path, target_path)
-    assert target_path.exists()
-    assert target_path.open().read().strip() == (
-        "--init_solution 1 --perform_pac 0 --perform_first_div 1 --perform_double_cc 1 "
-        "--perform_aspiration 1 --sel_var_break_tie_greedy 4 --perform_clause_weight 0 "
-        "--sel_clause_div 2 --sel_var_div 6 --prob_first_div 0.9918 "
-        "--gamma_hscore2 495644 --prob_novelty 0.4843")
+    assert IRACE.organise_output(source_path, None, None, 1) == {
+        "init_solution": "1", "perform_pac": "0", "perform_first_div": "1",
+        "perform_double_cc": "1", "perform_aspiration": "1",
+        "sel_var_break_tie_greedy": "4", "perform_clause_weight": "0",
+        "sel_clause_div": "2", "sel_var_div": "6", "prob_first_div": "0.9918",
+        "gamma_hscore2": "495644", "prob_novelty": "0.4843"}
 
 
 def test_irace_scenario_file(tmp_path: Path,
