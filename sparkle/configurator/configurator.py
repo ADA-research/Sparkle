@@ -42,8 +42,8 @@ class Configurator:
         self.multiobjective = multi_objective_support
         self.scenario = None
 
-    @property
-    def scenario_class(self: Configurator) -> ConfigurationScenario:
+    @staticmethod
+    def scenario_class() -> ConfigurationScenario:
         """Return the scenario class of the configurator."""
         return ConfigurationScenario
 
@@ -110,8 +110,18 @@ class Configurator:
         return current_optimal, config_str
 
     @staticmethod
-    def organise_output(output_source: Path, output_target: Path) -> None | str:
-        """Method to restructure and clean up after a single configurator call."""
+    def organise_output(output_source: Path,
+                        output_target: Path,
+                        scenario: ConfigurationScenario,
+                        run_id: int) -> None | str:
+        """Method to restructure and clean up after a single configurator call.
+
+        Args:
+            output_source: Path to the output file of the configurator run.
+            output_target: Path to the Performance DataFrame to store result.
+            scenario: ConfigurationScenario of the configuration.
+            run_id: ID of the run of the configuration.
+        """
         raise NotImplementedError
 
     def set_scenario_dirs(self: Configurator,
@@ -130,8 +140,7 @@ class ConfigurationScenario:
                  solver: Solver,
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
-                 parent_directory: Path)\
-            -> None:
+                 parent_directory: Path) -> None:
         """Initialize scenario paths and names.
 
         Args:

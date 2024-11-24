@@ -100,7 +100,7 @@ def main(argv: list[str]) -> None:
 
     # Make sure configuration results exist before trying to work with them
     configurator = gv.settings().get_general_sparkle_configurator()
-    config_scenario = configurator.scenario_class.find_scenario(
+    config_scenario = configurator.scenario_class().find_scenario(
         configurator.output_path, solver, instance_set_train)
 
     if config_scenario is None:

@@ -32,7 +32,7 @@ class TestGenerateConfigurationReport(TestCase):
         train_instance = "train-instance"
         test_instance = "test-instance"
         self.configurator_path = self.configurator.configurator_path
-        self.configuration_scenario = self.configurator.scenario_class(
+        self.configuration_scenario = self.configurator.scenario_class()(
             self.solver,
             Path(train_instance),
             [self.test_objective_runtime],

@@ -77,7 +77,7 @@ class AblationScenario:
         objective = gv.settings().get_general_sparkle_objectives()[0]
         configurator = gv.settings().get_general_sparkle_configurator()
         config_scenario = gv.latest_scenario().get_configuration_scenario(
-            configurator.scenario_class)
+            configurator.scenario_class())
         _, opt_config_str = configurator.get_optimal_configuration(
             config_scenario)
 

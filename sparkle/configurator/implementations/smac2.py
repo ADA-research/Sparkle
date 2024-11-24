@@ -3,7 +3,6 @@
 """Configurator classes to implement SMAC2 in Sparkle."""
 from __future__ import annotations
 from pathlib import Path
-import fcntl
 import glob
 import shutil
 
@@ -14,6 +13,7 @@ from runrunner import Runner, Run
 
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
+from sparkle.structures import PerformanceDataFrame
 from sparkle.solver.validator import Validator
 from sparkle.instance import InstanceSet, Instance_Set
 from sparkle.types import SparkleObjective
@@ -53,13 +53,14 @@ class SMAC2(Configurator):
         """Returns the name of the configurator."""
         return SMAC2.__name__
 
-    @property
-    def scenario_class(self: Configurator) -> ConfigurationScenario:
+    @staticmethod
+    def scenario_class() -> ConfigurationScenario:
         """Returns the SMAC2 scenario class."""
         return SMAC2Scenario
 
     def configure(self: Configurator,
                   scenario: ConfigurationScenario,
+                  data_target: PerformanceDataFrame,
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
                   num_parallel_jobs: int = None,
@@ -86,16 +87,19 @@ class SMAC2(Configurator):
         scenario.create_scenario()
         output_csv = scenario.validation / "configurations.csv"
         output_csv.parent.mkdir(exist_ok=True, parents=True)
+        # We set the seed over the last n run ids in the dataframe
+        seeds = data_target.run_ids[data_target.num_runs - scenario.number_of_runs:]
         output = [f"{(scenario.results_directory).absolute()}/"
                   f"{scenario.name}_seed_{seed}_smac.txt"
-                  for seed in range(scenario.number_of_runs)]
+                  for seed in seeds]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
-                f"{SMAC2.__name__} {output[seed]} {output_csv.absolute()} "
+                f"{SMAC2.__name__} {output_file} {data_target.csv_filepath.absolute()} "
+                f"{scenario.scenario_file_path.absolute()} {seed} "
                 f"{SMAC2.configurator_executable.absolute()} "
                 f"--scenario-file {scenario.scenario_file_path.absolute()} "
                 f"--seed {seed} "
                 f"--execdir {scenario.tmp.absolute()}"
-                for seed in range(scenario.number_of_runs)]
+                for output_file, seed in zip(output, seeds)]
         parallel_jobs = scenario.number_of_runs
         if num_parallel_jobs is not None:
             parallel_jobs = max(num_parallel_jobs, scenario.number_of_runs)
@@ -110,7 +114,10 @@ class SMAC2(Configurator):
             sbatch_options=sbatch_options,
             srun_options=["-N1", "-n1"])]
 
-        if validate_after:
+        # TODO: This should be done without validator and instead schedule jobs
+        # by refactoring run_solver_core into the solver class
+        # and dependency set per job array level to the configuration run
+        """if validate_after:
             self.validator.out_dir = output_csv.parent
             self.validator.tmp_out_dir = base_dir
             validate_run = self.validator.validate(
@@ -123,7 +130,7 @@ class SMAC2(Configurator):
                 dependency=runs,
                 sbatch_options=sbatch_options,
                 run_on=run_on)
-            runs.append(validate_run)
+            runs.append(validate_run)"""
 
         if run_on == Runner.LOCAL:
             for run in runs:
@@ -131,8 +138,12 @@ class SMAC2(Configurator):
         return runs
 
     @staticmethod
-    def organise_output(output_source: Path, output_target: Path = None) -> None | str:
-        """Retrieves configurations from SMAC files and places them in output."""
+    def organise_output(output_source: Path,
+                        output_target: Path,
+                        scenario: Path,
+                        run_id: int) -> None | dict:
+        """Retrieves configuration from SMAC file and places them in output."""
+        from filelock import FileLock
         call_key = SMAC2.configurator_target.name
         # Last line describing a call is the best found configuration
         for line in reversed(output_source.open("r").readlines()):
@@ -140,12 +151,31 @@ class SMAC2(Configurator):
                 call_str = line.split(call_key, maxsplit=1)[1].strip()
                 # The Configuration appears after the first 6 arguments
                 configuration = call_str.split(" ", 7)[-1]
-                if output_target is None:
-                    return configuration
-                with output_target.open("a") as fout:
-                    fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-                    fout.write(configuration + "\n")
                 break
+        configuration = Solver.config_str_to_dict(configuration)
+        if output_target is None or not output_target.exists():
+            return configuration
+        configuration["configuration_id"] = SMAC2.__name__  # Should be more unique
+        instance_names = scenario.instance_set.instance_names
+        lock = FileLock(f"{output_target}.lock")
+        with lock.acquire(timeout=60):
+            performance_data = PerformanceDataFrame(output_target)
+            # Resolve absolute path to Solver column
+            solver = [s for s in performance_data.solvers
+                      if Path(s).name == scenario.solver.name][0]
+            # For some reason the instance paths in the instance set are absolute
+            instances = [instance for instance in performance_data.instances
+                         if Path(instance).name in instance_names]
+            # We don't set the seed in the dataframe, as that should be part of the conf
+            performance_data.set_value(
+                value=[str(configuration)],
+                solver=solver,
+                instance=instances,
+                objective=None,
+                run=run_id,
+                solver_fields=[PerformanceDataFrame.column_configuration]
+            )
+            performance_data.save_csv()
 
     @staticmethod
     def get_smac_run_obj(objective: SparkleObjective) -> str:

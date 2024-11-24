@@ -17,7 +17,7 @@ from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.CLI.help import argparse_custom as ac
 
 from sparkle.platform.settings_objects import SettingState
-from sparkle.structures import FeatureDataFrame
+from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.configurator import implementations as configurator_implementations
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
@@ -152,13 +152,25 @@ def main(argv: list[str]) -> None:
 
     sparkle_objectives =\
         gv.settings().get_general_sparkle_objectives()
-    config_scenario = configurator.scenario_class(
-        solver, instance_set_train, sparkle_objectives, configurator.output_path,
-        **configurator_settings)
+    # Expand the performance dataframe so it can store the configuration
+    performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
+    performance_data.add_runs(gv.settings().get_configurator_number_of_runs(),
+                              instance_names=[
+                                  str(i) for i in instance_set_train.instance_paths])
+    performance_data.save_csv()
+    # Do we want to run each best found configuration per configurator run to be tested
+    # on the test set?
+    """if instance_set_test is not None:
+        performance_data.add_runs(gv.settings().get_configurator_number_of_runs(),
+                                  instance_names=[instance_set_test.instance_paths])"""
+    config_scenario = configurator.scenario_class()(
+        solver, instance_set_train, sparkle_objectives,
+        configurator.output_path, **configurator_settings)
 
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     dependency_job_list = configurator.configure(
         scenario=config_scenario,
+        data_target=performance_data,
         sbatch_options=sbatch_options,
         num_parallel_jobs=gv.settings().get_number_of_jobs_in_parallel(),
         base_dir=sl.caller_log_dir,

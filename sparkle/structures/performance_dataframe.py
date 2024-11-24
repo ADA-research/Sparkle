@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
-# -*- coding: UTF-8 -*-
 """Module to manage performance data files and common operations on them."""
 from __future__ import annotations
+from typing import Any
 import itertools
 from pathlib import Path
 import math
+import numpy as np
 import pandas as pd
 
 from sparkle.types import SparkleObjective, resolve_objective
@@ -25,6 +25,7 @@ class PerformanceDataFrame(pd.DataFrame):
     column_seed = "Seed"
     column_configuration = "Configuration"
     multi_column_names = [column_value, column_seed, column_configuration]
+    multi_column_dtypes = [float, int, str]
 
     def __init__(self: PerformanceDataFrame,
                  csv_filepath: Path,
@@ -52,7 +53,12 @@ class PerformanceDataFrame(pd.DataFrame):
             n_runs: The number of runs to consider per Solver/Objective/Instance comb.
         """
         if csv_filepath.exists():
-            df = pd.read_csv(csv_filepath, header=[0, 1], index_col=[0, 1, 2])
+            dtypes = {key: value for key, value in zip(
+                PerformanceDataFrame.multi_column_names,
+                PerformanceDataFrame.multi_column_dtypes)}
+            df = pd.read_csv(csv_filepath,
+                             header=[0, 1], index_col=[0, 1, 2],
+                             dtype=dtypes)
             super().__init__(df)
             self.csv_filepath = csv_filepath
         else:
@@ -329,48 +335,70 @@ class PerformanceDataFrame(pd.DataFrame):
 
     # Can we make this handle a sequence of inputs instead of just 1?
     def set_value(self: PerformanceDataFrame,
-                  value: float | str | list[float | str],
-                  solver: str,
-                  instance: str,
-                  objective: str = None,
-                  run: int = None,
+                  value: float | str | list[float | str] | list[list[float | str]],
+                  solver: str | list[str],
+                  instance: str | list[str],
+                  objective: str | list[str] = None,
+                  run: int | list[int] = None,
                   solver_fields: list[str] = ["Value"]) -> None:
         """Setter method to assign a value to the Dataframe.
 
+        Allows for setting the same value to multiple indices.
+
         Args:
-            value: Value(s) to be assigned.
-            solver: The solver that produced the value.
-            instance: The instance that the value was produced on.
-            objective: The objective for which the result was produced.
-                Optional in case of using single objective.
-            run: The run index for which the result was produced.
-                Optional in case of doing single run results.
+            value: Value(s) to be assigned. If value is a list, first dimension is
+                the solver field, second dimension is if multiple different values are
+                to be assigned. Must be the same shape as target.
+            solver: The solver(s) for which the value should be set.
+                If solver is a list, multiple solvers are set. If None, all
+                solvers are set.
+            instance: The instance(s) for which the value should be set.
+                If instance is a list, multiple instances are set. If None, all
+                instances are set.
+            objective: The objectives for which the value should be set.
+                When left None, set for all objectives
+            run: The run index for which the value should be set.
+                If left None, set for all runs.
             solver_fields: The level to which each value should be assinged.
                 Defaults to ["Value"].
         """
-        objective, run = self.verify_indexing(objective, run)
+        # Convert indices to slices for None values
+        solver = slice(solver) if solver is None else solver
+        instance = slice(instance) if instance is None else instance
+        objective = slice(objective) if objective is None else objective
+        run = slice(run) if run is None else run
+        # Convert column indices to slices for setting multiple columns
         value = [value] if not isinstance(value, list) else value
+        # NOTE: We currently forloop levels here, as it allows us to set the same
+        # sequence of values to the indices
         for item, level in zip(value, solver_fields):
-            self.at[(objective, instance, run), (solver, level)] = item
+            self.loc[(objective, instance, run), (solver, level)] = item
 
     # Can we unify get_value and get_values?
     def get_value(self: PerformanceDataFrame,
-                  solver: str,
-                  instance: str,
+                  solver: str | list[str],
+                  instance: str | list[str],
                   objective: str = None,
                   run: int = None,
                   solver_fields: list[str] = ["Value"]
-                  ) -> float | str | list[float | str]:
+                  ) -> float | str | list[Any]:
         """Index a value of the DataFrame and return it."""
-        objective, run = self.verify_indexing(objective, run)
-        target = list(self.loc[(objective, instance, run), solver][solver_fields])
-        if PerformanceDataFrame.column_value in solver_fields:
-            value_index = solver_fields.index(PerformanceDataFrame.column_value)
-            target[value_index] = float(target[value_index])
+        # Convert indices to slices for None values
+        solver = slice(solver) if solver is None else solver
+        instance = slice(instance) if instance is None else instance
+        objective = slice(objective) if objective is None else objective
+        run = slice(run) if run is None else run
+        target = self.loc[(objective, instance, run), (solver, solver_fields)].values
+
+        # Reduce dimensions when relevant
+        if isinstance(target[0], np.ndarray) and len(target[0]) == 1:
+            target = target.flatten()
+        target = target.tolist()
         if len(target) == 1:
             return target[0]
         return target
 
+    # This method can be removed now that above method does its job
     def get_values(self: PerformanceDataFrame,
                    solver: str,
                    instance: str = None,
@@ -397,7 +425,8 @@ class PerformanceDataFrame(pd.DataFrame):
     def get_instance_num_runs(self: PerformanceDataFrame,
                               instance: str) -> int:
         """Return the number of runs for an instance."""
-        return self.xs(instance, level=1).shape[0]
+        # We assume each objective has the same index for Instance/Runs
+        return len(self.loc[(self.objective_names[0], instance)].index)
 
     # Calculables
 

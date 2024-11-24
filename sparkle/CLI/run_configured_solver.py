@@ -81,7 +81,7 @@ def main(argv: list[str]) -> None:
     configurator = gv.settings().get_general_sparkle_configurator()
     objectives = gv.settings().get_general_sparkle_objectives()
     configuration_scenario = gv.latest_scenario().get_configuration_scenario(
-        configurator.scenario_class)
+        configurator.scenario_class())
     _, config_str = configurator.get_optimal_configuration(configuration_scenario)
     config = solver.config_str_to_dict(config_str)
     # Call the configured solver

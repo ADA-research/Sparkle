@@ -109,7 +109,7 @@ def main(argv: list[str]) -> None:
         gv.settings().DEFAULT_instance_dir, Instance_Set)
 
     configurator = gv.settings().get_general_sparkle_configurator()
-    config_scenario = configurator.scenario_class.find_scenario(
+    config_scenario = configurator.scenario_class().find_scenario(
         configurator.output_path, solver, instance_set_train)
     if config_scenario is None:
         print("No configuration scenario found for combination:\n"

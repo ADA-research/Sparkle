@@ -168,7 +168,6 @@ def test_add_remove_solver() -> None:
     assert pd_nan.get_values("AlgorithmTmp") == [None] * 5
 
     pd_nan.remove_solver("AlgorithmTmp")
-    print(pd_nan.solvers)
     assert "AlgorithmTmp" not in pd_nan.solvers
 
 
@@ -191,7 +190,6 @@ def test_add_remove_runs() -> None:
     pd_nan.remove_runs(2)
     assert pd_nan.num_runs == 1
 
-    # TODO: add tests for varying number of runs per instance
     instance_subset = pd_nan.instances[:2]
     pd_nan.add_runs(2, instance_names=instance_subset)
     assert pd_nan.num_runs == 3
@@ -202,6 +200,115 @@ def test_add_remove_runs() -> None:
             assert pd_nan.get_instance_num_runs(instance) == 1
     pd_nan.remove_runs(2, instance_names=instance_subset)
     assert pd_nan.num_runs == 1
+
+
+def test_set_get_value() -> None:
+    """Test set value method."""
+    pd_mo = PerformanceDataFrame(csv_example_mo)
+    # One index (e.g. one specific field)
+    solver = "RandomForest"
+    instances = "flower_petals.csv"
+    objective = "PAR10"
+    run = 1
+    value = 1337
+    pd_mo.set_value(value, solver, instances,
+                    objective=objective, run=run,
+                    solver_fields=[PerformanceDataFrame.column_value])
+    assert pd_mo.get_value(solver, instances,
+                           objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_value]) == value
+    # One index/solver, but set value, seed and configuration
+    seed = 42
+    configuration = {"parameter_alpha": 0.05}
+    pd_mo.set_value([value, seed, str(configuration)], solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_value,
+                        PerformanceDataFrame.column_seed,
+                        PerformanceDataFrame.column_configuration])
+    assert pd_mo.get_value(solver, instances, objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_value,
+                                          PerformanceDataFrame.column_seed,
+                                          PerformanceDataFrame.column_configuration]) ==\
+        [value, seed, str(configuration)]
+    # Set multiple instances the same value
+    value = 12.34
+    instances = ["flower_petals.csv", "mnist.csv"]
+    pd_mo.set_value(value, solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_value])
+    assert pd_mo.get_value(solver, instances, objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_value]) ==\
+        [value, value]
+    # Set multiple instances the same value and seed
+    value = 56.78
+    seed = 101
+    pd_mo.set_value([value, seed], solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_value,
+                        PerformanceDataFrame.column_seed])
+    assert pd_mo.get_value(solver, instances, objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_value,
+                                          PerformanceDataFrame.column_seed]) ==\
+        [[value, seed]] * 2
+
+    # Set multiple instances and specific subset of runs the same value
+    value = 910.1112
+    run = [3, 4]
+    pd_mo.set_value(value, solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_value])
+    assert pd_mo.get_value(solver, instances, objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_value]) ==\
+        [value] * 4
+    # Set multiple instances and two objectives the same value
+    value = 1314.1516
+    run = 5
+    objective = ["PAR10", "TrainAccuracy:max"]
+    pd_mo.set_value(value, solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_value])
+    assert pd_mo.get_value(solver, instances, objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_value]) ==\
+        [value] * 4
+    # Set multiple instances/solvers but a specific objective and run diff value
+    value = [[[1718.1920, 1920.2021], [2223.2425, 2627.2829]]]
+    solver = ["RandomForest", "MultiLayerPerceptron"]
+    run = 1
+    objective = "ValidationAccuracy:max"
+    pd_mo.set_value(value, solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_value])
+    assert pd_mo.get_value(solver, instances, objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_value]) ==\
+        value[0]
+    # Set a specific objective/instance/run but all solvers the same value
+    solver = None
+    instances = "mnist.csv"
+    value = 3031.3233
+    run = 3
+    objective = "PAR10"
+    pd_mo.set_value(value, solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_value])
+    assert pd_mo.get_value(solver, instances, objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_value]) ==\
+        [value] * pd_mo.num_solvers
+    # TODO: Create tests for:
+    # Set a multiple instance, specific run/solver combination
+    # but all objectives the same configuration
+    solver = "RandomForest"
+    instances = ["flower_petals.csv", "mnist.csv"]
+    configuration = str({"parameter_alpha": 0.07, "parameter_beta": 0.08})
+    run = 3
+    objective = None
+    pd_mo.set_value(configuration, solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_configuration])
+    assert pd_mo.get_value(solver, instances, objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_configuration]) ==\
+        [configuration] * pd_mo.num_objectives * 2
+    # Reload the dataframe to reset it to its original values
+    pd_mo = PerformanceDataFrame(csv_example_mo)
 
 
 def test_get_list_remaining_jobs()\
