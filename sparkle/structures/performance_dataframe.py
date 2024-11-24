@@ -273,10 +273,10 @@ class PerformanceDataFrame(pd.DataFrame):
                 index_runs_start = len(self.loc[(objective, instance)]) + 1
                 for run in range(index_runs_start, index_runs_start + num_extra_runs):
                     self.loc[(objective, instance, run)] = self.missing_value
-            # Sort the index to optimize lookup speed
-            # NOTE: It would be better to do this at the end, but that results in
-            # 'PerformanceWarning: indexing past lexsort depth may impact performance.'
-            self.sort_index(axis=0, inplace=True)
+                # Sort the index to optimize lookup speed
+                # NOTE: It would be better to do this at the end, but that results in
+                # PerformanceWarning: indexing past lexsort depth may impact performance.
+                self.sort_index(axis=0, inplace=True)
 
     def remove_solver(self: PerformanceDataFrame, solver_name: str | list[str]) -> None:
         """Drop one or more solvers from the Dataframe."""
