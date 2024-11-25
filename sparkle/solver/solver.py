@@ -17,6 +17,7 @@ from sparkle.tools import pcsparser, RunSolver
 from sparkle.types import SparkleCallable, SolverStatus
 from sparkle.solver.verifier import SolutionVerifier
 from sparkle.instance import InstanceSet
+from sparkle.structures import PerformanceDataFrame
 from sparkle.types import resolve_objective, SparkleObjective, UseTime
 
 
@@ -174,7 +175,8 @@ class Solver(SparkleCallable):
             configuration: dict = None,
             run_on: Runner = Runner.LOCAL,
             sbatch_options: list[str] = None,
-            log_dir: Path = None) -> SlurmRun | list[dict[str, Any]] | dict[str, Any]:
+            log_dir: Path = None,
+            ) -> SlurmRun | list[dict[str, Any]] | dict[str, Any]:
         """Run the solver on an instance with a certain configuration.
 
         Args:
@@ -244,6 +246,33 @@ class Solver(SparkleCallable):
                 solver_outputs.append(solver_output)
             return solver_outputs if len(solver_outputs) > 1 else solver_output
         return run
+
+    def run_performance_dataframe(self: Solver,
+                                  instance: str | list[str] | InstanceSet,
+                                  run_id: int,
+                                  performance_dataframe: PerformanceDataFrame,
+                                  cutoff_time: int = None,
+                                  sbatch_options: list[str] = None,
+                                  log_dir: Path = None,
+                                  run_on: Runner = Runner.SLURM,
+                                  ) -> PerformanceDataFrame:
+        """Run the solver from and place the results in the performance dataframe.
+
+        This in practice actually runs Solver.run, but has a little script before/after,
+        to read and write to the performance dataframe.
+
+        Args:
+            instance: The instance(s) to run the solver on. In case of an instance set,
+                or list, will create a job for all instances in the set/list.
+            run_id: The run index to use in the performance dataframe.
+            performance_dataframe: The performance dataframe to use.
+            cutoff_time: The cutoff time for the solver, measured through RunSolver.
+            sbatch_options: List of slurm batch options to use
+            log_dir: Path where to place output files. Defaults to
+                self.raw_output_directory.
+            run_on: On which platform to run the jobs. Default: Slurm.
+        """
+        return
 
     @staticmethod
     def config_str_to_dict(config_str: str) -> dict[str, str]:
