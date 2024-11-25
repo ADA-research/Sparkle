@@ -36,7 +36,7 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=str, required=False,
                         help=" seed to use for the solver. If not provided, read from "
                              "the PerformanceDataFrame.")
-    parser.add_argument("--cutoff", type=int, required=False,
+    parser.add_argument("--cutoff-time", type=int, required=False,
                         help="the cutoff time for the solver.")
     parser.add_argument("--use-verifier", required=False, type=bool,
                         help="Indicator whether to use SAT solution verifier.")
@@ -56,7 +56,6 @@ if __name__ == "__main__":
 
     verifier = SATVerifier() if args.use_verifier else None
     solver = Solver(args.solver, verifier=verifier)
-    cutoff = args.cutoff
 
     if not args.configuration or not args.seed or not args.objectives:  # Read
         # FileLock not required as its just reading?
@@ -67,23 +66,30 @@ if __name__ == "__main__":
         else:
             objectives = performance_dataframe.objectives
 
-        seed, configuration = performance_dataframe.get_value(
+        seed, df_configuration = performance_dataframe.get_value(
             str(args.solver),
             str(args.instance),
             objectives[0].name,
-            run=args.run,
+            run=args.run_index,
             solver_fields=[PerformanceDataFrame.column_seed,
                            PerformanceDataFrame.column_configuration])
+        seed = args.seed or seed
         # If no seed is provided and no seed can be read, generate one
-        seed = args.seed or seed or random.randint(0, 2**32 - 1)
-        configuration = args.configuration or dict(configuration)
+        if not isinstance(seed, int):
+            seed = random.randint(0, 2**32 - 1)
+        configuration = args.configuration
+        if configuration is None:  # Try to read from the dataframe
+            try:
+                configuration = dict(df_configuration)
+            except Exception:
+                print("Failed to read configuration from dataframe: ", df_configuration)
 
     solver_output = solver.run(
         instance_path.absolute(),
         objectives=objectives,
         seed=seed,
         configuration=configuration,
-        cutoff_time=cutoff,
+        cutoff_time=args.cutoff_time,
         log_dir=log_dir,
         run_on=Runner.LOCAL)
 
@@ -101,7 +107,7 @@ if __name__ == "__main__":
             solver=str(args.solver),
             instance=str(args.instance),
             objective=[o.name for o in objectives],
-            run=args.run,
+            run=args.run_index,
             solver_fields=[
                 PerformanceDataFrame.column_value,
                 PerformanceDataFrame.column_seed,
