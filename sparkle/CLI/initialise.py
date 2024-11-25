@@ -109,9 +109,10 @@ def initialise_sparkle(download_examples: bool = False) -> None:
     """
     print("Start initialising Sparkle platform ...")
     if detect_sparkle_platform_exists(check=all):
-        print("Current Sparkle platform found! Saving as snapshot.")
+        print("Current Sparkle platform found! "
+              "Saving as snapshot, maintaining current settings directory.")
         snh.save_current_platform()
-        snh.remove_current_platform()
+        snh.remove_current_platform(filter=[gv.settings().DEFAULT_settings_dir])
 
     for working_dir in gv.settings().DEFAULT_working_dirs:
         working_dir.mkdir(exist_ok=True)

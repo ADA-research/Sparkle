@@ -34,10 +34,11 @@ def save_current_platform(name: str = None) -> None:
     print(f"Snapshot file {snapshot_tmp_path}.zip saved successfully!")
 
 
-def remove_current_platform() -> None:
+def remove_current_platform(filter: list[Path]) -> None:
     """Remove the current Sparkle platform."""
     for working_dir in gv.settings().DEFAULT_working_dirs:
-        shutil.rmtree(working_dir, ignore_errors=True)
+        if working_dir not in filter:
+            shutil.rmtree(working_dir, ignore_errors=True)
 
 
 def create_working_dirs() -> None:
