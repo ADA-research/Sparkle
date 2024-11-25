@@ -26,7 +26,7 @@ if __name__ == "__main__":
                              "If not provided, read from the PerformanceDataFrame.")
     parser.add_argument("--instance", required=True, type=str,
                         help="path to instance to run on")
-    parser.add_argument("--run", required=True, type=int,
+    parser.add_argument("--run-index", required=True, type=int,
                         help="run index in the dataframe")
     parser.add_argument("--log-dir", type=Path, required=True,
                         help="path to the log directory")
@@ -72,7 +72,8 @@ if __name__ == "__main__":
             str(args.instance),
             objectives[0].name,
             run=args.run,
-            solver_fields=["Seed", "Configuration"])
+            solver_fields=[PerformanceDataFrame.column_seed,
+                           PerformanceDataFrame.column_configuration])
         # If no seed is provided and no seed can be read, generate one
         seed = args.seed or seed or random.randint(0, 2**32 - 1)
         configuration = args.configuration or dict(configuration)

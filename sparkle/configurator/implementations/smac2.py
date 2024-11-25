@@ -114,6 +114,18 @@ class SMAC2(Configurator):
             sbatch_options=sbatch_options,
             srun_options=["-N1", "-n1"])]
 
+        if validate_after:
+            # TODO: Array job specific dependency, requires RunRunner update
+            validate = scenario.solver.run_performance_dataframe(
+                scenario.instance_set,
+                run_ids=seeds,
+                cutoff_time=scenario.cutoff_time,
+                run_on=run_on,
+                sbatch_options=sbatch_options,
+                log_dir=scenario.tmp,
+                dependencies=runs,
+            )
+            runs.append(validate)
         # TODO: This should be done without validator and instead schedule jobs
         # by refactoring run_solver_core into the solver class
         # and dependency set per job array level to the configuration run

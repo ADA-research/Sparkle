@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import sys
+import itertools
 from typing import Any
 import shlex
 import ast
@@ -10,7 +11,7 @@ from pathlib import Path
 
 import runrunner as rrr
 from runrunner.local import LocalRun
-from runrunner.slurm import SlurmRun
+from runrunner.slurm import Run, SlurmRun
 from runrunner.base import Status, Runner
 
 from sparkle.tools import pcsparser, RunSolver
@@ -25,6 +26,7 @@ class Solver(SparkleCallable):
     """Class to handle a solver and its directories."""
     meta_data = "solver_meta.txt"
     wrapper = "sparkle_solver_wrapper.py"
+    solver_cli = Path(__file__) / "solver_cli.py"
 
     def __init__(self: Solver,
                  directory: Path,
@@ -248,14 +250,15 @@ class Solver(SparkleCallable):
         return run
 
     def run_performance_dataframe(self: Solver,
-                                  instance: str | list[str] | InstanceSet,
-                                  run_id: int,
+                                  instances: str | list[str] | InstanceSet,
+                                  run_ids: int | list[int],
                                   performance_dataframe: PerformanceDataFrame,
                                   cutoff_time: int = None,
                                   sbatch_options: list[str] = None,
+                                  dependencies: list[SlurmRun] = None,
                                   log_dir: Path = None,
                                   run_on: Runner = Runner.SLURM,
-                                  ) -> PerformanceDataFrame:
+                                  ) -> Run:
         """Run the solver from and place the results in the performance dataframe.
 
         This in practice actually runs Solver.run, but has a little script before/after,
@@ -264,15 +267,39 @@ class Solver(SparkleCallable):
         Args:
             instance: The instance(s) to run the solver on. In case of an instance set,
                 or list, will create a job for all instances in the set/list.
-            run_id: The run index to use in the performance dataframe.
+            run_ids: The run indices to use in the performance dataframe.
             performance_dataframe: The performance dataframe to use.
             cutoff_time: The cutoff time for the solver, measured through RunSolver.
             sbatch_options: List of slurm batch options to use
+            dependencies: List of slurm runs to use as dependencies
             log_dir: Path where to place output files. Defaults to
                 self.raw_output_directory.
             run_on: On which platform to run the jobs. Default: Slurm.
+
+        Returns:
+            SlurmRun or Local run of the job.
         """
-        return
+        instances = list[instances] if isinstance(instances, str) else instances
+        if isinstance(instances, InstanceSet):
+            instances = [str(i) for i in instances.instance_paths]
+        cmds = [f"{Solver.solver_cli} "
+                f"--solver {self.name} "
+                f"--instance {instance} "
+                f"--run-index {run_index} "
+                f"--performance_dataframe {performance_dataframe.csv_filepath} "
+                f"--cutoff_time {cutoff_time} "
+                f"--log_dir {log_dir} "
+                f"--use-verifier" if self.verifier is not None else ""
+                for instance, run_index in itertools.product(instances, run_ids)]
+        set_name = instances.name if isinstance(instances, InstanceSet) else "instances"
+        return rrr.add_to_queue(
+            runner=run_on,
+            cmd=cmds,
+            name=f"Run Solver: {self.name} on {set_name}",
+            base_dir=log_dir,
+            sbatch_options=sbatch_options,
+            dependencies=dependencies
+        )
 
     @staticmethod
     def config_str_to_dict(config_str: str) -> dict[str, str]:
