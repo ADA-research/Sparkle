@@ -293,7 +293,7 @@ def test_set_get_value() -> None:
     assert pd_mo.get_value(solver, instances, objective=objective, run=run,
                            solver_fields=[PerformanceDataFrame.column_value]) ==\
         [value] * pd_mo.num_solvers
-    # TODO: Create tests for:
+
     # Set a multiple instance, specific run/solver combination
     # but all objectives the same configuration
     solver = "RandomForest"
@@ -307,6 +307,23 @@ def test_set_get_value() -> None:
     assert pd_mo.get_value(solver, instances, objective=objective, run=run,
                            solver_fields=[PerformanceDataFrame.column_configuration]) ==\
         [configuration] * pd_mo.num_objectives * 2
+
+    # Set multiple objectives, multiple solver fields at once
+    instances = "mnist.csv"
+    objective = ["PAR10", "TrainAccuracy:max"]
+    value = [[599.0, 0.77], [seed, seed], [configuration, configuration]]
+    pd_mo.set_value(value, solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_value,
+                        PerformanceDataFrame.column_seed,
+                        PerformanceDataFrame.column_configuration])
+    assert pd_mo.get_value(solver, instances,
+                           objective=objective, run=run, solver_fields=[
+                               PerformanceDataFrame.column_value,
+                               PerformanceDataFrame.column_seed,
+                               PerformanceDataFrame.column_configuration]) ==\
+        [[599.0, seed, configuration], [0.77, seed, configuration]]
+
     # Reload the dataframe to reset it to its original values
     pd_mo = PerformanceDataFrame(csv_example_mo)
 

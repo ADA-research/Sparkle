@@ -4,6 +4,7 @@
 from filelock import FileLock
 import argparse
 from pathlib import Path
+import random
 
 from runrunner import Runner
 
@@ -72,7 +73,8 @@ if __name__ == "__main__":
             objectives[0].name,
             run=args.run,
             solver_fields=["Seed", "Configuration"])
-        seed = args.seed or seed
+        # If no seed is provided and no seed can be read, generate one
+        seed = args.seed or seed or random.randint(0, 2**32 - 1)
         configuration = args.configuration or dict(configuration)
 
     solver_output = solver.run(
@@ -84,15 +86,24 @@ if __name__ == "__main__":
         log_dir=log_dir,
         run_on=Runner.LOCAL)
 
+    # Prepare the results for the DataFrame
+    result = [[solver_output[objective.name] for objective in objectives],
+              [seed] * len(objectives),
+              str(configuration) * len(objectives)]
+
     # Now that we have all the results, we can add them to the performance dataframe
     lock = FileLock(f"{args.performance_dataframe}.lock")  # Lock the file
     with lock.acquire(timeout=60):
-        performance_dataframe = PerformanceDataFrame(args.args.performance_dataframe)
-        for objective in objectives:
-            measurement = solver_output[objective.name]
-            performance_dataframe.set_value(measurement,
-                                            solver=str(args.solver),
-                                            instance=str(args.instance),
-                                            objective=objective.name)
+        performance_dataframe = PerformanceDataFrame(args.performance_dataframe)
+        performance_dataframe.set_value(
+            result,
+            solver=str(args.solver),
+            instance=str(args.instance),
+            objective=[o.name for o in objectives],
+            run=args.run,
+            solver_fields=[
+                PerformanceDataFrame.column_value,
+                PerformanceDataFrame.column_seed,
+                PerformanceDataFrame.column_configuration])
         performance_dataframe.save_csv()
     lock.release()
