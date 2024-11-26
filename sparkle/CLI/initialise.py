@@ -8,7 +8,7 @@ import sys
 import warnings
 from pathlib import Path
 
-from sparkle.CLI.help.argparse_custom import DownloadExamplesArgument
+from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help import snapshot_help as snh
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
@@ -20,8 +20,10 @@ def parser_function() -> argparse.ArgumentParser:
     """Parse CLI arguments for the initialise command."""
     parser = argparse.ArgumentParser(
         description="Initialise the Sparkle platform in the current directory.")
-    parser.add_argument(*DownloadExamplesArgument.names,
-                        **DownloadExamplesArgument.kwargs)
+    parser.add_argument(*ac.NoSavePlatformArgument.names,
+                        **ac.NoSavePlatformArgument.kwargs)
+    parser.add_argument(*ac.DownloadExamplesArgument.names,
+                        **ac.DownloadExamplesArgument.kwargs)
     return parser
 
 
@@ -100,19 +102,23 @@ def check_for_initialise() -> None:
         os.chdir(platform_path)
 
 
-def initialise_sparkle(download_examples: bool = False) -> None:
+def initialise_sparkle(save_existing_platform: bool = True,
+                       download_examples: bool = False) -> None:
     """Initialize a new Sparkle platform.
 
     Args:
+        save_existing_platform: If present, save the current platform as a snapshot.
         download_examples: Downloads examples from the Sparkle Github.
             WARNING: May take a some time to complete due to the large amount of data.
     """
     print("Start initialising Sparkle platform ...")
     if detect_sparkle_platform_exists(check=all):
-        print("Current Sparkle platform found! "
-              "Saving as snapshot, maintaining current settings directory.")
-        snh.save_current_platform()
+        print("Current Sparkle platform found!")
+        if save_existing_platform:
+            print("Saving as snapshot...")
+            snh.save_current_platform()
         snh.remove_current_platform(filter=[gv.settings().DEFAULT_settings_dir])
+        print("Your settings directory was not removed.")
 
     for working_dir in gv.settings().DEFAULT_working_dirs:
         working_dir.mkdir(exist_ok=True)
@@ -201,8 +207,8 @@ def main(argv: list[str]) -> None:
     parser = parser_function()
     # Process command line arguments
     args = parser.parse_args(argv)
-    download = False if args.download_examples is None else args.download_examples
-    initialise_sparkle(download_examples=download)
+    initialise_sparkle(save_existing_platform=args.no_save,
+                       download_examples=args.download_examples)
     sys.exit(0)
 
 

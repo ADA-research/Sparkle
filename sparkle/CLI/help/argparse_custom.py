@@ -129,8 +129,9 @@ DeterministicArgument =\
 
 DownloadExamplesArgument =\
     ArgumentContainer(names=["--download-examples"],
-                      kwargs={"action": argparse.BooleanOptionalAction,
+                      kwargs={"action": "store_true",
                               "default": False,
+                              "required": False,
                               "help": "Download the Examples into the directory."})
 
 ExtractorPathArgument = ArgumentContainer(names=["extractor_path"],
@@ -250,6 +251,13 @@ NoCopyArgument = ArgumentContainer(names=["--no-copy"],
                                            "help": "do not copy the source directory to "
                                                    "the platform directory, but create a"
                                                    " symbolic link instead"})
+
+NoSavePlatformArgument = ArgumentContainer(names=["--no-save"],
+                                           kwargs={"action": "store_false",
+                                                   "default": False,
+                                                   "required": False,
+                                                   "help": "do not save the platform "
+                                                           "upon re-initialisation."})
 
 NumberOfRunsConfigurationArgument = \
     ArgumentContainer(names=["--number-of-runs"],
