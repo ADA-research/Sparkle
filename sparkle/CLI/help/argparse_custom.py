@@ -254,7 +254,7 @@ NoCopyArgument = ArgumentContainer(names=["--no-copy"],
 
 NoSavePlatformArgument = ArgumentContainer(names=["--no-save"],
                                            kwargs={"action": "store_false",
-                                                   "default": False,
+                                                   "default": True,
                                                    "required": False,
                                                    "help": "do not save the platform "
                                                            "upon re-initialisation."})
