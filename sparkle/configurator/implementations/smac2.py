@@ -119,10 +119,12 @@ class SMAC2(Configurator):
             validate = scenario.solver.run_performance_dataframe(
                 scenario.instance_set,
                 run_ids=seeds,
+                performance_dataframe=data_target,
                 cutoff_time=scenario.cutoff_time,
                 run_on=run_on,
                 sbatch_options=sbatch_options,
-                log_dir=scenario.tmp,
+                log_dir=scenario.validation,
+                base_dir=base_dir,
                 dependencies=runs,
             )
             runs.append(validate)
@@ -167,7 +169,9 @@ class SMAC2(Configurator):
         configuration = Solver.config_str_to_dict(configuration)
         if output_target is None or not output_target.exists():
             return configuration
-        configuration["configuration_id"] = SMAC2.__name__  # Should be more unique
+        time_stamp = scenario.scenario_file_path.stat().st_mtime
+        configuration["configuration_id"] =\
+            f"{SMAC2.__name__}_{time_stamp}_{run_id}"
         instance_names = scenario.instance_set.instance_names
         lock = FileLock(f"{output_target}.lock")
         with lock.acquire(timeout=60):

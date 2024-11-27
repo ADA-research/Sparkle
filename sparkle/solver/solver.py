@@ -26,7 +26,7 @@ class Solver(SparkleCallable):
     """Class to handle a solver and its directories."""
     meta_data = "solver_meta.txt"
     wrapper = "sparkle_solver_wrapper.py"
-    solver_cli = Path(__file__) / "solver_cli.py"
+    solver_cli = Path(__file__).parent / "solver_cli.py"
 
     def __init__(self: Solver,
                  directory: Path,
@@ -61,6 +61,10 @@ class Solver(SparkleCallable):
                 self.deterministic = meta_dict["deterministic"]
             else:
                 self.deterministic = False
+
+    def __str__(self: Solver) -> str:
+        """Return the sting representation of the solver."""
+        return self.name
 
     def _get_pcs_file(self: Solver, port_type: str = None) -> Path | bool:
         """Get path of the parameter file.
@@ -154,6 +158,8 @@ class Solver(SparkleCallable):
         configuration["objectives"] = ",".join([str(obj) for obj in objectives])
         configuration["cutoff_time"] =\
             cutoff_time if cutoff_time is not None else sys.maxsize
+        if "configuration_id" in configuration:
+            del configuration["configuration_id"]
         # Ensure stringification of dictionary will go correctly for key value pairs
         configuration = {key: str(configuration[key]) for key in configuration}
         solver_cmd = [str((self.directory / Solver.wrapper)),
@@ -224,6 +230,8 @@ class Solver(SparkleCallable):
 
         if isinstance(run, LocalRun):
             run.wait()
+            import time
+            time.sleep(5)
             # Subprocess resulted in error
             if run.status == Status.ERROR:
                 print(f"WARNING: Solver {self.name} execution seems to have failed!\n")
@@ -257,6 +265,7 @@ class Solver(SparkleCallable):
                                   sbatch_options: list[str] = None,
                                   dependencies: list[SlurmRun] = None,
                                   log_dir: Path = None,
+                                  base_dir: Path = None,
                                   run_on: Runner = Runner.SLURM,
                                   ) -> Run:
         """Run the solver from and place the results in the performance dataframe.
@@ -274,32 +283,35 @@ class Solver(SparkleCallable):
             dependencies: List of slurm runs to use as dependencies
             log_dir: Path where to place output files. Defaults to
                 self.raw_output_directory.
+            base_dir: Path where to place output files.
             run_on: On which platform to run the jobs. Default: Slurm.
 
         Returns:
             SlurmRun or Local run of the job.
         """
         instances = list[instances] if isinstance(instances, str) else instances
+        set_name = "instances"
         if isinstance(instances, InstanceSet):
+            set_name = instances.name
             instances = [str(i) for i in instances.instance_paths]
         cmds = [f"{Solver.solver_cli} "
-                f"--solver {self.name} "
+                f"--solver {self.directory} "
                 f"--instance {instance} "
                 f"--run-index {run_index} "
-                f"--performance_dataframe {performance_dataframe.csv_filepath} "
-                f"--cutoff_time {cutoff_time} "
-                f"--log_dir {log_dir} "
-                f"--use-verifier" if self.verifier is not None else ""
+                f"--performance-dataframe {performance_dataframe.csv_filepath} "
+                f"--cutoff-time {cutoff_time} "
+                f"--log-dir {log_dir} "
+                f"{'--use-verifier' if self.verifier else ''}"
                 for instance, run_index in itertools.product(instances, run_ids)]
-        set_name = instances.name if isinstance(instances, InstanceSet) else "instances"
-        return rrr.add_to_queue(
+        r = rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
-            name=f"Run Solver: {self.name} on {set_name}",
-            base_dir=log_dir,
+            name=f"Run: {self.name} on {set_name}",
+            base_dir=base_dir,
             sbatch_options=sbatch_options,
             dependencies=dependencies
         )
+        return r
 
     @staticmethod
     def config_str_to_dict(config_str: str) -> dict[str, str]:

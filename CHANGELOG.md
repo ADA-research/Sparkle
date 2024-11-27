@@ -7,11 +7,13 @@ Notable changes to Sparkle will be documented in this file.
 ### Added
 
 - Added no-copy argument to all CLI add commands so the user can create symbolic links to their files instead of copying [SPRK-356]
+- Added no-save argument to initialise command [SPRK-358]
 
 ### Changed
 
 - Validate command now checks whether there are still jobs running it needs completed before allowing the user to start this command [SPRK-328]
 - PerformanceDataFrame now directly subclasses from Pandas DataFrame instead of functioning as a container class [SPRK-278]
+- Initialise command no longer removes the user's Settings directory if a platform already exists, but does still save it to the snapshot. [SPRK-355]
 
 ## [0.9.0] - 2024/10/30
 

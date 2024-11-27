@@ -37,6 +37,14 @@ def test_full_init() -> None:
     pass
 
 
+def test_load_duplicate_index() -> None:
+    """Test load duplicate index."""
+    duplicate_index_path = Path("tests/test_files/performance/"
+                                "example_duplicate_index.csv")
+    corrected_pdf = PerformanceDataFrame(duplicate_index_path)
+    assert len(corrected_pdf.index) == 10
+
+
 def test_get_job_list() -> None:
     """Test job list method, without and with recompute bool."""
     job_list = []

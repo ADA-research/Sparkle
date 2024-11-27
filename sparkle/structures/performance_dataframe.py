@@ -86,6 +86,14 @@ class PerformanceDataFrame(pd.DataFrame):
             self.csv_filepath = csv_filepath
             self.save_csv()
 
+        if self.index.duplicated().any():  # Combine duplicate indices
+            combined = self.groupby(level=[0, 1, 2]).first()
+            duplicates = self.index[self.index.duplicated(keep="first")]
+            # Remove all duplicate entries from self
+            self.drop(duplicates, inplace=True)
+            for d in duplicates:  # Place combined duplicates in self
+                self.loc[d, :] = combined.loc[d, :]
+
         # Sort the index to optimize lookup speed
         self.sort_index(axis=0, inplace=True)
 
@@ -342,7 +350,8 @@ class PerformanceDataFrame(pd.DataFrame):
                   instance: str | list[str],
                   objective: str | list[str] = None,
                   run: int | list[int] = None,
-                  solver_fields: list[str] = ["Value"]) -> None:
+                  solver_fields: list[str] = ["Value"],
+                  append_write_csv: bool = False) -> None:
         """Setter method to assign a value to the Dataframe.
 
         Allows for setting the same value to multiple indices.
@@ -363,6 +372,10 @@ class PerformanceDataFrame(pd.DataFrame):
                 If left None, set for all runs.
             solver_fields: The level to which each value should be assinged.
                 Defaults to ["Value"].
+            append_write_csv: For concurrent writing to the PerformanceDataFrame.
+                If True, the value is directly appended to the CSV file.
+                This will create duplicate entries in the file, but these are combined
+                when loading the file.
         """
         # Convert indices to slices for None values
         solver = slice(solver) if solver is None else solver
@@ -375,6 +388,13 @@ class PerformanceDataFrame(pd.DataFrame):
         # sequence of values to the indices
         for item, level in zip(value, solver_fields):
             self.loc[(objective, instance, run), (solver, level)] = item
+
+        if append_write_csv:
+            writeable = self.loc[(objective, instance, run), :]
+            if isinstance(writeable, pd.Series):  # Single row, convert to pd.DataFrame
+                writeable = self.loc[[(objective, instance, run)], :]
+            # Append the new rows to the dataframe csv file
+            writeable.to_csv(self.csv_filepath, mode="a", header=False)
 
     # Can we unify get_value and get_values?
     def get_value(self: PerformanceDataFrame,

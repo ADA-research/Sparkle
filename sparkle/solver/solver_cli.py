@@ -5,6 +5,7 @@ from filelock import FileLock
 import argparse
 from pathlib import Path
 import random
+import ast
 
 from runrunner import Runner
 
@@ -43,11 +44,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
     # Process command line arguments
     log_dir = args.log_dir
-
+    print(f"Running Solver and read/writing results with {args.performance_dataframe}")
     # Resolve possible multi-file instance
     instance_path = Path(args.instance)
     instance_name = instance_path.name
     instance_key = instance_path
+    run_index = args.run_index
     if not instance_path.exists():
         # If its an instance name (Multi-file instance), retrieve path list
         data_set = Instance_Set(instance_path.parent)
@@ -58,32 +60,43 @@ if __name__ == "__main__":
     solver = Solver(args.solver, verifier=verifier)
 
     if not args.configuration or not args.seed or not args.objectives:  # Read
-        # FileLock not required as its just reading?
-        performance_dataframe = PerformanceDataFrame(args.performance_dataframe)
+        lock = FileLock(f"{args.performance_dataframe}.lock")  # Lock the file
+
+        with lock.acquire(timeout=600):
+            performance_dataframe = PerformanceDataFrame(args.performance_dataframe)
 
         if args.objectives:
             objectives = [resolve_objective(o) for o in args.objectives.split(",")]
         else:
             objectives = performance_dataframe.objectives
 
-        seed, df_configuration = performance_dataframe.get_value(
+        target = performance_dataframe.get_value(
             str(args.solver),
             str(args.instance),
-            objectives[0].name,
-            run=args.run_index,
+            objective=None,
+            run=run_index,
             solver_fields=[PerformanceDataFrame.column_seed,
                            PerformanceDataFrame.column_configuration])
+        if isinstance(target[0], list):  # We take the first value we find
+            target = target[0]
+        seed, df_configuration = target
         seed = args.seed or seed
         # If no seed is provided and no seed can be read, generate one
         if not isinstance(seed, int):
             seed = random.randint(0, 2**32 - 1)
+
         configuration = args.configuration
         if configuration is None:  # Try to read from the dataframe
-            try:
-                configuration = dict(df_configuration)
-            except Exception:
-                print("Failed to read configuration from dataframe: ", df_configuration)
+            if not isinstance(df_configuration, dict):
+                try:
+                    configuration = ast.literal_eval(df_configuration)
+                except Exception:
+                    print("Failed to read configuration from dataframe: "
+                          f"{df_configuration}")
+            else:
+                configuration = df_configuration
 
+    print(f"Running Solver {solver} on instance {instance_path.name} with seed {seed}..")
     solver_output = solver.run(
         instance_path.absolute(),
         objectives=objectives,
@@ -93,24 +106,25 @@ if __name__ == "__main__":
         log_dir=log_dir,
         run_on=Runner.LOCAL)
 
-    # Prepare the results for the DataFrame
+    # Prepare the results for the DataFrame for each objective
     result = [[solver_output[objective.name] for objective in objectives],
-              [seed] * len(objectives),
-              str(configuration) * len(objectives)]
+              [seed] * len(objectives)]
+    objective_values = [f"{objective.name}: {solver_output[objective.name]}"
+                        for objective in objectives]
+    print(f"Setting value objective values: {', '.join(objective_values)}")
+    print(f"At index: Instance {args.instance}, Run {args.run_index}")
 
     # Now that we have all the results, we can add them to the performance dataframe
     lock = FileLock(f"{args.performance_dataframe}.lock")  # Lock the file
-    with lock.acquire(timeout=60):
+    with lock.acquire(timeout=600):
         performance_dataframe = PerformanceDataFrame(args.performance_dataframe)
         performance_dataframe.set_value(
             result,
             solver=str(args.solver),
             instance=str(args.instance),
             objective=[o.name for o in objectives],
-            run=args.run_index,
+            run=run_index,
             solver_fields=[
                 PerformanceDataFrame.column_value,
-                PerformanceDataFrame.column_seed,
-                PerformanceDataFrame.column_configuration])
-        performance_dataframe.save_csv()
-    lock.release()
+                PerformanceDataFrame.column_seed],
+            append_write_csv=True)
