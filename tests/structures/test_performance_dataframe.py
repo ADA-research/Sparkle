@@ -353,6 +353,26 @@ def test_get_list_remaining_jobs()\
     assert result == remaining
 
 
+def test_best_configuration() -> None:
+    """Test calculating best configuration."""
+    best_conf = {"alpha": 0.69, "beta": 0.42}
+    best_value = 3.8
+    result = pd_mo.best_configuration("RandomForest", "PAR10", ["flower_petals.csv"])
+    assert result == (best_conf, best_value)
+
+    best_conf = {"kappa": 0.99, "mu": "std3"}
+    best_value = 54.8
+    result = pd_mo.best_configuration("MultiLayerPerceptron", "PAR10", ["mnist.csv"])
+    assert result == (best_conf, best_value)
+
+    # Test with two instances
+    best_conf = {"alpha": 0.05, "beta": 0.99}
+    best_value = 4.75
+    result = pd_mo.best_configuration("RandomForest", "PAR10", ["mnist.csv",
+                                                                "flower_petals.csv"])
+    assert result == (best_conf, best_value)
+
+
 def test_best_instance_performance() -> None:
     """Test calculating best score on instance."""
     bp_instance_runtime = [30.0, 5.0, 3.0, 8.0, 41.0]
