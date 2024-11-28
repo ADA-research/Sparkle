@@ -372,6 +372,29 @@ def test_best_configuration() -> None:
                                                                 "flower_petals.csv"])
     assert result == (best_conf, best_value)
 
+    # Test with large set
+    actual_path = Path("tests/test_files/performance/actual-data.csv")
+    actual_pdf = PerformanceDataFrame(actual_path)
+    best_conf = {"configuration_id": "SMAC2_1732722833.0_7",
+                 "gamma_hscore2": "351",
+                 "init_solution": "1",
+                 "p_swt": "0.20423712003341465",
+                 "perform_aspiration": "1",
+                 "perform_clause_weight": "1",
+                 "perform_double_cc": "0",
+                 "perform_first_div": "0",
+                 "perform_pac": "1",
+                 "prob_pac": "0.005730374136488115",
+                 "q_swt": "0.6807207179674418",
+                 "sel_clause_div": "1",
+                 "sel_clause_weight_scheme": "1",
+                 "sel_var_break_tie_greedy": "4",
+                 "sel_var_div": "2",
+                 "threshold_swt": "32"}
+    best_value = 3.9496955000000002
+    result = actual_pdf.best_configuration("Solvers/PbO-CCSAT-Generic", "PAR10")
+    assert result == (best_conf, best_value)
+
 
 def test_best_instance_performance() -> None:
     """Test calculating best score on instance."""

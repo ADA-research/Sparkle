@@ -541,13 +541,13 @@ class PerformanceDataFrame(pd.DataFrame):
         # Drop the seed, filter instances
         subdf = subdf.drop(PerformanceDataFrame.column_seed, axis=1).loc[instances, :]
         # Aggregate the runs per instance/configuration
+        subdf[PerformanceDataFrame.column_value] =\
+            pd.to_numeric(subdf[PerformanceDataFrame.column_value])  # Ensure type
         subdf = subdf.groupby([PerformanceDataFrame.index_instance,
                                PerformanceDataFrame.column_configuration]).agg(
                                    func=objective.run_aggregator.__name__)
         # Aggregate the instances per configuration
         subdf = subdf.droplevel(level=0).reset_index()  # Drop instance column
-        subdf[PerformanceDataFrame.column_value] =\
-            pd.to_numeric(subdf[PerformanceDataFrame.column_value])  # Ensure type
         subdf = subdf.groupby(PerformanceDataFrame.column_configuration).agg(
             func=objective.instance_aggregator.__name__)
 
