@@ -439,6 +439,12 @@ TestCaseDirectoryArgument = \
                               "help": "Path to test case directory of an instance set "
                               + "for a selection report"})
 
+TestSetRunAllConfigurationArgument = \
+    ArgumentContainer(names=["--test-set-run-all-configurations"],
+                      kwargs={"required": False,
+                              "action": "store_true",
+                              "help": "run all found configurations on the test set"})
+
 UseFeaturesArgument = ArgumentContainer(names=["--use-features"],
                                         kwargs={"required": False,
                                                 "action": "store_true",

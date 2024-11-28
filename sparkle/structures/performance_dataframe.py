@@ -331,10 +331,6 @@ class PerformanceDataFrame(pd.DataFrame):
         # Sort the index to optimize lookup speed
         self.sort_index(axis=0, inplace=True)
 
-    def correct_dimensions(self: PerformanceDataFrame) -> None:
-        """Add/remove nan instance/solver if necessary."""
-        return
-
     def reset_value(self: PerformanceDataFrame,
                     solver: str,
                     instance: str,
@@ -344,7 +340,6 @@ class PerformanceDataFrame(pd.DataFrame):
         self.set_value(PerformanceDataFrame.missing_value,
                        solver, instance, objective, run)
 
-    # Can we make this handle a sequence of inputs instead of just 1?
     def set_value(self: PerformanceDataFrame,
                   value: float | str | list[float | str] | list[list[float | str]],
                   solver: str | list[str],

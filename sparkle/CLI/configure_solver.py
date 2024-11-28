@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to configure a solver."""
 from __future__ import annotations
-
 import argparse
 import sys
 import os
@@ -37,6 +36,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstanceSetTrainArgument.kwargs)
     parser.add_argument(*ac.InstanceSetTestArgument.names,
                         **ac.InstanceSetTestArgument.kwargs)
+    parser.add_argument(*ac.TestSetRunAllConfigurationArgument.names,
+                        **ac.TestSetRunAllConfigurationArgument.kwargs)
     parser.add_argument(*ac.SparkleObjectiveArgument.names,
                         **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeConfigurationArgument.names,
@@ -152,17 +153,20 @@ def main(argv: list[str]) -> None:
 
     sparkle_objectives =\
         gv.settings().get_general_sparkle_objectives()
+    configurator_runs = gv.settings().get_configurator_number_of_runs()
     # Expand the performance dataframe so it can store the configuration
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
-    performance_data.add_runs(gv.settings().get_configurator_number_of_runs(),
+    performance_data.add_runs(configurator_runs,
                               instance_names=[
                                   str(i) for i in instance_set_train.instance_paths])
+    if instance_set_test is not None:
+        # Expand the performance dataframe so it can store the test set results of the
+        # found configurations
+        test_set_runs = configurator_runs if args.test_set_run_all_configurations else 1
+        performance_data.add_runs(
+            test_set_runs,
+            instance_names=[str(i) for i in instance_set_test.instance_paths])
     performance_data.save_csv()
-    # Do we want to run each best found configuration per configurator run to be tested
-    # on the test set?
-    """if instance_set_test is not None:
-        performance_data.add_runs(gv.settings().get_configurator_number_of_runs(),
-                                  instance_names=[instance_set_test.instance_paths])"""
     config_scenario = configurator.scenario_class()(
         solver, instance_set_train, sparkle_objectives,
         configurator.output_path, **configurator_settings)
@@ -184,6 +188,25 @@ def main(argv: list[str]) -> None:
 
     if instance_set_test is not None:
         gv.latest_scenario().set_config_instance_set_test(instance_set_test.directory)
+        # Schedule test set jobs
+        if args.test_set_run_all_configurations:
+            pass
+        else:
+            # We place the results in the index we just added
+            run_index = list(set([performance_data.get_instance_num_runs(str(i))
+                                  for i in instance_set_test.instance_paths]))
+        test_set_job = solver.run_performance_dataframe(
+            instance_set_test,
+            run_index,
+            performance_data,
+            cutoff_time=config_scenario.cutoff_time,
+            train_set=instance_set_train,
+            sbatch_options=sbatch_options,
+            log_dir=config_scenario.validation,
+            base_dir=sl.caller_log_dir,
+            dependencies=dependency_job_list,
+            run_on=run_on)
+        dependency_job_list.append(test_set_job)
     else:
         # Set to default to overwrite possible old path
         gv.latest_scenario().set_config_instance_set_test()
