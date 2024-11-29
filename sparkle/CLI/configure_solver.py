@@ -95,7 +95,7 @@ def main(argv: list[str]) -> None:
 
     apply_settings_from_args(args)
 
-    solver = resolve_object_name(
+    solver: Solver = resolve_object_name(
         args.solver,
         gv.file_storage_data_mapping[gv.solver_nickname_list_path],
         gv.settings().DEFAULT_solver_dir, class_name=Solver)
@@ -154,8 +154,28 @@ def main(argv: list[str]) -> None:
     sparkle_objectives =\
         gv.settings().get_general_sparkle_objectives()
     configurator_runs = gv.settings().get_configurator_number_of_runs()
-    # Expand the performance dataframe so it can store the configuration
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
+
+    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
+    config_scenario = configurator.scenario_class()(
+        solver, instance_set_train, sparkle_objectives,
+        configurator.output_path, **configurator_settings)
+
+    # Run the default configuration
+    remaining_jobs = performance_data.get_job_list()
+    relevant_jobs = []
+    for job in remaining_jobs:
+        if job[-1] != str(solver.directory):
+            continue
+        configuration = performance_data.get_value(
+            job[2], job[0], sparkle_objectives[0].name, run=job[1],
+            solver_fields=[PerformanceDataFrame.column_configuration])
+        # Only run jobs with the default configuration
+        import math
+        if configuration is None or configuration == {} or math.isnan(configuration):
+            relevant_jobs.append(job)
+
+    # Expand the performance dataframe so it can store the configuration
     performance_data.add_runs(configurator_runs,
                               instance_names=[
                                   str(i) for i in instance_set_train.instance_paths])
@@ -167,11 +187,7 @@ def main(argv: list[str]) -> None:
             test_set_runs,
             instance_names=[str(i) for i in instance_set_test.instance_paths])
     performance_data.save_csv()
-    config_scenario = configurator.scenario_class()(
-        solver, instance_set_train, sparkle_objectives,
-        configurator.output_path, **configurator_settings)
 
-    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     dependency_job_list = configurator.configure(
         scenario=config_scenario,
         data_target=performance_data,
@@ -179,6 +195,18 @@ def main(argv: list[str]) -> None:
         num_parallel_jobs=gv.settings().get_number_of_jobs_in_parallel(),
         base_dir=sl.caller_log_dir,
         run_on=run_on)
+
+    # If we have default configurations that need to be run, schedule them too
+    if len(relevant_jobs) > 0:
+        instances = [job[0] for job in relevant_jobs]
+        runs = list(set([job[1] for job in relevant_jobs]))
+        solver.run_performance_dataframe(
+            instances, runs, performance_data,
+            sbatch_options=sbatch_options,
+            cutoff_time=config_scenario.cutoff_time,
+            log_dir=config_scenario.validation,
+            base_dir=sl.caller_log_dir,
+            run_on=run_on)
 
     # Update latest scenario
     gv.latest_scenario().set_config_solver(solver)

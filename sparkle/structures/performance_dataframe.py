@@ -494,7 +494,7 @@ class PerformanceDataFrame(pd.DataFrame):
         df = df.groupby(df.index).agg({cname: "sum" for cname in df.columns})
         df.index = pd.MultiIndex.from_tuples(df.index, names=index_names)
 
-        # Return the Instance, Run, Algorithm combinations
+        # Return the Instance, Run, Solver combinations
         return [index + (column, )
                 for index, column in itertools.product(df.index, df.columns)
                 if rerun or df[column][index] > 0]

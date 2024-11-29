@@ -318,6 +318,8 @@ class Solver(SparkleCallable):
             sbatch_options=sbatch_options,
             dependencies=dependencies
         )
+        if run_on == Runner.LOCAL:
+            r.wait()
         return r
 
     @staticmethod
