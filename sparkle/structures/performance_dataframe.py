@@ -392,7 +392,6 @@ class PerformanceDataFrame(pd.DataFrame):
             # Append the new rows to the dataframe csv file
             writeable.to_csv(self.csv_filepath, mode="a", header=False)
 
-    # Can we unify get_value and get_values?
     def get_value(self: PerformanceDataFrame,
                   solver: str | list[str],
                   instance: str | list[str],
@@ -511,6 +510,60 @@ class PerformanceDataFrame(pd.DataFrame):
                 remaining_jobs[instance].append(solver)
         return remaining_jobs
 
+    def configuration_performance(
+            self: PerformanceDataFrame,
+            solver: str,
+            configuration: dict,
+            objective: str | SparkleObjective = None,
+            instances: list[str] = None,
+            per_instance: bool = False) -> tuple[dict, float]:
+        """Return the best configuration for the given objective over the instances.
+
+        Args:
+            solver: The solver for which we determine evaluate the configuration
+            configuration: The configuration to evaluate
+            objective: The objective for which we calculate find the best value
+            instances: The instances which should be selected for the evaluation
+            per_instance: Whether to return the performance per instance,
+                or aggregated.
+
+        Returns:
+            The best configuration and its aggregated performance.
+        """
+        objective = self.verify_objective(objective)
+        instances = instances or slice(instances)  # Convert None to slice
+        if isinstance(objective, str):
+            objective = resolve_objective(objective)
+        # Filter objective
+        subdf = self.xs(objective.name, level=0, drop_level=True)
+        if configuration:  # Filter configuration
+            subdf = subdf[subdf[solver][
+                PerformanceDataFrame.column_configuration] == str(configuration)]
+        # Filter solver
+        subdf = subdf.xs(solver, axis=1, drop_level=True)
+        # Drop the seed, filter instances
+        subdf = subdf.drop(PerformanceDataFrame.column_seed, axis=1).loc[instances, :]
+        # Aggregate the runs per instance/configuration
+        subdf[PerformanceDataFrame.column_value] =\
+            pd.to_numeric(subdf[PerformanceDataFrame.column_value])  # Ensure type
+        subdf = subdf.groupby([PerformanceDataFrame.index_instance,
+                               PerformanceDataFrame.column_configuration]).agg(
+                                   func=objective.run_aggregator.__name__)
+
+        if per_instance:  # No instance aggregation
+            # NOTE: How do we select the best configuration now if conf == None?
+            return configuration, subdf.values.flatten().tolist()
+
+        # Aggregate the instances per configuration
+        subdf = subdf.droplevel(level=0).reset_index()  # Drop instance column
+        subdf = subdf.groupby(PerformanceDataFrame.column_configuration).agg(
+            func=objective.instance_aggregator.__name__)
+
+        # In case of no configuration, select the one with best objective value
+        best_index = subdf.idxmin() if objective.minimise else subdf.idxmax()
+        return (ast.literal_eval(best_index.values[0]),
+                subdf.loc[best_index, PerformanceDataFrame.column_value].values[0])
+
     def best_configuration(self: PerformanceDataFrame,
                            solver: str,
                            objective: str | SparkleObjective = None,
@@ -525,6 +578,7 @@ class PerformanceDataFrame(pd.DataFrame):
         Returns:
             The best configuration and its aggregated performance.
         """
+        return self.configuration_performance(solver, None, objective, instances)
         objective = self.verify_objective(objective)
         instances = instances or slice(instances)  # Convert None to slice
         if isinstance(objective, str):

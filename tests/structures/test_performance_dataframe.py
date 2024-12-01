@@ -353,6 +353,48 @@ def test_get_list_remaining_jobs()\
     assert result == remaining
 
 
+def test_configuration_performance() -> None:
+    """Test getting configuration performance."""
+    configuration = {"alpha": 0.05, "beta": 0.99}
+    result = pd_mo.configuration_performance("RandomForest", configuration,
+                                             "PAR10", ["flower_petals.csv",
+                                                       "mnist.csv"])
+    assert result == (configuration, 4.75)
+
+    # Test per instance results
+    result = pd_mo.configuration_performance("RandomForest", configuration,
+                                             "PAR10", ["flower_petals.csv",
+                                                       "mnist.csv"],
+                                             per_instance=True)
+    assert result == (configuration, [4.4, 5.1])
+
+    # Test with large set, per all instances
+    actual_path = Path("tests/test_files/performance/actual-data.csv")
+    actual_pdf = PerformanceDataFrame(actual_path)
+    configuration = {"init_solution": "1", "p_swt": "0.3", "perform_aspiration": "1",
+                     "perform_clause_weight": "1", "perform_double_cc": "1",
+                     "perform_first_div": "0", "perform_pac": "0", "q_swt": "0.0",
+                     "sel_clause_div": "1", "sel_clause_weight_scheme": "1",
+                     "sel_var_break_tie_greedy": "2", "sel_var_div": "3",
+                     "threshold_swt": "300", "configuration_id": "SMAC2_1732722833.0_2"}
+    result = actual_pdf.configuration_performance("Solvers/PbO-CCSAT-Generic",
+                                                  configuration,
+                                                  "PAR10", per_instance=True)
+    assert result == (configuration, [600.0, 600.0, 600.0, 600.0, 600.0, 600.0,
+                                      20.8011, 13.9057, 11.2606, 14.4477, 10.152, 600.0])
+
+    # Test with subset of instances
+    result = actual_pdf.configuration_performance("Solvers/PbO-CCSAT-Generic",
+                                                  configuration,
+                                                  "PAR10",
+                                                  ["Instances/PTN/Ptn-7824-b15.cnf",
+                                                   "Instances/PTN/Ptn-7824-b19.cnf",
+                                                   "Instances/PTN/Ptn-7824-b13.cnf",
+                                                   "Instances/PTN/Ptn-7824-b07.cnf"],
+                                                  per_instance=True)
+    assert result == (configuration, [600.0, 20.8011, 13.9057, 14.4477])
+
+
 def test_best_configuration() -> None:
     """Test calculating best configuration."""
     best_conf = {"alpha": 0.69, "beta": 0.42}
