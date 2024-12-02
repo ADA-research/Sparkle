@@ -148,9 +148,9 @@ def main(argv: list[str]) -> None:
         run_on=run_on)
 
     # If there are no jobs return
-    if all(run is None for run in runs):
+    if runs is None or all(run is None for run in runs):
         print("Running solvers done!")
-        return
+        sys.exit(0)
 
     if run_on == Runner.LOCAL:
         print("Waiting for the local calculations to finish.")

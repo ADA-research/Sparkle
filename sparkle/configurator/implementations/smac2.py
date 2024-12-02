@@ -332,16 +332,16 @@ class SMAC2Scenario(ConfigurationScenario):
         """
         with self.scenario_file_path.open("w") as file:
             file.write(f"algo = {SMAC2.configurator_target.absolute()} "
-                       f"{self.solver.directory.absolute()} {self.sparkle_objective} \n"
-                       f"execdir = {self.tmp.absolute()}/\n"
+                       f"{self.solver.directory} {self.sparkle_objective} \n"
+                       f"execdir = {self.tmp}/\n"
                        f"deterministic = {1 if self.solver.deterministic else 0}\n"
                        f"run_obj = {self._get_performance_measure()}\n"
                        f"cutoffTime = {self.cutoff_time}\n"
                        f"cutoff_length = {self.cutoff_length}\n"
                        f"paramfile = {self.solver.get_pcs_file()}\n"
-                       f"outdir = {self.outdir_train.absolute()}\n"
-                       f"instance_file = {self.instance_file_path.absolute()}\n"
-                       f"test_instance_file = {self.instance_file_path.absolute()}\n")
+                       f"outdir = {self.outdir_train}\n"
+                       f"instance_file = {self.instance_file_path}\n"
+                       f"test_instance_file = {self.instance_file_path}\n")
             if self.max_iterations is not None:
                 file.write(f"iteration-limit = {self.max_iterations}\n")
             if self.wallclock_time is not None:
@@ -364,7 +364,7 @@ class SMAC2Scenario(ConfigurationScenario):
         self.instance_file_path.parent.mkdir(exist_ok=True, parents=True)
         with self.instance_file_path.open("w+") as file:
             for instance_path in self.instance_set._instance_paths:
-                file.write(f"{instance_path.absolute()}\n")
+                file.write(f"{instance_path}\n")
 
     def _get_performance_measure(self: SMAC2Scenario) -> str:
         """Retrieve the performance measure of the SparkleObjective.
