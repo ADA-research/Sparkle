@@ -125,7 +125,7 @@ if __name__ == "__main__":
         instance_path.absolute(),
         objectives=objectives,
         seed=seed,
-        configuration=configuration,
+        configuration=configuration.copy() if configuration else None,
         cutoff_time=args.cutoff_time,
         log_dir=log_dir,
         run_on=Runner.LOCAL)

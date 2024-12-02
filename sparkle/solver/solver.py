@@ -293,7 +293,8 @@ class Solver(SparkleCallable):
         Returns:
             SlurmRun or Local run of the job.
         """
-        instances = list[instances] if isinstance(instances, str) else instances
+        instances = [instances] if isinstance(instances, str) else instances
+        run_ids = [run_ids] if isinstance(run_ids, int) else run_ids
         set_name = "instances"
         if isinstance(instances, InstanceSet):
             set_name = instances.name

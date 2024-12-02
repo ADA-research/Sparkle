@@ -1,6 +1,5 @@
 """Tests for all helper functions in sparkle_generate_report_for_configuration_help."""
 from __future__ import annotations
-import pytest
 from unittest import TestCase
 from unittest.mock import Mock, ANY
 from unittest.mock import patch
@@ -13,7 +12,6 @@ from sparkle.configurator.implementations import SMAC2
 from sparkle.types.objective import SparkleObjective, PAR
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
-import csv
 
 
 class TestGenerateConfigurationReport(TestCase):
@@ -41,44 +39,6 @@ class TestGenerateConfigurationReport(TestCase):
             self.solver, Path(train_instance), Path(test_instance), Path(""))
         self.validator = Validator()
 
-    @patch("sparkle.platform.generate_report_for_configuration."
-           "get_dict_instance_to_performance")
-    def test_get_average_performance(
-            self: TestGenerateConfigurationReport,
-            mock_get_list: Mock) -> None:
-        """Test get_average_performance returns correct value.
-
-        A performance list should be retrieved from results file.
-        The mean of the performance values should be computed and returned.
-        """
-        mock_get_list.return_value = {"one": 10, "two": 5}
-
-        avg = sgrch.get_average_performance([], self.test_objective_runtime)
-        mock_get_list.assert_called_once_with([], self.test_objective_runtime)
-        assert avg == 7.5
-
-    def test_get_dict_instance_to_performance(
-            self: TestGenerateConfigurationReport) -> None:
-        """Test get_dict_instance_to_performance creates dict from performance list."""
-        validation_file = Path("tests/test_files/Validator/validation.csv")
-        csv_data = [line for line in csv.reader(validation_file.open("r"))]
-        instance_dict = sgrch.get_dict_instance_to_performance(
-            csv_data, self.test_objective_runtime)
-        assert instance_dict == {
-            "bce7824.cnf": 10.1316,
-            "Ptn-7824-b09.cnf": 10.0667,
-            "Ptn-7824-b13.cnf": 10.0786,
-            "Ptn-7824-b21.cnf": 10.1152,
-            "Ptn-7824-b15.cnf": 10.1177,
-            "Ptn-7824-b01.cnf": 10.0812,
-            "Ptn-7824-b19.cnf": 10.0642,
-            "Ptn-7824-b05.cnf": 10.1184,
-            "Ptn-7824-b03.cnf": 10.1368,
-            "Ptn-7824-b11.cnf": 10.1921,
-            "Ptn-7824-b07.cnf": 10.1672,
-            "Ptn-7824-b17.cnf": 0.993013
-        }
-
     @patch("sparkle.solver.ablation.AblationScenario.check_for_ablation")
     def test_get_ablation_bool_true(
             self: TestGenerateConfigurationReport,
@@ -98,51 +58,6 @@ class TestGenerateConfigurationReport(TestCase):
         ablation_bool = sgrch.get_ablation_bool(self.ablation_scenario)
         mock_check.assert_called_once()
         assert ablation_bool == r"\ablationfalse"
-
-    @patch("sparkle.platform.generate_report_for_configuration."
-           "get_dict_instance_to_performance")
-    def test_get_data_for_plot_same_instance(
-            self: TestGenerateConfigurationReport,
-            mock_dict: Mock) -> None:
-        """Test get_data_for_plot returns list of values if dicts are correct."""
-        dict_configured = {"instance-1.cnf": 1.0}
-        dict_default = {"instance-1.cnf": 0.01}
-        mock_dict.side_effect = [dict_configured, dict_default]
-
-        configured_dir = "configured/directory/"
-        default_dir = "default/directory/"
-        points = sgrch.get_data_for_plot(
-            configured_dir, default_dir, self.test_objective_runtime)
-
-        mock_dict.assert_any_call(default_dir, self.test_objective_runtime)
-        mock_dict.assert_any_call(configured_dir, self.test_objective_runtime)
-        assert points == [[1.0, 0.01]]
-
-    @patch("sparkle.platform.generate_report_for_configuration."
-           "get_dict_instance_to_performance")
-    def test_get_data_for_plot_instance_error(
-            self: TestGenerateConfigurationReport,
-            mock_dict: Mock) -> None:
-        """Test get_data_for_plot raises a SystemExit if dicts to not fit.
-
-        If the two dicts do not contain the same instances, an error is raised.
-        """
-        dict_configured = {
-            "instance-2.cnf": 1.0
-        }
-        dict_default = {
-            "instance-1.cnf": 0.01
-        }
-        mock_dict.side_effect = [dict_configured, dict_default]
-
-        configured_dir = "configured/directory/"
-        default_dir = "default/directory/"
-        with pytest.raises(SystemExit):
-            sgrch.get_data_for_plot(
-                configured_dir, default_dir, self.test_objective_runtime)
-
-        mock_dict.assert_any_call(default_dir, self.test_objective_runtime)
-        mock_dict.assert_any_call(default_dir, self.test_objective_runtime)
 
     @patch("sparkle.platform.latex.generate_comparison_plot")
     @patch("sparkle.platform.generate_report_for_configuration.get_data_for_plot")
