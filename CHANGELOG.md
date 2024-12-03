@@ -20,6 +20,7 @@ Notable changes to Sparkle will be documented in this file.
 
 ### Removed
 - Validate configured vs default command has been removed as it is now redundant [SPRK-358]
+- Validator class has been removed as it is no longer relevant [SPRK-358]
 
 ## [0.9.0] - 2024/10/30
 

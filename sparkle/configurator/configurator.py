@@ -7,7 +7,6 @@ from pathlib import Path
 
 from runrunner import Runner, Run
 from sparkle.solver import Solver
-from sparkle.solver.validator import Validator
 from sparkle.instance import InstanceSet
 from sparkle.types import SparkleObjective
 
@@ -16,13 +15,12 @@ class Configurator:
     """Abstact class to use different configurators like SMAC."""
     configurator_cli_path = Path(__file__).parent.resolve() / "configurator_cli.py"
 
-    def __init__(self: Configurator, validator: Validator, output_path: Path,
+    def __init__(self: Configurator, output_path: Path,
                  base_dir: Path, tmp_path: Path,
                  multi_objective_support: bool = False) -> None:
         """Initialize Configurator.
 
         Args:
-            validator: Validator object to validate configurations runs
             output_path: Output directory of the Configurator.
             objectives: The list of Sparkle Objectives the configurator has to
                 optimize.
@@ -31,7 +29,6 @@ class Configurator:
             multi_objective_support: Whether the configurator supports
                 multi objective optimization for solvers.
         """
-        self.validator = validator
         self.output_path = output_path
         self.base_dir = base_dir
         self.tmp_path = tmp_path

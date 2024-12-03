@@ -14,7 +14,6 @@ from runrunner import Runner, Run
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
 from sparkle.structures import PerformanceDataFrame
-from sparkle.solver.validator import Validator
 from sparkle.instance import InstanceSet, Instance_Set
 from sparkle.types import SparkleObjective
 
@@ -42,7 +41,6 @@ class SMAC2(Configurator):
         output_path = output_path / SMAC2.__name__
         output_path.mkdir(parents=True, exist_ok=True)
         return super().__init__(
-            validator=Validator(out_dir=output_path),
             output_path=output_path,
             base_dir=base_dir,
             tmp_path=output_path / "tmp",
@@ -70,7 +68,8 @@ class SMAC2(Configurator):
 
         Args:
             scenario: ConfigurationScenario object
-            validate_after: Whether the Validator will be called after the configuration
+            validate_after: Whether the configurations should be validated on the
+                train set afterwards.
             sbatch_options: List of slurm batch options to use
             num_parallel_jobs: The maximum number of jobs to run parallel.
             base_dir: The path where the sbatch scripts will be created for Slurm.

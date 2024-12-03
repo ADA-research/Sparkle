@@ -7,7 +7,6 @@ from pathlib import Path
 
 from sparkle.solver.ablation import AblationScenario
 from sparkle.platform import generate_report_for_configuration as sgrch
-from sparkle.solver.validator import Validator
 from sparkle.configurator.implementations import SMAC2
 from sparkle.types.objective import SparkleObjective, PAR
 from sparkle.solver import Solver
@@ -36,7 +35,6 @@ class TestGenerateConfigurationReport(TestCase):
             self.configurator.output_path)
         self.ablation_scenario = AblationScenario(
             self.solver, Path(train_instance), Path(test_instance), Path(""))
-        self.validator = Validator()
 
     @patch("sparkle.solver.ablation.AblationScenario.check_for_ablation")
     def test_get_ablation_bool_true(

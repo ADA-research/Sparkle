@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
-from sparkle.solver import Solver, Validator
+from sparkle.solver import Solver
 from sparkle.structures import PerformanceDataFrame
 from sparkle.instance import InstanceSet, Instance_Set
 from sparkle.types import SparkleObjective, resolve_objective
@@ -34,9 +34,7 @@ class IRACE(Configurator):
         """Initialize IRACE configurator."""
         output_path = output_path / IRACE.__name__
         output_path.mkdir(parents=True, exist_ok=True)
-        validator = Validator(out_dir=output_path)
-        super().__init__(validator=validator,
-                         output_path=output_path,
+        super().__init__(output_path=output_path,
                          base_dir=base_dir,
                          tmp_path=output_path / "tmp",
                          multi_objective_support=False)
