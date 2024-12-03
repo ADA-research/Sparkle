@@ -95,10 +95,14 @@ def main(argv: list[str]) -> None:
     Settings.check_settings_changes(gv.settings(), prev_settings)
 
     run_on = gv.settings().get_run_on()
-    solver_path = resolve_object_name(args.solver,
-                                      gv.solver_nickname_mapping,
-                                      gv.settings().DEFAULT_solver_dir)
-    solver = Solver(solver_path)
+    solver = resolve_object_name(args.solver,
+                                 gv.solver_nickname_mapping,
+                                 gv.settings().DEFAULT_solver_dir, Solver)
+    if solver is None:
+        print(f"Could not resolve Solver path/name {args.solver}!")
+        print([p for p in gv.settings().DEFAULT_solver_dir.iterdir()])
+        sys.exit(-1)
+
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],

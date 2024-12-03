@@ -34,8 +34,6 @@ sparkle configure_solver --solver PbO-CCSAT-Generic --instance-set-train PTN --i
 
 # This step should take about ~10 minutes, although it is of course very cluster / slurm settings dependant.
 
-### Validate the configuration
-
 # To make sure configuration is completed before running validation you can use the `wait` command
 
 sparkle wait
