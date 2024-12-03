@@ -5,13 +5,13 @@ import shutil
 from unittest.mock import Mock, ANY
 from unittest import TestCase
 from unittest.mock import patch
-import csv
 from pathlib import Path
 
 import runrunner as rrr
 
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
+from sparkle.structures import PerformanceDataFrame
 from sparkle.configurator.implementations import SMAC2, SMAC2Scenario
 from sparkle.types.objective import PAR
 
@@ -56,8 +56,11 @@ class TestConfiguratorSMAC2(TestCase):
         # We currently cannot test these strings as they are using absolute paths
         expected_cmds = ANY
         expected_outputs = ANY
+        data_target = PerformanceDataFrame(
+            Path("tests/test_files/performance/example_data_MO.csv"))
 
         runs = self.smac2_conf.configure(self.conf_scenario,
+                                         data_target=data_target,
                                          validate_after=False,
                                          base_dir=self.base_dir)
         mock_add_to_queue.assert_called_once_with(
@@ -66,7 +69,6 @@ class TestConfiguratorSMAC2(TestCase):
             cmd=expected_cmds,
             name=f"{SMAC2.__name__}: {self.conf_scenario.solver.name} on "
                  f"{self.conf_scenario.instance_set.name}",
-            path=ANY,
             output_path=expected_outputs,
             parallel_jobs=2,
             sbatch_options=[],
@@ -76,43 +78,18 @@ class TestConfiguratorSMAC2(TestCase):
 
         # TODO: Test with validation_after=True
 
-    @patch("sparkle.solver.validator.Validator.get_validation_results")
-    def test_smac2_get_optimal_configuration(self: TestConfiguratorSMAC2,
-                                             validation_mock: Mock) -> None:
-        """Tests the retrieval of the optimal configuration from SMAC2 run."""
-        # Mock the validator call
-        csv_file = Path("tests/test_files/Validator/validation_configuration.csv")
-        csv_lines = [line for line in csv.reader(csv_file.open("r"))]
-        validation_mock.return_value = csv_lines
-        configuration_scenario = SMAC2Scenario(
-            self.solver, self.train_set, [PAR(10)], csv_file.parent
-        )
-        opt_conf = self.smac2_conf.get_optimal_configuration(
-            configuration_scenario)
-
-        expect_conf = (11.206219166666667, "-gamma_hscore2 '351' -init_solution '1' "
-                       "-p_swt '0.20423712003341465' -perform_aspiration '1' "
-                       "-perform_clause_weight '1' -perform_double_cc '0' "
-                       "-perform_first_div '0' -perform_pac '1' -prob_pac "
-                       "'0.005730374136488115' -q_swt '0.6807207179674418' "
-                       "-sel_clause_div '1' -sel_clause_weight_scheme '1' "
-                       "-sel_var_break_tie_greedy '4' -sel_var_div '2' -threshold_swt "
-                       "'32'")
-        assert opt_conf == expect_conf
-
     def test_smac2_organise_output(self: TestConfiguratorSMAC2) -> None:
         """Testing SMAC2 ability to retrieve output from raw file."""
         raw_out = self.test_files / "Configuration" / "results" /\
             "PbO-CCSAT-Generic_PTN_seed_3_smac.txt"
         # By not specifiying an output file, the result is returned to us
-        expected = (
-            "-gamma_hscore2 '351' -init_solution '1' -p_swt '0.20423712003341465'"
-            " -perform_aspiration '1' -perform_clause_weight '1' "
-            "-perform_double_cc '0' -perform_first_div '0' -perform_pac '1' "
-            "-prob_pac '0.005730374136488115' -q_swt '0.6807207179674418' "
-            "-sel_clause_div '1' -sel_clause_weight_scheme '1' "
-            "-sel_var_break_tie_greedy '4' -sel_var_div '2' -threshold_swt '32'")
-        assert SMAC2.organise_output(raw_out) == expected
+        assert SMAC2.organise_output(raw_out, None, None, 1) == {
+            "gamma_hscore2": "351", "init_solution": "1", "p_swt": "0.20423712003341465",
+            "perform_aspiration": "1", "perform_clause_weight": "1",
+            "perform_double_cc": "0", "perform_first_div": "0", "perform_pac": "1",
+            "prob_pac": "0.005730374136488115", "q_swt": "0.6807207179674418",
+            "sel_clause_div": "1", "sel_clause_weight_scheme": "1",
+            "sel_var_break_tie_greedy": "4", "sel_var_div": "2", "threshold_swt": "32"}
 
     def test_smac2_get_status_from_logs(self: TestConfiguratorSMAC2) -> None:
         """Testing status retrievel from logs."""
@@ -177,34 +154,6 @@ class TestConfigurationScenarioSMAC2(TestCase):
                          True)
         self.assertTrue((self.scenario.directory / "tmp").is_dir())
         self.assertTrue(self.scenario.results_directory.is_dir())
-
-    @patch("pathlib.Path.absolute")
-    def test_configuration_scenario_check_scenario_file(
-        self: TestConfigurationScenarioSMAC2,
-        mock_abs_path: Mock
-    ) -> None:
-        """Test if create_scenario() correctly creates the scenario file."""
-        inst_list_path = Path("tests/test_files/test_configurator/scenarios/instances/"
-                              "Test-Instance-Set/Test-Instance-Set_train.txt")
-        mock_abs_path.side_effect = [Path("tests/test_files/test_configurator"),
-                                     Path("/configurator_dir/target_algorithm.py"),
-                                     self.solver_path,
-                                     inst_list_path,
-                                     inst_list_path,
-                                     Path(),
-                                     Path()]
-        self.scenario.create_scenario()
-
-        reference_scenario_file = Path("tests", "test_files", "reference_files",
-                                       "scenario_file.txt")
-
-        # Use to show full diff of file
-        self.maxDiff = None
-        self.assertTrue(self.scenario.scenario_file_path.is_file())
-        output = self.scenario.scenario_file_path.open().read()
-        # Strip the output of the homedirs (Due to absolute paths)
-        output = output.replace(str(Path.home()), "")
-        self.assertEqual(output, reference_scenario_file.open().read())
 
     def test_from_file(self: TestConfigurationScenarioSMAC2) -> None:
         """Test if ConfigurationScenario can be created from file."""

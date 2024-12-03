@@ -24,6 +24,7 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.ExtractorPathArgument.kwargs)
     parser.add_argument(*ac.NicknameFeatureExtractorArgument.names,
                         **ac.NicknameFeatureExtractorArgument.kwargs)
+    parser.add_argument(*ac.NoCopyArgument.names, **ac.NoCopyArgument.kwargs)
     return parser
 
 
@@ -53,8 +54,15 @@ def main(argv: list[str]) -> None:
         print(f"Feature extractor {extractor_source.name} already exists! "
               "Can not add feature extractor.")
         sys.exit(-1)
-    extractor_target_path.mkdir()
-    shutil.copytree(extractor_source, extractor_target_path, dirs_exist_ok=True)
+
+    if args.no_copy:
+        print(f"Creating symbolic link from {extractor_source} "
+              f"to {extractor_target_path}...")
+        extractor_target_path.symlink_to(extractor_source.absolute())
+    else:
+        print(f"Copying feature extractor {extractor_source.name} ...")
+        extractor_target_path.mkdir()
+        shutil.copytree(extractor_source, extractor_target_path, dirs_exist_ok=True)
 
     # Check execution permissions for wrapper
     extractor_wrapper = extractor_target_path / Extractor.wrapper

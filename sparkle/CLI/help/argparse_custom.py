@@ -129,8 +129,9 @@ DeterministicArgument =\
 
 DownloadExamplesArgument =\
     ArgumentContainer(names=["--download-examples"],
-                      kwargs={"action": argparse.BooleanOptionalAction,
+                      kwargs={"action": "store_true",
                               "default": False,
+                              "required": False,
                               "help": "Download the Examples into the directory."})
 
 ExtractorPathArgument = ArgumentContainer(names=["extractor_path"],
@@ -243,6 +244,20 @@ NoAblationReportArgument = ArgumentContainer(names=["--no-ablation"],
                                                      "help": "turn off reporting on "
                                                              "ablation for an algorithm "
                                                              "configuration report"})
+
+NoCopyArgument = ArgumentContainer(names=["--no-copy"],
+                                   kwargs={"action": "store_true",
+                                           "required": False,
+                                           "help": "do not copy the source directory to "
+                                                   "the platform directory, but create a"
+                                                   " symbolic link instead"})
+
+NoSavePlatformArgument = ArgumentContainer(names=["--no-save"],
+                                           kwargs={"action": "store_false",
+                                                   "default": True,
+                                                   "required": False,
+                                                   "help": "do not save the platform "
+                                                           "upon re-initialisation."})
 
 NumberOfRunsConfigurationArgument = \
     ArgumentContainer(names=["--number-of-runs"],
@@ -423,6 +438,12 @@ TestCaseDirectoryArgument = \
                               "default": None,
                               "help": "Path to test case directory of an instance set "
                               + "for a selection report"})
+
+TestSetRunAllConfigurationArgument = \
+    ArgumentContainer(names=["--test-set-run-all-configurations"],
+                      kwargs={"required": False,
+                              "action": "store_true",
+                              "help": "run all found configurations on the test set"})
 
 UseFeaturesArgument = ArgumentContainer(names=["--use-features"],
                                         kwargs={"required": False,

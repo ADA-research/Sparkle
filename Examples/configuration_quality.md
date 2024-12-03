@@ -34,7 +34,7 @@ In this case the source directory also contains an executable, as the algorithm 
 Perform configuration on the solver to obtain a target configuration. For the VRP we measure the absolute quality performance by setting the `--objectives` option, to avoid needing this for every command it can also be set in `Settings/sparkle_settings.ini`.
 
 ```bash
-sparkle configure_solver --solver Solvers/VRP_SISRs/ --instance-set-train Instances/X-1-10/ --objectives quality
+sparkle configure_solver --solver Solvers/VRP_SISRs/ --instance-set-train Instances/X-1-10/ --instance-set-test Instances/X-11-20/ --objectives quality
 ```
 
 ### Validate the configuration
@@ -43,12 +43,6 @@ To make sure configuration is completed before running validation you can use th
 
 ```bash
 sparkle wait
-```
-
-Validate the performance of the best found parameter configuration. The test set is optional. We again set the performance measure to absolute quality.
-
-```bash
-sparkle validate_configured_vs_default --solver Solvers/VRP_SISRs/ --instance-set-train Instances/X-1-10/ --instance-set-test Instances/X-11-20/ --objective quality
 ```
 
 ### Generate a report

@@ -63,7 +63,13 @@ def main(argv: list[str]) -> None:
         feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
         feature_data.remove_extractor(extractor.name)
         feature_data.save_csv()
-    shutil.rmtree(extractor.directory)
+
+    # We unlink symbolics links, erase copies
+    if extractor.directory.is_symlink():
+        extractor.directory.unlink()
+    else:
+        # Remove the directory and all its files
+        shutil.rmtree(extractor.directory)
 
     print(f"Removing feature extractor {extractor.name} done!")
     sys.exit(0)

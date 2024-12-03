@@ -15,6 +15,7 @@ from sparkle.CLI.help import logging as sl
 
 from sparkle.configurator.implementations import SMAC2
 from sparkle.solver import Solver
+from sparkle.structures import PerformanceDataFrame
 from sparkle.instance import InstanceSet
 
 
@@ -77,10 +78,14 @@ class AblationScenario:
         objective = gv.settings().get_general_sparkle_objectives()[0]
         configurator = gv.settings().get_general_sparkle_configurator()
         config_scenario = gv.latest_scenario().get_configuration_scenario(
-            configurator.scenario_class)
-        _, opt_config_str = configurator.get_optimal_configuration(
-            config_scenario)
-
+            configurator.scenario_class())
+        performance_data = PerformanceDataFrame(
+            gv.settings().DEFAULT_performance_data_path)
+        opt_config, _ = performance_data.best_configuration(
+            str(config_scenario.solver.directory),
+            config_scenario.sparkle_objective,
+            instances=[str(p) for p in config_scenario.instance_set.instance_paths])
+        opt_config_str = " ".join([f"-{k} {v}" for k, v in opt_config.items()])
         # We need to check which params are missing and supplement with default values
         pcs = self.solver.get_pcs()
         for p in pcs:
@@ -109,7 +114,8 @@ class AblationScenario:
         # Create config file
         config_file = Path(f"{ablation_scenario_dir}/ablation_config.txt")
         config = (f'algo = "{SMAC2.configurator_target.absolute()} '
-                  f'{self.solver.directory.absolute()} {objective}"\n'
+                  f"{self.solver.directory.absolute()} {self.tmp_dir.absolute()} "
+                  f'{objective}"\n'
                   f"execdir = {self.tmp_dir.absolute()}\n"
                   "experimentDir = ./\n"
                   f"deterministic = {1 if self.solver.deterministic else 0}\n"

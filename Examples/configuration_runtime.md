@@ -39,29 +39,15 @@ sparkle configure_solver --solver Solvers/PbO-CCSAT-Generic/ --instance-set-trai
 
 This step should take about ~10 minutes, although it is of course very cluster / slurm settings dependant. If you are using the default settings, this will use SMAC2 as configurator. If you wish to run with a different configurator, we also supply default settings for the other configurators for this scenario. You can simply change the configurator name in `sparkle_settings.ini` under the `general` section.
 
-### Validate the configuration
-
-To make sure configuration is completed before running validation you can use the `wait` command
-
-```bash
-sparkle wait
-```
-
-Now we can validate the performance of the best found parameter configuration against the default configuration specified in the PCS file. The test set is optional.
-
-```bash
-sparkle validate_configured_vs_default --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/
-```
-
 ### Generate a report
 
-Wait for validation to be completed
+We have to wait for the algorithm configuration to be completed, to get live updates on your terminal we can simply run:
 
 ```bash
 sparkle wait
 ```
 
-Generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in a `Configuration_Reports/` subdirectory for the solver, training set, and optionally test set like `PbO-CCSAT-Generic_PTN/Sparkle-latex-generator-for-configuration/`
+And now we can generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in `Output/Configuration/Analysis/`. Note that you may get the warning that not all solvers have been run yet: Sometimes an algorithm call may crash and can easily be restarted by sparkle by running `sparkle run solvers`.
 
 ```bash
 sparkle generate_report
