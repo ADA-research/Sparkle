@@ -16,7 +16,6 @@ from runrunner import Runner, Run
 
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
-from sparkle.solver.validator import Validator
 from sparkle.structures import FeatureDataFrame
 from sparkle.instance import InstanceSet, Instance_Set
 from sparkle.types import SparkleObjective, resolve_objective, SolverStatus
@@ -44,7 +43,6 @@ class SMAC3(Configurator):
         output_path = output_path / SMAC3.__name__
         output_path.mkdir(parents=True, exist_ok=True)
         return super().__init__(
-            validator=Validator(out_dir=output_path),
             output_path=output_path,
             base_dir=base_dir,
             tmp_path=output_path / "tmp",
@@ -98,7 +96,7 @@ class SMAC3(Configurator):
             sbatch_options=sbatch_options,
             base_dir=base_dir,
         )]
-        if validate_after:
+        '''if validate_after:
             self.validator.out_dir = output_csv.parent
             self.validator.tmp_out_dir = base_dir
             validate_run = self.validator.validate(
@@ -111,7 +109,7 @@ class SMAC3(Configurator):
                 dependency=runs,
                 sbatch_options=sbatch_options,
                 run_on=run_on)
-            runs.append(validate_run)
+            runs.append(validate_run)'''
 
         if run_on == Runner.LOCAL:
             for run in runs:
