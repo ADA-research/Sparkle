@@ -5,7 +5,6 @@ import shutil
 from unittest.mock import Mock, ANY
 from unittest import TestCase
 from unittest.mock import patch
-import csv
 from pathlib import Path
 
 import runrunner as rrr
@@ -78,30 +77,6 @@ class TestConfiguratorSMAC2(TestCase):
         assert runs == [None]
 
         # TODO: Test with validation_after=True
-
-    @patch("sparkle.solver.validator.Validator.get_validation_results")
-    def test_smac2_get_optimal_configuration(self: TestConfiguratorSMAC2,
-                                             validation_mock: Mock) -> None:
-        """Tests the retrieval of the optimal configuration from SMAC2 run."""
-        # Mock the validator call
-        csv_file = Path("tests/test_files/Validator/validation_configuration.csv")
-        csv_lines = [line for line in csv.reader(csv_file.open("r"))]
-        validation_mock.return_value = csv_lines
-        configuration_scenario = SMAC2Scenario(
-            self.solver, self.train_set, [PAR(10)], csv_file.parent
-        )
-        opt_conf = self.smac2_conf.get_optimal_configuration(
-            configuration_scenario)
-
-        expect_conf = (11.206219166666667, "-gamma_hscore2 '351' -init_solution '1' "
-                       "-p_swt '0.20423712003341465' -perform_aspiration '1' "
-                       "-perform_clause_weight '1' -perform_double_cc '0' "
-                       "-perform_first_div '0' -perform_pac '1' -prob_pac "
-                       "'0.005730374136488115' -q_swt '0.6807207179674418' "
-                       "-sel_clause_div '1' -sel_clause_weight_scheme '1' "
-                       "-sel_var_break_tie_greedy '4' -sel_var_div '2' -threshold_swt "
-                       "'32'")
-        assert opt_conf == expect_conf
 
     def test_smac2_organise_output(self: TestConfiguratorSMAC2) -> None:
         """Testing SMAC2 ability to retrieve output from raw file."""

@@ -3,10 +3,6 @@
 """Configurator class to use different algorithm configurators like SMAC."""
 from __future__ import annotations
 from abc import abstractmethod
-from typing import Callable
-import ast
-from statistics import mean
-import operator
 from pathlib import Path
 
 from runrunner import Runner, Run
@@ -70,44 +66,6 @@ class Configurator:
             A RunRunner Run object.
         """
         raise NotImplementedError
-
-    def get_optimal_configuration(
-            self: Configurator,
-            scenario: ConfigurationScenario,
-            aggregate_config: Callable = mean) -> tuple[float, str]:
-        """Returns optimal value and configuration string of solver on instance set."""
-        self.validator.out_dir = scenario.validation
-        results = self.validator.get_validation_results(
-            scenario.solver,
-            scenario.instance_set,
-            source_dir=scenario.validation,
-            subdir=Path())
-        # Group the results per configuration
-        objective = scenario.sparkle_objective
-        value_column = results[0].index(objective.name)
-        config_column = results[0].index("Configuration")
-        configurations = list(set(row[config_column] for row in results[1:]))
-        config_scores = []
-        for config in configurations:
-            values = [float(row[value_column])
-                      for row in results[1:] if row[1] == config]
-            config_scores.append(aggregate_config(values))
-
-        comparison = operator.lt if objective.minimise else operator.gt
-
-        # Return optimal value
-        min_index = 0
-        current_optimal = config_scores[min_index]
-        for i, score in enumerate(config_scores):
-            if comparison(score, current_optimal):
-                min_index, current_optimal = i, score
-
-        # Return the optimal configuration dictionary as commandline args
-        config_str = configurations[min_index].strip(" ")
-        if config_str.startswith("{"):
-            config = ast.literal_eval(config_str)
-            config_str = " ".join([f"-{key} '{config[key]}'" for key in config])
-        return current_optimal, config_str
 
     @staticmethod
     def organise_output(output_source: Path,

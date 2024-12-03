@@ -90,7 +90,6 @@ def running_solvers_performance_data(
     for solver_path in solver_jobs:
         solver = Solver(Path(solver_path))
         for instance, run in solver_jobs[solver_path]:
-            print(instance, run)
             run = solver.run_performance_dataframe(
                 instance, run, performance_dataframe, cutoff_time=cutoff,
                 sbatch_options=sbatch_options, log_dir=sl.caller_log_dir,

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Sparkle command to execute a configured solver."""
-
 import sys
 import argparse
 from pathlib import PurePath
@@ -10,6 +9,7 @@ from runrunner.base import Runner
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
+from sparkle.structures import PerformanceDataFrame
 from sparkle.instance import Instance_Set
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
@@ -82,8 +82,11 @@ def main(argv: list[str]) -> None:
     objectives = gv.settings().get_general_sparkle_objectives()
     configuration_scenario = gv.latest_scenario().get_configuration_scenario(
         configurator.scenario_class())
-    _, config_str = configurator.get_optimal_configuration(configuration_scenario)
-    config = solver.config_str_to_dict(config_str)
+    performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
+    config, _ = performance_data.best_configuration(
+        str(solver.directory),
+        objective=configuration_scenario.sparkle_objective,
+        instances=[str(p) for p in train_set.instance_paths],)
     # Call the configured solver
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     if run_on == Runner.LOCAL:
