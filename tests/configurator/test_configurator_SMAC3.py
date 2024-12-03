@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
+from sparkle.structures import PerformanceDataFrame
 from sparkle.types import resolve_objective
 from sparkle.configurator.implementations import SMAC3, SMAC3Scenario
 
@@ -73,6 +74,8 @@ def test_smac3_configure(tmp_path: Path,
     instance_set = Instance_Set(
         Path("tests/test_files/Instances/Train-Instance-Set").absolute())
     objectives = [resolve_objective("PAR10"), resolve_objective("accuray:min")]
+    data_target = PerformanceDataFrame(
+        Path("tests/test_files/performance/example_data_MO.csv"))
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
 
     scenario = SMAC3Scenario(
@@ -93,7 +96,7 @@ def test_smac3_configure(tmp_path: Path,
     scenario.create_scenario()
     smac_configurator = SMAC3(Path(), Path())
     with patch("runrunner.add_to_queue", new=lambda *args, **kwargs: None):
-        runs = smac_configurator.configure(scenario)
+        runs = smac_configurator.configure(scenario, data_target)
     assert runs == [None, None]
 
 

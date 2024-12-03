@@ -16,7 +16,7 @@ from runrunner import Runner, Run
 
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
-from sparkle.structures import FeatureDataFrame
+from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from sparkle.instance import InstanceSet, Instance_Set
 from sparkle.types import SparkleObjective, resolve_objective, SolverStatus
 
@@ -60,6 +60,7 @@ class SMAC3(Configurator):
 
     def configure(self: SMAC3,
                   scenario: SMAC3Scenario,
+                  data_target: PerformanceDataFrame,
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
                   num_parallel_jobs: int = None,
@@ -69,6 +70,7 @@ class SMAC3(Configurator):
 
         Args:
             scenario: ConfigurationScenario object
+            data_target: PerformanceDataFrame where to store the found configurations
             validate_after: Whether the Validator will be called after the configuration
             sbatch_options: List of slurm batch options to use
             num_parallel_jobs: The maximum number of jobs to run parallel.
@@ -79,26 +81,22 @@ class SMAC3(Configurator):
             A RunRunner Run object.
         """
         scenario.create_scenario()
-        parallel_jobs = scenario.number_of_runs
-        output_csv = scenario.validation / "configurations.csv"
-        output_csv.parent.mkdir(exist_ok=True, parents=True)
-        if num_parallel_jobs is not None:
-            parallel_jobs = max(num_parallel_jobs, scenario.number_of_runs)
+        num_parallel_jobs = num_parallel_jobs or scenario.number_of_runs
         cmds = [f"python3 {self.configurator_executable.absolute()} "
                 f"{scenario.scenario_file_path.absolute()} {seed} "
-                f"{output_csv.absolute()}"
+                f"{data_target.csv_filepath}"
                 for seed in range(scenario.number_of_runs)]
         runs = [rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
             name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
-            parallel_jobs=parallel_jobs,
+            parallel_jobs=num_parallel_jobs,
             sbatch_options=sbatch_options,
             base_dir=base_dir,
         )]
         if validate_after:
             # TODO: Fix validation
-            pass
+            runs.append(None)
 
         if run_on == Runner.LOCAL:
             for run in runs:
