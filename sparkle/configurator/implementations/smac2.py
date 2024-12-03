@@ -93,12 +93,11 @@ class SMAC2(Configurator):
                   f"{scenario.name}_seed_{seed}_smac.txt"
                   for seed in seeds]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
-                f"{SMAC2.__name__} {output_file} {data_target.csv_filepath.absolute()} "
-                f"{scenario.scenario_file_path.absolute()} {seed} "
+                f"{SMAC2.__name__} {output_file} {data_target.csv_filepath} "
+                f"{scenario.scenario_file_path} {seed} "
                 f"{SMAC2.configurator_executable.absolute()} "
-                f"--scenario-file {scenario.scenario_file_path.absolute()} "
+                f"--scenario-file {scenario.scenario_file_path} "
                 f"--seed {seed} "
-                f"--execdir {scenario.tmp.absolute()}"
                 for output_file, seed in zip(output, seeds)]
         parallel_jobs = scenario.number_of_runs
         if num_parallel_jobs is not None:
@@ -108,7 +107,6 @@ class SMAC2(Configurator):
             cmd=cmds,
             name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
             base_dir=base_dir,
-            path=scenario.results_directory,
             output_path=output,
             parallel_jobs=parallel_jobs,
             sbatch_options=sbatch_options,
@@ -128,23 +126,6 @@ class SMAC2(Configurator):
                 dependencies=runs,
             )
             runs.append(validate)
-        # TODO: This should be done without validator and instead schedule jobs
-        # by refactoring run_solver_core into the solver class
-        # and dependency set per job array level to the configuration run
-        """if validate_after:
-            self.validator.out_dir = output_csv.parent
-            self.validator.tmp_out_dir = base_dir
-            validate_run = self.validator.validate(
-                [scenario.solver] * scenario.number_of_runs,
-                output_csv,
-                [scenario.instance_set],
-                [scenario.sparkle_objective],
-                scenario.cutoff_time,
-                subdir=Path(),
-                dependency=runs,
-                sbatch_options=sbatch_options,
-                run_on=run_on)
-            runs.append(validate_run)"""
 
         if run_on == Runner.LOCAL:
             for run in runs:
@@ -154,7 +135,7 @@ class SMAC2(Configurator):
     @staticmethod
     def organise_output(output_source: Path,
                         output_target: Path,
-                        scenario: Path,
+                        scenario: SMAC2Scenario,
                         run_id: int) -> None | dict:
         """Retrieves configuration from SMAC file and places them in output."""
         from filelock import FileLock
@@ -163,8 +144,8 @@ class SMAC2(Configurator):
         for line in reversed(output_source.open("r").readlines()):
             if call_key in line:
                 call_str = line.split(call_key, maxsplit=1)[1].strip()
-                # The Configuration appears after the first 6 arguments
-                configuration = call_str.split(" ", 7)[-1]
+                # The Configuration appears after the first 7 arguments
+                configuration = call_str.split(" ", 8)[-1]
                 break
         configuration = Solver.config_str_to_dict(configuration)
         if output_target is None or not output_target.exists():
@@ -332,8 +313,7 @@ class SMAC2Scenario(ConfigurationScenario):
         """
         with self.scenario_file_path.open("w") as file:
             file.write(f"algo = {SMAC2.configurator_target.absolute()} "
-                       f"{self.solver.directory} {self.sparkle_objective} \n"
-                       f"execdir = {self.tmp}/\n"
+                       f"{self.solver.directory} {self.tmp} {self.sparkle_objective} \n"
                        f"deterministic = {1 if self.solver.deterministic else 0}\n"
                        f"run_obj = {self._get_performance_measure()}\n"
                        f"cutoffTime = {self.cutoff_time}\n"
@@ -433,7 +413,7 @@ class SMAC2Scenario(ConfigurationScenario):
         use_cpu_time_in_tunertime = config["use-cputime-in-tunertime"]\
             if "use-cputime-in-tunertime" in config else None
 
-        _, solver_path, objective_str = config["algo"].split(" ")
+        _, solver_path, _, objective_str = config["algo"].split(" ")
         objective = SparkleObjective(objective_str)
         solver = Solver(Path(solver_path.strip()))
         # Extract the instance set from the instance file

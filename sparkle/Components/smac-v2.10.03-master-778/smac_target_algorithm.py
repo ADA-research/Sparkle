@@ -13,16 +13,18 @@ from sparkle.types import resolve_objective
 if __name__ == "__main__":
     # Incoming call from SMAC:
     # Translate input to Solver object input
-    argsiter = iter(sys.argv[8:])
+    argsiter = iter(sys.argv[9:])
     args = zip(argsiter, argsiter)
     configuration = {arg.strip("-"): val for arg, val in args}
-    # Args 1-7 conditions of the run, the rest are configurations for the solver
-    # [Solver_dir, SparkleObjective, instance, specifics, cutoff_time, runlength, seed]
+    # Args 1-8 conditions of the run, the rest are configurations for the solver
+    # [Solver_dir, Solver_Log_dir, SparkleObjective, instance, specifics,
+    #  cutoff_time, runlength, seed]
     solver_dir = Path(sys.argv[1])
-    objective = resolve_objective(sys.argv[2])
-    instance = sys.argv[3]
-    cutoff_time = float(sys.argv[5])
-    seed = int(sys.argv[7])
+    solver_log_dir = Path(sys.argv[2])
+    objective = resolve_objective(sys.argv[3])
+    instance = sys.argv[4]
+    cutoff_time = float(sys.argv[6])
+    seed = int(sys.argv[8])
 
     runsolver_binary = solver_dir / "runsolver"
     solver = Solver(solver_dir,
@@ -34,6 +36,7 @@ if __name__ == "__main__":
                         seed=seed,
                         cutoff_time=cutoff_time,
                         configuration=configuration,
+                        log_dir=solver_log_dir,
                         run_on=Runner.LOCAL)
 
     # Return values to SMAC

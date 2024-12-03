@@ -85,10 +85,10 @@ class IRACE(Configurator):
             scenario.results_directory.absolute() / f"output_{job_idx}.Rdata"
             for job_idx in seeds]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
-                f"{IRACE.__name__} {output_path} {data_target.csv_filepath.absolute()} "
-                f"{scenario.scenario_file_path.absolute()} {seed} "
+                f"{IRACE.__name__} {output_path} {data_target.csv_filepath} "
+                f"{scenario.scenario_file_path} {seed} "
                 f"{IRACE.configurator_executable.absolute()} "
-                f"--scenario {scenario.scenario_file_path.absolute()} "
+                f"--scenario {scenario.scenario_file_path} "
                 f"--log-file {output_path} "
                 f"--seed {seed}" for seed, output_path in zip(seeds, output_files)]
         runs = [rrr.add_to_queue(
@@ -99,21 +99,20 @@ class IRACE(Configurator):
             sbatch_options=sbatch_options,
         )]
 
-        # TODO: Have these work with the new performance dataframe
-        """if validate_after:
-            self.validator.out_dir = output_csv.parent
-            self.validator.tmp_out_dir = base_dir
-            validate_run = self.validator.validate(
-                [scenario.solver] * scenario.number_of_runs,
-                output_csv,
-                [scenario.instance_set],
-                [scenario.sparkle_objective],
-                scenario.cutoff_time,
-                subdir=Path(),
-                dependency=runs,
+        if validate_after:
+            # TODO: Array job specific dependency, requires RunRunner update
+            validate = scenario.solver.run_performance_dataframe(
+                scenario.instance_set,
+                run_ids=seeds,
+                performance_dataframe=data_target,
+                cutoff_time=scenario.cutoff_time,
+                run_on=run_on,
                 sbatch_options=sbatch_options,
-                run_on=run_on)
-            runs.append(validate_run)"""
+                log_dir=scenario.validation,
+                base_dir=base_dir,
+                dependencies=runs,
+            )
+            runs.append(validate)
 
         if run_on == Runner.LOCAL:
             for run in runs:
@@ -124,7 +123,7 @@ class IRACE(Configurator):
     @staticmethod
     def organise_output(output_source: Path,
                         output_target: Path,
-                        scenario: Path,
+                        scenario: IRACEScenario,
                         run_id: int) -> None | dict:
         """Method to restructure and clean up after a single configurator call."""
         from filelock import FileLock
@@ -164,7 +163,9 @@ class IRACE(Configurator):
         if output_target is None or not output_target.exists():
             return configuration
 
-        configuration["configuration_id"] = IRACE.__name__  # Should be more unique
+        time_stamp = scenario.scenario_file_path.stat().st_mtime
+        configuration["configuration_id"] =\
+            f"{IRACE.__name__}_{time_stamp}_{run_id}"
         instance_names = scenario.instance_set.instance_names
         lock = FileLock(f"{output_target}.lock")
         with lock.acquire(timeout=60):

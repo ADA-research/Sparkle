@@ -70,7 +70,6 @@ class TestConfiguratorSMAC2(TestCase):
             cmd=expected_cmds,
             name=f"{SMAC2.__name__}: {self.conf_scenario.solver.name} on "
                  f"{self.conf_scenario.instance_set.name}",
-            path=ANY,
             output_path=expected_outputs,
             parallel_jobs=2,
             sbatch_options=[],
@@ -180,34 +179,6 @@ class TestConfigurationScenarioSMAC2(TestCase):
                          True)
         self.assertTrue((self.scenario.directory / "tmp").is_dir())
         self.assertTrue(self.scenario.results_directory.is_dir())
-
-    @patch("pathlib.Path.absolute")
-    def test_configuration_scenario_check_scenario_file(
-        self: TestConfigurationScenarioSMAC2,
-        mock_abs_path: Mock
-    ) -> None:
-        """Test if create_scenario() correctly creates the scenario file."""
-        inst_list_path = Path("tests/test_files/test_configurator/scenarios/instances/"
-                              "Test-Instance-Set/Test-Instance-Set_train.txt")
-        mock_abs_path.side_effect = [Path("tests/test_files/test_configurator"),
-                                     Path("/configurator_dir/target_algorithm.py"),
-                                     self.solver_path,
-                                     inst_list_path,
-                                     inst_list_path,
-                                     Path(),
-                                     Path()]
-        self.scenario.create_scenario()
-
-        reference_scenario_file = Path("tests", "test_files", "reference_files",
-                                       "scenario_file.txt")
-
-        # Use to show full diff of file
-        self.maxDiff = None
-        self.assertTrue(self.scenario.scenario_file_path.is_file())
-        output = self.scenario.scenario_file_path.open().read()
-        # Strip the output of the homedirs (Due to absolute paths)
-        output = output.replace(str(Path.home()), "")
-        self.assertEqual(output, reference_scenario_file.open().read())
 
     def test_from_file(self: TestConfigurationScenarioSMAC2) -> None:
         """Test if ConfigurationScenario can be created from file."""

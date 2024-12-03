@@ -4,6 +4,8 @@ from __future__ import annotations
 import argparse
 import sys
 import os
+import math
+
 from pandas import DataFrame
 
 from runrunner import Runner
@@ -116,7 +118,6 @@ def main(argv: list[str]) -> None:
     use_features = args.use_features
     run_on = gv.settings().get_run_on()
 
-    # Check if Solver and instance sets were resolved
     check_for_initialise()
 
     configurator = gv.settings().get_general_sparkle_configurator()
@@ -171,8 +172,7 @@ def main(argv: list[str]) -> None:
             job[2], job[0], sparkle_objectives[0].name, run=job[1],
             solver_fields=[PerformanceDataFrame.column_configuration])
         # Only run jobs with the default configuration
-        import math
-        if configuration is None or configuration == {} or math.isnan(configuration):
+        if not isinstance(configuration, str) and math.isnan(configuration):
             relevant_jobs.append(job)
 
     # Expand the performance dataframe so it can store the configuration
@@ -200,13 +200,14 @@ def main(argv: list[str]) -> None:
     if len(relevant_jobs) > 0:
         instances = [job[0] for job in relevant_jobs]
         runs = list(set([job[1] for job in relevant_jobs]))
-        solver.run_performance_dataframe(
+        default_job = solver.run_performance_dataframe(
             instances, runs, performance_data,
             sbatch_options=sbatch_options,
             cutoff_time=config_scenario.cutoff_time,
             log_dir=config_scenario.validation,
             base_dir=sl.caller_log_dir,
             run_on=run_on)
+        dependency_job_list.append(default_job)
 
     # Update latest scenario
     gv.latest_scenario().set_config_solver(solver)
