@@ -155,9 +155,6 @@ def main(argv: list[str]) -> None:
     # Only get objectives that should be optimised
     sparkle_objectives =\
         gv.settings().get_general_sparkle_objectives(filter_metric=True)
-    config_scenario = configurator.scenario_class(
-        solver, instance_set_train, sparkle_objectives, configurator.output_path,
-        **configurator_settings)
     configurator_runs = gv.settings().get_configurator_number_of_runs()
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
 
