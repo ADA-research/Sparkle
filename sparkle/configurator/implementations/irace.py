@@ -5,7 +5,8 @@ import subprocess
 from pathlib import Path
 
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
-from sparkle.solver import Solver, Validator
+from sparkle.solver import Solver
+from sparkle.structures import PerformanceDataFrame
 from sparkle.instance import InstanceSet, Instance_Set
 from sparkle.types import SparkleObjective, resolve_objective
 
@@ -33,9 +34,7 @@ class IRACE(Configurator):
         """Initialize IRACE configurator."""
         output_path = output_path / IRACE.__name__
         output_path.mkdir(parents=True, exist_ok=True)
-        validator = Validator(out_dir=output_path)
-        super().__init__(validator=validator,
-                         output_path=output_path,
+        super().__init__(output_path=output_path,
                          base_dir=base_dir,
                          tmp_path=output_path / "tmp",
                          multi_objective_support=False)
@@ -45,13 +44,14 @@ class IRACE(Configurator):
         """Returns the name of the configurator."""
         return IRACE.__name__
 
-    @property
-    def scenario_class(self: IRACE) -> ConfigurationScenario:
+    @staticmethod
+    def scenario_class() -> ConfigurationScenario:
         """Returns the IRACE scenario class."""
         return IRACEScenario
 
     def configure(self: IRACE,
                   scenario: ConfigurationScenario,
+                  data_target: PerformanceDataFrame,
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
                   num_parallel_jobs: int = None,
@@ -61,6 +61,7 @@ class IRACE(Configurator):
 
         Args:
             scenario: ConfigurationScenario to execute.
+            data_target: PerformanceDataFrame where to store the found configurations
             validate_after: Whether to validate the configuration on the training set
                 afterwards or not.
             sbatch_options: List of slurm batch options to use
@@ -76,15 +77,18 @@ class IRACE(Configurator):
         output_csv.parent.mkdir(exist_ok=True, parents=True)
 
         # Create command to call IRACE. Create plural based on number of runs var
+        # We set the seed over the last n run ids in the dataframe
+        seeds = data_target.run_ids[data_target.num_runs - scenario.number_of_runs:]
         output_files = [
             scenario.results_directory.absolute() / f"output_{job_idx}.Rdata"
-            for job_idx in range(0, scenario.number_of_runs)]
+            for job_idx in seeds]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
-                f"{IRACE.__name__} {output_files[job_idx]} {output_csv.absolute()} "
+                f"{IRACE.__name__} {output_path} {data_target.csv_filepath} "
+                f"{scenario.scenario_file_path} {seed} "
                 f"{IRACE.configurator_executable.absolute()} "
-                f"--scenario {scenario.scenario_file_path.absolute()} "
-                f"--log-file {output_files[job_idx]} "
-                f"--seed {job_idx}" for job_idx in range(0, scenario.number_of_runs)]
+                f"--scenario {scenario.scenario_file_path} "
+                f"--log-file {output_path} "
+                f"--seed {seed}" for seed, output_path in zip(seeds, output_files)]
         runs = [rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
@@ -92,26 +96,35 @@ class IRACE(Configurator):
             name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
             sbatch_options=sbatch_options,
         )]
+
         if validate_after:
-            self.validator.out_dir = output_csv.parent
-            self.validator.tmp_out_dir = base_dir
-            validate_run = self.validator.validate(
-                [scenario.solver] * scenario.number_of_runs,
-                output_csv,
-                [scenario.instance_set],
-                [scenario.sparkle_objective],
-                scenario.cutoff_time,
-                subdir=Path(),
-                dependency=runs,
+            # TODO: Array job specific dependency, requires RunRunner update
+            validate = scenario.solver.run_performance_dataframe(
+                scenario.instance_set,
+                run_ids=seeds,
+                performance_dataframe=data_target,
+                cutoff_time=scenario.cutoff_time,
+                run_on=run_on,
                 sbatch_options=sbatch_options,
-                run_on=run_on)
-            runs.append(validate_run)
+                log_dir=scenario.validation,
+                base_dir=base_dir,
+                dependencies=runs,
+            )
+            runs.append(validate)
+
+        if run_on == Runner.LOCAL:
+            for run in runs:
+                run.wait()
+
         return runs
 
     @staticmethod
-    def organise_output(output_source: Path, output_target: Path) -> None | str:
+    def organise_output(output_source: Path,
+                        output_target: Path,
+                        scenario: IRACEScenario,
+                        run_id: int) -> None | dict:
         """Method to restructure and clean up after a single configurator call."""
-        import fcntl
+        from filelock import FileLock
         get_config = subprocess.run(
             ["Rscript", "-e",
              'library("irace"); '
@@ -144,10 +157,33 @@ class IRACE(Configurator):
         for parameter, value in zip(header, content):
             if not parameter == ".PARENT." and value != "NA" and value != "<NA>":
                 configuration += f"--{parameter} {value} "
+        configuration = Solver.config_str_to_dict(configuration)
+        if output_target is None or not output_target.exists():
+            return configuration
 
-        with output_target.open("a") as fout:
-            fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-            fout.write(configuration + "\n")
+        time_stamp = scenario.scenario_file_path.stat().st_mtime
+        configuration["configuration_id"] =\
+            f"{IRACE.__name__}_{time_stamp}_{run_id}"
+        instance_names = scenario.instance_set.instance_names
+        lock = FileLock(f"{output_target}.lock")
+        with lock.acquire(timeout=60):
+            performance_data = PerformanceDataFrame(output_target)
+            # Resolve absolute path to Solver column
+            solver = [s for s in performance_data.solvers
+                      if Path(s).name == scenario.solver.name][0]
+            # For some reason the instance paths in the instance set are absolute
+            instances = [instance for instance in performance_data.instances
+                         if Path(instance).name in instance_names]
+            # We don't set the seed in the dataframe, as that should be part of the conf
+            performance_data.set_value(
+                value=[str(configuration)],
+                solver=solver,
+                instance=instances,
+                objective=None,
+                run=run_id,
+                solver_fields=[PerformanceDataFrame.column_configuration]
+            )
+            performance_data.save_csv()
 
     def get_status_from_logs(self: Configurator) -> None:
         """Method to scan the log files of the configurator for warnings."""

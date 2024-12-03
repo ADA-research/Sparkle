@@ -30,11 +30,9 @@ sparkle add_solver Examples/Resources/Solvers/PbO-CCSAT-Generic/
 
 # To perform configuration on the solver to obtain a target configuration we run:
 
-sparkle configure_solver --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/
+sparkle configure_solver --solver PbO-CCSAT-Generic --instance-set-train PTN --instance-set-test PTN2
 
 # This step should take about ~10 minutes, although it is of course very cluster / slurm settings dependant.
-
-### Validate the configuration
 
 # To make sure configuration is completed before running validation you can use the `wait` command
 

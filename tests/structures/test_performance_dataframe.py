@@ -25,16 +25,24 @@ def test_from_scratch(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     empty_df.add_instance("Instance1")
     empty_df.add_instance("Instance2")
     empty_df.add_instance("Instance3")
-    assert empty_df.instances == ["Instance1", "Instance2", "Instance3"]
+    assert set(empty_df.instances) == set(["Instance3", "Instance1", "Instance2"])
     empty_df.add_solver("AlgorithmA")
     empty_df.add_solver("AlgorithmB")
     empty_df.add_solver("AlgorithmC")
-    assert empty_df.solvers == ["AlgorithmA", "AlgorithmB", "AlgorithmC"]
+    assert set(empty_df.solvers) == set(["AlgorithmA", "AlgorithmB", "AlgorithmC"])
 
 
 def test_full_init() -> None:
     """Test creating a Performance DataFrame with all data in the constructor."""
     pass
+
+
+def test_load_duplicate_index() -> None:
+    """Test load duplicate index."""
+    duplicate_index_path = Path("tests/test_files/performance/"
+                                "example_duplicate_index.csv")
+    corrected_pdf = PerformanceDataFrame(duplicate_index_path)
+    assert len(corrected_pdf.index) == 10
 
 
 def test_get_job_list() -> None:
@@ -63,6 +71,7 @@ def test_get_job_list() -> None:
 def test_num_objectives() -> None:
     """Test the number of objectives getter method."""
     num_objectives = 1
+    print(pd)
     assert pd.num_objectives == num_objectives
     assert pd_nan.num_objectives == num_objectives
     num_objectives = 3
@@ -135,6 +144,14 @@ def test_has_missing_values() -> None:
     assert not pd.has_missing_values
     assert pd_nan.has_missing_values
     assert not pd_mo.has_missing_values
+    # Seed or config should not be included as 'missing value'
+    copy_pd = pd.clone()
+    copy_pd.set_value(PerformanceDataFrame.missing_value,
+                      "AlgorithmA", "Instance1", solver_fields=["Seed"])
+    assert not copy_pd.has_missing_values
+    copy_pd.set_value(PerformanceDataFrame.missing_value,
+                      "AlgorithmA", "Instance1", solver_fields=["Configuration"])
+    assert not copy_pd.has_missing_values
 
 
 def test_verify_objective() -> None:
@@ -172,17 +189,163 @@ def test_add_remove_instance() -> None:
     assert "InstanceTmp" not in pd_nan.instances
 
 
-def test_get_list_remaining_performance_computation_job()\
+def test_add_remove_runs() -> None:
+    """Test adding and removing runs."""
+    pd_nan.add_runs(5)
+    assert pd_nan.num_runs == 6
+    pd_nan.remove_runs(3)
+    assert pd_nan.num_runs == 3
+    pd_nan.remove_runs(2)
+    assert pd_nan.num_runs == 1
+
+    instance_subset = pd_nan.instances[:2]
+    pd_nan.add_runs(2, instance_names=instance_subset)
+    assert pd_nan.num_runs == 3
+    for instance in pd_nan.instances:
+        if instance in instance_subset:
+            assert pd_nan.get_instance_num_runs(instance) == 3
+        else:
+            assert pd_nan.get_instance_num_runs(instance) == 1
+    pd_nan.remove_runs(2, instance_names=instance_subset)
+    assert pd_nan.num_runs == 1
+
+
+def test_set_get_value() -> None:
+    """Test set value method."""
+    pd_mo = PerformanceDataFrame(csv_example_mo)
+    # One index (e.g. one specific field)
+    solver = "RandomForest"
+    instances = "flower_petals.csv"
+    objective = "PAR10"
+    run = 1
+    value = 1337
+    pd_mo.set_value(value, solver, instances,
+                    objective=objective, run=run,
+                    solver_fields=[PerformanceDataFrame.column_value])
+    assert pd_mo.get_value(solver, instances,
+                           objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_value]) == value
+    # One index/solver, but set value, seed and configuration
+    seed = 42
+    configuration = {"parameter_alpha": 0.05}
+    pd_mo.set_value([value, seed, str(configuration)], solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_value,
+                        PerformanceDataFrame.column_seed,
+                        PerformanceDataFrame.column_configuration])
+    assert pd_mo.get_value(solver, instances, objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_value,
+                                          PerformanceDataFrame.column_seed,
+                                          PerformanceDataFrame.column_configuration]) ==\
+        [value, seed, str(configuration)]
+    # Set multiple instances the same value
+    value = 12.34
+    instances = ["flower_petals.csv", "mnist.csv"]
+    pd_mo.set_value(value, solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_value])
+    assert pd_mo.get_value(solver, instances, objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_value]) ==\
+        [value, value]
+    # Set multiple instances the same value and seed
+    value = 56.78
+    seed = 101
+    pd_mo.set_value([value, seed], solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_value,
+                        PerformanceDataFrame.column_seed])
+    assert pd_mo.get_value(solver, instances, objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_value,
+                                          PerformanceDataFrame.column_seed]) ==\
+        [[value, seed]] * 2
+
+    # Set multiple instances and specific subset of runs the same value
+    value = 910.1112
+    run = [3, 4]
+    pd_mo.set_value(value, solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_value])
+    assert pd_mo.get_value(solver, instances, objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_value]) ==\
+        [value] * 4
+    # Set multiple instances and two objectives the same value
+    value = 1314.1516
+    run = 5
+    objective = ["PAR10", "TrainAccuracy:max"]
+    pd_mo.set_value(value, solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_value])
+    assert pd_mo.get_value(solver, instances, objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_value]) ==\
+        [value] * 4
+    # Set multiple instances/solvers but a specific objective and run diff value
+    value = [[[1718.1920, 1920.2021], [2223.2425, 2627.2829]]]
+    solver = ["RandomForest", "MultiLayerPerceptron"]
+    run = 1
+    objective = "ValidationAccuracy:max"
+    pd_mo.set_value(value, solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_value])
+    assert pd_mo.get_value(solver, instances, objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_value]) ==\
+        value[0]
+    # Set a specific objective/instance/run but all solvers the same value
+    solver = None
+    instances = "mnist.csv"
+    value = 3031.3233
+    run = 3
+    objective = "PAR10"
+    pd_mo.set_value(value, solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_value])
+    assert pd_mo.get_value(solver, instances, objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_value]) ==\
+        [value] * pd_mo.num_solvers
+
+    # Set a multiple instance, specific run/solver combination
+    # but all objectives the same configuration
+    solver = "RandomForest"
+    instances = ["flower_petals.csv", "mnist.csv"]
+    configuration = str({"parameter_alpha": 0.07, "parameter_beta": 0.08})
+    run = 3
+    objective = None
+    pd_mo.set_value(configuration, solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_configuration])
+    assert pd_mo.get_value(solver, instances, objective=objective, run=run,
+                           solver_fields=[PerformanceDataFrame.column_configuration]) ==\
+        [configuration] * pd_mo.num_objectives * 2
+
+    # Set multiple objectives, multiple solver fields at once
+    instances = "mnist.csv"
+    objective = ["PAR10", "TrainAccuracy:max"]
+    value = [[599.0, 0.77], [seed, seed], [configuration, configuration]]
+    pd_mo.set_value(value, solver, instances,
+                    objective=objective, run=run, solver_fields=[
+                        PerformanceDataFrame.column_value,
+                        PerformanceDataFrame.column_seed,
+                        PerformanceDataFrame.column_configuration])
+    assert pd_mo.get_value(solver, instances,
+                           objective=objective, run=run, solver_fields=[
+                               PerformanceDataFrame.column_value,
+                               PerformanceDataFrame.column_seed,
+                               PerformanceDataFrame.column_configuration]) ==\
+        [[599.0, seed, configuration], [0.77, seed, configuration]]
+
+    # Reload the dataframe to reset it to its original values
+    pd_mo = PerformanceDataFrame(csv_example_mo)
+
+
+def test_get_list_remaining_jobs()\
         -> None:
     """Test get remaining performance computation job getter."""
     remaining = {}
     result = pd.remaining_jobs()
     assert result == remaining
-
-    remaining = {"Instance1": {"AlgorithmA"}, "Instance2": {"AlgorithmA"},
-                 "Instance3": {"AlgorithmC", "AlgorithmA"},
-                 "Instance4": {"AlgorithmA", "AlgorithmE"},
-                 "Instance5": {"AlgorithmA"}}
+    remaining = {"Instance1": ["AlgorithmA"], "Instance2": ["AlgorithmA"],
+                 "Instance3": ["AlgorithmA", "AlgorithmC"],
+                 "Instance4": ["AlgorithmA", "AlgorithmE"],
+                 "Instance5": ["AlgorithmA"]}
     result = pd_nan.remaining_jobs()
     assert result == remaining
     remaining = {}
@@ -190,8 +353,92 @@ def test_get_list_remaining_performance_computation_job()\
     assert result == remaining
 
 
-def test_best_instance_performance()\
-        -> None:
+def test_configuration_performance() -> None:
+    """Test getting configuration performance."""
+    configuration = {"alpha": 0.05, "beta": 0.99}
+    result = pd_mo.configuration_performance("RandomForest", configuration,
+                                             "PAR10", ["flower_petals.csv",
+                                                       "mnist.csv"])
+    assert result == (configuration, 4.75)
+
+    # Test per instance results
+    result = pd_mo.configuration_performance("RandomForest", configuration,
+                                             "PAR10", ["flower_petals.csv",
+                                                       "mnist.csv"],
+                                             per_instance=True)
+    assert result == (configuration, [4.4, 5.1])
+
+    # Test with large set, per all instances
+    actual_path = Path("tests/test_files/performance/actual-data.csv")
+    actual_pdf = PerformanceDataFrame(actual_path)
+    configuration = {"init_solution": "1", "p_swt": "0.3", "perform_aspiration": "1",
+                     "perform_clause_weight": "1", "perform_double_cc": "1",
+                     "perform_first_div": "0", "perform_pac": "0", "q_swt": "0.0",
+                     "sel_clause_div": "1", "sel_clause_weight_scheme": "1",
+                     "sel_var_break_tie_greedy": "2", "sel_var_div": "3",
+                     "threshold_swt": "300", "configuration_id": "SMAC2_1732722833.0_2"}
+    result = actual_pdf.configuration_performance("Solvers/PbO-CCSAT-Generic",
+                                                  configuration,
+                                                  "PAR10", per_instance=True)
+    assert result == (configuration, [600.0, 600.0, 600.0, 600.0, 600.0, 600.0,
+                                      20.8011, 13.9057, 11.2606, 14.4477, 10.152, 600.0])
+
+    # Test with subset of instances
+    result = actual_pdf.configuration_performance("Solvers/PbO-CCSAT-Generic",
+                                                  configuration,
+                                                  "PAR10",
+                                                  ["Instances/PTN/Ptn-7824-b15.cnf",
+                                                   "Instances/PTN/Ptn-7824-b19.cnf",
+                                                   "Instances/PTN/Ptn-7824-b13.cnf",
+                                                   "Instances/PTN/Ptn-7824-b07.cnf"],
+                                                  per_instance=True)
+    assert result == (configuration, [600.0, 20.8011, 13.9057, 14.4477])
+
+
+def test_best_configuration() -> None:
+    """Test calculating best configuration."""
+    best_conf = {"alpha": 0.69, "beta": 0.42}
+    best_value = 3.8
+    result = pd_mo.best_configuration("RandomForest", "PAR10", ["flower_petals.csv"])
+    assert result == (best_conf, best_value)
+
+    best_conf = {"kappa": 0.99, "mu": "std3"}
+    best_value = 54.8
+    result = pd_mo.best_configuration("MultiLayerPerceptron", "PAR10", ["mnist.csv"])
+    assert result == (best_conf, best_value)
+
+    # Test with two instances
+    best_conf = {"alpha": 0.05, "beta": 0.99}
+    best_value = 4.75
+    result = pd_mo.best_configuration("RandomForest", "PAR10", ["mnist.csv",
+                                                                "flower_petals.csv"])
+    assert result == (best_conf, best_value)
+
+    # Test with large set
+    actual_path = Path("tests/test_files/performance/actual-data.csv")
+    actual_pdf = PerformanceDataFrame(actual_path)
+    best_conf = {"configuration_id": "SMAC2_1732722833.0_7",
+                 "gamma_hscore2": "351",
+                 "init_solution": "1",
+                 "p_swt": "0.20423712003341465",
+                 "perform_aspiration": "1",
+                 "perform_clause_weight": "1",
+                 "perform_double_cc": "0",
+                 "perform_first_div": "0",
+                 "perform_pac": "1",
+                 "prob_pac": "0.005730374136488115",
+                 "q_swt": "0.6807207179674418",
+                 "sel_clause_div": "1",
+                 "sel_clause_weight_scheme": "1",
+                 "sel_var_break_tie_greedy": "4",
+                 "sel_var_div": "2",
+                 "threshold_swt": "32"}
+    best_value = 3.9496955000000002
+    result = actual_pdf.best_configuration("Solvers/PbO-CCSAT-Generic", "PAR10")
+    assert result == (best_conf, best_value)
+
+
+def test_best_instance_performance() -> None:
     """Test calculating best score on instance."""
     bp_instance_runtime = [30.0, 5.0, 3.0, 8.0, 41.0]
     result_min = pd.best_instance_performance()

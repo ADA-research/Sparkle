@@ -1,9 +1,11 @@
-#!/usr/bin/env python3
-# -*- coding: UTF-8 -*-
 """Module to manage performance data files and common operations on them."""
 from __future__ import annotations
+import ast
+from typing import Any
+import itertools
 from pathlib import Path
 import math
+import numpy as np
 import pandas as pd
 
 from sparkle.types import SparkleObjective, resolve_objective
@@ -14,13 +16,23 @@ class PerformanceDataFrame(pd.DataFrame):
     missing_value = math.nan
 
     missing_objective = "UNKNOWN"
-    multi_dim_names = ["Objective", "Instance", "Run"]
+
+    index_objective = "Objective"
+    index_instance = "Instance"
+    index_run = "Run"
+    multi_index_names = [index_objective, index_instance, index_run]
+
+    column_value = "Value"
+    column_seed = "Seed"
+    column_configuration = "Configuration"
+    multi_column_names = [column_value, column_seed, column_configuration]
+    multi_column_dtypes = [float, int, str]
 
     def __init__(self: PerformanceDataFrame,
                  csv_filepath: Path,
-                 solvers: list[str] = [],
+                 solvers: list[str] = None,
                  objectives: list[str | SparkleObjective] = None,
-                 instances: list[str] = [],
+                 instances: list[str] = None,
                  n_runs: int = 1,
                  ) -> None:
         """Initialise a PerformanceDataFrame.
@@ -42,91 +54,87 @@ class PerformanceDataFrame(pd.DataFrame):
             n_runs: The number of runs to consider per Solver/Objective/Instance comb.
         """
         if csv_filepath.exists():
-            df = pd.read_csv(csv_filepath)  # Load the df and then force dimensions
+            dtypes = {key: value for key, value in zip(
+                PerformanceDataFrame.multi_column_names,
+                PerformanceDataFrame.multi_column_dtypes)}
+            df = pd.read_csv(csv_filepath,
+                             header=[0, 1], index_col=[0, 1, 2],
+                             dtype=dtypes,
+                             on_bad_lines="skip")
             super().__init__(df)
-            has_rows = len(df.index) > 0
-            if (PerformanceDataFrame.multi_dim_names[0] not in df.columns
-                    or not has_rows):
-                # No objective present, force into column
-                if objectives is None:
-                    self[PerformanceDataFrame.multi_dim_names[0]] =\
-                        PerformanceDataFrame.missing_objective
-                else:
-                    self[PerformanceDataFrame.multi_dim_names[0]] =\
-                        [str(o) for o in objectives]
-
-            if (PerformanceDataFrame.multi_dim_names[2] not in df.columns
-                    or not has_rows):
-                # No runs column present, force into column
-                self[PerformanceDataFrame.multi_dim_names[2]] = n_runs
-
-            if PerformanceDataFrame.multi_dim_names[1] not in self.columns:
-                # Instances are listed as rows, force into column
-                self.reset_index(inplace=True)
-                self.rename(
-                    columns={"index": PerformanceDataFrame.multi_dim_names[1]},
-                    inplace=True)
-            # Now we can cast the columns into multi dim
-            self.set_index(
-                PerformanceDataFrame.multi_dim_names, inplace=True)
             self.csv_filepath = csv_filepath
         else:
+            # Initialize empty DataFrame
+            run_ids = list(range(1, n_runs + 1))  # We count runs from 1
+            # We always need objectives to maintain the dimensions
             if objectives is None:
                 objectives = [PerformanceDataFrame.missing_objective]
             else:
                 objectives = [str(o) for o in objectives]
-            # Initialize empty DataFrame
-            run_ids = list(range(1, n_runs + 1))  # We count runs from 1
+            # We always need an instance to maintain the dimensions
+            if instances is None:
+                instances = [PerformanceDataFrame.missing_value]
+            # We always need a solver to maintain the dimensions
+            if solvers is None:
+                solvers = [PerformanceDataFrame.missing_value]
             midx = pd.MultiIndex.from_product(
                 [objectives, instances, run_ids],
-                names=PerformanceDataFrame.multi_dim_names)
+                names=PerformanceDataFrame.multi_index_names)
+            mcolumns = pd.MultiIndex.from_product(
+                [solvers, PerformanceDataFrame.multi_column_names],
+                names=["Solver", "Meta"])
             super().__init__(PerformanceDataFrame.missing_value,
-                             index=midx, columns=solvers)
+                             index=midx, columns=mcolumns)
             self.csv_filepath = csv_filepath
             self.save_csv()
-        # Remove 'nan' index if possible
-        if self.num_instances > 0 and any(not isinstance(i[1], str)
-                                          and math.isnan(i[1]) for i in self.index):
-            self.remove_instance(PerformanceDataFrame.missing_value)
+
+        if self.index.duplicated().any():  # Combine duplicate indices
+            combined = self.groupby(level=[0, 1, 2]).first()
+            duplicates = self.index[self.index.duplicated(keep="first")]
+            # Remove all duplicate entries from self
+            self.drop(duplicates, inplace=True)
+            for d in duplicates:  # Place combined duplicates in self
+                self.loc[d, :] = combined.loc[d, :]
+
         # Sort the index to optimize lookup speed
-        self.sort_index()
+        self.sort_index(axis=0, inplace=True)
 
     # Properties
 
     @property
     def num_objectives(self: PerformanceDataFrame) -> int:
         """Retrieve the number of objectives in the DataFrame."""
-        return self.index.levels[0].size
+        return self.index.get_level_values(0).unique().size
 
     @property
     def num_instances(self: PerformanceDataFrame) -> int:
         """Return the number of instances."""
-        return self.index.levels[1].size
+        return self.index.get_level_values(1).unique().size
 
     @property
     def num_runs(self: PerformanceDataFrame) -> int:
-        """Return the number of runs."""
-        return self.index.levels[2].size
+        """Return the maximum number of runs of each instance."""
+        return self.index.get_level_values(2).unique().size
 
     @property
     def num_solvers(self: PerformanceDataFrame) -> int:
         """Return the number of solvers."""
-        return self.columns.size
+        return self.columns.get_level_values(0).unique().size
 
     @property
     def multi_objective(self: PerformanceDataFrame) -> bool:
         """Return whether the dataframe represent MO or not."""
-        return self.index.levels[0].size > 1
+        return self.num_objectives > 1
 
     @property
     def solvers(self: PerformanceDataFrame) -> list[str]:
         """Return the solver present as a list of strings."""
-        return self.columns.tolist()
+        return self.columns.get_level_values(0).unique().to_list()
 
     @property
     def objective_names(self: PerformanceDataFrame) -> list[str]:
         """Return the objective names as a list of strings."""
-        return self.index.levels[0].tolist()
+        return self.index.get_level_values(0).unique().to_list()
 
     @property
     def objectives(self: PerformanceDataFrame) -> list[SparkleObjective]:
@@ -136,17 +144,19 @@ class PerformanceDataFrame(pd.DataFrame):
     @property
     def instances(self: PerformanceDataFrame) -> list[str]:
         """Return the instances as a Pandas Index object."""
-        return self.index.levels[1].tolist()
+        return self.index.get_level_values(1).unique().to_list()
 
     @property
     def run_ids(self: PerformanceDataFrame) -> list[int]:
         """Return the run ids as a list of integers."""
-        return self.index.levels[2].tolist()
+        return self.index.get_level_values(2).unique().to_list()
 
     @property
     def has_missing_values(self: PerformanceDataFrame) -> bool:
         """Returns True if there are any missing values in the dataframe."""
-        return self.isnull().any().any()
+        return self.isnull().any().drop([PerformanceDataFrame.column_seed,
+                                         PerformanceDataFrame.column_configuration],
+                                        level=1).any()
 
     def verify_objective(self: PerformanceDataFrame,
                          objective: str) -> str:
@@ -211,7 +221,7 @@ class PerformanceDataFrame(pd.DataFrame):
 
     def add_solver(self: PerformanceDataFrame,
                    solver_name: str,
-                   initial_value: float | list[float] = None) -> None:
+                   initial_value: float | list[str | float] = None) -> None:
         """Add a new solver to the dataframe. Initializes value to None by default.
 
         Args:
@@ -223,7 +233,18 @@ class PerformanceDataFrame(pd.DataFrame):
             print(f"WARNING: Tried adding already existing solver {solver_name} to "
                   f"Performance DataFrame: {self.csv_filepath}")
             return
-        self[solver_name] = initial_value
+        initial_value =\
+            [initial_value] if not isinstance(initial_value, list) else initial_value
+        column_dim_size = len(PerformanceDataFrame.multi_column_names)
+        if len(initial_value) < column_dim_size:
+            initial_value.extend([None] * (column_dim_size - len(initial_value)))
+        for field, value in zip(PerformanceDataFrame.multi_column_names, initial_value):
+            self[solver_name, field] = value
+        if self.num_solvers == 2:  # Remove nan solver
+            for solver in self.solvers:
+                if str(solver) == str(PerformanceDataFrame.missing_value):
+                    self.remove_solver(solver)
+                    break
 
     def add_instance(self: PerformanceDataFrame,
                      instance_name: str,
@@ -235,33 +256,81 @@ class PerformanceDataFrame(pd.DataFrame):
             print(f"WARNING: Tried adding already existing instance {instance_name} "
                   f"to Performance DataFrame: {self.csv_filepath}")
             return
-        # Create the missing indices, casting them to the correct sizes
-        levels = [self.objective_names * max(1, self.num_runs),  # Objective
-                  [instance_name] * max(1, self.num_objectives * self.num_runs),
-                  self.run_ids * self.num_objectives]  # Runs
+        # Add rows for all combinations
+        for objective, run in itertools.product(self.objective_names, self.run_ids):
+            self.loc[(objective, instance_name, run)] = initial_value
+        if self.num_instances == 2:  # Remove nan instance
+            for instance in self.instances:
+                if not isinstance(instance, str) and math.isnan(instance):
+                    self.remove_instance(instance)
+                    break
+        # Sort the index to optimize lookup speed
+        self.sort_index(axis=0, inplace=True)
 
-        emidx = pd.MultiIndex.from_arrays(levels,
-                                          names=PerformanceDataFrame.multi_dim_names)
-        if self.num_solvers == 0:  # Patch for no columns
-            self.add_solver(str(None))
-        for index in emidx:
-            self.loc[index] = initial_value
-        if self.solvers == [str(None)]:
-            self.remove_solver(str(None))
-        self.sort_index(inplace=True)
+    def add_runs(self: PerformanceDataFrame,
+                 num_extra_runs: int,
+                 instance_names: list[str] = None) -> None:
+        """Add runs to the DataFrame.
+
+        Args:
+            num_extra_runs: The number of runs to be added.
+            instance_names: The instances for which runs are to be added.
+              By default None, which means runs are added to all instances.
+        """
+        instance_names = self.instances if instance_names is None else instance_names
+        for instance in instance_names:
+            for objective in self.objective_names:
+                index_runs_start = len(self.loc[(objective, instance)]) + 1
+                for run in range(index_runs_start, index_runs_start + num_extra_runs):
+                    self.loc[(objective, instance, run)] = self.missing_value
+                # Sort the index to optimize lookup speed
+                # NOTE: It would be better to do this at the end, but that results in
+                # PerformanceWarning: indexing past lexsort depth may impact performance.
+                self.sort_index(axis=0, inplace=True)
 
     def remove_solver(self: PerformanceDataFrame, solver_name: str | list[str]) -> None:
         """Drop one or more solvers from the Dataframe."""
-        self.drop(columns=solver_name, axis=1, inplace=True)
+        # To make sure objectives / runs are saved when no solvers are present
+        if self.num_solvers == 1:
+            for field in PerformanceDataFrame.multi_column_names:
+                self[PerformanceDataFrame.missing_value, field] =\
+                    PerformanceDataFrame.missing_value
+        self.drop(columns=solver_name, level=0, axis=1, inplace=True)
 
     def remove_instance(self: PerformanceDataFrame, instance_name: str) -> None:
         """Drop an instance from the Dataframe."""
         # To make sure objectives / runs are saved when no instances are present
         if self.num_instances == 1:
-            self.add_instance(PerformanceDataFrame.missing_value)
-        self.drop(instance_name, axis=0, level="Instance", inplace=True)
-        self.reset_index(inplace=True)
-        self.set_index(PerformanceDataFrame.multi_dim_names, inplace=True)
+            for objective, run in itertools.product(self.objective_names, self.run_ids):
+                self.loc[(objective, PerformanceDataFrame.missing_value, run)] =\
+                    PerformanceDataFrame.missing_value
+        self.drop(instance_name,
+                  axis=0,
+                  level=PerformanceDataFrame.index_instance, inplace=True)
+        # Sort the index to optimize lookup speed
+        self.sort_index(axis=0, inplace=True)
+
+    def remove_runs(self: PerformanceDataFrame,
+                    runs: int | list[int],
+                    instance_names: list[str] = None) -> None:
+        """Drop one or more runs from the Dataframe.
+
+        Args:
+            runs: The run indices to be removed. If its an int,
+              the last n runs are removed. NOTE: If each instance has a different
+              number of runs, the amount of removed runs is not uniform.
+            instance_names: The instances for which runs are to be removed.
+              By default None, which means runs are removed from all instances.
+        """
+        instance_names = self.instances if instance_names is None else instance_names
+        runs = list(range((self.num_runs + 1) - runs, (self.num_runs + 1)))\
+            if isinstance(runs, int) else runs
+        self.drop(runs,
+                  axis=0,
+                  level=PerformanceDataFrame.index_run,
+                  inplace=True)
+        # Sort the index to optimize lookup speed
+        self.sort_index(axis=0, inplace=True)
 
     def reset_value(self: PerformanceDataFrame,
                     solver: str,
@@ -272,44 +341,91 @@ class PerformanceDataFrame(pd.DataFrame):
         self.set_value(PerformanceDataFrame.missing_value,
                        solver, instance, objective, run)
 
-    # Can we make this handle a sequence of inputs instead of just 1?
     def set_value(self: PerformanceDataFrame,
-                  value: float,
-                  solver: str,
-                  instance: str,
-                  objective: str = None,
-                  run: int = None) -> None:
+                  value: float | str | list[float | str] | list[list[float | str]],
+                  solver: str | list[str],
+                  instance: str | list[str],
+                  objective: str | list[str] = None,
+                  run: int | list[int] = None,
+                  solver_fields: list[str] = ["Value"],
+                  append_write_csv: bool = False) -> None:
         """Setter method to assign a value to the Dataframe.
 
+        Allows for setting the same value to multiple indices.
+
         Args:
-            value: Float value to be assigned.
-            solver: The solver that produced the value.
-            instance: The instance that the value was produced on.
-            objective: The objective for which the result was produced.
-                Optional in case of using single objective.
-            run: The run index for which the result was produced.
-                Optional in case of doing single run results.
+            value: Value(s) to be assigned. If value is a list, first dimension is
+                the solver field, second dimension is if multiple different values are
+                to be assigned. Must be the same shape as target.
+            solver: The solver(s) for which the value should be set.
+                If solver is a list, multiple solvers are set. If None, all
+                solvers are set.
+            instance: The instance(s) for which the value should be set.
+                If instance is a list, multiple instances are set. If None, all
+                instances are set.
+            objective: The objectives for which the value should be set.
+                When left None, set for all objectives
+            run: The run index for which the value should be set.
+                If left None, set for all runs.
+            solver_fields: The level to which each value should be assinged.
+                Defaults to ["Value"].
+            append_write_csv: For concurrent writing to the PerformanceDataFrame.
+                If True, the value is directly appended to the CSV file.
+                This will create duplicate entries in the file, but these are combined
+                when loading the file.
         """
-        objective, run = self.verify_indexing(objective, run)
-        self.at[(objective, instance, run), solver] = value
+        # Convert indices to slices for None values
+        solver = slice(solver) if solver is None else solver
+        instance = slice(instance) if instance is None else instance
+        objective = slice(objective) if objective is None else objective
+        run = slice(run) if run is None else run
+        # Convert column indices to slices for setting multiple columns
+        value = [value] if not isinstance(value, list) else value
+        # NOTE: We currently forloop levels here, as it allows us to set the same
+        # sequence of values to the indices
+        for item, level in zip(value, solver_fields):
+            self.loc[(objective, instance, run), (solver, level)] = item
 
-    # Can we unify get_value and get_values?
+        if append_write_csv:
+            writeable = self.loc[(objective, instance, run), :]
+            if isinstance(writeable, pd.Series):  # Single row, convert to pd.DataFrame
+                writeable = self.loc[[(objective, instance, run)], :]
+            # Append the new rows to the dataframe csv file
+            writeable.to_csv(self.csv_filepath, mode="a", header=False)
+
     def get_value(self: PerformanceDataFrame,
-                  solver: str,
-                  instance: str,
+                  solver: str | list[str],
+                  instance: str | list[str],
                   objective: str = None,
-                  run: int = None) -> float:
+                  run: int = None,
+                  solver_fields: list[str] = ["Value"]
+                  ) -> float | str | list[Any]:
         """Index a value of the DataFrame and return it."""
-        objective, run = self.verify_indexing(objective, run)
-        return float(self.loc[(objective, instance, run), solver])
+        # Convert indices to slices for None values
+        solver = slice(solver) if solver is None else solver
+        instance = slice(instance) if instance is None else instance
+        objective = slice(objective) if objective is None else objective
+        run = slice(run) if run is None else run
+        target = self.loc[(objective, instance, run), (solver, solver_fields)].values
 
+        # Reduce dimensions when relevant
+        if isinstance(target[0], np.ndarray) and len(target[0]) == 1:
+            target = target.flatten()
+        target = target.tolist()
+        if len(target) == 1:
+            return target[0]
+        return target
+
+    # This method can be removed now that above method does its job
     def get_values(self: PerformanceDataFrame,
                    solver: str,
                    instance: str = None,
                    objective: str = None,
-                   run: int = None) -> list[float]:
+                   run: int = None,
+                   solver_fields: list[str] = ["Value"]
+                   ) -> list[float | str] | list[list[float | str]]:
         """Return a list of solver values."""
-        subdf = self[solver]
+        subdf = self[solver][solver_fields]
         if objective is not None:
             objective = self.verify_objective(objective)
             subdf = subdf.xs(objective, level=0, drop_level=False)
@@ -318,7 +434,17 @@ class PerformanceDataFrame(pd.DataFrame):
         if run is not None:
             run = self.verify_run_id(run)
             subdf = subdf.xs(run, level=2, drop_level=False)
-        return subdf.to_list()
+        # Convert dict to list
+        result = [subdf[field].to_list() for field in solver_fields]
+        if len(result) == 1:
+            return result[0]
+        return result
+
+    def get_instance_num_runs(self: PerformanceDataFrame,
+                              instance: str) -> int:
+        """Return the number of runs for an instance."""
+        # We assume each objective has the same index for Instance/Runs
+        return len(self.loc[(self.objective_names[0], instance)].index)
 
     # Calculables
 
@@ -343,35 +469,129 @@ class PerformanceDataFrame(pd.DataFrame):
             -> list[tuple[str, str]]:
         """Return a list of performance computation jobs there are to be done.
 
-        Get a list of tuple[instance, solver] to run from the performance data
-        csv file. If rerun is False (default), get only the tuples that don't have a
-        value in the table, else (True) get all the tuples.
+        Get a list of tuple[instance, solver] to run from the performance data.
+        If rerun is False (default), get only the tuples that don't have a
+        value, else (True) get all the tuples.
 
         Args:
             rerun: Boolean indicating if we want to rerun all jobs
+
+        Returns:
+            A list of [instance, solver] combinations
         """
+        # Format the dataframe such that only the values remain
         df = self.stack(future_stack=True)
-        if not rerun:
-            df = df[df.isnull()]
-        df.index = df.index.droplevel(["Objective"])
-        return df.index.unique().tolist()
+        df.drop([PerformanceDataFrame.column_seed,
+                 PerformanceDataFrame.column_configuration], level=-1, inplace=True)
+        df.index.droplevel()
+        if not rerun:  # Filter the nan values
+            df = df.isnull()
+
+        # Count the number of missing objective values for each Instance/Run/Algorithm
+        df.index = df.index.droplevel(PerformanceDataFrame.index_objective)
+        df.index = df.index.droplevel(-1)
+        index_names = df.index.names
+        df = df.groupby(df.index).agg({cname: "sum" for cname in df.columns})
+        df.index = pd.MultiIndex.from_tuples(df.index, names=index_names)
+
+        # Return the Instance, Run, Solver combinations
+        return [index + (column, )
+                for index, column in itertools.product(df.index, df.columns)
+                if rerun or df[column][index] > 0]
 
     # TODO: This method should be refactored or not exist
     def remaining_jobs(self: PerformanceDataFrame) -> dict[str, list[str]]:
-        """Return a dictionary for empty values per instance and solver combination."""
+        """Return a dictionary for empty values as instance key and solver values."""
         remaining_jobs = {}
-        if self.num_solvers == 0 or self.num_instances == 0:
-            return remaining_jobs
-        null_df = self.isnull()
-        for row in self.index:
-            instance = row[1]
-            for solver in self.columns:
-                if null_df.at[row, solver]:
-                    if instance not in remaining_jobs:
-                        remaining_jobs[instance] = set([solver])
-                    else:
-                        remaining_jobs[instance].add(solver)
+        jobs = self.get_job_list(rerun=False)
+        for instance, _, solver in jobs:
+            if instance not in remaining_jobs:
+                remaining_jobs[instance] = [solver]
+            else:
+                remaining_jobs[instance].append(solver)
         return remaining_jobs
+
+    def configuration_performance(
+            self: PerformanceDataFrame,
+            solver: str,
+            configuration: dict,
+            objective: str | SparkleObjective = None,
+            instances: list[str] = None,
+            per_instance: bool = False) -> tuple[dict, float]:
+        """Return the configuration performance for objective over the instances.
+
+        Args:
+            solver: The solver for which we determine evaluate the configuration
+            configuration: The configuration to evaluate
+            objective: The objective for which we calculate find the best value
+            instances: The instances which should be selected for the evaluation
+            per_instance: Whether to return the performance per instance,
+                or aggregated.
+
+        Returns:
+            The best configuration and its aggregated performance.
+        """
+        objective = self.verify_objective(objective)
+        instances = instances or slice(instances)  # Convert None to slice
+        if isinstance(objective, str):
+            objective = resolve_objective(objective)
+        # Filter objective
+        subdf = self.xs(objective.name, level=0, drop_level=True)
+
+        if configuration:  # Filter configuration
+            if not isinstance(configuration, dict):  # Get empty configuration
+                subdf = subdf[subdf[solver][
+                    PerformanceDataFrame.column_configuration].isna()]
+            else:
+                subdf = subdf[subdf[solver][
+                    PerformanceDataFrame.column_configuration] == str(configuration)]
+        # Filter solver
+        subdf = subdf.xs(solver, axis=1, drop_level=True)
+
+        # Drop the seed, filter instances
+        subdf = subdf.drop(PerformanceDataFrame.column_seed, axis=1).loc[instances, :]
+        # Aggregate the runs per instance/configuration
+        try:  # Can only aggregate numerical values
+            subdf[PerformanceDataFrame.column_value] =\
+                pd.to_numeric(subdf[PerformanceDataFrame.column_value])  # Ensure type
+            subdf = subdf.groupby([PerformanceDataFrame.index_instance,
+                                   PerformanceDataFrame.column_configuration],
+                                  dropna=False).agg(objective.run_aggregator.__name__)
+        except ValueError:
+            subdf.drop(PerformanceDataFrame.column_configuration, axis=1, inplace=True)
+            return configuration, subdf.values.flatten().tolist()
+        if per_instance:  # No instance aggregation
+            # NOTE: How do we select the best configuration now if conf == None?
+            return configuration, subdf.values.flatten().tolist()
+
+        # Aggregate the instances per configuration
+        subdf = subdf.droplevel(level=0).reset_index()  # Drop instance column
+        subdf = subdf.groupby(PerformanceDataFrame.column_configuration,
+                              dropna=False).agg(
+            func=objective.instance_aggregator.__name__)
+
+        if configuration:
+            return configuration, subdf.values[0][0]
+        # In case of no configuration given, select the one with best objective value
+        best_index = subdf.idxmin() if objective.minimise else subdf.idxmax()
+        return (ast.literal_eval(best_index.values[0]),
+                subdf.loc[best_index, PerformanceDataFrame.column_value].values[0])
+
+    def best_configuration(self: PerformanceDataFrame,
+                           solver: str,
+                           objective: str | SparkleObjective = None,
+                           instances: list[str] = None) -> tuple[dict, float]:
+        """Return the best configuration for the given objective over the instances.
+
+        Args:
+            solver: The solver for which we determine the best configuration
+            objective: The objective for which we calculate the best configuration
+            instances: The instances which should be selected for the evaluation
+
+        Returns:
+            The best configuration and its aggregated performance.
+        """
+        return self.configuration_performance(solver, None, objective, instances)
 
     def best_instance_performance(
             self: PerformanceDataFrame,
@@ -392,9 +612,14 @@ class PerformanceDataFrame(pd.DataFrame):
         objective = self.verify_objective(objective)
         if isinstance(objective, str):
             objective = resolve_objective(objective)
-        subdf = self.xs(objective.name, level=0)
+        # Drop Seed/Configuration
+        subdf = self.drop(
+            [PerformanceDataFrame.column_seed,
+             PerformanceDataFrame.column_configuration],
+            axis=1, level=1)
+        subdf = subdf.xs(objective.name, level=0)
         if exclude_solvers is not None:
-            subdf = subdf.drop(exclude_solvers, axis=1)
+            subdf = subdf.drop(exclude_solvers, axis=1, level=0)
         if run_id is not None:
             run_id = self.verify_run_id(run_id)
             subdf = subdf.xs(run_id, level=1)
@@ -509,7 +734,12 @@ class PerformanceDataFrame(pd.DataFrame):
         objective = self.verify_objective(objective)
         if isinstance(objective, str):
             objective = resolve_objective(objective)
-        sub_df = self.loc(axis=0)[objective.name, :, :]
+        # Drop Seed/Configuration
+        subdf = self.drop(
+            [PerformanceDataFrame.column_seed,
+             PerformanceDataFrame.column_configuration],
+            axis=1, level=1)
+        sub_df = subdf.loc(axis=0)[objective.name, :, :]
         # Reduce Runs Dimension
         sub_df = sub_df.droplevel("Run").astype(float)
         # By using .__name__, pandas converts it to a Pandas Aggregator function
@@ -528,10 +758,6 @@ class PerformanceDataFrame(pd.DataFrame):
             csv_filepath: String path to the csv file. Defaults to self.csv_filepath.
         """
         csv_filepath = self.csv_filepath if csv_filepath is None else csv_filepath
-        # Remove 'nan' index if possible
-        if self.num_instances > 0 and any(not isinstance(i[1], str)
-                                          and math.isnan(i[1]) for i in self.index):
-            self.remove_instance(PerformanceDataFrame.missing_value)
         self.to_csv(csv_filepath)
 
     def clone(self: PerformanceDataFrame,
@@ -554,7 +780,9 @@ class PerformanceDataFrame(pd.DataFrame):
                 n_runs=self.num_runs)
             for solver in self.solvers:
                 for index in self.index:
-                    pd_copy.loc[index, solver] = self.loc[index, solver]
+                    for field in PerformanceDataFrame.multi_column_names:
+                        pd_copy.at[index, (solver, field)] =\
+                            self.loc[index, solver][field]
         return pd_copy
 
     def clean_csv(self: PerformanceDataFrame) -> None:
@@ -571,6 +799,10 @@ class PerformanceDataFrame(pd.DataFrame):
                   "to Autofolio due to multi objective or number of runs.")
             return
         autofolio_df = super().copy()
+        # Drop Seed/Configuration, then drop the level
+        autofolio_df = autofolio_df.drop([PerformanceDataFrame.column_seed,
+                                          PerformanceDataFrame.column_configuration],
+                                         axis=1, level=1).droplevel(level=1, axis=1)
         if objective is not None:
             autofolio_df = autofolio_df.loc[objective.name]
             autofolio_df.index = autofolio_df.index.droplevel("Run")

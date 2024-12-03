@@ -58,3 +58,13 @@ class TestSolver(TestCase):
         """Test if is_deterministic() correctly returns True."""
         solver = Solver(self.solver_path, deterministic=True)
         self.assertEqual(solver.deterministic, True)
+
+    def test_run(self: TestSolver) -> None:
+        """Test if run correctly adds to RunRunner queue."""
+        # TODO: write test
+        pass
+
+    def test_run_performance_dataframe(self: TestSolver) -> None:
+        """Test if run_performance_dataframe correctly adds to RunRunner queue."""
+        # TODO: write test
+        pass

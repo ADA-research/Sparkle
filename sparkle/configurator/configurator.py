@@ -3,15 +3,10 @@
 """Configurator class to use different algorithm configurators like SMAC."""
 from __future__ import annotations
 from abc import abstractmethod
-from typing import Callable
-import ast
-from statistics import mean
-import operator
 from pathlib import Path
 
 from runrunner import Runner, Run
 from sparkle.solver import Solver
-from sparkle.solver.validator import Validator
 from sparkle.instance import InstanceSet
 from sparkle.types import SparkleObjective
 
@@ -20,13 +15,12 @@ class Configurator:
     """Abstact class to use different configurators like SMAC."""
     configurator_cli_path = Path(__file__).parent.resolve() / "configurator_cli.py"
 
-    def __init__(self: Configurator, validator: Validator, output_path: Path,
+    def __init__(self: Configurator, output_path: Path,
                  base_dir: Path, tmp_path: Path,
                  multi_objective_support: bool = False) -> None:
         """Initialize Configurator.
 
         Args:
-            validator: Validator object to validate configurations runs
             output_path: Output directory of the Configurator.
             objectives: The list of Sparkle Objectives the configurator has to
                 optimize.
@@ -35,15 +29,14 @@ class Configurator:
             multi_objective_support: Whether the configurator supports
                 multi objective optimization for solvers.
         """
-        self.validator = validator
         self.output_path = output_path
         self.base_dir = base_dir
         self.tmp_path = tmp_path
         self.multiobjective = multi_objective_support
         self.scenario = None
 
-    @property
-    def scenario_class(self: Configurator) -> ConfigurationScenario:
+    @staticmethod
+    def scenario_class() -> ConfigurationScenario:
         """Return the scenario class of the configurator."""
         return ConfigurationScenario
 
@@ -71,47 +64,19 @@ class Configurator:
         """
         raise NotImplementedError
 
-    def get_optimal_configuration(
-            self: Configurator,
-            scenario: ConfigurationScenario,
-            aggregate_config: Callable = mean) -> tuple[float, str]:
-        """Returns optimal value and configuration string of solver on instance set."""
-        self.validator.out_dir = scenario.validation
-        results = self.validator.get_validation_results(
-            scenario.solver,
-            scenario.instance_set,
-            source_dir=scenario.validation,
-            subdir=Path())
-        # Group the results per configuration
-        objective = scenario.sparkle_objective
-        value_column = results[0].index(objective.name)
-        config_column = results[0].index("Configuration")
-        configurations = list(set(row[config_column] for row in results[1:]))
-        config_scores = []
-        for config in configurations:
-            values = [float(row[value_column])
-                      for row in results[1:] if row[1] == config]
-            config_scores.append(aggregate_config(values))
-
-        comparison = operator.lt if objective.minimise else operator.gt
-
-        # Return optimal value
-        min_index = 0
-        current_optimal = config_scores[min_index]
-        for i, score in enumerate(config_scores):
-            if comparison(score, current_optimal):
-                min_index, current_optimal = i, score
-
-        # Return the optimal configuration dictionary as commandline args
-        config_str = configurations[min_index].strip(" ")
-        if config_str.startswith("{"):
-            config = ast.literal_eval(config_str)
-            config_str = " ".join([f"-{key} '{config[key]}'" for key in config])
-        return current_optimal, config_str
-
     @staticmethod
-    def organise_output(output_source: Path, output_target: Path) -> None | str:
-        """Method to restructure and clean up after a single configurator call."""
+    def organise_output(output_source: Path,
+                        output_target: Path,
+                        scenario: ConfigurationScenario,
+                        run_id: int) -> None | str:
+        """Method to restructure and clean up after a single configurator call.
+
+        Args:
+            output_source: Path to the output file of the configurator run.
+            output_target: Path to the Performance DataFrame to store result.
+            scenario: ConfigurationScenario of the configuration.
+            run_id: ID of the run of the configuration.
+        """
         raise NotImplementedError
 
     def set_scenario_dirs(self: Configurator,
@@ -130,8 +95,7 @@ class ConfigurationScenario:
                  solver: Solver,
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
-                 parent_directory: Path)\
-            -> None:
+                 parent_directory: Path) -> None:
         """Initialize scenario paths and names.
 
         Args:

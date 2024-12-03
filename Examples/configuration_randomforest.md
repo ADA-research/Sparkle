@@ -28,12 +28,6 @@ sparkle configure_solver --solver RandomForest --instance-set-train Iris --objec
 sparkle wait
 ```
 
-Validate the performance of the best found parameter configuration. The test set is optional.
-
-```bash
-sparkle validate_configured_vs_default --solver RandomForest --instance-set-train Iris --objectives accuracy:max
-```
-
 ### Generate a report
 
 Wait for validation to be completed
