@@ -82,8 +82,6 @@ class SMAC2(Configurator):
                 "Please ensure Java is installed and try again."
             )
         scenario.create_scenario()
-        output_csv = scenario.validation / "configurations.csv"
-        output_csv.parent.mkdir(exist_ok=True, parents=True)
         # We set the seed over the last n run ids in the dataframe
         seeds = data_target.run_ids[data_target.num_runs - scenario.number_of_runs:]
         output = [f"{(scenario.results_directory).absolute()}/"
@@ -207,7 +205,8 @@ class SMAC2(Configurator):
 
 class SMAC2Scenario(ConfigurationScenario):
     """Class to handle SMAC2 configuration scenarios."""
-    def __init__(self: SMAC2Scenario, solver: Solver,
+    def __init__(self: SMAC2Scenario,
+                 solver: Solver,
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
                  parent_directory: Path,

@@ -152,9 +152,8 @@ def main(argv: list[str]) -> None:
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
         configurator_settings.update({"feature_data_df": feature_data_df})
 
-    # Only get objectives that should be optimised
     sparkle_objectives =\
-        gv.settings().get_general_sparkle_objectives(filter_metric=True)
+        gv.settings().get_general_sparkle_objectives()
     configurator_runs = gv.settings().get_configurator_number_of_runs()
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
 

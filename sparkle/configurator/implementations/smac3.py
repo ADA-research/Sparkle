@@ -81,11 +81,14 @@ class SMAC3(Configurator):
             A RunRunner Run object.
         """
         scenario.create_scenario()
+        # We set the seed over the last n run ids in the dataframe
+        seeds = data_target.run_ids[data_target.num_runs - scenario.number_of_runs:]
         num_parallel_jobs = num_parallel_jobs or scenario.number_of_runs
+        # We do not require the configurator CLI as its already our own python wrapper
         cmds = [f"python3 {self.configurator_executable.absolute()} "
                 f"{scenario.scenario_file_path.absolute()} {seed} "
                 f"{data_target.csv_filepath}"
-                for seed in range(scenario.number_of_runs)]
+                for seed in seeds]
         runs = [rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
@@ -95,8 +98,19 @@ class SMAC3(Configurator):
             base_dir=base_dir,
         )]
         if validate_after:
-            # TODO: Fix validation
-            runs.append(None)
+            # TODO: Array job specific dependency, requires RunRunner update
+            validate = scenario.solver.run_performance_dataframe(
+                scenario.instance_set,
+                run_ids=seeds,
+                performance_dataframe=data_target,
+                cutoff_time=scenario.cutoff_time,
+                run_on=run_on,
+                sbatch_options=sbatch_options,
+                log_dir=scenario.validation,
+                base_dir=base_dir,
+                dependencies=runs,
+            )
+            runs.append(validate)
 
         if run_on == Runner.LOCAL:
             for run in runs:
@@ -104,7 +118,10 @@ class SMAC3(Configurator):
         return runs
 
     @staticmethod
-    def organise_output(output_source: Path, output_target: Path,
+    def organise_output(output_source: Path,
+                        output_target: Path,
+                        scenario: SMAC3Scenario,
+                        run_id: int,
                         objective: SparkleObjective) -> None | str:
         """Method to restructure and clean up after a single configurator call."""
         import json
@@ -123,12 +140,32 @@ class SMAC3(Configurator):
                         for evaluations in config_evals]
         best_config = configurations[
             config_evals.index(objective.solver_aggregator(config_evals))]
-        best_config_str = " ".join([f"-{key} {value}" for key, value in
-                                    best_config.items()])
+        if output_target is None or not output_target.exists():
+            return best_config
+
+        time_stamp = scenario.scenario_file_path.stat().st_mtime
+        best_config["configuration_id"] =\
+            f"{SMAC3.__name__}_{time_stamp}_{run_id}"
+        instance_names = scenario.instance_set.instance_names
         lock = FileLock(f"{output_target}.lock")
         with lock.acquire(timeout=60):
-            with output_target.open("a") as fout:
-                fout.write(f"{best_config_str}\n")
+            performance_data = PerformanceDataFrame(output_target)
+            # Resolve absolute path to Solver column
+            solver = [s for s in performance_data.solvers
+                      if Path(s).name == scenario.solver.name][0]
+            # For some reason the instance paths in the instance set are absolute
+            instances = [instance for instance in performance_data.instances
+                         if Path(instance).name in instance_names]
+            # We don't set the seed in the dataframe, as that should be part of the conf
+            performance_data.set_value(
+                value=[str(best_config)],
+                solver=solver,
+                instance=instances,
+                objective=None,
+                run=run_id,
+                solver_fields=[PerformanceDataFrame.column_configuration]
+            )
+            performance_data.save_csv()
         lock.release()
 
     def get_status_from_logs(self: SMAC3) -> None:
@@ -158,8 +195,8 @@ class SMAC3Scenario(ConfigurationScenario):
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
                  parent_directory: Path,
-                 cutoff_time: int,
-                 number_of_runs: int,
+                 cutoff_time: int = None,
+                 number_of_runs: int = None,
                  smac_facade: smacfacades.AbstractFacade =
                  smacfacades.HyperparameterOptimizationFacade,
                  crash_cost: float | list[float] = np.inf,

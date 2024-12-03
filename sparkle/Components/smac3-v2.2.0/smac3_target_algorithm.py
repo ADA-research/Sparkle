@@ -256,7 +256,7 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     scenario_file = Path(args[0])
     run_index = int(args[1])
-    output_csv = Path(args[2])
+    output_path = Path(args[2])
     scenario = SMAC3Scenario.from_file(scenario_file, run_index=run_index)
     global solver, objectives, cutoff, log_dir
     solver = scenario.solver
@@ -279,8 +279,11 @@ if __name__ == "__main__":
     smac_facade._optimizer = smac_facade._get_optimizer()
 
     incumbent = smac_facade.optimize()
+    print(incumbent)
     # TODO: Fix taking first objective, how do we determine 'best configuration' from
     # a multi objective run?
     SMAC3.organise_output(scenario.smac3_scenario.output_directory / "runhistory.json",
-                          output_csv,
-                          scenario.sparkle_objectives[0])
+                          output_target=output_path,
+                          scenario=scenario,
+                          run_id=run_index,
+                          objective=scenario.sparkle_objectives[0])
