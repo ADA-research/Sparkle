@@ -53,8 +53,8 @@ class SMAC3(Configurator):
         """Returns the name of the configurator."""
         return SMAC3.__name__
 
-    @property
-    def scenario_class(self: SMAC3) -> ConfigurationScenario:
+    @staticmethod
+    def scenario_class() -> ConfigurationScenario:
         """Returns the SMAC3 scenario class."""
         return SMAC3Scenario
 
@@ -315,14 +315,13 @@ class SMAC3Scenario(ConfigurationScenario):
         # NOTE: We don't use trial_walltime_limit as a way of managing resources
         # As it uses pynisher to do it (python based) and our targets are maybe not
         # RunSolver is the better option for accuracy.
-        print(sparkle_objectives)
         self.cutoff_time = cutoff_time
         self.smac3_scenario = SmacScenario(
             configspace=solver.get_configspace(),
             name=self.name,
             output_directory=self.results_directory / smac3_output_directory,
             deterministic=solver.deterministic,
-            objectives=[o.name for o in self.sparkle_objectives],
+            objectives=[self.sparkle_objective.name],
             crash_cost=crash_cost,
             termination_cost_threshold=termination_cost_threshold,
             walltime_limit=walltime_limit,
@@ -351,6 +350,7 @@ class SMAC3Scenario(ConfigurationScenario):
         # Create empty directories as needed
         self.results_directory.mkdir(parents=True)  # Prepare results directory
         self.log_dir.mkdir(parents=True)
+        self.validation.mkdir(parents=True, exist_ok=True)
         self.create_scenario_file()
 
     def create_scenario_file(self: ConfigurationScenario) -> Path:

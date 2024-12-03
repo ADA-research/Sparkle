@@ -26,7 +26,6 @@ def smac3_solver_call(config: Configuration, instance: str, seed: int) -> list[f
         seed,
         cutoff_time=cutoff,
         configuration=dict(config),
-        commandname=f"SMAC3 configuration evaluation {config.config_id}",
         log_dir=log_dir
     )
 

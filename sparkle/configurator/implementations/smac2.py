@@ -289,6 +289,7 @@ class SMAC2Scenario(ConfigurationScenario):
         # Create empty directories as needed
         self.outdir_train.mkdir()
         self.tmp.mkdir()
+        self.validation.mkdir()
         self.results_directory.mkdir(parents=True)  # Prepare results directory
 
         self._prepare_instances()
