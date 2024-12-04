@@ -284,5 +284,4 @@ if __name__ == "__main__":
     SMAC3.organise_output(scenario.smac3_scenario.output_directory / "runhistory.json",
                           output_target=output_path,
                           scenario=scenario,
-                          run_id=run_index,
-                          objective=scenario.sparkle_objectives[0])
+                          run_id=run_index)

@@ -9,6 +9,8 @@ from sparkle.structures import PerformanceDataFrame
 from sparkle.types import resolve_objective
 from sparkle.configurator.implementations import SMAC3, SMAC3Scenario
 
+scenario = None  # We need the created scenario in two tests
+
 
 def test_smac3_scenario_to_file(tmp_path: Path,
                                 monkeypatch: pytest.MonkeyPatch) -> None:
@@ -106,8 +108,7 @@ def test_organise_output(tmp_path: Path,
     file = Path("tests/test_files/Configuration/results/"
                 "runhistory_PbO-CCSAT-Generic_PTN_SMAC3.json").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
-    configuration = SMAC3.organise_output(file, None, None, None,
-                                          resolve_objective("PAR10"))
+    configuration = SMAC3.organise_output(file, None, scenario, None)
     expected = {"init_solution": "2", "perform_aspiration": "1",
                 "perform_clause_weight": "1",
                 "perform_double_cc": "0", "perform_first_div": "0",

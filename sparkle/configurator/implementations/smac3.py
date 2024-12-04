@@ -124,8 +124,7 @@ class SMAC3(Configurator):
     def organise_output(output_source: Path,
                         output_target: Path,
                         scenario: SMAC3Scenario,
-                        run_id: int,
-                        objective: SparkleObjective) -> None | str:
+                        run_id: int) -> None | str:
         """Method to restructure and clean up after a single configurator call."""
         import json
         from filelock import FileLock
@@ -135,6 +134,7 @@ class SMAC3(Configurator):
         results_dict = json.load(output_source.open("r"))
         configurations = [value for _, value in results_dict["configs"].items()]
         config_evals = [[] for _ in range(len(configurations))]
+        objective = scenario.sparkle_objective
         for entry in results_dict["data"]:
             config_id, _, _, _, score, _, _, _, _, _ = entry
             # SMAC3 configuration ids start at 1
