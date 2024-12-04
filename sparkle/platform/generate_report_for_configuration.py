@@ -125,16 +125,19 @@ def get_timeouts_instanceset(config_output: ConfigurationOutput,
     """
     solver_key = str(config_output.solver.directory)
     instance_keys = [str(instance) for instance in instance_set.instance_paths]
+    # Determine status objective name
+    objective = [o for o in config_output.performance_data.objectives
+                 if o.stem.lower() == "status"][0]
     _, configured_status = config_output.performance_data.configuration_performance(
         solver_key,
         configuration=config_output.best_configuration,
-        objective="status",
+        objective=objective,
         instances=instance_keys,
         per_instance=True)
     _, default_status = config_output.performance_data.configuration_performance(
         solver_key,
         configuration=PerformanceDataFrame.missing_value,
-        objective="status",
+        objective=objective,
         instances=instance_keys,
         per_instance=True)
 

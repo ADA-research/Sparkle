@@ -258,7 +258,8 @@ class Solver(SparkleCallable):
                 if solver_cmd[0] == str(self.runsolver_exec.absolute()):
                     runsolver_configuration = solver_cmd[:11]
                 solver_output = Solver.parse_solver_output(run.jobs[i].stdout,
-                                                           runsolver_configuration)
+                                                           runsolver_configuration,
+                                                           objectives=objectives)
                 if self.verifier is not None:
                     solver_output["status"] = self.verifier.verifiy(
                         instance, Path(runsolver_configuration[-1]))
@@ -352,13 +353,15 @@ class Solver(SparkleCallable):
     @staticmethod
     def parse_solver_output(
             solver_output: str,
-            runsolver_configuration: list[str | Path] = None) -> dict[str, Any]:
+            runsolver_configuration: list[str | Path] = None,
+            objectives: list[SparkleObjective] = None) -> dict[str, Any]:
         """Parse the output of the solver.
 
         Args:
             solver_output: The output of the solver run which needs to be parsed
             runsolver_configuration: The runsolver configuration to wrap the solver
                 with. If runsolver was not used this should be None.
+            objectives: The objectives to apply to the solver output
 
         Returns:
             Dictionary representing the parsed solver output
@@ -369,17 +372,24 @@ class Solver(SparkleCallable):
         else:
             parsed_output = ast.literal_eval(solver_output)
         # cast status attribute from str to Enum
+        # TODO: Setup status as an objective class with a post process mapping
         parsed_output["status"] = SolverStatus(parsed_output["status"])
-        # apply objectives to parsed output, runtime based objectives added here
+        if objectives:  # Create objective map
+            objectives = {o.stem: o for o in objectives}
+        removable_keys = ["cutoff_time"]  # Keys to remove
+        # Apply objectives to parsed output, runtime based objectives added here
         for key, value in parsed_output.items():
-            if key == "status":
-                continue
-            objective = resolve_objective(key)
-            if objective is None:
+            if objectives and key in objectives:
+                objective = objectives[key]
+                removable_keys.append(key)  # We translate it into the full name
+            else:
+                objective = resolve_objective(key)
+            # If not found in objectives, resolve to which objective the output belongs
+            if objective is None:  # Could not parse, skip
                 continue
             if objective.use_time == UseTime.NO:
                 if objective.post_process is not None:
-                    parsed_output[objective] = objective.post_process(value)
+                    parsed_output[key] = objective.post_process(value)
             else:
                 if runsolver_configuration is None:
                     continue
@@ -390,6 +400,15 @@ class Solver(SparkleCallable):
                 if objective.post_process is not None:
                     parsed_output[key] = objective.post_process(
                         parsed_output[key], parsed_output["cutoff_time"])
-        if "cutoff_time" in parsed_output:
-            del parsed_output["cutoff_time"]
+
+        # Replace or remove keys based on the objective names
+        for key in removable_keys:
+            if key in parsed_output:
+                if key in objectives:
+                    # Map the result to the objective
+                    parsed_output[objectives[key].name] = parsed_output[key]
+                    if key != objectives[key].name:  # Only delete actual mappings
+                        del parsed_output[key]
+                else:
+                    del parsed_output[key]
         return parsed_output

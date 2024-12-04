@@ -52,7 +52,12 @@ class SparkleObjective:
 
     def __str__(self: SparkleObjective) -> str:
         """Return a stringified version."""
-        return f"{self.name}"
+        return self.name
+
+    @property
+    def stem(self: SparkleObjective) -> str:
+        """Return the stem of the objective name."""
+        return self.name.split(":")[0]
 
     @property
     def time(self: SparkleObjective) -> bool:
