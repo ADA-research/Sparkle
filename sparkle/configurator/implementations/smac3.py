@@ -80,6 +80,8 @@ class SMAC3(Configurator):
         Returns:
             A RunRunner Run object.
         """
+        if scenario.wall_time is None and scenario.cpu_time is None:
+            print("WARNING: Starting SMAC3 scenario without any time limit.")
         scenario.create_scenario()
         # We set the seed over the last n run ids in the dataframe
         seeds = data_target.run_ids[data_target.num_runs - scenario.number_of_runs:]
