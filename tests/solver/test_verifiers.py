@@ -14,8 +14,15 @@ def test_solution_file_verifier() -> None:
     """Test if SolutionFileVerifier correctly returns value."""
     file = Path("tests/test_files/verifier/verifier_file.csv")
     verifier = verifiers.SolutionFileVerifier(file)
-    assert verifier.verify(Path("a/instance1.txt"), "SAT") == SolverStatus.SAT
-    assert verifier.verify(Path("b/instance2.txt"), "UNSAT") == SolverStatus.UNSAT
-    assert verifier.verify(Path("c/instance3.txt"), "15.1") == SolverStatus.WRONG
-    assert verifier.verify(Path("c/instance3.txt"), "15.0") == SolverStatus.SUCCESS
-    assert verifier.verify(Path("d/idonotexist.txt"), "123") == SolverStatus.UNKNOWN
+    assert verifier.verify(Path("a/instance1.txt"),
+                           {"status": "SAT"}, None) == SolverStatus.SAT
+    assert verifier.verify(Path("b/instance2.txt"),
+                           {"status": "UNSAT"}, None) == SolverStatus.UNSAT
+    assert verifier.verify(Path("c/instance3.txt"),
+                           {"coolmetric": "15.1"}, None) == SolverStatus.WRONG
+    assert verifier.verify(Path("c/instance3.txt"),
+                           {"coolmetric": "15.0"}, None) == SolverStatus.SUCCESS
+    assert verifier.verify(Path("d/idonotexist.txt"),
+                           {"coolmetric": "123"}, None) == SolverStatus.UNKNOWN
+    assert verifier.verify(Path("c/instance3.txt"),
+                           {"idonotexist": "123"}, None) == SolverStatus.UNKNOWN

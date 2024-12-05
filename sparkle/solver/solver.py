@@ -258,8 +258,11 @@ class Solver(SparkleCallable):
                 solver_output = Solver.parse_solver_output(run.jobs[i].stdout,
                                                            runsolver_configuration)
                 if self.verifier is not None:
-                    solver_output["status"] = self.verifier.verifiy(
-                        instance, Path(runsolver_configuration[-1]))
+                    target_instance = instance
+                    if isinstance(instance, InstanceSet):
+                        target_instance = instance.instance_paths[i]
+                    solver_output["status"] = self.verifier.verify(
+                        target_instance, solver_output, solver_cmd)
                 solver_outputs.append(solver_output)
             return solver_outputs if len(solver_outputs) > 1 else solver_output
         return run

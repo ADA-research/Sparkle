@@ -9,7 +9,10 @@ from sparkle.types import SolverStatus
 class SolutionVerifier:
     """Solution verifier base class."""
 
-    def verify(self: SolutionVerifier) -> SolverStatus:
+    def verify(self: SolutionVerifier,
+               instance: Path,
+               output: dict,
+               solver_call: list[str]) -> SolverStatus:
         """Verify the solution."""
         raise NotImplementedError
 
@@ -24,8 +27,9 @@ class SATVerifier(SolutionVerifier):
         return SATVerifier.__name__
 
     @staticmethod
-    def verify(instance: Path, raw_result: Path) -> SolverStatus:
+    def verify(instance: Path, output: dict, solver_call: list[str]) -> SolverStatus:
         """Run a SAT verifier and return its status."""
+        raw_result = Path([s for s in solver_call if s.endswith(".rawres")][0])
         return SATVerifier.sat_judge_correctness_raw_result(instance, raw_result)
 
     @staticmethod
@@ -72,9 +76,10 @@ class SolutionFileVerifier(SolutionVerifier):
     def __init__(self: SolutionFileVerifier, csv_file: Path) -> None:
         """Initialize the verifier by building dictionary from csv."""
         self.csv_file = csv_file
-        lines = [line.split(",", maxsplit=1)
+        lines = [line.split(",", maxsplit=2)
                  for line in self.csv_file.read_text().splitlines()]
-        self.solutions = {instance: solution for instance, solution in lines}
+        self.solutions = {instance: (objective, solution)
+                          for instance, objective, solution in lines}
 
     def __str__(self: SATVerifier) -> str:
         """Return the name of the SAT verifier."""
@@ -82,21 +87,29 @@ class SolutionFileVerifier(SolutionVerifier):
 
     def verify(self: SolutionFileVerifier,
                instance: Path,
-               outcome: object) -> SolverStatus:
+               solver_output: dict[str, object],
+               solver_call: list[str]) -> SolverStatus:
         """Verify the solution.
 
         Args:
             instance: instance to verify, solution found by instance name as key
-            outcome: outcome to verify, must be string or stringifiable
+            solver_output: outcome of the solver to verify
 
         Returns:
             The status of the solver on the instance
         """
-        instance, outcome = instance.name, str(outcome)
+        instance = instance.name
         if instance not in self.solutions:
             return SolverStatus.UNKNOWN
-        if self.solutions[instance] != outcome:
+
+        objective, solution = self.solutions[instance]
+        if objective not in solver_output:
+            return SolverStatus.UNKNOWN
+
+        outcome = solver_output[objective]
+        if solution != outcome:
             return SolverStatus.WRONG
+
         if outcome in SolverStatus._value2member_map_:  # SAT/UNSAT status
             return SolverStatus(outcome)
         return SolverStatus.SUCCESS
