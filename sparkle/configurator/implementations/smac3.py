@@ -319,6 +319,14 @@ class SMAC3Scenario(ConfigurationScenario):
         # As it uses pynisher to do it (python based) and our targets are maybe not
         # RunSolver is the better option for accuracy.
         self.cutoff_time = cutoff_time
+        if solver_calls is None:  # If solver calls is None, try to calculate it
+            if self.cutoff_time is not None and (cputime_limit or walltime_limit):
+                if cputime_limit:
+                    solver_calls = int(cputime_limit / self.cutoff_time)
+                elif walltime_limit:
+                    solver_calls = int(walltime_limit / self.cutoff_time)
+            else:
+                solver_calls = 100  # SMAC3 Default value
         self.smac3_scenario = SmacScenario(
             configspace=solver.get_configspace(),
             name=self.name,
@@ -329,8 +337,7 @@ class SMAC3Scenario(ConfigurationScenario):
             termination_cost_threshold=termination_cost_threshold,
             walltime_limit=walltime_limit,
             cputime_limit=cputime_limit,
-            n_trials=solver_calls or int(
-                self.cutoff_time / cputime_limit or walltime_limit),
+            n_trials=solver_calls,
             use_default_config=use_default_config,
             instances=instance_set.instance_paths,
             instance_features=instance_features,
