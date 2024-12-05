@@ -24,7 +24,10 @@ def _check_class(candidate: Callable) -> bool:
 def resolve_objective(objective_name: str) -> SparkleObjective:
     """Try to resolve the objective class by (case-sensitive) name.
 
-    convention: objective_name(variable-k)?(:[min|max])?(:metric)?
+    convention: objective_name(variable-k)?(:[min|max])?(:[metric|objective])?
+    Here, min|max refers to the minimisation or maximisation of the objective
+    and metric|objective refers to whether the objective should be optimized
+    or just recorded.
 
     Order of resolving:
         class_name of user defined SparkleObjectives
