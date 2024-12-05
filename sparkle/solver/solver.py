@@ -16,7 +16,7 @@ from runrunner.base import Status, Runner
 
 from sparkle.tools import pcsparser, RunSolver
 from sparkle.types import SparkleCallable, SolverStatus
-from sparkle.solver.verifier import SolutionVerifier
+from sparkle.solver import verifiers
 from sparkle.instance import InstanceSet
 from sparkle.structures import PerformanceDataFrame
 from sparkle.types import resolve_objective, SparkleObjective, UseTime
@@ -33,7 +33,7 @@ class Solver(SparkleCallable):
                  raw_output_directory: Path = None,
                  runsolver_exec: Path = None,
                  deterministic: bool = None,
-                 verifier: SolutionVerifier = None) -> None:
+                 verifier: verifiers.SolutionVerifier = None) -> None:
         """Initialize solver.
 
         Args:
@@ -48,19 +48,22 @@ class Solver(SparkleCallable):
         super().__init__(directory, runsolver_exec, raw_output_directory)
         self.deterministic = deterministic
         self.verifier = verifier
-        self.meta_data_file = self.directory / Solver.meta_data
 
+        meta_data_file = self.directory / Solver.meta_data
         if self.runsolver_exec is None:
             self.runsolver_exec = self.directory / "runsolver"
-        if not self.meta_data_file.exists():
-            self.meta_data_file = None
-        if self.deterministic is None:
-            if self.meta_data_file is not None:
-                # Read the parameter from file
-                meta_dict = ast.literal_eval(self.meta_data_file.open().read())
-                self.deterministic = meta_dict["deterministic"]
-            else:
-                self.deterministic = False
+        if meta_data_file.exists():
+            meta_data = ast.literal_eval(meta_data_file.open().read())
+            # We only override the deterministic and verifier from file if not set
+            if self.deterministic is None:
+                if ("deterministic" in meta_data
+                        and meta_data["deterministic"] is not None):
+                    self.deterministic = meta_data["deterministic"]
+            if (self.verifier is None and "verifier" in meta_data
+                    and meta_data["verifier"] in verifiers.mapping):
+                self.verifier = verifiers.mapping[meta_data["verifier"]]
+        if self.deterministic is None:  # Default to False
+            self.deterministic = False
 
     def __str__(self: Solver) -> str:
         """Return the sting representation of the solver."""
@@ -308,7 +311,6 @@ class Solver(SparkleCallable):
                 f"--performance-dataframe {performance_dataframe.csv_filepath} "
                 f"--cutoff-time {cutoff_time} "
                 f"--log-dir {log_dir} "
-                f"{'--use-verifier' if self.verifier else ' '}"
                 f"{'--best-configuration-instances' if train_set else ''} {train_arg}"
                 for instance, run_index in itertools.product(instances, run_ids)]
         r = rrr.add_to_queue(

@@ -1,4 +1,4 @@
-"""Methods related to SAT specific runs."""
+"""Classes for verifying solutions."""
 from __future__ import annotations
 from pathlib import Path
 import subprocess
@@ -9,28 +9,22 @@ from sparkle.types import SolverStatus
 class SolutionVerifier:
     """Solution verifier base class."""
 
-    def __init__(self: SolutionVerifier) -> None:
-        """Initialize the solution verifier."""
-        raise NotImplementedError
-
-    def verifiy(self: SolutionVerifier) -> SolverStatus:
+    def verify(self: SolutionVerifier) -> SolverStatus:
         """Verify the solution."""
         raise NotImplementedError
 
 
 class SATVerifier(SolutionVerifier):
     """Class to handle the SAT verifier."""
-    sat_verifier_path = Path("sparkle/Components/Sparkle-SAT-verifier/SAT")
-
-    def __init__(self: SATVerifier) -> None:
-        """Initialize the SAT verifier."""
-        return
+    sat_verifier_path =\
+        Path(__file__).parent.parent / "Components/Sparkle-SAT-verifier/SAT"
 
     def __str__(self: SATVerifier) -> str:
         """Return the name of the SAT verifier."""
-        return "SATVerifier"
+        return SATVerifier.__name__
 
-    def verify(self: SATVerifier, instance: Path, raw_result: Path) -> SolverStatus:
+    @staticmethod
+    def verify(instance: Path, raw_result: Path) -> SolverStatus:
         """Run a SAT verifier and return its status."""
         return SATVerifier.sat_judge_correctness_raw_result(instance, raw_result)
 
@@ -70,3 +64,7 @@ class SATVerifier(SolutionVerifier):
                                      raw_result],
                                     capture_output=True)
         return SATVerifier.sat_get_verify_string(sat_verify.stdout.decode())
+
+
+# Define a mapping so we can translate between names and classes
+mapping = {SATVerifier.__name__: SATVerifier}
