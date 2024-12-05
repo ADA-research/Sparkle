@@ -64,3 +64,7 @@ class SATVerifier(SolutionVerifier):
                                      raw_result],
                                     capture_output=True)
         return SATVerifier.sat_get_verify_string(sat_verify.stdout.decode())
+
+
+# Define a mapping so we can translate between names and classes
+mapping = {SATVerifier.__name__: SATVerifier}
