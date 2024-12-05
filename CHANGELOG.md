@@ -17,6 +17,7 @@ Notable changes to Sparkle will be documented in this file.
 - Solver configuration now stores found configurations and their results in the PerformanceDataFrame [SPRK-358]
 - run_solvers_core is integrated now into the solver class [SPRK-358]
 - configure solver command now also runs default configuration, schedules train set validation and test set validation if given [SPRK-358]
+- Modified SolutionVerifier adding to solvers as a CLI argument that is saved in the Solver meta file instead of in the Settings file [SPRK-359]
 
 ### Removed
 - Validate configured vs default command has been removed as it is now redundant [SPRK-358]
