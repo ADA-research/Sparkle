@@ -52,16 +52,17 @@ class Solver(SparkleCallable):
         meta_data_file = self.directory / Solver.meta_data
         if self.runsolver_exec is None:
             self.runsolver_exec = self.directory / "runsolver"
-        if not meta_data_file.exists():
-            self.meta_data_file = None
-        else:
+        if meta_data_file.exists():
             meta_data = ast.literal_eval(meta_data_file.open().read())
-            self.deterministic = deterministic or meta_data["deterministic"]
-            if self.deterministic is None and "deterministic" in meta_data:
-                self.deterministic = meta_data["deterministic"] or False
+            if self.deterministic is None:
+                if ("deterministic" in meta_data
+                        and meta_data["deterministic"] is not None):
+                    self.deterministic = meta_data["deterministic"]
             if (self.verifier is None and "verifier" in meta_data
                     and meta_data["verifier"] in verifiers.mapping):
                 self.verifier = verifiers.mapping[meta_data["verifier"]]
+        if self.deterministic is None:  # Default to False
+            self.deterministic = False
 
     def __str__(self: Solver) -> str:
         """Return the sting representation of the solver."""
