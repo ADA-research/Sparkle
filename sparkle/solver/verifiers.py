@@ -116,6 +116,10 @@ class SolutionFileVerifier(SolutionVerifier):
             solution, outcome = SolverStatus(solution), SolverStatus(outcome)
             if solution == SolverStatus.UNKNOWN:
                 return outcome
+            elif solution == outcome:
+                return outcome
+            else:
+                return SolverStatus.WRONG
 
         if solution != outcome:
             return SolverStatus.WRONG
