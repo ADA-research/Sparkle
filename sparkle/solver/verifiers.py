@@ -112,11 +112,13 @@ class SolutionFileVerifier(SolutionVerifier):
             return SolverStatus.UNKNOWN
 
         outcome = solver_output[objective]
+        if solution in SolverStatus._value2member_map_:  # SAT type status
+            solution, outcome = SolverStatus(solution), SolverStatus(outcome)
+            if solution == SolverStatus.UNKNOWN:
+                return outcome
+
         if solution != outcome:
             return SolverStatus.WRONG
-
-        if outcome in SolverStatus._value2member_map_:  # SAT/UNSAT status
-            return SolverStatus(outcome)
         return SolverStatus.SUCCESS
 
 

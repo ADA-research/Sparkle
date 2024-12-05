@@ -30,11 +30,12 @@ params = get_solver_call_params(args_dict)
 # Execute the solver call
 try:
     solver_call = subprocess.run(solver_cmd + params,
-                             capture_output=True)
+                                 capture_output=True)
 except Exception as ex:
     print(f"Solver call failed with exception:\n{ex}")
 
 output_str = solver_call.stdout.decode()
+print(output_str)  # Print original output so it can be verified
 output_list = output_str.splitlines()
 
 quality = 1000000000000
