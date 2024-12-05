@@ -74,7 +74,12 @@ class SolutionFileVerifier(SolutionVerifier):
     """Class to handle the file verifier."""
 
     def __init__(self: SolutionFileVerifier, csv_file: Path) -> None:
-        """Initialize the verifier by building dictionary from csv."""
+        """Initialize the verifier by building dictionary from csv.
+
+        Args:
+            csv_file: path to the csv file. Requires lines to be of the form:
+                instance,objective,solution
+        """
         self.csv_file = csv_file
         lines = [line.split(",", maxsplit=2)
                  for line in self.csv_file.read_text().splitlines()]

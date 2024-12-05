@@ -8,6 +8,7 @@ Notable changes to Sparkle will be documented in this file.
 
 - Added no-copy argument to all CLI add commands so the user can create symbolic links to their files instead of copying [SPRK-356]
 - Added no-save argument to initialise command [SPRK-358]
+- Added SolutionFileVerifier to verify instance solutions from CSV file [SPRK-360]
 
 ### Changed
 
