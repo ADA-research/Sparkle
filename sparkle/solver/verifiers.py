@@ -76,6 +76,10 @@ class SolutionFileVerifier(SolutionVerifier):
                  for line in self.csv_file.read_text().splitlines()]
         self.solutions = {instance: solution for instance, solution in lines}
 
+    def __str__(self: SATVerifier) -> str:
+        """Return the name of the SAT verifier."""
+        return SolutionFileVerifier.__name__
+
     def verify(self: SolutionFileVerifier,
                instance: Path,
                outcome: object) -> SolverStatus:

@@ -46,16 +46,20 @@ def main(argv: list[str]) -> None:
     deterministic = args.deterministic
     solution_verifier = args.solution_verifier
 
-    # Make sure it is pointing to the verifiers module
-    if solution_verifier and solution_verifier not in verifiers.mapping:
-        print(f"ERROR: Unknown solution verifier {solution_verifier}!")
-        sys.exit(-1)
-
     check_for_initialise()
 
     if not solver_source.exists():
         print(f'Solver path "{solver_source}" does not exist!')
         sys.exit(-1)
+
+    # Make sure it is pointing to the verifiers module
+    if solution_verifier:
+        if Path(solution_verifier).is_file():  # File verifier
+            solution_verifier = (verifiers.SolutionFileVerifier.__name__,
+                                 solution_verifier)
+        elif solution_verifier not in verifiers.mapping:
+            print(f"ERROR: Unknown solution verifier {solution_verifier}!")
+            sys.exit(-1)
 
     nickname = args.nickname
 

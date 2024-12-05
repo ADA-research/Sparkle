@@ -59,9 +59,13 @@ class Solver(SparkleCallable):
                 if ("deterministic" in meta_data
                         and meta_data["deterministic"] is not None):
                     self.deterministic = meta_data["deterministic"]
-            if (self.verifier is None and "verifier" in meta_data
-                    and meta_data["verifier"] in verifiers.mapping):
-                self.verifier = verifiers.mapping[meta_data["verifier"]]
+            if self.verifier is None and "verifier" in meta_data:
+                if isinstance(meta_data["verifier"], tuple):  # File verifier
+                    self.verifier = verifiers.mapping[meta_data["verifier"][0]](
+                        Path(meta_data["verifier"][1])
+                    )
+                elif meta_data["verifier"] in verifiers.mapping:
+                    self.verifier = verifiers.mapping[meta_data["verifier"]]
         if self.deterministic is None:  # Default to False
             self.deterministic = False
 
