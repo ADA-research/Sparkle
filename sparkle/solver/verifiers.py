@@ -66,5 +66,38 @@ class SATVerifier(SolutionVerifier):
         return SATVerifier.sat_get_verify_string(sat_verify.stdout.decode())
 
 
+class SolutionFileVerifier(SolutionVerifier):
+    """Class to handle the file verifier."""
+
+    def __init__(self: SolutionFileVerifier, csv_file: Path) -> None:
+        """Initialize the verifier by building dictionary from csv."""
+        self.csv_file = csv_file
+        lines = [line.split(",", maxsplit=1)
+                 for line in self.csv_file.read_text().splitlines()]
+        self.solutions = {instance: solution for instance, solution in lines}
+
+    def verify(self: SolutionFileVerifier,
+               instance: Path,
+               outcome: object) -> SolverStatus:
+        """Verify the solution.
+
+        Args:
+            instance: instance to verify, solution found by instance name as key
+            outcome: outcome to verify, must be string or stringifiable
+
+        Returns:
+            The status of the solver on the instance
+        """
+        instance, outcome = instance.name, str(outcome)
+        if instance not in self.solutions:
+            return SolverStatus.UNKNOWN
+        if self.solutions[instance] != outcome:
+            return SolverStatus.WRONG
+        if outcome in SolverStatus._value2member_map_:  # SAT/UNSAT status
+            return SolverStatus(outcome)
+        return SolverStatus.SUCCESS
+
+
 # Define a mapping so we can translate between names and classes
-mapping = {SATVerifier.__name__: SATVerifier}
+mapping = {SATVerifier.__name__: SATVerifier,
+           SolutionFileVerifier.__name__: SolutionFileVerifier}
