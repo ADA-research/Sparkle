@@ -201,7 +201,7 @@ class SMAC3Scenario(ConfigurationScenario):
                  cutoff_time: int = None,
                  number_of_runs: int = None,
                  smac_facade: smacfacades.AbstractFacade =
-                 smacfacades.HyperparameterOptimizationFacade,
+                 smacfacades.AlgorithmConfigurationFacade,
                  crash_cost: float | list[float] = np.inf,
                  termination_cost_threshold: float | list[float] = np.inf,
                  walltime_limit: float = np.inf,
@@ -232,7 +232,7 @@ class SMAC3Scenario(ConfigurationScenario):
                 is allowed to run. Is managed by RunSolver, not pynisher.
             number_of_runs: int
                 The number of times this scenario will be executed with different seeds.
-            smac_facade: AbstractFacade, defaults to HyperparameterOptimizationFacade
+            smac_facade: AbstractFacade, defaults to AlgorithmConfigurationFacade
                 The SMAC facade to use for Optimisation.
             crash_cost: float | list[float], defaults to np.inf
                 Defines the cost for a failed trial. In case of multi-objective,

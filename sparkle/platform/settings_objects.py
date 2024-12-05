@@ -137,7 +137,7 @@ class Settings:
 
     # Default SMAC3 settings
     DEFAULT_smac3_number_of_runs = None
-    DEFAULT_smac3_facade = smac_facades.HyperparameterOptimizationFacade.__name__
+    DEFAULT_smac3_facade = smac_facades.AlgorithmConfigurationFacade.__name__
     DEFAULT_smac3_facade_max_ratio = None
     DEFAULT_smac3_crash_cost = None
     DEFAULT_smac3_termination_cost_threshold = None
