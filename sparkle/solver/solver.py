@@ -57,11 +57,11 @@ class Solver(SparkleCallable):
         else:
             meta_data = ast.literal_eval(meta_data_file.open().read())
             self.deterministic = deterministic or meta_data["deterministic"]
-            if self.verifier is None and meta_data["verifier"] is not None:
+            if self.deterministic is None and "deterministic" in meta_data:
+                self.deterministic = meta_data["deterministic"] or False
+            if (self.verifier is None and "verifier" in meta_data
+                    and meta_data["verifier"] in verifiers.mapping):
                 self.verifier = verifiers.mapping[meta_data["verifier"]]
-
-        if self.deterministic is None:
-            self.deterministic = False  # Always default to False
 
     def __str__(self: Solver) -> str:
         """Return the sting representation of the solver."""
