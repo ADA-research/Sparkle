@@ -54,6 +54,7 @@ class Solver(SparkleCallable):
             self.runsolver_exec = self.directory / "runsolver"
         if meta_data_file.exists():
             meta_data = ast.literal_eval(meta_data_file.open().read())
+            # We only override the deterministic and verifier from file if not set
             if self.deterministic is None:
                 if ("deterministic" in meta_data
                         and meta_data["deterministic"] is not None):
