@@ -5,7 +5,7 @@ Notable changes to Sparkle will be documented in this file.
 ## [0.9.1] - 2024/??/??
 
 ### Added
-
+- Added the SMAC3 configurator to Sparkle [SPRK-335]
 - Added no-copy argument to all CLI add commands so the user can create symbolic links to their files instead of copying [SPRK-356]
 - Added no-save argument to initialise command [SPRK-358]
 - Added SolutionFileVerifier to verify instance solutions from CSV file [SPRK-360]

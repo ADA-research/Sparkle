@@ -1,5 +1,4 @@
 """File to handle a solver and its directories."""
-
 from __future__ import annotations
 import sys
 import itertools
@@ -8,6 +7,8 @@ import shlex
 import ast
 import json
 from pathlib import Path
+
+from ConfigSpace import ConfigurationSpace
 
 import runrunner as rrr
 from runrunner.local import LocalRun
@@ -128,6 +129,14 @@ class Solver(SparkleCallable):
             return
         parser.export(convention=port_type,
                       destination=target_pcs_file)
+
+    def get_configspace(self: Solver) -> ConfigurationSpace:
+        """Get the parameter content of the PCS file."""
+        if not (pcs_file := self.get_pcs_file()):
+            return None
+        parser = pcsparser.PCSParser()
+        parser.load(str(pcs_file), convention="smac")
+        return parser.get_configspace()
 
     def get_forbidden(self: Solver, port_type: pcsparser.PCSConvention) -> Path:
         """Get the path to the file containing forbidden parameter combinations."""
@@ -253,8 +262,9 @@ class Solver(SparkleCallable):
             for i, job in enumerate(run.jobs):
                 solver_cmd = cmds[i].split(" ")
                 solver_output = Solver.parse_solver_output(run.jobs[i].stdout,
-                                                           solver_cmd,
-                                                           self.verifier)
+                                                           solver_call=solver_cmd,
+                                                           objectives=objectives,
+                                                           verifier=self.verifier)
                 solver_outputs.append(solver_output)
             return solver_outputs if len(solver_outputs) > 1 else solver_output
         return run
@@ -345,12 +355,15 @@ class Solver(SparkleCallable):
     def parse_solver_output(
             solver_output: str,
             solver_call: list[str | Path] = None,
+            objectives: list[SparkleObjective] = None,
             verifier: verifiers.SolutionVerifier = None) -> dict[str, Any]:
         """Parse the output of the solver.
 
         Args:
             solver_output: The output of the solver run which needs to be parsed
             solver_call: The solver call used to run the solver
+            objectives: The objectives to apply to the solver output
+            verifier: The verifier to check the solver output
 
         Returns:
             Dictionary representing the parsed solver output
@@ -364,6 +377,7 @@ class Solver(SparkleCallable):
             parsed_output = ast.literal_eval(solver_output)
         # cast status attribute from str to Enum
         parsed_output["status"] = SolverStatus(parsed_output["status"])
+        # Apply objectives to parsed output, runtime based objectives added here
         if verifier is not None and used_runsolver:
             # Horrible hack to get the instance from the solver input
             solver_call_str: str = " ".join(solver_call)
@@ -375,16 +389,23 @@ class Solver(SparkleCallable):
             parsed_output["status"] = verifier.verify(
                 target_instance, parsed_output, solver_call)
 
+        # Create objective map
+        objectives = {o.stem: o for o in objectives} if objectives else {}
+        removable_keys = ["cutoff_time"]  # Keys to remove
+
         # apply objectives to parsed output, runtime based objectives added here
         for key, value in parsed_output.items():
-            if key == "status":
-                continue
-            objective = resolve_objective(key)
-            if objective is None:
+            if objectives and key in objectives:
+                objective = objectives[key]
+                removable_keys.append(key)  # We translate it into the full name
+            else:
+                objective = resolve_objective(key)
+            # If not found in objectives, resolve to which objective the output belongs
+            if objective is None:  # Could not parse, skip
                 continue
             if objective.use_time == UseTime.NO:
                 if objective.post_process is not None:
-                    parsed_output[objective] = objective.post_process(value)
+                    parsed_output[key] = objective.post_process(value)
             else:
                 if not used_runsolver:
                     continue
@@ -397,6 +418,15 @@ class Solver(SparkleCallable):
                         parsed_output[key],
                         parsed_output["cutoff_time"],
                         parsed_output["status"])
-        if "cutoff_time" in parsed_output:
-            del parsed_output["cutoff_time"]
+
+        # Replace or remove keys based on the objective names
+        for key in removable_keys:
+            if key in parsed_output:
+                if key in objectives:
+                    # Map the result to the objective
+                    parsed_output[objectives[key].name] = parsed_output[key]
+                    if key != objectives[key].name:  # Only delete actual mappings
+                        del parsed_output[key]
+                else:
+                    del parsed_output[key]
         return parsed_output

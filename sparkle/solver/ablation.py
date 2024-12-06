@@ -78,6 +78,7 @@ class AblationScenario:
         Returns:
             None
         """
+        self.concurrent_clis = concurrent_clis
         ablation_scenario_dir = self.scenario_dir
         objective = self.config_scenario.sparkle_objective
         pcs = self.solver.get_pcs()
@@ -119,7 +120,7 @@ class AblationScenario:
                   f"overall_obj = {objective_str}\n"
                   f"cutoffTime = {cutoff_time}\n"
                   f"cutoff_length = {cutoff_length}\n"
-                  f"cli-cores = {concurrent_clis}\n"
+                  f"cli-cores = {self.concurrent_clis}\n"
                   f"useRacing = {ablation_racing}\n"
                   "seed = 1234\n"
                   f"paramfile = {pcs_file_path}\n"
@@ -199,14 +200,16 @@ class AblationScenario:
         # 1. submit the ablation to the runrunner queue
         cmd = (f"{AblationScenario.ablation_executable.absolute()} "
                "--optionFile ablation_config.txt")
-
+        srun_options = ["-N1", "-n1", f"-c{self.concurrent_clis}"]
+        sbatch_options += [f"--cpus-per-task={self.concurrent_clis}"]
         run_ablation = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
             name=f"Ablation analysis: {self.solver.name} on {self.train_set.name}",
             base_dir=sl.caller_log_dir,
             path=self.scenario_dir,
-            sbatch_options=sbatch_options)
+            sbatch_options=sbatch_options,
+            srun_options=srun_options)
 
         runs = []
         if run_on == Runner.LOCAL:

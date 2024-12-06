@@ -10,6 +10,7 @@ from sparkle.platform import generate_report_for_configuration as sgrch
 from sparkle.configurator.implementations import SMAC2
 from sparkle.types.objective import SparkleObjective, PAR
 from sparkle.solver import Solver
+from sparkle.instance import Instance_Set
 
 
 class TestGenerateConfigurationReport(TestCase):
@@ -25,16 +26,18 @@ class TestGenerateConfigurationReport(TestCase):
         self.configurator = SMAC2(Path(), Path())
         self.solver_path = Path("tests/test_files/Solvers/Test-Solver")
         self.solver = Solver(self.solver_path, raw_output_directory=Path(""))
-        train_instance = "train-instance"
-        test_instance = "test-instance"
+        train_instance_set = Instance_Set(Path(
+            "tests/test_files/Instances/Train-Instance-Set"))
+        test_instance_set = Instance_Set(Path(
+            "tests/test_files/Instances/Test-Instance-Set"))
         self.configurator_path = self.configurator.configurator_path
         self.configuration_scenario = self.configurator.scenario_class()(
             self.solver,
-            Path(train_instance),
+            train_instance_set,
             [self.test_objective_runtime],
             self.configurator.output_path)
         self.ablation_scenario = AblationScenario(
-            self.configuration_scenario, Path(test_instance), Path(""))
+            self.configuration_scenario, test_instance_set, Path(""))
 
     @patch("sparkle.solver.ablation.AblationScenario.check_for_ablation")
     def test_get_ablation_bool_true(

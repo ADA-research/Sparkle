@@ -1,0 +1,223 @@
+{
+  "stats": {
+    "submitted": 12,
+    "finished": 12,
+    "running": 0
+  },
+  "data": [
+    [
+      1,
+      "Instances/PTN/Ptn-7824-b03.cnf",
+      1045889673,
+      null,
+      600.0,
+      60.1805,
+      3,
+      1731924955.461108,
+      1731925042.1518188,
+      {}
+    ],
+    [
+      1,
+      "Instances/PTN/Ptn-7824-b11.cnf",
+      1045889673,
+      null,
+      600.0,
+      60.1245,
+      3,
+      1731925042.1711597,
+      1731925123.1243706,
+      {}
+    ],
+    [
+      1,
+      "Instances/PTN/Ptn-7824-b17.cnf",
+      1045889673,
+      null,
+      600.0,
+      60.0886,
+      3,
+      1731925123.1364515,
+      1731925201.646416,
+      {}
+    ],
+    [
+      2,
+      "Instances/PTN/Ptn-7824-b11.cnf",
+      1045889673,
+      null,
+      1.49752,
+      1.49752,
+      1,
+      1731925201.6635034,
+      1731925206.6569736,
+      {}
+    ],
+    [
+      2,
+      "Instances/PTN/Ptn-7824-b17.cnf",
+      1045889673,
+      null,
+      2.37963,
+      2.37963,
+      1,
+      1731925206.670532,
+      1731925212.1765268,
+      {}
+    ],
+    [
+      2,
+      "Instances/PTN/Ptn-7824-b03.cnf",
+      1045889673,
+      null,
+      600.0,
+      60.1162,
+      3,
+      1731925212.1888175,
+      1731925291.5995016,
+      {}
+    ],
+    [
+      3,
+      "Instances/PTN/Ptn-7824-b17.cnf",
+      1045889673,
+      null,
+      3.41818,
+      3.41818,
+      1,
+      1731925291.6080866,
+      1731925299.8121095,
+      {}
+    ],
+    [
+      3,
+      "Instances/PTN/Ptn-7824-b03.cnf",
+      1045889673,
+      null,
+      600.0,
+      60.1059,
+      3,
+      1731925299.8235402,
+      1731925379.718434,
+      {}
+    ],
+    [
+      3,
+      "Instances/PTN/Ptn-7824-b11.cnf",
+      1045889673,
+      null,
+      600.0,
+      60.1654,
+      3,
+      1731925379.7296698,
+      1731925458.6044118,
+      {}
+    ],
+    [
+      4,
+      "Instances/PTN/Ptn-7824-b03.cnf",
+      1045889673,
+      null,
+      600.0,
+      60.0974,
+      3,
+      1731925458.6143248,
+      1731925540.5045416,
+      {}
+    ],
+    [
+      4,
+      "Instances/PTN/Ptn-7824-b17.cnf",
+      1045889673,
+      null,
+      1.67974,
+      1.67974,
+      1,
+      1731925540.5196502,
+      1731925547.2798645,
+      {}
+    ],
+    [
+      4,
+      "Instances/PTN/Ptn-7824-b11.cnf",
+      1045889673,
+      null,
+      600.0,
+      60.0653,
+      3,
+      1731925547.290348,
+      1731925617.9341013,
+      {}
+    ]
+  ],
+  "configs": {
+    "1": {
+      "init_solution": "1",
+      "perform_aspiration": "0",
+      "perform_clause_weight": "0",
+      "perform_double_cc": "1",
+      "perform_first_div": "1",
+      "perform_pac": "0",
+      "sel_clause_div": "1",
+      "sel_var_break_tie_greedy": "3",
+      "sel_var_div": "3",
+      "beta_hscore": 12243,
+      "d_hscore": 1,
+      "prob_first_div": 0.6257762248162
+    },
+    "2": {
+      "init_solution": "2",
+      "perform_aspiration": "1",
+      "perform_clause_weight": "1",
+      "perform_double_cc": "0",
+      "perform_first_div": "0",
+      "perform_pac": "1",
+      "sel_clause_div": "2",
+      "sel_var_break_tie_greedy": "2",
+      "sel_var_div": "4",
+      "beta_hscore": 2688,
+      "d_hscore": 9,
+      "prob_pac": 0.0028671877126,
+      "sel_clause_weight_scheme": "1",
+      "p_swt": 0.7162626739591,
+      "q_swt": 0.2213662965223,
+      "threshold_swt": 665
+    },
+    "3": {
+      "init_solution": "2",
+      "perform_aspiration": "0",
+      "perform_clause_weight": "0",
+      "perform_double_cc": "1",
+      "perform_first_div": "0",
+      "perform_pac": "1",
+      "sel_clause_div": "1",
+      "sel_var_break_tie_greedy": "1",
+      "sel_var_div": "6",
+      "prob_novelty": 0.509714611806,
+      "prob_pac": 0.0747312321281
+    },
+    "4": {
+      "init_solution": "1",
+      "perform_aspiration": "1",
+      "perform_clause_weight": "1",
+      "perform_double_cc": "0",
+      "perform_first_div": "1",
+      "perform_pac": "0",
+      "sel_clause_div": "2",
+      "sel_var_break_tie_greedy": "4",
+      "sel_var_div": "1",
+      "gamma_hscore2": 218,
+      "prob_first_div": 0.0042535526925,
+      "sel_clause_weight_scheme": "1",
+      "p_swt": 0.8805690212175,
+      "q_swt": 0.4821782084182,
+      "threshold_swt": 933
+    }
+  },
+  "config_origins": {
+    "1": "Initial Design: Sobol",
+    "2": "Initial Design: Sobol",
+    "3": "Initial Design: Sobol",
+    "4": "Initial Design: Sobol"
+  }
+}

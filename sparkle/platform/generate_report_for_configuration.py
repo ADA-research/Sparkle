@@ -96,11 +96,14 @@ def plot_configured_vs_default(
                    "output_dir": target_directory
                    }
     # Check if the scale of the axis can be considered linear
-    linearity_x = linregress([p[0] for p in points], range(len(points))).rvalue > 0.5
-    linearity_y = linregress([p[1] for p in points], range(len(points))).rvalue > 0.5
-    if not linearity_x or not linearity_y:
-        plot_params["scale"] = "log"
-        plot_params["replace_zeros"] = True
+    x_points = [p[0] for p in points]
+    y_points = [p[1] for p in points]
+    if not len(set(x_points)) == 1 and not len(set(y_points)) == 1:
+        linearity_x = linregress(x_points, range(len(points))).rvalue > 0.5
+        linearity_y = linregress(y_points, range(len(points))).rvalue > 0.5
+        if not linearity_x or not linearity_y:
+            plot_params["scale"] = "log"
+            plot_params["replace_zeros"] = True
 
     stex.generate_comparison_plot(points,
                                   figure_filename,
@@ -122,16 +125,19 @@ def get_timeouts_instanceset(config_output: ConfigurationOutput,
     """
     solver_key = str(config_output.solver.directory)
     instance_keys = [str(instance) for instance in instance_set.instance_paths]
+    # Determine status objective name
+    objective = [o for o in config_output.performance_data.objectives
+                 if o.stem.lower() == "status"][0]
     _, configured_status = config_output.performance_data.configuration_performance(
         solver_key,
         configuration=config_output.best_configuration,
-        objective="status",
+        objective=objective,
         instances=instance_keys,
         per_instance=True)
     _, default_status = config_output.performance_data.configuration_performance(
         solver_key,
         configuration=PerformanceDataFrame.missing_value,
-        objective="status",
+        objective=objective,
         instances=instance_keys,
         per_instance=True)
 
@@ -289,6 +295,8 @@ def get_dict_variable_to_value_common(config_scenario: ConfigurationScenario,
     latex_dict["numConfiguratorRuns"] = config_scenario.number_of_runs
     if hasattr(config_scenario, "wallclock_time"):
         latex_dict["wholeTimeBudget"] = config_scenario.wallclock_time
+    elif hasattr(config_scenario, "smac3_scenario"):  # SMAC3
+        latex_dict["wholeTimeBudget"] = config_scenario.smac3_scenario.walltime_limit
     else:
         latex_dict["wholeTimeBudget"] = config_scenario.max_time
     latex_dict["eachRunCutoffTime"] = config_scenario.cutoff_time

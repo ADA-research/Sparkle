@@ -1,4 +1,4 @@
-"""Test public methods of SMAC2 configurator."""
+"""Test methods of SMAC2 configurator."""
 from __future__ import annotations
 
 import shutil
@@ -162,6 +162,6 @@ class TestConfigurationScenarioSMAC2(TestCase):
         self.assertEqual(scenario.solver.name, "PbO-CCSAT-Generic")
         self.assertEqual(scenario.instance_set.name, "PTN")
         self.assertEqual(scenario.sparkle_objectives[0].name, "PAR10")
-        self.assertEqual(scenario.number_of_runs, 1)
+        self.assertEqual(scenario.number_of_runs, 2)
         self.assertEqual(scenario.wallclock_time, 600)
         self.assertEqual(scenario.cutoff_time, 60)

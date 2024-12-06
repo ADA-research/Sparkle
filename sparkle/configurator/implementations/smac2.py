@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: UTF-8 -*-
 """Configurator classes to implement SMAC2 in Sparkle."""
 from __future__ import annotations
 from pathlib import Path
@@ -21,9 +19,9 @@ from sparkle.types import SparkleObjective
 class SMAC2(Configurator):
     """Class for SMAC2 (Java) configurator."""
     configurator_path = Path(__file__).parent.parent.parent.resolve() /\
-        "Components/smac-v2.10.03-master-778"
+        "Components/smac2-v2.10.03-master-778"
     configurator_executable = configurator_path / "smac"
-    configurator_target = configurator_path / "smac_target_algorithm.py"
+    configurator_target = configurator_path / "smac2_target_algorithm.py"
 
     version = "2.10.03"
     full_name = "Sequential Model-based Algorithm Configuration"
@@ -31,7 +29,7 @@ class SMAC2(Configurator):
     def __init__(self: SMAC2,
                  base_dir: Path,
                  output_path: Path) -> None:
-        """Returns the SMAC configurator, Java SMAC V2.10.03.
+        """Returns the SMAC2 configurator, Java SMAC V2.10.03.
 
         Args:
             objectives: The objectives to optimize. Only supports one objective.
@@ -84,8 +82,6 @@ class SMAC2(Configurator):
                 "Please ensure Java is installed and try again."
             )
         scenario.create_scenario()
-        output_csv = scenario.validation / "configurations.csv"
-        output_csv.parent.mkdir(exist_ok=True, parents=True)
         # We set the seed over the last n run ids in the dataframe
         seeds = data_target.run_ids[data_target.num_runs - scenario.number_of_runs:]
         output = [f"{(scenario.results_directory).absolute()}/"
@@ -209,7 +205,8 @@ class SMAC2(Configurator):
 
 class SMAC2Scenario(ConfigurationScenario):
     """Class to handle SMAC2 configuration scenarios."""
-    def __init__(self: SMAC2Scenario, solver: Solver,
+    def __init__(self: SMAC2Scenario,
+                 solver: Solver,
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
                  parent_directory: Path,
@@ -274,9 +271,6 @@ class SMAC2Scenario(ConfigurationScenario):
 
         # Scenario Paths
         self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
-        self.tmp = self.directory / "tmp"
-        self.validation = self.directory / "validation"
-        self.results_directory = self.directory / "results"
 
         # SMAC2 Specific
         self.outdir_train = self.directory / "outdir_train_configuration"
@@ -295,6 +289,7 @@ class SMAC2Scenario(ConfigurationScenario):
         # Create empty directories as needed
         self.outdir_train.mkdir()
         self.tmp.mkdir()
+        self.validation.mkdir()
         self.results_directory.mkdir(parents=True)  # Prepare results directory
 
         self._prepare_instances()
@@ -359,24 +354,8 @@ class SMAC2Scenario(ConfigurationScenario):
         """Create CSV file from feature data."""
         self.feature_file_path = Path(self.directory
                                       / f"{self.instance_set.name}_features.csv")
-        self.feature_data.to_csv(self.directory
-                                 / self.feature_file_path, index_label="INSTANCE_NAME")
-
-    def _clean_up_scenario_dirs(self: SMAC2Scenario,
-                                configurator_path: Path,) -> list[Path]:
-        """Yield directories to clean up after configuration scenario is done.
-
-        Returns:
-            list[str]: Full paths to directories that can be removed
-        """
-        result = []
-        configurator_solver_path = configurator_path / "scenarios"\
-            / f"{self.solver.name}_{self.instance_set.name}"
-
-        for index in range(self.number_of_runs):
-            dir = configurator_solver_path / str(index)
-            result.append(dir)
-        return result
+        self.feature_data.to_csv(self.directory / self.feature_file_path,
+                                 index_label="INSTANCE_NAME")
 
     def serialize_scenario(self: SMAC2Scenario) -> dict:
         """Transform ConfigurationScenario to dictionary format."""

@@ -79,11 +79,6 @@ class Configurator:
         """
         raise NotImplementedError
 
-    def set_scenario_dirs(self: Configurator,
-                          solver: Solver, instance_set: InstanceSet) -> None:
-        """Patching method to allow the rebuilding of configuration scenario."""
-        raise NotImplementedError
-
     def get_status_from_logs(self: Configurator) -> None:
         """Method to scan the log files of the configurator for warnings."""
         raise NotImplementedError
@@ -109,11 +104,15 @@ class ConfigurationScenario:
         self.sparkle_objectives = sparkle_objectives
         self.name = f"{self.solver.name}_{self.instance_set.name}"
 
+        if self.instance_set.size == 0:
+            raise Exception("Cannot configure on an empty instance set "
+                            f"('{instance_set.name}').")
+
         self.directory = parent_directory / self.name
         self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
-        self.validation: Path = None
-        self.tmp: Path = None
-        self.results_directory: Path = None
+        self.validation: Path = self.directory / "validation"
+        self.tmp: Path = self.directory / "tmp"
+        self.results_directory: Path = self.directory / "results"
 
     def create_scenario(self: ConfigurationScenario, parent_directory: Path) -> None:
         """Create scenario with solver and instances in the parent directory.

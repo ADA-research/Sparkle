@@ -107,10 +107,13 @@ def main(argv: list[str]) -> None:
     else:
         if isinstance(run, dict):
             run = [run]
+        # Resolve objective keys
+        status_key = [key for key in run[0] if key.lower().startswith("status")][0]
+        time_key = [key for key in run[0] if key.lower().startswith("cpu_time")][0]
         for i, solver_output in enumerate(run):
             print(f"Execution of {solver.name} on instance "
                   f"{data_set.instance_names[i]} completed with status "
-                  f"{solver_output['status']} in {solver_output['cpu_time']} seconds.")
+                  f"{solver_output[status_key]} in {solver_output[time_key]} seconds.")
         print("Running configured solver done!")
 
     # Write used settings to file
