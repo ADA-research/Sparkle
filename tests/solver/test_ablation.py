@@ -7,7 +7,7 @@ from sparkle.configurator.implementations import SMAC2Scenario
 from sparkle.solver.ablation import AblationScenario
 from sparkle.solver import Solver
 from sparkle.types.objective import PAR
-from sparkle.instance import InstanceSet
+from sparkle.instance import Instance_Set
 
 
 class TestAblationScenario(TestCase):
@@ -16,9 +16,11 @@ class TestAblationScenario(TestCase):
     def setUp(self: TestAblationScenario) -> None:
         """Setup objects for tests."""
         self.solver = Solver(Path("tests/test_files/Solvers/Test-Solver"))
-        self.dataset: InstanceSet = InstanceSet(Path("Instances/Train-Instance-Set"))
+        self.dataset = Instance_Set(Path(
+            "tests/test_files/Instances/Test-Instance-Set"))
         self.objective = PAR(10)
-        self.test_dataset: InstanceSet = InstanceSet(Path("Instances/Test-Instance-Set"))
+        self.test_dataset = Instance_Set(Path(
+            "tests/test_files/Instances/Test-Instance-Set"))
         self.output_directory: Path = Path("Output/ablation_test")
         self.ablation_executable: Path = None
         self.validation_executable: Path = None
