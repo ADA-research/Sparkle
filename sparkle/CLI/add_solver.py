@@ -10,7 +10,7 @@ from pathlib import Path
 from sparkle.platform import file_help as sfh
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
-from sparkle.solver import Solver
+from sparkle.solver import Solver, verifiers
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
@@ -22,6 +22,8 @@ def parser_function() -> argparse.ArgumentParser:
         description="Add a solver to the Sparkle platform.")
     parser.add_argument(*ac.DeterministicArgument.names,
                         **ac.DeterministicArgument.kwargs)
+    parser.add_argument(*ac.SolutionVerifierArgument.names,
+                        **ac.SolutionVerifierArgument.kwargs)
     parser.add_argument(*ac.NicknameSolverArgument.names,
                         **ac.NicknameSolverArgument.kwargs)
     parser.add_argument(*ac.SolverPathArgument.names, **ac.SolverPathArgument.kwargs)
@@ -42,12 +44,22 @@ def main(argv: list[str]) -> None:
     args = parser.parse_args(argv)
     solver_source = Path(args.solver_path)
     deterministic = args.deterministic
+    solution_verifier = args.solution_verifier
 
     check_for_initialise()
 
     if not solver_source.exists():
         print(f'Solver path "{solver_source}" does not exist!')
         sys.exit(-1)
+
+    # Make sure it is pointing to the verifiers module
+    if solution_verifier:
+        if Path(solution_verifier).is_file():  # File verifier
+            solution_verifier = (verifiers.SolutionFileVerifier.__name__,
+                                 solution_verifier)
+        elif solution_verifier not in verifiers.mapping:
+            print(f"ERROR: Unknown solution verifier {solution_verifier}!")
+            sys.exit(-1)
 
     nickname = args.nickname
 
@@ -91,7 +103,8 @@ def main(argv: list[str]) -> None:
 
     # Save the deterministic bool in the solver
     with (solver_directory / Solver.meta_data).open("w+") as fout:
-        fout.write(str({"deterministic": deterministic}))
+        fout.write(str({"deterministic": deterministic,
+                        "verifier": solution_verifier}))
 
     # Add RunSolver executable to the solver
     runsolver_path = gv.settings().DEFAULT_runsolver_exec

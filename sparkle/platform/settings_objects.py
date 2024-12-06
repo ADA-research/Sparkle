@@ -12,7 +12,6 @@ from sparkle.types import SparkleObjective, resolve_objective
 from sparkle.types.objective import PAR
 from sparkle.solver import Selector
 from sparkle.configurator.configurator import Configurator
-from sparkle.solver.verifier import SATVerifier
 from sparkle.configurator import implementations as cim
 
 from runrunner import Runner
@@ -116,7 +115,6 @@ class Settings:
     # Constant default values
     DEFAULT_general_sparkle_objective = PAR(10)
     DEFAULT_general_sparkle_configurator = cim.SMAC2.__name__
-    DEFAULT_general_solution_verifier = str(None)
     DEFAULT_general_target_cutoff_time = 60
     DEFAULT_general_extractor_cutoff_time = 60
     DEFAULT_number_of_jobs_in_parallel = 25
@@ -172,7 +170,6 @@ class Settings:
         self.__general_sparkle_objective_set = SettingState.NOT_SET
         self.__general_sparkle_configurator_set = SettingState.NOT_SET
         self.__general_sparkle_selector_set = SettingState.NOT_SET
-        self.__general_solution_verifier_set = SettingState.NOT_SET
         self.__general_target_cutoff_time_set = SettingState.NOT_SET
         self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
         self.__general_verbosity_set = SettingState.NOT_SET
@@ -256,13 +253,6 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
                     self.set_general_sparkle_selector(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("solution_verifier", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.get(section, option).lower()
-                    self.set_general_solution_verifier(value, state)
                     file_settings.remove_option(section, option)
 
             option_names = ("target_cutoff_time",
@@ -686,28 +676,6 @@ class Settings:
             self.set_general_sparkle_selector()
         return Selector(Path(self.__settings["general"]["selector"]),
                         self.DEFAULT_selection_output_raw)
-
-    def set_general_solution_verifier(
-            self: Settings, value: str = DEFAULT_general_solution_verifier,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the solution verifier to use."""
-        section = "general"
-        name = "solution_verifier"
-
-        if value is not None and self.__check_setting_state(
-                self.__general_solution_verifier_set, origin, name):
-            self.__init_section(section)
-            self.__general_solution_verifier_set = origin
-            self.__settings[section][name] = value
-
-    def get_general_solution_verifier(self: Settings) -> object:
-        """Return the solution verifier to use."""
-        if self.__general_solution_verifier_set == SettingState.NOT_SET:
-            self.set_general_solution_verifier()
-        name = self.__settings["general"]["solution_verifier"].lower()
-        if name == str(SATVerifier()).lower():
-            return SATVerifier()
-        return None
 
     def set_general_target_cutoff_time(
             self: Settings, value: int = DEFAULT_general_target_cutoff_time,

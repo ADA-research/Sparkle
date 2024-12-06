@@ -11,7 +11,6 @@ import time
 from runrunner import Runner
 
 from sparkle.solver import Solver
-from sparkle.solver.verifier import SATVerifier
 from sparkle.instance import Instance_Set
 from sparkle.types import resolve_objective
 from sparkle.structures import PerformanceDataFrame
@@ -40,8 +39,6 @@ if __name__ == "__main__":
                              "the PerformanceDataFrame or generate one.")
     parser.add_argument("--cutoff-time", type=int, required=False,
                         help="the cutoff time for the solver.")
-    parser.add_argument("--use-verifier", required=False, type=bool,
-                        help="Indicator whether to use SAT solution verifier.")
     parser.add_argument("--best-configuration-instances", required=False, type=str,
                         help="If given, will ignore any given configurations, and try to"
                              " determine the best found configurations over the given "
@@ -63,8 +60,7 @@ if __name__ == "__main__":
         instance_path = data_set.get_path_by_name(instance_name)
         instance_key = instance_name
 
-    verifier = SATVerifier() if args.use_verifier else None
-    solver = Solver(args.solver, verifier=verifier)
+    solver = Solver(args.solver)
 
     if not args.configuration or not args.seed or not args.objectives:  # Read
         # Desyncronize from other possible jobs writing to the same file

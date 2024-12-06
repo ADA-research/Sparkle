@@ -12,6 +12,7 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
+from sparkle.structures import PerformanceDataFrame
 from sparkle.instance import Instance_Set
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.initialise import check_for_initialise
@@ -115,6 +116,12 @@ def main(argv: list[str]) -> None:
     configurator = gv.settings().get_general_sparkle_configurator()
     config_scenario = configurator.scenario_class().find_scenario(
         configurator.output_path, solver, instance_set_train)
+    performance_data = PerformanceDataFrame(
+        gv.settings().DEFAULT_performance_data_path)
+    best_configuration, _ = performance_data.best_configuration(
+        str(config_scenario.solver.directory),
+        config_scenario.sparkle_objective,
+        instances=[str(p) for p in config_scenario.instance_set.instance_paths])
     if config_scenario is None:
         print("No configuration scenario found for combination:\n"
               f"{configurator.name} {solver.name} {instance_set_train.name}")
@@ -131,19 +138,28 @@ def main(argv: list[str]) -> None:
         print("Configuration exists!")
 
     ablation_scenario = AblationScenario(
-        solver, instance_set_train, instance_set_test,
+        config_scenario,
+        instance_set_test,
         gv.settings().DEFAULT_ablation_output,
-        gv.settings().DEFAULT_ablation_exec,
-        gv.settings().DEFAULT_ablation_validation_exec, override_dirs=True)
+        override_dirs=True)
 
     # Instances
     ablation_scenario.create_instance_file()
     ablation_scenario.create_instance_file(test=True)
 
     # Configurations
-    ablation_scenario.create_configuration_file()
+    ablation_scenario.create_configuration_file(
+        cutoff_time=gv.settings().get_general_target_cutoff_time(),
+        cutoff_length=gv.settings().get_smac2_target_cutoff_length(),  # NOTE: SMAC2
+        concurrent_clis=gv.settings().get_slurm_max_parallel_runs_per_node(),
+        best_configuration=best_configuration,
+        ablation_racing=gv.settings().get_ablation_racing_flag(),
+    )
+
     print("Submiting ablation run...")
-    runs = ablation_scenario.submit_ablation(run_on=run_on)
+    runs = ablation_scenario.submit_ablation(
+        sbatch_options=gv.settings().get_slurm_extra_options(as_args=True),
+        run_on=run_on)
 
     if run_on == Runner.LOCAL:
         print("Ablation analysis finished!")

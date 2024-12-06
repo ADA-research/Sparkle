@@ -17,7 +17,7 @@ from runrunner.base import Status, Runner
 
 from sparkle.tools import pcsparser, RunSolver
 from sparkle.types import SparkleCallable, SolverStatus
-from sparkle.solver.verifier import SolutionVerifier
+from sparkle.solver import verifiers
 from sparkle.instance import InstanceSet
 from sparkle.structures import PerformanceDataFrame
 from sparkle.types import resolve_objective, SparkleObjective, UseTime
@@ -34,7 +34,7 @@ class Solver(SparkleCallable):
                  raw_output_directory: Path = None,
                  runsolver_exec: Path = None,
                  deterministic: bool = None,
-                 verifier: SolutionVerifier = None) -> None:
+                 verifier: verifiers.SolutionVerifier = None) -> None:
         """Initialize solver.
 
         Args:
@@ -49,19 +49,26 @@ class Solver(SparkleCallable):
         super().__init__(directory, runsolver_exec, raw_output_directory)
         self.deterministic = deterministic
         self.verifier = verifier
-        self.meta_data_file = self.directory / Solver.meta_data
 
+        meta_data_file = self.directory / Solver.meta_data
         if self.runsolver_exec is None:
             self.runsolver_exec = self.directory / "runsolver"
-        if not self.meta_data_file.exists():
-            self.meta_data_file = None
-        if self.deterministic is None:
-            if self.meta_data_file is not None:
-                # Read the parameter from file
-                meta_dict = ast.literal_eval(self.meta_data_file.open().read())
-                self.deterministic = meta_dict["deterministic"]
-            else:
-                self.deterministic = False
+        if meta_data_file.exists():
+            meta_data = ast.literal_eval(meta_data_file.open().read())
+            # We only override the deterministic and verifier from file if not set
+            if self.deterministic is None:
+                if ("deterministic" in meta_data
+                        and meta_data["deterministic"] is not None):
+                    self.deterministic = meta_data["deterministic"]
+            if self.verifier is None and "verifier" in meta_data:
+                if isinstance(meta_data["verifier"], tuple):  # File verifier
+                    self.verifier = verifiers.mapping[meta_data["verifier"][0]](
+                        Path(meta_data["verifier"][1])
+                    )
+                elif meta_data["verifier"] in verifiers.mapping:
+                    self.verifier = verifiers.mapping[meta_data["verifier"]]
+        if self.deterministic is None:  # Default to False
+            self.deterministic = False
 
     def __str__(self: Solver) -> str:
         """Return the sting representation of the solver."""
@@ -254,15 +261,9 @@ class Solver(SparkleCallable):
             solver_outputs = []
             for i, job in enumerate(run.jobs):
                 solver_cmd = cmds[i].split(" ")
-                runsolver_configuration = None
-                if solver_cmd[0] == str(self.runsolver_exec.absolute()):
-                    runsolver_configuration = solver_cmd[:11]
                 solver_output = Solver.parse_solver_output(run.jobs[i].stdout,
-                                                           runsolver_configuration,
-                                                           objectives=objectives)
-                if self.verifier is not None:
-                    solver_output["status"] = self.verifier.verifiy(
-                        instance, Path(runsolver_configuration[-1]))
+                                                           solver_cmd,
+                                                           self.verifier)
                 solver_outputs.append(solver_output)
             return solver_outputs if len(solver_outputs) > 1 else solver_output
         return run
@@ -318,7 +319,6 @@ class Solver(SparkleCallable):
                 f"--performance-dataframe {performance_dataframe.csv_filepath} "
                 f"--cutoff-time {cutoff_time} "
                 f"--log-dir {log_dir} "
-                f"{'--use-verifier' if self.verifier else ' '}"
                 f"{'--best-configuration-instances' if train_set else ''} {train_arg}"
                 for instance, run_index in itertools.product(instances, run_ids)]
         r = rrr.add_to_queue(
@@ -353,31 +353,46 @@ class Solver(SparkleCallable):
     @staticmethod
     def parse_solver_output(
             solver_output: str,
-            runsolver_configuration: list[str | Path] = None,
-            objectives: list[SparkleObjective] = None) -> dict[str, Any]:
+            solver_call: list[str | Path] = None,
+            objectives: list[SparkleObjective] = None,
+            verifier: verifiers.SolutionVerifier = None) -> dict[str, Any]:
         """Parse the output of the solver.
 
         Args:
             solver_output: The output of the solver run which needs to be parsed
-            runsolver_configuration: The runsolver configuration to wrap the solver
-                with. If runsolver was not used this should be None.
+            solver_call: The solver call used to run the solver
             objectives: The objectives to apply to the solver output
+            verifier: The verifier to check the solver output
 
         Returns:
             Dictionary representing the parsed solver output
         """
-        if runsolver_configuration is not None:
-            parsed_output = RunSolver.get_solver_output(runsolver_configuration,
+        used_runsolver = False
+        if solver_call is not None and len(solver_call) > 2:
+            used_runsolver = True
+            parsed_output = RunSolver.get_solver_output(solver_call,
                                                         solver_output)
         else:
             parsed_output = ast.literal_eval(solver_output)
         # cast status attribute from str to Enum
-        # TODO: Setup status as an objective class with a post process mapping
         parsed_output["status"] = SolverStatus(parsed_output["status"])
+        # Apply objectives to parsed output, runtime based objectives added here
+        if verifier is not None and used_runsolver:
+            # Horrible hack to get the instance from the solver input
+            solver_call_str: str = " ".join(solver_call)
+            solver_input_str = solver_call_str.split(Solver.wrapper, maxsplit=1)[1]
+            solver_input_str = solver_input_str[solver_input_str.index("{"):
+                                                solver_input_str.index("}") + 1]
+            solver_input = ast.literal_eval(solver_input_str)
+            target_instance = Path(solver_input["instance"])
+            parsed_output["status"] = verifier.verify(
+                target_instance, parsed_output, solver_call)
+
         if objectives:  # Create objective map
             objectives = {o.stem: o for o in objectives}
         removable_keys = ["cutoff_time"]  # Keys to remove
-        # Apply objectives to parsed output, runtime based objectives added here
+
+        # apply objectives to parsed output, runtime based objectives added here
         for key, value in parsed_output.items():
             if objectives and key in objectives:
                 objective = objectives[key]
@@ -391,7 +406,7 @@ class Solver(SparkleCallable):
                 if objective.post_process is not None:
                     parsed_output[key] = objective.post_process(value)
             else:
-                if runsolver_configuration is None:
+                if not used_runsolver:
                     continue
                 if objective.use_time == UseTime.CPU_TIME:
                     parsed_output[key] = parsed_output["cpu_time"]
@@ -399,7 +414,9 @@ class Solver(SparkleCallable):
                     parsed_output[key] = parsed_output["wall_time"]
                 if objective.post_process is not None:
                     parsed_output[key] = objective.post_process(
-                        parsed_output[key], parsed_output["cutoff_time"])
+                        parsed_output[key],
+                        parsed_output["cutoff_time"],
+                        parsed_output["status"])
 
         # Replace or remove keys based on the objective names
         for key in removable_keys:

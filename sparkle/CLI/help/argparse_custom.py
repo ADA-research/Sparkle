@@ -468,6 +468,13 @@ SelectorTimeoutArgument = \
                               "help": "Cuttoff time (in seconds) for the algorithm"
                                       "selector construction"})
 
+SolutionVerifierArgument = \
+    ArgumentContainer(names=["--solution-verifier"],
+                      kwargs={"type": str,
+                              "default": None,
+                              "help": "the class name of the solution verifier or path "
+                                      "to solutions to use for the Solver."})
+
 SparkleObjectiveArgument = \
     ArgumentContainer(names=["--objectives"],
                       kwargs={"type": str,
