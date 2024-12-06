@@ -29,6 +29,8 @@ class SATVerifier(SolutionVerifier):
     @staticmethod
     def verify(instance: Path, output: dict, solver_call: list[str]) -> SolverStatus:
         """Run a SAT verifier and return its status."""
+        if SolverStatus(output["status"]) == SolverStatus.TIMEOUT:
+            return SolverStatus.TIMEOUT
         raw_result = Path([s for s in solver_call if s.endswith(".rawres")][0])
         return SATVerifier.call_sat_raw_result(instance, raw_result)
 
@@ -46,6 +48,7 @@ class SATVerifier(SolutionVerifier):
         # Wrong code OR Unknown code
         if return_code == 0 and "Wrong solution." in sat_output:
             return SolverStatus.WRONG
+        # Should not occur
         return SolverStatus.UNKNOWN
 
     @staticmethod
