@@ -10,8 +10,6 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner, Run
 
-from sparkle.CLI.help import logging as sl
-
 from sparkle.configurator.implementations import SMAC2
 from sparkle.configurator.configurator import ConfigurationScenario
 from sparkle.instance import InstanceSet
@@ -186,11 +184,13 @@ class AblationScenario:
         return results
 
     def submit_ablation(self: AblationScenario,
+                        log_dir: Path,
                         sbatch_options: list[str] = [],
                         run_on: Runner = Runner.SLURM) -> list[Run]:
         """Submit an ablation job.
 
         Args:
+            log_dir: Directory to store job logs
             sbatch_options: Options to pass to sbatch
             run_on: Determines to which RunRunner queue the job is added
 
@@ -206,7 +206,7 @@ class AblationScenario:
             runner=run_on,
             cmd=cmd,
             name=f"Ablation analysis: {self.solver.name} on {self.train_set.name}",
-            base_dir=sl.caller_log_dir,
+            base_dir=log_dir,
             path=self.scenario_dir,
             sbatch_options=sbatch_options,
             srun_options=srun_options)
@@ -229,7 +229,7 @@ class AblationScenario:
                 cmd=cmd,
                 name=f"Ablation validation: Test set {self.test_set.name}",
                 path=self.validation_dir,
-                base_dir=sl.caller_log_dir,
+                base_dir=log_dir,
                 dependencies=run_ablation,
                 sbatch_options=sbatch_options)
 

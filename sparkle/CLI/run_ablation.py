@@ -158,6 +158,7 @@ def main(argv: list[str]) -> None:
 
     print("Submiting ablation run...")
     runs = ablation_scenario.submit_ablation(
+        log_dir=sl.caller_log_dir,
         sbatch_options=gv.settings().get_slurm_extra_options(as_args=True),
         run_on=run_on)
 
