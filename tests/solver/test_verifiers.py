@@ -10,12 +10,15 @@ def test_sat_verifier() -> None:
     solver_call_sat = ["tests/test_files/verifier/sat_solver_runsolver.rawres"]
     solver_call_unsat = ["tests/test_files/verifier/unsat_solver_runsolver.rawres"]
     solver_call_timeout = ["tests/test_files/verifier/timeout_solver_runsolver.rawres"]
+    solver_call_wrong = ["tests/test_files/verifier/wrong_solver_runsolver.rawres"]
     assert verifiers.SATVerifier.verify(instance_sat, None,
                                         solver_call_sat) == SolverStatus.SAT
     assert verifiers.SATVerifier.verify(instance_sat, None,
                                         solver_call_unsat) == SolverStatus.UNSAT
     assert verifiers.SATVerifier.verify(instance_sat, None,
                                         solver_call_timeout) == SolverStatus.UNKNOWN
+    assert verifiers.SATVerifier.verify(instance_sat, None,
+                                        solver_call_wrong) == SolverStatus.WRONG
 
 
 def test_solution_file_verifier() -> None:

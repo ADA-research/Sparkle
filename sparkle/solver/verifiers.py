@@ -30,31 +30,27 @@ class SATVerifier(SolutionVerifier):
     def verify(instance: Path, output: dict, solver_call: list[str]) -> SolverStatus:
         """Run a SAT verifier and return its status."""
         raw_result = Path([s for s in solver_call if s.endswith(".rawres")][0])
-        return SATVerifier.sat_judge_correctness_raw_result(instance, raw_result)
+        return SATVerifier.call_sat_raw_result(instance, raw_result)
 
     @staticmethod
-    def sat_get_verify_string(sat_output: str) -> SolverStatus:
+    def sat_verify_output(sat_output: str) -> SolverStatus:
         """Return the status of the SAT verifier.
 
         Four statuses are possible: "SAT", "UNSAT", "WRONG", "UNKNOWN"
         """
-        lines = [line.strip() for line in sat_output.splitlines()]
-        # NOTE: We should check what the logic here is with the numbers @JR
-        for index, line in enumerate(lines):
-            if line == "Solution verified.":
-                if lines[index + 2] == "11":
-                    return SolverStatus.SAT
-            elif line == "Solver reported unsatisfiable. I guess it must be right!":
-                if lines[index + 2] == "10":
-                    return SolverStatus.UNSAT
-            elif line == "Wrong solution.":
-                if lines[index + 2] == "0":
-                    return SolverStatus.WRONG
+        return_code = int(sat_output.splitlines()[-1])
+        if return_code == 11:  # SAT code
+            return SolverStatus.SAT
+        if return_code == 10:  # UNSAT code
+            return SolverStatus.UNSAT
+        # Wrong code OR Unknown code
+        if return_code == 0 and "Wrong solution." in sat_output:
+            return SolverStatus.WRONG
         return SolverStatus.UNKNOWN
 
     @staticmethod
-    def sat_judge_correctness_raw_result(instance: Path,
-                                         raw_result: Path) -> SolverStatus:
+    def call_sat_raw_result(instance: Path,
+                            raw_result: Path) -> SolverStatus:
         """Run a SAT verifier to determine correctness of a result.
 
         Args:
@@ -68,7 +64,7 @@ class SATVerifier(SolutionVerifier):
                                      instance,
                                      raw_result],
                                     capture_output=True)
-        return SATVerifier.sat_get_verify_string(sat_verify.stdout.decode())
+        return SATVerifier.sat_verify_output(sat_verify.stdout.decode())
 
 
 class SolutionFileVerifier(SolutionVerifier):
