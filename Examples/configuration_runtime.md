@@ -21,10 +21,10 @@ sparkle add_instances Examples/Resources/Instances/PTN2/
 
 Add a configurable solver (here for SAT solving) with a wrapper containing the executable name of the solver and a string of command line parameters, without running the solver yet
 
-The solver directory should contain the solver executable, the `sparkle_solver_wrapper` wrapper, and a `.pcs` file describing the configurable parameters
+The solver directory should contain the solver executable, the `sparkle_solver_wrapper` wrapper, and a `.pcs` file describing the configurable parameters. In this example, we are running a SAT solver, and we can add the argument for a solution verifier to check each solution presented by the solver, and update its status acccordingly.
 
 ```bash
-sparkle add_solver Examples/Resources/Solvers/PbO-CCSAT-Generic/
+sparkle add_solver Examples/Resources/Solvers/PbO-CCSAT-Generic/ --solution-verifier SATVerifier
 ```
 
 If needed solvers can also include additional files or scripts in their directory, but keeping additional files to a minimum speeds up copying.
