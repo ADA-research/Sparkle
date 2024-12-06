@@ -100,6 +100,9 @@ class SolutionFileVerifier(SolutionVerifier):
         Returns:
             The status of the solver on the instance
         """
+        # If the solver ran out of time, we cannot verify a solution
+        if SolverStatus(solver_output["status"]) == SolverStatus.TIMEOUT:
+            return SolverStatus.TIMEOUT
         instance = instance.name
         if instance not in self.solutions:
             return SolverStatus.UNKNOWN
