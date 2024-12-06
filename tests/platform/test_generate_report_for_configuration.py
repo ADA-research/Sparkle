@@ -34,7 +34,7 @@ class TestGenerateConfigurationReport(TestCase):
             [self.test_objective_runtime],
             self.configurator.output_path)
         self.ablation_scenario = AblationScenario(
-            self.solver, Path(train_instance), Path(test_instance), Path(""))
+            self.configuration_scenario, Path(test_instance), Path(""))
 
     @patch("sparkle.solver.ablation.AblationScenario.check_for_ablation")
     def test_get_ablation_bool_true(
