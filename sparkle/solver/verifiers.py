@@ -38,8 +38,8 @@ class SATVerifier(SolutionVerifier):
 
         Four statuses are possible: "SAT", "UNSAT", "WRONG", "UNKNOWN"
         """
-        print(sat_output)
         lines = [line.strip() for line in sat_output.splitlines()]
+        # NOTE: We should check what the logic here is with the numbers @JR
         for index, line in enumerate(lines):
             if line == "Solution verified.":
                 if lines[index + 2] == "11":
