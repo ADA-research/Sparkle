@@ -218,7 +218,7 @@ def main(argv: list[str]) -> None:
         ablation_scenario = None
         if args.flag_ablation:
             ablation_scenario = AblationScenario(
-                solver, instance_set_train, instance_set_test,
+                config_scenario, instance_set_test,
                 gv.settings().DEFAULT_ablation_output)
         performance_data = PerformanceDataFrame(
             gv.settings().DEFAULT_performance_data_path)
