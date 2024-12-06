@@ -22,9 +22,6 @@ if __name__ == "__main__":
     parser.add_argument("--performance-dataframe", required=True, type=Path,
                         help="path to the performance dataframe")
     parser.add_argument("--solver", required=True, type=Path, help="path to solver")
-    parser.add_argument("--objectives", required=False, type=str,
-                        help="The objectives to use for the solver. Comma separated. "
-                             "If not provided, read from the PerformanceDataFrame.")
     parser.add_argument("--instance", required=True, type=str,
                         help="path to instance to run on")
     parser.add_argument("--run-index", required=True, type=int,
@@ -39,6 +36,8 @@ if __name__ == "__main__":
                              "the PerformanceDataFrame or generate one.")
     parser.add_argument("--cutoff-time", type=int, required=False,
                         help="the cutoff time for the solver.")
+    parser.add_argument("--target-objective", required=False, type=str,
+                        help="The objective to use to determine the best configuration.")
     parser.add_argument("--best-configuration-instances", required=False, type=str,
                         help="If given, will ignore any given configurations, and try to"
                              " determine the best found configurations over the given "
@@ -62,22 +61,19 @@ if __name__ == "__main__":
 
     solver = Solver(args.solver)
 
-    if not args.configuration or not args.seed or not args.objectives:  # Read
+    if not args.configuration or not args.seed:  # Read
         # Desyncronize from other possible jobs writing to the same file
         time.sleep(random.random() * 10)
         lock = FileLock(f"{args.performance_dataframe}.lock")  # Lock the file
         with lock.acquire(timeout=600):
             performance_dataframe = PerformanceDataFrame(args.performance_dataframe)
 
-        if args.objectives:
-            objectives = [resolve_objective(o) for o in args.objectives.split(",")]
-        else:
-            objectives = performance_dataframe.objectives
+        objectives = performance_dataframe.objectives
         # Filter out possible errors, shouldn't occur
         objectives = [o for o in objectives if o is not None]
         if args.best_configuration_instances:  # Determine best configuration
             best_configuration_instances = args.best_configuration_instances.split(",")
-            target_objective = objectives[0]
+            target_objective = resolve_objective(args.target_objective)
             configuration, value = performance_dataframe.best_configuration(
                 solver=str(args.solver),
                 objective=target_objective,

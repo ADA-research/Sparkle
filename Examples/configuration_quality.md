@@ -31,23 +31,15 @@ In this case the source directory also contains an executable, as the algorithm 
 
 ### Configure the solver
 
-Perform configuration on the solver to obtain a target configuration. For the VRP we measure the absolute quality performance by setting the `--objectives` option, to avoid needing this for every command it can also be set in `Settings/sparkle_settings.ini`.
+Perform configuration on the solver to obtain a target configuration. For the VRP we measure the absolute quality performance by setting the `--objectives` option, to avoid needing this for every command it can also be set as the first objective in `Settings/sparkle_settings.ini` under the general section.
 
 ```bash
 sparkle configure_solver --solver Solvers/VRP_SISRs/ --instance-set-train Instances/X-1-10/ --instance-set-test Instances/X-11-20/ --objectives quality
 ```
 
-### Validate the configuration
-
-To make sure configuration is completed before running validation you can use the `sparkle wait` command
-
-```bash
-sparkle wait
-```
-
 ### Generate a report
 
-Wait for validation to be completed
+Wait for the configuration to be completed:
 
 ```bash
 sparkle wait

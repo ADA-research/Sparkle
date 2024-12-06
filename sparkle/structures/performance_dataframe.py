@@ -246,6 +246,19 @@ class PerformanceDataFrame(pd.DataFrame):
                     self.remove_solver(solver)
                     break
 
+    def add_objective(self: PerformanceDataFrame,
+                      objective_name: str,
+                      initial_value: float = None) -> None:
+        """Add an objective to the DataFrame."""
+        initial_value = initial_value or self.missing_value
+        if objective_name in self.objective_names:
+            print(f"WARNING: Tried adding already existing objective {objective_name} "
+                  f"to Performance DataFrame: {self.csv_filepath}")
+            return
+        for instance, run in itertools.product(self.instances, self.run_ids):
+            self.loc[(objective_name, instance, run)] = initial_value
+        self.sort_index(axis=0, inplace=True)
+
     def add_instance(self: PerformanceDataFrame,
                      instance_name: str,
                      initial_value: float = None) -> None:
@@ -574,12 +587,17 @@ class PerformanceDataFrame(pd.DataFrame):
             return configuration, subdf.values[0][0]
         # In case of no configuration given, select the one with best objective value
         best_index = subdf.idxmin() if objective.minimise else subdf.idxmax()
-        return (ast.literal_eval(best_index.values[0]),
+        try:
+            best_configuration = ast.literal_eval(best_index.values[0])
+        except Exception:  # Configuration is not a dictionary
+            best_value = subdf.min() if objective.minimise else subdf.max()
+            return {}, best_value.values[0]
+        return (best_configuration,
                 subdf.loc[best_index, PerformanceDataFrame.column_value].values[0])
 
     def best_configuration(self: PerformanceDataFrame,
                            solver: str,
-                           objective: str | SparkleObjective = None,
+                           objective: SparkleObjective = None,
                            instances: list[str] = None) -> tuple[dict, float]:
         """Return the best configuration for the given objective over the instances.
 

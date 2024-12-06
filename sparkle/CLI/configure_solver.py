@@ -157,6 +157,13 @@ def main(argv: list[str]) -> None:
     configurator_runs = gv.settings().get_configurator_number_of_runs()
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
 
+    # Check if given objectives are in the data frame
+    for objective in sparkle_objectives:
+        if objective.name not in performance_data.objective_names:
+            print(f"WARNING: Objective {objective.name} not found in performance data. "
+                  "Adding to data frame.")
+            performance_data.add_objective(objective.name)
+
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     config_scenario = configurator.scenario_class()(
         solver, instance_set_train, sparkle_objectives,
@@ -229,6 +236,7 @@ def main(argv: list[str]) -> None:
             run_index,
             performance_data,
             cutoff_time=config_scenario.cutoff_time,
+            objective=config_scenario.sparkle_objective,
             train_set=instance_set_train,
             sbatch_options=sbatch_options,
             log_dir=config_scenario.validation,

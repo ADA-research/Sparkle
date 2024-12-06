@@ -274,6 +274,7 @@ class Solver(SparkleCallable):
                                   run_ids: int | list[int],
                                   performance_dataframe: PerformanceDataFrame,
                                   cutoff_time: int = None,
+                                  objective: SparkleObjective = None,
                                   train_set: InstanceSet = None,
                                   sbatch_options: list[str] = None,
                                   dependencies: list[SlurmRun] = None,
@@ -292,6 +293,8 @@ class Solver(SparkleCallable):
             run_ids: The run indices to use in the performance dataframe.
             performance_dataframe: The performance dataframe to use.
             cutoff_time: The cutoff time for the solver, measured through RunSolver.
+            objective: The objective to use, only relevant for train set best config
+                determining
             train_set: The training set to use. If present, will determine the best
                 configuration of the solver using these instances and run with it on
                 all instances in the instance argument.
@@ -311,6 +314,7 @@ class Solver(SparkleCallable):
         if isinstance(instances, InstanceSet):
             set_name = instances.name
             instances = [str(i) for i in instances.instance_paths]
+        objective_arg = f"--target-objective {objective.name}" if objective else ""
         train_arg =\
             ",".join([str(i) for i in train_set.instance_paths]) if train_set else ""
         cmds = [f"{Solver.solver_cli} "
@@ -320,6 +324,7 @@ class Solver(SparkleCallable):
                 f"--performance-dataframe {performance_dataframe.csv_filepath} "
                 f"--cutoff-time {cutoff_time} "
                 f"--log-dir {log_dir} "
+                f"{objective_arg} "
                 f"{'--best-configuration-instances' if train_set else ''} {train_arg}"
                 for instance, run_index in itertools.product(instances, run_ids)]
         r = rrr.add_to_queue(
