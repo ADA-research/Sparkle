@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.8.4
+# Auto-Generated .sh files from the original .md by Sparkle 0.9.0
 
 ## Algorithm Quality Configuration
 # We can configure an algorithm too based on some quality objective, that can be defined by the user. See the {ref}`SparkleObjective <sparkle-objective>` page for all options regarding objective defintions.
@@ -30,17 +30,13 @@ sparkle add_solver Examples/Resources/CVRP/Solvers/VRP_SISRs/
 
 # Perform configuration on the solver to obtain a target configuration. For the VRP we measure the absolute quality performance by setting the `--objectives` option, to avoid needing this for every command it can also be set in `Settings/sparkle_settings.ini`.
 
-sparkle configure_solver --solver Solvers/VRP_SISRs/ --instance-set-train Instances/X-1-10/ --objectives quality
+sparkle configure_solver --solver Solvers/VRP_SISRs/ --instance-set-train Instances/X-1-10/ --instance-set-test Instances/X-11-20/ --objectives quality
 
 ### Validate the configuration
 
 # To make sure configuration is completed before running validation you can use the `sparkle wait` command
 
 sparkle wait
-
-# Validate the performance of the best found parameter configuration. The test set is optional. We again set the performance measure to absolute quality.
-
-sparkle validate_configured_vs_default --solver Solvers/VRP_SISRs/ --instance-set-train Instances/X-1-10/ --instance-set-test Instances/X-11-20/ --objective quality
 
 ### Generate a report
 

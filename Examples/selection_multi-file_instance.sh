@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.8.4
+# Auto-Generated .sh files from the original .md by Sparkle 0.9.0
 
 ## Algorithm selection with multi-file instances
 
@@ -55,7 +55,7 @@ sparkle construct_portfolio_selector --objectives quality
 
 #### Run on a single instance
 
-# Run the portfolio selector on a *single* testing instance; the result will be printed to the command line. We again set the objective to quality.
+# Run the portfolio selector on a *single* testing instance; the result will be printed to the command line if you add `--run-on local` to the command. We again set the objective to quality.
 
 sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/Banking2.model Examples/Resources/CCAG/Instances/CCAG2/Banking2.constraints --objectives quality
 
