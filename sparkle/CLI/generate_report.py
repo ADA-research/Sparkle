@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path, PurePath
 
 from sparkle.CLI.help import global_variables as gv
-from sparkle.solver.ablation import AblationScenario
+from sparkle.configurator.ablation import AblationScenario
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.platform import \
     generate_report_for_configuration as sgrfch

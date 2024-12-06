@@ -4,7 +4,7 @@ from unittest import TestCase
 from pathlib import Path
 
 from sparkle.configurator.implementations import SMAC2Scenario
-from sparkle.solver.ablation import AblationScenario
+from sparkle.configurator.ablation import AblationScenario
 from sparkle.solver import Solver
 from sparkle.types.objective import PAR
 from sparkle.instance import Instance_Set

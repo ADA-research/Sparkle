@@ -10,13 +10,16 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner, Run
 
-from sparkle.configurator.implementations import SMAC2
-from sparkle.configurator.configurator import ConfigurationScenario
+from sparkle.configurator import ConfigurationScenario
 from sparkle.instance import InstanceSet
 
 
 class AblationScenario:
     """Class for ablation analysis."""
+
+    # We use the SMAC2 target algorithm for solver output handling
+    configurator_target = Path(__file__).parent.parent.resolve() /\
+        "Components" / "smac2-v2.10.03-master-778" / "smac2-v2.10.03-master-778"
 
     ablation_dir = Path(__file__).parent.parent / "Components" /\
         "ablationAnalysis-0.9.4"
@@ -102,13 +105,13 @@ class AblationScenario:
                 formatted = format(ctx.create_decimal(float_value), "f")
                 opt_config_str = opt_config_str.replace(value, formatted)
 
-        smac_run_obj = SMAC2.get_smac_run_obj(objective)
-        objective_str = "MEAN10" if smac_run_obj == "RUNTIME" else "MEAN"
+        smac_run_obj = "RUNTIME" if objective.time else "QUALITY"
+        objective_str = "MEAN10" if objective.time else "MEAN"
         pcs_file_path = f"{self.config_scenario.solver.get_pcs_file().absolute()}"
 
         # Create config file
         config_file = Path(f"{ablation_scenario_dir}/ablation_config.txt")
-        config = (f'algo = "{SMAC2.configurator_target.absolute()} '
+        config = (f'algo = "{AblationScenario.configurator_target.absolute()} '
                   f"{self.config_scenario.solver.directory.absolute()} "
                   f'{self.tmp_dir.absolute()} {objective}"\n'
                   f"execdir = {self.tmp_dir.absolute()}\n"
