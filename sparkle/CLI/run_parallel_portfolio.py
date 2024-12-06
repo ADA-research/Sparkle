@@ -138,18 +138,19 @@ def run_parallel_portfolio(instances_set: InstanceSet,
 
     # Now iterate over runsolver logs to get runtime, get the lowest value per seed
     for index, cmd in enumerate(cmd_list):
-        runsolver_configuration = cmd.split(" ")[:11]
-        solver_output = Solver.parse_solver_output(run.jobs[i].stdout,
-                                                   runsolver_configuration)
         solver_index = int((index % n_instance_jobs) / seeds_per_solver)
-        solver_name = solvers[solver_index].name
+        runsolver_configuration = cmd.split(" ")[:11]
+        solver_obj = solvers[solver_index]
+        solver_output = Solver.parse_solver_output(run.jobs[i].stdout,
+                                                   cmd.split(" "),
+                                                   solver_obj.verifier)
         instance_name = instances_set._instance_names[int(index / n_instance_jobs)]
         cpu_time = solver_output["cpu_time"]
-        cmd_output = job_output_dict[instance_name][solver_name]
+        cmd_output = job_output_dict[instance_name][solver_obj.name]
         if cpu_time > 0.0 and cpu_time < cmd_output["cpu_time"]:
             for key, value in solver_output.items():
                 if key in [o.name for o in objectives]:
-                    job_output_dict[instance_name][solver_name][key] = value
+                    job_output_dict[instance_name][solver_obj.name][key] = value
             if "status" not in cmd_output or cmd_output["status"] != SolverStatus.KILLED:
                 cmd_output["status"] = solver_output["status"]
 
