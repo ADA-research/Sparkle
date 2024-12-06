@@ -262,8 +262,9 @@ class Solver(SparkleCallable):
             for i, job in enumerate(run.jobs):
                 solver_cmd = cmds[i].split(" ")
                 solver_output = Solver.parse_solver_output(run.jobs[i].stdout,
-                                                           solver_cmd,
-                                                           self.verifier)
+                                                           solver_call=solver_cmd,
+                                                           objectives=objectives,
+                                                           verifier=self.verifier)
                 solver_outputs.append(solver_output)
             return solver_outputs if len(solver_outputs) > 1 else solver_output
         return run
@@ -388,8 +389,8 @@ class Solver(SparkleCallable):
             parsed_output["status"] = verifier.verify(
                 target_instance, parsed_output, solver_call)
 
-        if objectives:  # Create objective map
-            objectives = {o.stem: o for o in objectives}
+        # Create objective map
+        objectives = {o.stem: o for o in objectives} if objectives else {}
         removable_keys = ["cutoff_time"]  # Keys to remove
 
         # apply objectives to parsed output, runtime based objectives added here
