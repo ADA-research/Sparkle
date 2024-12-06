@@ -1,3 +1,11 @@
+(mod-CLI)=
+```{eval-rst}
+CLI
+===============
+.. automodule:: sparkle.CLI
+    :members: 
+```
+
 (mod-about)=
 ```{eval-rst}
 about
@@ -11,7 +19,7 @@ about
 configurator
 ===============
 .. automodule:: sparkle.configurator
-    :members: 
+    :members: AblationScenario,ConfigurationScenario,Configurator
 ```
 
 (mod-instance)=
@@ -19,7 +27,7 @@ configurator
 instance
 ===============
 .. automodule:: sparkle.instance
-    :members: instance_set,FileInstanceSet,InstanceSet,IterableFileInstanceSet,MultiFileInstanceSet
+    :members: Instance_Set,FileInstanceSet,InstanceSet,IterableFileInstanceSet,MultiFileInstanceSet
 ```
 
 (mod-platform)=
@@ -27,7 +35,7 @@ instance
 platform
 ===============
 .. automodule:: sparkle.platform
-    :members: CommandName,SettingState,Settings
+    :members: SettingState,Settings
 ```
 
 (mod-solver)=
@@ -35,7 +43,7 @@ platform
 solver
 ===============
 .. automodule:: sparkle.solver
-    :members: Extractor,SATVerifier,Selector,SolutionVerifier,Solver,Validator
+    :members: Extractor,SATVerifier,Selector,SolutionVerifier,Solver
 ```
 
 (mod-structures)=
@@ -51,7 +59,7 @@ structures
 tools
 ===============
 .. automodule:: sparkle.tools
-    :members: get_solver_args,get_solver_call_params,get_time_pid_random_string,PCSParser,SlurmBatch
+    :members: get_solver_call_params,get_time_pid_random_string,PCSParser,RunSolver,SlurmBatch
 ```
 
 (mod-types)=
