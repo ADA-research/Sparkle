@@ -38,6 +38,7 @@ class SATVerifier(SolutionVerifier):
 
         Four statuses are possible: "SAT", "UNSAT", "WRONG", "UNKNOWN"
         """
+        print(sat_output)
         lines = [line.strip() for line in sat_output.splitlines()]
         for index, line in enumerate(lines):
             if line == "Solution verified.":
@@ -114,10 +115,9 @@ class SolutionFileVerifier(SolutionVerifier):
         outcome = solver_output[objective]
         if solution in SolverStatus._value2member_map_:  # SAT type status
             solution, outcome = SolverStatus(solution), SolverStatus(outcome)
-            if solution == SolverStatus.UNKNOWN:
-                return outcome
-            elif solution == outcome:
-                return outcome
+            if solution == SolverStatus.UNKNOWN or solution == outcome:
+                # Verify that the presented solution is correct
+                return SATVerifier.verify(instance, solver_output, solver_call)
             else:
                 return SolverStatus.WRONG
 

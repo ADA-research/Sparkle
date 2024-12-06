@@ -1,0 +1,34 @@
+36.82/40.67	c
+36.82/40.67	c This is PbO-CCSAT (a local_search SAT solver)
+36.82/40.67	c Version: 1.2.3
+36.82/40.67	c
+36.82/40.67	c
+36.82/40.67	c instance = /home/snelleman/Sparkle/Instances/PTN2/Ptn-7824-b08.cnf
+36.82/40.67	c ori_num_vars = 3725
+36.82/40.67	c ori_num_clauses = 14257
+36.82/40.67	c maxi_clause_len = 3
+36.82/40.67	c mini_clause_len = 2
+36.82/40.67	c seed = 2127925097
+36.82/40.67	c maxi_flips = 2000000000
+36.82/40.67	c init_solution_ptr = init_solution_all_true_or_false
+36.82/40.67	c decision_perform_double_cc = true
+36.82/40.67	c decision_perform_aspiration = true
+36.82/40.67	c select_var_by_break_tie_in_set_ptr = select_var_by_greatest_age_break_tie_in_set
+36.82/40.67	c decision_perform_clause_weight_scheme = true
+36.82/40.67	c init_clause_weight_scheme_ptr = init_clause_weight_scheme_swt
+36.82/40.67	c clause_weight_scheme_ptr = clause_weight_scheme_swt
+36.82/40.67	c threshold_swt = 300
+36.82/40.67	c p_swt = 0.3
+36.82/40.67	c q_swt = 0
+36.82/40.67	c select_unsat_clause_heuristic_div_ptr = select_unsat_clause_random_heuristic
+36.82/40.67	c select_var_from_clause_heuristic_div_ptr = select_var_from_clause_sparrow_heuristic
+36.82/40.67	c sparrow_c1 = 2.15
+36.82/40.67	c sparrow_c2 = 4
+36.82/40.67	c sparrow_c3 = 75000
+36.82/40.67	c
+36.82/40.67	s UNSATISFIABLE
+36.82/40.68	c Solution Verified!
+36.82/40.68	c run time = 36.61 second(s)
+36.82/40.68	c total steps = 66448574 + (0 * 2000000000)
+36.82/40.68	
+36.82/40.68	{'status': 'SUCCESS', 'quality': 0, 'solver_call': ['/home/snelleman/Sparkle/Solvers/PbO-CCSAT-Generic/PbO-CCSAT', '-inst', '/home/snelleman/Sparkle/Instances/PTN2/Ptn-7824-b08.cnf', '-seed', '2127925097']}
