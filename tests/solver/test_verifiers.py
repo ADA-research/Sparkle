@@ -6,7 +6,7 @@ from pathlib import Path
 
 def test_sat_verifier() -> None:
     """Test if SATVerifier correctly returns value."""
-    instance_sat = Path("/home/snelleman/Sparkle/Instances/PTN2/Ptn-7824-b08.cnf")
+    instance_sat = Path("Examples/Resources/Instances/PTN2/Ptn-7824-b08.cnf")
     solver_call_sat = ["tests/test_files/verifier/sat_solver_runsolver.rawres"]
     solver_call_unsat = ["tests/test_files/verifier/unsat_solver_runsolver.rawres"]
     solver_call_timeout = ["tests/test_files/verifier/timeout_solver_runsolver.rawres"]
