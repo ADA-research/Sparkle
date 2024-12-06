@@ -3,6 +3,7 @@ from __future__ import annotations
 from enum import Enum
 import typing
 import numpy as np
+from sparkle.types.status import SolverStatus
 
 
 class UseTime(str, Enum):
@@ -59,6 +60,11 @@ class SparkleObjective:
 
 class PAR(SparkleObjective):
     """Penalised Averaged Runtime Objective for Sparkle."""
+    negative_status = {SolverStatus.CRASHED,
+                       SolverStatus.KILLED,
+                       SolverStatus.ERROR,
+                       SolverStatus.TIMEOUT,
+                       SolverStatus.WRONG}
 
     def __init__(self: PAR, k: int = 10) -> None:
         """Initialize PAR."""
@@ -66,9 +72,9 @@ class PAR(SparkleObjective):
         if k <= 0:
             raise ValueError("k must be greater than 0.")
 
-        def penalise(value: float, cutoff: float) -> float:
+        def penalise(value: float, cutoff: float, status: SolverStatus) -> float:
             """Return penalised value."""
-            if value > cutoff:
+            if status in PAR.negative_status or value > cutoff:
                 return cutoff * self.k
             return value
 

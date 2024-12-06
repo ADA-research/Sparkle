@@ -81,6 +81,7 @@ except Exception as ex:
 
 # Convert Solver output to dictionary for configurator target algorithm script
 output_str = solver_call.stdout.decode()
+print(output_str)  # Print original output so it can be verified
 
 status = SolverStatus.CRASHED
 for line in output_str.splitlines():

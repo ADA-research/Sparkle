@@ -59,9 +59,13 @@ class Solver(SparkleCallable):
                 if ("deterministic" in meta_data
                         and meta_data["deterministic"] is not None):
                     self.deterministic = meta_data["deterministic"]
-            if (self.verifier is None and "verifier" in meta_data
-                    and meta_data["verifier"] in verifiers.mapping):
-                self.verifier = verifiers.mapping[meta_data["verifier"]]
+            if self.verifier is None and "verifier" in meta_data:
+                if isinstance(meta_data["verifier"], tuple):  # File verifier
+                    self.verifier = verifiers.mapping[meta_data["verifier"][0]](
+                        Path(meta_data["verifier"][1])
+                    )
+                elif meta_data["verifier"] in verifiers.mapping:
+                    self.verifier = verifiers.mapping[meta_data["verifier"]]
         if self.deterministic is None:  # Default to False
             self.deterministic = False
 
@@ -248,14 +252,9 @@ class Solver(SparkleCallable):
             solver_outputs = []
             for i, job in enumerate(run.jobs):
                 solver_cmd = cmds[i].split(" ")
-                runsolver_configuration = None
-                if solver_cmd[0] == str(self.runsolver_exec.absolute()):
-                    runsolver_configuration = solver_cmd[:11]
                 solver_output = Solver.parse_solver_output(run.jobs[i].stdout,
-                                                           runsolver_configuration)
-                if self.verifier is not None:
-                    solver_output["status"] = self.verifier.verifiy(
-                        instance, Path(runsolver_configuration[-1]))
+                                                           solver_cmd,
+                                                           self.verifier)
                 solver_outputs.append(solver_output)
             return solver_outputs if len(solver_outputs) > 1 else solver_output
         return run
@@ -345,24 +344,37 @@ class Solver(SparkleCallable):
     @staticmethod
     def parse_solver_output(
             solver_output: str,
-            runsolver_configuration: list[str | Path] = None) -> dict[str, Any]:
+            solver_call: list[str | Path] = None,
+            verifier: verifiers.SolutionVerifier = None) -> dict[str, Any]:
         """Parse the output of the solver.
 
         Args:
             solver_output: The output of the solver run which needs to be parsed
-            runsolver_configuration: The runsolver configuration to wrap the solver
-                with. If runsolver was not used this should be None.
+            solver_call: The solver call used to run the solver
 
         Returns:
             Dictionary representing the parsed solver output
         """
-        if runsolver_configuration is not None:
-            parsed_output = RunSolver.get_solver_output(runsolver_configuration,
+        used_runsolver = False
+        if solver_call is not None and len(solver_call) > 2:
+            used_runsolver = True
+            parsed_output = RunSolver.get_solver_output(solver_call,
                                                         solver_output)
         else:
             parsed_output = ast.literal_eval(solver_output)
         # cast status attribute from str to Enum
         parsed_output["status"] = SolverStatus(parsed_output["status"])
+        if verifier is not None and used_runsolver:
+            # Horrible hack to get the instance from the solver input
+            solver_call_str: str = " ".join(solver_call)
+            solver_input_str = solver_call_str.split(Solver.wrapper, maxsplit=1)[1]
+            solver_input_str = solver_input_str[solver_input_str.index("{"):
+                                                solver_input_str.index("}") + 1]
+            solver_input = ast.literal_eval(solver_input_str)
+            target_instance = Path(solver_input["instance"])
+            parsed_output["status"] = verifier.verify(
+                target_instance, parsed_output, solver_call)
+
         # apply objectives to parsed output, runtime based objectives added here
         for key, value in parsed_output.items():
             if key == "status":
@@ -374,7 +386,7 @@ class Solver(SparkleCallable):
                 if objective.post_process is not None:
                     parsed_output[objective] = objective.post_process(value)
             else:
-                if runsolver_configuration is None:
+                if not used_runsolver:
                     continue
                 if objective.use_time == UseTime.CPU_TIME:
                     parsed_output[key] = parsed_output["cpu_time"]
@@ -382,7 +394,9 @@ class Solver(SparkleCallable):
                     parsed_output[key] = parsed_output["wall_time"]
                 if objective.post_process is not None:
                     parsed_output[key] = objective.post_process(
-                        parsed_output[key], parsed_output["cutoff_time"])
+                        parsed_output[key],
+                        parsed_output["cutoff_time"],
+                        parsed_output["status"])
         if "cutoff_time" in parsed_output:
             del parsed_output["cutoff_time"]
         return parsed_output

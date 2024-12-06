@@ -472,8 +472,8 @@ SolutionVerifierArgument = \
     ArgumentContainer(names=["--solution-verifier"],
                       kwargs={"type": str,
                               "default": None,
-                              "help": "the class name of the solution verifier "
-                                      "to use for the Solver."})
+                              "help": "the class name of the solution verifier or path "
+                                      "to solutions to use for the Solver."})
 
 SparkleObjectiveArgument = \
     ArgumentContainer(names=["--objectives"],
