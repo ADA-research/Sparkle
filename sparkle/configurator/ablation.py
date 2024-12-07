@@ -19,7 +19,7 @@ class AblationScenario:
 
     # We use the SMAC2 target algorithm for solver output handling
     configurator_target = Path(__file__).parent.parent.resolve() /\
-        "Components" / "smac2-v2.10.03-master-778" / "smac2-v2.10.03-master-778"
+        "Components" / "smac2-v2.10.03-master-778" / "smac2_target_algorithm.py"
 
     ablation_dir = Path(__file__).parent.parent / "Components" /\
         "ablationAnalysis-0.9.4"
