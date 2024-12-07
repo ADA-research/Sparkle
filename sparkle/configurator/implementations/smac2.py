@@ -13,7 +13,7 @@ from sparkle.configurator.configurator import Configurator, ConfigurationScenari
 from sparkle.solver import Solver
 from sparkle.structures import PerformanceDataFrame
 from sparkle.instance import InstanceSet, Instance_Set
-from sparkle.types import SparkleObjective
+from sparkle.types import SparkleObjective, resolve_objective
 
 
 class SMAC2(Configurator):
@@ -392,7 +392,7 @@ class SMAC2Scenario(ConfigurationScenario):
             if "use-cputime-in-tunertime" in config else None
 
         _, solver_path, _, objective_str = config["algo"].split(" ")
-        objective = SparkleObjective(objective_str)
+        objective = resolve_objective(objective_str)
         solver = Solver(Path(solver_path.strip()))
         # Extract the instance set from the instance file
         instance_file_path = Path(config["instance_file"])

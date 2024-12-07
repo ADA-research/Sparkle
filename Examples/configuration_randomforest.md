@@ -24,13 +24,11 @@ sparkle add_solver Examples/Resources/Solvers/RandomForest
 
 ```bash
 sparkle configure_solver --solver RandomForest --instance-set-train Iris --objectives accuracy:max
-
-sparkle wait
 ```
 
 ### Generate a report
 
-Wait for validation to be completed
+Wait for configuration to be completed
 
 ```bash
 sparkle wait
@@ -39,5 +37,5 @@ sparkle wait
 Generate a report detailing the results on the training (and optionally testing) set.
 
 ```bash
-sparkle generate_report --objectives accuracy:max
+sparkle generate_report
 ```

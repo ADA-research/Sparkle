@@ -31,4 +31,4 @@ sparkle wait
 
 # Generate a report detailing the results on the training (and optionally testing) set.
 
-sparkle generate_report --objectives accuracy:max
+sparkle generate_report
