@@ -30,7 +30,6 @@ sparkle add solver Examples/Resources/Solvers/MiniSAT/
 ### Add feature extractor
 To run the selector, we need certain features to represent our instances. To that end, we add a feature extractor to the platform that creates vector representations of our instances.
 
-
 ```bash
 sparkle add feature extractor Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/
 ```
