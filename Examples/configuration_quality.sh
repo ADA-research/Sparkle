@@ -28,23 +28,17 @@ sparkle add_solver Examples/Resources/CVRP/Solvers/VRP_SISRs/
 
 ### Configure the solver
 
-# Perform configuration on the solver to obtain a target configuration. For the VRP we measure the absolute quality performance by setting the `--objectives` option, to avoid needing this for every command it can also be set in `Settings/sparkle_settings.ini`.
+# Perform configuration on the solver to obtain a target configuration. For the VRP we measure the absolute quality performance by setting the `--objectives` option, to avoid needing this for every command it can also be set as the first objective in `Settings/sparkle_settings.ini` under the general section.
 
 sparkle configure_solver --solver Solvers/VRP_SISRs/ --instance-set-train Instances/X-1-10/ --instance-set-test Instances/X-11-20/ --objectives quality
 
-### Validate the configuration
-
-# To make sure configuration is completed before running validation you can use the `sparkle wait` command
-
-sparkle wait
-
 ### Generate a report
 
-# Wait for validation to be completed
+# Wait for the configuration to be completed:
 
 sparkle wait
 
-# Generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in a `Configuration_Reports/` subdirectory for the solver, training set, and optionally test set like `VRP_SISRs_X-1-10_X-11-20/Sparkle-latex-generator-for-configuration/`. We again set the performance measure to absolute quality.
+# Generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in `Output/Configuration/Analysis`. The configuration scenario is saved by Sparkle, including the specified objective.
 
 sparkle generate_report
 

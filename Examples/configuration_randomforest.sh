@@ -21,11 +21,9 @@ sparkle add_solver Examples/Resources/Solvers/RandomForest
 
 sparkle configure_solver --solver RandomForest --instance-set-train Iris --objectives accuracy:max
 
-sparkle wait
-
 ### Generate a report
 
-# Wait for validation to be completed
+# Wait for configuration to be completed
 
 sparkle wait
 
