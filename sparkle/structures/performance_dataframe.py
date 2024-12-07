@@ -694,10 +694,10 @@ class PerformanceDataFrame(pd.DataFrame):
         if isinstance(objective, str):
             objective = resolve_objective(objective)
         select = min if objective.minimise else max
-        performances = [0.0 for _ in range(len(schedule.keys()))]
+        performances = [0.0] * len(schedule.keys())
         for ix, instance in enumerate(schedule.keys()):
             for iy, (solver, max_runtime) in enumerate(schedule[instance]):
-                performance = self.get_value(solver, instance, objective.name)
+                performance = float(self.get_value(solver, instance, objective.name))
                 if max_runtime is not None:  # We are dealing with runtime
                     performances[ix] += performance
                     if performance < max_runtime:
