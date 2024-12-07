@@ -2,7 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.9.1] - 2024/??/??
+## [0.9.1] - 2024/12/08
 
 ### Added
 - Added the SMAC3 configurator to Sparkle [SPRK-335]
