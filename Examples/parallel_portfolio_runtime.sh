@@ -18,9 +18,9 @@ sparkle add_instances Examples/Resources/Instances/PTN/
 # Now we can add our solvers to the portfolio that we want to "race" in parallel against eachother.
 # The path used should be the full path to the solver directory and should contain the solver executable and the `sparkle_solver_wrapper` wrapper. It is always a good idea to keep the amount of files in your solver directory to a minimum.
 
-sparkle add_solver Examples/Resources/Solvers/CSCCSat/
-sparkle add_solver Examples/Resources/Solvers/MiniSAT/
-sparkle add_solver Examples/Resources/Solvers/PbO-CCSAT-Generic/
+sparkle add_solver Examples/Resources/Solvers/CSCCSat/ --solution-verifier SATVerifier
+sparkle add_solver Examples/Resources/Solvers/MiniSAT/ --solution-verifier SATVerifier
+sparkle add_solver Examples/Resources/Solvers/PbO-CCSAT-Generic/ --solution-verifier SATVerifier
 
 ### Run the portfolio 
 

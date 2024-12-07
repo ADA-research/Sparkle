@@ -81,14 +81,15 @@ def run_parallel_portfolio(instances_set: InstanceSet,
     instances_done = [False] * num_instances
     # We record the 'best' of all seed results per solver-instance,
     # setting start values for objectives that are always present
+    cpu_time_key = [o.name for o in objectives if o.name.startswith("cpu_time")][0]
+    status_key = [o.name for o in objectives if o.name.startswith("status")][0]
+    wall_time_key = [o.name for o in objectives if o.name.startswith("wall_time")][0]
     default_objective_values = {}
     for o in objectives:
         default_value = float(sys.maxsize) if o.minimise else 0
         # Default values for time objectives can be linked to cutoff time
-        if o.time:
-            default_value = cutoff + 1.0
-            if o.post_process is not None:
-                default_value = o.post_process(default_value, cutoff)
+        if o.time and o.post_process:
+            default_value = o.post_process(default_value, cutoff, SolverStatus.KILLED)
         default_objective_values[o.name] = default_value
     job_output_dict = {instance_name: {solver.name: default_objective_values.copy()
                                        for solver in solvers}
@@ -143,46 +144,50 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         solver_obj = solvers[solver_index]
         solver_output = Solver.parse_solver_output(run.jobs[i].stdout,
                                                    cmd.split(" "),
-                                                   solver_obj.verifier)
+                                                   objectives=objectives,
+                                                   verifier=solver_obj.verifier)
         instance_name = instances_set._instance_names[int(index / n_instance_jobs)]
-        cpu_time = solver_output["cpu_time"]
+        print(solver_output)
+        cpu_time = solver_output[cpu_time_key]
         cmd_output = job_output_dict[instance_name][solver_obj.name]
-        if cpu_time > 0.0 and cpu_time < cmd_output["cpu_time"]:
+        if cpu_time > 0.0 and cpu_time < cmd_output[cpu_time_key]:
             for key, value in solver_output.items():
                 if key in [o.name for o in objectives]:
                     job_output_dict[instance_name][solver_obj.name][key] = value
-            if "status" not in cmd_output or cmd_output["status"] != SolverStatus.KILLED:
-                cmd_output["status"] = solver_output["status"]
+            if (status_key not in cmd_output
+                    or cmd_output[status_key] != SolverStatus.KILLED):
+                cmd_output[status_key] = solver_output[status_key]
 
     # Fix the CPU/WC time for non existent logs to instance min time + check_interval
     for instance in job_output_dict.keys():
         no_log_solvers = []
         min_time = cutoff
         for solver in job_output_dict[instance].keys():
-            cpu_time = job_output_dict[instance][solver]["cpu_time"]
+            cpu_time = job_output_dict[instance][solver][cpu_time_key]
             if cpu_time == -1.0 or cpu_time == float(sys.maxsize):
                 no_log_solvers.append(solver)
             elif cpu_time < min_time:
                 min_time = cpu_time
         for solver in no_log_solvers:
-            job_output_dict[instance][solver]["cpu_time"] = min_time + check_interval
-            job_output_dict[instance][solver]["wall_time"] = min_time + check_interval
+            job_output_dict[instance][solver][cpu_time_key] = min_time + check_interval
+            job_output_dict[instance][solver][wall_time_key] = min_time + check_interval
             # Fix runtime objectives with resolved CPU/Wall times
             for key, value in job_output_dict[instance][solver].items():
                 objective = resolve_objective(key)
                 if objective is not None and objective.time:
                     if objective.use_time == UseTime.CPU_TIME:
-                        value = job_output_dict[instance][solver]["cpu_time"]
+                        value = job_output_dict[instance][solver][cpu_time_key]
                     else:
-                        value = job_output_dict[instance][solver]["wall_time"]
+                        value = job_output_dict[instance][solver][wall_time_key]
                     if objective.post_process is not None:
-                        value = objective.post_process(value, cutoff)
+                        status = job_output_dict[instance][solver][status_key]
+                        value = objective.post_process(value, cutoff, status)
                     job_output_dict[instance][solver][key] = value
 
     for index, instance_name in enumerate(instances_set._instance_names):
         index_str = f"[{index + 1}/{num_instances}] "
         instance_output = job_output_dict[instance_name]
-        if all([instance_output[k]["status"] == SolverStatus.TIMEOUT
+        if all([instance_output[k][status_key] == SolverStatus.TIMEOUT
                 for k in instance_output.keys()]):
             print(f"\n{index_str}{instance_name} was not solved within the cutoff-time.")
             continue
@@ -190,12 +195,13 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         for sindex in range(index * num_solvers, (index + 1) * num_solvers):
             solver_name = solvers[sindex % num_solvers].name
             job_info = job_output_dict[instance_name][solver_name]
-            print(f"\t- {solver_name} ended with status {job_info['status']} in "
-                  f"{job_info['cpu_time']}s CPU-Time ({job_info['wall_time']}s WC-Time)")
+            print(f"\t- {solver_name} ended with status {job_info[status_key]} in "
+                  f"{job_info[cpu_time_key]}s CPU-Time ({job_info[wall_time_key]}s "
+                  "Wall clock time)")
 
     # Write the results to a CSV
     csv_path = portfolio_path / "results.csv"
-    values_header = ["status"] + [o.name for o in objectives]
+    values_header = [o.name for o in objectives]
     header = ["Instance", "Solver"] + values_header
     result_rows = [header]
     for instance_name in job_output_dict.keys():
