@@ -182,14 +182,6 @@
 
 ```
 
-(cmd-validate-configured-vs-default)=
-
-```{eval-rst}
-.. autoprogram:: sparkle.CLI.validate_configured_vs_default:parser_function()
-   :prog: validate_configured_vs_default
-
-```
-
 (cmd-wait)=
 
 ```{eval-rst}
