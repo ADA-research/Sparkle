@@ -161,6 +161,13 @@ class Settings:
     DEFAULT_parallel_portfolio_check_interval = 4
     DEFAULT_parallel_portfolio_num_seeds_per_solver = 1
 
+    # Default IRACE settings
+    DEFAULT_irace_max_time = 0  # IRACE equivalent of None in this case
+    DEFAULT_irace_max_experiments = 0
+    DEFAULT_irace_first_test = None
+    DEFAULT_irace_mu = None
+    DEFAULT_irace_max_iterations = None
+
     def __init__(self: Settings, file_path: PurePath = None) -> None:
         """Initialise a settings object."""
         # Settings 'dictionary' in configparser format
