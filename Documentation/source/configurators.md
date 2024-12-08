@@ -4,7 +4,7 @@ Sparkle offers several configurators to use for Algorithm Configuration. Althoug
 
 ## SMAC2
 
-Sequantial Model-Based Optimization for General Algorithm Configuration[[1]](#1), or [SMAC]((https://www.cs.ubc.ca/labs/algorithms/Projects/SMAC)) for short is a Java based algorithm configurator. *Note that this the second version, and not SMAC3 the Python version*. The original documentation of the configurator can be found [here](https://www.cs.ubc.ca/labs/algorithms/Projects/SMAC/v2.10.03/manual.pdf).
+Sequantial Model-Based Optimization for General Algorithm Configuration[[1]](#1), or [SMAC]((https://www.cs.ubc.ca/labs/algorithms/Projects/SMAC)) for short is a Java based algorithm configurator. *Note that this the second version, and not SMAC3 the Python version. For SMAC3 see below*. The original documentation of the configurator can be found [here](https://www.cs.ubc.ca/labs/algorithms/Projects/SMAC/v2.10.03/manual.pdf).
 
 ```{note}
 SMAC2 is written in Java and therefore requires Java to be installed in your environment. The current tested version in Sparkle is 1.8.0_402
@@ -12,11 +12,23 @@ SMAC2 is written in Java and therefore requires Java to be installed in your env
 
 ### Budget
 
-SMAC2 receives it budget in terms of `solver_calls`, which specify the maximum amount of times the target solver (e.g. your algorithm) may be run on a certain instance, or through `cpu_time` or `wallclock_time`. Note that in the case of using time as a budget, not only the solver time measurement is used for the budget but also that of SMAC itself. If you want only the execution time of the algorithm to be used for the budget, set `use_cpu_time_in_tunertime` to `False`.
+SMAC2 receives it budget in terms of `solver_calls`, which specifies the maximum amount of times the target solver (e.g. your algorithm) may be run on a certain instance, or through `cpu_time` or `wallclock_time`. Note that in the case of using time as a budget, not only the solver time measurement is used for the budget but also that of SMAC itself. If you want only the execution time of the algorithm to be used for the budget, set `use_cpu_time_in_tunertime` to `False`.
+
+## SMAC3
+
+The Python version of Sequantial Model-Based Optimization for General Algorithm Configuration[[2]](#2), or [SMAC3](https://github.com/automl/SMAC3) for short. The original documentation can be found [here](https://automl.github.io/SMAC3/). 
+
+### Budget
+
+SMAC3 can be budgetted in terms of `solver_calls`, which specifies the maximum amount of times the target solver (e.g. your algorithm) may be run on a certain instance, but also through `walltime_limit` or `cputime_limit`. Not that the time limits only consider the budget in terms of time used by your solver, and not time used by the configurator. The time used by your solver is timed in Sparkle by RunSolver and directly communicated to SMAC3 to ensure comparibility cross platform. SMAC3 also offers target solver limitations in terms of time and memory, but this is not available in Sparkle by design, as this would cause SMAC3 to wrap our target algorithm call by Pynisher. However, RunSolver is more accurate in its measurements and to avoid any interference between the two resource management tools, this is disabled.
+
+```{warning}
+Although misleading, SMAC3 does currently not actually support CPU time: The budgets are deducted by a single 'time' variable, and currently Sparkle communicates measured CPU time for fairness. It is planned to separate these variables, such that the budgets are actually different.
+```
 
 ## IRACE
 
-Iterated Racing for Automatic Algorithm Configuration[[2]](#2), or [IRACE](https://mlopez-ibanez.github.io/irace/) for short is an R based algorithm configurator. The full documentation of the configurator can be found [here](https://cran.r-project.org/web/packages/irace/vignettes/irace-package.pdf).
+Iterated Racing for Automatic Algorithm Configuration[[3]](#3), or [IRACE](https://mlopez-ibanez.github.io/irace/) for short is an R based algorithm configurator. The full documentation of the configurator can be found [here](https://cran.r-project.org/web/packages/irace/vignettes/irace-package.pdf).
 
 IRACE offers many parameters that can be set, but also automatically computed in accordance with their paper[[2]](#2) and we recommend not deviating from those formulae as it may result in unexpected behaviour.
 
@@ -52,6 +64,11 @@ F. Hutter and H. H. Hoos and K. Leyton-Brown (2011)
 Proc.~of LION-5, 2011, p507--523
 
 <a id="2">[2]</a>
+SMAC3: A Versatile Bayesian Optimization Package for Hyperparameter Optimization
+Marius Lindauer and Katharina Eggensperger and Matthias Feurer and André Biedenkapp and Difan Deng and Carolin Benjamins and Tim Ruhkopf and René Sass and Frank Hutter (2022)
+Journal of Machine Learning Research, 2022, p1--9
+
+<a id="3">[3]</a>
 The irace package: Iterated Racing for Automatic Algorithm Configuration,
 Manuel López-Ibáñez and Jérémie Dubois-Lacoste and Leslie Pérez Cáceres and Thomas Stützle and Mauro Birattari (2016)
 Operations Research Perspectives, Volume 3, p43--58

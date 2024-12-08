@@ -183,14 +183,13 @@ class RandomForest:
             y_test = y_train_base[test_id]
 
         classifier.fit(x_train, y_train)
-
         y_pred = classifier.predict(x_test)
 
         model_size = 0
         for decision_tree in classifier.estimators_:
             model_size += decision_tree.tree_.node_count
 
-        averaging = "binary"
+        averaging = "binary" if len(np.unique(y_train)) == 2 else "micro"
 
         performances = {
             "accuracy": accuracy_score(y_test, y_pred),
@@ -222,7 +221,6 @@ if __name__ == "__main__":
 
     dataset = DataSet().load_from_csv(dataset)
     rf = RandomForest(dataset)
-    rf.objectives = [o.metric.lower() for o in objectives]
 
     for k, v in config.items():
         if v == "True":
@@ -293,12 +291,10 @@ if __name__ == "__main__":
     status = "SUCCESS"
     try:
         result = rf.train(config, instance, seed)
-    except Exception:
+    except Exception as e:
+        print(e)
         status = "CRASHED"
-        result = {k: 100 for k in objectives}
+        result = {k: 0 for k in objectives}
 
-    # quality = list(result.values())[0]
-    outdict = {"status": status,
-               "quality": result}
-
-    print(outdict)
+    result["status"] = status
+    print(result)

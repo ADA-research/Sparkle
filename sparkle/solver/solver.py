@@ -1,22 +1,25 @@
 """File to handle a solver and its directories."""
-
 from __future__ import annotations
 import sys
+import itertools
 from typing import Any
 import shlex
 import ast
 import json
 from pathlib import Path
 
+from ConfigSpace import ConfigurationSpace
+
 import runrunner as rrr
 from runrunner.local import LocalRun
-from runrunner.slurm import SlurmRun
+from runrunner.slurm import Run, SlurmRun
 from runrunner.base import Status, Runner
 
 from sparkle.tools import pcsparser, RunSolver
 from sparkle.types import SparkleCallable, SolverStatus
-from sparkle.solver.verifier import SolutionVerifier
+from sparkle.solver import verifiers
 from sparkle.instance import InstanceSet
+from sparkle.structures import PerformanceDataFrame
 from sparkle.types import resolve_objective, SparkleObjective, UseTime
 
 
@@ -24,13 +27,14 @@ class Solver(SparkleCallable):
     """Class to handle a solver and its directories."""
     meta_data = "solver_meta.txt"
     wrapper = "sparkle_solver_wrapper.py"
+    solver_cli = Path(__file__).parent / "solver_cli.py"
 
     def __init__(self: Solver,
                  directory: Path,
                  raw_output_directory: Path = None,
                  runsolver_exec: Path = None,
                  deterministic: bool = None,
-                 verifier: SolutionVerifier = None) -> None:
+                 verifier: verifiers.SolutionVerifier = None) -> None:
         """Initialize solver.
 
         Args:
@@ -45,19 +49,30 @@ class Solver(SparkleCallable):
         super().__init__(directory, runsolver_exec, raw_output_directory)
         self.deterministic = deterministic
         self.verifier = verifier
-        self.meta_data_file = self.directory / Solver.meta_data
 
+        meta_data_file = self.directory / Solver.meta_data
         if self.runsolver_exec is None:
             self.runsolver_exec = self.directory / "runsolver"
-        if not self.meta_data_file.exists():
-            self.meta_data_file = None
-        if self.deterministic is None:
-            if self.meta_data_file is not None:
-                # Read the parameter from file
-                meta_dict = ast.literal_eval(self.meta_data_file.open().read())
-                self.deterministic = meta_dict["deterministic"]
-            else:
-                self.deterministic = False
+        if meta_data_file.exists():
+            meta_data = ast.literal_eval(meta_data_file.open().read())
+            # We only override the deterministic and verifier from file if not set
+            if self.deterministic is None:
+                if ("deterministic" in meta_data
+                        and meta_data["deterministic"] is not None):
+                    self.deterministic = meta_data["deterministic"]
+            if self.verifier is None and "verifier" in meta_data:
+                if isinstance(meta_data["verifier"], tuple):  # File verifier
+                    self.verifier = verifiers.mapping[meta_data["verifier"][0]](
+                        Path(meta_data["verifier"][1])
+                    )
+                elif meta_data["verifier"] in verifiers.mapping:
+                    self.verifier = verifiers.mapping[meta_data["verifier"]]
+        if self.deterministic is None:  # Default to False
+            self.deterministic = False
+
+    def __str__(self: Solver) -> str:
+        """Return the sting representation of the solver."""
+        return self.name
 
     def _get_pcs_file(self: Solver, port_type: str = None) -> Path | bool:
         """Get path of the parameter file.
@@ -115,6 +130,14 @@ class Solver(SparkleCallable):
         parser.export(convention=port_type,
                       destination=target_pcs_file)
 
+    def get_configspace(self: Solver) -> ConfigurationSpace:
+        """Get the parameter content of the PCS file."""
+        if not (pcs_file := self.get_pcs_file()):
+            return None
+        parser = pcsparser.PCSParser()
+        parser.load(str(pcs_file), convention="smac")
+        return parser.get_configspace()
+
     def get_forbidden(self: Solver, port_type: pcsparser.PCSConvention) -> Path:
         """Get the path to the file containing forbidden parameter combinations."""
         if port_type == "IRACE":
@@ -151,6 +174,8 @@ class Solver(SparkleCallable):
         configuration["objectives"] = ",".join([str(obj) for obj in objectives])
         configuration["cutoff_time"] =\
             cutoff_time if cutoff_time is not None else sys.maxsize
+        if "configuration_id" in configuration:
+            del configuration["configuration_id"]
         # Ensure stringification of dictionary will go correctly for key value pairs
         configuration = {key: str(configuration[key]) for key in configuration}
         solver_cmd = [str((self.directory / Solver.wrapper)),
@@ -173,9 +198,9 @@ class Solver(SparkleCallable):
             cutoff_time: int = None,
             configuration: dict = None,
             run_on: Runner = Runner.LOCAL,
-            commandname: str = "run_solver",
             sbatch_options: list[str] = None,
-            log_dir: Path = None) -> SlurmRun | list[dict[str, Any]] | dict[str, Any]:
+            log_dir: Path = None,
+            ) -> SlurmRun | list[dict[str, Any]] | dict[str, Any]:
         """Run the solver on an instance with a certain configuration.
 
         Args:
@@ -212,6 +237,7 @@ class Solver(SparkleCallable):
                                         configuration=configuration,
                                         log_dir=log_dir)
             cmds.append(" ".join(solver_cmd))
+        commandname = f"Run Solver: {self.name} on {instance}"
         run = rrr.add_to_queue(runner=run_on,
                                cmd=cmds,
                                name=commandname,
@@ -220,6 +246,8 @@ class Solver(SparkleCallable):
 
         if isinstance(run, LocalRun):
             run.wait()
+            import time
+            time.sleep(5)
             # Subprocess resulted in error
             if run.status == Status.ERROR:
                 print(f"WARNING: Solver {self.name} execution seems to have failed!\n")
@@ -233,17 +261,83 @@ class Solver(SparkleCallable):
             solver_outputs = []
             for i, job in enumerate(run.jobs):
                 solver_cmd = cmds[i].split(" ")
-                runsolver_configuration = None
-                if solver_cmd[0] == str(self.runsolver_exec.absolute()):
-                    runsolver_configuration = solver_cmd[:11]
                 solver_output = Solver.parse_solver_output(run.jobs[i].stdout,
-                                                           runsolver_configuration)
-                if self.verifier is not None:
-                    solver_output["status"] = self.verifier.verifiy(
-                        instance, Path(runsolver_configuration[-1]))
+                                                           solver_call=solver_cmd,
+                                                           objectives=objectives,
+                                                           verifier=self.verifier)
                 solver_outputs.append(solver_output)
             return solver_outputs if len(solver_outputs) > 1 else solver_output
         return run
+
+    def run_performance_dataframe(self: Solver,
+                                  instances: str | list[str] | InstanceSet,
+                                  run_ids: int | list[int],
+                                  performance_dataframe: PerformanceDataFrame,
+                                  cutoff_time: int = None,
+                                  objective: SparkleObjective = None,
+                                  train_set: InstanceSet = None,
+                                  sbatch_options: list[str] = None,
+                                  dependencies: list[SlurmRun] = None,
+                                  log_dir: Path = None,
+                                  base_dir: Path = None,
+                                  run_on: Runner = Runner.SLURM,
+                                  ) -> Run:
+        """Run the solver from and place the results in the performance dataframe.
+
+        This in practice actually runs Solver.run, but has a little script before/after,
+        to read and write to the performance dataframe.
+
+        Args:
+            instance: The instance(s) to run the solver on. In case of an instance set,
+                or list, will create a job for all instances in the set/list.
+            run_ids: The run indices to use in the performance dataframe.
+            performance_dataframe: The performance dataframe to use.
+            cutoff_time: The cutoff time for the solver, measured through RunSolver.
+            objective: The objective to use, only relevant for train set best config
+                determining
+            train_set: The training set to use. If present, will determine the best
+                configuration of the solver using these instances and run with it on
+                all instances in the instance argument.
+            sbatch_options: List of slurm batch options to use
+            dependencies: List of slurm runs to use as dependencies
+            log_dir: Path where to place output files. Defaults to
+                self.raw_output_directory.
+            base_dir: Path where to place output files.
+            run_on: On which platform to run the jobs. Default: Slurm.
+
+        Returns:
+            SlurmRun or Local run of the job.
+        """
+        instances = [instances] if isinstance(instances, str) else instances
+        run_ids = [run_ids] if isinstance(run_ids, int) else run_ids
+        set_name = "instances"
+        if isinstance(instances, InstanceSet):
+            set_name = instances.name
+            instances = [str(i) for i in instances.instance_paths]
+        objective_arg = f"--target-objective {objective.name}" if objective else ""
+        train_arg =\
+            ",".join([str(i) for i in train_set.instance_paths]) if train_set else ""
+        cmds = [f"{Solver.solver_cli} "
+                f"--solver {self.directory} "
+                f"--instance {instance} "
+                f"--run-index {run_index} "
+                f"--performance-dataframe {performance_dataframe.csv_filepath} "
+                f"--cutoff-time {cutoff_time} "
+                f"--log-dir {log_dir} "
+                f"{objective_arg} "
+                f"{'--best-configuration-instances' if train_set else ''} {train_arg}"
+                for instance, run_index in itertools.product(instances, run_ids)]
+        r = rrr.add_to_queue(
+            runner=run_on,
+            cmd=cmds,
+            name=f"Run: {self.name} on {set_name}",
+            base_dir=base_dir,
+            sbatch_options=sbatch_options,
+            dependencies=dependencies
+        )
+        if run_on == Runner.LOCAL:
+            r.wait()
+        return r
 
     @staticmethod
     def config_str_to_dict(config_str: str) -> dict[str, str]:
@@ -265,36 +359,60 @@ class Solver(SparkleCallable):
     @staticmethod
     def parse_solver_output(
             solver_output: str,
-            runsolver_configuration: list[str | Path] = None) -> dict[str, Any]:
+            solver_call: list[str | Path] = None,
+            objectives: list[SparkleObjective] = None,
+            verifier: verifiers.SolutionVerifier = None) -> dict[str, Any]:
         """Parse the output of the solver.
 
         Args:
             solver_output: The output of the solver run which needs to be parsed
-            runsolver_configuration: The runsolver configuration to wrap the solver
-                with. If runsolver was not used this should be None.
+            solver_call: The solver call used to run the solver
+            objectives: The objectives to apply to the solver output
+            verifier: The verifier to check the solver output
 
         Returns:
             Dictionary representing the parsed solver output
         """
-        if runsolver_configuration is not None:
-            parsed_output = RunSolver.get_solver_output(runsolver_configuration,
+        used_runsolver = False
+        if solver_call is not None and len(solver_call) > 2:
+            used_runsolver = True
+            parsed_output = RunSolver.get_solver_output(solver_call,
                                                         solver_output)
         else:
             parsed_output = ast.literal_eval(solver_output)
         # cast status attribute from str to Enum
         parsed_output["status"] = SolverStatus(parsed_output["status"])
+        # Apply objectives to parsed output, runtime based objectives added here
+        if verifier is not None and used_runsolver:
+            # Horrible hack to get the instance from the solver input
+            solver_call_str: str = " ".join(solver_call)
+            solver_input_str = solver_call_str.split(Solver.wrapper, maxsplit=1)[1]
+            solver_input_str = solver_input_str[solver_input_str.index("{"):
+                                                solver_input_str.index("}") + 1]
+            solver_input = ast.literal_eval(solver_input_str)
+            target_instance = Path(solver_input["instance"])
+            parsed_output["status"] = verifier.verify(
+                target_instance, parsed_output, solver_call)
+
+        # Create objective map
+        objectives = {o.stem: o for o in objectives} if objectives else {}
+        removable_keys = ["cutoff_time"]  # Keys to remove
+
         # apply objectives to parsed output, runtime based objectives added here
         for key, value in parsed_output.items():
-            if key == "status":
-                continue
-            objective = resolve_objective(key)
-            if objective is None:
+            if objectives and key in objectives:
+                objective = objectives[key]
+                removable_keys.append(key)  # We translate it into the full name
+            else:
+                objective = resolve_objective(key)
+            # If not found in objectives, resolve to which objective the output belongs
+            if objective is None:  # Could not parse, skip
                 continue
             if objective.use_time == UseTime.NO:
                 if objective.post_process is not None:
-                    parsed_output[objective] = objective.post_process(value)
+                    parsed_output[key] = objective.post_process(value)
             else:
-                if runsolver_configuration is None:
+                if not used_runsolver:
                     continue
                 if objective.use_time == UseTime.CPU_TIME:
                     parsed_output[key] = parsed_output["cpu_time"]
@@ -302,7 +420,18 @@ class Solver(SparkleCallable):
                     parsed_output[key] = parsed_output["wall_time"]
                 if objective.post_process is not None:
                     parsed_output[key] = objective.post_process(
-                        parsed_output[key], parsed_output["cutoff_time"])
-        if "cutoff_time" in parsed_output:
-            del parsed_output["cutoff_time"]
+                        parsed_output[key],
+                        parsed_output["cutoff_time"],
+                        parsed_output["status"])
+
+        # Replace or remove keys based on the objective names
+        for key in removable_keys:
+            if key in parsed_output:
+                if key in objectives:
+                    # Map the result to the objective
+                    parsed_output[objectives[key].name] = parsed_output[key]
+                    if key != objectives[key].name:  # Only delete actual mappings
+                        del parsed_output[key]
+                else:
+                    del parsed_output[key]
         return parsed_output

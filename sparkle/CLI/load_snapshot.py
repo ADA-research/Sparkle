@@ -28,6 +28,12 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
     snapshot_help.load_snapshot(Path(args.snapshot_file_path))
+    # Make sure we have Solver execution rights again after unpacking
+    for solver in gv.settings().DEFAULT_solver_dir.iterdir():
+        if solver.is_dir():
+            for file in solver.iterdir():
+                if file.is_file():
+                    file.chmod(0o755)
     # Reset Global variables as they should be re-read from snapshot
     gv.__settings = None
     gv.__latest_scenario = None

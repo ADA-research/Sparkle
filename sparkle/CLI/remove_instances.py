@@ -10,7 +10,6 @@ from sparkle.platform import file_help as sfh
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from sparkle.instance import Instance_Set
 from sparkle.CLI.help import logging as sl
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
@@ -37,7 +36,7 @@ def main(argv: list[str]) -> None:
     instances_path = resolve_object_name(args.instances_path,
                                          target_dir=gv.settings().DEFAULT_instance_dir)
 
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.REMOVE_INSTANCES])
+    check_for_initialise()
 
     if instances_path is None or not instances_path.exists() or not\
             instances_path.is_dir():
@@ -66,10 +65,14 @@ def main(argv: list[str]) -> None:
                                          key=key, remove=True)
             break
 
-    # Remove the directory and all its files
-    shutil.rmtree(instances_path)
+    # We unlink symbolics links, erase copies
+    if instances_path.is_symlink():
+        instances_path.unlink()
+    else:
+        # Remove the directory and all its files
+        shutil.rmtree(instances_path)
 
-    print(f"Removing instances in directory {instances_path} done!")
+    print(f"Removing instances set {instances_path.name} done!")
     sys.exit(0)
 
 

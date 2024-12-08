@@ -1,0 +1,42 @@
+Configuration space object:
+  Hyperparameters:
+    beta_hscore, Type: UniformInteger, Range: [100, 1000000], Default: 1000, on log-scale
+    d_hscore, Type: UniformInteger, Range: [1, 15], Default: 8
+    gamma_hscore2, Type: UniformInteger, Range: [100, 1000000], Default: 1000, on log-scale
+    init_solution, Type: Categorical, Choices: {1, 2}, Default: 1
+    p_swt, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.3
+    perform_aspiration, Type: Categorical, Choices: {0, 1}, Default: 1
+    perform_clause_weight, Type: Categorical, Choices: {0, 1}, Default: 1
+    perform_double_cc, Type: Categorical, Choices: {0, 1}, Default: 1
+    perform_first_div, Type: Categorical, Choices: {0, 1}, Default: 0
+    perform_pac, Type: Categorical, Choices: {0, 1}, Default: 0
+    prob_first_div, Type: UniformFloat, Range: [0.001, 1.0], Default: 0.0228, on log-scale
+    prob_novelty, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.119
+    prob_pac, Type: UniformFloat, Range: [1e-05, 0.1], Default: 0.00058, on log-scale
+    q_swt, Type: UniformFloat, Range: [0.0, 1.0], Default: 0.0
+    sel_clause_div, Type: Categorical, Choices: {1, 2}, Default: 1
+    sel_clause_weight_scheme, Type: Categorical, Choices: {1, 2}, Default: 1
+    sel_var_break_tie_greedy, Type: Categorical, Choices: {1, 2, 3, 4}, Default: 2
+    sel_var_div, Type: Categorical, Choices: {1, 2, 3, 4, 5, 6, 7}, Default: 3
+    sp_paws, Type: UniformFloat, Range: [0.5, 1.0], Default: 0.8
+    sparrow_c1, Type: UniformFloat, Range: [2.0, 10.0], Default: 2.15
+    sparrow_c2, Type: UniformInteger, Range: [1, 5], Default: 4
+    sparrow_c3, Type: UniformInteger, Range: [20000, 100000], Default: 75000
+    threshold_swt, Type: UniformInteger, Range: [10, 1000], Default: 300
+  Conditions:
+    (beta_hscore | sel_var_break_tie_greedy in {'3'} || beta_hscore | sel_var_div in {'4'})
+    (d_hscore | sel_var_break_tie_greedy in {'3'} || d_hscore | sel_var_div in {'4'})
+    (gamma_hscore2 | sel_var_break_tie_greedy in {'4'} || gamma_hscore2 | sel_var_div in {'5'})
+    (p_swt | perform_clause_weight in {'1'} && p_swt | sel_clause_weight_scheme in {'1'})
+    (q_swt | perform_clause_weight in {'1'} && q_swt | sel_clause_weight_scheme in {'1'})
+    (sp_paws | perform_clause_weight in {'1'} && sp_paws | sel_clause_weight_scheme in {'2'})
+    (sparrow_c3 | sparrow_c1 != 10.0 && sparrow_c3 | sparrow_c2 > 2)
+    (threshold_swt | perform_clause_weight in {'1'} && threshold_swt | sel_clause_weight_scheme in {'1'})
+    prob_first_div | perform_first_div in {'1'}
+    prob_novelty | sel_var_div in {'6'}
+    prob_pac | perform_pac in {'1'}
+    sel_clause_weight_scheme | perform_clause_weight in {'1'}
+    sparrow_c1 | sel_var_div in {'7'}
+    sparrow_c2 | sparrow_c1 > 3.0
+  Forbidden Clauses:
+    (Forbidden: sel_clause_div == '2' && Forbidden: perform_clause_weight == '0')

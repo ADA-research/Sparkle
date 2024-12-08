@@ -2,6 +2,29 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.9.1] - 2024/12/08
+
+### Added
+- Added the SMAC3 configurator to Sparkle [SPRK-335]
+- Added no-copy argument to all CLI add commands so the user can create symbolic links to their files instead of copying [SPRK-356]
+- Added no-save argument to initialise command [SPRK-358]
+- Added SolutionFileVerifier to verify instance solutions from CSV file [SPRK-360]
+
+### Changed
+
+- Generate report command (Configuration report) now checks whether there are still jobs that should be run before allowing the user to start this command [SPRK-328]
+- PerformanceDataFrame now directly subclasses from Pandas DataFrame instead of functioning as a container class [SPRK-278]
+- Initialise command no longer removes the user's Settings directory if a platform already exists, but does still save it to the snapshot. [SPRK-355]
+- Solver configuration now stores found configurations and their results in the PerformanceDataFrame [SPRK-358]
+- run_solvers_core is integrated now into the solver class [SPRK-358]
+- configure solver command now also runs default configuration, schedules train set validation and test set validation if given [SPRK-358]
+- Modified SolutionVerifier adding to solvers as a CLI argument that is saved in the Solver meta file instead of in the Settings file [SPRK-359]
+- PAR objective now takes into account 'negative status' and penalises solvers for crashing or incorrect answers [SPRK-360]
+
+### Removed
+- Validate configured vs default command has been removed as it is now redundant [SPRK-358]
+- Validator class has been removed as it is no longer relevant [SPRK-358]
+
 ## [0.9.0] - 2024/10/30
 
 ### Added

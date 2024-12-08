@@ -40,7 +40,8 @@ class ParallelPortfolioOutput:
         csv_data = csv_data[1:]
         solver_column = header.index("Solver")
         instance_column = header.index("Instance")
-        status_column = header.index("status")
+        status_column = [i for i, v in enumerate(header)
+                         if v.startswith("status")][0]
         objective_column = header.index(objective.name)
         self.solver_list = list(set([line[solver_column] for line in csv_data]))
 

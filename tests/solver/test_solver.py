@@ -6,7 +6,7 @@ import shutil
 
 from unittest import TestCase
 from pathlib import Path
-from sparkle.solver import Solver
+from sparkle.solver import Solver, verifiers
 
 
 class TestSolver(TestCase):
@@ -49,12 +49,45 @@ class TestSolver(TestCase):
         solver = Solver(self.solver_path)
         assert solver.get_pcs_file() == self.solver_path / "paramfile.pcs"
 
-    def test_is_deterministic_false(self: TestSolver) -> None:
-        """Test if is_deterministic() correctly returns False."""
+    def test_is_deterministic(self: TestSolver) -> None:
+        """Test if deterministic correctly returns value."""
         solver = Solver(self.solver_path)
         self.assertEqual(solver.deterministic, False)
 
-    def test_is_deterministic_true(self: TestSolver) -> None:
-        """Test if is_deterministic() correctly returns True."""
         solver = Solver(self.solver_path, deterministic=True)
         self.assertEqual(solver.deterministic, True)
+
+    def test_verifier(self: TestSolver) -> None:
+        """Test if verifier correctly returns value."""
+        # No verifier
+        solver = Solver(self.solver_path)
+        self.assertEqual(solver.verifier, None)
+
+        # Verifier passed by constructor
+        solver = Solver(self.solver_path, verifier=verifiers.SATVerifier)
+        self.assertEqual(solver.verifier, verifiers.SATVerifier)
+
+        # None in meta file
+        meta_file = self.solver_path / Solver.meta_data
+        meta_data = {"deterministic": False,
+                     "verifier": None}
+        meta_file.open("w").write(str(meta_data))
+        solver = Solver(self.solver_path)
+        self.assertEqual(solver.verifier, None)
+
+        # Verifier SAT in meta file
+        meta_data = {"deterministic": False,
+                     "verifier": "SATVerifier"}
+        meta_file.open("w").write(str(meta_data))
+        solver = Solver(self.solver_path)
+        self.assertEqual(solver.verifier, verifiers.SATVerifier)
+
+    def test_run(self: TestSolver) -> None:
+        """Test if run correctly adds to RunRunner queue."""
+        # TODO: write test
+        pass
+
+    def test_run_performance_dataframe(self: TestSolver) -> None:
+        """Test if run_performance_dataframe correctly adds to RunRunner queue."""
+        # TODO: write test
+        pass

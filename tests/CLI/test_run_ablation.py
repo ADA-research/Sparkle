@@ -2,7 +2,7 @@
 import pytest
 from pathlib import Path
 
-from sparkle.CLI import load_snapshot, run_ablation, add_solver, add_instances
+from sparkle.CLI import load_snapshot, run_ablation
 
 from tests.CLI import tools as cli_tools
 
@@ -27,24 +27,6 @@ def test_run_ablation_command(
     # Set up platform
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         load_snapshot.main([str(snapshot_path)])
-    assert pytest_wrapped_e.type is SystemExit
-    assert pytest_wrapped_e.value.code == 0
-
-    # Add solver
-    with pytest.raises(SystemExit) as pytest_wrapped_e:
-        add_solver.main([str(solver_pbo_path)])
-    assert pytest_wrapped_e.type is SystemExit
-    assert pytest_wrapped_e.value.code == 0
-
-    # Add train instances
-    with pytest.raises(SystemExit) as pytest_wrapped_e:
-        add_instances.main([str(train_set_path)])
-    assert pytest_wrapped_e.type is SystemExit
-    assert pytest_wrapped_e.value.code == 0
-
-    # Add test instances
-    with pytest.raises(SystemExit) as pytest_wrapped_e:
-        add_instances.main([str(test_set_path)])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 

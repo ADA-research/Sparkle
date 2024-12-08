@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path, PurePath
 
 from sparkle.CLI.help import global_variables as gv
-from sparkle.solver.ablation import AblationScenario
+from sparkle.configurator.ablation import AblationScenario
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.platform import \
     generate_report_for_configuration as sgrfch
@@ -17,14 +17,12 @@ from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.platform import \
     generate_report_for_parallel_portfolio as sgrfpph
 from sparkle.solver import Solver
-from sparkle.solver.validator import Validator
 from sparkle.instance import Instance_Set
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.platform.output.configuration_output import ConfigurationOutput
 from sparkle.platform.output.selection_output import SelectionOutput
 from sparkle.platform.output.parallel_portfolio_output import ParallelPortfolioOutput
 
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
 
@@ -73,7 +71,7 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
 
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.GENERATE_REPORT])
+    check_for_initialise()
 
     # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "settings_file"):
@@ -212,41 +210,42 @@ def main(argv: list[str]) -> None:
             print(f"Usage: {sys.argv[0]} --solver <solver> [--instance-set-train "
                   "<instance-set-train>] [--instance-set-test <instance-set-test>]")
             sys.exit(-1)
-        # Generate a report depending on which instance sets are provided
-        if flag_instance_set_train or flag_instance_set_test:
-            # Check if there are result to generate a report from
-            validator = Validator(gv.settings().DEFAULT_validation_output)
-            train_res = validator.get_validation_results(
-                solver, instance_set_train)
-            if instance_set_test is not None:
-                test_res = validator.get_validation_results(solver,
-                                                            instance_set_test)
-            if len(train_res) == 0 or (instance_set_test is not None
-                                       and len(test_res) == 0):
-                print("Error: Results not found for the given solver and instance set(s)"
-                      ' combination. Make sure the "configure_solver" and "validate_'
-                      'configured_vs_default" commands were correctly executed. ')
-                sys.exit(-1)
-        else:
-            print("Error: No results from validate_configured_vs_default found that "
-                  "can be used in the report!")
-            sys.exit(-1)
         # Extract config scenario data for report, but this should be read from the
         # scenario file instead as we can't know wether features were used or not now
         configurator = gv.settings().get_general_sparkle_configurator()
         config_scenario = gv.latest_scenario().get_configuration_scenario(
-            configurator.scenario_class)
+            configurator.scenario_class())
         ablation_scenario = None
         if args.flag_ablation:
             ablation_scenario = AblationScenario(
-                solver, instance_set_train, instance_set_test,
+                config_scenario, instance_set_test,
                 gv.settings().DEFAULT_ablation_output)
+        performance_data = PerformanceDataFrame(
+            gv.settings().DEFAULT_performance_data_path)
+        # Filter the performance data to solver/instance sets
+        performance_data = performance_data
+        if performance_data.num_solvers > 1:
+            performance_data.remove_solver(
+                [s for s in performance_data.solvers
+                 if s != solver.directory])
 
+        used_instances = [str(i) for i in instance_set_train.instance_paths]
+        if instance_set_test:
+            used_instances += [str(i) for i in instance_set_test.instance_paths]
+        for i in performance_data.instances:
+            if i not in used_instances:
+                performance_data.remove_instance(i)
+        configuration_jobs = performance_data.get_job_list()
+        if len(configuration_jobs) > 0:
+            print(f"ERROR: {(len(configuration_jobs))} jobs for the configuration were "
+                  "not executed! Please run 'sparkle run solvers' before continuing.")
+            sys.exit(-1)
         # Create machine readable output
         output = gv.settings().DEFAULT_configuration_output_analysis
         config_output = ConfigurationOutput(config_scenario.directory,
                                             configurator,
                                             config_scenario,
+                                            performance_data,
                                             instance_set_test,
                                             output)
         config_output.write_output()
@@ -254,17 +253,14 @@ def main(argv: list[str]) -> None:
 
         if not only_json:
             sgrfch.generate_report_for_configuration(
-                solver,
-                gv.settings().get_general_sparkle_configurator(),
-                Validator(gv.settings().DEFAULT_validation_output),
+                config_scenario,
+                config_output,
                 gv.settings().DEFAULT_extractor_dir,
                 gv.settings().DEFAULT_configuration_output_analysis,
                 gv.settings().DEFAULT_latex_source,
                 gv.settings().DEFAULT_latex_bib,
                 gv.settings().get_general_extractor_cutoff_time(),
-                config_scenario,
-                instance_set_test,
-                ablation=ablation_scenario
+                ablation=ablation_scenario,
             )
 
     # Write used settings to file

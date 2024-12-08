@@ -21,10 +21,10 @@ sparkle add_instances Examples/Resources/Instances/PTN2/
 
 Add a configurable solver (here for SAT solving) with a wrapper containing the executable name of the solver and a string of command line parameters, without running the solver yet
 
-The solver directory should contain the solver executable, the `sparkle_solver_wrapper` wrapper, and a `.pcs` file describing the configurable parameters
+The solver directory should contain the solver executable, the `sparkle_solver_wrapper` wrapper, and a `.pcs` file describing the configurable parameters. In this example, we are running a SAT solver, and we can add the argument for a solution verifier to check each solution presented by the solver, and update its status acccordingly.
 
 ```bash
-sparkle add_solver Examples/Resources/Solvers/PbO-CCSAT-Generic/
+sparkle add_solver Examples/Resources/Solvers/PbO-CCSAT-Generic/ --solution-verifier SATVerifier
 ```
 
 If needed solvers can also include additional files or scripts in their directory, but keeping additional files to a minimum speeds up copying.
@@ -34,34 +34,20 @@ If needed solvers can also include additional files or scripts in their director
 To perform configuration on the solver to obtain a target configuration we run:
 
 ```bash
-sparkle configure_solver --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/
+sparkle configure_solver --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2
 ```
 
-This step should take about ~10 minutes, although it is of course very cluster / slurm settings dependant.
-
-### Validate the configuration
-
-To make sure configuration is completed before running validation you can use the `wait` command
-
-```bash
-sparkle wait
-```
-
-Now we can validate the performance of the best found parameter configuration against the default configuration specified in the PCS file. The test set is optional.
-
-```bash
-sparkle validate_configured_vs_default --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/
-```
+This step should take about ~10 minutes, although it is of course very cluster / slurm settings dependant. If you are using the default settings, this will use SMAC2 as configurator. If you wish to run with a different configurator, we also supply default settings for the other configurators for this scenario. You can simply change the configurator name in `sparkle_settings.ini` under the `general` section.
 
 ### Generate a report
 
-Wait for validation to be completed
+We have to wait for the algorithm configuration to be completed, to get live updates on your terminal we can simply run:
 
 ```bash
 sparkle wait
 ```
 
-Generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in a `Configuration_Reports/` subdirectory for the solver, training set, and optionally test set like `PbO-CCSAT-Generic_PTN/Sparkle-latex-generator-for-configuration/`
+And now we can generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in `Output/Configuration/Analysis/`. Note that you may get the warning that not all solvers have been run yet: Sometimes an algorithm call may crash and can easily be restarted by sparkle by running `sparkle run solvers`.
 
 ```bash
 sparkle generate_report
@@ -93,27 +79,6 @@ sparkle generate_report
 ```
 
 The ablation section can be suppressed with `--no-ablation` 
-
-#### Immediate ablation and validation after configuration
-
-By adding `--ablation` and/or `--validate` to the `configure_solver` command, ablation and respectively validation will run directly after the configuration is finished.
-
-There is no need to execute `run_ablation` and/or `validate_configured_vs_default` when these flags are given with the `configure_solver` command
-
-#### Training set only
-
-```bash
-sparkle configure_solver --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --ablation --validate
-```
-
-#### Training and testing sets
-
-Wait for the previous example to be completed
-
-```bash
-sparkle wait
-sparkle configure_solver --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/ --ablation --validate
-```
 
 ### Run configured solver
 

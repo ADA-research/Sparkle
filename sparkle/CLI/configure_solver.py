@@ -1,28 +1,27 @@
 #!/usr/bin/env python3
 """Sparkle command to configure a solver."""
 from __future__ import annotations
-
 import argparse
 import sys
 import os
-from pathlib import Path
+import math
+
 from pandas import DataFrame
 
-from runrunner.base import Runner, Run
-import runrunner as rrr
+from runrunner import Runner
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
-from sparkle.platform.settings_objects import SettingState
-from sparkle.CLI.help.reporting_scenario import Scenario
-from sparkle.structures import FeatureDataFrame
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
-from sparkle.configurator import implementations as configurator_implementations
-from sparkle.CLI.help.nicknames import resolve_object_name
-from sparkle.solver import Solver
 from sparkle.CLI.initialise import check_for_initialise
+from sparkle.CLI.help.reporting_scenario import Scenario
+from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.instance import Instance_Set, InstanceSet
+
+from sparkle.platform.settings_objects import SettingState
+from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
+from sparkle.configurator import implementations as configurator_implementations
+from sparkle.solver import Solver
+from sparkle.instance import Instance_Set
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -39,6 +38,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstanceSetTrainArgument.kwargs)
     parser.add_argument(*ac.InstanceSetTestArgument.names,
                         **ac.InstanceSetTestArgument.kwargs)
+    parser.add_argument(*ac.TestSetRunAllConfigurationArgument.names,
+                        **ac.TestSetRunAllConfigurationArgument.kwargs)
     parser.add_argument(*ac.SparkleObjectiveArgument.names,
                         **ac.SparkleObjectiveArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeConfigurationArgument.names,
@@ -51,10 +52,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.SettingsFileArgument.kwargs)
     parser.add_argument(*ac.UseFeaturesArgument.names,
                         **ac.UseFeaturesArgument.kwargs)
-    parser.add_argument(*ac.ValidateArgument.names,
-                        **ac.ValidateArgument.kwargs)
-    parser.add_argument(*ac.AblationArgument.names,
-                        **ac.AblationArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
     return parser
@@ -88,50 +85,6 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
             args.run_on.value, SettingState.CMD_LINE)
 
 
-def run_after(solver: Path,
-              train_set: InstanceSet,
-              test_set: InstanceSet,
-              dependency: list[Run],
-              command: CommandName,
-              run_on: Runner = Runner.SLURM) -> Run:
-    """Add a command to run after configuration to RunRunner queue.
-
-    Args:
-      solver: Path (object) to solver.
-      train_set: Instances used for training.
-      test_set: Instances used for testing.
-      dependency: List of job dependencies.
-      command: The command to run. Currently supported: Validation and Ablation.
-      run_on: Whether the job is executed on Slurm or locally.
-
-    Returns:
-      RunRunner Run object regarding the callback
-    """
-    cmd_file = "validate_configured_vs_default.py"
-    if command == CommandName.RUN_ABLATION:
-        cmd_file = "run_ablation.py"
-
-    command_line = f"./sparkle/CLI/{cmd_file} --settings-file Settings/latest.ini "\
-                   f"--solver {solver.name} --instance-set-train {train_set.directory}"\
-                   f" --run-on {run_on}"
-    if test_set is not None:
-        command_line += f" --instance-set-test {test_set.directory}"
-
-    run = rrr.add_to_queue(
-        runner=run_on,
-        cmd=command_line,
-        name=command,
-        dependencies=dependency,
-        base_dir=sl.caller_log_dir,
-        srun_options=["-N1", "-n1"],
-        sbatch_options=gv.settings().get_slurm_extra_options(as_args=True))
-
-    if run_on == Runner.LOCAL:
-        print("Waiting for the local calculations to finish.")
-        run.wait()
-    return run
-
-
 def main(argv: list[str]) -> None:
     """Main function of the configure solver command."""
     # Log command call
@@ -144,9 +97,7 @@ def main(argv: list[str]) -> None:
 
     apply_settings_from_args(args)
 
-    validate = args.validate
-    ablation = args.ablation
-    solver = resolve_object_name(
+    solver: Solver = resolve_object_name(
         args.solver,
         gv.file_storage_data_mapping[gv.solver_nickname_list_path],
         gv.settings().DEFAULT_solver_dir, class_name=Solver)
@@ -167,8 +118,7 @@ def main(argv: list[str]) -> None:
     use_features = args.use_features
     run_on = gv.settings().get_run_on()
 
-    # Check if Solver and instance sets were resolved
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.CONFIGURE_SOLVER])
+    check_for_initialise()
 
     configurator = gv.settings().get_general_sparkle_configurator()
     configurator_settings = gv.settings().get_configurator_settings(configurator.name)
@@ -204,17 +154,67 @@ def main(argv: list[str]) -> None:
 
     sparkle_objectives =\
         gv.settings().get_general_sparkle_objectives()
-    config_scenario = configurator.scenario_class(
-        solver, instance_set_train, sparkle_objectives, configurator.output_path,
-        **configurator_settings)
+    configurator_runs = gv.settings().get_configurator_number_of_runs()
+    performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
+
+    # Check if given objectives are in the data frame
+    for objective in sparkle_objectives:
+        if objective.name not in performance_data.objective_names:
+            print(f"WARNING: Objective {objective.name} not found in performance data. "
+                  "Adding to data frame.")
+            performance_data.add_objective(objective.name)
 
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
+    config_scenario = configurator.scenario_class()(
+        solver, instance_set_train, sparkle_objectives,
+        configurator.output_path, **configurator_settings)
+
+    # Run the default configuration
+    remaining_jobs = performance_data.get_job_list()
+    relevant_jobs = []
+    for job in remaining_jobs:
+        if job[-1] != str(solver.directory):
+            continue
+        configuration = performance_data.get_value(
+            job[2], job[0], sparkle_objectives[0].name, run=job[1],
+            solver_fields=[PerformanceDataFrame.column_configuration])
+        # Only run jobs with the default configuration
+        if not isinstance(configuration, str) and math.isnan(configuration):
+            relevant_jobs.append(job)
+
+    # Expand the performance dataframe so it can store the configuration
+    performance_data.add_runs(configurator_runs,
+                              instance_names=[
+                                  str(i) for i in instance_set_train.instance_paths])
+    if instance_set_test is not None:
+        # Expand the performance dataframe so it can store the test set results of the
+        # found configurations
+        test_set_runs = configurator_runs if args.test_set_run_all_configurations else 1
+        performance_data.add_runs(
+            test_set_runs,
+            instance_names=[str(i) for i in instance_set_test.instance_paths])
+    performance_data.save_csv()
+
     dependency_job_list = configurator.configure(
         scenario=config_scenario,
+        data_target=performance_data,
         sbatch_options=sbatch_options,
         num_parallel_jobs=gv.settings().get_number_of_jobs_in_parallel(),
         base_dir=sl.caller_log_dir,
         run_on=run_on)
+
+    # If we have default configurations that need to be run, schedule them too
+    if len(relevant_jobs) > 0:
+        instances = [job[0] for job in relevant_jobs]
+        runs = list(set([job[1] for job in relevant_jobs]))
+        default_job = solver.run_performance_dataframe(
+            instances, runs, performance_data,
+            sbatch_options=sbatch_options,
+            cutoff_time=config_scenario.cutoff_time,
+            log_dir=config_scenario.validation,
+            base_dir=sl.caller_log_dir,
+            run_on=run_on)
+        dependency_job_list.append(default_job)
 
     # Update latest scenario
     gv.latest_scenario().set_config_solver(solver)
@@ -224,24 +224,29 @@ def main(argv: list[str]) -> None:
 
     if instance_set_test is not None:
         gv.latest_scenario().set_config_instance_set_test(instance_set_test.directory)
+        # Schedule test set jobs
+        if args.test_set_run_all_configurations:
+            pass
+        else:
+            # We place the results in the index we just added
+            run_index = list(set([performance_data.get_instance_num_runs(str(i))
+                                  for i in instance_set_test.instance_paths]))
+        test_set_job = solver.run_performance_dataframe(
+            instance_set_test,
+            run_index,
+            performance_data,
+            cutoff_time=config_scenario.cutoff_time,
+            objective=config_scenario.sparkle_objective,
+            train_set=instance_set_train,
+            sbatch_options=sbatch_options,
+            log_dir=config_scenario.validation,
+            base_dir=sl.caller_log_dir,
+            dependencies=dependency_job_list,
+            run_on=run_on)
+        dependency_job_list.append(test_set_job)
     else:
         # Set to default to overwrite possible old path
         gv.latest_scenario().set_config_instance_set_test()
-
-    # Set validation to wait until configuration is done
-    if validate:
-        validate_jobid = run_after(
-            solver, instance_set_train, instance_set_test, dependency_job_list,
-            command=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT, run_on=run_on
-        )
-        dependency_job_list.append(validate_jobid)
-
-    if ablation:
-        ablation_jobid = run_after(
-            solver, instance_set_train, instance_set_test, dependency_job_list,
-            command=CommandName.RUN_ABLATION, run_on=run_on
-        )
-        dependency_job_list.append(ablation_jobid)
 
     if run_on == Runner.SLURM:
         job_id_str = ",".join([run.run_id for run in dependency_job_list])

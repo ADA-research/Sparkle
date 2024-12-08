@@ -3,9 +3,11 @@ from __future__ import annotations
 from unittest import TestCase
 from pathlib import Path
 
-from sparkle.solver.ablation import AblationScenario
+from sparkle.configurator.implementations import SMAC2Scenario
+from sparkle.configurator.ablation import AblationScenario
 from sparkle.solver import Solver
-from sparkle.instance import InstanceSet
+from sparkle.types.objective import PAR
+from sparkle.instance import Instance_Set
 
 
 class TestAblationScenario(TestCase):
@@ -14,20 +16,26 @@ class TestAblationScenario(TestCase):
     def setUp(self: TestAblationScenario) -> None:
         """Setup objects for tests."""
         self.solver = Solver(Path("tests/test_files/Solvers/Test-Solver"))
-        self.dataset: InstanceSet = InstanceSet(Path("Instances/Train-Instance-Set"))
-        self.test_dataset: InstanceSet = InstanceSet(Path("Instances/Test-Instance-Set"))
+        self.dataset = Instance_Set(Path(
+            "tests/test_files/Instances/Test-Instance-Set"))
+        self.objective = PAR(10)
+        self.test_dataset = Instance_Set(Path(
+            "tests/test_files/Instances/Test-Instance-Set"))
         self.output_directory: Path = Path("Output/ablation_test")
         self.ablation_executable: Path = None
         self.validation_executable: Path = None
         self.override_dirs: bool = False
+        self.configuration_scenario = SMAC2Scenario(
+            self.solver,
+            self.dataset,
+            [self.objective],
+            Path())
         self.scenario = AblationScenario(
-            self.solver, self.dataset, self.test_dataset, self.output_directory,
-            self.ablation_executable, self.validation_executable, self.override_dirs)
+            self.configuration_scenario, self.test_dataset, self.output_directory,
+            self.override_dirs)
 
     def test_ablation_scenario_constructor(self: TestAblationScenario) -> None:
         """Test for ablation scenario constructor."""
-        assert self.scenario.ablation_exec == self.ablation_executable
-        assert self.scenario.ablation_validation_exec == self.validation_executable
         assert self.scenario.solver == self.solver
         assert self.scenario.train_set == self.dataset
         assert self.scenario.test_set == self.test_dataset

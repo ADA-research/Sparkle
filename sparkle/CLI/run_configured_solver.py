@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Sparkle command to execute a configured solver."""
-
 import sys
 import argparse
 from pathlib import PurePath
@@ -10,8 +9,8 @@ from runrunner.base import Runner
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
+from sparkle.structures import PerformanceDataFrame
 from sparkle.instance import Instance_Set
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
@@ -43,7 +42,7 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
 
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_CONFIGURED_SOLVER])
+    check_for_initialise()
 
     if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file
@@ -82,9 +81,12 @@ def main(argv: list[str]) -> None:
     configurator = gv.settings().get_general_sparkle_configurator()
     objectives = gv.settings().get_general_sparkle_objectives()
     configuration_scenario = gv.latest_scenario().get_configuration_scenario(
-        configurator.scenario_class)
-    _, config_str = configurator.get_optimal_configuration(configuration_scenario)
-    config = solver.config_str_to_dict(config_str)
+        configurator.scenario_class())
+    performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
+    config, _ = performance_data.best_configuration(
+        str(solver.directory),
+        objective=configuration_scenario.sparkle_objective,
+        instances=[str(p) for p in train_set.instance_paths],)
     # Call the configured solver
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     if run_on == Runner.LOCAL:
@@ -95,7 +97,6 @@ def main(argv: list[str]) -> None:
                      cutoff_time=custom_cutoff,
                      configuration=config,
                      run_on=run_on,
-                     commandname=CommandName.RUN_CONFIGURED_SOLVER,
                      sbatch_options=sbatch_options,
                      log_dir=sl.caller_log_dir)
 
@@ -106,10 +107,13 @@ def main(argv: list[str]) -> None:
     else:
         if isinstance(run, dict):
             run = [run]
+        # Resolve objective keys
+        status_key = [key for key in run[0] if key.lower().startswith("status")][0]
+        time_key = [key for key in run[0] if key.lower().startswith("cpu_time")][0]
         for i, solver_output in enumerate(run):
             print(f"Execution of {solver.name} on instance "
                   f"{data_set.instance_names[i]} completed with status "
-                  f"{solver_output['status']} in {solver_output['cpu_time']} seconds.")
+                  f"{solver_output[status_key]} in {solver_output[time_key]} seconds.")
         print("Running configured solver done!")
 
     # Write used settings to file

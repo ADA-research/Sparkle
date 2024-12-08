@@ -11,7 +11,8 @@ from sparkle.types import objective
 from sparkle.types.objective import SparkleObjective, UseTime
 
 
-objective_string_regex = re.compile(r"(?P<name>[\w\-_]+)(:(?P<direction>min|max))?$")
+objective_string_regex = re.compile(
+    r"(?P<name>[\w\-_]+)(:(?P<direction>min|max))?(:(?P<type>metric|objective))?$")
 objective_variable_regex = re.compile(r"(-?\d+)$")
 
 
@@ -23,7 +24,10 @@ def _check_class(candidate: Callable) -> bool:
 def resolve_objective(objective_name: str) -> SparkleObjective:
     """Try to resolve the objective class by (case-sensitive) name.
 
-    convention: objective_name(variable-k)?(:[min|max])?
+    convention: objective_name(variable-k)?(:[min|max])?(:[metric|objective])?
+    Here, min|max refers to the minimisation or maximisation of the objective
+    and metric|objective refers to whether the objective should be optimized
+    or just recorded.
 
     Order of resolving:
         class_name of user defined SparkleObjectives
@@ -42,6 +46,7 @@ def resolve_objective(objective_name: str) -> SparkleObjective:
 
     name = match.group("name")
     minimise = not match.group("direction") == "max"  # .group returns "" if no match
+    metric = match.group("type") == "metric"
 
     # Search for optional variable and record split point between name and variable
     name_options = [(name, None), ]  # Options of names to check for
@@ -57,8 +62,8 @@ def resolve_objective(objective_name: str) -> SparkleObjective:
                                                       predicate=_check_class):
                 if o_name == rname:
                     if rarg is not None:
-                        return o_class(rarg)
-                    return o_class()
+                        return o_class(rarg, minimise=minimise, metric=metric)
+                    return o_class(minimise=minimise, metric=metric)
         except Exception:
             pass
 
@@ -68,8 +73,8 @@ def resolve_objective(objective_name: str) -> SparkleObjective:
                                                   predicate=_check_class):
             if o_name == rname:
                 if rarg is not None:
-                    return o_class(rarg)
-                return o_class()
+                    return o_class(rarg, minimise=minimise, metric=metric)
+                return o_class(minimise=minimise, metric=metric)
 
     # No special objects found. Return objective with full name
-    return SparkleObjective(name=objective_name, minimise=minimise)
+    return SparkleObjective(name=objective_name, minimise=minimise, metric=metric)

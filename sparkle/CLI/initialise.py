@@ -8,8 +8,7 @@ import sys
 import warnings
 from pathlib import Path
 
-from sparkle.platform import CommandName
-from sparkle.CLI.help.argparse_custom import DownloadExamplesArgument
+from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help import snapshot_help as snh
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
@@ -21,8 +20,10 @@ def parser_function() -> argparse.ArgumentParser:
     """Parse CLI arguments for the initialise command."""
     parser = argparse.ArgumentParser(
         description="Initialise the Sparkle platform in the current directory.")
-    parser.add_argument(*DownloadExamplesArgument.names,
-                        **DownloadExamplesArgument.kwargs)
+    parser.add_argument(*ac.NoSavePlatformArgument.names,
+                        **ac.NoSavePlatformArgument.kwargs)
+    parser.add_argument(*ac.DownloadExamplesArgument.names,
+                        **ac.DownloadExamplesArgument.kwargs)
     return parser
 
 
@@ -67,11 +68,6 @@ def initialise_irace() -> None:
                   r6_install.stderr.decode(), "\n"
                   "IRACE installation failed!")
             return
-    else:
-        print(f"[{r6_package_check.returncode}] "
-              "R6 package (IRACE dependency) was already installed: "
-              f"{r6_package_check.stdout.decode()}\n"
-              f"{r6_package_check.stderr.decode()}")
     # Install IRACE from tarball
     irace_install = subprocess.run(
         ["Rscript", "-e",
@@ -85,8 +81,7 @@ def initialise_irace() -> None:
         print("IRACE installed!")
 
 
-def check_for_initialise(requirements: list[CommandName] = None)\
-        -> None:
+def check_for_initialise() -> None:
     """Function to check if initialize command was executed and execute it otherwise.
 
     Args:
@@ -98,14 +93,7 @@ def check_for_initialise(requirements: list[CommandName] = None)\
     if platform_path is None:
         print("-----------------------------------------------")
         print("No Sparkle platform found; "
-              + "The platform will now be initialized automatically")
-        if requirements is not None:
-            if len(requirements) == 1:
-                print(f"The command {requirements[0]} has \
-                      to be executed before executing this command.")
-            else:
-                print(f"""The commands {", ".join(requirements)} \
-                      have to be executed before executing this command.""")
+              "The platform will now be initialized automatically.")
         print("-----------------------------------------------")
         initialise_sparkle()
     elif platform_path != Path.cwd():
@@ -114,18 +102,23 @@ def check_for_initialise(requirements: list[CommandName] = None)\
         os.chdir(platform_path)
 
 
-def initialise_sparkle(download_examples: bool = False) -> None:
+def initialise_sparkle(save_existing_platform: bool = True,
+                       download_examples: bool = False) -> None:
     """Initialize a new Sparkle platform.
 
     Args:
+        save_existing_platform: If present, save the current platform as a snapshot.
         download_examples: Downloads examples from the Sparkle Github.
             WARNING: May take a some time to complete due to the large amount of data.
     """
     print("Start initialising Sparkle platform ...")
     if detect_sparkle_platform_exists(check=all):
-        print("Current Sparkle platform found! Saving as snapshot.")
-        snh.save_current_platform()
-        snh.remove_current_platform()
+        print("Current Sparkle platform found!")
+        if save_existing_platform:
+            print("Saving as snapshot...")
+            snh.save_current_platform()
+        snh.remove_current_platform(filter=[gv.settings().DEFAULT_settings_dir])
+        print("Your settings directory was not removed.")
 
     for working_dir in gv.settings().DEFAULT_working_dirs:
         working_dir.mkdir(exist_ok=True)
@@ -168,6 +161,17 @@ def initialise_sparkle(download_examples: bool = False) -> None:
                               f"{compile_runsolver.stderr.decode()}")
             else:
                 print("Runsolver compiled successfully!")
+
+    # If Runsolver is compiled, check that it can be executed
+    if gv.settings().DEFAULT_runsolver_exec.exists():
+        runsolver_check = subprocess.run([gv.settings().DEFAULT_runsolver_exec,
+                                          "--version"],
+                                         capture_output=True)
+        if runsolver_check.returncode != 0:
+            print("WARNING: Runsolver executable cannot be run successfully. "
+                  "Please verify the following error messages:\n"
+                  f"{runsolver_check.stderr.decode()}")
+
     # Check that java is available for SMAC2
     if shutil.which("java") is None:
         # NOTE: An automatic resolution of Java at this point would be good
@@ -203,8 +207,8 @@ def main(argv: list[str]) -> None:
     parser = parser_function()
     # Process command line arguments
     args = parser.parse_args(argv)
-    download = False if args.download_examples is None else args.download_examples
-    initialise_sparkle(download_examples=download)
+    initialise_sparkle(save_existing_platform=args.no_save,
+                       download_examples=args.download_examples)
     sys.exit(0)
 
 
