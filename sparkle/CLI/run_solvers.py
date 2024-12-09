@@ -36,7 +36,6 @@ def parser_function() -> argparse.ArgumentParser:
 
 def running_solvers_performance_data(
         performance_data_csv_path: Path,
-        num_job_in_parallel: int,
         rerun: bool = False,
         run_on: Runner = Runner.SLURM) -> list[Run]:
     """Run the solvers for the performance data.
@@ -45,8 +44,6 @@ def running_solvers_performance_data(
     ----------
     performance_data_csv_path: Path
         The path to the performance data file
-    num_job_in_parallel: int
-        The maximum number of jobs to run in parallel
     rerun: bool
         Run only solvers for which no data is available yet (False) or (re)run all
         solvers to get (new) performance data for them (True)
@@ -83,20 +80,25 @@ def running_solvers_performance_data(
     cutoff = gv.settings().get_general_target_cutoff_time()
 
     # Sort the jobs per solver
-    solver_jobs = {solver: [] for _, _, solver in jobs}
-    runs = []
+    solver_jobs = {solver: {} for _, _, solver in jobs}
     for instance, run, solver in jobs:
-        solver_jobs[solver].append((instance, run))
+        if instance not in solver_jobs[solver]:
+            solver_jobs[solver][instance] = [run]
+        else:
+            solver_jobs[solver][instance].append(run)
+    runrunner_runs = []
     for solver_path in solver_jobs:
         solver = Solver(Path(solver_path))
-        for instance, run in solver_jobs[solver_path]:
-            run = solver.run_performance_dataframe(
-                instance, run, performance_dataframe, cutoff_time=cutoff,
-                sbatch_options=sbatch_options, log_dir=sl.caller_log_dir,
-                base_dir=sl.caller_log_dir, run_on=run_on)
-            runs.append(run)
+        instances = solver_jobs[solver_path].keys()
+        runs = solver_jobs[solver_path].values()
+        # for instance, run in solver_jobs[solver_path]:
+        run = solver.run_performance_dataframe(
+            instances, runs, performance_dataframe, cutoff_time=cutoff,
+            sbatch_options=sbatch_options, log_dir=sl.caller_log_dir,
+            base_dir=sl.caller_log_dir, run_on=run_on)
+        runrunner_runs.append(run)
 
-    return runs
+    return runrunner_runs
 
 
 def main(argv: list[str]) -> None:
@@ -138,11 +140,9 @@ def main(argv: list[str]) -> None:
     run_on = gv.settings().get_run_on()
     if args.recompute:
         PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path).clean_csv()
-    num_job_in_parallel = gv.settings().get_number_of_jobs_in_parallel()
 
     runs = running_solvers_performance_data(
         performance_data_csv_path=gv.settings().DEFAULT_performance_data_path,
-        num_job_in_parallel=num_job_in_parallel,
         rerun=args.recompute,
         run_on=run_on)
 

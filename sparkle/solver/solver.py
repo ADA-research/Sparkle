@@ -1,7 +1,6 @@
 """File to handle a solver and its directories."""
 from __future__ import annotations
 import sys
-import itertools
 from typing import Any
 import shlex
 import ast
@@ -269,19 +268,20 @@ class Solver(SparkleCallable):
             return solver_outputs if len(solver_outputs) > 1 else solver_output
         return run
 
-    def run_performance_dataframe(self: Solver,
-                                  instances: str | list[str] | InstanceSet,
-                                  run_ids: int | list[int],
-                                  performance_dataframe: PerformanceDataFrame,
-                                  cutoff_time: int = None,
-                                  objective: SparkleObjective = None,
-                                  train_set: InstanceSet = None,
-                                  sbatch_options: list[str] = None,
-                                  dependencies: list[SlurmRun] = None,
-                                  log_dir: Path = None,
-                                  base_dir: Path = None,
-                                  run_on: Runner = Runner.SLURM,
-                                  ) -> Run:
+    def run_performance_dataframe(
+            self: Solver,
+            instances: str | list[str] | InstanceSet,
+            run_ids: int | list[int] | range[int, int]
+            | list[list[int]] | list[range[int]],
+            performance_dataframe: PerformanceDataFrame,
+            cutoff_time: int = None,
+            objective: SparkleObjective = None,
+            train_set: InstanceSet = None,
+            sbatch_options: list[str] = None,
+            dependencies: list[SlurmRun] = None,
+            log_dir: Path = None,
+            base_dir: Path = None,
+            run_on: Runner = Runner.SLURM) -> Run:
         """Run the solver from and place the results in the performance dataframe.
 
         This in practice actually runs Solver.run, but has a little script before/after,
@@ -291,6 +291,10 @@ class Solver(SparkleCallable):
             instance: The instance(s) to run the solver on. In case of an instance set,
                 or list, will create a job for all instances in the set/list.
             run_ids: The run indices to use in the performance dataframe.
+                If int, will run only this id for all instances. If a list of integers
+                or range, will run all run indexes for all instances.
+                If a list of lists or list of ranges, will assume the runs are paired
+                with the instances, e.g. will use sequence 1 for instance 1, ...
             performance_dataframe: The performance dataframe to use.
             cutoff_time: The cutoff time for the solver, measured through RunSolver.
             objective: The objective to use, only relevant for train set best config
@@ -309,24 +313,39 @@ class Solver(SparkleCallable):
             SlurmRun or Local run of the job.
         """
         instances = [instances] if isinstance(instances, str) else instances
-        run_ids = [run_ids] if isinstance(run_ids, int) else run_ids
         set_name = "instances"
         if isinstance(instances, InstanceSet):
             set_name = instances.name
             instances = [str(i) for i in instances.instance_paths]
+        # Resolve run_ids to which run indices to use for which instance
+        if isinstance(run_ids, int):
+            run_ids = [[run_ids]] * len(instances)
+        elif isinstance(run_ids, range):
+            run_ids = [list(run_ids)] * len(instances)
+        elif isinstance(run_ids, list):
+            if all(isinstance(i, int) for i in run_ids):
+                run_ids = [run_ids] * len(instances)
+            elif all(isinstance(i, range) for i in run_ids):
+                run_ids = [list(i) for i in run_ids]
+            elif all(isinstance(i, list) for i in run_ids):
+                pass
+            else:
+                raise TypeError(f"Invalid type combination for run_ids: {type(run_ids)}")
         objective_arg = f"--target-objective {objective.name}" if objective else ""
         train_arg =\
             ",".join([str(i) for i in train_set.instance_paths]) if train_set else ""
-        cmds = [f"{Solver.solver_cli} "
-                f"--solver {self.directory} "
-                f"--instance {instance} "
-                f"--run-index {run_index} "
-                f"--performance-dataframe {performance_dataframe.csv_filepath} "
-                f"--cutoff-time {cutoff_time} "
-                f"--log-dir {log_dir} "
-                f"{objective_arg} "
-                f"{'--best-configuration-instances' if train_set else ''} {train_arg}"
-                for instance, run_index in itertools.product(instances, run_ids)]
+        cmds = [
+            f"{Solver.solver_cli} "
+            f"--solver {self.directory} "
+            f"--instance {instance} "
+            f"--run-index {run_index} "
+            f"--performance-dataframe {performance_dataframe.csv_filepath} "
+            f"--cutoff-time {cutoff_time} "
+            f"--log-dir {log_dir} "
+            f"{objective_arg} "
+            f"{'--best-configuration-instances' if train_set else ''} {train_arg}"
+            for instance, run_indices in zip(instances, run_ids)
+            for run_index in run_indices]
         r = rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
