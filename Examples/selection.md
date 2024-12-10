@@ -42,10 +42,10 @@ sparkle compute features
 ```
 
 ### Run the solvers
-Similarly, we can now also compute our objective values for our solvers, in this case PAR10. Note that we can at this point still specifiy multiple objectives by separating them with a comma, or denote them in our settings file.
+Similarly, we can now also compute our objective values for our solvers, in this case PAR10 as specified in the settings file. We run the run solvers command with the `--performance-data`, so Sparkle will compute all empty values in the performance data frame.
 
 ```bash
-sparkle run solvers --objective PAR10
+sparkle run solvers --performance-data
 ```
 
 ### Construct a portfolio selector
@@ -55,7 +55,7 @@ To make sure feature computation and solver performance computation are done bef
 sparkle wait
 ```
 
-Now we can construct a portfolio selector, using the previously computed features and the results of running the solvers. The `--selector-timeout` argument determines for how many seconds we will train our selector for. We can set the flag `--solver-ablation` for actual marginal contribution computation later.
+Now we can construct a portfolio selector, using the previously computed features and the objective value results of running the solvers. We can specify an objective to select on with the `--objective` flag, but if we do not, Sparkle will default to the first objective specified in the Settings file. The `--selector-timeout` argument determines for how many seconds we will train our selector for. We can set the flag `--solver-ablation` for actual marginal contribution computation later.
 
 ```bash
 sparkle construct portfolio selector --selector-timeout 1000 --solver-ablation
@@ -131,7 +131,7 @@ sparkle wait  # Wait for it to complete before continuing
 And run the solvers on the new data set.
 
 ```bash
-sparkle run solvers
+sparkle run solvers --performance-data
 sparkle wait
 ```
 

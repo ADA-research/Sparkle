@@ -25,8 +25,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.PerfectSelectorMarginalContributionArgument.kwargs)
     parser.add_argument(*ac.ActualMarginalContributionArgument.names,
                         **ac.ActualMarginalContributionArgument.kwargs)
-    parser.add_argument(*ac.SparkleObjectiveArgument.names,
-                        **ac.SparkleObjectiveArgument.kwargs)
+    parser.add_argument(*ac.ObjectivesArgument.names,
+                        **ac.ObjectivesArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
 

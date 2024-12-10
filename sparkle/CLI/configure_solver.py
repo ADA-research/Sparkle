@@ -40,10 +40,10 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstanceSetTestArgument.kwargs)
     parser.add_argument(*ac.TestSetRunAllConfigurationArgument.names,
                         **ac.TestSetRunAllConfigurationArgument.kwargs)
-    parser.add_argument(*ac.SparkleObjectiveArgument.names,
-                        **ac.SparkleObjectiveArgument.kwargs)
-    parser.add_argument(*ac.TargetCutOffTimeConfigurationArgument.names,
-                        **ac.TargetCutOffTimeConfigurationArgument.kwargs)
+    parser.add_argument(*ac.ObjectivesArgument.names,
+                        **ac.ObjectivesArgument.kwargs)
+    parser.add_argument(*ac.TargetCutOffTimeArgument.names,
+                        **ac.TargetCutOffTimeArgument.kwargs)
     parser.add_argument(*ac.SolverCallsArgument.names,
                         **ac.SolverCallsArgument.kwargs)
     parser.add_argument(*ac.NumberOfRunsConfigurationArgument.names,

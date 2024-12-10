@@ -37,7 +37,7 @@ sparkle compute features
 ### Run the solvers
 # Similarly, we can now also compute our objective values for our solvers, in this case PAR10. Note that we can at this point still specifiy multiple objectives by separating them with a comma, or denote them in our settings file.
 
-sparkle run solvers --objective PAR10
+sparkle run solvers --performance-data
 
 ### Construct a portfolio selector
 # To make sure feature computation and solver performance computation are done before constructing the portfolio use the `wait` command

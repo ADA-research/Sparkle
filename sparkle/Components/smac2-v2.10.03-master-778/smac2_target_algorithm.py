@@ -31,7 +31,7 @@ if __name__ == "__main__":
                     raw_output_directory=Path(),
                     runsolver_exec=runsolver_binary)
     # Call Runsolver with the solver configurator wrapper and its arguments
-    output = solver.run(instance=instance,
+    output = solver.run(instances=instance,
                         objectives=[objective],
                         seed=seed,
                         cutoff_time=cutoff_time,

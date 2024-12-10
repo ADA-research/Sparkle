@@ -32,10 +32,10 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstanceSetTrainAblationArgument.kwargs)
     parser.add_argument(*ac.InstanceSetTestAblationArgument.names,
                         **ac.InstanceSetTestAblationArgument.kwargs)
-    parser.add_argument(*ac.SparkleObjectiveArgument.names,
-                        **ac.SparkleObjectiveArgument.kwargs)
-    parser.add_argument(*ac.TargetCutOffTimeAblationArgument.names,
-                        **ac.TargetCutOffTimeAblationArgument.kwargs)
+    parser.add_argument(*ac.ObjectivesArgument.names,
+                        **ac.ObjectivesArgument.kwargs)
+    parser.add_argument(*ac.TargetCutOffTimeArgument.names,
+                        **ac.TargetCutOffTimeArgument.kwargs)
     parser.add_argument(*ac.WallClockTimeArgument.names,
                         **ac.WallClockTimeArgument.kwargs)
     parser.add_argument(*ac.NumberOfRunsAblationArgument.names,

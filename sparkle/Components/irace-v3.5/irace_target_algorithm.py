@@ -34,7 +34,7 @@ if __name__ == "__main__":
     # Call Runsolver with the solver configurator wrapper and its arguments
     # IRACE cannot deal with printed warnings, we filter out missing RunSolver logs
     warnings.filterwarnings("ignore", category=RuntimeWarning)
-    output = solver.run(instance=instance,
+    output = solver.run(instances=instance,
                         objectives=[objective],
                         seed=seed,
                         cutoff_time=cutoff_time,
