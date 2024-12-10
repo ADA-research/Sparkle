@@ -3,6 +3,7 @@
 from __future__ import annotations
 import random
 import sys
+import ast
 import argparse
 from pathlib import PurePath, Path
 
@@ -221,7 +222,7 @@ def main(argv: list[str]) -> None:
     if args.run_on is not None:
         gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
-    if args.best_configuration:
+    if args.best_configuration or args.configuration:
         if not args.objective:
             objective = gv.settings().get_general_sparkle_objectives()[0]
             print("WARNING: Best configuration requested, but no objective specified. "
@@ -272,7 +273,7 @@ def main(argv: list[str]) -> None:
             sbatch_options=sbatch_options,
             run_on=run_on)
     else:
-        configurations = None
+        configurations = [None] * len(solvers)
         if args.best_configuration:
             train_instances = None
             if isinstance(args.best_configuration, list):
@@ -290,8 +291,12 @@ def main(argv: list[str]) -> None:
                 for solver in solvers]
         elif args.configuration:
             # Use given configurations
-            # TODO: How do we retrieve configuration based on only run index?
-            configurations = [performance_dataframe.get_value()]
+            # Hotfix: We take the first instance in the DF. Might not work in some cases
+            instance = performance_dataframe.instances[0]
+            configurations = [ast.literal_eval(performance_dataframe.get_value(
+                str(solver.directory), instance, objective.name, run=args.configuration,
+                solver_fields=[PerformanceDataFrame.column_configuration]))
+                for solver in solvers]
         if instances is None:
             instances = performance_dataframe.instances
         runs = run_solvers(
