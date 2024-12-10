@@ -220,6 +220,7 @@ class Solver(SparkleCallable):
             log_dir = self.raw_output_directory
         cmds = []
         instances = [instances] if not isinstance(instances, list) else instances
+        set_label = instances.name if isinstance(instances, InstanceSet) else "instances"
         for instance in instances:
             paths = instance.instace_paths if isinstance(instance,
                                                          InstanceSet) else [instance]
@@ -232,7 +233,7 @@ class Solver(SparkleCallable):
                                             log_dir=log_dir)
                 cmds.append(" ".join(solver_cmd))
 
-        commandname = f"Run Solver: {self.name} on {instances}"
+        commandname = f"Run Solver: {self.name} on {set_label}"
         run = rrr.add_to_queue(runner=run_on,
                                cmd=cmds,
                                name=commandname,

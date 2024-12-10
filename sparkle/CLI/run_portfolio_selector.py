@@ -31,9 +31,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
-    parser.add_argument(*ac.ObjectivesArgument.names,
-                        **ac.ObjectivesArgument.kwargs)
-
     return parser
 
 
@@ -54,9 +51,6 @@ def main(argv: list[str]) -> None:
         gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
-    if ac.set_by_user(args, "objectives"):
-        gv.settings().set_general_sparkle_objectives(args.objectives,
-                                                     SettingState.CMD_LINE)
     if args.run_on is not None:
         gv.settings().set_run_on(args.run_on.value, SettingState.CMD_LINE)
 
@@ -75,12 +69,6 @@ def main(argv: list[str]) -> None:
         sys.exit(-1)
 
     run_on = gv.settings().get_run_on()
-    objectives = gv.settings().get_general_sparkle_objectives()
-    # NOTE: Is this still relevant?
-    if not objectives[0].time:
-        print("ERROR: The run_portfolio_selector command is not yet implemented"
-              " for the QUALITY_ABSOLUTE performance measure!")
-        sys.exit(-1)
 
     selector_scenario = gv.latest_scenario().get_selection_scenario_path()
     selector_path = selector_scenario / "portfolio_selector"
@@ -104,7 +92,7 @@ def main(argv: list[str]) -> None:
 
     if run_on == Runner.LOCAL:
         feature_run.wait()
-
+    objectives = gv.settings().get_general_sparkle_objectives()
     # Prepare performance data
     performance_data = PerformanceDataFrame(
         test_case_path / "performance_data.csv",
@@ -141,8 +129,6 @@ def main(argv: list[str]) -> None:
 
     if run_on == Runner.LOCAL:
         selector_run.wait()
-        for job in selector_run.jobs:
-            print(job.stdout)
         print("Running Sparkle portfolio selector done!")
     else:
         print("Sparkle portfolio selector is running ...")

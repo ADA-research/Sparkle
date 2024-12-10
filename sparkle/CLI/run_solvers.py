@@ -119,10 +119,10 @@ def run_solvers(
 
 def run_solvers_performance_data(
         performance_data: PerformanceDataFrame,
+        cutoff_time: int,
         rerun: bool = False,
         solvers: list[Solver] = None,
         instances: list[str] = None,
-        cutoff_time: int = None,
         sbatch_options: list[str] = None,
         run_on: Runner = Runner.SLURM) -> list[Run]:
     """Run the solvers for the performance data.
@@ -131,6 +131,8 @@ def run_solvers_performance_data(
     ----------
     performance_data: PerformanceDataFrame
         The performance data
+    cutoff_time: int
+        The cut off time for the solvers
     rerun: bool
         Run only solvers for which no data is available yet (False) or (re)run all
         solvers to get (new) performance data for them (True)
@@ -138,8 +140,6 @@ def run_solvers_performance_data(
         The solvers to run. If None, run all found solvers.
     instances: list[str]
         The instances to run the solvers on. If None, run all found instances.
-    cutoff_time: int
-        The cut off time for the solvers
     sbatch_options: list[str]
         The sbatch options to use
     run_on: Runner
@@ -269,6 +269,7 @@ def main(argv: list[str]) -> None:
             performance_data=performance_dataframe,
             solvers=solvers,
             instances=instances,
+            cutoff_time=cutoff_time,
             rerun=args.recompute,
             sbatch_options=sbatch_options,
             run_on=run_on)
