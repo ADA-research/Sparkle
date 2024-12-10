@@ -2,6 +2,11 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.9.2] - 2025/??/??
+
+### Changed
+- run_configured_solver command has now been merged into run_solvers [SPRK-361]
+
 ## [0.9.1] - 2024/12/08
 
 ### Added
