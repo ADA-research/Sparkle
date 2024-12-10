@@ -84,10 +84,10 @@ The ablation section can be suppressed with `--no-ablation`
 
 #### Run configured solver on a single instance
 
-Now that we have a configured solver, we can run it on a single instance to get a result.
+Now that we have a configured solver, we can run it on a single instance to get a result. We do not have to specify which solver, as we only added one to Sparkle in this example. By specifying an instance set after `--best-configuration`, Sparkle will only consider configurations found for this instance set.
 
 ```bash
-sparkle run_configured_solver Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf
+sparkle run_solvers --best-configuration PTN --instance Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf --run-on local
 ```
 
 #### Run configured solver on an instance directory
@@ -95,5 +95,5 @@ sparkle run_configured_solver Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf
 It is also possible to run a configured solver directly on an entire directory.
 
 ```bash
-sparkle run_configured_solver Examples/Resources/Instances/PTN2
+sparkle run_solvers --best-configuration PTN --instance Examples/Resources/Instances/PTN2
 ```

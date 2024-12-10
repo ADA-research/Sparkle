@@ -49,8 +49,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(*ac.TestCaseDirectoryArgument.names,
                         **ac.TestCaseDirectoryArgument.kwargs)
     # Common arguments
-    parser.add_argument(*ac.SparkleObjectiveArgument.names,
-                        **ac.SparkleObjectiveArgument.kwargs)
+    parser.add_argument(*ac.ObjectivesArgument.names,
+                        **ac.ObjectivesArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
     parser.add_argument(*ac.GenerateJSONArgument.names,

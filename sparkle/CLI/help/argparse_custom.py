@@ -93,6 +93,17 @@ AllJobsArgument = \
                       kwargs={"action": "store_true",
                               "help": "use all known job ID(s) for the command"})
 
+BestConfigurationArgument = \
+    ArgumentContainer(names=["--best-configuration"],
+                      kwargs={"required": False,
+                              "nargs": "?",
+                              "type": Path,
+                              "const": True,
+                              "default": False,
+                              "help": "Paths to instance(s) or instanceset(s) over "
+                                      "which to determine the best configuration. If "
+                                      "empty, all known instances are used."})
+
 CleanupArgumentAll = \
     ArgumentContainer(names=["--all"],
                       kwargs={"action": "store_true",
@@ -103,6 +114,12 @@ CleanupArgumentRemove = \
                       kwargs={"action": "store_true",
                               "help": "remove all files in the platform, including "
                                       "user data such as InstanceSets and Solvers"})
+
+ConfigurationArgument = \
+    ArgumentContainer(names=["--configuration"],
+                      kwargs={"required": False,
+                              "type": int,
+                              "help": "The run index of which configuration to use"})
 
 ConfiguratorArgument = ArgumentContainer(names=["--configurator"],
                                          kwargs={"type": str,
@@ -153,10 +170,15 @@ InstancePathPositional = ArgumentContainer(names=["instance_path"],
                                            kwargs={"type": Path,
                                                    "help": "Path to an instance (set)"})
 
-InstancePath = ArgumentContainer(names=["--instance-path"],
-                                 kwargs={"required": True,
-                                         "type": Path,
-                                         "help": "Path to an instance (set)"})
+InstanceSetPathsArgument =\
+    ArgumentContainer(names=["--instance-path", "--instance-set-path",
+                             "--instance", "--instance-set",
+                             "--instances", "--instance-sets",
+                             "--instance-paths", "--instance-set-paths"],
+                      kwargs={"required": False,
+                              "nargs": "+",
+                              "type": Path,
+                              "help": "Path to an instance (set)"})
 
 InstanceSetTestArgument = \
     ArgumentContainer(names=["--instance-set-test"],
@@ -320,6 +342,12 @@ RecomputeRunSolversArgument = \
                               "help": "recompute the performance of all solvers on all "
                                       "instances"})
 
+PerformanceDataJobsArgument = \
+    ArgumentContainer(names=["--performance-data-jobs"],
+                      kwargs={"action": "store_true",
+                              "help": "compute the remaining jobs in the Performance "
+                              "DataFrame"})
+
 RunOnArgument = ArgumentContainer(names=["--run-on"],
                                   kwargs={"type": Runner,
                                           "choices": [Runner.LOCAL,
@@ -372,10 +400,11 @@ SolverArgument = ArgumentContainer(names=["--solver"],
                                            "type": Path,
                                            "help": "path to solver"})
 
-SolversArgument = ArgumentContainer(names=["--solvers"],
+SolversArgument = ArgumentContainer(names=["--solvers", "--solver-paths",
+                                           "--solver", "--solver-path"],
                                     kwargs={"required": False,
                                             "nargs": "+",
-                                            "type": list[str],
+                                            "type": str,
                                             "help": "Specify the list of solvers to be "
                                                     "used. If not specifed, all solvers "
                                                     "known in Sparkle will be used."})
@@ -408,29 +437,12 @@ SolverReportArgument = ArgumentContainer(names=["--solver"],
                                                  "help": "path to solver for an "
                                                  "algorithm configuration report"})
 
-TargetCutOffTimeAblationArgument = \
-    ArgumentContainer(names=["--target-cutoff-time"],
+TargetCutOffTimeArgument = \
+    ArgumentContainer(names=["--target-cutoff-time", "--solver-cutoff-time"],
                       kwargs={"type": int,
                               "default": Settings.DEFAULT_general_target_cutoff_time,
                               "action": SetByUser,
-                              "help": "cutoff time per target algorithm run in seconds"})
-
-TargetCutOffTimeConfigurationArgument = \
-    ArgumentContainer(names=["--target-cutoff-time"],
-                      kwargs={"type": int,
-                              "help": "cutoff time per target algorithm run in seconds"})
-
-TargetCutOffTimeRunSolversArgument = \
-    ArgumentContainer(names=["--target-cutoff-time"],
-                      kwargs={"type": int,
-                              "help": "cutoff time per target algorithm run in seconds"})
-
-TargetCutOffTimeValidationArgument = \
-    ArgumentContainer(names=["--target-cutoff-time"],
-                      kwargs={"type": int,
-                              "default": Settings.DEFAULT_general_target_cutoff_time,
-                              "action": SetByUser,
-                              "help": "cutoff time per target algorithm run in seconds"})
+                              "help": "cutoff time per Solver run in seconds"})
 
 TestCaseDirectoryArgument = \
     ArgumentContainer(names=["--test-case-directory"],
@@ -475,7 +487,12 @@ SolutionVerifierArgument = \
                               "help": "the class name of the solution verifier or path "
                                       "to solutions to use for the Solver."})
 
-SparkleObjectiveArgument = \
+ObjectiveArgument = \
+    ArgumentContainer(names=["--objective"],
+                      kwargs={"type": str,
+                              "help": "the objective to use."})
+
+ObjectivesArgument = \
     ArgumentContainer(names=["--objectives"],
                       kwargs={"type": str,
                               "help": "the comma seperated objective(s) to use."})

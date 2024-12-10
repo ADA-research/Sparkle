@@ -134,14 +134,6 @@
 
 ```
 
-(cmd-run-configured-solver)=
-
-```{eval-rst}
-.. autoprogram:: sparkle.CLI.run_configured_solver:parser_function()
-   :prog: run_configured_solver
-
-```
-
 (cmd-run-parallel-portfolio)=
 
 ```{eval-rst}

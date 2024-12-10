@@ -25,8 +25,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.RecomputePortfolioSelectorArgument.kwargs)
     parser.add_argument(*ac.SelectorTimeoutArgument.names,
                         **ac.SelectorTimeoutArgument.kwargs)
-    parser.add_argument(*ac.SparkleObjectiveArgument.names,
-                        **ac.SparkleObjectiveArgument.kwargs)
+    parser.add_argument(*ac.ObjectivesArgument.names,
+                        **ac.ObjectivesArgument.kwargs)
     parser.add_argument(*ac.SelectorAblationArgument.names,
                         **ac.SelectorAblationArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
@@ -172,7 +172,7 @@ def main(argv: list[str]) -> None:
     # Compute the marginal contribution
     with_actual = "--actual" if solver_ablation else ""
     cmd = (f"sparkle/CLI/compute_marginal_contribution.py --perfect {with_actual} "
-           f"{ac.SparkleObjectiveArgument.names[0]} {objective}")
+           f"{ac.ObjectivesArgument.names[0]} {objective}")
     solver_names = ", ".join([Path(s).name for s in performance_data.solvers])
     marginal_contribution = rrr.add_to_queue(
         runner=run_on,

@@ -191,7 +191,7 @@ class Solver(SparkleCallable):
         return solver_cmd
 
     def run(self: Solver,
-            instance: str | list[str] | InstanceSet,
+            instances: str | list[str] | InstanceSet | list[InstanceSet],
             objectives: list[SparkleObjective],
             seed: int,
             cutoff_time: int = None,
@@ -219,24 +219,20 @@ class Solver(SparkleCallable):
         if log_dir is None:
             log_dir = self.raw_output_directory
         cmds = []
-        if isinstance(instance, InstanceSet):
-            for inst in instance.instance_paths:
-                solver_cmd = self.build_cmd(inst.absolute(),
+        instances = [instances] if not isinstance(instances, list) else instances
+        for instance in instances:
+            paths = instance.instace_paths if isinstance(instance,
+                                                         InstanceSet) else [instance]
+            for instance_path in paths:
+                solver_cmd = self.build_cmd(instance_path,
                                             objectives=objectives,
                                             seed=seed,
                                             cutoff_time=cutoff_time,
                                             configuration=configuration,
                                             log_dir=log_dir)
                 cmds.append(" ".join(solver_cmd))
-        else:
-            solver_cmd = self.build_cmd(instance,
-                                        objectives=objectives,
-                                        seed=seed,
-                                        cutoff_time=cutoff_time,
-                                        configuration=configuration,
-                                        log_dir=log_dir)
-            cmds.append(" ".join(solver_cmd))
-        commandname = f"Run Solver: {self.name} on {instance}"
+
+        commandname = f"Run Solver: {self.name} on {instances}"
         run = rrr.add_to_queue(runner=run_on,
                                cmd=cmds,
                                name=commandname,
