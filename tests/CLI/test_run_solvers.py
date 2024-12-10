@@ -37,14 +37,16 @@ def test_run_solvers(tmp_path: Path,
     # Second we test the command twice, once with local and once with slurm
     # NOTE: Expensive local test
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        run_solvers.main(["--run-on", "local",
+        run_solvers.main(["--performance-data-jobs",
+                          "--run-on", "local",
                           "--settings-file", str(settings_path)])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
     # TODO: Check if testing with Slurm is relevant for system
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        run_solvers.main(["--run-on", "slurm",
+        run_solvers.main(["--performance-data-jobs",
+                          "--run-on", "slurm",
                           "--settings-file", str(settings_path)])
     cli_tools.kill_slurm_jobs()
     assert pytest_wrapped_e.type is SystemExit
