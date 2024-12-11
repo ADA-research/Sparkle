@@ -32,9 +32,10 @@ def main(argv: list[str]) -> None:
 
     # Process command line arguments
     args = parser.parse_args(argv)
-    solver_path = resolve_object_name(args.solver,
-                                      gv.solver_nickname_mapping,
-                                      gv.settings().DEFAULT_solver_dir)
+    solver_path = resolve_object_name(
+        args.solver,
+        gv.file_storage_data_mapping[gv.solver_nickname_list_path],
+        gv.settings().DEFAULT_solver_dir)
 
     check_for_initialise()
     if solver_path is None:
@@ -47,17 +48,19 @@ def main(argv: list[str]) -> None:
 
     print(f"Start removing solver {solver_path.name} ...")
 
-    solver_nickname_mapping = gv.solver_nickname_mapping
+    solver_nickname_mapping = gv.file_storage_data_mapping[gv.solver_nickname_list_path]
     if len(solver_nickname_mapping):
         nickname = None
         for key in solver_nickname_mapping:
             if solver_nickname_mapping[key] == str(solver_path):
                 nickname = key
                 break
+
         sfh.add_remove_platform_item(
-            nickname,
+            solver_path,
             gv.solver_nickname_list_path,
             gv.file_storage_data_mapping[gv.solver_nickname_list_path],
+            key=nickname,
             remove=True)
 
     if gv.settings().DEFAULT_performance_data_path.exists():

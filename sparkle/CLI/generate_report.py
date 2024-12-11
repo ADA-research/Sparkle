@@ -85,9 +85,10 @@ def main(argv: list[str]) -> None:
     test_case_dir = args.test_case_directory
     only_json = args.only_json
 
-    solver = resolve_object_name(args.solver,
-                                 gv.solver_nickname_mapping,
-                                 gv.settings().DEFAULT_solver_dir, Solver)
+    solver = resolve_object_name(
+        args.solver,
+        gv.file_storage_data_mapping[gv.solver_nickname_list_path],
+        gv.settings().DEFAULT_solver_dir, Solver)
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],

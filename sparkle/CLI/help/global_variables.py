@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Definitions of constants broadly used in Sparkle."""
 import ast
-from pathlib import Path
 
 from sparkle.CLI.help.reporting_scenario import ReportingScenario
 from sparkle.platform.settings_objects import Settings
@@ -35,8 +34,7 @@ def settings() -> Settings:
     return __settings
 
 
-reference_list_dir = Path("Reference_Lists")
-reference_list_dir.mkdir(exist_ok=True)
+reference_list_dir = settings().DEFAULT_reference_dir
 extractor_nickname_list_path = reference_list_dir / "sparkle_extractor_nickname_list.txt"
 solver_nickname_list_path = reference_list_dir / "sparkle_solver_nickname_list.txt"
 instances_nickname_path = reference_list_dir / "sparkle_instance_nickname_list.txt"

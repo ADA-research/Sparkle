@@ -125,8 +125,11 @@ def main(argv: list[str]) -> None:
     print(f"Adding solver {solver_source.name} done!")
 
     if nickname is not None:
-        sfh.add_remove_platform_item(solver_directory,
-                                     gv.solver_nickname_list_path, key=nickname)
+        sfh.add_remove_platform_item(
+            solver_directory,
+            gv.solver_nickname_list_path,
+            gv.file_storage_data_mapping[gv.solver_nickname_list_path],
+            key=nickname)
 
     solver = Solver(solver_directory)  # Recreate solver from its new directory
     if solver.get_pcs_file() is not None:

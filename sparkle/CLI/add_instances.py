@@ -51,8 +51,11 @@ def main(argv: list[str]) -> None:
               "Exiting...")
         sys.exit(-1)
     if args.nickname is not None:
-        sfh.add_remove_platform_item(instances_target,
-                                     gv.instances_nickname_path, key=args.nickname)
+        sfh.add_remove_platform_item(
+            instances_target,
+            gv.instances_nickname_path,
+            gv.file_storage_data_mapping[gv.instances_nickname_path],
+            key=args.nickname)
 
     print(f"Start adding all instances in directory {instances_source} ...")
     new_instance_set = Instance_Set(instances_source)
