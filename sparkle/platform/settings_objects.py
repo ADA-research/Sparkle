@@ -77,7 +77,6 @@ class Settings:
     DEFAULT_output = cwd_prefix / "Output"
     DEFAULT_configuration_output = DEFAULT_output / "Configuration"
     DEFAULT_selection_output = DEFAULT_output / "Selection"
-    DEFAULT_validation_output = DEFAULT_output / "Validation"
     DEFAULT_parallel_portfolio_output = DEFAULT_output / "Parallel_Portfolio"
     DEFAULT_ablation_output = DEFAULT_output / "Ablation"
     DEFAULT_log_output = DEFAULT_output / "Log"
@@ -99,7 +98,7 @@ class Settings:
     # Collection of all working dirs for platform
     DEFAULT_working_dirs = [
         DEFAULT_output, DEFAULT_configuration_output,
-        DEFAULT_selection_output, DEFAULT_validation_output,
+        DEFAULT_selection_output,
         DEFAULT_tmp_output, DEFAULT_log_output,
         DEFAULT_solver_dir, DEFAULT_instance_dir,
         DEFAULT_feature_data, DEFAULT_performance_data,
