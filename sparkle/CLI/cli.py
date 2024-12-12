@@ -4,6 +4,15 @@ import sys
 import os
 from pathlib import Path
 
+module_path = Path(__file__).parent.resolve()
+
+package_cli_entry_points = [
+    module_path / "Core" / "compute_features.py",
+    module_path / "Core" / "run_portfolio_selector_core.py",
+    module_path.parent / "Solver" / "solver_cli.py",
+    module_path.parent / "Configurator" / "configurator_cli.py",
+]
+
 
 def commands() -> list[str]:
     """Get list of available commands."""
@@ -15,7 +24,11 @@ def commands() -> list[str]:
 
 def main() -> None:
     """Pass through command to launch CLI commands."""
-    module_path = Path(__file__).parent.resolve()
+    # Make sure Core and Package commands are executable
+    # NOTE: This would preferably be in a post-install script so its only done once
+    for path in package_cli_entry_points:
+        if not os.access(path, os.X_OK):  # Pip installation changes exec rights
+            path.chmod(0o755)
     max_space = max([path.name.count("_") for path in module_path.iterdir()
                      if path.is_file()])
     if len(sys.argv) < 2:
