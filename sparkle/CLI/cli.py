@@ -7,10 +7,10 @@ from pathlib import Path
 module_path = Path(__file__).parent.resolve()
 
 package_cli_entry_points = [
-    module_path / "Core" / "compute_features.py",
-    module_path / "Core" / "run_portfolio_selector_core.py",
-    module_path.parent / "Solver" / "solver_cli.py",
-    module_path.parent / "Configurator" / "configurator_cli.py",
+    module_path / "core" / "compute_features.py",
+    module_path / "core" / "run_portfolio_selector_core.py",
+    module_path.parent / "solver" / "solver_cli.py",
+    module_path.parent / "configurator" / "configurator_cli.py",
 ]
 
 
