@@ -40,7 +40,6 @@ def call_solver_solve_instance(
         cutoff_time=cutoff_time,
         log_dir=log_dir,
         run_on=Runner.LOCAL)
-
     status = solver_output["status"]
     flag_solved = False
     if (status == SolverStatus.SUCCESS
@@ -64,12 +63,12 @@ def call_solver_solve_instance(
             lock.release()
         except Timeout:
             print(f"ERROR: Cannot acquire File Lock on {performance_data}.")
+
+    if flag_solved:
+        print(f"Instance solved by solver {solver.name}")
     else:
-        if flag_solved:
-            print(f"Instance solved by solver {solver.name}")
-        else:
-            print(f"Solver {solver.name} failed to solve the instance with status "
-                  f"{status}")
+        print(f"Solver {solver.name} failed to solve the instance with status "
+              f"{status}")
     return flag_solved
 
 
@@ -102,11 +101,9 @@ if __name__ == "__main__":
 
     if predict_schedule is None:  # Selector Failed to produce prediction
         sys.exit(-1)
-
     print("Predicting done!")
-    verifier = gv.settings().get_general_solution_verifier()
     for solver, cutoff_time in predict_schedule:
-        solver = Solver(Path(solver), verifier=verifier)
+        solver = Solver(Path(solver))
         print(f"Calling solver {solver.name} with time budget {cutoff_time} ...")
         flag_solved = call_solver_solve_instance(
             solver, Path(args.instance), cutoff_time, log_dir, performance_data)

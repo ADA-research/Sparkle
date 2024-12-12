@@ -224,14 +224,14 @@ def parser_function() -> argparse.ArgumentParser:
     """
     parser = argparse.ArgumentParser(description="Run a portfolio of solvers on an "
                                                  "instance set in parallel.")
-    parser.add_argument(*ac.InstancePath.names,
-                        **ac.InstancePath.kwargs)
+    parser.add_argument(*ac.InstanceSetPathsArgument.names,
+                        **ac.InstanceSetPathsArgument.kwargs)
     parser.add_argument(*ac.NicknamePortfolioArgument.names,
                         **ac.NicknamePortfolioArgument.kwargs)
     parser.add_argument(*ac.SolversArgument.names,
                         **ac.SolversArgument.kwargs)
-    parser.add_argument(*ac.SparkleObjectiveArgument.names,
-                        **ac.SparkleObjectiveArgument.kwargs)
+    parser.add_argument(*ac.ObjectivesArgument.names,
+                        **ac.ObjectivesArgument.kwargs)
     parser.add_argument(*ac.CutOffTimeArgument.names,
                         **ac.CutOffTimeArgument.kwargs)
     parser.add_argument(*ac.SolverSeedsArgument.names,

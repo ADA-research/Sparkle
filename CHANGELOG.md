@@ -2,6 +2,17 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.9.1.1] - 2025/12/12
+
+Patchfix
+
+### Fixed
+- Execution rights on internal package CLI files were removed during pip installation
+- Various bugfixes regarding nicknames
+
+### Changed
+- run_configured_solver command has now been merged into run_solvers [SPRK-361]
+
 ## [0.9.1] - 2024/12/08
 
 ### Added

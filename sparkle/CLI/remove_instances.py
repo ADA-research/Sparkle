@@ -33,8 +33,10 @@ def main(argv: list[str]) -> None:
 
     # Process command line arguments
     args = parser.parse_args(argv)
-    instances_path = resolve_object_name(args.instances_path,
-                                         target_dir=gv.settings().DEFAULT_instance_dir)
+    instances_path = resolve_object_name(
+        args.instances_path,
+        nickname_dict=gv.file_storage_data_mapping[gv.instances_nickname_path],
+        target_dir=gv.settings().DEFAULT_instance_dir)
 
     check_for_initialise()
 

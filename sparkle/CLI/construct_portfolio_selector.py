@@ -7,10 +7,11 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner
 
-from sparkle.CLI.help import global_variables as gv
-from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import SettingState
+from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
+from sparkle.types import resolve_objective
+from sparkle.CLI.help import global_variables as gv
+from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.CLI.initialise import check_for_initialise
@@ -25,8 +26,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.RecomputePortfolioSelectorArgument.kwargs)
     parser.add_argument(*ac.SelectorTimeoutArgument.names,
                         **ac.SelectorTimeoutArgument.kwargs)
-    parser.add_argument(*ac.SparkleObjectiveArgument.names,
-                        **ac.SparkleObjectiveArgument.kwargs)
+    parser.add_argument(*ac.ObjectiveArgument.names,
+                        **ac.ObjectiveArgument.kwargs)
     parser.add_argument(*ac.SelectorAblationArgument.names,
                         **ac.SelectorAblationArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
@@ -40,10 +41,18 @@ def judge_exist_remaining_jobs(feature_data_csv: Path,
                                performance_data_csv: Path) -> bool:
     """Return whether there are remaining feature or performance computation jobs."""
     feature_data = FeatureDataFrame(feature_data_csv)
-    if feature_data.has_missing_vectors():
-        return True
     performance_data = PerformanceDataFrame(performance_data_csv)
-    return performance_data.has_missing_values
+    missing_features = feature_data.has_missing_vectors()
+    missing_performances = performance_data.has_missing_values
+    if missing_features:
+        print("There remain unperformed feature computation jobs!")
+    if missing_performances:
+        print("There remain unperformed performance computation jobs!")
+    if missing_features or missing_performances:
+        print("Please first execute all unperformed jobs before constructing Sparkle "
+              "portfolio selector")
+        print("Sparkle portfolio selector is not successfully constructed!")
+        sys.exit(-1)
 
 
 def main(argv: list[str]) -> None:
@@ -66,10 +75,12 @@ def main(argv: list[str]) -> None:
         gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
-    if ac.set_by_user(args, "objectives"):
-        gv.settings().set_general_sparkle_objectives(
-            args.objectives, SettingState.CMD_LINE
-        )
+    if ac.set_by_user(args, "objective"):
+        objective = resolve_objective(args.objective)
+    else:
+        objective = gv.settings().get_general_sparkle_objectives()[0]
+        print("WARNING: No objective specified, defaulting to first objective from "
+              f"settings ({objective}).")
     if args.run_on is not None:
         gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
@@ -78,23 +89,12 @@ def main(argv: list[str]) -> None:
     print("Start constructing Sparkle portfolio selector ...")
     selector = gv.settings().get_general_sparkle_selector()
 
-    flag_judge_exist_remaining_jobs = judge_exist_remaining_jobs(
+    judge_exist_remaining_jobs(
         gv.settings().DEFAULT_feature_data_path,
         gv.settings().DEFAULT_performance_data_path)
 
-    if flag_judge_exist_remaining_jobs:
-        print("There remain unperformed feature computation jobs or performance "
-              "computation jobs!")
-        print("Please first execute all unperformed jobs before constructing Sparkle "
-              "portfolio selector")
-        print("Sparkle portfolio selector is not successfully constructed!")
-        sys.exit(-1)
-
     # Selector (AutoFolio) cannot handle cutoff time less than 2, adjust if needed
     cutoff_time = max(gv.settings().get_general_target_cutoff_time(), 2)
-
-    # Determine the objective function
-    objective = gv.settings().get_general_sparkle_objectives()[0]
 
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
@@ -172,7 +172,7 @@ def main(argv: list[str]) -> None:
     # Compute the marginal contribution
     with_actual = "--actual" if solver_ablation else ""
     cmd = (f"sparkle/CLI/compute_marginal_contribution.py --perfect {with_actual} "
-           f"{ac.SparkleObjectiveArgument.names[0]} {objective}")
+           f"{ac.ObjectivesArgument.names[0]} {objective}")
     solver_names = ", ".join([Path(s).name for s in performance_data.solvers])
     marginal_contribution = rrr.add_to_queue(
         runner=run_on,
