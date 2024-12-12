@@ -239,7 +239,8 @@ def main(argv: list[str]) -> None:
         configuration_jobs = performance_data.get_job_list()
         if len(configuration_jobs) > 0:
             print(f"ERROR: {(len(configuration_jobs))} jobs for the configuration were "
-                  "not executed! Please run 'sparkle run solvers' before continuing.")
+                  "not executed! Please run 'sparkle run solvers --performance-data' "
+                  "before continuing.")
             sys.exit(-1)
         # Create machine readable output
         output = gv.settings().DEFAULT_configuration_output_analysis
