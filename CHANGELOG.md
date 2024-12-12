@@ -2,7 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.9.1.1] - 2025/12/12
+## [0.9.1.2] - 2025/12/12
 
 Patchfix
 
