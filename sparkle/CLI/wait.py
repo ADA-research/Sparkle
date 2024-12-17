@@ -84,7 +84,9 @@ def wait_for_jobs(path: Path,
                             or run.status == Status.RUNNING]
             sorted_jobs = sorted(
                 jobs, key=lambda job: (status_order.get(job.status, 4), job.run_id))
-            table = jobs_help.create_jobs_table(sorted_jobs)
+            table = jobs_help.create_jobs_table(
+                sorted_jobs,
+                format="grid" if len(running_jobs) > 0 else "fancy_grid")
             print(table)
             time.sleep(check_interval)
             if len(running_jobs) > 0:
