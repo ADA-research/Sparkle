@@ -1,8 +1,6 @@
 """Configurator classes to implement SMAC3 in Sparkle."""
 from __future__ import annotations
 from pathlib import Path
-# import fcntl
-# import glob
 import shutil
 
 from smac import version as smac_version
@@ -11,7 +9,6 @@ from smac import facade as smacfacades
 from smac.runhistory.enumerations import StatusType as SmacStatusType
 import numpy as np
 
-import runrunner as rrr
 from runrunner import Runner, Run
 
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
@@ -92,33 +89,17 @@ class SMAC3(Configurator):
                 f"{scenario.scenario_file_path.absolute()} {seed} "
                 f"{data_target.csv_filepath}"
                 for seed in seeds]
-        runs = [rrr.add_to_queue(
-            runner=run_on,
-            cmd=cmds,
-            name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
-            parallel_jobs=num_parallel_jobs,
+        return super().configure(
+            configuration_commands=cmds,
+            data_target=data_target,
+            output=None,
+            scenario=scenario,
+            validation_ids=seeds if validate_after else None,
             sbatch_options=sbatch_options,
+            parallel_jobs=num_parallel_jobs,
             base_dir=base_dir,
-        )]
-        if validate_after:
-            # TODO: Array job specific dependency, requires RunRunner update
-            validate = scenario.solver.run_performance_dataframe(
-                scenario.instance_set,
-                run_ids=seeds,
-                performance_dataframe=data_target,
-                cutoff_time=scenario.cutoff_time,
-                run_on=run_on,
-                sbatch_options=sbatch_options,
-                log_dir=scenario.validation,
-                base_dir=base_dir,
-                dependencies=runs,
-            )
-            runs.append(validate)
-
-        if run_on == Runner.LOCAL:
-            for run in runs:
-                run.wait()
-        return runs
+            run_on=run_on
+        )
 
     @staticmethod
     def organise_output(output_source: Path,

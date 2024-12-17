@@ -2,12 +2,14 @@
 # -*- coding: UTF-8 -*-
 """Configurator class to use different algorithm configurators like SMAC."""
 from __future__ import annotations
-from abc import abstractmethod
 from pathlib import Path
 
+import runrunner as rrr
 from runrunner import Runner, Run
+
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
+from sparkle.structures import PerformanceDataFrame
 from sparkle.types import SparkleObjective
 
 
@@ -40,17 +42,20 @@ class Configurator:
         """Return the scenario class of the configurator."""
         return ConfigurationScenario
 
-    @abstractmethod
     def configure(self: Configurator,
+                  configuration_commands: list[str],
+                  data_target: PerformanceDataFrame,
+                  output: Path,
                   scenario: ConfigurationScenario,
-                  validate_after: bool = True,
-                  sbatch_options: list[str] = [],
+                  validation_ids: list[int] = None,
+                  sbatch_options: list[str] = None,
                   num_parallel_jobs: int = None,
                   base_dir: Path = None,
                   run_on: Runner = Runner.SLURM) -> Run:
         """Start configuration job.
 
         Args:
+
             scenario: ConfigurationScenario to execute.
             validate_after: Whether to validate the configuration on the training set
                 afterwards or not.
@@ -62,7 +67,33 @@ class Configurator:
         Returns:
             A RunRunner Run object.
         """
-        raise NotImplementedError
+        runs = [rrr.add_to_queue(
+            runner=run_on,
+            cmd=configuration_commands,
+            name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
+            base_dir=base_dir,
+            output_path=output,
+            parallel_jobs=num_parallel_jobs,
+            sbatch_options=sbatch_options)]
+
+        if validation_ids:
+            validate = scenario.solver.run_performance_dataframe(
+                scenario.instance_set,
+                run_ids=validation_ids,
+                performance_dataframe=data_target,
+                cutoff_time=scenario.cutoff_time,
+                run_on=run_on,
+                sbatch_options=sbatch_options,
+                log_dir=scenario.validation,
+                base_dir=base_dir,
+                dependencies=runs,
+            )
+            runs.append(validate)
+
+        if run_on == Runner.LOCAL:
+            for run in runs:
+                run.wait()
+        return runs
 
     @staticmethod
     def organise_output(output_source: Path,
