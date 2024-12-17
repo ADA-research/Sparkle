@@ -6,7 +6,7 @@ from pathlib import Path
 
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
-from sparkle.structures import PerformanceDataFrame
+from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.instance import InstanceSet, Instance_Set
 from sparkle.types import SparkleObjective, resolve_objective
 
@@ -205,6 +205,7 @@ class IRACEScenario(ConfigurationScenario):
                  first_test: int = None,
                  mu: int = None,
                  max_iterations: int = None,
+                 feature_data: FeatureDataFrame = None,
                  )\
             -> None:
         """Initialize scenario paths and names.
@@ -324,6 +325,9 @@ class IRACEScenario(ConfigurationScenario):
             self.sparkle_objective = sparkle_objectives[0]
         else:
             self.sparkle_objective = None
+
+        if feature_data is not None:
+            print("WARNING: Instance features currently not supported by IRACE.")
 
         self.number_of_runs = number_of_runs
         self.solver_calls = solver_calls if solver_calls and solver_calls > 0 else None
