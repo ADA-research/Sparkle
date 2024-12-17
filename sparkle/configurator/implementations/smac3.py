@@ -274,9 +274,9 @@ class SMAC3Scenario(ConfigurationScenario):
         # The files are saved in `./output_directory/name/seed`.
         self.log_dir = self.directory / "logs"
         self.number_of_runs = number_of_runs
-        self.feature_dataframe = feature_data
-        if isinstance(self.feature_dataframe, Path):  # Load from file
-            self.feature_dataframe = FeatureDataFrame(self.feature_dataframe)
+        self.feature_data = feature_data
+        if isinstance(self.feature_data, Path):  # Load from file
+            self.feature_data = FeatureDataFrame(self.feature_data)
 
         # Facade parameters
         self.smac_facade = smac_facade
@@ -284,9 +284,9 @@ class SMAC3Scenario(ConfigurationScenario):
             self.smac_facade = getattr(smacfacades, self.smac_facade)
         self.max_ratio = max_ratio
 
-        if feature_data is not None:
+        if self.feature_data is not None:
             instance_features =\
-                {instance: self.feature_dataframe.get_instance(str(instance))
+                {instance: self.feature_data.get_instance(str(instance))
                     for instance in self.instance_set.instance_paths}
         else:
             # 'If no instance features are passed, the runhistory encoder can not
@@ -357,7 +357,7 @@ class SMAC3Scenario(ConfigurationScenario):
     def serialize(self: ConfigurationScenario) -> dict:
         """Serialize the configuration scenario."""
         feature_data =\
-            self.feature_dataframe.csv_filepath if self.feature_dataframe else None
+            self.feature_data.csv_filepath if self.feature_data else None
         return {
             "solver": self.solver.directory,
             "instance_set": self.instance_set.directory,

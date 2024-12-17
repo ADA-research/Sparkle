@@ -30,7 +30,7 @@ def test_smac3_scenario_to_file(tmp_path: Path,
         cputime_limit=20.0,
         solver_calls=5,
         use_default_config=False,
-        instance_features=None,
+        feature_data=None,
         min_budget=50.0,
         max_budget=60.0,
         seed=42,
@@ -52,7 +52,6 @@ def test_smac3_scenario_from_file() -> None:
     assert scenario.directory == source.parent.parent / scenario.name
     assert scenario.cutoff_time == 60
     assert scenario.number_of_runs == 5
-    assert scenario.feature_dataframe is None
     assert scenario.smac3_scenario.crash_cost == 15.0
     assert scenario.smac3_scenario.termination_cost_threshold == 24.0
     assert scenario.smac3_scenario.walltime_limit == 10.0
@@ -88,7 +87,7 @@ def test_smac3_configure(tmp_path: Path,
         cputime_limit=20.0,
         solver_calls=5,
         use_default_config=False,
-        instance_features=None,
+        feature_data=None,
         min_budget=50.0,
         max_budget=60.0,
         seed=42,
