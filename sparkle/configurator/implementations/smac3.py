@@ -96,7 +96,7 @@ class SMAC3(Configurator):
             scenario=scenario,
             validation_ids=seeds if validate_after else None,
             sbatch_options=sbatch_options,
-            parallel_jobs=num_parallel_jobs,
+            num_parallel_jobs=num_parallel_jobs,
             base_dir=base_dir,
             run_on=run_on
         )
@@ -181,7 +181,7 @@ class SMAC3Scenario(ConfigurationScenario):
                  parent_directory: Path,
                  cutoff_time: int = None,
                  number_of_runs: int = None,
-                 smac_facade: smacfacades.AbstractFacade =
+                 smac_facade: smacfacades.AbstractFacade | str =
                  smacfacades.AlgorithmConfigurationFacade,
                  crash_cost: float | list[float] = np.inf,
                  termination_cost_threshold: float | list[float] = np.inf,
@@ -189,12 +189,12 @@ class SMAC3Scenario(ConfigurationScenario):
                  cputime_limit: float = np.inf,
                  solver_calls: int = None,
                  use_default_config: bool = False,
-                 instance_features: FeatureDataFrame = None,
+                 feature_data: FeatureDataFrame | Path = None,
                  min_budget: float | int | None = None,
                  max_budget: float | int | None = None,
                  seed: int = -1,
                  n_workers: int = 1,
-                 max_ratio: float = 0.25,
+                 max_ratio: float = None,
                  smac3_output_directory: Path = Path(),
                  ) -> None:
         """Initialize scenario paths and names.
@@ -242,11 +242,11 @@ class SMAC3Scenario(ConfigurationScenario):
             instances: list[str] | None, defaults to None
                 Names of the instances to use. If None, no instances are used. Instances
                 could be dataset names, seeds, subsets, etc.
-            instance_features: FeatureDataFrame, defaults to None
+            feature_data: FeatureDataFrame or Path, defaults to None
                 Instances can be associated with features. For example, meta data of
                 the dataset (mean, var, ...) can be incorporated which are then further
-                used to expand the training data of the surrogate model. When no features
-                are given, will use index as instance features.
+                used to expand the training data of the surrogate model. If Path, loaded
+                from file. When no features are given, uses index as instance features.
             min_budget: float | int | None, defaults to None
                 The minimum budget (epochs, subset size, number of instances, ...) that
                 is used for the optimization. Use this argument if you use multi-fidelity
@@ -262,10 +262,10 @@ class SMAC3Scenario(ConfigurationScenario):
                 The number of workers to use for parallelization.
                 If `n_workers` is greather than 1, SMAC will use DASK to parallelize the
                 optimization.
-            max_ratio: float, defaults to 0.25
+            max_ratio: float, defaults to None.
                 Facade uses at most scenario.n_trials * max_ratio number of
                 configurations in the initial design. Additional configurations are not
-                affected by this parameter.
+                affected by this parameter. Not applicable to each facade.
             smac3_output_directory: Path, defaults to Path()
                 The output subdirectory for the SMAC3 scenario. Defaults to the scenario
                 results directory.
@@ -274,16 +274,20 @@ class SMAC3Scenario(ConfigurationScenario):
         # The files are saved in `./output_directory/name/seed`.
         self.log_dir = self.directory / "logs"
         self.number_of_runs = number_of_runs
-        self.feature_dataframe = instance_features
+        self.feature_dataframe = feature_data
+        if isinstance(self.feature_dataframe, Path):  # Load from file
+            self.feature_dataframe = FeatureDataFrame(self.feature_dataframe)
 
         # Facade parameters
         self.smac_facade = smac_facade
+        if isinstance(self.smac_facade, str):
+            self.smac_facade = getattr(smacfacades, self.smac_facade)
         self.max_ratio = max_ratio
 
-        if instance_features is not None:
+        if feature_data is not None:
             instance_features =\
-                {instance_name: self.feature_dataframe.get_instance(instance_name)
-                    for instance_name in self.feature_dataframe.instances}
+                {instance: self.feature_dataframe.get_instance(str(instance))
+                    for instance in self.instance_set.instance_paths}
         else:
             # 'If no instance features are passed, the runhistory encoder can not
             # distinguish between different instances and therefore returns the same data
@@ -367,7 +371,7 @@ class SMAC3Scenario(ConfigurationScenario):
             "cputime_limit": self.smac3_scenario.cputime_limit,
             "solver_calls": self.smac3_scenario.n_trials,
             "use_default_config": self.smac3_scenario.use_default_config,
-            "instance_features": feature_data,
+            "feature_data": feature_data,
             "min_budget": self.smac3_scenario.min_budget,
             "max_budget": self.smac3_scenario.max_budget,
             "seed": self.smac3_scenario.seed,
@@ -422,10 +426,10 @@ class SMAC3Scenario(ConfigurationScenario):
         variables["use_default_config"] =\
             ast.literal_eval(variables["use_default_config"])
 
-        if variables["instance_features"] != "None":
-            variables["instance_features"] = Path(variables["instance_features"])
+        if variables["feature_data"] != "None":
+            variables["feature_data"] = Path(variables["feature_data"])
         else:
-            variables["instance_features"] = None
+            variables["feature_data"] = None
 
         variables["min_budget"] = ast.literal_eval(variables["min_budget"])
         variables["max_budget"] = ast.literal_eval(variables["max_budget"])

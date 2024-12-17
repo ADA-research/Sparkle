@@ -6,8 +6,6 @@ import ast
 from pathlib import Path
 from pathlib import PurePath
 
-from smac import facade as smac_facades
-
 from sparkle.types import SparkleObjective, resolve_objective
 from sparkle.types.objective import PAR
 from sparkle.solver import Selector
@@ -135,7 +133,7 @@ class Settings:
 
     # Default SMAC3 settings
     DEFAULT_smac3_number_of_runs = None
-    DEFAULT_smac3_facade = smac_facades.AlgorithmConfigurationFacade.__name__
+    DEFAULT_smac3_facade = "AlgorithmConfigurationFacade"
     DEFAULT_smac3_facade_max_ratio = None
     DEFAULT_smac3_crash_cost = None
     DEFAULT_smac3_termination_cost_threshold = None
@@ -367,7 +365,7 @@ class Settings:
                     self.set_smac3_number_of_trials(value, state)
                     file_settings.remove_option(section, option)
 
-            options_names = ("facade", "smac_facade", )
+            options_names = ("facade", "smac_facade", "smac3_facade")
             for option in options_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
@@ -1048,14 +1046,11 @@ class Settings:
             self.__smac3_smac_facade_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_smac3_smac_facade(self: Settings) -> smac_facades.AbstractFacade:
+    def get_smac3_smac_facade(self: Settings) -> str:
         """Return the SMAC3 facade."""
         if self.__smac3_smac_facade_set == SettingState.NOT_SET:
             self.set_smac3_smac_facade()
-        facade_name = self.__settings["smac3"]["facade"]
-        if facade_name == "None":
-            return None
-        return getattr(smac_facades, facade_name)
+        return self.__settings["smac3"]["facade"]
 
     def set_smac3_facade_max_ratio(
             self: Settings, value: float = DEFAULT_smac3_facade_max_ratio,
@@ -1082,7 +1077,7 @@ class Settings:
         section = "smac3"
         name = "crash_cost"
 
-        if self.__check_setting_state(self.__smac3_smac_facade_set, origin, name):
+        if self.__check_setting_state(self.__smac3_crash_cost_set, origin, name):
             self.__init_section(section)
             self.__smac3_smac_facade_set = origin
             self.__settings[section][name] = str(value)
