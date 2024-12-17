@@ -3,10 +3,7 @@
 from __future__ import annotations
 import argparse
 import sys
-import os
 import math
-
-from pandas import DataFrame
 
 from runrunner import Runner
 
@@ -19,7 +16,6 @@ from sparkle.CLI.help import argparse_custom as ac
 
 from sparkle.platform.settings_objects import SettingState
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from sparkle.configurator import implementations as configurator_implementations
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
 
@@ -122,35 +118,6 @@ def main(argv: list[str]) -> None:
 
     configurator = gv.settings().get_general_sparkle_configurator()
     configurator_settings = gv.settings().get_configurator_settings(configurator.name)
-    if use_features and configurator.name == configurator_implementations.SMAC2.__name__:
-        feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
-
-        data_dict = {}
-        feature_data_df = feature_data.dataframe
-
-        for label, row in feature_data_df.iterrows():
-            # os.path.split(os.path.split(label)[0])[1] gives the dir/instance set name
-            if os.path.split(os.path.split(label)[0])[1] == instance_set_train.name:
-                if row.empty:
-                    print("No feature data exists for the given training set, please "
-                          "run add_feature_extractor.py, then compute_features.py")
-                    sys.exit(-1)
-
-                new_label = (f"../../../instances/{instance_set_train.name}/"
-                             + os.path.split(label)[1])
-                data_dict[new_label] = row
-
-        feature_data_df = DataFrame.from_dict(data_dict, orient="index",
-                                              columns=feature_data_df.columns)
-
-        if feature_data.has_missing_value():
-            print("You have unfinished feature computation jobs, please run "
-                  "`sparkle compute features`")
-            sys.exit(-1)
-
-        for index, column in enumerate(feature_data_df):
-            feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
-        configurator_settings.update({"feature_data_df": feature_data_df})
 
     sparkle_objectives =\
         gv.settings().get_general_sparkle_objectives()
@@ -163,6 +130,23 @@ def main(argv: list[str]) -> None:
             print(f"WARNING: Objective {objective.name} not found in performance data. "
                   "Adding to data frame.")
             performance_data.add_objective(objective.name)
+
+    if use_features:
+        feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
+        # Check that the train instance set is in the feature data frame
+        invalid = False
+        remaining_instance_jobs =\
+            set([instance for instance, _, _ in feature_data.remaining_jobs()])
+        for instance in instance_set_train.instance_paths:
+            if str(instance) not in feature_data.instances:
+                print(f"ERROR: Train Instance {instance} not found in feature data.")
+                invalid = True
+            elif instance in remaining_instance_jobs:  # Check jobs
+                print(f"ERROR: Features have not been computed for instance {instance}.")
+                invalid = True
+        if invalid:
+            sys.exit(-1)
+        configurator_settings.update({"feature_data": feature_data})
 
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     config_scenario = configurator.scenario_class()(
