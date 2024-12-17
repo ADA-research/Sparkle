@@ -85,6 +85,7 @@ def main(argv: list[str]) -> None:
     """Main function of the configure solver command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     parser = parser_function()
 
@@ -113,8 +114,6 @@ def main(argv: list[str]) -> None:
             gv.settings().DEFAULT_instance_dir, Instance_Set)
     use_features = args.use_features
     run_on = gv.settings().get_run_on()
-
-    check_for_initialise()
 
     configurator = gv.settings().get_general_sparkle_configurator()
     configurator_settings = gv.settings().get_configurator_settings(configurator.name)

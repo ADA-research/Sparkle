@@ -26,6 +26,7 @@ def main(argv: list[str]) -> None:
     """Main function of the remove solver command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     # Define command line arguments
     parser = parser_function()
@@ -37,7 +38,6 @@ def main(argv: list[str]) -> None:
         gv.file_storage_data_mapping[gv.solver_nickname_list_path],
         gv.settings().DEFAULT_solver_dir)
 
-    check_for_initialise()
     if solver_path is None:
         print(f'Could not resolve Solver path/name "{solver_path}"!')
         sys.exit(-1)

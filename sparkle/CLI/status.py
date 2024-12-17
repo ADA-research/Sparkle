@@ -22,14 +22,13 @@ def main(argv: list[str]) -> None:
     """Main function of the status command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     # Define command line arguments
     parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args(argv)
-
-    check_for_initialise()
 
     print("Reporting current system status of Sparkle ...")
     sssh.print_sparkle_list([s for s in gv.settings().DEFAULT_solver_dir.iterdir()],
