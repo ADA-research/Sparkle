@@ -516,10 +516,10 @@ class Settings:
                               f'{option}" in file {file_path} ignored')
 
         # Print error if unable to read the settings
-        else:
+        elif Path(file_path).exists():
             print(f"ERROR: Failed to read settings from {file_path} The file may have "
-                  "been empty, located in a different path, or be in another format than"
-                  " INI. Default Settings values be used.")
+                  "been empty or be in another format than INI. Default Setting values "
+                  "will be used.")
 
     def write_used_settings(self: Settings) -> None:
         """Write the used settings to the default locations."""

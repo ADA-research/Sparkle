@@ -10,7 +10,6 @@ from pathlib import Path
 
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help import snapshot_help as snh
-from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.CLI.help import global_variables as gv
 from sparkle.configurator.implementations.irace import IRACE
@@ -51,7 +50,7 @@ def initialise_irace() -> None:
     """Initialise IRACE."""
     if shutil.which("R") is None:
         warnings.warn("R is not installed, which is required for the IRACE"
-                      "configurator. Make sure R is installed and try again.")
+                      "configurator. Consider installing R.")
         return
     print("Initialising IRACE ...")
     r6_package_check = subprocess.run(["Rscript", "-e",
@@ -123,12 +122,6 @@ def initialise_sparkle(save_existing_platform: bool = True,
     for working_dir in gv.settings().DEFAULT_working_dirs:
         working_dir.mkdir(exist_ok=True)
 
-    # Check if Settings file exists, otherwise initialise a default one
-    if not Path(Settings.DEFAULT_settings_path).exists():
-        print("Settings file does not exist, initializing default settings ...")
-        gv.__settings = Settings(Settings.DEFAULT_example_settings_path)
-        gv.settings().write_settings_ini(Path(Settings.DEFAULT_settings_path))
-
     # Initialise latest scenario file
     gv.ReportingScenario.DEFAULT_reporting_scenario_path.open("w+")
 
@@ -176,8 +169,8 @@ def initialise_sparkle(save_existing_platform: bool = True,
     if shutil.which("java") is None:
         # NOTE: An automatic resolution of Java at this point would be good
         # However, loading modules from Python has thusfar not been successfull.
-        warnings.warn("Could not find Java as an executable! "
-                      "Java 1.8.0_402 is required to use SMAC2 as a configurator.")
+        warnings.warn("Could not find Java as an executable! Java 1.8.0_402 is required "
+                      "to use SMAC2 as a configurator. Consider installing Java.")
 
     # Check if IRACE is installed
     if not IRACE.configurator_executable.exists():
