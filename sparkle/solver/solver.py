@@ -332,7 +332,7 @@ class Solver(SparkleCallable):
         train_arg =\
             ",".join([str(i) for i in train_set.instance_paths]) if train_set else ""
         cmds = [
-            f"{Solver.solver_cli} "
+            f"python3 {Solver.solver_cli} "
             f"--solver {self.directory} "
             f"--instance {instance} "
             f"--run-index {run_index} "

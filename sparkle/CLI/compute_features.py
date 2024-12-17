@@ -71,7 +71,7 @@ def compute_features(
     for instance_path, extractor_name, feature_group in jobs:
         extractor_path = gv.settings().DEFAULT_extractor_dir / extractor_name
         instance_paths.add(instance_path)
-        cmd = (f"{features_core} "
+        cmd = (f"python3 {features_core} "
                f"--instance {instance_path} "
                f"--extractor {extractor_path} "
                f"--feature-csv {feature_data.csv_filepath} "

@@ -110,7 +110,7 @@ def main(argv: list[str]) -> None:
 
     run_core = Path(__file__).parent.parent.resolve() /\
         "CLI" / "core" / "run_portfolio_selector_core.py"
-    cmd_list = [f"python {run_core} "
+    cmd_list = [f"python3 {run_core} "
                 f"--selector {selector_path} "
                 f"--feature-data-csv {feature_dataframe.csv_filepath} "
                 f"--performance-data-csv {performance_data.csv_filepath} "

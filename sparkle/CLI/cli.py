@@ -24,11 +24,6 @@ def commands() -> list[str]:
 
 def main() -> None:
     """Pass through command to launch CLI commands."""
-    # Make sure Core and Package commands are executable
-    # NOTE: This would preferably be in a post-install script so its only done once
-    for path in package_cli_entry_points:
-        if not os.access(path, os.X_OK):  # Pip installation changes exec rights
-            path.chmod(0o755)
     max_space = max([path.name.count("_") for path in module_path.iterdir()
                      if path.is_file()])
     if len(sys.argv) < 2:
@@ -43,9 +38,7 @@ def main() -> None:
         if command in possible_commands:
             break
     if command_file.is_file():
-        if not os.access(command_file, os.X_OK):  # Pip installation changes exec rights
-            command_file.chmod(0o755)
-        os.system(f"{command_file} {' '.join(args)}")
+        os.system(f"python3 {command_file} {' '.join(args)}")
     else:
         print(f"Does not understand command {command}")
 
