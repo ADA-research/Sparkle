@@ -50,6 +50,10 @@ def wait_for_jobs(path: Path,
 
     running_jobs = jobs
 
+    if len(running_jobs) == 0:
+        print("No jobs running.")
+        sys.exit(0)
+
     def signal_handler(num: int, _: any) -> None:
         """Create clean exit for CTRL + C."""
         if num == signal.SIGINT:
@@ -83,16 +87,14 @@ def wait_for_jobs(path: Path,
             table = jobs_help.create_jobs_table(sorted_jobs)
             print(table)
             time.sleep(check_interval)
-
-            # Clears the table for the new table to be printed
-            lines = table.count("\n") + 1
-            # \033 is the escape character (ESC),
-            # [{lines}A is the escape sequence that moves the cursor up.
-            print(f"\033[{lines}A", end="")
-            # [J is the escape sequence that clears the console from the cursor down
-            print("\033[J", end="")
-
-    print("All jobs done!")
+            if len(running_jobs) > 0:
+                # Clears the table for the new table to be printed
+                lines = table.count("\n") + 1
+                # \033 is the escape character (ESC),
+                # [{lines}A is the escape sequence that moves the cursor up.
+                print(f"\033[{lines}A", end="")
+                # [J is the escape sequence that clears the console from the cursor down
+                print("\033[J", end="")
 
 
 def main(argv: list[str]) -> None:

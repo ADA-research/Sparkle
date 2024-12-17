@@ -10,9 +10,10 @@ from pathlib import Path
 
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help import snapshot_help as snh
-from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.CLI.help import global_variables as gv
 from sparkle.configurator.implementations.irace import IRACE
+from sparkle.platform import Settings
+from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -122,6 +123,12 @@ def initialise_sparkle(save_existing_platform: bool = True,
     for working_dir in gv.settings().DEFAULT_working_dirs:
         working_dir.mkdir(exist_ok=True)
 
+    # Check if Settings file exists, otherwise initialise a default one
+    if not Path(Settings.DEFAULT_settings_path).exists():
+        print("Settings file does not exist, initializing default settings ...")
+        gv.__settings = Settings(Settings.DEFAULT_example_settings_path)
+        gv.settings().write_settings_ini(Path(Settings.DEFAULT_settings_path))
+
     # Initialise latest scenario file
     gv.ReportingScenario.DEFAULT_reporting_scenario_path.open("w+")
 
@@ -178,7 +185,6 @@ def initialise_sparkle(save_existing_platform: bool = True,
 
     if download_examples:
         # Download Sparkle examples from Github
-        # NOTE: Needs to be thoroughly tested after Pip install is working
         print("Downloading examples ...")
         curl = subprocess.Popen(
             ["curl", "https://codeload.github.com/ADA-research/Sparkle/tar.gz/main"],
