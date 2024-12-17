@@ -238,6 +238,8 @@ class IRACEScenario(ConfigurationScenario):
                 N^param is the number of non-fixed parameters to be tuned.
                 Setting this parameter may make irace stop sooner than it should without
                 using all the available budget. We recommend to use the default value.
+            feature_data: FeatureDataFrame object with the feature data.
+                Currently not supported by IRACE.
         """
         """
         Other possible arguments that are not added yet to Sparkle:
