@@ -70,9 +70,8 @@ class TestConfiguratorSMAC2(TestCase):
             name=f"{SMAC2.__name__}: {self.conf_scenario.solver.name} on "
                  f"{self.conf_scenario.instance_set.name}",
             output_path=expected_outputs,
-            parallel_jobs=2,
+            parallel_jobs=None,
             sbatch_options=[],
-            srun_options=["-N1", "-n1"]
         )
         assert runs == [None]
 
