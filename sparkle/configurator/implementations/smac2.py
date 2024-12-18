@@ -198,6 +198,7 @@ class SMAC2Scenario(ConfigurationScenario):
                  wallclock_time: int = None,
                  cutoff_time: int = None,
                  target_cutoff_length: str = None,
+                 cli_cores: int = None,
                  use_cpu_time_in_tunertime: bool = None,
                  feature_data: FeatureDataFrame | Path = None)\
             -> None:
@@ -222,6 +223,8 @@ class SMAC2Scenario(ConfigurationScenario):
                 configuration.
             target_cutoff_length: A domain specific measure of when the algorithm
                 should consider itself done.
+            cli_cores: int
+                The number of cores to use to execute runs. Defaults in SMAC2 to 1.
             use_cpu_time_in_tunertime: Whether to calculate SMAC2's own used time for
                 budget deduction. Defaults in SMAC2 to True.
             feature_data: If features are used, this contains the feature data.
@@ -249,6 +252,7 @@ class SMAC2Scenario(ConfigurationScenario):
         self.cutoff_time = cutoff_time
         self.cutoff_length = target_cutoff_length
         self.max_iterations = max_iterations
+        self.cli_cores = cli_cores
         self.use_cpu_time_in_tunertime = use_cpu_time_in_tunertime
 
         self.feature_data = feature_data
@@ -340,6 +344,8 @@ class SMAC2Scenario(ConfigurationScenario):
                 file.write(f"cputime-limit = {self.cpu_time}\n")
             if self.solver_calls is not None:
                 file.write(f"runcount-limit = {self.solver_calls}\n")
+            if self.cli_cores is not None:
+                file.write(f"cli-cores = {self.cli_cores}")
             if self.feature_data is not None:
                 file.write(f"feature_file = {self.feature_file_path}\n")
             if self.use_cpu_time_in_tunertime is not None:
@@ -404,6 +410,7 @@ class SMAC2Scenario(ConfigurationScenario):
             else None
         use_cpu_time_in_tunertime = config["use-cputime-in-tunertime"]\
             if "use-cputime-in-tunertime" in config else None
+        cli_cores = config["cli-cores"] if "cli-cores" in config else None
 
         _, solver_path, _, objective_str = config["algo"].split(" ")
         objective = resolve_objective(objective_str)
@@ -429,5 +436,6 @@ class SMAC2Scenario(ConfigurationScenario):
                              wallclock_limit,
                              int(config["cutoffTime"]),
                              config["cutoff_length"],
+                             cli_cores,
                              use_cpu_time_in_tunertime,
                              feature_data_path)
