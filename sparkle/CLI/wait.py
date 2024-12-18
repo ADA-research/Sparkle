@@ -42,13 +42,16 @@ def wait_for_jobs(path: Path,
         filter: If present, only show the given job ids.
     """
     # Filter jobs on relevant status
-    jobs = [run for run in jobs_help.get_runs_from_file(path)
-            if run.status == Status.WAITING or run.status == Status.RUNNING]
+    jobs = jobs_help.get_runs_from_file(path, filter=[Status.WAITING, Status.RUNNING])
 
     if filter is not None:
         jobs = [job for job in jobs if job.run_id in filter]
 
     running_jobs = jobs
+
+    if len(running_jobs) == 0:
+        print("No jobs running.")
+        sys.exit(0)
 
     def signal_handler(num: int, _: any) -> None:
         """Create clean exit for CTRL + C."""
@@ -80,19 +83,19 @@ def wait_for_jobs(path: Path,
                             or run.status == Status.RUNNING]
             sorted_jobs = sorted(
                 jobs, key=lambda job: (status_order.get(job.status, 4), job.run_id))
-            table = jobs_help.create_jobs_table(sorted_jobs)
+            table = jobs_help.create_jobs_table(
+                sorted_jobs,
+                format="grid" if len(running_jobs) > 0 else "fancy_grid")
             print(table)
             time.sleep(check_interval)
-
-            # Clears the table for the new table to be printed
-            lines = table.count("\n") + 1
-            # \033 is the escape character (ESC),
-            # [{lines}A is the escape sequence that moves the cursor up.
-            print(f"\033[{lines}A", end="")
-            # [J is the escape sequence that clears the console from the cursor down
-            print("\033[J", end="")
-
-    print("All jobs done!")
+            if len(running_jobs) > 0:
+                # Clears the table for the new table to be printed
+                lines = table.count("\n") + 1
+                # \033 is the escape character (ESC),
+                # [{lines}A is the escape sequence that moves the cursor up.
+                print(f"\033[{lines}A", end="")
+                # [J is the escape sequence that clears the console from the cursor down
+                print("\033[J", end="")
 
 
 def main(argv: list[str]) -> None:

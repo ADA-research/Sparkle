@@ -36,6 +36,7 @@ def main(argv: list[str]) -> None:
     """Main function of the command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     # Define command line arguments
     parser = parser_function()
@@ -45,8 +46,6 @@ def main(argv: list[str]) -> None:
     solver_source = Path(args.solver_path)
     deterministic = args.deterministic
     solution_verifier = args.solution_verifier
-
-    check_for_initialise()
 
     if not solver_source.exists():
         print(f'Solver path "{solver_source}" does not exist!')

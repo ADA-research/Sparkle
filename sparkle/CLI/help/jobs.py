@@ -38,13 +38,16 @@ def get_runs_from_file(path: Path,
     return runs
 
 
-def create_jobs_table(jobs: list[SlurmRun], markup: bool = True) -> str:
+def create_jobs_table(jobs: list[SlurmRun],
+                      markup: bool = True,
+                      format: str = "grid") -> str:
     """Create a table of jobs.
 
     Args:
         runs: List of SlurmRun objects.
         markup: By default some mark up will be applied to the table.
             If false, a more plain version will be created.
+        format: The tabulate format to use.
 
     Returns:
         A table of jobs as a string.
@@ -73,5 +76,5 @@ def create_jobs_table(jobs: list[SlurmRun], markup: bool = True) -> str:
              f"{finished_jobs_count}/{len(job.all_status)}",
              job.runtime])
     if markup:
-        return tabulate(job_table, headers="firstrow", tablefmt="grid")
+        return tabulate(job_table, headers="firstrow", tablefmt=format)
     return job_table

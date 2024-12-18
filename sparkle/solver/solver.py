@@ -278,6 +278,7 @@ class Solver(SparkleCallable):
             dependencies: list[SlurmRun] = None,
             log_dir: Path = None,
             base_dir: Path = None,
+            job_name: str = None,
             run_on: Runner = Runner.SLURM) -> Run:
         """Run the solver from and place the results in the performance dataframe.
 
@@ -304,6 +305,8 @@ class Solver(SparkleCallable):
             log_dir: Path where to place output files. Defaults to
                 self.raw_output_directory.
             base_dir: Path where to place output files.
+            job_name: Name of the job
+                If None, will generate a name based on Solver and Instances
             run_on: On which platform to run the jobs. Default: Slurm.
 
         Returns:
@@ -332,7 +335,7 @@ class Solver(SparkleCallable):
         train_arg =\
             ",".join([str(i) for i in train_set.instance_paths]) if train_set else ""
         cmds = [
-            f"{Solver.solver_cli} "
+            f"python3 {Solver.solver_cli} "
             f"--solver {self.directory} "
             f"--instance {instance} "
             f"--run-index {run_index} "
@@ -343,10 +346,11 @@ class Solver(SparkleCallable):
             f"{'--best-configuration-instances' if train_set else ''} {train_arg}"
             for instance, run_indices in zip(instances, run_ids)
             for run_index in run_indices]
+        job_name = f"Run: {self.name} on {set_name}" if job_name is None else job_name
         r = rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
-            name=f"Run: {self.name} on {set_name}",
+            name=job_name,
             base_dir=base_dir,
             sbatch_options=sbatch_options,
             dependencies=dependencies

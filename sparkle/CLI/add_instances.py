@@ -35,13 +35,12 @@ def main(argv: list[str]) -> None:
 
     # Define command line arguments
     parser = parser_function()
+    check_for_initialise()
 
     # Process command line arguments
     args = parser.parse_args(argv)
     instances_source = Path(args.instances_path)
     instances_target = gv.settings().DEFAULT_instance_dir / instances_source.name
-
-    check_for_initialise()
 
     if not instances_source.exists():
         print(f'Instance set path "{instances_source}" does not exist!')

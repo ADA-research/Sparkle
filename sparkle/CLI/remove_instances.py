@@ -27,6 +27,7 @@ def main(argv: list[str]) -> None:
     """Main function of the remove instances command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     # Define command line arguments
     parser = parser_function()
@@ -37,8 +38,6 @@ def main(argv: list[str]) -> None:
         args.instances_path,
         nickname_dict=gv.file_storage_data_mapping[gv.instances_nickname_path],
         target_dir=gv.settings().DEFAULT_instance_dir)
-
-    check_for_initialise()
 
     if instances_path is None or not instances_path.exists() or not\
             instances_path.is_dir():

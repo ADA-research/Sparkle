@@ -85,6 +85,7 @@ def main(argv: list[str]) -> None:
     """Main function of the configure solver command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     parser = parser_function()
 
@@ -113,8 +114,6 @@ def main(argv: list[str]) -> None:
             gv.settings().DEFAULT_instance_dir, Instance_Set)
     use_features = args.use_features
     run_on = gv.settings().get_run_on()
-
-    check_for_initialise()
 
     configurator = gv.settings().get_general_sparkle_configurator()
     configurator_settings = gv.settings().get_configurator_settings(configurator.name)
@@ -156,15 +155,16 @@ def main(argv: list[str]) -> None:
     # Run the default configuration
     remaining_jobs = performance_data.get_job_list()
     relevant_jobs = []
-    for job in remaining_jobs:
-        if job[-1] != str(solver.directory):
+    for instance, run_id, solver_id in remaining_jobs:
+        # NOTE: This run_id skip will not work if we do multiple runs per configuration
+        if run_id != 1 or solver_id != str(solver.directory):
             continue
         configuration = performance_data.get_value(
-            job[2], job[0], sparkle_objectives[0].name, run=job[1],
+            solver_id, instance, sparkle_objectives[0].name, run=run_id,
             solver_fields=[PerformanceDataFrame.column_configuration])
         # Only run jobs with the default configuration
         if not isinstance(configuration, str) and math.isnan(configuration):
-            relevant_jobs.append(job)
+            relevant_jobs.append((instance, run_id, solver_id))
 
     # Expand the performance dataframe so it can store the configuration
     performance_data.add_runs(configurator_runs,
@@ -197,6 +197,8 @@ def main(argv: list[str]) -> None:
             cutoff_time=config_scenario.cutoff_time,
             log_dir=config_scenario.validation,
             base_dir=sl.caller_log_dir,
+            job_name=f"Default Configuration: {solver.name} Validation on "
+                     f"{instance_set_train.name}",
             run_on=run_on)
         dependency_job_list.append(default_job)
 
@@ -210,24 +212,28 @@ def main(argv: list[str]) -> None:
         gv.latest_scenario().set_config_instance_set_test(instance_set_test.directory)
         # Schedule test set jobs
         if args.test_set_run_all_configurations:
+            # TODO: Schedule test set runs for all configurations
+            print("Running all configurations on test set is not implemented yet.")
             pass
         else:
             # We place the results in the index we just added
             run_index = list(set([performance_data.get_instance_num_runs(str(i))
                                   for i in instance_set_test.instance_paths]))
-        test_set_job = solver.run_performance_dataframe(
-            instance_set_test,
-            run_index,
-            performance_data,
-            cutoff_time=config_scenario.cutoff_time,
-            objective=config_scenario.sparkle_objective,
-            train_set=instance_set_train,
-            sbatch_options=sbatch_options,
-            log_dir=config_scenario.validation,
-            base_dir=sl.caller_log_dir,
-            dependencies=dependency_job_list,
-            run_on=run_on)
-        dependency_job_list.append(test_set_job)
+            test_set_job = solver.run_performance_dataframe(
+                instance_set_test,
+                run_index,
+                performance_data,
+                cutoff_time=config_scenario.cutoff_time,
+                objective=config_scenario.sparkle_objective,
+                train_set=instance_set_train,
+                sbatch_options=sbatch_options,
+                log_dir=config_scenario.validation,
+                base_dir=sl.caller_log_dir,
+                dependencies=dependency_job_list,
+                job_name=f"Best Configuration: {solver.name} Validation on "
+                         f"{instance_set_test.name}",
+                run_on=run_on)
+            dependency_job_list.append(test_set_job)
     else:
         # Set to default to overwrite possible old path
         gv.latest_scenario().set_config_instance_set_test()

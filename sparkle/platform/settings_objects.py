@@ -129,6 +129,7 @@ class Settings:
     DEFAULT_smac2_cpu_time = None
     DEFAULT_smac2_target_cutoff_length = "max"
     DEFAULT_smac2_use_cpu_time_in_tunertime = None
+    DEFAULT_smac2_cli_cores = None
     DEFAULT_smac2_max_iterations = None
 
     # Default SMAC3 settings
@@ -187,7 +188,9 @@ class Settings:
         self.__smac2_wallclock_time_set = SettingState.NOT_SET
         self.__smac2_cpu_time_set = SettingState.NOT_SET
         self.__smac2_use_cpu_time_in_tunertime_set = SettingState.NOT_SET
+        self.__smac2_cli_cores_set = SettingState.NOT_SET
         self.__smac2_max_iterations_set = SettingState.NOT_SET
+        self.__smac2_target_cutoff_length_set = SettingState.NOT_SET
 
         self.__smac3_number_of_trials_set = SettingState.NOT_SET
         self.__smac3_smac_facade_set = SettingState.NOT_SET
@@ -203,7 +206,6 @@ class Settings:
         self.__run_on_set = SettingState.NOT_SET
         self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
         self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
-        self.__smac2_target_cutoff_length_set = SettingState.NOT_SET
         self.__ablation_racing_flag_set = SettingState.NOT_SET
 
         self.__parallel_portfolio_check_interval_set = SettingState.NOT_SET
@@ -346,6 +348,13 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.getboolean(section, option)
                     self.set_smac2_use_cpu_time_in_tunertime(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("cli_cores", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_smac2_cli_cores(value, state)
                     file_settings.remove_option(section, option)
 
             options_names = ("iteration_limit", "numIterations", "numberOfIterations",
@@ -516,10 +525,10 @@ class Settings:
                               f'{option}" in file {file_path} ignored')
 
         # Print error if unable to read the settings
-        else:
+        elif Path(file_path).exists():
             print(f"ERROR: Failed to read settings from {file_path} The file may have "
-                  "been empty, located in a different path, or be in another format than"
-                  " INI. Default Settings values be used.")
+                  "been empty or be in another format than INI. Default Setting values "
+                  "will be used.")
 
     def write_used_settings(self: Settings) -> None:
         """Write the used settings to the default locations."""
@@ -802,6 +811,7 @@ class Settings:
                 "wallclock_time": self.get_smac2_wallclock_time(),
                 "target_cutoff_length": self.get_smac2_target_cutoff_length(),
                 "use_cpu_time_in_tunertime": self.get_smac2_use_cpu_time_in_tunertime(),
+                "cli_cores": self.get_smac2_cli_cores(),
                 "max_iterations": self.get_smac2_max_iterations()
                 or configurator_settings["max_iterations"],
             })
@@ -987,6 +997,29 @@ class Settings:
         if self.__smac2_use_cpu_time_in_tunertime_set == SettingState.NOT_SET:
             self.set_smac2_use_cpu_time_in_tunertime()
         return ast.literal_eval(self.__settings["smac2"]["use_cpu_time_in_tunertime"])
+
+    def set_smac2_cli_cores(
+            self: Settings, value: int = DEFAULT_smac2_cli_cores,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the number of cores to use for SMAC2 CLI."""
+        section = "smac2"
+        name = "cli_cores"
+
+        if self.__check_setting_state(
+                self.__smac2_cli_cores_set, origin, name):
+            self.__init_section(section)
+            self.__smac2_cli_cores_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac2_cli_cores(self: Settings) -> int | None:
+        """Number of cores to use to execute runs.
+
+        In other words, the number of requests to run at a given time.
+        """
+        if self.__smac2_cli_cores_set == SettingState.NOT_SET:
+            self.set_smac2_cli_cores()
+        cli_cores = self.__settings["smac2"]["cli_cores"]
+        return int(cli_cores) if cli_cores.isdigit() else None
 
     def set_smac2_max_iterations(
             self: Settings, value: int = DEFAULT_smac2_max_iterations,

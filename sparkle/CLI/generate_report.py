@@ -60,18 +60,15 @@ def parser_function() -> argparse.ArgumentParser:
 
 def main(argv: list[str]) -> None:
     """Generate a report for an executed experiment."""
-    prev_settings = Settings(PurePath("Settings/latest.ini"))
-
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     # Define command line arguments
     parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args(argv)
-
-    check_for_initialise()
 
     # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "settings_file"):
@@ -98,7 +95,8 @@ def main(argv: list[str]) -> None:
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings().DEFAULT_instance_dir, Instance_Set)
 
-    Settings.check_settings_changes(gv.settings(), prev_settings)
+    Settings.check_settings_changes(gv.settings(),
+                                    Settings(PurePath("Settings/latest.ini")))
     # If no arguments are set get the latest scenario
     if not selection and test_case_dir is None and solver is None:
         scenario = gv.latest_scenario().get_latest_scenario()
@@ -153,7 +151,7 @@ def main(argv: list[str]) -> None:
             instance_sets, test_set, objective, cutoff_time,
             output)
         selection_output.write_output()
-        print("Machine readable output is placed at: ", selection_output.output)
+        print("Machine readable output is placed at:", selection_output.output)
 
         if not only_json:
             sgfs.generate_report_selection(
@@ -186,7 +184,7 @@ def main(argv: list[str]) -> None:
                                                             objective,
                                                             output)
         parallel_portfolio_output.write_output()
-        print("Machine readable output is placed at: ", parallel_portfolio_output.output)
+        print("Machine readable output is placed at:", parallel_portfolio_output.output)
 
         if not only_json:
             sgrfpph.generate_report_parallel_portfolio(
@@ -251,7 +249,7 @@ def main(argv: list[str]) -> None:
                                             instance_set_test,
                                             output)
         config_output.write_output()
-        print("Machine readable output is placed at: ", config_output.output)
+        print("Machine readable output is placed at:", config_output.output)
 
         if not only_json:
             sgrfch.generate_report_for_configuration(

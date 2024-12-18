@@ -28,6 +28,7 @@ def main(argv: list[str]) -> None:
     """Main function of the remove feature extractor command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     # Define command line arguments
     parser = parser_function()
@@ -40,8 +41,6 @@ def main(argv: list[str]) -> None:
         extractor_nicknames,
         gv.settings().DEFAULT_extractor_dir,
         class_name=Extractor)
-
-    check_for_initialise()
 
     if extractor is None:
         print(f'Feature extractor path "{args.extractor_path}" does not exist!')

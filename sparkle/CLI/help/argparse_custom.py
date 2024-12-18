@@ -115,6 +115,11 @@ CleanupArgumentRemove = \
                               "help": "remove all files in the platform, including "
                                       "user data such as InstanceSets and Solvers"})
 
+CleanUpPerformanceDataArgument = \
+    ArgumentContainer(names=["--performance-data"],
+                      kwargs={"action": "store_true",
+                              "help": "clean performance data from empty lines"})
+
 ConfigurationArgument = \
     ArgumentContainer(names=["--configuration"],
                       kwargs={"required": False,
@@ -347,6 +352,13 @@ PerformanceDataJobsArgument = \
                       kwargs={"action": "store_true",
                               "help": "compute the remaining jobs in the Performance "
                               "DataFrame"})
+
+RebuildRunsolverArgument = \
+    ArgumentContainer(names=["--rebuild-runsolver"],
+                      kwargs={"action": "store_true",
+                              "required": False,
+                              "default": False,
+                              "help": "Clean the RunSolver executable and rebuild it."})
 
 RunOnArgument = ArgumentContainer(names=["--run-on"],
                                   kwargs={"type": Runner,
