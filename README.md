@@ -58,7 +58,7 @@ You will need to reactivate the environment every time you start the terminal, b
 
 ### venv
 
-Sparkle can also be installed as a standalone package using Pip. We recommend creating a new virtual environment with [venv](https://docs.python.org/3/library/venv.html) before to ensure no clashes between dependencies occur. Note that when creating a new venv, Sparkle needs Python 3.10 to run.
+Sparkle can also be installed as a standalone package using Pip. We recommend creating a new virtual environment with [venv](https://docs.python.org/3/library/venv.html) before to ensure no clashes between dependencies occur. Note that when creating a new venv, Sparkle needs Python 3.10 to run, so create your virtual environment with this Python version active
 
 To install Sparkle in the virtual environment simply type:
 
@@ -73,8 +73,27 @@ You will need to supply, asside from the other dependencies in the next section,
 - `libnuma` and `numactl` in order to compile RunSolver. We suggest to use `GCCcore-12.2.0`.
 - The `R6` package, in order to compile `IRACE`
 
+If your system works with [Lmod](http://lmod.readthedocs.org), we recommend loading the modules in the following order (Check that the versions are available):
 
-### Install dependencies
+```bash
+module load R/4.3.2
+module load Java/8.402
+module load numactl/2.0.16-GCCcore-12.2.0
+```
+
+Whilst loading these modules you can receive various messages that module versions have changed whilst loading. Executing the loads in this order will ensure the changes are correct. Afterwards you can save your loaded modules as a set with nickname `sparkle` by typing:
+
+```bash
+module save sparkle
+```
+
+Which can then at a later point easily be loaded by typing:
+
+```bash
+module restore sparkle
+```
+
+### Dependencies
 Asside from several package dependencies, Sparkle's package / CLI relies on a few user supplied executables:
 - `LaTex` compiler ([pdflatex](https://gist.github.com/rain1024/98dd5e2c6c8c28f9ea9d)) for report generation
 - `Java`, tested with version 1.8.0_402, in order to use SMAC2
