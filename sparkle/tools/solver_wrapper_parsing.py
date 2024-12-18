@@ -48,7 +48,7 @@ def parse_solver_wrapper_args(args: list[str]) -> dict[Any]:
     return args_dict
 
 
-def get_solver_call_params(args_dict: dict, prefix: str = "-") -> list[str]:
+def get_solver_call_params(args_dict: dict, prefix: str = "-", postfix=" ") -> list[str]:
     """Gather the additional parameters for the solver call.
 
     Args:
@@ -63,6 +63,9 @@ def get_solver_call_params(args_dict: dict, prefix: str = "-") -> list[str]:
     ignore_args = {"solver_dir", "instance", "cutoff_time", "seed", "objectives"}
     for key in args_dict:
         if key not in ignore_args and args_dict[key] is not None:
-            params.extend([prefix + str(key), str(args_dict[key])])
+            if postfix == " ":
+                params.extend([prefix + str(key), str(args_dict[key])])
+            else:
+                params.extend([prefix + str(key) + postfix + str(args_dict[key])])
 
     return params
