@@ -44,7 +44,7 @@ def main() -> None:
         script_path = command_file.with_suffix(".sh")
         script_path.chmod(0o755)  # Ensure execution rights with shipment
         os.system(f"source {script_path}")
-        print("Autocompletion activated")
+        print("Sparkle autocomplete activated!")
     else:
         print(f"Sparkle does not understand command <{command}>")
 
