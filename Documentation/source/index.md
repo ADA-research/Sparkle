@@ -35,6 +35,10 @@ Furthermore, Sparkle handles various tasks for the user such as:
 
 ## Installation
 
+Sparkle is a Python based package, but required several non-Python dependencies to run fully. The easiest installation is through Conda. A setup with Python virtual Environment is also possible, but requires more user input for the installation process.
+
+### Conda
+
 The quick and full installation of Sparkle can be done using Conda (For Conda installation see [here]( https://docs.conda.io/en/latest/miniconda.html)). 
 
 Simply download the `environment.yml` file from the [Github](https://github.com/ADA-research/Sparkle/blob/main/environment.yml) with wget:
@@ -64,13 +68,23 @@ The creation of the Conda environment also takes care of the installation of the
 You will need to reactivate the environment every time you start the terminal, before using Sparkle.
 ```
 
-Sparkle can also be installed as a standalone package using Pip. We recommend creating a new virtual environment (For example, [venv](https://docs.python.org/3/library/venv.html)) before to ensure no clashes between dependencies occur. 
+### venv
+
+Sparkle can also be installed as a standalone package using Pip. We recommend creating a new virtual environment with [venv](https://docs.python.org/3/library/venv.html) before to ensure no clashes between dependencies occur. Note that when creating a new venv, Sparkle needs Python 3.10 to run.
+
+To install Sparkle in the virtual environment simply type:
 
 ```bash
 pip install SparkleAI
 ```
 
 Note that a direct installation through Pip does not handle certain dependencies of the Sparkle CLI, such as the required libraries for compiling [RunSolver](https://www.cril.univ-artois.fr/~roussel/runsolver/).
+
+You will need to supply, asside from the other dependencies in the next section, the following in your virtual environment:
+- `Python 3.10` is required to use Sparkle
+- `libnuma` and `numactl` in order to compile RunSolver. We suggest to use `GCCcore-12.2.0`.
+- The `R6` package, in order to compile `IRACE`
+
 
 ### Install dependencies
 Asside from several package dependencies, Sparkle's package / CLI relies on a few user supplied executables:
@@ -140,6 +154,7 @@ K. van der Blom, H. H. Hoos, C. Luo and J. G. Rook, **Sparkle: Toward Accessible
 ### Maintainers
 Thijs Snelleman,
 Jeroen Rook,
+Hadar Shavit,
 Holger H. Hoos,
 
 ### Contributors
@@ -157,7 +172,8 @@ Marie Anastacio,
 Aaron Berger
 Koen van der Blom,
 Noah Peil,
-Brian Schiller
+Brian Schiller,
+Emir Pisiciri
 
 ### Contact
 sparkle@aim.rwth-aachen.de
