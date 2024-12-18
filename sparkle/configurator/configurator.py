@@ -82,11 +82,14 @@ class Configurator:
                 run_ids=validation_ids,
                 performance_dataframe=data_target,
                 cutoff_time=scenario.cutoff_time,
-                run_on=run_on,
                 sbatch_options=sbatch_options,
                 log_dir=scenario.validation,
                 base_dir=base_dir,
                 dependencies=runs,
+                job_name=f"{self.name}: Validating {len(validation_ids)} "
+                         f"{scenario.solver.name} Configurations on "
+                         f"{scenario.instance_set.name}",
+                run_on=run_on,
             )
             runs.append(validate)
 

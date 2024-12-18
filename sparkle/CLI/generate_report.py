@@ -151,7 +151,7 @@ def main(argv: list[str]) -> None:
             instance_sets, test_set, objective, cutoff_time,
             output)
         selection_output.write_output()
-        print("Machine readable output is placed at: ", selection_output.output)
+        print("Machine readable output is placed at:", selection_output.output)
 
         if not only_json:
             sgfs.generate_report_selection(
@@ -184,7 +184,7 @@ def main(argv: list[str]) -> None:
                                                             objective,
                                                             output)
         parallel_portfolio_output.write_output()
-        print("Machine readable output is placed at: ", parallel_portfolio_output.output)
+        print("Machine readable output is placed at:", parallel_portfolio_output.output)
 
         if not only_json:
             sgrfpph.generate_report_parallel_portfolio(
@@ -249,7 +249,7 @@ def main(argv: list[str]) -> None:
                                             instance_set_test,
                                             output)
         config_output.write_output()
-        print("Machine readable output is placed at: ", config_output.output)
+        print("Machine readable output is placed at:", config_output.output)
 
         if not only_json:
             sgrfch.generate_report_for_configuration(

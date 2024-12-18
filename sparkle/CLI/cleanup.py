@@ -64,9 +64,12 @@ def main(argv: list[str]) -> None:
         from sparkle.structures import PerformanceDataFrame
         performance_data = PerformanceDataFrame(
             gv.settings().DEFAULT_performance_data_path)
+        index_num = len(performance_data.index)
         # We only clean lines that are completely empty
         performance_data.remove_empty_runs()
         performance_data.save_csv()
+        print(f"Removed {index_num - len(performance_data.index)} rows from the "
+              f"Performance DataFrame, leaving {len(performance_data.index)} rows.")
     sys.exit(0)
 
 
