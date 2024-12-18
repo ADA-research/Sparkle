@@ -12,6 +12,19 @@ To build the html documentation and the userguide (pdf).
 make all
 ```
 
+## Live build
+
+If you want to localhost the documentation website and watch your changes happen live there, simply run:
+```bash
+sphinx-autobuild Documentation/source Documentation/build
+```
+
+from the main repository directory.
+
+## Rebuilding the CLI descriptions
+
+If you have made changes to the CLI and need to re-autogenerate the descriptions, run `command_descriptions.py` from the Documentation directory.
+
 ## Build the html documentation
 
 To build the full html documentation

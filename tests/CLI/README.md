@@ -1,1 +1,0 @@
-These integration tests only test whether commands reach the desired output state (e.g. they don't fail because of an error). They do not ensure the produced output (e.g. performance data) is correct.

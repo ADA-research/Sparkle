@@ -18,7 +18,7 @@ def call_solver_solve_instance(
         solver: Solver,
         instance: Path,
         cutoff_time: int,
-        cwd: Path,
+        log_dir: Path,
         performance_data: PerformanceDataFrame = None) -> bool:
     """Call the Sparkle portfolio selector to solve a single instance with a cutoff.
 
@@ -26,19 +26,21 @@ def call_solver_solve_instance(
         solver: The solver to run on the instance
         instance: The path to the instance
         cutoff_time: The cutoff time for the solver
-        cwd: The working directory for the solver
+        log_dir: The log directory for the solver
         performance_data: The dataframe to store the results in
 
     Returns:
         Whether the instance was solved by the solver
     """
+    objectives = gv.settings().get_general_sparkle_objectives()
     solver_output = solver.run(
         instance.absolute(),
+        objectives=objectives,
         seed=gv.get_seed(),
         cutoff_time=cutoff_time,
-        cwd=cwd,
+        log_dir=log_dir,
         run_on=Runner.LOCAL)
-    cpu_time, status = solver_output["cpu_time"], solver_output["status"]
+    status = solver_output["status"]
     flag_solved = False
     if (status == SolverStatus.SUCCESS
             or status == SolverStatus.SAT or status == SolverStatus.UNSAT):
@@ -46,24 +48,27 @@ def call_solver_solve_instance(
 
     if performance_data is not None:
         solver_name = performance_data.solvers[0]
-        print(f"Trying to write: {cpu_time}, {solver_name}, {instance}")
         try:
             # Creating a seperate locked file for writing
             lock = FileLock(f"{performance_data.csv_filepath}.lock")
             with lock.acquire(timeout=60):
                 # Reload the dataframe to latest version
                 performance_data = PerformanceDataFrame(performance_data.csv_filepath)
-                performance_data.set_value(cpu_time, solver_name, str(instance))
+                for objective in objectives:
+                    performance_data.set_value(solver_output[objective.name],
+                                               solver_name,
+                                               instance.name,
+                                               objective=objective.name)
                 performance_data.save_csv()
             lock.release()
         except Timeout:
             print(f"ERROR: Cannot acquire File Lock on {performance_data}.")
+
+    if flag_solved:
+        print(f"Instance solved by solver {solver.name}")
     else:
-        if flag_solved:
-            print(f"Instance solved by solver {solver.name}")
-        else:
-            print(f"Solver {solver.name} failed to solve the instance with status "
-                  f"{status}")
+        print(f"Solver {solver.name} failed to solve the instance with status "
+              f"{status}")
     return flag_solved
 
 
@@ -83,7 +88,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Process command line arguments
-    cwd = args.log_dir if args.log_dir is not None else gv.settings().DEFAULT_tmp_output
+    log_dir =\
+        args.log_dir if args.log_dir is not None else gv.settings().DEFAULT_tmp_output
     feature_data = FeatureDataFrame(Path(args.feature_data_csv))
     performance_data = PerformanceDataFrame(Path(args.performance_data_csv))
 
@@ -95,14 +101,12 @@ if __name__ == "__main__":
 
     if predict_schedule is None:  # Selector Failed to produce prediction
         sys.exit(-1)
-
     print("Predicting done!")
-    verifier = gv.settings().get_general_solution_verifier()
     for solver, cutoff_time in predict_schedule:
-        solver = Solver(Path(solver), verifier=verifier)
+        solver = Solver(Path(solver))
         print(f"Calling solver {solver.name} with time budget {cutoff_time} ...")
         flag_solved = call_solver_solve_instance(
-            solver, args.instance, cutoff_time, cwd, performance_data)
+            solver, Path(args.instance), cutoff_time, log_dir, performance_data)
         print(f"Calling solver {solver.name} done!")
 
         if flag_solved:

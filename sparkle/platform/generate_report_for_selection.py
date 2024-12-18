@@ -46,7 +46,7 @@ def solver_ranked_latex_list(solver_ranking: list[tuple[str, float]],
     Returns:
         The list of solvers ranked as LaTeX str.
     """
-    objective_str = f"{objective.metric}: " if objective is not None else ""
+    objective_str = f"{objective}: " if objective is not None else ""
     return stex.list_to_latex([(row[0], f", {objective_str} {row[1]}")
                                for row in solver_ranking])
 
@@ -69,8 +69,7 @@ def get_figure_portfolio_selector_vs_sbs(
         objective: SparkleObjective,
         train_data: PerformanceDataFrame,
         portfolio_selector_performance: PerformanceDataFrame,
-        sbs_solver: str,
-        penalty: int) -> str:
+        sbs_solver: str) -> str:
     """Create a LaTeX plot comparing the selector and the SBS.
 
     The plot compares the performance on each instance of the portfolio selector created
@@ -81,8 +80,10 @@ def get_figure_portfolio_selector_vs_sbs(
     """
     # We create a point of x,y form (SBS performance, portfolio performance)
     selector = portfolio_selector_performance.solvers[0]
-    points = [[train_data.get_value(sbs_solver, instance),
-               portfolio_selector_performance.get_value(selector, instance)]
+    points = [[float(train_data.get_value(sbs_solver, instance, objective.name)),
+               float(portfolio_selector_performance.get_value(selector,
+                                                              instance,
+                                                              objective.name))]
               for instance in portfolio_selector_performance.instances]
 
     figure_filename = "figure_portfolio_selector_sparkle_vs_sbs"
@@ -90,12 +91,11 @@ def get_figure_portfolio_selector_vs_sbs(
 
     stex.generate_comparison_plot(points,
                                   figure_filename,
-                                  xlabel=f"SBS ({sbs_solver_name}) [{objective.metric}]",
-                                  ylabel=f"Sparkle Selector [{objective.metric}]",
+                                  xlabel=f"SBS ({sbs_solver_name}) [{objective}]",
+                                  ylabel=f"Sparkle Selector [{objective}]",
                                   limit="magnitude",
                                   limit_min=0.25,
                                   limit_max=0.25,
-                                  penalty_time=penalty,
                                   replace_zeros=True,
                                   output_dir=output_dir)
     return f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
@@ -105,8 +105,7 @@ def get_figure_portfolio_selector_sparkle_vs_vbs(
         output_dir: Path,
         objective: SparkleObjective,
         train_data: PerformanceDataFrame,
-        actual_portfolio_selector_penalty: PerformanceDataFrame,
-        penalty: int) -> str:
+        actual_portfolio_selector_penalty: PerformanceDataFrame) -> str:
     """Create a LaTeX plot comparing the selector and the VBS.
 
     The plot compares the performance on each instance of the portfolio selector created
@@ -115,26 +114,26 @@ def get_figure_portfolio_selector_sparkle_vs_vbs(
     Returns:
         LaTeX str to include the comparison plot in a LaTeX report.
     """
-    vbs_performance = train_data.best_instance_performance()
+    vbs_performance = train_data.best_instance_performance(objective=objective.name)
     instances = actual_portfolio_selector_penalty.instances
     solver = actual_portfolio_selector_penalty.solvers[0]
     points = [(vbs_performance[instance],
-               actual_portfolio_selector_penalty.get_value(solver, instance))
+               actual_portfolio_selector_penalty.get_value(solver,
+                                                           instance,
+                                                           objective.name))
               for instance in instances]
 
     figure_filename = "figure_portfolio_selector_sparkle_vs_vbs"
 
     stex.generate_comparison_plot(points,
                                   figure_filename,
-                                  xlabel=f"VBS [{objective.metric}]",
+                                  xlabel=f"VBS [{objective}]",
                                   ylabel=f"Sparkle Selector [{objective.name}]",
                                   limit="magnitude",
                                   limit_min=0.25,
                                   limit_max=0.25,
-                                  penalty_time=penalty,
                                   replace_zeros=True,
                                   output_dir=output_dir)
-
     return f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
 
 
@@ -145,9 +144,9 @@ def selection_report_variables(
         selection_scenario: Path,
         performance_data: PerformanceDataFrame,
         feature_data: FeatureDataFrame,
+        objective: SparkleObjective,
         extractor_cutoff: int,
         cutoff: int,
-        penalty: int,
         test_case_data: PerformanceDataFrame = None) -> dict[str, str]:
     """Returns: a dict matching variables in the LaTeX template with their values.
 
@@ -159,9 +158,9 @@ def selection_report_variables(
     Returns:
         A dict matching str variables in the LaTeX template with their value str.
     """
-    objective = SparkleObjective(performance_data.objective_names[0])
     actual_performance_data = get_portfolio_selector_performance(selection_scenario)
-    solver_performance_ranking = performance_data.get_solver_ranking()
+    solver_performance_ranking = performance_data.get_solver_ranking(
+        objective=objective)
     single_best_solver = solver_performance_ranking[0][0]
     latex_dict = {"bibliographypath": bibliograpghy_path.absolute(),
                   "numSolvers": performance_data.num_solvers,
@@ -177,27 +176,28 @@ def selection_report_variables(
         get_instance_set_count_list(performance_data.instances)
     latex_dict["featureComputationCutoffTime"] = extractor_cutoff
     latex_dict["performanceComputationCutoffTime"] = cutoff
-    rank_list_perfect = performance_data.marginal_contribution(sort=True)
+    rank_list_perfect = performance_data.marginal_contribution(objective, sort=True)
     rank_list_actual = compute_selector_marginal_contribution(performance_data,
                                                               feature_data,
-                                                              selection_scenario)
+                                                              selection_scenario,
+                                                              objective)
     latex_dict["solverPerfectRankingList"] = solver_ranked_latex_list(rank_list_perfect)
     latex_dict["solverActualRankingList"] = solver_ranked_latex_list(rank_list_actual)
     latex_dict["PARRankingList"] = solver_ranked_latex_list(solver_performance_ranking,
                                                             objective)
-    latex_dict["VBSPAR"] = performance_data.best_instance_performance().mean()
-    latex_dict["actualPAR"] = actual_performance_data.mean()
-    latex_dict["metric"] = objective.metric
+    latex_dict["VBSPAR"] = objective.instance_aggregator(
+        performance_data.best_instance_performance(objective=objective.name))
+    latex_dict["actualPAR"] = actual_performance_data.mean(objective=objective.name)
+    latex_dict["metric"] = objective.name
     latex_dict["figure-portfolio-selector-sparkle-vs-sbs"] =\
         get_figure_portfolio_selector_vs_sbs(
             target_dir, objective, performance_data,
-            actual_performance_data, single_best_solver, penalty)
+            actual_performance_data, single_best_solver)
     latex_dict["figure-portfolio-selector-sparkle-vs-vbs"] =\
         get_figure_portfolio_selector_sparkle_vs_vbs(target_dir,
                                                      objective,
                                                      performance_data,
-                                                     actual_performance_data,
-                                                     penalty)
+                                                     actual_performance_data)
     latex_dict["testBool"] = r"\testfalse"
 
     # Train and test
@@ -206,7 +206,7 @@ def selection_report_variables(
             f"\\textbf{ {test_case_data.csv_filepath.parent.name} }"
         latex_dict["numInstanceInTestInstanceClass"] =\
             test_case_data.num_instances
-        latex_dict["testActualPAR"] = test_case_data.mean()
+        latex_dict["testActualPAR"] = test_case_data.mean(objective=objective.name)
         latex_dict["testBool"] = r"\testtrue"
 
     return latex_dict
@@ -220,9 +220,9 @@ def generate_report_selection(target_path: Path,
                               selection_scenario: Path,
                               feature_data: FeatureDataFrame,
                               train_data: PerformanceDataFrame,
+                              objective: SparkleObjective,
                               extractor_cutoff: int,
                               cutoff: int,
-                              penalty: int,
                               test_case_data: PerformanceDataFrame = None) -> None:
     """Generate a report for algorithm selection.
 
@@ -235,9 +235,9 @@ def generate_report_selection(target_path: Path,
         selection_scenario: Path to the selector scenario
         feature_data: Feature data created by extractor
         train_data: The performance input data for the selector
+        objective: The objective for the selector
         extractor_cutoff: The maximum time for the selector to run
         cutoff: The cutoff per solver
-        penalty: The penalty for solvers TIMEOUT
         test_case_data: Path to the test case directory. Defaults to None.
     """
     # Include results on the test set if a test case directory is given
@@ -252,9 +252,9 @@ def generate_report_selection(target_path: Path,
                                                         selection_scenario,
                                                         train_data,
                                                         feature_data,
+                                                        objective,
                                                         extractor_cutoff,
                                                         cutoff,
-                                                        penalty,
                                                         test_case_data)
     stex.generate_report(latex_dir,
                          latex_template,

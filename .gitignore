@@ -1,5 +1,7 @@
 *.pyc
 *.egg-info
+.coverage
+.xml
 Reference_Lists/*
 Solvers/*
 Extractors/*
@@ -9,17 +11,20 @@ Output/*
 Snapshots/*
 Settings/*
 tests/test_files/tmp
+sparkle/Components/irace-v3.5/irace/
+sparkle/Components/irace-v3.5/R6/
 sparkle/Components/runsolver/src/*.o
 sparkle/Components/runsolver/src/runsolver.d
 sparkle/Components/runsolver/src/runsolver
+smac3_output/*
 
 Examples/Resources/CCAG/Solvers/TCA/src/
 Examples/Resources/CCAG/Solvers/FastCA/src/
 Examples/Resources/CVRP/Solvers/VRP_SISRs/src/
-*.json
 
 # Generated documentation 
 Documentation/source/_generated/
+Documentation/build
 
 # Common IDE
 .idea
@@ -34,7 +39,6 @@ Documentation/source/_generated/
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
-*.log
 *.lot
 *.fls
 *.out

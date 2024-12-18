@@ -6,11 +6,10 @@ import time
 import argparse
 from pathlib import Path
 
-from runrunner.slurm import SlurmRun
 from runrunner.base import Status
-from tabulate import tabulate
 
-from sparkle.platform.cli_types import VerbosityLevel, TEXT
+from sparkle.platform.cli_types import VerbosityLevel
+from sparkle.CLI.help import jobs as jobs_help
 from sparkle.CLI.help import logging
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help import global_variables as gv
@@ -22,32 +21,11 @@ def parser_function() -> argparse.ArgumentParser:
     Returns:
       The argument parser.
     """
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Wait for async jobs to finish. Gives periodic updates in table "
+                    " format about each job.")
     parser.add_argument(*ac.JobIDsArgument.names, **ac.JobIDsArgument.kwargs)
     return parser
-
-
-def get_runs_from_file(path: Path, print_error: bool = False) -> list[SlurmRun]:
-    """Retrieve all run objects from file storage.
-
-    Args:
-        path: Path object where to look recursively for the files.
-
-    Returns:
-        List of all found SlumRun objects.
-    """
-    runs = []
-    for file in path.rglob("*.json"):
-        # TODO: RunRunner should be adapted to have more general methods for runs
-        # So this method can work for both local and slurm
-        try:
-            run_obj = SlurmRun.from_file(file)
-            runs.append(run_obj)
-        except Exception as ex:
-            # Not a (correct) RunRunner JSON file
-            if print_error:
-                print(f"[WARNING] Could not load file: {file}. Exception: {ex}")
-    return runs
 
 
 def wait_for_jobs(path: Path,
@@ -64,26 +42,29 @@ def wait_for_jobs(path: Path,
         filter: If present, only show the given job ids.
     """
     # Filter jobs on relevant status
-    jobs = [run for run in get_runs_from_file(path)
-            if run.status == Status.WAITING or run.status == Status.RUNNING]
+    jobs = jobs_help.get_runs_from_file(path, filter=[Status.WAITING, Status.RUNNING])
 
     if filter is not None:
         jobs = [job for job in jobs if job.run_id in filter]
 
     running_jobs = jobs
 
+    if len(running_jobs) == 0:
+        print("No jobs running.")
+        sys.exit(0)
+
     def signal_handler(num: int, _: any) -> None:
         """Create clean exit for CTRL + C."""
         if num == signal.SIGINT:
-            sys.exit(0)
-
+            sys.exit()
     signal.signal(signal.SIGINT, signal_handler)
+
     # If verbosity is quiet there is no need for further information
     if verbosity == VerbosityLevel.QUIET:
         prev_jobs = len(running_jobs) + 1
         while len(running_jobs) > 0:
             if len(running_jobs) < prev_jobs:
-                print(f"Waiting for {len(running_jobs)} jobs...", flush=True)
+                print(f"Waiting for {len(running_jobs)} jobs...", flush=False)
             time.sleep(check_interval)
             prev_jobs = len(running_jobs)
             running_jobs = [run for run in running_jobs
@@ -95,50 +76,30 @@ def wait_for_jobs(path: Path,
         # Order in which to display the jobs
         status_order = {Status.COMPLETED: 0, Status.RUNNING: 1, Status.WAITING: 2}
         while len(running_jobs) > 0:
-            # Information to be printed to the table
-            information = [["RunId", "Name", "Partition", "Status",
-                            "Dependencies", "Finished Jobs", "Run Time"]]
+            for job in running_jobs:
+                job.get_latest_job_details()
             running_jobs = [run for run in running_jobs
                             if run.status == Status.WAITING
                             or run.status == Status.RUNNING]
             sorted_jobs = sorted(
                 jobs, key=lambda job: (status_order.get(job.status, 4), job.run_id))
-            for job in sorted_jobs:
-                # Count number of jobs that have finished
-                finished_jobs_count = sum(1 for status in job.all_status
-                                          if status == Status.COMPLETED)
-                # Format job.status
-                status_text = \
-                    TEXT.format_text([TEXT.BOLD], job.status) \
-                    if job.status == Status.RUNNING else \
-                    (TEXT.format_text([TEXT.ITALIC], job.status)
-                        if job.status == Status.COMPLETED else job.status)
-                information.append(
-                    [job.run_id,
-                     job.name,
-                     job.partition,
-                     status_text,
-                     "None" if len(job.dependencies) == 0
-                        else ", ".join(job.dependencies),
-                     f"{finished_jobs_count}/{len(job.all_status)}",
-                     job.runtime])
-            # Print the table
-            table = tabulate(information, headers="firstrow", tablefmt="grid")
+            table = jobs_help.create_jobs_table(
+                sorted_jobs,
+                format="grid" if len(running_jobs) > 0 else "fancy_grid")
             print(table)
             time.sleep(check_interval)
-
-            # Clears the table for the new table to be printed
-            lines = table.count("\n") + 1
-            # \033 is the escape character (ESC),
-            # [{lines}A is the escape sequence that moves the cursor up.
-            print(f"\033[{lines}A", end="")
-            # [J is the escape sequence that clears the console from the cursor down
-            print("\033[J", end="")
-
-    print("All jobs done!")
+            if len(running_jobs) > 0:
+                # Clears the table for the new table to be printed
+                lines = table.count("\n") + 1
+                # \033 is the escape character (ESC),
+                # [{lines}A is the escape sequence that moves the cursor up.
+                print(f"\033[{lines}A", end="")
+                # [J is the escape sequence that clears the console from the cursor down
+                print("\033[J", end="")
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the wait command."""
     # Log command call
     logging.log_command(sys.argv)
 
@@ -146,7 +107,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     check_interval = gv.settings().get_general_check_interval()
     verbosity = gv.settings().get_general_verbosity()
@@ -155,3 +116,7 @@ if __name__ == "__main__":
                   check_interval=check_interval,
                   verbosity=verbosity,
                   filter=args.job_ids)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

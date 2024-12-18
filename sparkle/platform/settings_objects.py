@@ -2,16 +2,14 @@
 from __future__ import annotations
 import configparser
 from enum import Enum
+import ast
 from pathlib import Path
 from pathlib import PurePath
-from typing import Callable
-import builtins
-import statistics
 
-from sparkle.types.objective import SparkleObjective
+from sparkle.types import SparkleObjective, resolve_objective
+from sparkle.types.objective import PAR
 from sparkle.solver import Selector
 from sparkle.configurator.configurator import Configurator
-from sparkle.solver.verifier import SATVerifier
 from sparkle.configurator import implementations as cim
 
 from runrunner import Runner
@@ -19,7 +17,7 @@ from sparkle.platform.cli_types import VerbosityLevel
 
 
 class SettingState(Enum):
-    """Possible setting states."""
+    """Enum of possible setting states."""
 
     NOT_SET = 0
     DEFAULT = 1
@@ -28,7 +26,7 @@ class SettingState(Enum):
 
 
 class Settings:
-    """Read, write, set, and get settings."""
+    """Class to read, write, set, and get settings."""
     # CWD Prefix
     cwd_prefix = Path()  # Empty for now
 
@@ -38,11 +36,12 @@ class Settings:
     # Default directory names
     rawdata_dir = Path("Raw_Data")
     analysis_dir = Path("Analysis")
-    __settings_dir = Path("Settings")
+    DEFAULT_settings_dir = Path("Settings")
     __settings_file = Path("sparkle_settings.ini")
 
     # Default settings path
-    DEFAULT_settings_path = PurePath(cwd_prefix / __settings_dir / __settings_file)
+    DEFAULT_settings_path = PurePath(cwd_prefix / DEFAULT_settings_dir / __settings_file)
+    DEFAULT_reference_dir = DEFAULT_settings_dir / "Reference_Lists"
 
     # Default library pathing
     DEFAULT_components = lib_prefix / "Components"
@@ -77,7 +76,6 @@ class Settings:
     DEFAULT_output = cwd_prefix / "Output"
     DEFAULT_configuration_output = DEFAULT_output / "Configuration"
     DEFAULT_selection_output = DEFAULT_output / "Selection"
-    DEFAULT_validation_output = DEFAULT_output / "Validation"
     DEFAULT_parallel_portfolio_output = DEFAULT_output / "Parallel_Portfolio"
     DEFAULT_ablation_output = DEFAULT_output / "Ablation"
     DEFAULT_log_output = DEFAULT_output / "Log"
@@ -98,13 +96,12 @@ class Settings:
 
     # Collection of all working dirs for platform
     DEFAULT_working_dirs = [
+        DEFAULT_solver_dir, DEFAULT_instance_dir, DEFAULT_extractor_dir,
         DEFAULT_output, DEFAULT_configuration_output,
-        DEFAULT_selection_output, DEFAULT_validation_output,
-        DEFAULT_tmp_output,
-        DEFAULT_log_output,
-        DEFAULT_solver_dir, DEFAULT_instance_dir,
+        DEFAULT_selection_output,
+        DEFAULT_tmp_output, DEFAULT_log_output,
         DEFAULT_feature_data, DEFAULT_performance_data,
-        DEFAULT_extractor_dir,
+        DEFAULT_settings_dir, DEFAULT_reference_dir,
     ]
 
     # Old default file paths from GV which should be turned into variables
@@ -114,21 +111,45 @@ class Settings:
         DEFAULT_performance_data / "performance_data.csv"
 
     # Constant default values
-    DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")
+    DEFAULT_general_sparkle_objective = PAR(10)
     DEFAULT_general_sparkle_configurator = cim.SMAC2.__name__
-    DEFAULT_general_solution_verifier = str(None)
     DEFAULT_general_target_cutoff_time = 60
-    DEFAULT_general_penalty_multiplier = 10
     DEFAULT_general_extractor_cutoff_time = 60
     DEFAULT_number_of_jobs_in_parallel = 25
     DEFAULT_general_verbosity = VerbosityLevel.STANDARD
     DEFAULT_general_check_interval = 10
+    DEFAULT_general_run_on = "local"
 
-    DEFAULT_config_wallclock_time = 600
-    DEFAULT_config_cpu_time = None
-    DEFAULT_config_solver_calls = None
-    DEFAULT_config_number_of_runs = 25
-    DEFAULT_configurator_target_cutoff_length = "max"
+    DEFAULT_configurator_number_of_runs = 25
+    DEFAULT_configurator_solver_calls = 100
+    DEFAULT_configurator_maximum_iterations = None
+
+    # Default SMAC2 settings
+    DEFAULT_smac2_wallclock_time = None
+    DEFAULT_smac2_cpu_time = None
+    DEFAULT_smac2_target_cutoff_length = "max"
+    DEFAULT_smac2_use_cpu_time_in_tunertime = None
+    DEFAULT_smac2_cli_cores = None
+    DEFAULT_smac2_max_iterations = None
+
+    # Default SMAC3 settings
+    DEFAULT_smac3_number_of_runs = None
+    DEFAULT_smac3_facade = "AlgorithmConfigurationFacade"
+    DEFAULT_smac3_facade_max_ratio = None
+    DEFAULT_smac3_crash_cost = None
+    DEFAULT_smac3_termination_cost_threshold = None
+    DEFAULT_smac3_walltime_limit = None
+    DEFAULT_smac3_cputime_limit = None
+    DEFAULT_smac3_use_default_config = None
+    DEFAULT_smac3_min_budget = None
+    DEFAULT_smac3_max_budget = None
+
+    # Default IRACE settings
+    DEFAULT_irace_max_time = 0  # IRACE equivalent of None in this case
+    DEFAULT_irace_max_experiments = 0
+    DEFAULT_irace_first_test = None
+    DEFAULT_irace_mu = None
+    DEFAULT_irace_max_iterations = None
 
     DEFAULT_portfolio_construction_timeout = None
 
@@ -139,6 +160,13 @@ class Settings:
     DEFAULT_parallel_portfolio_check_interval = 4
     DEFAULT_parallel_portfolio_num_seeds_per_solver = 1
 
+    # Default IRACE settings
+    DEFAULT_irace_max_time = 0  # IRACE equivalent of None in this case
+    DEFAULT_irace_max_experiments = 0
+    DEFAULT_irace_first_test = None
+    DEFAULT_irace_mu = None
+    DEFAULT_irace_max_iterations = None
+
     def __init__(self: Settings, file_path: PurePath = None) -> None:
         """Initialise a settings object."""
         # Settings 'dictionary' in configparser format
@@ -148,31 +176,50 @@ class Settings:
         self.__general_sparkle_objective_set = SettingState.NOT_SET
         self.__general_sparkle_configurator_set = SettingState.NOT_SET
         self.__general_sparkle_selector_set = SettingState.NOT_SET
-        self.__general_solution_verifier_set = SettingState.NOT_SET
         self.__general_target_cutoff_time_set = SettingState.NOT_SET
-        self.__general_cap_value_set = SettingState.NOT_SET
-        self.__general_penalty_multiplier_set = SettingState.NOT_SET
-        self.__general_metric_aggregation_function_set = SettingState.NOT_SET
         self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
         self.__general_verbosity_set = SettingState.NOT_SET
         self.__general_check_interval_set = SettingState.NOT_SET
 
-        self.__config_wallclock_time_set = SettingState.NOT_SET
-        self.__config_cpu_time_set = SettingState.NOT_SET
         self.__config_solver_calls_set = SettingState.NOT_SET
         self.__config_number_of_runs_set = SettingState.NOT_SET
+        self.__config_max_iterations_set = SettingState.NOT_SET
+
+        self.__smac2_wallclock_time_set = SettingState.NOT_SET
+        self.__smac2_cpu_time_set = SettingState.NOT_SET
+        self.__smac2_use_cpu_time_in_tunertime_set = SettingState.NOT_SET
+        self.__smac2_cli_cores_set = SettingState.NOT_SET
+        self.__smac2_max_iterations_set = SettingState.NOT_SET
+        self.__smac2_target_cutoff_length_set = SettingState.NOT_SET
+
+        self.__smac3_number_of_trials_set = SettingState.NOT_SET
+        self.__smac3_smac_facade_set = SettingState.NOT_SET
+        self.__smac3_facade_max_ratio_set = SettingState.NOT_SET
+        self.__smac3_crash_cost_set = SettingState.NOT_SET
+        self.__smac3_termination_cost_threshold_set = SettingState.NOT_SET
+        self.__smac3_walltime_limit_set = SettingState.NOT_SET
+        self.__smac3_cputime_limit_set = SettingState.NOT_SET
+        self.__smac3_use_default_config_set = SettingState.NOT_SET
+        self.__smac3_min_budget_set = SettingState.NOT_SET
+        self.__smac3_max_budget_set = SettingState.NOT_SET
 
         self.__run_on_set = SettingState.NOT_SET
         self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
         self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
-        self.__configurator_target_cutoff_length_set = SettingState.NOT_SET
-        self.__slurm_extra_options_set = dict()
         self.__ablation_racing_flag_set = SettingState.NOT_SET
 
         self.__parallel_portfolio_check_interval_set = SettingState.NOT_SET
         self.__parallel_portfolio_num_seeds_per_solver_set = SettingState.NOT_SET
 
+        self.__irace_max_time_set = SettingState.NOT_SET
+        self.__irace_max_experiments_set = SettingState.NOT_SET
+        self.__irace_first_test_set = SettingState.NOT_SET
+        self.__irace_mu_set = SettingState.NOT_SET
+        self.__irace_max_iterations_set = SettingState.NOT_SET
+
         self.__general_sparkle_configurator = None
+
+        self.__slurm_extra_options_set = dict()
 
         if file_path is None:
             # Initialise settings from default file path
@@ -192,56 +239,35 @@ class Settings:
         # successfully
         if file_settings.sections() != []:
             section = "general"
-            option_names = ("objective", "smac_run_obj")
+            option_names = ("objectives", )
             for option in option_names:
                 if file_settings.has_option(section, option):
-                    value = SparkleObjective.from_multi_str(
-                        file_settings.get(section, option))
+                    value = [resolve_objective(obj) for obj in
+                             file_settings.get(section, option).split(",")]
                     self.set_general_sparkle_objectives(value, state)
                     file_settings.remove_option(section, option)
 
             # Comma so python understands it's a tuple...
-            option_names = ("configurator",)
+            option_names = ("configurator", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
                     self.set_general_sparkle_configurator(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("selector",)
+            option_names = ("selector", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
                     self.set_general_sparkle_selector(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("solution_verifier",)
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.get(section, option).lower()
-                    self.set_general_solution_verifier(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("target_cutoff_time", "smac_each_run_cutoff_time",
-                            "cutoff_time_each_performance_computation")
+            option_names = ("target_cutoff_time",
+                            "cutoff_time_each_solver_call")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_general_target_cutoff_time(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("cap_value",)
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getfloat(section, option)
-                    self.set_general_cap_value(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("penalty_multiplier", "penalty_number")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_general_penalty_multiplier(value, state)
                     file_settings.remove_option(section, option)
 
             option_names = ("extractor_cutoff_time",
@@ -250,13 +276,6 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_general_extractor_cutoff_time(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("number_of_jobs_in_parallel", "num_job_in_parallel")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_number_of_jobs_in_parallel(value, state)
                     file_settings.remove_option(section, option)
 
             option_names = ("run_on", )
@@ -282,43 +301,187 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             section = "configuration"
-            option_names = ("wallclock_time", "smac_whole_time_budget")
+            option_names = ("solver_calls", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
-                    self.set_config_wallclock_time(value, state)
+                    self.set_configurator_solver_calls(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("cpu_time", "smac_cpu_time_budget")
+            option_names = ("number_of_runs", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
-                    self.set_config_cpu_time(value, state)
+                    self.set_configurator_number_of_runs(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("solver_calls", "smac_solver_calls_budget")
+            option_name = "max_iterations"
+            if file_settings.has_option(section, option_name):
+                value = file_settings.getint(section, option_name)
+                self.set_configurator_max_iterations(value, state)
+                file_settings.remove_option(section, option_name)
+
+            section = "smac2"
+            option_names = ("wallclock_time", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
-                    self.set_config_solver_calls(value, state)
+                    self.set_smac2_wallclock_time(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("number_of_runs", "num_of_smac_runs")
+            option_names = ("cpu_time", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
-                    self.set_config_number_of_runs(value, state)
+                    self.set_smac2_cpu_time(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("target_cutoff_length", "smac_each_run_cutoff_length")
+            option_names = ("target_cutoff_length", "each_run_cutoff_length")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
-                    self.set_configurator_target_cutoff_length(value, state)
+                    self.set_smac2_target_cutoff_length(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("use_cpu_time_in_tunertime", "countSMACTimeAsTunerTime")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getboolean(section, option)
+                    self.set_smac2_use_cpu_time_in_tunertime(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("cli_cores", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_smac2_cli_cores(value, state)
+                    file_settings.remove_option(section, option)
+
+            options_names = ("iteration_limit", "numIterations", "numberOfIterations",
+                             "max_iterations")
+            for option in options_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_smac2_max_iterations(value, state)
+                    file_settings.remove_option(section, option)
+
+            section = "smac3"
+
+            option_names = ("n_trials", "number_of_trials", "solver_calls")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_smac3_number_of_trials(value, state)
+                    file_settings.remove_option(section, option)
+
+            options_names = ("facade", "smac_facade", "smac3_facade")
+            for option in options_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.get(section, option)
+                    self.set_smac3_smac_facade(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("max_ratio", "facade_max_ratio", "initial_trials_max_ratio")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getfloat(section, option)
+                    self.set_smac3_facade_max_ratio(value, state)
+                    file_settings.remove_option(section, option)
+
+            options_names = ("crash_cost", )
+            for option in options_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.get(section, option)
+                    self.set_smac3_crash_cost(value, state)
+                    file_settings.remove_option(section, option)
+
+            options_names = ("termination_cost_threshold", )
+            for option in options_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.get(section, option)
+                    self.set_smac3_termination_cost_threshold(value, state)
+                    file_settings.remove_option(section, option)
+
+            options_names = ("walltime_limit", "wallclock_time")
+            for option in options_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getfloat(section, option)
+                    self.set_smac3_walltime_limit(value, state)
+                    file_settings.remove_option(section, option)
+
+            options_names = ("cputime_limit", )
+            for option in options_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getfloat(section, option)
+                    self.set_smac3_cputime_limit(value, state)
+                    file_settings.remove_option(section, option)
+
+            options_names = ("use_default_config", )
+            for option in options_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getboolean(section, option)
+                    self.set_smac3_use_default_config(value, state)
+                    file_settings.remove_option(section, option)
+
+            options_names = ("min_budget", )
+            for option in options_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getfloat(section, option)
+                    self.set_smac3_min_budget(value, state)
+                    file_settings.remove_option(section, option)
+
+            options_names = ("max_budget", )
+            for option in options_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getfloat(section, option)
+                    self.set_smac3_max_budget(value, state)
+                    file_settings.remove_option(section, option)
+
+            section = "irace"
+            option_names = ("max_time", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_irace_max_time(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("max_experiments", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_irace_max_experiments(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("first_test", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_irace_first_test(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("mu", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_irace_mu(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("nb_iterations", "iterations", "max_iterations")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_irace_max_iterations(value, state)
                     file_settings.remove_option(section, option)
 
             section = "slurm"
-            option_names = ("max_parallel_runs_per_node", "clis_per_node", )
+            option_names = ("number_of_jobs_in_parallel", "num_job_in_parallel")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_number_of_jobs_in_parallel(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("max_parallel_runs_per_node", "clis_per_node")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
@@ -362,16 +525,15 @@ class Settings:
                               f'{option}" in file {file_path} ignored')
 
         # Print error if unable to read the settings
-        else:
-            print(f"ERROR: Failed to read settings from {file_path} The file may "
-                  "have been empty, located in a different path, or be in another format"
-                  " than INI. Settings from different sources will be used (e.g. default"
-                  " values).")
+        elif Path(file_path).exists():
+            print(f"ERROR: Failed to read settings from {file_path} The file may have "
+                  "been empty or be in another format than INI. Default Setting values "
+                  "will be used.")
 
     def write_used_settings(self: Settings) -> None:
         """Write the used settings to the default locations."""
         # Write to latest settings file
-        self.write_settings_ini(self.__settings_dir / "latest.ini")
+        self.write_settings_ini(self.DEFAULT_settings_dir / "latest.ini")
 
     def write_settings_ini(self: Settings, file_path: Path) -> None:
         """Write the settings to an INI file."""
@@ -385,6 +547,16 @@ class Settings:
                 self.__settings["slurm"][key] = self.__settings["slurm_extra"][key]
                 slurm_extra_section_options[key] = self.__settings["slurm_extra"][key]
             self.__settings.remove_section("slurm_extra")
+        # We do not write None values
+        removed = []
+        for section in self.__settings.sections():
+            for option in self.__settings[section]:
+                try:
+                    if ast.literal_eval(str(self.__settings[section][option])) is None:
+                        del self.__settings[section][option]
+                        removed.append((section, option))
+                except Exception:
+                    pass
         # Write the settings to file
         with file_path.open("w") as settings_file:
             self.__settings.write(settings_file)
@@ -393,6 +565,9 @@ class Settings:
             self.__settings.add_section("slurm_extra")
             for key in slurm_extra_section_options:
                 self.__settings["slurm_extra"][key] = slurm_extra_section_options[key]
+        # Rebuild None if needed
+        for section, option in removed:
+            self.__settings[section][option] = "None"
 
     def __init_section(self: Settings, section: str) -> None:
         if section not in self.__settings:
@@ -426,22 +601,43 @@ class Settings:
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the sparkle objective."""
         section = "general"
-        name = "objective"
+        name = "objectives"
+
         if value is not None and self.__check_setting_state(
                 self.__general_sparkle_objective_set, origin, name):
             if isinstance(value, list):
-                value = ",".join([obj.name for obj in value])
+                value = ",".join([str(obj) for obj in value])
+            else:
+                value = str(value)
+
+            # Append standard Sparkle Objectives
+            if "status" not in value:
+                value += ",status:metric"
+            if "cpu_time" not in value:
+                value += ",cpu_time:metric"
+            if "wall_time" not in value:
+                value += ",wall_time:metric"
+            if "memory" not in value:
+                value += ",memory:metric"
+
             self.__init_section(section)
             self.__general_sparkle_objective_set = origin
             self.__settings[section][name] = value
 
-    def get_general_sparkle_objectives(self: Settings) -> list[SparkleObjective]:
-        """Return the performance measure."""
+    def get_general_sparkle_objectives(
+            self: Settings,
+            filter_metric: bool = False) -> list[SparkleObjective]:
+        """Return the Sparkle objectives."""
         if self.__general_sparkle_objective_set == SettingState.NOT_SET:
             self.set_general_sparkle_objectives()
 
-        return SparkleObjective.from_multi_str(
-            self.__settings["general"]["objective"])
+        objectives = [resolve_objective(obj)
+                      for obj in self.__settings["general"]["objectives"].split(",")]
+
+        if filter_metric:
+            return [obj for obj in objectives if not obj.metric]
+
+        return objectives
 
     def set_general_sparkle_configurator(
             self: Settings,
@@ -460,16 +656,17 @@ class Settings:
         """Return the configurator init method."""
         if self.__general_sparkle_configurator_set == SettingState.NOT_SET:
             self.set_general_sparkle_configurator()
-        if self.__general_sparkle_configurator is None:
+        configurator_var = self.__settings["general"]["configurator"]
+        if (self.__general_sparkle_configurator is None
+                or self.__general_sparkle_configurator.name != configurator_var):
             configurator_subclass =\
                 cim.resolve_configurator(self.__settings["general"]["configurator"])
             if configurator_subclass is not None:
                 self.__general_sparkle_configurator = configurator_subclass(
-                    objectives=self.get_general_sparkle_objectives(),
-                    base_dir=Settings.DEFAULT_tmp_output,
+                    base_dir=Path(),
                     output_path=Settings.DEFAULT_configuration_output_raw)
             else:
-                print("WARNING: Configurator class name not recognised:"
+                print("WARNING: Configurator class name not recognised: "
                       f'{self.__settings["general"]["configurator"]}. '
                       "Configurator not set.")
         return self.__general_sparkle_configurator
@@ -493,111 +690,6 @@ class Settings:
             self.set_general_sparkle_selector()
         return Selector(Path(self.__settings["general"]["selector"]),
                         self.DEFAULT_selection_output_raw)
-
-    def get_performance_metric_for_report(self: Settings) -> str:
-        """Return a string describing the full performance metric, e.g. PAR10."""
-        objectives = self.get_general_sparkle_objectives()
-        if len(objectives) == 1:
-            return objectives[0].metric
-        return ""
-
-    def set_general_cap_value(
-            self: Settings, value: float = None,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the general cap value."""
-        section = "general"
-        name = "cap_value"
-
-        if value is not None and self.__check_setting_state(
-                self.__general_cap_value_set, origin, name):
-            self.__init_section(section)
-            self.__general_cap_value_set = origin
-            self.__settings[section][name] = float(value)
-
-    def get_general_cap_value(self: Settings) -> float:
-        """Get the general cap value."""
-        if self.__general_cap_value_set == SettingState.NOT_SET:
-            self.set_general_cap_value()
-
-        if "cap_value" in self.__settings["general"]:
-            return self.__settings["general"]["cap_value"]
-        return None
-
-    def set_general_penalty_multiplier(
-            self: Settings, value: int = DEFAULT_general_penalty_multiplier,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the penalty multiplier."""
-        section = "general"
-        name = "penalty_multiplier"
-
-        if value is not None and self.__check_setting_state(
-                self.__general_penalty_multiplier_set, origin, name):
-            self.__init_section(section)
-            self.__general_penalty_multiplier_set = origin
-            self.__settings[section][name] = str(value)
-
-    def get_general_penalty_multiplier(self: Settings) -> int:
-        """Return the penalty multiplier."""
-        if self.__general_penalty_multiplier_set == SettingState.NOT_SET:
-            self.set_general_penalty_multiplier()
-
-        return int(self.__settings["general"]["penalty_multiplier"])
-
-    def set_general_metric_aggregation_function(
-            self: Settings, value: str = "mean",
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the general aggregation function of performance measure."""
-        section = "general"
-        name = "metric_aggregation_function"
-
-        if value is not None and self.__check_setting_state(
-                self.__general_metric_aggregation_function_set, origin, name):
-            self.__init_section(section)
-            self.__general_metric_aggregation_function_set = origin
-            self.__settings[section][name] = value
-
-    def get_general_metric_aggregation_function(self: Settings) -> Callable:
-        """Set the general aggregation function of performance measure."""
-        if self.__general_metric_aggregation_function_set == SettingState.NOT_SET:
-            self.set_general_metric_aggregation_function()
-        method = self.__settings["general"]["metric_aggregation_function"]
-        libraries = (builtins, statistics)
-        for lib in libraries:
-            if not isinstance(method, str):
-                break
-            try:
-                method = getattr(lib, method)
-            except AttributeError:
-                continue
-        return method
-
-    def get_penalised_time(self: Settings, custom_cutoff: int = None) -> int:
-        """Return the penalised time associated with the cutoff time."""
-        if custom_cutoff is None:
-            custom_cutoff = self.get_general_target_cutoff_time()
-        return custom_cutoff * self.get_general_penalty_multiplier()
-
-    def set_general_solution_verifier(
-            self: Settings, value: str = DEFAULT_general_solution_verifier,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the solution verifier to use."""
-        section = "general"
-        name = "solution_verifier"
-
-        if value is not None and self.__check_setting_state(
-                self.__general_solution_verifier_set, origin, name):
-            self.__init_section(section)
-            self.__general_solution_verifier_set = origin
-            self.__settings[section][name] = value
-
-    def get_general_solution_verifier(self: Settings) -> object:
-        """Return the solution verifier to use."""
-        if self.__general_solution_verifier_set == SettingState.NOT_SET:
-            self.set_general_solution_verifier()
-        name = self.__settings["general"]["solution_verifier"].lower()
-        if name == str(SATVerifier()).lower():
-            return SATVerifier()
-        return None
 
     def set_general_target_cutoff_time(
             self: Settings, value: int = DEFAULT_general_target_cutoff_time,
@@ -641,7 +733,7 @@ class Settings:
             self: Settings, value: int = DEFAULT_number_of_jobs_in_parallel,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the number of runs Sparkle can do in parallel."""
-        section = "general"
+        section = "slurm"
         name = "number_of_jobs_in_parallel"
 
         if value is not None and self.__check_setting_state(
@@ -655,7 +747,7 @@ class Settings:
         if self.__number_of_jobs_in_parallel_set == SettingState.NOT_SET:
             self.set_number_of_jobs_in_parallel()
 
-        return int(self.__settings["general"]["number_of_jobs_in_parallel"])
+        return int(self.__settings["slurm"]["number_of_jobs_in_parallel"])
 
     def set_general_verbosity(
             self: Settings, value: VerbosityLevel = DEFAULT_general_verbosity,
@@ -697,53 +789,71 @@ class Settings:
         if self.__general_check_interval_set == SettingState.NOT_SET:
             self.set_general_check_interval()
 
-        return int(
-            self.__settings["general"]["check_interval"])
+        return int(self.__settings["general"]["check_interval"])
 
-    # Configuration settings ###
+    # Configuration settings General ###
 
-    def set_config_wallclock_time(
-            self: Settings, value: int = DEFAULT_config_wallclock_time,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the budget per configuration run in seconds (wallclock)."""
-        section = "configuration"
-        name = "wallclock_time"
+    def get_configurator_settings(self: Settings,
+                                  configurator_name: str) -> dict[str, any]:
+        """Return the configurator settings."""
+        configurator_settings = {
+            "number_of_runs": self.get_configurator_number_of_runs(),
+            "solver_calls": self.get_configurator_solver_calls(),
+            "cutoff_time": self.get_general_target_cutoff_time(),
+            "max_iterations": self.get_configurator_max_iterations()
+        }
+        # In the settings below, we default to the configurator general settings if no
+        # specific configurator settings are given, by using the [None] or [Value]
+        if configurator_name == cim.SMAC2.__name__:
+            # Return all settings from the SMAC2 section
+            configurator_settings.update({
+                "cpu_time": self.get_smac2_cpu_time(),
+                "wallclock_time": self.get_smac2_wallclock_time(),
+                "target_cutoff_length": self.get_smac2_target_cutoff_length(),
+                "use_cpu_time_in_tunertime": self.get_smac2_use_cpu_time_in_tunertime(),
+                "cli_cores": self.get_smac2_cli_cores(),
+                "max_iterations": self.get_smac2_max_iterations()
+                or configurator_settings["max_iterations"],
+            })
+        elif configurator_name == cim.SMAC3.__name__:
+            # Return all settings from the SMAC3 section
+            del configurator_settings["max_iterations"]  # SMAC3 does not have this?
+            configurator_settings.update({
+                "smac_facade": self.get_smac3_smac_facade(),
+                "max_ratio": self.get_smac3_facade_max_ratio(),
+                "crash_cost": self.get_smac3_crash_cost(),
+                "termination_cost_threshold":
+                self.get_smac3_termination_cost_threshold(),
+                "walltime_limit": self.get_smac3_walltime_limit(),
+                "cputime_limit": self.get_smac3_cputime_limit(),
+                "use_default_config": self.get_smac3_use_default_config(),
+                "min_budget": self.get_smac3_min_budget(),
+                "max_budget": self.get_smac3_max_budget(),
+                "solver_calls": self.get_smac3_number_of_trials()
+                or configurator_settings["solver_calls"],
+            })
+            # Do not pass None values to SMAC3, it Scenario resolves default settings
+            configurator_settings = {key: value
+                                     for key, value in configurator_settings.items()
+                                     if value is not None}
+        elif configurator_name == cim.IRACE.__name__:
+            # Return all settings from the IRACE section
+            configurator_settings.update({
+                "solver_calls": self.get_irace_max_experiments(),
+                "max_time": self.get_irace_max_time(),
+                "first_test": self.get_irace_first_test(),
+                "mu": self.get_irace_mu(),
+                "max_iterations": self.get_irace_max_iterations()
+                or configurator_settings["max_iterations"],
+            })
+            if (configurator_settings["solver_calls"] == 0
+                    and configurator_settings["max_time"] == 0):  # Default to base
+                configurator_settings["solver_calls"] =\
+                    self.get_configurator_solver_calls()
+        return configurator_settings
 
-        if value is not None and self.__check_setting_state(
-                self.__config_wallclock_time_set, origin, name):
-            self.__init_section(section)
-            self.__config_wallclock_time_set = origin
-            self.__settings[section][name] = str(value)
-
-    def get_config_wallclock_time(self: Settings) -> int:
-        """Return the budget per configuration run in seconds (wallclock)."""
-        if self.__config_wallclock_time_set == SettingState.NOT_SET:
-            self.set_config_wallclock_time()
-        return int(self.__settings["configuration"]["wallclock_time"])
-
-    def set_config_cpu_time(
-            self: Settings, value: int = DEFAULT_config_cpu_time,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the budget per configuration run in seconds (cpu)."""
-        section = "configuration"
-        name = "cpu_time"
-
-        if value is not None and self.__check_setting_state(
-                self.__config_cpu_time_set, origin, name):
-            self.__init_section(section)
-            self.__config_cpu_time_set = origin
-            self.__settings[section][name] = str(value)
-
-    def get_config_cpu_time(self: Settings) -> int | None:
-        """Return the budget per configuration run in seconds (cpu)."""
-        if self.__config_cpu_time_set == SettingState.NOT_SET:
-            self.set_config_cpu_time()
-            return None
-
-        return int(self.__settings["configuration"]["cpu_time"])
-
-    def set_config_solver_calls(
-            self: Settings, value: int = DEFAULT_config_solver_calls,
+    def set_configurator_solver_calls(
+            self: Settings, value: int = DEFAULT_configurator_solver_calls,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the number of solver calls."""
         section = "configuration"
@@ -755,16 +865,15 @@ class Settings:
             self.__config_solver_calls_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_config_solver_calls(self: Settings) -> int | None:
-        """Return the number of solver calls."""
+    def get_configurator_solver_calls(self: Settings) -> int | None:
+        """Return the maximum number of solver calls the configurator can do."""
         if self.__config_solver_calls_set == SettingState.NOT_SET:
-            self.set_config_solver_calls()
-            return None
+            self.set_configurator_solver_calls()
 
         return int(self.__settings["configuration"]["solver_calls"])
 
-    def set_config_number_of_runs(
-            self: Settings, value: int = DEFAULT_config_number_of_runs,
+    def set_configurator_number_of_runs(
+            self: Settings, value: int = DEFAULT_configurator_number_of_runs,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the number of configuration runs."""
         section = "configuration"
@@ -776,33 +885,501 @@ class Settings:
             self.__config_number_of_runs_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_config_number_of_runs(self: Settings) -> int:
+    def get_configurator_number_of_runs(self: Settings) -> int:
         """Return the number of configuration runs."""
         if self.__config_number_of_runs_set == SettingState.NOT_SET:
-            self.set_config_number_of_runs()
+            self.set_configurator_number_of_runs()
 
         return int(self.__settings["configuration"]["number_of_runs"])
 
-    # Configuration: SMAC specific settings ###
+    def set_configurator_max_iterations(
+            self: Settings, value: int = DEFAULT_configurator_maximum_iterations,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the number of configuration runs."""
+        section = "configuration"
+        name = "max_iterations"
 
-    def set_configurator_target_cutoff_length(
-            self: Settings, value: str = DEFAULT_configurator_target_cutoff_length,
+        if self.__check_setting_state(
+                self.__config_max_iterations_set, origin, name):
+            self.__init_section(section)
+            self.__config_max_iterations_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_configurator_max_iterations(self: Settings) -> int | None:
+        """Get the maximum number of configurator iterations."""
+        if self.__config_max_iterations_set == SettingState.NOT_SET:
+            self.set_configurator_max_iterations()
+        max_iterations = self.__settings["configuration"]["max_iterations"]
+        return int(max_iterations) if max_iterations.isdigit() else None
+
+    # Configuration: SMAC2 specific settings ###
+
+    def set_smac2_wallclock_time(
+            self: Settings, value: int = DEFAULT_smac2_wallclock_time,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the budget per configuration run in seconds (wallclock)."""
+        section = "smac2"
+        name = "wallclock_time"
+
+        if self.__check_setting_state(
+                self.__smac2_wallclock_time_set, origin, name):
+            self.__init_section(section)
+            self.__smac2_wallclock_time_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac2_wallclock_time(self: Settings) -> int | None:
+        """Return the budget per configuration run in seconds (wallclock)."""
+        if self.__smac2_wallclock_time_set == SettingState.NOT_SET:
+            self.set_smac2_wallclock_time()
+        wallclock_time = self.__settings["smac2"]["wallclock_time"]
+        return int(wallclock_time) if wallclock_time.isdigit() else None
+
+    def set_smac2_cpu_time(
+            self: Settings, value: int = DEFAULT_smac2_cpu_time,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the budget per configuration run in seconds (cpu)."""
+        section = "smac2"
+        name = "cpu_time"
+
+        if self.__check_setting_state(
+                self.__smac2_cpu_time_set, origin, name):
+            self.__init_section(section)
+            self.__smac2_cpu_time_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac2_cpu_time(self: Settings) -> int | None:
+        """Return the budget per configuration run in seconds (cpu)."""
+        if self.__smac2_cpu_time_set == SettingState.NOT_SET:
+            self.set_smac2_cpu_time()
+        cpu_time = self.__settings["smac2"]["cpu_time"]
+        return int(cpu_time) if cpu_time.isdigit() else None
+
+    def set_smac2_target_cutoff_length(
+            self: Settings, value: str = DEFAULT_smac2_target_cutoff_length,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the target algorithm cutoff length."""
-        section = "configuration"
+        section = "smac2"
         name = "target_cutoff_length"
 
         if value is not None and self.__check_setting_state(
-                self.__configurator_target_cutoff_length_set, origin, name):
+                self.__smac2_target_cutoff_length_set, origin, name):
             self.__init_section(section)
-            self.__configurator_target_cutoff_length_set = origin
+            self.__smac2_target_cutoff_length_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_configurator_target_cutoff_length(self: Settings) -> str:
-        """Return the target algorithm cutoff length."""
-        if self.__configurator_target_cutoff_length_set == SettingState.NOT_SET:
-            self.set_configurator_target_cutoff_length()
-        return self.__settings["configuration"]["target_cutoff_length"]
+    def get_smac2_target_cutoff_length(self: Settings) -> str:
+        """Return the target algorithm cutoff length.
+
+        'A domain specific measure of when the algorithm should consider itself done.'
+
+        Returns:
+            The target algorithm cutoff length.
+        """
+        if self.__smac2_target_cutoff_length_set == SettingState.NOT_SET:
+            self.set_smac2_target_cutoff_length()
+        return self.__settings["smac2"]["target_cutoff_length"]
+
+    def set_smac2_use_cpu_time_in_tunertime(
+            self: Settings, value: bool = DEFAULT_smac2_use_cpu_time_in_tunertime,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set whether to use CPU time in tunertime."""
+        section = "smac2"
+        name = "use_cpu_time_in_tunertime"
+
+        if self.__check_setting_state(
+                self.__smac2_use_cpu_time_in_tunertime_set, origin, name):
+            self.__init_section(section)
+            self.__smac2_use_cpu_time_in_tunertime_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac2_use_cpu_time_in_tunertime(self: Settings) -> bool:
+        """Return whether to use CPU time in tunertime."""
+        if self.__smac2_use_cpu_time_in_tunertime_set == SettingState.NOT_SET:
+            self.set_smac2_use_cpu_time_in_tunertime()
+        return ast.literal_eval(self.__settings["smac2"]["use_cpu_time_in_tunertime"])
+
+    def set_smac2_cli_cores(
+            self: Settings, value: int = DEFAULT_smac2_cli_cores,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the number of cores to use for SMAC2 CLI."""
+        section = "smac2"
+        name = "cli_cores"
+
+        if self.__check_setting_state(
+                self.__smac2_cli_cores_set, origin, name):
+            self.__init_section(section)
+            self.__smac2_cli_cores_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac2_cli_cores(self: Settings) -> int | None:
+        """Number of cores to use to execute runs.
+
+        In other words, the number of requests to run at a given time.
+        """
+        if self.__smac2_cli_cores_set == SettingState.NOT_SET:
+            self.set_smac2_cli_cores()
+        cli_cores = self.__settings["smac2"]["cli_cores"]
+        return int(cli_cores) if cli_cores.isdigit() else None
+
+    def set_smac2_max_iterations(
+            self: Settings, value: int = DEFAULT_smac2_max_iterations,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the maximum number of SMAC2 iterations."""
+        section = "smac2"
+        name = "max_iterations"
+
+        if self.__check_setting_state(
+                self.__smac2_max_iterations_set, origin, name):
+            self.__init_section(section)
+            self.__smac2_max_iterations_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac2_max_iterations(self: Settings) -> int | None:
+        """Get the maximum number of SMAC2 iterations."""
+        if self.__smac2_max_iterations_set == SettingState.NOT_SET:
+            self.set_smac2_max_iterations()
+        max_iterations = self.__settings["smac2"]["max_iterations"]
+        return int(max_iterations) if max_iterations.isdigit() else None
+
+    # Configuration: SMAC3 specific settings ###
+
+    def set_smac3_number_of_trials(
+            self: Settings, value: int = DEFAULT_smac3_number_of_runs,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the number of SMAC3 trials."""
+        section = "smac3"
+        name = "number_of_runs"
+
+        if self.__check_setting_state(
+                self.__smac3_number_of_trials_set, origin, name):
+            self.__init_section(section)
+            self.__smac3_number_of_trials_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac3_number_of_trials(self: Settings) -> int | None:
+        """Return the number of SMAC3 trials (Solver calls).
+
+        'The maximum number of trials (combination of configuration, seed, budget,
+        and instance, depending on the task) to run.'
+        """
+        if self.__smac3_number_of_trials_set == SettingState.NOT_SET:
+            self.set_smac3_number_of_trials()
+        number_of_runs = self.__settings["smac3"]["number_of_runs"]
+        return int(number_of_runs) if number_of_runs.isdigit() else None
+
+    def set_smac3_smac_facade(
+            self: Settings, value: str = DEFAULT_smac3_facade,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the SMAC3 facade."""
+        section = "smac3"
+        name = "facade"
+
+        if self.__check_setting_state(self.__smac3_smac_facade_set, origin, name):
+            self.__init_section(section)
+            self.__smac3_smac_facade_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac3_smac_facade(self: Settings) -> str:
+        """Return the SMAC3 facade."""
+        if self.__smac3_smac_facade_set == SettingState.NOT_SET:
+            self.set_smac3_smac_facade()
+        return self.__settings["smac3"]["facade"]
+
+    def set_smac3_facade_max_ratio(
+            self: Settings, value: float = DEFAULT_smac3_facade_max_ratio,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the SMAC3 facade max ratio."""
+        section = "smac3"
+        name = "facade_max_ratio"
+
+        if self.__check_setting_state(
+                self.__smac3_facade_max_ratio_set, origin, name):
+            self.__init_section(section)
+            self.__smac3_facade_max_ratio_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac3_facade_max_ratio(self: Settings) -> float:
+        """Return the SMAC3 facade max ratio."""
+        if self.__smac3_facade_max_ratio_set == SettingState.NOT_SET:
+            self.set_smac3_facade_max_ratio()
+        return ast.literal_eval(self.__settings["smac3"]["facade_max_ratio"])
+
+    def set_smac3_crash_cost(self: Settings, value: float = DEFAULT_smac3_crash_cost,
+                             origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the SMAC3 objective crash cost."""
+        section = "smac3"
+        name = "crash_cost"
+
+        if self.__check_setting_state(self.__smac3_crash_cost_set, origin, name):
+            self.__init_section(section)
+            self.__smac3_smac_facade_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac3_crash_cost(self: Settings) -> float | list[float]:
+        """Get the SMAC3 objective crash cost.
+
+        'crash_cost : float | list[float], defaults to np.inf
+        Defines the cost for a failed trial. In case of multi-objective,
+        each objective can be associated with a different cost.'
+        """
+        if self.__smac3_crash_cost_set == SettingState.NOT_SET:
+            self.set_smac3_crash_cost()
+        return ast.literal_eval(self.__settings["smac3"]["crash_cost"])
+
+    def set_smac3_termination_cost_threshold(
+            self: Settings,
+            value: float = DEFAULT_smac3_termination_cost_threshold,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the SMAC3 termination cost threshold."""
+        section = "smac3"
+        name = "termination_cost_threshold"
+
+        if self.__check_setting_state(
+                self.__smac3_termination_cost_threshold_set, origin, name):
+            self.__init_section(section)
+            self.__smac3_termination_cost_threshold_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac3_termination_cost_threshold(self: Settings) -> float | list[float]:
+        """Get the SMAC3 termination cost threshold.
+
+        'Defines a cost threshold when the optimization should stop. In case of
+        multi-objective, each objective *must* be associated with a cost.
+        The optimization stops when all objectives crossed the threshold.'
+        """
+        if self.__smac3_termination_cost_threshold_set == SettingState.NOT_SET:
+            self.set_smac3_termination_cost_threshold()
+        return ast.literal_eval(self.__settings["smac3"]["termination_cost_threshold"])
+
+    def set_smac3_walltime_limit(
+            self: Settings, value: float = DEFAULT_smac3_walltime_limit,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the SMAC3 walltime limit."""
+        section = "smac3"
+        name = "walltime_limit"
+
+        if self.__check_setting_state(self.__smac3_walltime_limit_set, origin, name):
+            self.__init_section(section)
+            self.__smac3_walltime_limit_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac3_walltime_limit(self: Settings) -> float:
+        """Get the SMAC3 walltime limit.
+
+        'The maximum time in seconds that SMAC is allowed to run.'
+        """
+        if self.__smac3_walltime_limit_set == SettingState.NOT_SET:
+            self.set_smac3_walltime_limit()
+        return ast.literal_eval(self.__settings["smac3"]["walltime_limit"])
+
+    def set_smac3_cputime_limit(
+            self: Settings, value: float = DEFAULT_smac3_cputime_limit,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the SMAC3 CPU time limit."""
+        section = "smac3"
+        name = "cputime_limit"
+
+        if self.__check_setting_state(self.__smac3_cputime_limit_set, origin, name):
+            self.__init_section(section)
+            self.__smac3_cputime_limit_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac3_cputime_limit(self: Settings) -> float:
+        """Get the SMAC3 CPU time limit.
+
+        'The maximum CPU time in seconds that SMAC is allowed to run.'
+        """
+        if self.__smac3_cputime_limit_set == SettingState.NOT_SET:
+            self.set_smac3_cputime_limit()
+        return ast.literal_eval(self.__settings["smac3"]["cputime_limit"])
+
+    def set_smac3_use_default_config(
+            self: Settings, value: bool = DEFAULT_smac3_use_default_config,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the SMAC3 to use default config."""
+        section = "smac3"
+        name = "use_default_config"
+
+        if self.__check_setting_state(self.__smac3_use_default_config_set, origin, name):
+            self.__init_section(section)
+            self.__smac3_use_default_config_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac3_use_default_config(self: Settings) -> bool:
+        """Get the SMAC3 to use default config.
+
+        'If True, the configspace's default configuration is evaluated in the
+        initial design. For historic benchmark reasons, this is False by default.
+        Notice, that this will result in n_configs + 1 for the initial design.
+        Respecting n_trials, this will result in one fewer evaluated
+        configuration in the optimization.'
+        """
+        if self.__smac3_use_default_config_set == SettingState.NOT_SET:
+            self.set_smac3_use_default_config()
+        return ast.literal_eval(self.__settings["smac3"]["use_default_config"])
+
+    def set_smac3_min_budget(
+            self: Settings, value: int | float = DEFAULT_smac3_min_budget,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the SMAC3 min budget."""
+        section = "smac3"
+        name = "min_budget"
+
+        if self.__check_setting_state(self.__smac3_min_budget_set, origin, name):
+            self.__init_section(section)
+            self.__smac3_min_budget_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac3_min_budget(self: Settings) -> int | float:
+        """Get the SMAC3 min budget.
+
+        'The minimum budget (epochs, subset size, number of instances, ...) that
+        is used for the optimization. Use this argument if you use multi-fidelity
+        or instance optimization.'
+        """
+        if self.__smac3_min_budget_set == SettingState.NOT_SET:
+            self.set_smac3_min_budget()
+        return ast.literal_eval(self.__settings["smac3"]["min_budget"])
+
+    def set_smac3_max_budget(
+            self: Settings, value: int | float = DEFAULT_smac3_max_budget,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the SMAC3 max budget."""
+        section = "smac3"
+        name = "max_budget"
+
+        if self.__check_setting_state(self.__smac3_max_budget_set, origin, name):
+            self.__init_section(section)
+            self.__smac3_max_budget_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac3_max_budget(self: Settings) -> int | float:
+        """Get the SMAC3 max budget.
+
+        'The maximum budget (epochs, subset size, number of instances, ...) that
+        is used for the optimization. Use this argument if you use multi-fidelity
+        or instance optimization.'
+        """
+        if self.__smac3_max_budget_set == SettingState.NOT_SET:
+            self.set_smac3_max_budget()
+        return ast.literal_eval(self.__settings["smac3"]["max_budget"])
+
+    # Configuration: IRACE specific settings ###
+
+    def get_irace_max_time(self: Settings) -> int:
+        """Return the max time in seconds for IRACE."""
+        if self.__irace_max_time_set == SettingState.NOT_SET:
+            self.set_irace_max_time()
+        return int(self.__settings["irace"]["max_time"])
+
+    def set_irace_max_time(
+            self: Settings, value: int = DEFAULT_irace_max_time,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the max time in seconds for IRACE."""
+        section = "irace"
+        name = "max_time"
+
+        if value is not None and self.__check_setting_state(
+                self.__irace_max_time_set, origin, name):
+            self.__init_section(section)
+            self.__irace_max_time_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_irace_max_experiments(self: Settings) -> int:
+        """Return the max number of experiments for IRACE."""
+        if self.__irace_max_experiments_set == SettingState.NOT_SET:
+            self.set_irace_max_experiments()
+        return int(self.__settings["irace"]["max_experiments"])
+
+    def set_irace_max_experiments(
+            self: Settings, value: int = DEFAULT_irace_max_experiments,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the max number of experiments for IRACE."""
+        section = "irace"
+        name = "max_experiments"
+
+        if value is not None and self.__check_setting_state(
+                self.__irace_max_experiments_set, origin, name):
+            self.__init_section(section)
+            self.__irace_max_experiments_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_irace_first_test(self: Settings) -> int | None:
+        """Return the first test for IRACE.
+
+        Specifies how many instances are evaluated before the first
+        elimination test. IRACE Default: 5. [firstTest]
+        """
+        if self.__irace_first_test_set == SettingState.NOT_SET:
+            self.set_irace_first_test()
+        first_test = self.__settings["irace"]["first_test"]
+        return int(first_test) if first_test.isdigit() else None
+
+    def set_irace_first_test(
+            self: Settings, value: int = DEFAULT_irace_first_test,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the first test for IRACE."""
+        section = "irace"
+        name = "first_test"
+
+        if self.__check_setting_state(
+                self.__irace_first_test_set, origin, name):
+            self.__init_section(section)
+            self.__irace_first_test_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_irace_mu(self: Settings) -> int | None:
+        """Return the mu for IRACE.
+
+        Parameter used to define the number of configurations sampled and
+        evaluated at each iteration. IRACE Default: 5. [mu]
+        """
+        if self.__irace_mu_set == SettingState.NOT_SET:
+            self.set_irace_mu()
+        mu = self.__settings["irace"]["mu"]
+        return int(mu) if mu.isdigit() else None
+
+    def set_irace_mu(
+            self: Settings, value: int = DEFAULT_irace_mu,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the mu for IRACE."""
+        section = "irace"
+        name = "mu"
+
+        if self.__check_setting_state(
+                self.__irace_mu_set, origin, name):
+            self.__init_section(section)
+            self.__irace_mu_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_irace_max_iterations(self: Settings) -> int:
+        """Return the number of iterations for IRACE."""
+        if self.__irace_max_iterations_set == SettingState.NOT_SET:
+            self.set_irace_max_iterations()
+        max_iterations = self.__settings["irace"]["max_iterations"]
+        return int(max_iterations) if max_iterations.isdigit() else None
+
+    def set_irace_max_iterations(
+            self: Settings, value: int = DEFAULT_irace_max_iterations,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the number of iterations for IRACE.
+
+        Maximum number of iterations to be executed. Each iteration involves the
+        generation of new configurations and the use of racing to select the best
+        configurations. By default (with 0), irace calculates a minimum number of
+        iterations as N^iter = ⌊2 + log2 N param⌋, where N^param is the number of
+        non-fixed parameters to be tuned.
+        Setting this parameter may make irace stop sooner than it should without using
+        all the available budget. IRACE recommends to use the default value (Empty).
+        """
+        section = "irace"
+        name = "max_iterations"
+
+        if self.__check_setting_state(
+                self.__irace_max_iterations_set, origin, name):
+            self.__init_section(section)
+            self.__irace_max_iterations_set = origin
+            self.__settings[section][name] = str(value)
 
     # Slurm settings ###
 
@@ -923,7 +1500,7 @@ class Settings:
         return int(
             self.__settings["parallel_portfolio"]["num_seeds_per_solver"])
 
-    def set_run_on(self: Settings, value: Runner = str,
+    def set_run_on(self: Settings, value: Runner = DEFAULT_general_run_on,
                    origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the compute on which to run."""
         section = "general"
@@ -937,6 +1514,9 @@ class Settings:
 
     def get_run_on(self: Settings) -> Runner:
         """Return the compute on which to run."""
+        if self.__run_on_set == SettingState.NOT_SET:
+            self.set_run_on()
+
         return Runner(self.__settings["general"]["run_on"])
 
     @staticmethod
@@ -957,7 +1537,6 @@ class Settings:
 
         cur_sections_set = set(cur_dict.keys())
         prev_sections_set = set(prev_dict.keys())
-
         sections_removed = prev_sections_set - cur_sections_set
         if sections_removed:
             print("Warning: the following sections have been removed:")
@@ -979,7 +1558,9 @@ class Settings:
                 # if name is not present in one of the two dicts, get None as placeholder
                 cur_val = cur_dict[section].get(name, None)
                 prev_val = prev_dict[section].get(name, None)
-                if cur_val != prev_val:
+
+                # If cur val is None, it is default
+                if cur_val is not None and cur_val != prev_val:
                     # Have we printed the initial warning?
                     if not option_changed:
                         print("Warning: The following attributes/options have changed:")

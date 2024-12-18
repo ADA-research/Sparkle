@@ -1,0 +1,6 @@
+.wy-side-nav-search, .wy-nav-top {
+    background: #e6f6ff;
+}
+.wy-nav-content {
+    max-width: 1000px !important;
+}

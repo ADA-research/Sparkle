@@ -9,40 +9,35 @@ from pathlib import Path
 from sparkle.platform import file_help as sfh
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import FeatureDataFrame
-from sparkle.CLI.compute_features import compute_features
 from sparkle.CLI.help import logging as sl
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help import argparse_custom as apc
+from sparkle.CLI.help import argparse_custom as ac
 from sparkle.solver import Extractor
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     # Define command line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument(*apc.ExtractorPathArgument.names,
-                        **apc.ExtractorPathArgument.kwargs)
-    group_extractor_run = parser.add_mutually_exclusive_group()
-    group_extractor_run.add_argument(*apc.RunExtractorNowArgument.names,
-                                     **apc.RunExtractorNowArgument.kwargs)
-    group_extractor_run.add_argument(*apc.RunExtractorLaterArgument.names,
-                                     **apc.RunExtractorLaterArgument.kwargs)
-    parser.add_argument(*apc.NicknameFeatureExtractorArgument.names,
-                        **apc.NicknameFeatureExtractorArgument.kwargs)
+    parser = argparse.ArgumentParser(
+        description="Add a feature extractor to the platform.")
+    parser.add_argument(*ac.ExtractorPathArgument.names,
+                        **ac.ExtractorPathArgument.kwargs)
+    parser.add_argument(*ac.NicknameFeatureExtractorArgument.names,
+                        **ac.NicknameFeatureExtractorArgument.kwargs)
+    parser.add_argument(*ac.NoCopyArgument.names, **ac.NoCopyArgument.kwargs)
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the add feature extractor command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
-
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.ADD_FEATURE_EXTRACTOR])
+    args = parser.parse_args(argv)
 
     extractor_source = Path(args.extractor_path)
     if not extractor_source.exists():
@@ -58,8 +53,15 @@ if __name__ == "__main__":
         print(f"Feature extractor {extractor_source.name} already exists! "
               "Can not add feature extractor.")
         sys.exit(-1)
-    extractor_target_path.mkdir()
-    shutil.copytree(extractor_source, extractor_target_path, dirs_exist_ok=True)
+
+    if args.no_copy:
+        print(f"Creating symbolic link from {extractor_source} "
+              f"to {extractor_target_path}...")
+        extractor_target_path.symlink_to(extractor_source.absolute())
+    else:
+        print(f"Copying feature extractor {extractor_source.name} ...")
+        extractor_target_path.mkdir()
+        shutil.copytree(extractor_source, extractor_target_path, dirs_exist_ok=True)
 
     # Check execution permissions for wrapper
     extractor_wrapper = extractor_target_path / Extractor.wrapper
@@ -83,9 +85,10 @@ if __name__ == "__main__":
             gv.file_storage_data_mapping[gv.extractor_nickname_list_path],
             key=nickname_str)
 
-    if args.run_extractor_now:
-        print("Start computing features ...")
-        compute_features(gv.settings().DEFAULT_feature_data_path, False)
-
     # Write used settings to file
     gv.settings().write_used_settings()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

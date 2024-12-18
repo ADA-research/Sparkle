@@ -2,12 +2,99 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.8.5] - 2024/09/??
+## [0.9.2] - ??
+
+### Fixed
+- Bugs regarding using Configuration with instance features [SPRK-364]
+- Allow user to easily recompile runsolver with initialise command for Venv support [SPRK-367]
+- Added performance data argument to clean up command [SPRK-367]
+- Updated wait command to yield more information when jobs are finished [SPRK-367]
+
+### Added
+- Added documentation on how to use Venv instead of Conda for Sparkle [SPRK-367]
+
+## [0.9.1.2] - 2025/12/12
+
+Patchfix
+
+### Fixed
+- Execution rights on internal package CLI files were removed during pip installation
+- Various bugfixes regarding nicknames
+
+### Changed
+- run_configured_solver command has now been merged into run_solvers [SPRK-361]
+
+## [0.9.1] - 2024/12/08
+
+### Added
+- Added the SMAC3 configurator to Sparkle [SPRK-335]
+- Added no-copy argument to all CLI add commands so the user can create symbolic links to their files instead of copying [SPRK-356]
+- Added no-save argument to initialise command [SPRK-358]
+- Added SolutionFileVerifier to verify instance solutions from CSV file [SPRK-360]
 
 ### Changed
 
+- Generate report command (Configuration report) now checks whether there are still jobs that should be run before allowing the user to start this command [SPRK-328]
+- PerformanceDataFrame now directly subclasses from Pandas DataFrame instead of functioning as a container class [SPRK-278]
+- Initialise command no longer removes the user's Settings directory if a platform already exists, but does still save it to the snapshot. [SPRK-355]
+- Solver configuration now stores found configurations and their results in the PerformanceDataFrame [SPRK-358]
+- run_solvers_core is integrated now into the solver class [SPRK-358]
+- configure solver command now also runs default configuration, schedules train set validation and test set validation if given [SPRK-358]
+- Modified SolutionVerifier adding to solvers as a CLI argument that is saved in the Solver meta file instead of in the Settings file [SPRK-359]
+- PAR objective now takes into account 'negative status' and penalises solvers for crashing or incorrect answers [SPRK-360]
+
+### Removed
+- Validate configured vs default command has been removed as it is now redundant [SPRK-358]
+- Validator class has been removed as it is no longer relevant [SPRK-358]
+
+## [0.9.0] - 2024/10/30
+
 ### Added
-- CLI autocompletion support, which can be activated with a oneliner after installation [SPRK-332]
+- Added cancel command to Sparkle to cancel Slurm jobs including interactive table to make your selection [SPRK-338]
+- Added the IRACE configurator to Sparkle, which works 'out of the box' with the Conda Environment (Only R is user supplied) [SPRK-290]
+
+### Changed
+- RunSolver logging paths are now passed as a parameter instead of placed in CWD [SPRK-344]
+- Most commands are no longer using a specific WD and instead are executed from the platform dir
+- ConfigurationScenarios can now be re-created from file and be detected based on Configurator/Solver/Instance set combination [SPRK-201]
+- Updated various package dependencies to their latest versions
+
+### Fixed
+- Reporting changes when default settings were used [SPRK-319]
+- Bug when generating configuration report for quality [SPRK-298]
+
+## [0.8.9] - 2024/09/27
+- Various updates to Documentation, automated testing and CI pipelines
+
+### Fixed
+- Bugfix for generating figures in report generation for 'configuration_quality' tutorial
+
+## [0.8.8] - 2024/09/20
+
+### Changed
+- ConfiguratorScenario is now a template class that must be implemented by each configurator
+- Documentation has been completely revamped
+
+## [0.8.6] - 2024/09/16
+
+### Changed
+- SparkleObjectives are now used platform wide to define what metrics should be collected from Solvers and stored, how they should be treated (Minisation, aggregation), and can be easily set by the user. They can be overriden with custom implementations by the user.
+
+## [0.8.5] - 2024/09/02
+
+### Changed
+- Solver wrappers have been simplified in their usage and extra tools are available to the user [SPRK-274]
+- Solver dict parsing hase been simplified [SPRK-310]
+- InstanceSet object has been expanded to now support ML task based data sets [SPRK-325]
+- RunRunner logging is now forwarded to CLI call log, all RunRunner generated files and logs are placed in the same dir instead of Tmp [SPRK-330]
+- PCSParser has been added to the Sparkle Tools instead of installed from Github [SPRK-334]
+
+### Added
+- Generating a report now includes a JSON serialised version of all the output data [SPRK-79]
+
+### Fixed
+- Many methods/properties used string variables where Path was needed and have been changed accordingly [SPRK-222]
+
 
 ## [0.8.4] - 2024/07/30
 

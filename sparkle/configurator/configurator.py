@@ -1,36 +1,29 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Configurator class to use different algorithm configurators like SMAC."""
-
 from __future__ import annotations
-from abc import abstractmethod
 from pathlib import Path
 
+import runrunner as rrr
 from runrunner import Runner, Run
 
-from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver import Solver
-from sparkle.solver.validator import Validator
 from sparkle.instance import InstanceSet
-from sparkle.types.objective import PerformanceMeasure, SparkleObjective
+from sparkle.structures import PerformanceDataFrame
+from sparkle.types import SparkleObjective
 
 
 class Configurator:
     """Abstact class to use different configurators like SMAC."""
     configurator_cli_path = Path(__file__).parent.resolve() / "configurator_cli.py"
 
-    def __init__(self: Configurator, validator: Validator, output_path: Path,
-                 executable_path: Path, configurator_target: Path,
-                 objectives: list[SparkleObjective], base_dir: Path, tmp_path: Path,
+    def __init__(self: Configurator, output_path: Path,
+                 base_dir: Path, tmp_path: Path,
                  multi_objective_support: bool = False) -> None:
         """Initialize Configurator.
 
         Args:
-            validator: Validator object to validate configurations runs
             output_path: Output directory of the Configurator.
-            executable_path: Executable of the configurator for Sparkle to call
-            configurator_target: The wrapper algorithm to standardize configurator
-                input/output towards solver wrappers.
             objectives: The list of Sparkle Objectives the configurator has to
                 optimize.
             base_dir: Where to execute the configuration
@@ -38,31 +31,31 @@ class Configurator:
             multi_objective_support: Whether the configurator supports
                 multi objective optimization for solvers.
         """
-        self.validator = validator
         self.output_path = output_path
-        self.executable_path = executable_path
-        self.configurator_target = configurator_target
-        self.objectives = objectives
         self.base_dir = base_dir
         self.tmp_path = tmp_path
         self.multiobjective = multi_objective_support
         self.scenario = None
-        if len(self.objectives) > 1 and not self.multiobjective:
-            print("Warning: Multiple objectives specified but current configurator "
-                  f"{self.configurator_path.name} only supports single objective. "
-                  f"Defaulted to first specified objective: {self.objectives[0].name}")
 
-    @abstractmethod
+    @staticmethod
+    def scenario_class() -> ConfigurationScenario:
+        """Return the scenario class of the configurator."""
+        return ConfigurationScenario
+
     def configure(self: Configurator,
+                  configuration_commands: list[str],
+                  data_target: PerformanceDataFrame,
+                  output: Path,
                   scenario: ConfigurationScenario,
-                  validate_after: bool = True,
-                  sbatch_options: list[str] = [],
+                  validation_ids: list[int] = None,
+                  sbatch_options: list[str] = None,
                   num_parallel_jobs: int = None,
                   base_dir: Path = None,
                   run_on: Runner = Runner.SLURM) -> Run:
         """Start configuration job.
 
         Args:
+
             scenario: ConfigurationScenario to execute.
             validate_after: Whether to validate the configuration on the training set
                 afterwards or not.
@@ -74,26 +67,122 @@ class Configurator:
         Returns:
             A RunRunner Run object.
         """
-        raise NotImplementedError
+        runs = [rrr.add_to_queue(
+            runner=run_on,
+            cmd=configuration_commands,
+            name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
+            base_dir=base_dir,
+            output_path=output,
+            parallel_jobs=num_parallel_jobs,
+            sbatch_options=sbatch_options)]
 
-    @abstractmethod
-    def get_optimal_configuration(self: Configurator,
-                                  solver: Solver,
-                                  instance_set: InstanceSet,
-                                  performance: PerformanceMeasure) -> tuple[float, str]:
-        """Returns the optimal configuration string for a solver of an instance set."""
-        raise NotImplementedError
+        if validation_ids:
+            validate = scenario.solver.run_performance_dataframe(
+                scenario.instance_set,
+                run_ids=validation_ids,
+                performance_dataframe=data_target,
+                cutoff_time=scenario.cutoff_time,
+                sbatch_options=sbatch_options,
+                log_dir=scenario.validation,
+                base_dir=base_dir,
+                dependencies=runs,
+                job_name=f"{self.name}: Validating {len(validation_ids)} "
+                         f"{scenario.solver.name} Configurations on "
+                         f"{scenario.instance_set.name}",
+                run_on=run_on,
+            )
+            runs.append(validate)
+
+        if run_on == Runner.LOCAL:
+            for run in runs:
+                run.wait()
+        return runs
 
     @staticmethod
-    def organise_output(output_source: Path, output_target: Path) -> None | str:
-        """Method to restructure and clean up after a single configurator call."""
-        raise NotImplementedError
+    def organise_output(output_source: Path,
+                        output_target: Path,
+                        scenario: ConfigurationScenario,
+                        run_id: int) -> None | str:
+        """Method to restructure and clean up after a single configurator call.
 
-    def set_scenario_dirs(self: Configurator,
-                          solver: Solver, instance_set: InstanceSet) -> None:
-        """Patching method to allow the rebuilding of configuration scenario."""
+        Args:
+            output_source: Path to the output file of the configurator run.
+            output_target: Path to the Performance DataFrame to store result.
+            scenario: ConfigurationScenario of the configuration.
+            run_id: ID of the run of the configuration.
+        """
         raise NotImplementedError
 
     def get_status_from_logs(self: Configurator) -> None:
         """Method to scan the log files of the configurator for warnings."""
+        raise NotImplementedError
+
+
+class ConfigurationScenario:
+    """Template class to handle a configuration scenarios."""
+    def __init__(self: ConfigurationScenario,
+                 solver: Solver,
+                 instance_set: InstanceSet,
+                 sparkle_objectives: list[SparkleObjective],
+                 parent_directory: Path) -> None:
+        """Initialize scenario paths and names.
+
+        Args:
+            solver: Solver that should be configured.
+            instance_set: Instances object for the scenario.
+            sparkle_objectives: Sparkle Objectives to optimize.
+            parent_directory: Directory in which the scenario should be placed.
+        """
+        self.solver = solver
+        self.instance_set = instance_set
+        self.sparkle_objectives = sparkle_objectives
+        self.name = f"{self.solver.name}_{self.instance_set.name}"
+
+        if self.instance_set.size == 0:
+            raise Exception("Cannot configure on an empty instance set "
+                            f"('{instance_set.name}').")
+
+        self.directory = parent_directory / self.name
+        self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
+        self.validation: Path = self.directory / "validation"
+        self.tmp: Path = self.directory / "tmp"
+        self.results_directory: Path = self.directory / "results"
+
+    def create_scenario(self: ConfigurationScenario, parent_directory: Path) -> None:
+        """Create scenario with solver and instances in the parent directory.
+
+        This prepares all the necessary subdirectories related to configuration.
+
+        Args:
+            parent_directory: Directory in which the scenario should be created.
+        """
+        raise NotImplementedError
+
+    def create_scenario_file(self: ConfigurationScenario) -> Path:
+        """Create a file with the configuration scenario.
+
+        Writes supplementary information to the target algorithm (algo =) as:
+        algo = {configurator_target} {solver_directory} {sparkle_objective}
+        """
+        raise NotImplementedError
+
+    def serialize(self: ConfigurationScenario) -> dict:
+        """Serialize the configuration scenario."""
+        raise NotImplementedError
+
+    @classmethod
+    def find_scenario(cls: ConfigurationScenario,
+                      directory: Path,
+                      solver: Solver,
+                      instance_set: InstanceSet) -> ConfigurationScenario:
+        """Resolve a scenario from a directory and Solver / Training set."""
+        scenario_name = f"{solver.name}_{instance_set.name}"
+        path = directory / f"{scenario_name}" / f"{scenario_name}_scenario.txt"
+        if not path.exists():
+            return None
+        return cls.from_file(path)
+
+    @staticmethod
+    def from_file(scenario_file: Path) -> ConfigurationScenario:
+        """Reads scenario file and initalises ConfigurationScenario."""
         raise NotImplementedError

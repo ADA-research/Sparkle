@@ -5,10 +5,10 @@ import sys
 import subprocess
 from pathlib import Path
 from sparkle.types import SolverStatus
-from sparkle.tools.slurm_parsing import parse_commandline_dict
+from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args
 
 # Convert the arguments to a dictionary
-args = parse_commandline_dict(sys.argv[1:])
+args = parse_solver_wrapper_args(sys.argv[1:])
 
 # Extract and delete data that needs specific formatting
 solver_dir = Path(args["solver_dir"])
@@ -43,6 +43,8 @@ except Exception as ex:
 
 # Convert Solver output to dictionary for configurator target algorithm script
 output_str = solver_call.stdout.decode()
+# Optional: Print original output so the solution can be verified by SATVerifier
+print(output_str)
 
 status = SolverStatus.CRASHED
 for line in output_str.splitlines():

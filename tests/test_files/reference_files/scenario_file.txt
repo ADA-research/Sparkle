@@ -1,5 +1,4 @@
-algo = /configurator_dir/target_algorithm.py tests/test_files/Solvers/Test-Solver
-execdir = tests/test_files/test_configurator/scenarios/instances/Test-Instance-Set/Test-Instance-Set_train.txt/
+algo = /configurator_dir/target_algorithm.py tests/test_files/Solvers/Test-Solver scenario/tmp PAR10 
 deterministic = 0
 run_obj = RUNTIME
 cutoffTime = 60

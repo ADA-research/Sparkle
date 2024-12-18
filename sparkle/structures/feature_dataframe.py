@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: UTF-8 -*-
-"""Module to manage feature data CSV files and common operation son them."""
+"""Module to manage feature data files and common operations on them."""
 from __future__ import annotations
 import pandas as pd
 import math
@@ -17,7 +15,7 @@ class FeatureDataFrame:
                  instances: list[str] = [],
                  extractor_data: dict[str, list[tuple[str, str]]] = {}
                  ) -> None:
-        """Initialise a SparkleFeatureDataCSV object.
+        """Initialise a FeatureDataFrame object.
 
         Arguments:
             csv_filepath: The Path for the CSV storage. If it does not exist,
@@ -84,10 +82,6 @@ class FeatureDataFrame:
         """Remove an instance from the dataframe."""
         self.dataframe.drop(instances, axis=1, inplace=True)
 
-    def get_extractors(self: FeatureDataFrame) -> list[str]:
-        """Returns all unique extractors in the DataFrame."""
-        return self.dataframe.index.get_level_values("Extractor").unique().to_list()
-
     def get_feature_groups(self: FeatureDataFrame,
                            extractor: str | list[str] = None) -> list[str]:
         """Retrieve the feature groups in the dataframe.
@@ -126,7 +120,7 @@ class FeatureDataFrame:
     def has_missing_vectors(self: FeatureDataFrame) -> bool:
         """Returns True if there are any Extractors still to be run on any instance."""
         for instance in self.dataframe.columns:
-            for extractor in self.get_extractors():
+            for extractor in self.extractors:
                 extractor_features = self.dataframe.xs(extractor, level=2,
                                                        drop_level=False)
                 if extractor_features.loc[:, instance].isnull().all():
@@ -141,7 +135,7 @@ class FeatureDataFrame:
                 that needs to be computed.
         """
         remaining_jobs = []
-        for extractor in self.get_extractors():
+        for extractor in self.extractors:
             for group in self.get_feature_groups(extractor):
                 subset = self.dataframe.xs((group, extractor), level=(0, 2))
                 for instance in self.dataframe.columns:
@@ -173,6 +167,16 @@ class FeatureDataFrame:
     def instances(self: FeatureDataFrame) -> list[str]:
         """Return the instances in the dataframe."""
         return self.dataframe.columns
+
+    @property
+    def extractors(self: FeatureDataFrame) -> list[str]:
+        """Returns all unique extractors in the DataFrame."""
+        return self.dataframe.index.get_level_values("Extractor").unique().to_list()
+
+    @property
+    def num_features(self: FeatureDataFrame) -> int:
+        """Return the number of features in the dataframe."""
+        return self.dataframe.shape[0]
 
     def save_csv(self: FeatureDataFrame, csv_filepath: Path = None) -> None:
         """Write a CSV to the given path.

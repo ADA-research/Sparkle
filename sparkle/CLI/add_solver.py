@@ -7,67 +7,60 @@ import argparse
 import shutil
 from pathlib import Path
 
-import runrunner as rrr
-
 from sparkle.platform import file_help as sfh
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
-from sparkle.CLI.run_solvers import running_solvers_performance_data
-from sparkle.solver import Solver
+from sparkle.solver import Solver, verifiers
 from sparkle.CLI.help import logging as sl
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help import argparse_custom as apc
-from sparkle.platform.settings_objects import SettingState
+from sparkle.CLI.help import argparse_custom as ac
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Add a solver to the Sparkle platform.",
-        epilog="")
-    parser.add_argument(*apc.DeterministicArgument.names,
-                        **apc.DeterministicArgument.kwargs)
-    group_solver_run = parser.add_mutually_exclusive_group()
-    group_solver_run.add_argument(*apc.RunSolverNowArgument.names,
-                                  **apc.RunSolverNowArgument.kwargs)
-    group_solver_run.add_argument(*apc.RunExtractorLaterArgument.names,
-                                  **apc.RunSolverLaterArgument.kwargs)
-    parser.add_argument(*apc.NicknameSolverArgument.names,
-                        **apc.NicknameSolverArgument.kwargs)
-    parser.add_argument(*apc.SolverPathArgument.names,
-                        **apc.SolverPathArgument.kwargs)
-    parser.add_argument(*apc.RunOnArgument.names,
-                        **apc.RunOnArgument.kwargs)
-    parser.add_argument(*apc.SkipChecksArgument.names,
-                        **apc.SkipChecksArgument.kwargs)
+        description="Add a solver to the Sparkle platform.")
+    parser.add_argument(*ac.DeterministicArgument.names,
+                        **ac.DeterministicArgument.kwargs)
+    parser.add_argument(*ac.SolutionVerifierArgument.names,
+                        **ac.SolutionVerifierArgument.kwargs)
+    parser.add_argument(*ac.NicknameSolverArgument.names,
+                        **ac.NicknameSolverArgument.kwargs)
+    parser.add_argument(*ac.SolverPathArgument.names, **ac.SolverPathArgument.kwargs)
+    parser.add_argument(*ac.SkipChecksArgument.names, **ac.SkipChecksArgument.kwargs)
+    parser.add_argument(*ac.NoCopyArgument.names, **ac.NoCopyArgument.kwargs)
     return parser
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     # Define command line arguments
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     solver_source = Path(args.solver_path)
     deterministic = args.deterministic
-
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.ADD_SOLVER])
+    solution_verifier = args.solution_verifier
 
     if not solver_source.exists():
         print(f'Solver path "{solver_source}" does not exist!')
         sys.exit(-1)
 
-    nickname = args.nickname
+    # Make sure it is pointing to the verifiers module
+    if solution_verifier:
+        if Path(solution_verifier).is_file():  # File verifier
+            solution_verifier = (verifiers.SolutionFileVerifier.__name__,
+                                 solution_verifier)
+        elif solution_verifier not in verifiers.mapping:
+            print(f"ERROR: Unknown solution verifier {solution_verifier}!")
+            sys.exit(-1)
 
-    if args.run_on is not None:
-        gv.settings().set_run_on(
-            args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
+    nickname = args.nickname
 
     if args.run_checks:
         print("Running checks...")
@@ -87,20 +80,30 @@ if __name__ == "__main__":
         if not (configurator_wrapper_path.is_file()
                 and os.access(configurator_wrapper_path, os.X_OK)):
             print(f"WARNING: Solver {solver_source.name} does not have a solver wrapper "
-                  f"(Missing file {gv.sparkle_solver_wrapper}) or is not executable. ")
+                  f"(Missing file {Solver.wrapper}) or is not executable. ")
 
     # Start add solver
     solver_directory = gv.settings().DEFAULT_solver_dir / solver_source.name
-    if not solver_directory.exists():
-        solver_directory.mkdir(parents=True, exist_ok=True)
-    else:
+    if solver_directory.exists():
         print(f"ERROR: Solver {solver_source.name} already exists! "
               "Can not add new solver.")
         sys.exit(-1)
-    shutil.copytree(solver_source, solver_directory, dirs_exist_ok=True)
+    if args.no_copy:
+        print(f"Creating symbolic link from {solver_source} "
+              f"to {solver_directory}...")
+        if not os.access(solver_source, os.W_OK):
+            raise PermissionError("Sparkle does not have the right to write to the "
+                                  "destination folder.")
+        solver_directory.symlink_to(solver_source.absolute())
+    else:
+        print(f"Copying {solver_source.name} to platform...")
+        solver_directory.mkdir(parents=True)
+        shutil.copytree(solver_source, solver_directory, dirs_exist_ok=True)
+
     # Save the deterministic bool in the solver
     with (solver_directory / Solver.meta_data).open("w+") as fout:
-        fout.write(str({"deterministic": deterministic}))
+        fout.write(str({"deterministic": deterministic,
+                        "verifier": solution_verifier}))
 
     # Add RunSolver executable to the solver
     runsolver_path = gv.settings().DEFAULT_runsolver_exec
@@ -115,41 +118,28 @@ if __name__ == "__main__":
     performance_data = PerformanceDataFrame(
         gv.settings().DEFAULT_performance_data_path,
         objectives=gv.settings().get_general_sparkle_objectives())
-    performance_data.add_solver(solver_directory)
+    performance_data.add_solver(str(solver_directory))
     performance_data.save_csv()
 
     print(f"Adding solver {solver_source.name} done!")
 
     if nickname is not None:
-        sfh.add_remove_platform_item(solver_directory,
-                                     gv.solver_nickname_list_path, key=nickname)
+        sfh.add_remove_platform_item(
+            solver_directory,
+            gv.solver_nickname_list_path,
+            gv.file_storage_data_mapping[gv.solver_nickname_list_path],
+            key=nickname)
 
-    if args.run_solver_now:
-        num_job_in_parallel = gv.settings().get_number_of_jobs_in_parallel()
-        dependency_run_list = [running_solvers_performance_data(
-            gv.settings().DEFAULT_performance_data_path, num_job_in_parallel,
-            rerun=False, run_on=run_on
-        )]
-
-        sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
-        srun_options = ["-N1", "-n1"] + sbatch_options
-        run_construct_portfolio_selector = rrr.add_to_queue(
-            cmd="sparkle/CLI/construct_portfolio_selector.py",
-            name=CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
-            dependencies=dependency_run_list,
-            base_dir=sl.caller_log_dir,
-            sbatch_options=sbatch_options,
-            srun_options=srun_options)
-
-        dependency_run_list.append(run_construct_portfolio_selector)
-
-        run_generate_report = rrr.add_to_queue(
-            cmd="sparkle/CLI/generate_report.py",
-            name=CommandName.GENERATE_REPORT,
-            dependencies=dependency_run_list,
-            base_dir=sl.caller_log_dir,
-            sbatch_options=sbatch_options,
-            srun_options=srun_options)
+    solver = Solver(solver_directory)  # Recreate solver from its new directory
+    if solver.get_pcs_file() is not None:
+        print("Generating missing PCS files...")
+        solver.port_pcs("IRACE")  # Create PCS file for IRACE
+        print("Generating done!")
 
     # Write used settings to file
     gv.settings().write_used_settings()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

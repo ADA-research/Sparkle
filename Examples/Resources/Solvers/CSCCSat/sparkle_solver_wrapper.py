@@ -5,8 +5,7 @@ import sys
 import subprocess
 from pathlib import Path
 from sparkle.types import SolverStatus
-from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args, \
-    get_solver_call_params
+from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args
 
 
 # Parse the arguments of the solver wrapper
@@ -34,6 +33,7 @@ except Exception as ex:
 
 # Convert Solver output to dictionary for configurator target algorithm script
 output_str = solver_call.stdout.decode()
+print(output_str)  # Print original output so it can be verified
 
 # Try to parse the status from the output
 status = SolverStatus.CRASHED

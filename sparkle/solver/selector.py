@@ -7,9 +7,7 @@ import ast
 import runrunner as rrr
 from runrunner import Runner, Run
 
-
-from sparkle.platform.cli_types import CommandName
-from sparkle.types import SparkleCallable
+from sparkle.types import SparkleCallable, SparkleObjective
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 
 
@@ -39,7 +37,7 @@ class Selector(SparkleCallable):
             target_file: Path,
             performance_data: Path,
             feature_data: Path,
-            objective: str,
+            objective: SparkleObjective,
             runtime_cutoff: int | float | str = None,
             wallclock_limit: int | float | str = None) -> list[str | Path]:
         """Builds the commandline call string for constructing the Selector.
@@ -55,11 +53,12 @@ class Selector(SparkleCallable):
         Returns:
             The command list for constructing the Selector.
         """
+        objective_function = "runtime" if objective.time else "solution_quality"
         # Python3 to avoid execution rights
         cmd = ["python3", self.selector_builder_path,
                "--performance_csv", performance_data,
                "--feature_csv", feature_data,
-               "--objective", objective,
+               "--objective", objective_function,
                "--save", target_file]
         if runtime_cutoff is not None:
             cmd.extend(["--runtime_cutoff", str(runtime_cutoff), "--tune"])
@@ -71,7 +70,7 @@ class Selector(SparkleCallable):
                   target_file: Path | str,
                   performance_data: PerformanceDataFrame,
                   feature_data: FeatureDataFrame,
-                  objective: str,
+                  objective: SparkleObjective,
                   runtime_cutoff: int | float | str = None,
                   wallclock_limit: int | float | str = None,
                   run_on: Runner = Runner.SLURM,
@@ -96,7 +95,8 @@ class Selector(SparkleCallable):
         if isinstance(target_file, str):
             target_file = self.raw_output_directory / target_file
         # Convert the dataframes to Selector Format
-        performance_csv = performance_data.to_autofolio(target_file.parent)
+        performance_csv = performance_data.to_autofolio(objective=objective,
+                                                        target=target_file.parent)
         feature_csv = feature_data.to_autofolio(target_file.parent)
         cmd = self.build_construction_cmd(target_file,
                                           performance_csv,
@@ -106,10 +106,11 @@ class Selector(SparkleCallable):
                                           wallclock_limit)
 
         cmd_str = " ".join([str(c) for c in cmd])
+        solver_names = ", ".join([Path(s).name for s in performance_data.solvers])
         construct = rrr.add_to_queue(
             runner=run_on,
             cmd=[cmd_str],
-            name=CommandName.CONSTRUCT_PORTFOLIO_SELECTOR,
+            name=f"Selector Construction: {solver_names}",
             base_dir=base_dir,
             stdout=Path("normal.log"),
             stderr=Path("error.log"),

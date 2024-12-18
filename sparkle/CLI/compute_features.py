@@ -13,21 +13,21 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.platform import COMMAND_DEPENDENCIES, CommandName
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help import argparse_custom as apc
 from sparkle.structures import FeatureDataFrame
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument(*apc.RecomputeFeaturesArgument.names,
-                        **apc.RecomputeFeaturesArgument.kwargs)
-    parser.add_argument(*apc.SettingsFileArgument.names,
-                        **apc.SettingsFileArgument.kwargs)
-    parser.add_argument(*apc.RunOnArgument.names,
-                        **apc.RunOnArgument.kwargs)
+    parser = argparse.ArgumentParser(description="Sparkle command to Compute features "
+                                                 "for instances using added extractors "
+                                                 "and instances.")
+    parser.add_argument(*ac.RecomputeFeaturesArgument.names,
+                        **ac.RecomputeFeaturesArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
 
     return parser
 
@@ -65,15 +65,18 @@ def compute_features(
     cutoff = gv.settings().get_general_extractor_cutoff_time()
     cmd_list = []
     extractors = {}
+    instance_paths = set()
     features_core = Path(__file__).parent.resolve() / "core" / "compute_features.py"
     # We create a job for each instance/extractor combination
     for instance_path, extractor_name, feature_group in jobs:
         extractor_path = gv.settings().DEFAULT_extractor_dir / extractor_name
-        cmd = (f"{features_core} "
+        instance_paths.add(instance_path)
+        cmd = (f"python3 {features_core} "
                f"--instance {instance_path} "
                f"--extractor {extractor_path} "
                f"--feature-csv {feature_data.csv_filepath} "
-               f"--cutoff {cutoff}")
+               f"--cutoff {cutoff} "
+               f"--log-dir {sl.caller_log_dir}")
         if extractor_name in extractors:
             extractor = extractors[extractor_name]
         else:
@@ -93,7 +96,8 @@ def compute_features(
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
-        name=CommandName.COMPUTE_FEATURES,
+        name=f"Compute Features: {len(extractors)} Extractors on "
+             f"{len(instance_paths)} instances",
         parallel_jobs=parallel_jobs,
         base_dir=sl.caller_log_dir,
         sbatch_options=sbatch_options,
@@ -115,27 +119,26 @@ def compute_features(
     return run
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main function of the compute features command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     # Define command line arguments
     parser = parser_function()
 
     # Process command line arguments
-    args = parser.parse_args()
-
-    if args.run_on is not None:
-        gv.settings().set_run_on(
-            args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
-
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.COMPUTE_FEATURES])
+    args = parser.parse_args(argv)
 
     if ac.set_by_user(args, "settings_file"):
         gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
+    if args.run_on is not None:
+        gv.settings().set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
+    run_on = gv.settings().get_run_on()
 
     # Check if there are any feature extractors registered
     if not any([p.is_dir() for p in gv.settings().DEFAULT_extractor_dir.iterdir()]):
@@ -149,3 +152,8 @@ if __name__ == "__main__":
 
     # Write used settings to file
     gv.settings().write_used_settings()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

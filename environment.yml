@@ -5,11 +5,12 @@ channels:
 variables: # runsolver compilation
   CPATH: "'${CONDA_PREFIX}/include:$CPATH'"
   LDPATH: "'${CONDA_PREFIX}/lib'"
+  R_LIBS_USER: "'${CONDA_PREFIX}/lib/python3.10/site-packages/sparkle/Components/irace-v3.5'"  # Adding IRACE install dir to R libspath
 dependencies:
   - python=3.10
   - swig=4.0.2 # SMAC3 C++ compiler
-  - libnuma # runsolver compilation
-  - numactl # runsolver compilation
-  - pip
+  - libnuma=2.0.18 # runsolver compilation
+  - numactl=2.0.18 # runsolver compilation
+  - pip # Sparkle installation
   - pip:
     - SparkleAI

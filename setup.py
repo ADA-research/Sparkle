@@ -21,16 +21,17 @@ setup(name="SparkleAI",
           "pandas==2.2.2",
           "filelock==3.15.1",
           "tabulate==0.9.0",
-          "RunRunner==0.1.6.4",
-          "pcsparser @ git+https://git@github.com/jeroenrook/pcsparser.git",
+          "pytermgui==7.7.2",
+          "tqdm==4.66.5",
+          "RunRunner==0.1.8",
           # Reporting packages
-          "plotly==5.23.0",
+          "plotly==5.24.1",
           "kaleido==0.2.1",
           # Autofolio packages
           "xgboost==2.0.3",
           "scikit-learn==1.3.2",
           "liac-arff==2.5.0",
-          "smac==2.2.0"
+          "smac==2.2.0",
       ],
       include_package_data=True,
       entry_points={"console_scripts": ["sparkle=sparkle.CLI.cli:main"], },)

@@ -1,0 +1,25 @@
+bootstrap categorical {True, False} [True]
+criterion categorical {gini, entropy, log_loss} [gini]
+max_depth_type categorical {None, int} [None]
+max_features_type categorical {special, float} [special]
+max_leaf_nodes_type categorical {None, int} [None]
+min_impurity_decrease real [0.0, 0.5] [0.0]
+min_samples_leaf integer [1, 100] [1]
+min_samples_split integer [1, 100] [2]
+min_weight_fraction_leaf real [0.0, 0.5] [0.0]
+n_estimators integer [1, 500] [100]
+max_depth integer [1, 100] [10]
+max_features_float real [0.0, 1.0] [0.5]
+max_features_special categorical {sqrt, log2, None} [sqrt]
+max_leaf_nodes integer [1, 1000] [100]
+max_samples_type categorical {None, float} [None]
+oob_score categorical {True, False} [True]
+max_samples real [0.05, 0.95] [0.8]
+
+max_depth | max_depth_type in {int}
+max_features_float | max_features_type in {float}
+max_features_special | max_features_type in {special}
+max_leaf_nodes | max_leaf_nodes_type in {int}
+max_samples_type | bootstrap in {True}
+oob_score | bootstrap in {True}
+max_samples | max_samples_type in {float}
