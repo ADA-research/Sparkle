@@ -188,7 +188,9 @@ class Settings:
         self.__smac2_wallclock_time_set = SettingState.NOT_SET
         self.__smac2_cpu_time_set = SettingState.NOT_SET
         self.__smac2_use_cpu_time_in_tunertime_set = SettingState.NOT_SET
+        self.__smac2_cli_cores_set = SettingState.NOT_SET
         self.__smac2_max_iterations_set = SettingState.NOT_SET
+        self.__smac2_target_cutoff_length_set = SettingState.NOT_SET
 
         self.__smac3_number_of_trials_set = SettingState.NOT_SET
         self.__smac3_smac_facade_set = SettingState.NOT_SET
@@ -204,7 +206,6 @@ class Settings:
         self.__run_on_set = SettingState.NOT_SET
         self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
         self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
-        self.__smac2_target_cutoff_length_set = SettingState.NOT_SET
         self.__ablation_racing_flag_set = SettingState.NOT_SET
 
         self.__parallel_portfolio_check_interval_set = SettingState.NOT_SET
