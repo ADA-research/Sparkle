@@ -42,8 +42,7 @@ def wait_for_jobs(path: Path,
         filter: If present, only show the given job ids.
     """
     # Filter jobs on relevant status
-    jobs = [run for run in jobs_help.get_runs_from_file(path)
-            if run.status == Status.WAITING or run.status == Status.RUNNING]
+    jobs = jobs_help.get_runs_from_file(path, filter=[Status.WAITING, Status.RUNNING])
 
     if filter is not None:
         jobs = [job for job in jobs if job.run_id in filter]

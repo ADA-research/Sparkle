@@ -20,10 +20,12 @@ def parser_function() -> argparse.ArgumentParser:
     """Parse CLI arguments for the initialise command."""
     parser = argparse.ArgumentParser(
         description="Initialise the Sparkle platform in the current directory.")
-    parser.add_argument(*ac.NoSavePlatformArgument.names,
-                        **ac.NoSavePlatformArgument.kwargs)
     parser.add_argument(*ac.DownloadExamplesArgument.names,
                         **ac.DownloadExamplesArgument.kwargs)
+    parser.add_argument(*ac.NoSavePlatformArgument.names,
+                        **ac.NoSavePlatformArgument.kwargs)
+    parser.add_argument(*ac.RebuildRunsolverArgument.names,
+                        **ac.RebuildRunsolverArgument.kwargs)
     return parser
 
 
@@ -103,13 +105,15 @@ def check_for_initialise() -> None:
 
 
 def initialise_sparkle(save_existing_platform: bool = True,
-                       download_examples: bool = False) -> None:
+                       download_examples: bool = False,
+                       rebuild_runsolver: bool = False) -> None:
     """Initialize a new Sparkle platform.
 
     Args:
         save_existing_platform: If present, save the current platform as a snapshot.
         download_examples: Downloads examples from the Sparkle Github.
             WARNING: May take a some time to complete due to the large amount of data.
+        rebuild_runsolver: Will clean the RunSolver executable and rebuild it.
     """
     print("Start initialising Sparkle platform ...")
     if detect_sparkle_platform_exists(check=all):
@@ -142,6 +146,15 @@ def initialise_sparkle(save_existing_platform: bool = True,
     PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path,
                          objectives=gv.settings().get_general_sparkle_objectives(),
                          n_runs=1)
+
+    if rebuild_runsolver:
+        print("Cleaning Runsolver ...")
+        runsolver_clean = subprocess.run(["make", "clean"],
+                                         cwd=gv.settings().DEFAULT_runsolver_dir,
+                                         capture_output=True)
+        if runsolver_clean.returncode != 0:
+            warnings.warn(f"[{runsolver_clean.returncode}] Cleaning of Runsolver failed "
+                          f"with the following msg: {runsolver_clean.stdout.decode()}")
 
     # Check that Runsolver is compiled, otherwise, compile
     if not gv.settings().DEFAULT_runsolver_exec.exists():
@@ -207,7 +220,8 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
     initialise_sparkle(save_existing_platform=args.no_save,
-                       download_examples=args.download_examples)
+                       download_examples=args.download_examples,
+                       rebuild_runsolver=args.rebuild_runsolver)
     sys.exit(0)
 
 
