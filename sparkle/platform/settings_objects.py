@@ -1013,7 +1013,8 @@ class Settings:
     def get_smac2_cli_cores(self: Settings) -> int | None:
         """Number of cores to use to execute runs.
 
-        In other words, the number of requests to run at a given time."""
+        In other words, the number of requests to run at a given time.
+        """
         if self.__smac2_cli_cores_set == SettingState.NOT_SET:
             self.set_smac2_cli_cores()
         cli_cores = self.__settings["smac2"]["cli_cores"]
