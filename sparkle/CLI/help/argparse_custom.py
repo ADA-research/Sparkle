@@ -496,8 +496,10 @@ SolutionVerifierArgument = \
     ArgumentContainer(names=["--solution-verifier"],
                       kwargs={"type": str,
                               "default": None,
-                              "help": "the class name of the solution verifier or path "
-                                      "to solutions to use for the Solver."})
+                              "help": "the class name of the solution verifier to use "
+                                      "for the Solver. If it is a Path, will resolve as "
+                                      "a SolutionFileVerifier class with the specified "
+                                      "Path instead."})
 
 ObjectiveArgument = \
     ArgumentContainer(names=["--objective"],
