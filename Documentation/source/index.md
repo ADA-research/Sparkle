@@ -105,6 +105,10 @@ Which can then at a later point easily be loaded by typing:
 module restore sparkle
 ```
 
+### Bash autocomplete
+
+If you wish for the Bash autocomplete to also work for Sparkle's CLI commands, you can type `sparkle install autocomplete`, which will append a single line of code to your `.bash_profile` allowing you to auto complete any sparkle command with the tab.
+
 ### Dependencies
 Asside from several package dependencies, Sparkle's package / CLI relies on a few user supplied executables:
 - `LaTex` compiler ([pdflatex](https://gist.github.com/rain1024/98dd5e2c6c8c28f9ea9d)) for report generation
