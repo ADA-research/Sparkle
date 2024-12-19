@@ -1,20 +1,18 @@
 # man page for "complete": https://manpages.ubuntu.com/manpages/noble/en/man7/bash-builtins.7.html
 #/usr/bin/env bash
 _sparkle_target() {
-    local cur prev opts
+    local cur opts
     # Retrieving the current typed argument
     cur="${COMP_WORDS[COMP_CWORD]}"
-    # Retrieving the previous typed argument ("-m" for example)
-    prev="${COMP_WORDS[COMP_CWORD - 1]}"
 
     # Preparing an array to store available list for completions
     # COMREPLY will be checked to suggest the list
     COMPREPLY=()
 
-    # Here, we only handle the case of "-m"
+    # Here, we only handle the case of the second keyword, first being sparkle
     # we want to leave the autocomplete of the standard usage to the default,
     # so COMREPLY stays an empty array and we fallback through "-o default"
-    if [[ "$prev" != "sparkle" ]]; then
+    if [ "${#COMP_WORDS[@]}" -gt 2 ]; then
         return 0
     fi
 

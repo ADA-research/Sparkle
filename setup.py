@@ -34,4 +34,4 @@ setup(name="SparkleAI",
           "smac==2.2.0",
       ],
       include_package_data=True,
-      entry_points={"console_scripts": ["sparkle=sparkle.CLI.cli:main"], },)
+      entry_points={"console_scripts": ["sparkle=sparkle.CLI._cli_:main"], },)
