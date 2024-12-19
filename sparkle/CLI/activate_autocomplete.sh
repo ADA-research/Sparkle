@@ -28,7 +28,6 @@ _sparkle_target() {
     # Then we store the whole list by invoking "compgen" and filling COMREPLY with its output content.
     # To mimick standard bash autocompletions we truncate autocomplete to the next folder (identified by dots)
     COMPREPLY=($(compgen -W "$opts" -- "$cur"))
-    #COMPREPLY+=($PACKAGE_PATH)
 }
 
 # nospace disables printing of a space at the end of autocomplete,
