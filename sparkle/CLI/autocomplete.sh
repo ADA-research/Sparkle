@@ -1,5 +1,4 @@
-# man page for "complete": https://manpages.ubuntu.com/manpages/noble/en/man7/bash-builtins.7.html
-#/usr/bin/env bash
+# -------------------------------- Sparkle autocomplete ---------------------------------
 _sparkle_target() {
     local cur opts
     # Retrieving the current typed argument
@@ -34,3 +33,5 @@ _sparkle_target() {
 # - removes the addition of the trailing / for standard python completion on folders
 # -o default makes sure that default behaviour of bash is used when our script returns 0
 complete -F _sparkle_target -o default sparkle
+
+# -------------------------------- Sparkle autocomplete ---------------------------------

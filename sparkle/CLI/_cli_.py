@@ -40,11 +40,17 @@ def main() -> None:
 
     if command_file.is_file():
         os.system(f"python3 {command_file} {' '.join(args)}")
-    elif command_file.with_suffix(".sh").is_file():
-        script_path = command_file.with_suffix(".sh")
-        script_path.chmod(0o755)  # Ensure execution rights with shipment
-        os.system(f"source {script_path}")
-        print("Sparkle autocomplete activated!")
+    elif command == "install_autocomplete":
+        script_path = module_path / "autocomplete.sh"
+        bash_profile = Path.home() / ".bash_profile"
+        if not bash_profile.exists():
+            bash_profile.open("w+").close()
+        bash_profile.open("a").write(
+            "\n#----- Sparkle AutoComplete ----\n"
+            f"source {script_path.absolute()}"
+            "\n#----- Sparkle AutoComplete ----\n")
+        print(f"Sparkle autocomplete installed! To enable, run `source {bash_profile}` "
+              "or restart your terminal.")
     else:
         print(f"Sparkle does not understand command <{command}>")
 
