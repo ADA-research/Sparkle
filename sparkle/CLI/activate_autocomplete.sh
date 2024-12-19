@@ -2,7 +2,6 @@
 #/usr/bin/env bash
 _sparkle_target() {
     local cur prev opts
-
     # Retrieving the current typed argument
     cur="${COMP_WORDS[COMP_CWORD]}"
     # Retrieving the previous typed argument ("-m" for example)
@@ -24,15 +23,17 @@ _sparkle_target() {
 
     # Otherwise, first we retrieve all paths of folder and .py files inside the <your_package> package,
     # we keep only the package related section, remove the .py extension and convert their separators into dots
-    opts="$(find $PACKAGE_PATH -maxdepth 1 -regex ".*py" | sed "s|$PACKAGE_PATH/||" | sed "s|\.py||" )"
+    opts=$(find $PACKAGE_PATH -maxdepth 1 -name "[a-zA-Z]*.py" | sed "s|$PACKAGE_PATH/||" | sed "s|\.py||")
 
     # Then we store the whole list by invoking "compgen" and filling COMREPLY with its output content.
     # To mimick standard bash autocompletions we truncate autocomplete to the next folder (identified by dots)
     COMPREPLY=($(compgen -W "$opts" -- "$cur"))
+    #COMPREPLY+=($PACKAGE_PATH)
 }
 
 # nospace disables printing of a space at the end of autocomplete,
 # it allows to chain the autocomplete but:
 # - removes the indication on end of chain that only one match was found.
 # - removes the addition of the trailing / for standard python completion on folders
-complete -F _sparkle_target -o bashdefault -o default sparkle
+# -o default makes sure that default behaviour of bash is used when our script returns 0
+complete -F _sparkle_target -o default sparkle
