@@ -12,6 +12,7 @@ Notable changes to Sparkle will be documented in this file.
 
 ### Added
 - Added documentation on how to use Venv instead of Conda for Sparkle [SPRK-367]
+- Added autocompletion for Sparkle CLI [SPRK-332]
 
 ## [0.9.1.2] - 2025/12/12
 
