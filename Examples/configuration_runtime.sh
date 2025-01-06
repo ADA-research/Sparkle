@@ -38,7 +38,7 @@ sparkle configure_solver --solver Solvers/PbO-CCSAT-Generic/ --instance-set-trai
 
 # We have to wait for the algorithm configuration to be completed, to get live updates on your terminal we can simply run:
 
-sparkle wait
+sparkle jobs
 
 # And now we can generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in `Output/Configuration/Analysis/`. Note that you may get the warning that not all solvers have been run yet: Sometimes an algorithm call may crash and can easily be restarted by sparkle by running `sparkle run solvers`.
 
@@ -57,7 +57,7 @@ sparkle run_ablation --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train In
 
 # Wait for ablation to be completed
 
-sparkle wait
+sparkle jobs
 
 # Generate a report including ablation, and as before the results on the train (and optionally test) set, the experimental procedure and performance information; this will be located in a `Configuration_Reports/` subdirectory for the solver, training set, and optionally test set like `PbO-CCSAT-Generic_PTN/Sparkle-latex-generator-for-configuration/`
 

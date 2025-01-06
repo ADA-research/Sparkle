@@ -40,14 +40,14 @@ sparkle compute features
 sparkle run solvers --performance-data
 
 ### Construct a portfolio selector
-# To make sure feature computation and solver performance computation are done before constructing the portfolio use the `wait` command
+# To make sure feature computation and solver performance computation are done before constructing the portfolio use the `jobs` command
 
-sparkle wait
+sparkle jobs
 
 # Now we can construct a portfolio selector, using the previously computed features and the results of running the solvers. The `--selector-timeout` argument determines for how many seconds we will train our selector for. We can set the flag `--solver-ablation` for actual marginal contribution computation later.
 
 sparkle construct portfolio selector --selector-timeout 1000 --solver-ablation
-sparkle wait  # Wait for the constructor to complete its computations
+sparkle jobs  # Wait for the constructor to complete its computations
 
 ### Generate a report
 
@@ -68,7 +68,7 @@ sparkle run portfolio selector Examples/Resources/Instances/PTN2/plain7824.cnf -
 # Run the portfolio selector on a testing instance *set*
 
 sparkle run portfolio selector Examples/Resources/Instances/PTN2/
-sparkle wait  # Wait for the portfolio selector to be done running on the testing instance set
+sparkle jobs  # Wait for the portfolio selector to be done running on the testing instance set
 
 #### Generate a report including results on the test set
 
@@ -97,17 +97,17 @@ sparkle add instances Examples/Resources/Instances/SATCOMP2023_SUB
 # We compute the features for the new extractor and new instances.
 
 sparkle compute features
-sparkle wait  # Wait for it to complete before continuing
+sparkle jobs  # Wait for it to complete before continuing
 
 # And run the solvers on the new data set.
 
 sparkle run solvers
-sparkle wait
+sparkle jobs
 
 # Now we can train a selector based on these features.
 
 sparkle construct portfolio selector --selector-timeout 1000
-sparkle wait  #Wait for the computation to be done
+sparkle jobs  #Wait for the computation to be done
 
 # And generate the report. When running on the PTN/PTN2 data sets, you can compare the two to see the impact of different feature extractors.
 

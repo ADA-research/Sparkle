@@ -43,9 +43,9 @@ sparkle run_solvers --objectives quality
 
 ### Construct a portfolio selector
 
-# To make sure feature computation and solver performance computation are done before constructing the portfolio use the `wait` command
+# To make sure feature computation and solver performance computation are done before constructing the portfolio use the `jobs` command
 
-sparkle wait
+sparkle jobs
 
 # Construct a portfolio selector, using the previously computed features and the results of running the solvers. We again set the objective measure to quality.
 
@@ -67,9 +67,9 @@ sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/ --object
 
 #### Generate a report including results on the test set
 
-# Wait for the portfolio selector to be done running on the testing instance set
+# Jobs for the portfolio selector to be done running on the testing instance set
 
-sparkle wait
+sparkle jobs
 
 # Generate an experimental report that includes the results on the test set, and as before the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report_For_Test.pdf`. We again set the obejctive to quality.
 
