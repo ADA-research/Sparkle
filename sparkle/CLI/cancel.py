@@ -91,10 +91,11 @@ def main(argv: list[str]) -> None:
                     continue
                 else:
                     job = job_id_map[row.split("|")[1].strip()]
-                    if job.status in [Status.RUNNING, Status.WAITING]:
+                    if job.status in [Status.WAITING, Status.RUNNING]:
                         window._widgets[iw + 1] = ptg.Button(label=row,
                                                              onclick=cancel_jobs)
                     elif isinstance(window._widgets[iw + 1], ptg.Button):
+                        # Finished job, replace button with label
                         window._widgets[iw + 1] = ptg.Label(row)
                 window._widgets[iw + 1].parent = window
 
