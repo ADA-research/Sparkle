@@ -2,7 +2,8 @@
 import pytest
 from pathlib import Path
 
-from sparkle.CLI import initialise, cancel, add_solver, add_instances, configure_solver
+from sparkle.CLI import initialise, add_solver, add_instances, configure_solver
+from sparkle.CLI import jobs as sparkle_jobs
 from sparkle.CLI.help import jobs as jobs_help
 from sparkle.CLI.help import global_variables as gv
 
@@ -26,13 +27,13 @@ def test_cancel_command_no_jobs(tmp_path: Path,
 
     # Test with nothing to cancel
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        cancel.main(["--all"])
+        sparkle_jobs.main(["--cancel", "--all"])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
     # Test with an ID that does not exist
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        cancel.main(["--job-ids", "1234"])
+        sparkle_jobs.main(["--cancel", "--job-ids", "1234"])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == -1
 
@@ -84,7 +85,7 @@ def test_cancel_command_configuration(tmp_path: Path,
 
     # Cancel configuration jobs
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        cancel.main(["--job-ids"] + [str(job.run_id) for job in jobs])
+        sparkle_jobs.main(["--cancel", "--job-ids"] + [str(job.run_id) for job in jobs])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 

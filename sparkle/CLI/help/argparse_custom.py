@@ -104,6 +104,11 @@ BestConfigurationArgument = \
                                       "which to determine the best configuration. If "
                                       "empty, all known instances are used."})
 
+CancelJobsArgument = \
+    ArgumentContainer(names=["--cancel"],
+                      kwargs={"action": "store_true",
+                              "help": "cancel the job(s) with the given ID(s)"})
+
 CleanupArgumentAll = \
     ArgumentContainer(names=["--all"],
                       kwargs={"action": "store_true",
