@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Command to cancel async jobs."""
 import sys
+import time
 import argparse
 import pytermgui as ptg
 
@@ -52,7 +53,7 @@ def main(argv: list[str]) -> None:
         print(f"Canceled {len(killed_jobs)} jobs with IDs: "
               f"{', '.join([j.run_id for j in killed_jobs])}.")
     elif len(jobs) == 0:
-        print("No jobs available to cancel.")
+        print("No jobs running.")
     else:
         jobs = sorted(jobs, key=lambda j: j.run_id)
         ptg.Button.chars = {"delimiter": ["", ""]}  # Disable padding around buttons
@@ -60,33 +61,76 @@ def main(argv: list[str]) -> None:
         def cancel_jobs(self: ptg.Button) -> None:
             """Cancel jobs based on a button click."""
             job_id = self.label.split("|")[1].strip()
-            for job in jobs:
-                if job.run_id == job_id:
-                    job.kill()
-                    # Replace button with label
-                    for iw, widget in enumerate(self.parent._widgets):
-                        if isinstance(widget, ptg.Button) and \
-                                widget.label == self.label:
-                            self.parent._widgets[iw] = ptg.Label(self.label)
-                    break
+            job = job_id_map[job_id]
+
+            def kill_exit(self: ptg.Button) -> None:
+                """Two step protocol of killing the job and removing the popup."""
+                job.kill()
+                manager.remove(popup)
+
+            button_yes = ptg.Button("Yes", kill_exit)
+            button_no = ptg.Button("No", lambda *_: manager.remove(popup))
+
+            popup = manager.alert(ptg.Label(f"Cancel job {job_id}?"),
+                                  button_no, button_yes)
+
             refresh_data(self.parent)
 
-        def refresh_data(self: ptg.Window) -> None:
+        def refresh_data(self: ptg.Window | ptg.WindowManager, key: str = None) -> None:
             """Refresh the table."""
+            # Resolve window
+            window = self._windows[0] if isinstance(self, ptg.WindowManager) else self
+            # Fetch latest data
+            for job in jobs:
+                if job.status in [Status.WAITING, Status.RUNNING]:
+                    job.get_latest_job_details()
             data_table = jobs_help.create_jobs_table(jobs, markup=True).splitlines()
-            for iw, widget in enumerate(self._widgets):
-                self._widgets[iw] = type(widget)(data_table[iw], onclick=cancel_jobs)
-                self._widgets[iw].parent = self
+            # Rebuild the widgets
+            for iw, row in enumerate(data_table):
+                if "|" not in row or not row.split("|")[1].strip().isnumeric():  # Label
+                    continue
+                else:
+                    job = job_id_map[row.split("|")[1].strip()]
+                    if job.status in [Status.RUNNING, Status.WAITING]:
+                        window._widgets[iw + 1] = ptg.Button(label=row,
+                                                             onclick=cancel_jobs)
+                    elif isinstance(window._widgets[iw + 1], ptg.Button):
+                        window._widgets[iw + 1] = ptg.Label(row)
+                window._widgets[iw + 1].parent = window
 
         table = jobs_help.create_jobs_table(jobs, markup=True).splitlines()
         with ptg.WindowManager() as manager:
+            def macro_reload(fmt: str) -> str:
+                """Updates jobs in the table with an interval."""
+                if "last_reload" not in globals():
+                    global last_reload
+                    last_reload = time.time()
+                diff = time.time() - last_reload
+                interval = 10.0
+                if diff > interval:  # Check every 10 seconds
+                    last_reload = 0
+                    any_running = False
+                    for job in jobs:
+                        if job.status in [Status.RUNNING, Status.WAITING]:
+                            any_running = True
+                            job.get_latest_job_details()
+                    if not any_running:
+                        manager.stop()
+                    refresh_data(manager)
+                    last_reload = time.time()
+                n_bars = int(diff / 2)
+                return "|" + "█" * n_bars + " " * (4 - n_bars) + "|"
+
+            ptg.tim.define("!reload", macro_reload)
             window = (
                 ptg.Window(
+                    "[bold]Sparkle Jobs [!reload]%c",
                     width=len(table[0]),
                     box="EMPTY",
                 )
                 .set_title("Running Sparkle Jobs")
             )
+            job_id_map = {job.run_id: job for job in jobs}
             for row in table:
                 if "|" not in row or not row.split("|")[1].strip().isnumeric():
                     window._add_widget(ptg.Label(row))
@@ -94,6 +138,7 @@ def main(argv: list[str]) -> None:
                     window._add_widget(ptg.Button(label=row, onclick=cancel_jobs))
 
             manager.add(window)
+            manager.bind(" ", action=refresh_data, description="Refresh")
 
     sys.exit(0)
 
