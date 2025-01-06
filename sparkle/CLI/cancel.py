@@ -36,6 +36,10 @@ def main(argv: list[str]) -> None:
     path = gv.settings().DEFAULT_log_output
     jobs = [run for run in jobs_help.get_runs_from_file(path)
             if run.status == Status.WAITING or run.status == Status.RUNNING]
+    if len(jobs) == 0:
+        print("No jobs running.")
+        sys.exit(0)
+
     if args.all or args.job_ids:
         killed_jobs = []
         for j in jobs:
@@ -79,25 +83,27 @@ def main(argv: list[str]) -> None:
         def refresh_data(self: ptg.Window | ptg.WindowManager, key: str = None) -> None:
             """Refresh the table."""
             # Resolve window
-            window = self._windows[0] if isinstance(self, ptg.WindowManager) else self
+            window = self._windows[-1] if isinstance(self, ptg.WindowManager) else self
             # Fetch latest data
             for job in jobs:
                 if job.status in [Status.WAITING, Status.RUNNING]:
                     job.get_latest_job_details()
-            data_table = jobs_help.create_jobs_table(jobs, markup=True).splitlines()
             # Rebuild the widgets
-            for iw, row in enumerate(data_table):
-                if "|" not in row or not row.split("|")[1].strip().isnumeric():  # Label
+            for iw, widget in enumerate(window._widgets):
+                if not isinstance(widget, ptg.Button):
                     continue
+                job_id = widget.label.split("|")[1].strip()
+                job = job_id_map[job_id]
+                # Create a new job row
+                job_row = jobs_help.create_jobs_table([job],
+                                                      markup=True).splitlines()[-2]
+                if job.status in [Status.WAITING, Status.RUNNING]:
+                    window._widgets[iw] = ptg.Button(label=job_row,
+                                                     onclick=cancel_jobs)
                 else:
-                    job = job_id_map[row.split("|")[1].strip()]
-                    if job.status in [Status.WAITING, Status.RUNNING]:
-                        window._widgets[iw + 1] = ptg.Button(label=row,
-                                                             onclick=cancel_jobs)
-                    elif isinstance(window._widgets[iw + 1], ptg.Button):
-                        # Finished job, replace button with label
-                        window._widgets[iw + 1] = ptg.Label(row)
-                window._widgets[iw + 1].parent = window
+                    # Finished job, replace button with label
+                    window._widgets[iw] = ptg.Label(job_row)
+                window._widgets[iw].parent = window
 
         table = jobs_help.create_jobs_table(jobs, markup=True).splitlines()
         with ptg.WindowManager() as manager:
@@ -139,8 +145,10 @@ def main(argv: list[str]) -> None:
                     window._add_widget(ptg.Button(label=row, onclick=cancel_jobs))
 
             manager.add(window)
-            manager.bind(" ", action=refresh_data, description="Refresh")
 
+        # If we exit here, it means all jobs were finished. Print final table.
+        table = jobs_help.create_jobs_table(jobs, format="fancy_grid")
+        print(table)
     sys.exit(0)
 
 
