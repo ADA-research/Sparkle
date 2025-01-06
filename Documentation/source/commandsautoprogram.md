@@ -30,14 +30,6 @@
 
 ```
 
-(cmd-cancel)=
-
-```{eval-rst}
-.. autoprogram:: sparkle.CLI.cancel:parser_function()
-   :prog: cancel
-
-```
-
 (cmd-cleanup)=
 
 ```{eval-rst}
@@ -91,6 +83,14 @@
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.initialise:parser_function()
    :prog: initialise
+
+```
+
+(cmd-jobs)=
+
+```{eval-rst}
+.. autoprogram:: sparkle.CLI.jobs:parser_function()
+   :prog: jobs
 
 ```
 
@@ -171,13 +171,5 @@
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.status:parser_function()
    :prog: status
-
-```
-
-(cmd-wait)=
-
-```{eval-rst}
-.. autoprogram:: sparkle.CLI.wait:parser_function()
-   :prog: wait
 
 ```

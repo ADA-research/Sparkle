@@ -36,7 +36,7 @@ sparkle configure_solver --solver Solvers/VRP_SISRs/ --instance-set-train Instan
 
 # Wait for the configuration to be completed:
 
-sparkle wait
+sparkle jobs
 
 # Generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in `Output/Configuration/Analysis`. The configuration scenario is saved by Sparkle, including the specified objective.
 

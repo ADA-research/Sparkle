@@ -29,7 +29,7 @@ def test_cancel_command_no_jobs(tmp_path: Path,
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         sparkle_jobs.main(["--cancel", "--all"])
     assert pytest_wrapped_e.type is SystemExit
-    assert pytest_wrapped_e.value.code == 0
+    assert pytest_wrapped_e.value.code == -1
 
     # Test with an ID that does not exist
     with pytest.raises(SystemExit) as pytest_wrapped_e:

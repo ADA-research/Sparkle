@@ -25,7 +25,7 @@ sparkle configure_solver --solver RandomForest --instance-set-train Iris --objec
 
 # Wait for configuration to be completed
 
-sparkle wait
+sparkle jobs
 
 # Generate a report detailing the results on the training (and optionally testing) set.
 
