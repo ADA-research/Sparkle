@@ -345,6 +345,14 @@ class PerformanceDataFrame(pd.DataFrame):
         # Sort the index to optimize lookup speed
         self.sort_index(axis=0, inplace=True)
 
+    def remove_empty_runs(self: PerformanceDataFrame) -> None:
+        """Remove runs that contain no data, except for the first."""
+        for row_index in self.index:
+            if row_index[2] == 1:  # First run, never delete
+                continue
+            if self.loc[row_index].isna().all():
+                self.drop(row_index, inplace=True)
+
     def reset_value(self: PerformanceDataFrame,
                     solver: str,
                     instance: str,

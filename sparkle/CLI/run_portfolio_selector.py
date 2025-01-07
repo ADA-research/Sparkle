@@ -38,14 +38,13 @@ def main(argv: list[str]) -> None:
     """Main function of the run portfolio selector command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     # Define command line arguments
     parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args(argv)
-
-    check_for_initialise()
 
     if ac.set_by_user(args, "settings_file"):
         gv.settings().read_settings_ini(
@@ -110,7 +109,7 @@ def main(argv: list[str]) -> None:
 
     run_core = Path(__file__).parent.parent.resolve() /\
         "CLI" / "core" / "run_portfolio_selector_core.py"
-    cmd_list = [f"python {run_core} "
+    cmd_list = [f"python3 {run_core} "
                 f"--selector {selector_path} "
                 f"--feature-data-csv {feature_dataframe.csv_filepath} "
                 f"--performance-data-csv {performance_data.csv_filepath} "

@@ -6,14 +6,14 @@ from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import global_variables as gv
 
 
-def test__update_caller() -> None:
+def test_update_caller() -> None:
     """Test caller is correctly updated when _update_caller is called."""
     argv = ["test.py"]
     sl._update_caller(argv)
     assert sl.caller == "test"
 
 
-def test__update_caller_file_path() -> None:
+def test_update_caller_file_path() -> None:
     """Test _update_caller_file_path uses the right file name and creates it."""
     timestamp = "18-08-2023_12:34:56"
     sl._update_caller_file_path(timestamp)
@@ -22,7 +22,7 @@ def test__update_caller_file_path() -> None:
     assert isinstance(sl.caller_log_path, PurePath)
     assert isinstance(sl.caller_log_dir, Path)
 
-    assert str(sl.caller_out_dir) == f"{timestamp}_{sl.caller}"
+    assert str(sl.caller_out_dir) == f"{sl.caller}_{timestamp}"
 
     assert Path(sl.caller_log_path).is_file()
 

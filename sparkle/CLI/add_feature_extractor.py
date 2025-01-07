@@ -32,13 +32,12 @@ def main(argv: list[str]) -> None:
     """Main function of the add feature extractor command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args(argv)
-
-    check_for_initialise()
 
     extractor_source = Path(args.extractor_path)
     if not extractor_source.exists():

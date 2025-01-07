@@ -2,6 +2,23 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+
+## [0.9.2] - 07/01/2025
+
+### Fixed
+- Bugs regarding using Configuration with instance features [SPRK-364]
+- Allow user to easily recompile runsolver with initialise command for Venv support [SPRK-367]
+- Added performance data argument to clean up command [SPRK-367]
+- Updated wait command to yield more information when jobs are finished [SPRK-367]
+
+### Added
+- Added documentation on how to use Venv instead of Conda for Sparkle [SPRK-367]
+- Added autocompletion for Sparkle CLI [SPRK-332]
+- Cancelling a job through the interactive table now has a confirmation dialog [SPRK-343]
+
+### Changed
+- The wait command and cancel command have been merged into the `jobs` command [SPRK-343]
+
 ## [0.9.1.2] - 2025/12/12
 
 Patchfix

@@ -20,7 +20,12 @@ Furthermore, Sparkle handles various tasks for the user such as:
  * Compute cluster job submission and monitoring
  * Log file collection
 
+
 ## Installation
+
+Sparkle is a Python based package, but required several non-Python dependencies to run fully. The easiest installation is through Conda. A setup with Python virtual Environment is also possible, but requires more user input for the installation process.
+
+### Conda
 
 The quick and full installation of Sparkle can be done using Conda (For Conda installation see [here]( https://docs.conda.io/en/latest/miniconda.html)). 
 
@@ -51,7 +56,11 @@ The creation of the Conda environment also takes care of the installation of the
 You will need to reactivate the environment every time you start the terminal, before using Sparkle.
 ```
 
-Sparkle can also be installed as a standalone package using Pip. We recommend creating a new virtual environment (For example, [venv](https://docs.python.org/3/library/venv.html)) before to ensure no clashes between dependencies occur. 
+### venv
+
+Sparkle can also be installed as a standalone package using Pip. We recommend creating a new virtual environment with [venv](https://docs.python.org/3/library/venv.html) before to ensure no clashes between dependencies occur. Note that when creating a new venv, Sparkle needs Python 3.10 to run, so create your virtual environment with this Python version active
+
+To install Sparkle in the virtual environment simply type:
 
 ```bash
 pip install SparkleAI
@@ -59,11 +68,40 @@ pip install SparkleAI
 
 Note that a direct installation through Pip does not handle certain dependencies of the Sparkle CLI, such as the required libraries for compiling [RunSolver](https://www.cril.univ-artois.fr/~roussel/runsolver/).
 
-### Install dependencies
+You will need to supply, asside from the other dependencies in the next section, the following in your virtual environment:
+- `Python 3.10` is required to use Sparkle
+- `libnuma` and `numactl` in order to compile RunSolver. We suggest to use `GCCcore-12.2.0`.
+- The `R6` package, in order to compile `IRACE`
+
+If your system works with [Lmod](http://lmod.readthedocs.org), we recommend loading the modules in the following order (Check that the versions are available):
+
+```bash
+module load R/4.3.2
+module load Java/8.402
+module load numactl/2.0.16-GCCcore-12.2.0
+```
+
+Whilst loading these modules you can receive various messages that module versions have changed whilst loading. Executing the loads in this order will ensure the changes are correct. Afterwards you can save your loaded modules as a set with nickname `sparkle` by typing:
+
+```bash
+module save sparkle
+```
+
+Which can then at a later point easily be loaded by typing:
+
+```bash
+module restore sparkle
+```
+
+### Bash autocomplete
+
+If you wish for the Bash autocomplete to also work for Sparkle's CLI commands, you can type `sparkle install autocomplete`, which will append a single line of code to your `.bash_profile` allowing you to auto complete any sparkle command with the tab.
+
+### Dependencies
 Asside from several package dependencies, Sparkle's package / CLI relies on a few user supplied executables:
 - `LaTex` compiler ([pdflatex](https://gist.github.com/rain1024/98dd5e2c6c8c28f9ea9d)) for report generation
 - `Java`, tested with version 1.8.0_402, in order to use SMAC2
-- `R`, tested with version 4.3.1 in order to use IRACE
+- `R` 4.3.1, in order to use IRACE
 
 Other dependencies are handled by the Conda environment, but if that is not an option for you please ensure you have the following:
 
@@ -127,6 +165,7 @@ K. van der Blom, H. H. Hoos, C. Luo and J. G. Rook, **Sparkle: Toward Accessible
 ### Maintainers
 Thijs Snelleman,
 Jeroen Rook,
+Hadar Shavit,
 Holger H. Hoos,
 
 ### Contributors
@@ -144,7 +183,8 @@ Marie Anastacio,
 Aaron Berger
 Koen van der Blom,
 Noah Peil,
-Brian Schiller
+Brian Schiller,
+Emir Pisiciri
 
 ### Contact
 sparkle@aim.rwth-aachen.de

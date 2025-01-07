@@ -2,7 +2,6 @@
 - {ref}`cmd-add-feature-extractor`
 - {ref}`cmd-add-instances`
 - {ref}`cmd-add-solver`
-- {ref}`cmd-cancel`
 - {ref}`cmd-cleanup`
 - {ref}`cmd-compute-features`
 - {ref}`cmd-compute-marginal-contribution`
@@ -10,16 +9,14 @@
 - {ref}`cmd-construct-portfolio-selector`
 - {ref}`cmd-generate-report`
 - {ref}`cmd-initialise`
+- {ref}`cmd-jobs`
 - {ref}`cmd-load-snapshot`
 - {ref}`cmd-remove-feature-extractor`
 - {ref}`cmd-remove-instances`
 - {ref}`cmd-remove-solver`
 - {ref}`cmd-run-ablation`
-- {ref}`cmd-run-configured-solver`
 - {ref}`cmd-run-parallel-portfolio`
 - {ref}`cmd-run-portfolio-selector`
 - {ref}`cmd-run-solvers`
 - {ref}`cmd-save-snapshot`
 - {ref}`cmd-status`
-- {ref}`cmd-validate-configured-vs-default`
-- {ref}`cmd-wait`

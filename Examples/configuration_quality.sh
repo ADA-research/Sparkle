@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.9.0
+# Auto-Generated .sh files from the original .md by Sparkle 0.9.2
 
 ## Algorithm Quality Configuration
 # We can configure an algorithm too based on some quality objective, that can be defined by the user. See the {ref}`SparkleObjective <sparkle-objective>` page for all options regarding objective defintions.
@@ -36,7 +36,7 @@ sparkle configure_solver --solver Solvers/VRP_SISRs/ --instance-set-train Instan
 
 # Wait for the configuration to be completed:
 
-sparkle wait
+sparkle jobs
 
 # Generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in `Output/Configuration/Analysis`. The configuration scenario is saved by Sparkle, including the specified objective.
 

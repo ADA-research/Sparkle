@@ -71,7 +71,7 @@ def compute_features(
     for instance_path, extractor_name, feature_group in jobs:
         extractor_path = gv.settings().DEFAULT_extractor_dir / extractor_name
         instance_paths.add(instance_path)
-        cmd = (f"{features_core} "
+        cmd = (f"python3 {features_core} "
                f"--instance {instance_path} "
                f"--extractor {extractor_path} "
                f"--feature-csv {feature_data.csv_filepath} "
@@ -123,14 +123,13 @@ def main(argv: list[str]) -> None:
     """Main function of the compute features command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     # Define command line arguments
     parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args(argv)
-
-    check_for_initialise()
 
     if ac.set_by_user(args, "settings_file"):
         gv.settings().read_settings_ini(

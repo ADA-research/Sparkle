@@ -10,20 +10,22 @@ from pathlib import Path
 
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help import snapshot_help as snh
-from sparkle.platform.settings_objects import Settings
-from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.CLI.help import global_variables as gv
 from sparkle.configurator.implementations.irace import IRACE
+from sparkle.platform import Settings
+from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Parse CLI arguments for the initialise command."""
     parser = argparse.ArgumentParser(
         description="Initialise the Sparkle platform in the current directory.")
-    parser.add_argument(*ac.NoSavePlatformArgument.names,
-                        **ac.NoSavePlatformArgument.kwargs)
     parser.add_argument(*ac.DownloadExamplesArgument.names,
                         **ac.DownloadExamplesArgument.kwargs)
+    parser.add_argument(*ac.NoSavePlatformArgument.names,
+                        **ac.NoSavePlatformArgument.kwargs)
+    parser.add_argument(*ac.RebuildRunsolverArgument.names,
+                        **ac.RebuildRunsolverArgument.kwargs)
     return parser
 
 
@@ -51,7 +53,7 @@ def initialise_irace() -> None:
     """Initialise IRACE."""
     if shutil.which("R") is None:
         warnings.warn("R is not installed, which is required for the IRACE"
-                      "configurator. Make sure R is installed and try again.")
+                      "configurator. Consider installing R.")
         return
     print("Initialising IRACE ...")
     r6_package_check = subprocess.run(["Rscript", "-e",
@@ -103,13 +105,15 @@ def check_for_initialise() -> None:
 
 
 def initialise_sparkle(save_existing_platform: bool = True,
-                       download_examples: bool = False) -> None:
+                       download_examples: bool = False,
+                       rebuild_runsolver: bool = False) -> None:
     """Initialize a new Sparkle platform.
 
     Args:
         save_existing_platform: If present, save the current platform as a snapshot.
         download_examples: Downloads examples from the Sparkle Github.
             WARNING: May take a some time to complete due to the large amount of data.
+        rebuild_runsolver: Will clean the RunSolver executable and rebuild it.
     """
     print("Start initialising Sparkle platform ...")
     if detect_sparkle_platform_exists(check=all):
@@ -142,6 +146,15 @@ def initialise_sparkle(save_existing_platform: bool = True,
     PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path,
                          objectives=gv.settings().get_general_sparkle_objectives(),
                          n_runs=1)
+
+    if rebuild_runsolver:
+        print("Cleaning Runsolver ...")
+        runsolver_clean = subprocess.run(["make", "clean"],
+                                         cwd=gv.settings().DEFAULT_runsolver_dir,
+                                         capture_output=True)
+        if runsolver_clean.returncode != 0:
+            warnings.warn(f"[{runsolver_clean.returncode}] Cleaning of Runsolver failed "
+                          f"with the following msg: {runsolver_clean.stdout.decode()}")
 
     # Check that Runsolver is compiled, otherwise, compile
     if not gv.settings().DEFAULT_runsolver_exec.exists():
@@ -176,8 +189,8 @@ def initialise_sparkle(save_existing_platform: bool = True,
     if shutil.which("java") is None:
         # NOTE: An automatic resolution of Java at this point would be good
         # However, loading modules from Python has thusfar not been successfull.
-        warnings.warn("Could not find Java as an executable! "
-                      "Java 1.8.0_402 is required to use SMAC2 as a configurator.")
+        warnings.warn("Could not find Java as an executable! Java 1.8.0_402 is required "
+                      "to use SMAC2 as a configurator. Consider installing Java.")
 
     # Check if IRACE is installed
     if not IRACE.configurator_executable.exists():
@@ -185,7 +198,6 @@ def initialise_sparkle(save_existing_platform: bool = True,
 
     if download_examples:
         # Download Sparkle examples from Github
-        # NOTE: Needs to be thoroughly tested after Pip install is working
         print("Downloading examples ...")
         curl = subprocess.Popen(
             ["curl", "https://codeload.github.com/ADA-research/Sparkle/tar.gz/main"],
@@ -208,7 +220,8 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
     initialise_sparkle(save_existing_platform=args.no_save,
-                       download_examples=args.download_examples)
+                       download_examples=args.download_examples,
+                       rebuild_runsolver=args.rebuild_runsolver)
     sys.exit(0)
 
 

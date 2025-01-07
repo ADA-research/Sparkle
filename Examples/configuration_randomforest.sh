@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.9.0
+# Auto-Generated .sh files from the original .md by Sparkle 0.9.2
 
 ## Configuring Random Forest on Iris
 
@@ -25,7 +25,7 @@ sparkle configure_solver --solver RandomForest --instance-set-train Iris --objec
 
 # Wait for configuration to be completed
 
-sparkle wait
+sparkle jobs
 
 # Generate a report detailing the results on the training (and optionally testing) set.
 

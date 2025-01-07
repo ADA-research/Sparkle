@@ -247,6 +247,7 @@ def main(argv: list[str]) -> None:
     """Main method of run parallel portfolio command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     # Define command line arguments
     parser = parser_function()
@@ -267,8 +268,6 @@ def main(argv: list[str]) -> None:
     else:
         solvers = [Solver(p) for p in
                    gv.settings().DEFAULT_solver_dir.iterdir() if p.is_dir()]
-
-    check_for_initialise()
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))

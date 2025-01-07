@@ -6,8 +6,6 @@ import ast
 from pathlib import Path
 from pathlib import PurePath
 
-from smac import facade as smac_facades
-
 from sparkle.types import SparkleObjective, resolve_objective
 from sparkle.types.objective import PAR
 from sparkle.solver import Selector
@@ -131,11 +129,12 @@ class Settings:
     DEFAULT_smac2_cpu_time = None
     DEFAULT_smac2_target_cutoff_length = "max"
     DEFAULT_smac2_use_cpu_time_in_tunertime = None
+    DEFAULT_smac2_cli_cores = None
     DEFAULT_smac2_max_iterations = None
 
     # Default SMAC3 settings
     DEFAULT_smac3_number_of_runs = None
-    DEFAULT_smac3_facade = smac_facades.AlgorithmConfigurationFacade.__name__
+    DEFAULT_smac3_facade = "AlgorithmConfigurationFacade"
     DEFAULT_smac3_facade_max_ratio = None
     DEFAULT_smac3_crash_cost = None
     DEFAULT_smac3_termination_cost_threshold = None
@@ -189,7 +188,9 @@ class Settings:
         self.__smac2_wallclock_time_set = SettingState.NOT_SET
         self.__smac2_cpu_time_set = SettingState.NOT_SET
         self.__smac2_use_cpu_time_in_tunertime_set = SettingState.NOT_SET
+        self.__smac2_cli_cores_set = SettingState.NOT_SET
         self.__smac2_max_iterations_set = SettingState.NOT_SET
+        self.__smac2_target_cutoff_length_set = SettingState.NOT_SET
 
         self.__smac3_number_of_trials_set = SettingState.NOT_SET
         self.__smac3_smac_facade_set = SettingState.NOT_SET
@@ -205,7 +206,6 @@ class Settings:
         self.__run_on_set = SettingState.NOT_SET
         self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
         self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
-        self.__smac2_target_cutoff_length_set = SettingState.NOT_SET
         self.__ablation_racing_flag_set = SettingState.NOT_SET
 
         self.__parallel_portfolio_check_interval_set = SettingState.NOT_SET
@@ -350,6 +350,13 @@ class Settings:
                     self.set_smac2_use_cpu_time_in_tunertime(value, state)
                     file_settings.remove_option(section, option)
 
+            option_names = ("cli_cores", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_smac2_cli_cores(value, state)
+                    file_settings.remove_option(section, option)
+
             options_names = ("iteration_limit", "numIterations", "numberOfIterations",
                              "max_iterations")
             for option in options_names:
@@ -367,7 +374,7 @@ class Settings:
                     self.set_smac3_number_of_trials(value, state)
                     file_settings.remove_option(section, option)
 
-            options_names = ("facade", "smac_facade", )
+            options_names = ("facade", "smac_facade", "smac3_facade")
             for option in options_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
@@ -518,10 +525,10 @@ class Settings:
                               f'{option}" in file {file_path} ignored')
 
         # Print error if unable to read the settings
-        else:
+        elif Path(file_path).exists():
             print(f"ERROR: Failed to read settings from {file_path} The file may have "
-                  "been empty, located in a different path, or be in another format than"
-                  " INI. Default Settings values be used.")
+                  "been empty or be in another format than INI. Default Setting values "
+                  "will be used.")
 
     def write_used_settings(self: Settings) -> None:
         """Write the used settings to the default locations."""
@@ -804,6 +811,7 @@ class Settings:
                 "wallclock_time": self.get_smac2_wallclock_time(),
                 "target_cutoff_length": self.get_smac2_target_cutoff_length(),
                 "use_cpu_time_in_tunertime": self.get_smac2_use_cpu_time_in_tunertime(),
+                "cli_cores": self.get_smac2_cli_cores(),
                 "max_iterations": self.get_smac2_max_iterations()
                 or configurator_settings["max_iterations"],
             })
@@ -990,6 +998,29 @@ class Settings:
             self.set_smac2_use_cpu_time_in_tunertime()
         return ast.literal_eval(self.__settings["smac2"]["use_cpu_time_in_tunertime"])
 
+    def set_smac2_cli_cores(
+            self: Settings, value: int = DEFAULT_smac2_cli_cores,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the number of cores to use for SMAC2 CLI."""
+        section = "smac2"
+        name = "cli_cores"
+
+        if self.__check_setting_state(
+                self.__smac2_cli_cores_set, origin, name):
+            self.__init_section(section)
+            self.__smac2_cli_cores_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_smac2_cli_cores(self: Settings) -> int | None:
+        """Number of cores to use to execute runs.
+
+        In other words, the number of requests to run at a given time.
+        """
+        if self.__smac2_cli_cores_set == SettingState.NOT_SET:
+            self.set_smac2_cli_cores()
+        cli_cores = self.__settings["smac2"]["cli_cores"]
+        return int(cli_cores) if cli_cores.isdigit() else None
+
     def set_smac2_max_iterations(
             self: Settings, value: int = DEFAULT_smac2_max_iterations,
             origin: SettingState = SettingState.DEFAULT) -> None:
@@ -1048,14 +1079,11 @@ class Settings:
             self.__smac3_smac_facade_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_smac3_smac_facade(self: Settings) -> smac_facades.AbstractFacade:
+    def get_smac3_smac_facade(self: Settings) -> str:
         """Return the SMAC3 facade."""
         if self.__smac3_smac_facade_set == SettingState.NOT_SET:
             self.set_smac3_smac_facade()
-        facade_name = self.__settings["smac3"]["facade"]
-        if facade_name == "None":
-            return None
-        return getattr(smac_facades, facade_name)
+        return self.__settings["smac3"]["facade"]
 
     def set_smac3_facade_max_ratio(
             self: Settings, value: float = DEFAULT_smac3_facade_max_ratio,
@@ -1082,7 +1110,7 @@ class Settings:
         section = "smac3"
         name = "crash_cost"
 
-        if self.__check_setting_state(self.__smac3_smac_facade_set, origin, name):
+        if self.__check_setting_state(self.__smac3_crash_cost_set, origin, name):
             self.__init_section(section)
             self.__smac3_smac_facade_set = origin
             self.__settings[section][name] = str(value)

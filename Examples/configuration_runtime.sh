@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.9.0
+# Auto-Generated .sh files from the original .md by Sparkle 0.9.2
 
 ## Algorithm Runtime Configuration
 
@@ -38,7 +38,7 @@ sparkle configure_solver --solver Solvers/PbO-CCSAT-Generic/ --instance-set-trai
 
 # We have to wait for the algorithm configuration to be completed, to get live updates on your terminal we can simply run:
 
-sparkle wait
+sparkle jobs
 
 # And now we can generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in `Output/Configuration/Analysis/`. Note that you may get the warning that not all solvers have been run yet: Sometimes an algorithm call may crash and can easily be restarted by sparkle by running `sparkle run solvers`.
 
@@ -57,7 +57,7 @@ sparkle run_ablation --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train In
 
 # Wait for ablation to be completed
 
-sparkle wait
+sparkle jobs
 
 # Generate a report including ablation, and as before the results on the train (and optionally test) set, the experimental procedure and performance information; this will be located in a `Configuration_Reports/` subdirectory for the solver, training set, and optionally test set like `PbO-CCSAT-Generic_PTN/Sparkle-latex-generator-for-configuration/`
 
@@ -69,7 +69,7 @@ sparkle generate_report
 
 #### Run configured solver on a single instance
 
-# Now that we have a configured solver, we can run it on a single instance to get a result.
+# Now that we have a configured solver, we can run it on a single instance to get a result. We do not have to specify which solver, as we only added one to Sparkle in this example. By specifying an instance set after `--best-configuration`, Sparkle will only consider configurations found for this instance set.
 
 sparkle run_solvers --best-configuration PTN --instance Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf --run-on local
 

@@ -3,15 +3,15 @@ from __future__ import annotations
 from pathlib import Path
 import glob
 import shutil
+import math
 
 import pandas as pd
 
-import runrunner as rrr
 from runrunner import Runner, Run
 
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
-from sparkle.structures import PerformanceDataFrame
+from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.instance import InstanceSet, Instance_Set
 from sparkle.types import SparkleObjective, resolve_objective
 
@@ -94,38 +94,19 @@ class SMAC2(Configurator):
                 f"--scenario-file {scenario.scenario_file_path} "
                 f"--seed {seed} "
                 for output_file, seed in zip(output, seeds)]
-        parallel_jobs = scenario.number_of_runs
         if num_parallel_jobs is not None:
-            parallel_jobs = max(num_parallel_jobs, scenario.number_of_runs)
-        runs = [rrr.add_to_queue(
-            runner=run_on,
-            cmd=cmds,
-            name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
-            base_dir=base_dir,
-            output_path=output,
-            parallel_jobs=parallel_jobs,
+            num_parallel_jobs = max(num_parallel_jobs, scenario.number_of_runs)
+        return super().configure(
+            configuration_commands=cmds,
+            data_target=data_target,
+            output=output,
+            num_parallel_jobs=num_parallel_jobs,
+            scenario=scenario,
+            validation_ids=seeds if validate_after else None,
             sbatch_options=sbatch_options,
-            srun_options=["-N1", "-n1"])]
-
-        if validate_after:
-            # TODO: Array job specific dependency, requires RunRunner update
-            validate = scenario.solver.run_performance_dataframe(
-                scenario.instance_set,
-                run_ids=seeds,
-                performance_dataframe=data_target,
-                cutoff_time=scenario.cutoff_time,
-                run_on=run_on,
-                sbatch_options=sbatch_options,
-                log_dir=scenario.validation,
-                base_dir=base_dir,
-                dependencies=runs,
-            )
-            runs.append(validate)
-
-        if run_on == Runner.LOCAL:
-            for run in runs:
-                run.wait()
-        return runs
+            base_dir=base_dir,
+            run_on=run_on
+        )
 
     @staticmethod
     def organise_output(output_source: Path,
@@ -217,8 +198,9 @@ class SMAC2Scenario(ConfigurationScenario):
                  wallclock_time: int = None,
                  cutoff_time: int = None,
                  target_cutoff_length: str = None,
+                 cli_cores: int = None,
                  use_cpu_time_in_tunertime: bool = None,
-                 feature_data_df: pd.DataFrame = None)\
+                 feature_data: FeatureDataFrame | Path = None)\
             -> None:
         """Initialize scenario paths and names.
 
@@ -241,9 +223,13 @@ class SMAC2Scenario(ConfigurationScenario):
                 configuration.
             target_cutoff_length: A domain specific measure of when the algorithm
                 should consider itself done.
+            cli_cores: int
+                The number of cores to use to execute runs. Defaults in SMAC2 to 1.
             use_cpu_time_in_tunertime: Whether to calculate SMAC2's own used time for
                 budget deduction. Defaults in SMAC2 to True.
-            feature_data_df: If features are used, this contains the feature data.
+            feature_data: If features are used, this contains the feature data.
+                If it is a FeatureDataFrame, will convert values to SMAC2 format.
+                If it is a Path, will pass the path to SMAC2.
                 Defaults to None.
         """
         super().__init__(solver, instance_set, sparkle_objectives, parent_directory)
@@ -266,8 +252,42 @@ class SMAC2Scenario(ConfigurationScenario):
         self.cutoff_time = cutoff_time
         self.cutoff_length = target_cutoff_length
         self.max_iterations = max_iterations
+        self.cli_cores = cli_cores
         self.use_cpu_time_in_tunertime = use_cpu_time_in_tunertime
-        self.feature_data = feature_data_df
+
+        self.feature_data = feature_data
+        self.feature_file_path = None
+        if self.feature_data:
+            if isinstance(self.feature_data, FeatureDataFrame):
+                # Convert feature data to SMAC2 format
+                data_dict = {}
+                for instance in self.instance_set.instance_paths:
+                    data_dict[str(instance)] = feature_data.get_instance(str(instance))
+
+                self.feature_data = pd.DataFrame.from_dict(
+                    data_dict, orient="index",
+                    columns=[f"Feature{index+1}"
+                             for index in range(feature_data.num_features)])
+
+                def map_nan(x: str) -> int:
+                    """Map non-numeric values with -512 (Pre-defined by SMAC2)."""
+                    if math.isnan(x):
+                        return -512.0
+                    try:
+                        return float(x)
+                    except Exception:
+                        return -512.0
+
+                self.feature_data = self.feature_data.map(map_nan)
+                self.feature_file_path =\
+                    self.directory / f"{self.instance_set.name}_features.csv"
+            elif isinstance(self.feature_data, Path):  # Read from Path
+                self.feature_file_path = feature_data
+                self.feature_data = pd.read_csv(self.feature_file_path,
+                                                index_col=0)
+            else:
+                print(f"WARNING: Feature data is of type {type(feature_data)}. "
+                      "Expected FeatureDataFrame or Path.")
 
         # Scenario Paths
         self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
@@ -324,6 +344,8 @@ class SMAC2Scenario(ConfigurationScenario):
                 file.write(f"cputime-limit = {self.cpu_time}\n")
             if self.solver_calls is not None:
                 file.write(f"runcount-limit = {self.solver_calls}\n")
+            if self.cli_cores is not None:
+                file.write(f"cli-cores = {self.cli_cores}")
             if self.feature_data is not None:
                 file.write(f"feature_file = {self.feature_file_path}\n")
             if self.use_cpu_time_in_tunertime is not None:
@@ -340,6 +362,11 @@ class SMAC2Scenario(ConfigurationScenario):
             for instance_path in self.instance_set._instance_paths:
                 file.write(f"{instance_path}\n")
 
+    def _create_feature_file(self: SMAC2Scenario) -> None:
+        """Create CSV file from feature data."""
+        self.feature_data.to_csv(self.feature_file_path,
+                                 index_label="INSTANCE_NAME")
+
     def _get_performance_measure(self: SMAC2Scenario) -> str:
         """Retrieve the performance measure of the SparkleObjective.
 
@@ -349,13 +376,6 @@ class SMAC2Scenario(ConfigurationScenario):
         if self.sparkle_objective.time:
             return "RUNTIME"
         return "QUALITY"
-
-    def _create_feature_file(self: SMAC2Scenario) -> None:
-        """Create CSV file from feature data."""
-        self.feature_file_path = Path(self.directory
-                                      / f"{self.instance_set.name}_features.csv")
-        self.feature_data.to_csv(self.directory / self.feature_file_path,
-                                 index_label="INSTANCE_NAME")
 
     def serialize_scenario(self: SMAC2Scenario) -> dict:
         """Transform ConfigurationScenario to dictionary format."""
@@ -368,7 +388,7 @@ class SMAC2Scenario(ConfigurationScenario):
             "cutoff_length": self.cutoff_length,
             "max_iterations": self.max_iterations,
             "sparkle_objective": self.sparkle_objective.name,
-            "feature_data": self.feature_data,
+            "feature_data": self.feature_data_path,
             "use_cpu_time_in_tunertime": self.use_cpu_time_in_tunertime
         }
 
@@ -390,6 +410,7 @@ class SMAC2Scenario(ConfigurationScenario):
             else None
         use_cpu_time_in_tunertime = config["use-cputime-in-tunertime"]\
             if "use-cputime-in-tunertime" in config else None
+        cli_cores = config["cli-cores"] if "cli-cores" in config else None
 
         _, solver_path, _, objective_str = config["algo"].split(" ")
         objective = resolve_objective(objective_str)
@@ -401,6 +422,9 @@ class SMAC2Scenario(ConfigurationScenario):
         results_folder = scenario_file.parent / "results"
         state_run_dirs = [p for p in results_folder.iterdir() if p.is_file()]
         number_of_runs = len(state_run_dirs)
+        feature_data_path = None
+        if "feature_file" in config:
+            feature_data_path = Path(config["feature_file"])
         return SMAC2Scenario(solver,
                              instance_set,
                              [objective],
@@ -412,4 +436,6 @@ class SMAC2Scenario(ConfigurationScenario):
                              wallclock_limit,
                              int(config["cutoffTime"]),
                              config["cutoff_length"],
-                             use_cpu_time_in_tunertime)
+                             cli_cores,
+                             use_cpu_time_in_tunertime,
+                             feature_data_path)

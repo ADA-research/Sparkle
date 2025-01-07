@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.9.0
+# Auto-Generated .sh files from the original .md by Sparkle 0.9.2
 
 ## Algorithm selection with multi-file instances
 
@@ -45,7 +45,7 @@ sparkle run_solvers --objectives quality
 
 # To make sure feature computation and solver performance computation are done before constructing the portfolio use the `wait` command
 
-sparkle wait
+sparkle jobs
 
 # Construct a portfolio selector, using the previously computed features and the results of running the solvers. We again set the objective measure to quality.
 
@@ -69,7 +69,7 @@ sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/ --object
 
 # Wait for the portfolio selector to be done running on the testing instance set
 
-sparkle wait
+sparkle jobs
 
 # Generate an experimental report that includes the results on the test set, and as before the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report_For_Test.pdf`. We again set the obejctive to quality.
 

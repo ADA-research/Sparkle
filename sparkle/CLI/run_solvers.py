@@ -207,6 +207,7 @@ def main(argv: list[str]) -> None:
     """Main function of the run solvers command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     # Define command line arguments
     parser = parser_function()
@@ -230,7 +231,6 @@ def main(argv: list[str]) -> None:
         else:
             objective = resolve_objective(args.objective)
 
-    check_for_initialise()
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
     Settings.check_settings_changes(gv.settings(), prev_settings)

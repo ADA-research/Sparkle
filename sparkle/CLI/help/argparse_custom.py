@@ -104,6 +104,11 @@ BestConfigurationArgument = \
                                       "which to determine the best configuration. If "
                                       "empty, all known instances are used."})
 
+CancelJobsArgument = \
+    ArgumentContainer(names=["--cancel"],
+                      kwargs={"action": "store_true",
+                              "help": "cancel the job(s) with the given ID(s)"})
+
 CleanupArgumentAll = \
     ArgumentContainer(names=["--all"],
                       kwargs={"action": "store_true",
@@ -114,6 +119,11 @@ CleanupArgumentRemove = \
                       kwargs={"action": "store_true",
                               "help": "remove all files in the platform, including "
                                       "user data such as InstanceSets and Solvers"})
+
+CleanUpPerformanceDataArgument = \
+    ArgumentContainer(names=["--performance-data"],
+                      kwargs={"action": "store_true",
+                              "help": "clean performance data from empty lines"})
 
 ConfigurationArgument = \
     ArgumentContainer(names=["--configuration"],
@@ -348,6 +358,13 @@ PerformanceDataJobsArgument = \
                               "help": "compute the remaining jobs in the Performance "
                               "DataFrame"})
 
+RebuildRunsolverArgument = \
+    ArgumentContainer(names=["--rebuild-runsolver"],
+                      kwargs={"action": "store_true",
+                              "required": False,
+                              "default": False,
+                              "help": "Clean the RunSolver executable and rebuild it."})
+
 RunOnArgument = ArgumentContainer(names=["--run-on"],
                                   kwargs={"type": Runner,
                                           "choices": [Runner.LOCAL,
@@ -484,8 +501,10 @@ SolutionVerifierArgument = \
     ArgumentContainer(names=["--solution-verifier"],
                       kwargs={"type": str,
                               "default": None,
-                              "help": "the class name of the solution verifier or path "
-                                      "to solutions to use for the Solver."})
+                              "help": "the class name of the solution verifier to use "
+                                      "for the Solver. If it is a Path, will resolve as "
+                                      "a SolutionFileVerifier class with the specified "
+                                      "Path instead."})
 
 ObjectiveArgument = \
     ArgumentContainer(names=["--objective"],

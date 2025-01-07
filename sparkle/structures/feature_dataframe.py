@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: UTF-8 -*-
 """Module to manage feature data files and common operations on them."""
 from __future__ import annotations
 import pandas as pd
@@ -17,7 +15,7 @@ class FeatureDataFrame:
                  instances: list[str] = [],
                  extractor_data: dict[str, list[tuple[str, str]]] = {}
                  ) -> None:
-        """Initialise a SparkleFeatureDataCSV object.
+        """Initialise a FeatureDataFrame object.
 
         Arguments:
             csv_filepath: The Path for the CSV storage. If it does not exist,
@@ -174,6 +172,11 @@ class FeatureDataFrame:
     def extractors(self: FeatureDataFrame) -> list[str]:
         """Returns all unique extractors in the DataFrame."""
         return self.dataframe.index.get_level_values("Extractor").unique().to_list()
+
+    @property
+    def num_features(self: FeatureDataFrame) -> int:
+        """Return the number of features in the dataframe."""
+        return self.dataframe.shape[0]
 
     def save_csv(self: FeatureDataFrame, csv_filepath: Path = None) -> None:
         """Write a CSV to the given path.

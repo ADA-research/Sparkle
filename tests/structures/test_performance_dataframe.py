@@ -210,6 +210,15 @@ def test_add_remove_runs() -> None:
     assert pd_nan.num_runs == 1
 
 
+def test_remove_empty_runs() -> None:
+    """Test removing empty runs."""
+    empty_runs_csv = Path("tests/test_files/performance/empty_runs.csv")
+    pd_empty = PerformanceDataFrame(empty_runs_csv)
+    assert pd_empty.num_runs == 26
+    pd_empty.remove_empty_runs()
+    assert pd_empty.num_runs == 1
+
+
 def test_set_get_value() -> None:
     """Test set value method."""
     pd_mo = PerformanceDataFrame(csv_example_mo)
