@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.9.0
+# Auto-Generated .sh files from the original .md by Sparkle 0.9.2
 
 ## Algorithm Runtime Configuration
 
@@ -69,7 +69,7 @@ sparkle generate_report
 
 #### Run configured solver on a single instance
 
-# Now that we have a configured solver, we can run it on a single instance to get a result.
+# Now that we have a configured solver, we can run it on a single instance to get a result. We do not have to specify which solver, as we only added one to Sparkle in this example. By specifying an instance set after `--best-configuration`, Sparkle will only consider configurations found for this instance set.
 
 sparkle run_solvers --best-configuration PTN --instance Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf --run-on local
 
