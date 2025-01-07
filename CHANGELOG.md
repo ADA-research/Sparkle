@@ -2,6 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+
 ## [0.9.2] - 07/01/2025
 
 ### Fixed
