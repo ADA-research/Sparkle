@@ -2,7 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.9.2] - ??
+## [0.9.2] - 07/01/2025
 
 ### Fixed
 - Bugs regarding using Configuration with instance features [SPRK-364]
