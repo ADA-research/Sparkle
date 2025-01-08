@@ -73,7 +73,7 @@ for line in output_str.splitlines():
             status = SolverStatus.SUCCESS
 
 outdir = {"status": status.value,
-          "quality": 0,
+          "quality": solution_quality,
           "solver_call": solver_cmd + params}
 
 print(outdir)
