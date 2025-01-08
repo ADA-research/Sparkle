@@ -3,10 +3,14 @@
 import sys
 import time
 import argparse
+
 import pytermgui as ptg
+from tabulate import tabulate
 
 from runrunner.base import Status, Run
+from runrunner.slurm import SlurmRun
 
+from sparkle.platform.cli_types import TEXT
 from sparkle.CLI.help import logging
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help import jobs as jobs_help
@@ -20,6 +24,51 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(*ac.JobIDsArgument.names, **ac.JobIDsArgument.kwargs)
     parser.add_argument(*ac.AllJobsArgument.names, **ac.AllJobsArgument.kwargs)
     return parser
+
+
+def create_jobs_table(jobs: list[SlurmRun],
+                      markup: bool = True,
+                      format: str = "grid") -> str:
+    """Create a table of jobs.
+
+    Args:
+        runs: List of SlurmRun objects.
+        markup: By default some mark up will be applied to the table.
+            If false, a more plain version will be created.
+        format: The tabulate format to use.
+        per_job: If true, returns a dict with the job ids as keys and
+            The lines per job as values.
+
+    Returns:
+        A table of jobs as a string.
+    """
+    job_table = [["RunId", "Name", "Quality of Service", "Partition", "Status",
+                  "Dependencies", "Finished Jobs", "Run Time"]]
+    for job in jobs:
+        # Count number of jobs that have finished
+        finished_jobs_count = sum(1 for status in job.all_status
+                                  if status == Status.COMPLETED)
+        if markup:  # Format job.status
+            status_text = \
+                TEXT.format_text([TEXT.BOLD], job.status) \
+                if job.status == Status.RUNNING else \
+                (TEXT.format_text([TEXT.ITALIC], job.status)
+                    if job.status == Status.COMPLETED else job.status.value)
+        else:
+            status_text = job.status.value
+        job_table.append(
+            [job.run_id,
+             job.name,
+             job.qos,
+             job.partition,
+             status_text,
+             "None" if len(job.dependencies) == 0 else ", ".join(job.dependencies),
+             f"{finished_jobs_count}/{len(job.all_status)}",
+             job.runtime])
+    if markup:
+        job_table = tabulate(job_table, headers="firstrow", tablefmt=format,
+                             maxcolwidths=[12, 32, 14, 12, 16, 16, 16, 10])
+    return job_table
 
 
 def table_gui(jobs: list[Run]) -> None:
@@ -53,24 +102,26 @@ def table_gui(jobs: list[Run]) -> None:
         for job in jobs:
             if job.status in [Status.WAITING, Status.RUNNING]:
                 job.get_latest_job_details()
-        # Rebuild the widgets
-        for iw, widget in enumerate(window._widgets):
-            if not isinstance(widget, ptg.Button):
-                continue
-            job_id = widget.label.split("|")[1].strip()
-            job = job_id_map[job_id]
-            # Create a new job row
-            job_row = jobs_help.create_jobs_table([job],
-                                                  markup=True).splitlines()[-2]
-            if job.status in [Status.WAITING, Status.RUNNING]:
-                window._widgets[iw] = ptg.Button(label=job_row,
-                                                 onclick=cancel_jobs)
-            else:
-                # Finished job, replace button with label
-                window._widgets[iw] = ptg.Label(job_row)
-            window._widgets[iw].parent = window
+        job_table = create_jobs_table(jobs,
+                                      markup=True).splitlines()
 
-    table = jobs_help.create_jobs_table(jobs, markup=True).splitlines()
+        if window.width != len(job_table[0]):  # Resize window
+            window.width = len(job_table[0])
+
+        for index, row in enumerate(job_table):
+            if row.startswith("|"):
+                row_id = row.split("|")[1].strip()
+                if (row_id in job_id_map.keys()
+                        and job_id_map[row_id].status in [Status.WAITING,
+                                                          Status.RUNNING]):
+                    window._widgets[index + 1] = ptg.Button(row, cancel_jobs)
+                else:
+                    window._widgets[index + 1] = ptg.Label(row)
+            else:
+                window._widgets[index + 1] = ptg.Label(row)
+            window._widgets[index + 1].parent = window
+
+    table = create_jobs_table(jobs, markup=True).splitlines()
     with ptg.WindowManager() as manager:
         def macro_reload(fmt: str) -> str:
             """Updates jobs in the table with an interval."""
@@ -110,9 +161,10 @@ def table_gui(jobs: list[Run]) -> None:
 
         manager.add(window)
 
-    # If we exit here, it means all jobs were finished. Print final table.
-    table = jobs_help.create_jobs_table(jobs, format="fancy_grid")
-    print(table)
+    # If all jobs were finished, print final table.
+    if all([j.status not in [Status.WAITING, Status.RUNNING] for j in jobs]):
+        table = create_jobs_table(jobs, format="fancy_grid")
+        print(table)
 
 
 def main(argv: list[str]) -> None:
