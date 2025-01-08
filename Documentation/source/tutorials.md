@@ -79,6 +79,18 @@ make
 cp VRP_SISRs ../
 ```
 
+#### FastVC2+p
+
+FastVC2+p requires `glibc-static` in order to compile, and is currently untested within Sparkle.
+It can be recompiled as follows in the `Examples/Resources/MinVC/Solvers/FastVC2+p` directory:
+
+```bash
+unzip FastVC2+p_std_source_code.zip
+cd FastVC2+p_std_source_code
+make
+
+```
+
 ```{include} ../../Examples/configuration_runtime.md
 ```
 
