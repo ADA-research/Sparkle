@@ -19,7 +19,12 @@ from sparkle.CLI.help import global_variables as gv
 
 def parser_function() -> argparse.ArgumentParser:
     """Create parser for the jobs command."""
-    parser = argparse.ArgumentParser(description="Command to interact with async jobs.")
+    parser = argparse.ArgumentParser(description="Command to interact with async jobs. "
+                                                 "The command starts an interactive "
+                                                 "table when no flags are given. Jobs "
+                                                 "can be selected for cancelling in the "
+                                                 "table and non activate jobs can be "
+                                                 "flushed by pressing the spacebar.")
     parser.add_argument(*ac.CancelJobsArgument.names, **ac.CancelJobsArgument.kwargs)
     parser.add_argument(*ac.JobIDsArgument.names, **ac.JobIDsArgument.kwargs)
     parser.add_argument(*ac.AllJobsArgument.names, **ac.AllJobsArgument.kwargs)
@@ -144,6 +149,52 @@ def table_gui(jobs: list[Run]) -> None:
             n_bars = int(diff / 2)
             return "|" + "█" * n_bars + " " * (4 - n_bars) + "|"
 
+        def flush_popup(self: ptg.WindowManager, key: str) -> None:
+            """Pop up for flushing completed jobs."""
+            if len(jobs) <= 1:  # Cannot flush the last job
+                return
+            flushable_jobs = []
+            flushable_job_ids = []
+            for job in jobs:
+                if job.status not in [Status.WAITING, Status.RUNNING]:
+                    flushable_jobs.append(job)
+                    flushable_job_ids.append(job.run_id)
+            if len(flushable_jobs) == 0:  # Nothing to flush
+                return
+
+            def flush(self: ptg.Button) -> None:
+                """Flush completed jobs."""
+                for job in flushable_jobs:
+                    jobs.remove(job)
+                    del job_id_map[job.run_id]
+                flushable_widgets = []
+                table_window = manager._windows[-1]
+                for iw, widget in enumerate(table_window._widgets):
+                    if isinstance(widget, ptg.Label):
+                        if ("|" in widget.value
+                                and widget.value.split("|")[1].strip().isnumeric()):
+                            job_id = widget.value.split("|")[1].strip()
+                            if job_id in flushable_job_ids:
+                                flushable_widgets.append(widget)
+                                # Jobs can be multiple rows (labels) in the table window,
+                                # are underlined with a vertical line to seperate jobs
+                                offset = 1
+                                while (len(table_window._widgets) - (iw + offset)) > 0:
+                                    current_widget = table_window._widgets[iw + offset]
+                                    if not isinstance(current_widget, ptg.Label):
+                                        break  # This method only cleans labels
+                                    flushable_widgets.append(current_widget)
+                                    if current_widget.value.startswith("+"):
+                                        break  # Seperation line, stop
+                                    offset += 1
+                for widget in flushable_widgets:
+                    table_window.remove(widget)
+                manager.remove(popup)
+
+            popup = manager.alert(ptg.Label("Flush non-active jobs?"),
+                                  ptg.Button("Yes", flush),
+                                  ptg.Button("No", lambda *_: manager.remove(popup)))
+
         ptg.tim.define("!reload", macro_reload)
         window = (
             ptg.Window(
@@ -160,6 +211,7 @@ def table_gui(jobs: list[Run]) -> None:
                 window._add_widget(ptg.Button(label=row, onclick=cancel_jobs))
 
         manager.add(window)
+        manager.bind(" ", flush_popup, description="Flush finished jobs")
 
     # If all jobs were finished, print final table.
     if all([j.status not in [Status.WAITING, Status.RUNNING] for j in jobs]):
