@@ -54,8 +54,8 @@ class SMAC2(Configurator):
         """Returns the SMAC2 scenario class."""
         return SMAC2Scenario
 
-    def configure(self: Configurator,
-                  scenario: ConfigurationScenario,
+    def configure(self: SMAC2,
+                  scenario: SMAC2Scenario,
                   data_target: PerformanceDataFrame,
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
@@ -66,6 +66,7 @@ class SMAC2(Configurator):
 
         Args:
             scenario: ConfigurationScenario object
+            data_target: PerformanceDataFrame where to store the found configurations
             validate_after: Whether the configurations should be validated on the
                 train set afterwards.
             sbatch_options: List of slurm batch options to use
@@ -95,7 +96,7 @@ class SMAC2(Configurator):
                 f"--seed {seed} "
                 for output_file, seed in zip(output, seeds)]
         if num_parallel_jobs is not None:
-            num_parallel_jobs = max(num_parallel_jobs, scenario.number_of_runs)
+            num_parallel_jobs = max(num_parallel_jobs, len(cmds))
         return super().configure(
             configuration_commands=cmds,
             data_target=data_target,

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: UTF-8 -*-
 """Configurator class to use different configurators like SMAC."""
 
 from __future__ import annotations
@@ -14,12 +12,11 @@ import shutil
 
 # import pandas as pd
 
-import runrunner as rrr
 from runrunner import Runner, Run
 
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
-from sparkle.solver.validator import Validator
+from sparkle.structures import PerformanceDataFrame
 from sparkle.instance import InstanceSet
 from sparkle.types import SparkleObjective
 
@@ -28,38 +25,40 @@ class ParamILS(Configurator):
     """Class for ParamILS (Ruby) configurator."""
     configurator_path = Path(__file__).parent.parent.parent.resolve() /\
         "Components/paramils2.3.8-source"
+    configurator_executable = configurator_path / "param_ils_2_3_run.rb"
     target_algorithm = "paramils_target_algorithm.py"
+    configurator_target = configurator_path / target_algorithm
 
     def __init__(self: ParamILS,
-                 objectives: list[SparkleObjective],
                  base_dir: Path,
                  output_path: Path) -> None:
         """Returns the ParamILS (Ruby) configurator, V2.3.8.
 
         Args:
-            objectives: The objectives to optimize. Only supports one objective.
             base_dir: The path where the configurator will be executed in.
             output_path: The path where the output will be placed.
         """
         output_path = output_path / ParamILS.__name__
         output_path.mkdir(parents=True, exist_ok=True)
         return super().__init__(
-            validator=Validator(out_dir=output_path),
             output_path=output_path,
-            executable_path=ParamILS.configurator_path / "param_ils_2_3_run.rb",
-            configurator_target=ParamILS.configurator_path / ParamILS.target_algorithm,
-            objectives=objectives,
             base_dir=base_dir,
             tmp_path=output_path / "tmp",
             multi_objective_support=False)
 
     @property
-    def scenario_class(self: Configurator) -> ConfigurationScenario:
+    def name(self: ParamILS) -> str:
+        """Returns the name of the configurator."""
+        return ParamILS.__name__
+
+    @staticmethod
+    def scenario_class() -> ParamILSScenario:
         """Returns the ParamILS scenario class."""
         return ParamILSScenario
 
-    def configure(self: Configurator,
-                  scenario: ConfigurationScenario,
+    def configure(self: ParamILS,
+                  scenario: ParamILSScenario,
+                  data_target: PerformanceDataFrame,
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
                   num_parallel_jobs: int = None,
@@ -69,6 +68,7 @@ class ParamILS(Configurator):
 
         Args:
             scenario: ConfigurationScenario object
+            data_target: PerformanceDataFrame where to store the found configurations
             validate_after: Whether the Validator will be called after the configuration
             sbatch_options: List of slurm batch options to use
             num_parallel_jobs: The maximum number of jobs to run parallel.
@@ -82,51 +82,33 @@ class ParamILS(Configurator):
         self.scenario.create_scenario(parent_directory=self.output_path)
         output_csv = self.scenario.validation / "configurations.csv"
         output_csv.parent.mkdir(exist_ok=True, parents=True)
+        seeds = data_target.run_ids[data_target.num_runs - scenario.number_of_runs:]
         output = [f"{(self.scenario.result_directory).absolute()}/"
                   f"{self.scenario.name}_seed_{seed}_paramils.txt"
-                  for seed in range(self.scenario.number_of_runs)]
+                  for seed in seeds]
         # execdir timeout should go to another place
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{ParamILS.__name__} {output[seed]} {output_csv.absolute()} "
-                f"{self.executable_path.absolute()} "
+                f"{ParamILS.configurator_executable.absolute()} "
                 f"-scenariofile {(self.scenario.scenario_file_path).absolute()} "
                 f"-numRun {seed} "
                 f"-outdir {output[seed]}"
-                for seed in range(self.scenario.number_of_runs)]
-        parallel_jobs = self.scenario.number_of_runs
+                for seed in seeds]
+
         if num_parallel_jobs is not None:
-            parallel_jobs = max(num_parallel_jobs,
-                                self.scenario.number_of_runs)
-        configuration_run = rrr.add_to_queue(
-            runner=run_on,
-            cmd=cmds,
-            name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
-            base_dir=base_dir,
-            output_path=output,
-            parallel_jobs=parallel_jobs,
+            num_parallel_jobs = max(num_parallel_jobs, len(cmds))
+
+        return super().configure(
+            configuration_commands=cmds,
+            data_target=data_target,
+            output=output,
+            num_parallel_jobs=num_parallel_jobs,
+            scenario=scenario,
+            validation_ids=seeds if validate_after else None,
             sbatch_options=sbatch_options,
-            srun_options=["-N1", "-n1"])
-        runs = [configuration_run]
-
-        if validate_after:
-            self.validator.out_dir = output_csv.parent
-            self.validator.tmp_out_dir = base_dir
-            validate_run = self.validator.validate(
-                [scenario.solver] * self.scenario.number_of_runs,
-                output_csv.absolute(),
-                [scenario.instance_set],
-                [self.scenario.sparkle_objective],
-                scenario.cutoff_time,
-                subdir=Path(),
-                dependency=configuration_run,
-                sbatch_options=sbatch_options,
-                run_on=run_on)
-            runs.append(validate_run)
-
-        if run_on == Runner.LOCAL:
-            for run in runs:
-                run.wait()
-        return runs
+            base_dir=base_dir,
+            run_on=run_on
+        )
 
     @staticmethod
     def organise_output(output_source: Path, output_target: Path = None) -> None | str:
@@ -153,7 +135,7 @@ class ParamILS(Configurator):
 class ParamILSScenario(ConfigurationScenario):
     """Class to handle ParamILS configuration scenarios."""
 
-    def __init__(self: ConfigurationScenario, solver: Solver,
+    def __init__(self: ParamILSScenario, solver: Solver,
                  instance_set: InstanceSet,
                  tuner_timeout: int = None, cutoff_time: int = None,
                  cutoff_length: int = None,
@@ -189,7 +171,7 @@ class ParamILSScenario(ConfigurationScenario):
         self.result_directory = Path()
         self.scenario_file_path = Path()
 
-    def create_scenario(self: ConfigurationScenario, parent_directory: Path) -> None:
+    def create_scenario(self: ParamILSScenario, parent_directory: Path) -> None:
         """Create scenario with solver and instances in the parent directory.
 
         This prepares all the necessary subdirectories related to configuration.
@@ -207,7 +189,7 @@ class ParamILSScenario(ConfigurationScenario):
 
         self._create_scenario_file()
 
-    def _set_paths(self: ConfigurationScenario, parent_directory: Path) -> None:
+    def _set_paths(self: ParamILSScenario, parent_directory: Path) -> None:
         """Set the paths for the scenario based on the specified parent directory."""
         self.parent_directory = parent_directory
         self.directory = self.parent_directory / "scenarios" / self.name
@@ -216,7 +198,7 @@ class ParamILSScenario(ConfigurationScenario):
         self.tmp = self.directory / "tmp"
         self.validation = self.directory / "validation"
 
-    def _prepare_scenario_directory(self: ConfigurationScenario) -> None:
+    def _prepare_scenario_directory(self: ParamILSScenario) -> None:
         """Delete old scenario dir, recreate it, create empty dirs inside."""
         shutil.rmtree(self.directory, ignore_errors=True)
         self.directory.mkdir(parents=True)
@@ -225,12 +207,12 @@ class ParamILSScenario(ConfigurationScenario):
         self.outdir_train.mkdir()
         self.tmp.mkdir()
 
-    def _prepare_result_directory(self: ConfigurationScenario) -> None:
+    def _prepare_result_directory(self: ParamILSScenario) -> None:
         """Delete possible files in result directory."""
         shutil.rmtree(self.result_directory, ignore_errors=True)
         self.result_directory.mkdir(parents=True)
 
-    def _create_scenario_file(self: ConfigurationScenario) -> None:
+    def _create_scenario_file(self: ParamILSScenario) -> None:
         """Create a file with the configuration scenario.
 
         Writes supplementary information to the target algorithm (algo =) as:
@@ -238,7 +220,7 @@ class ParamILSScenario(ConfigurationScenario):
         """
         self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
         with self.scenario_file_path.open("w") as file:
-            file.write(f"algo = {self.configurator_target.absolute()} "
+            file.write(f"algo = {ParamILS.configurator_target.absolute()} "
                        f"{self.solver.directory.absolute()} {self.sparkle_objective} \n"
                        f"execdir = {self.tmp.absolute()}/\n"
                        f"deterministic = {1 if self.solver.deterministic else 0}\n"
@@ -253,14 +235,14 @@ class ParamILSScenario(ConfigurationScenario):
             # We don't let SMAC do the validation
             # file.write("validation = false" + "\n") TODO
 
-    def _prepare_instances(self: ConfigurationScenario) -> None:
+    def _prepare_instances(self: ParamILSScenario) -> None:
         """Create instance list file without instance specifics."""
         self.instance_file_path.parent.mkdir(exist_ok=True, parents=True)
         with self.instance_file_path.open("w+") as file:
             for instance_path in self.instance_set._instance_paths:
                 file.write(f"{instance_path.absolute()}\n")
 
-    def _get_performance_measure(self: ConfigurationScenario) -> str:
+    def _get_performance_measure(self: ParamILSScenario) -> str:
         """Retrieve the ParamILS performance measure of the SparkleObjective.
 
         Returns:
@@ -272,7 +254,7 @@ class ParamILSScenario(ConfigurationScenario):
 
     @staticmethod
     def from_file(scenario_file: Path, solver: Solver, instance_set: InstanceSet,
-                  ) -> ConfigurationScenario:
+                  ) -> ParamILSScenario:
         """Reads scenario file and initalises ConfigurationScenario."""
         config = {}
         with scenario_file.open() as file:
