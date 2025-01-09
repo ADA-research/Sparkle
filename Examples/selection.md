@@ -30,7 +30,6 @@ sparkle add solver Examples/Resources/Solvers/MiniSAT/
 ### Add feature extractor
 To run the selector, we need certain features to represent our instances. To that end, we add a feature extractor to the platform that creates vector representations of our instances.
 
-
 ```bash
 sparkle add feature extractor Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/
 ```
@@ -43,24 +42,24 @@ sparkle compute features
 ```
 
 ### Run the solvers
-Similarly, we can now also compute our objective values for our solvers, in this case PAR10. Note that we can at this point still specifiy multiple objectives by separating them with a comma, or denote them in our settings file.
+Similarly, we can now also compute our objective values for our solvers, in this case PAR10 as specified in the settings file. We run the run solvers command with the `--performance-data`, so Sparkle will compute all empty values in the performance data frame.
 
 ```bash
-sparkle run solvers --objective PAR10
+sparkle run solvers --performance-data
 ```
 
 ### Construct a portfolio selector
-To make sure feature computation and solver performance computation are done before constructing the portfolio use the `wait` command
+To make sure feature computation and solver performance computation are done before constructing the portfolio use the `jobs` command
 
 ```bash
-sparkle wait
+sparkle jobs
 ```
 
-Now we can construct a portfolio selector, using the previously computed features and the results of running the solvers. The `--selector-timeout` argument determines for how many seconds we will train our selector for. We can set the flag `--solver-ablation` for actual marginal contribution computation later.
+Now we can construct a portfolio selector, using the previously computed features and the objective value results of running the solvers. We can specify an objective to select on with the `--objective` flag, but if we do not, Sparkle will default to the first objective specified in the Settings file. The `--selector-timeout` argument determines for how many seconds we will train our selector for. We can set the flag `--solver-ablation` for actual marginal contribution computation later.
 
 ```bash
 sparkle construct portfolio selector --selector-timeout 1000 --solver-ablation
-sparkle wait  # Wait for the constructor to complete its computations
+sparkle jobs  # Wait for the constructor to complete its computations
 ```
 
 ### Generate a report
@@ -78,7 +77,7 @@ sparkle generate report
 Run the portfolio selector on a *single* testing instance; the result will be printed to the command line if you add `--run-on local` to the command.
 
 ```bash
-sparkle run portfolio selector Examples/Resources/Instances/PTN2/plain7824.cnf
+sparkle run portfolio selector Examples/Resources/Instances/PTN2/plain7824.cnf --run-on local
 ```
 
 ### Run on an instance set
@@ -87,7 +86,7 @@ Run the portfolio selector on a testing instance *set*
 
 ```bash
 sparkle run portfolio selector Examples/Resources/Instances/PTN2/
-sparkle wait  # Wait for the portfolio selector to be done running on the testing instance set
+sparkle jobs  # Wait for the portfolio selector to be done running on the testing instance set
 ```
 
 #### Generate a report including results on the test set
@@ -111,7 +110,6 @@ sparkle remove feature extractor SAT-features-competition2012_revised_without_Sa
 Otherwise, Sparkle will interpret adding the other feature extractor as creating a combined feature vector per instance from all present extractors in Sparkle. Now we can add SATZilla 2024 from the Examples directory
 Note that this feature extractor requires GCC (any version, tested with 13.2.0) to run.
 
-
 ```bash
 sparkle add feature extractor Examples/Resources/Extractors/SAT-features-competition2024
 ```
@@ -127,21 +125,21 @@ We compute the features for the new extractor and new instances.
 
 ```bash
 sparkle compute features
-sparkle wait  # Wait for it to complete before continuing
+sparkle jobs  # Wait for it to complete before continuing
 ```
 
 And run the solvers on the new data set.
 
 ```bash
-sparkle run solvers
-sparkle wait
+sparkle run solvers --performance-data
+sparkle jobs
 ```
 
 Now we can train a selector based on these features.
 
 ```bash
 sparkle construct portfolio selector --selector-timeout 1000
-sparkle wait  #Wait for the computation to be done
+sparkle jobs  # Wait for the computation to be done
 ```
 
 And generate the report. When running on the PTN/PTN2 data sets, you can compare the two to see the impact of different feature extractors.

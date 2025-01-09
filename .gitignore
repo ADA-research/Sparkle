@@ -16,11 +16,11 @@ sparkle/Components/irace-v3.5/R6/
 sparkle/Components/runsolver/src/*.o
 sparkle/Components/runsolver/src/runsolver.d
 sparkle/Components/runsolver/src/runsolver
+smac3_output/*
 
 Examples/Resources/CCAG/Solvers/TCA/src/
 Examples/Resources/CCAG/Solvers/FastCA/src/
 Examples/Resources/CVRP/Solvers/VRP_SISRs/src/
-*.json
 
 # Generated documentation 
 Documentation/source/_generated/
@@ -39,7 +39,6 @@ Documentation/build
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
-*.log
 *.lot
 *.fls
 *.out

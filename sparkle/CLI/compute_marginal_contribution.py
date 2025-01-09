@@ -11,7 +11,6 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.types import SparkleObjective
@@ -26,8 +25,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.PerfectSelectorMarginalContributionArgument.kwargs)
     parser.add_argument(*ac.ActualMarginalContributionArgument.names,
                         **ac.ActualMarginalContributionArgument.kwargs)
-    parser.add_argument(*ac.SparkleObjectiveArgument.names,
-                        **ac.SparkleObjectiveArgument.kwargs)
+    parser.add_argument(*ac.ObjectivesArgument.names,
+                        **ac.ObjectivesArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
 
@@ -56,7 +55,7 @@ def compute_selector_performance(
         return objective.instance_aggregator(
             selector_performance_data.get_values("portfolio_selector",
                                                  objective=str(objective)))
-    selector_performance_data = performance_data.copy()
+    selector_performance_data = performance_data.clone()
 
     selector_performance_data.add_solver("portfolio_selector")
     selector_performance_data.csv_filepath =\
@@ -69,6 +68,7 @@ def compute_selector_performance(
         # for the instance.
         feature_vector = feature_data.get_instance(instance)
         schedule[instance] = selector.run(actual_portfolio_selector, feature_vector)
+
     schedule_performance = selector_performance_data.schedule_performance(
         schedule, target_solver="portfolio_selector", objective=objective)
     # Remove solvers from the dataframe
@@ -113,7 +113,7 @@ def compute_selector_marginal_contribution(
     for solver in performance_data.solvers:
         solver_name = Path(solver).name
         # 1. Copy the dataframe original df
-        tmp_performance_df = performance_data.copy()
+        tmp_performance_df = performance_data.clone()
         # 2. Remove the solver from this copy
         tmp_performance_df.remove_solver(solver)
         ablated_actual_portfolio_selector =\
@@ -193,16 +193,13 @@ def main(argv: list[str]) -> None:
     """Main function of the marginal contribution command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     # Define command line arguments
     parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args(argv)
-
-    check_for_initialise(
-        COMMAND_DEPENDENCIES[CommandName.COMPUTE_MARGINAL_CONTRIBUTION]
-    )
 
     if ac.set_by_user(args, "settings_file"):
         gv.settings().read_settings_ini(

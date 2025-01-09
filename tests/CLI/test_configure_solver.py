@@ -62,18 +62,6 @@ def test_configure_solver(mock_which: Mock,
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
-    # --validate flag
-    with pytest.raises(SystemExit) as pytest_wrapped_e:
-        configure_solver.main(["--solver", solver_path.name,
-                               "--instance-set-train", instance_set_path.name,
-                               "--objectives", "PAR10",
-                               "--settings-file", str(test_settings_path),
-                               "--validate",
-                               "--run-on", "slurm"])
-    tools.kill_slurm_jobs()
-    assert pytest_wrapped_e.type is SystemExit
-    assert pytest_wrapped_e.value.code == 0
-
     # with IRACE instead of SMAC2
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         configure_solver.main(["--configurator", "IRACE",

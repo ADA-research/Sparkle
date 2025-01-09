@@ -23,7 +23,7 @@ from pygments.lexers.shell import BashLexer
 from pygments.formatters.terminal import TerminalFormatter
 
 import sparkle.CLI
-from sparkle.CLI.cli import commands
+from sparkle.CLI._cli_ import commands
 
 # Add path to sparkle root
 sys.path.append(os.path.abspath("../../sparkle"))

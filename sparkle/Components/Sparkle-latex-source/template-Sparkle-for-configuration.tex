@@ -100,14 +100,13 @@ After the configuration process mentioned above, \emph{Sparkle} obtained the opt
 
 \vspace{5mm}
 
-%The PAR value of the optimised configuration on the entire training set is @@optimisedConfigurationTrainingPerformancePAR@@.
 
 \section{Comparison between Configured Version and Default Version on the Training Instance Set}
 In order to investigate the performance on the training instance set, \emph{Sparkle} ran the configured version of @@solver@@ and the default version of @@solver@@ on the training instance set. During this phase, each version performed one run per instance with a cutoff time of @@eachRunCutoffTime@@ seconds. The results are reported as follows.
 
 \begin{itemize}
-    \item \textbf{@@solver@@ (configured)}, @@objectiveName@@: @@optimisedConfigurationTrainingPerformancePAR@@
-    \item \textbf{@@solver@@ (default)}, @@objectiveName@@: @@defaultConfigurationTrainingPerformancePAR@@
+    \item \textbf{@@solver@@ (configured)}, @@objectiveName@@: @@optimisedConfigurationTrainingPerformance@@
+    \item \textbf{@@solver@@ (default)}, @@objectiveName@@: @@defaultConfigurationTrainingPerformance@@
 \end{itemize}
 
 The empirical comparison between the @@solver@@ (configured) and @@solver@@ (default) on the training set of @@instanceSetTrain@@ is presented in Figure \ref{fig:configured_vs_default_train}.
@@ -143,8 +142,8 @@ Table \ref{tbl:timeouts_train} shows on how many instances the @@solver@@ (confi
     After specifying the optimised configuration, \emph{Sparkle} ran the configured version of @@solver@@ and the default version of @@solver@@ on the testing instance set. During this phase, each version performed one run per instance with a cutoff time of @@eachRunCutoffTime@@ seconds. The results are reported as follows.
 
     \begin{itemize}
-        \item \textbf{@@solver@@ (configured)}, @@objectiveName@@: @@optimisedConfigurationTestingPerformancePAR@@
-        \item \textbf{@@solver@@ (default)}, @@objectiveName@@: @@defaultConfigurationTestingPerformancePAR@@
+        \item \textbf{@@solver@@ (configured)}, @@objectiveName@@: @@optimisedConfigurationTestingPerformance@@
+        \item \textbf{@@solver@@ (default)}, @@objectiveName@@: @@defaultConfigurationTestingPerformance@@
     \end{itemize}
 
     The empirical comparison between the @@solver@@ (configured) and @@solver@@ (default) on the testing set of @@instanceSetTest@@ is presented in Figure \ref{fig:configured_vs_default_test}.
@@ -153,7 +152,6 @@ Table \ref{tbl:timeouts_train} shows on how many instances the @@solver@@ (confi
         \noindent
         \begin{centering}
             @@figure-configured-vs-default-test@@
-            % \includegraphics[width=0.8\textwidth]{fittedModels}
             \par
         \end{centering}
 

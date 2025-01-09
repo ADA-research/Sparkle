@@ -43,6 +43,8 @@ except Exception as ex:
 
 # Convert Solver output to dictionary for configurator target algorithm script
 output_str = solver_call.stdout.decode()
+# Optional: Print original output so the solution can be verified by SATVerifier
+print(output_str)
 
 status = SolverStatus.CRASHED
 for line in output_str.splitlines():

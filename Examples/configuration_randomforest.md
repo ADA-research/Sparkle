@@ -24,26 +24,18 @@ sparkle add_solver Examples/Resources/Solvers/RandomForest
 
 ```bash
 sparkle configure_solver --solver RandomForest --instance-set-train Iris --objectives accuracy:max
-
-sparkle wait
-```
-
-Validate the performance of the best found parameter configuration. The test set is optional.
-
-```bash
-sparkle validate_configured_vs_default --solver RandomForest --instance-set-train Iris --objectives accuracy:max
 ```
 
 ### Generate a report
 
-Wait for validation to be completed
+Wait for configuration to be completed
 
 ```bash
-sparkle wait
+sparkle jobs
 ```
 
 Generate a report detailing the results on the training (and optionally testing) set.
 
 ```bash
-sparkle generate_report --objectives accuracy:max
+sparkle generate_report
 ```

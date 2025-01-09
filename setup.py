@@ -23,7 +23,7 @@ setup(name="SparkleAI",
           "tabulate==0.9.0",
           "pytermgui==7.7.2",
           "tqdm==4.66.5",
-          "RunRunner==0.1.8",
+          "RunRunner==0.1.9.1",
           # Reporting packages
           "plotly==5.24.1",
           "kaleido==0.2.1",
@@ -34,4 +34,4 @@ setup(name="SparkleAI",
           "smac==2.2.0",
       ],
       include_package_data=True,
-      entry_points={"console_scripts": ["sparkle=sparkle.CLI.cli:main"], },)
+      entry_points={"console_scripts": ["sparkle=sparkle.CLI._cli_:main"], },)

@@ -13,7 +13,6 @@ from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
@@ -32,9 +31,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
-    parser.add_argument(*ac.SparkleObjectiveArgument.names,
-                        **ac.SparkleObjectiveArgument.kwargs)
-
     return parser
 
 
@@ -42,6 +38,7 @@ def main(argv: list[str]) -> None:
     """Main function of the run portfolio selector command."""
     # Log command call
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     # Define command line arguments
     parser = parser_function()
@@ -49,15 +46,10 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
 
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_PORTFOLIO_SELECTOR])
-
     if ac.set_by_user(args, "settings_file"):
         gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
-    if ac.set_by_user(args, "objectives"):
-        gv.settings().set_general_sparkle_objectives(args.objectives,
-                                                     SettingState.CMD_LINE)
     if args.run_on is not None:
         gv.settings().set_run_on(args.run_on.value, SettingState.CMD_LINE)
 
@@ -76,12 +68,6 @@ def main(argv: list[str]) -> None:
         sys.exit(-1)
 
     run_on = gv.settings().get_run_on()
-    objectives = gv.settings().get_general_sparkle_objectives()
-    # NOTE: Is this still relevant?
-    if not objectives[0].time:
-        print("ERROR: The run_portfolio_selector command is not yet implemented"
-              " for the QUALITY_ABSOLUTE performance measure!")
-        sys.exit(-1)
 
     selector_scenario = gv.latest_scenario().get_selection_scenario_path()
     selector_path = selector_scenario / "portfolio_selector"
@@ -105,7 +91,7 @@ def main(argv: list[str]) -> None:
 
     if run_on == Runner.LOCAL:
         feature_run.wait()
-
+    objectives = gv.settings().get_general_sparkle_objectives()
     # Prepare performance data
     performance_data = PerformanceDataFrame(
         test_case_path / "performance_data.csv",
@@ -123,7 +109,7 @@ def main(argv: list[str]) -> None:
 
     run_core = Path(__file__).parent.parent.resolve() /\
         "CLI" / "core" / "run_portfolio_selector_core.py"
-    cmd_list = [f"python {run_core} "
+    cmd_list = [f"python3 {run_core} "
                 f"--selector {selector_path} "
                 f"--feature-data-csv {feature_dataframe.csv_filepath} "
                 f"--performance-data-csv {performance_data.csv_filepath} "
@@ -134,7 +120,7 @@ def main(argv: list[str]) -> None:
     selector_run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
-        name=CommandName.RUN_PORTFOLIO_SELECTOR,
+        name=f"Portfolio Selector: {selector_path.name} on {data_set.name}",
         base_dir=sl.caller_log_dir,
         stdout=None,
         dependencies=feature_run if run_on == Runner.SLURM else None,
@@ -142,8 +128,6 @@ def main(argv: list[str]) -> None:
 
     if run_on == Runner.LOCAL:
         selector_run.wait()
-        for job in selector_run.jobs:
-            print(job.stdout)
         print("Running Sparkle portfolio selector done!")
     else:
         print("Sparkle portfolio selector is running ...")

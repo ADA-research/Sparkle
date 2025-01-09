@@ -50,7 +50,7 @@ def _update_caller_file_path(timestamp: str) -> None:
 
     """
     caller_file = caller + "_main_log.txt"
-    caller_dir = Path(timestamp + "_" + caller)
+    caller_dir = Path(caller + "_" + timestamp)
     log_dir = gv.settings().DEFAULT_log_output
     # Set caller directory for other Sparkle functions to use
     global caller_out_dir
@@ -102,7 +102,7 @@ def log_command(argv: list[str]) -> None:
     _update_caller(argv)
 
     # Prepare logging information
-    timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
+    timestamp = time.strftime("%Y-%m-%d-%H.%M.%S", time.localtime(time.time()))
     _update_caller_file_path(timestamp)
     output_file = caller_log_path
     args = " ".join(argv[0:])

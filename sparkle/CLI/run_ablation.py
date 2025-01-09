@@ -7,14 +7,14 @@ from pathlib import PurePath
 
 from runrunner.base import Runner
 
-from sparkle.solver.ablation import AblationScenario
+from sparkle.configurator.ablation import AblationScenario
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
+from sparkle.structures import PerformanceDataFrame
 from sparkle.instance import Instance_Set
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.platform import CommandName, COMMAND_DEPENDENCIES
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
 
@@ -32,10 +32,10 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstanceSetTrainAblationArgument.kwargs)
     parser.add_argument(*ac.InstanceSetTestAblationArgument.names,
                         **ac.InstanceSetTestAblationArgument.kwargs)
-    parser.add_argument(*ac.SparkleObjectiveArgument.names,
-                        **ac.SparkleObjectiveArgument.kwargs)
-    parser.add_argument(*ac.TargetCutOffTimeAblationArgument.names,
-                        **ac.TargetCutOffTimeAblationArgument.kwargs)
+    parser.add_argument(*ac.ObjectivesArgument.names,
+                        **ac.ObjectivesArgument.kwargs)
+    parser.add_argument(*ac.TargetCutOffTimeArgument.names,
+                        **ac.TargetCutOffTimeArgument.kwargs)
     parser.add_argument(*ac.WallClockTimeArgument.names,
                         **ac.WallClockTimeArgument.kwargs)
     parser.add_argument(*ac.NumberOfRunsAblationArgument.names,
@@ -53,14 +53,13 @@ def parser_function() -> argparse.ArgumentParser:
 def main(argv: list[str]) -> None:
     """Main function to run ablation analysis."""
     sl.log_command(sys.argv)
+    check_for_initialise()
 
     # Define command line arguments
     parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args(argv)
-
-    check_for_initialise(COMMAND_DEPENDENCIES[CommandName.RUN_ABLATION])
 
     if ac.set_by_user(args, "settings_file"):
         # Do first, so other command line options can override settings from the file
@@ -96,10 +95,14 @@ def main(argv: list[str]) -> None:
     Settings.check_settings_changes(gv.settings(), prev_settings)
 
     run_on = gv.settings().get_run_on()
-    solver_path = resolve_object_name(args.solver,
-                                      gv.solver_nickname_mapping,
-                                      gv.settings().DEFAULT_solver_dir)
-    solver = Solver(solver_path)
+    solver = resolve_object_name(args.solver,
+                                 gv.solver_nickname_mapping,
+                                 gv.settings().DEFAULT_solver_dir, Solver)
+    if solver is None:
+        print(f"Could not resolve Solver path/name {args.solver}!")
+        print([p for p in gv.settings().DEFAULT_solver_dir.iterdir()])
+        sys.exit(-1)
+
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
@@ -110,8 +113,14 @@ def main(argv: list[str]) -> None:
         gv.settings().DEFAULT_instance_dir, Instance_Set)
 
     configurator = gv.settings().get_general_sparkle_configurator()
-    config_scenario = configurator.scenario_class.find_scenario(
+    config_scenario = configurator.scenario_class().find_scenario(
         configurator.output_path, solver, instance_set_train)
+    performance_data = PerformanceDataFrame(
+        gv.settings().DEFAULT_performance_data_path)
+    best_configuration, _ = performance_data.best_configuration(
+        str(config_scenario.solver.directory),
+        config_scenario.sparkle_objective,
+        instances=[str(p) for p in config_scenario.instance_set.instance_paths])
     if config_scenario is None:
         print("No configuration scenario found for combination:\n"
               f"{configurator.name} {solver.name} {instance_set_train.name}")
@@ -128,19 +137,29 @@ def main(argv: list[str]) -> None:
         print("Configuration exists!")
 
     ablation_scenario = AblationScenario(
-        solver, instance_set_train, instance_set_test,
+        config_scenario,
+        instance_set_test,
         gv.settings().DEFAULT_ablation_output,
-        gv.settings().DEFAULT_ablation_exec,
-        gv.settings().DEFAULT_ablation_validation_exec, override_dirs=True)
+        override_dirs=True)
 
     # Instances
     ablation_scenario.create_instance_file()
     ablation_scenario.create_instance_file(test=True)
 
     # Configurations
-    ablation_scenario.create_configuration_file()
+    ablation_scenario.create_configuration_file(
+        cutoff_time=gv.settings().get_general_target_cutoff_time(),
+        cutoff_length=gv.settings().get_smac2_target_cutoff_length(),  # NOTE: SMAC2
+        concurrent_clis=gv.settings().get_slurm_max_parallel_runs_per_node(),
+        best_configuration=best_configuration,
+        ablation_racing=gv.settings().get_ablation_racing_flag(),
+    )
+
     print("Submiting ablation run...")
-    runs = ablation_scenario.submit_ablation(run_on=run_on)
+    runs = ablation_scenario.submit_ablation(
+        log_dir=sl.caller_log_dir,
+        sbatch_options=gv.settings().get_slurm_extra_options(as_args=True),
+        run_on=run_on)
 
     if run_on == Runner.LOCAL:
         print("Ablation analysis finished!")

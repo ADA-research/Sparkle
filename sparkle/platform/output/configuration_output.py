@@ -1,33 +1,32 @@
-#!/usr/bin/env python3
 """Sparkle class to organise configuration output."""
-
 from __future__ import annotations
-
-from sparkle.platform import \
-    generate_report_for_configuration as sgrfch
-from sparkle.solver import Solver
-from sparkle.instance import InstanceSet
-from sparkle.configurator.configurator import Configurator, ConfigurationScenario
-from sparkle.solver.validator import Validator
-from sparkle.platform.output.structures import ValidationResults, ConfigurationResults
-from sparkle.types import SolverStatus
-
+import ast
 import json
 from pathlib import Path
+
+from sparkle.solver import Solver
+from sparkle.structures import PerformanceDataFrame
+from sparkle.instance import InstanceSet, Instance_Set
+from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 
 
 class ConfigurationOutput:
     """Class that collects configuration data and outputs it a JSON format."""
 
-    def __init__(self: ConfigurationOutput, path: Path,
-                 configurator: Configurator, config_scenario: ConfigurationScenario,
-                 instance_set_test: InstanceSet, output: Path) -> None:
+    def __init__(self: ConfigurationOutput,
+                 path: Path,
+                 configurator: Configurator,
+                 config_scenario: ConfigurationScenario,
+                 performance_data: PerformanceDataFrame,
+                 instance_set_test: InstanceSet,
+                 output: Path) -> None:
         """Initialize Configurator Output class.
 
         Args:
             path: Path to configuration output directory
             configurator: The configurator that was used
             config_scenario: The scenario to output
+            performance_data: Performance data
             instance_set_test: Instance set used for testing
             output: Path to the output directory
         """
@@ -39,116 +38,117 @@ class ConfigurationOutput:
         self.config_scenario = config_scenario
         self.output = output / "configuration.json" if not output.is_file() else output
 
-        solver_dir_name = path.name
-        scenario_file = path / f"{solver_dir_name}_scenario.txt"
-        if not scenario_file.is_file():
-            raise Exception("Can't find scenario file")
-
+        # Fix relative path
+        if Path.cwd() in self.solver.directory.parents:
+            self.solver = Solver(
+                self.solver.directory.relative_to(Path.cwd()),
+            )
+        if Path.cwd() in self.instance_set_train.directory.parents:
+            self.instance_set_train = Instance_Set(
+                self.instance_set_train.directory.relative_to(Path.cwd())
+            )
+        if (self.instance_set_test
+                and Path.cwd() in self.instance_set_test.directory.parents):
+            self.instance_set_test = Instance_Set(
+                self.instance_set_test.directory.relative_to(Path.cwd())
+            )
         # Retrieve all configurations
-        config_path = path / "validation" / "configurations.csv"
-        self.configurations = self.get_configurations(config_path)
+        solver_key = str(self.solver.directory)
+        all_configurations = performance_data.get_value(
+            solver_key, None,
+            objective=self.config_scenario.sparkle_objective.name,
+            solver_fields=[PerformanceDataFrame.column_configuration])
+
+        # Turn in to dictionary and unique
+        self.configurations_performances = []
+        for config in all_configurations:
+            try:
+                config = ast.literal_eval(config)
+                if config not in self.configurations_performances:
+                    self.configurations_performances.append(config)
+            except Exception:
+                if isinstance(config, str):
+                    print("Failed to parse configuration:\n", config)
+        # Retrieve configuration performances
+        train_instances = [str(p) for p in self.instance_set_train.instance_paths]
+        # Retrieve Default (No configuration) performance
+        _, self.default_performance_train = performance_data.configuration_performance(
+            solver_key, PerformanceDataFrame.missing_value,
+            objective=self.config_scenario.sparkle_objective,
+            instances=train_instances)
+
+        _, self.default_performance_per_instance_train =\
+            performance_data.configuration_performance(
+                solver_key, PerformanceDataFrame.missing_value,
+                objective=self.config_scenario.sparkle_objective,
+                instances=train_instances,
+                per_instance=True)
+
+        self.configurations_performances = [performance_data.configuration_performance(
+            solver_key, config,
+            objective=self.config_scenario.sparkle_objective,
+            instances=train_instances) for config in self.configurations_performances]
 
         # Retrieve best found configuration
-        _, self.best_config = self.configurator.get_optimal_configuration(
-            self.config_scenario)
+        self.best_configuration, self.best_performance_train =\
+            performance_data.best_configuration(
+                solver_key,
+                objective=self.config_scenario.sparkle_objective,
+                instances=train_instances)
 
-        # Retrieves validation results for all configurations
-        self.validation_results = []
-        for config in self.configurations:
-            val_res = self.get_validation_data(self.instance_set_train,
-                                               config)
-            self.validation_results.append(val_res)
+        # Retrieve best configuration per instance performances
+        _, self.best_conf_performance_per_instance_train =\
+            performance_data.configuration_performance(
+                solver_key, self.best_configuration,
+                objective=self.config_scenario.sparkle_objective,
+                instances=train_instances,
+                per_instance=True)
 
-        # Retrieve test validation results if they exist
-        if self.instance_set_test is not None:
-            self.validation_results_test = []
-            for config in self.configurations:
-                val_res = self.get_validation_data(self.instance_set_test,
-                                                   config)
-                self.validation_results_test.append(val_res)
-
-    def get_configurations(self: ConfigurationOutput, config_path: Path) -> list[dict]:
-        """Read all configurations and transform them to dictionaries."""
-        configs = []
-        # Check if the path exists and is a file
-        if config_path.exists() and config_path.is_file():
-            with config_path.open("r") as file:
-                for line in file:
-                    config = Solver.config_str_to_dict(line.strip())
-                    if config not in configs:
-                        configs.append(config)
-        return configs
-
-    def get_validation_data(self: ConfigurationOutput, instance_set: InstanceSet,
-                            config: dict) -> ConfigurationResults:
-        """Returns best config and ConfigurationResults for instance set."""
-        objective = self.config_scenario.sparkle_objective
-
-        # Retrieve found configuration
-        _, best_config = self.configurator.get_optimal_configuration(
-            self.config_scenario)
-
-        # Retrieve validation results
-        validator = Validator(self.directory)
-        val_results = validator.get_validation_results(
-            self.solver, instance_set, config=best_config,
-            source_dir=self.directory, subdir="validation")
-        header = val_results[0]
-        results = []
-        value_column = header.index(objective.name)
-        instance_column = header.index("Instance")
-        status_column = header.index("Status")
-        cpu_time_column = header.index("CPU Time")
-        wall_time_column = header.index("Wallclock Time")
-        for res in val_results[1:]:
-            results.append([res[instance_column], SolverStatus(res[status_column]),
-                            res[value_column], res[cpu_time_column],
-                            res[wall_time_column]])
-        final_results = ValidationResults(self.solver, config,
-                                          instance_set, results)
-        perf_par = sgrfch.get_average_performance(val_results,
-                                                  objective)
-        return ConfigurationResults(perf_par,
-                                    final_results)
-
-    def serialize_configuration_results(self: ConfigurationOutput,
-                                        cr: ConfigurationResults) -> dict:
-        """Transform ConfigurationResults to dictionary format."""
-        return {
-            "performance": cr.performance,
-            "results": {
-                "solver": cr.results.solver.name,
-                "configuration": cr.results.configuration,
-                "instance_set": cr.results.instance_set.name,
-                "result_header": cr.results.result_header,
-                "result_values": cr.results.result_vals,
-            },
-        }
+        if instance_set_test:
+            test_instances = [str(p) for p in self.instance_set_test.instance_paths]
+            # Retrieve default performance on the test set
+            _, self.default_performance_test =\
+                performance_data.configuration_performance(
+                    solver_key, PerformanceDataFrame.missing_value,
+                    objective=self.config_scenario.sparkle_objective,
+                    instances=test_instances)
+            _, self.default_performance_per_instance_test =\
+                performance_data.configuration_performance(
+                    solver_key, PerformanceDataFrame.missing_value,
+                    objective=self.config_scenario.sparkle_objective,
+                    instances=test_instances,
+                    per_instance=True)
+            # Retrieve the best configuration test set performance
+            _, self.best_performance_test = performance_data.configuration_performance(
+                solver_key, self.best_configuration,
+                objective=self.config_scenario.sparkle_objective,
+                instances=test_instances,
+            )
+            _, self.best_conf_performance_per_instance_test =\
+                performance_data.configuration_performance(
+                    solver_key, self.best_configuration,
+                    objective=self.config_scenario.sparkle_objective,
+                    instances=test_instances,
+                    per_instance=True)
+        self.performance_data = performance_data
 
     def write_output(self: ConfigurationOutput) -> None:
         """Write data into a JSON file."""
         output_data = {
-            "solver": self.solver.name if self.solver else None,
-            "configurator": (
-                str(self.configurator) if self.configurator else None
-            ),
-            "best_configuration": Solver.config_str_to_dict(self.best_config),
-            "configurations": self.configurations,
+            "solver": self.solver.name,
+            "configurator": self.configurator.name,
+            "best_configuration": self.best_configuration,
+            "best_performance_train": self.best_performance_train,
             "scenario": self.config_scenario.serialize()
             if self.configurator.scenario else None,
-            "training_results": [
-                self.serialize_configuration_results(validation_result)
-                for validation_result in self.validation_results
-            ],
-            "test_set": (
-                [
-                    self.serialize_configuration_results(validation_result)
-                    for validation_result in self.validation_results_test
-                ]
-                if self.instance_set_test else None
-            ),
+            "train_set_results": self.performance_data[self.performance_data.index.isin(
+                [str(p) for p in self.instance_set_train.instance_paths],
+                level=PerformanceDataFrame.index_instance)].to_json(),
+            "test_set_results": (self.performance_data[self.performance_data.index.isin(
+                [str(p) for p in self.instance_set_test.instance_paths],
+                level=PerformanceDataFrame.index_instance)].to_json()
+                if self.instance_set_test else None),
         }
-
         self.output.parent.mkdir(parents=True, exist_ok=True)
         with self.output.open("w") as f:
             json.dump(output_data, f, indent=4)

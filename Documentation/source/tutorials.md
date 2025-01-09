@@ -79,6 +79,18 @@ make
 cp VRP_SISRs ../
 ```
 
+#### Untested: FastVC2+p and MetaVC
+
+FastVC2+p and MetaVC require `glibc-static` in order to compile, and are currently untested within Sparkle. Therefore none of the examples below make use of these solvers, but they are available in the downloadable resources.
+It can be recompiled as follows in the `Examples/Resources/MinVC/Solvers/FastVC2+p` directory:
+
+```bash
+unzip FastVC2+p_std_source_code.zip
+cd FastVC2+p_std_source_code
+make
+
+```
+
 ```{include} ../../Examples/configuration_runtime.md
 ```
 

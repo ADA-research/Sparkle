@@ -2,6 +2,61 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.9.3] - ??/??/2025
+
+### Added
+- Flushing completed jobs from jobs command by hitting spacebar [SPRK-313]
+
+## [0.9.2] - 07/01/2025
+
+### Fixed
+- Bugs regarding using Configuration with instance features [SPRK-364]
+- Allow user to easily recompile runsolver with initialise command for Venv support [SPRK-367]
+- Added performance data argument to clean up command [SPRK-367]
+- Updated wait command to yield more information when jobs are finished [SPRK-367]
+
+### Added
+- Added documentation on how to use Venv instead of Conda for Sparkle [SPRK-367]
+- Added autocompletion for Sparkle CLI [SPRK-332]
+- Cancelling a job through the interactive table now has a confirmation dialog [SPRK-343]
+
+### Changed
+- The wait command and cancel command have been merged into the `jobs` command [SPRK-343]
+
+## [0.9.1.2] - 2025/12/12
+
+Patchfix
+
+### Fixed
+- Execution rights on internal package CLI files were removed during pip installation
+- Various bugfixes regarding nicknames
+
+### Changed
+- run_configured_solver command has now been merged into run_solvers [SPRK-361]
+
+## [0.9.1] - 2024/12/08
+
+### Added
+- Added the SMAC3 configurator to Sparkle [SPRK-335]
+- Added no-copy argument to all CLI add commands so the user can create symbolic links to their files instead of copying [SPRK-356]
+- Added no-save argument to initialise command [SPRK-358]
+- Added SolutionFileVerifier to verify instance solutions from CSV file [SPRK-360]
+
+### Changed
+
+- Generate report command (Configuration report) now checks whether there are still jobs that should be run before allowing the user to start this command [SPRK-328]
+- PerformanceDataFrame now directly subclasses from Pandas DataFrame instead of functioning as a container class [SPRK-278]
+- Initialise command no longer removes the user's Settings directory if a platform already exists, but does still save it to the snapshot. [SPRK-355]
+- Solver configuration now stores found configurations and their results in the PerformanceDataFrame [SPRK-358]
+- run_solvers_core is integrated now into the solver class [SPRK-358]
+- configure solver command now also runs default configuration, schedules train set validation and test set validation if given [SPRK-358]
+- Modified SolutionVerifier adding to solvers as a CLI argument that is saved in the Solver meta file instead of in the Settings file [SPRK-359]
+- PAR objective now takes into account 'negative status' and penalises solvers for crashing or incorrect answers [SPRK-360]
+
+### Removed
+- Validate configured vs default command has been removed as it is now redundant [SPRK-358]
+- Validator class has been removed as it is no longer relevant [SPRK-358]
+
 ## [0.9.0] - 2024/10/30
 
 ### Added

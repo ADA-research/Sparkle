@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.8.4
+# Auto-Generated .sh files from the original .md by Sparkle 0.9.2
 
 ## Configuring Random Forest on Iris
 
@@ -21,18 +21,12 @@ sparkle add_solver Examples/Resources/Solvers/RandomForest
 
 sparkle configure_solver --solver RandomForest --instance-set-train Iris --objectives accuracy:max
 
-sparkle wait
-
-# Validate the performance of the best found parameter configuration. The test set is optional.
-
-sparkle validate_configured_vs_default --solver RandomForest --instance-set-train Iris --objectives accuracy:max
-
 ### Generate a report
 
-# Wait for validation to be completed
+# Wait for configuration to be completed
 
-sparkle wait
+sparkle jobs
 
 # Generate a report detailing the results on the training (and optionally testing) set.
 
-sparkle generate_report --objectives accuracy:max
+sparkle generate_report

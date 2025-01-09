@@ -106,10 +106,11 @@ class Selector(SparkleCallable):
                                           wallclock_limit)
 
         cmd_str = " ".join([str(c) for c in cmd])
+        solver_names = ", ".join([Path(s).name for s in performance_data.solvers])
         construct = rrr.add_to_queue(
             runner=run_on,
             cmd=[cmd_str],
-            name="construct_selector",
+            name=f"Selector Construction: {solver_names}",
             base_dir=base_dir,
             stdout=Path("normal.log"),
             stderr=Path("error.log"),

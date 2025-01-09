@@ -30,14 +30,6 @@
 
 ```
 
-(cmd-cancel)=
-
-```{eval-rst}
-.. autoprogram:: sparkle.CLI.cancel:parser_function()
-   :prog: cancel
-
-```
-
 (cmd-cleanup)=
 
 ```{eval-rst}
@@ -94,6 +86,14 @@
 
 ```
 
+(cmd-jobs)=
+
+```{eval-rst}
+.. autoprogram:: sparkle.CLI.jobs:parser_function()
+   :prog: jobs
+
+```
+
 (cmd-load-snapshot)=
 
 ```{eval-rst}
@@ -134,14 +134,6 @@
 
 ```
 
-(cmd-run-configured-solver)=
-
-```{eval-rst}
-.. autoprogram:: sparkle.CLI.run_configured_solver:parser_function()
-   :prog: run_configured_solver
-
-```
-
 (cmd-run-parallel-portfolio)=
 
 ```{eval-rst}
@@ -179,21 +171,5 @@
 ```{eval-rst}
 .. autoprogram:: sparkle.CLI.status:parser_function()
    :prog: status
-
-```
-
-(cmd-validate-configured-vs-default)=
-
-```{eval-rst}
-.. autoprogram:: sparkle.CLI.validate_configured_vs_default:parser_function()
-   :prog: validate_configured_vs_default
-
-```
-
-(cmd-wait)=
-
-```{eval-rst}
-.. autoprogram:: sparkle.CLI.wait:parser_function()
-   :prog: wait
 
 ```
