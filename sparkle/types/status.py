@@ -4,7 +4,7 @@ from enum import Enum
 
 
 class SolverStatus(str, Enum):
-    """Possible return states for solver runs."""    
+    """Possible return states for solver runs."""
     SUCCESS = "SUCCESS"  # Positive status
     UNKNOWN = "UNKNOWN"  # Semi positive status
     SAT = "SAT"  # SAT specific positive status
@@ -17,5 +17,6 @@ class SolverStatus(str, Enum):
     ERROR = "ERROR"
     KILLED = "KILLED"
 
-    def __str__(self):
+    def __str__(self: SolverStatus) -> str:
+        """Return the string value of the SolverStatus."""
         return str(self.value)
