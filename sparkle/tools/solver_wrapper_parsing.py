@@ -48,7 +48,7 @@ def parse_solver_wrapper_args(args: list[str]) -> dict[Any]:
     return args_dict
 
 
-def get_solver_call_params(args_dict: dict, prefix: str = "-", postfix=" ") -> list[str]:
+def get_solver_call_params(args_dict: dict, prefix: str = "-", postfix: str=" ") -> list[str]:
     """Gather the additional parameters for the solver call.
 
     Args:
