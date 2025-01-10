@@ -54,6 +54,7 @@ def get_solver_call_params(args_dict: dict, prefix: str = "-", postfix=" ") -> l
     Args:
         args_dict: Dictionary mapping argument names to their currently held values
         prefix: Prefix of the command line options
+        postfix: Postfix of the command line options
 
     Returns:
         A list of parameters for the solver call
