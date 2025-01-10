@@ -1,12 +1,9 @@
 name: Unittest
 
-on: [pull_request]
-
 on:
   pull_request:
     paths:
       - sparkle/**
-
 
 jobs:
   pytest:
