@@ -52,7 +52,16 @@ def main() -> None:
         print(f"Sparkle autocomplete installed! To enable, run `source {bash_profile}` "
               "or restart your terminal.")
     else:
-        print(f"Sparkle does not understand command <{command}>")
+        print(f"Sparkle does not understand command <{command}>", end="")
+        from difflib import SequenceMatcher
+        similarities = [SequenceMatcher(None, command, alt).ratio()
+                        for alt in possible_commands]
+
+        if max(similarities) > 0.6:
+            alternative = possible_commands[similarities.index(max(similarities))]
+            print(f". Did you mean <{alternative}>?")
+        else:
+            print()
 
 
 if __name__ == "__main__":
