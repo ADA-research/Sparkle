@@ -307,7 +307,10 @@ class PerformanceDataFrame(pd.DataFrame):
         """
         initial_values = initial_values or self.missing_value
         if not isinstance(initial_values, list):
-            initial_values = [initial_values] * len(self.multi_column_names)
+            initial_values =\
+                [initial_values] * len(self.multi_column_names) * self.num_solvers
+        elif len(initial_values) == len(self.multi_column_names):
+            initial_values = initial_values * self.num_solvers
         instance_names = self.instances if instance_names is None else instance_names
         for instance in instance_names:
             for objective in self.objective_names:
