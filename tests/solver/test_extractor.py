@@ -7,11 +7,13 @@ from unittest.mock import patch
 
 
 # Define test directories for 2024 and 2012 versions of the extractor
-test_dir_2024 = Path("Examples/Resources/Extractors/"
-                     "SAT-features-competition2024/")
-test_dir_2012 = Path("Examples/Resources/Extractors/"
-                     "SAT-features-competition2012"
-                     "_revised_without_SatELite_sparkle")
+test_dir_2024 = Path(
+    "Examples/Resources/Extractors/SAT-features-competition2024/"
+)
+test_dir_2012 = Path(
+    "Examples/Resources/Extractors/"
+    "SAT-features-competition2012_revised_without_SatELite_sparkle"
+)
 
 # Instantiate Extractor objects for each directory
 extractor_2012 = Extractor(directory=test_dir_2012)
@@ -45,17 +47,20 @@ def test_features(extractor: Extractor) -> None:
     # Access the features for the first time
     first_call_features = extractor.features
 
-    # Validate the features are returned as a list
-    assert isinstance(first_call_features, list), \
+    # Validate that features are returned as a list
+    assert isinstance(first_call_features, list), (
         "Expected features to be a list."
+    )
 
-    # Validate internal caching of features
-    assert extractor._features == first_call_features, \
+    # Validate internal storage consistency
+    assert extractor._features == first_call_features, (
         "Internal _features attribute should match the accessed value."
+    )
 
     # Check that the list is not empty
-    assert len(first_call_features) > 0, \
+    assert len(first_call_features) > 0, (
         "Feature list should not be empty for a valid extractor."
+    )
 
     # Ensure each feature is a tuple of two strings
     for pair in first_call_features:
@@ -75,15 +80,18 @@ def test_features(extractor: Extractor) -> None:
     with patch("subprocess.run") as mock_subprocess_run:
         # Access the property again to verify caching
         second_call_features = extractor.features
-        assert first_call_features == second_call_features, \
-            "Features property should cache the result."
 
-        # Check if subprocess is called
-        mock_subprocess_run.assert_not_called()
+        # Validate that caching works (both calls should return the same value)
+        assert first_call_features == second_call_features, (
+            "Features property should cache the result and "
+            "return consistent values."
+        )
 
-    # Verify that internal caching works
-    assert extractor._features == first_call_features, \
-        "Internal _features attribute should match the accessed value."
+        # Ensure subprocess.run was not called during the second access
+        mock_subprocess_run.assert_not_called(), (
+            "subprocess.run should not be called again as the result should "
+            "be cached after the first access."
+        )
 
 
 def test_feature_groups() -> None:
