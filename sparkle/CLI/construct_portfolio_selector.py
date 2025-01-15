@@ -13,6 +13,7 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner
 
+from sparkle.solver import Selector
 from sparkle.platform.settings_objects import SettingState
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.types import resolve_objective
@@ -92,7 +93,8 @@ def main(argv: list[str]) -> None:
     run_on = gv.settings().get_run_on()
 
     print("Start constructing Sparkle portfolio selector ...")
-    selector = gv.settings().get_general_sparkle_selector()
+    selector = Selector(gv.settings().get_selection_class(),
+                        gv.settings().get_selection_model())
 
     judge_exist_remaining_jobs(
         gv.settings().DEFAULT_feature_data_path,
@@ -113,10 +115,8 @@ def main(argv: list[str]) -> None:
 
     # Selector is named after the solvers it can predict, sort for permutation invariance
     solvers = sorted([s.name for s in gv.settings().DEFAULT_solver_dir.iterdir()])
-    selection_scenario_path = (
-        gv.settings().DEFAULT_selection_output
-        / gv.settings().DEFAULT_general_sparkle_selector.name
-        / "_".join(solvers))
+    selection_scenario_path =\
+        gv.settings().DEFAULT_selection_output / selector.name / "_".join(solvers)
 
     # Update latest scenario
     gv.latest_scenario().set_selection_scenario_path(selection_scenario_path)

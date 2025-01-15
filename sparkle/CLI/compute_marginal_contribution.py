@@ -60,7 +60,7 @@ def compute_selector_performance(
     selector_performance_data.add_solver("portfolio_selector")
     selector_performance_data.csv_filepath =\
         actual_portfolio_selector.parent / "performance.csv"
-    selector = gv.settings().get_general_sparkle_selector()
+    selector = gv.settings().get_selection_class()
 
     schedule = {}
     for instance in performance_data.instances:

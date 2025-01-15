@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
     # Run portfolio selector
     print("Sparkle portfolio selector predicting ...")
-    selector = gv.settings().get_general_sparkle_selector()
+    selector = gv.settings().get_selection_class()
     predict_schedule = selector.run(args.selector,
                                     feature_data.get_instance(str(args.instance)))
 

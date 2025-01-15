@@ -5,6 +5,7 @@ import ast
 
 from sklearn.base import ClassifierMixin, RegressorMixin
 from asf.cli import cli_train as asf_cli
+from asf.scenario.scenario_metadata import ScenarioMetadata
 from asf.predictors import AbstractPredictor
 from asf.selectors.abstract_model_based_selector import AbstractModelBasedSelector
 
@@ -20,27 +21,27 @@ class Selector:
 
     def __init__(
             self: Selector,
-            raw_output_directory: Path,
             selector_class: AbstractModelBasedSelector,
             model_class: AbstractPredictor | ClassifierMixin | RegressorMixin) -> None:
         """Initialize the Selector object.
 
         Args:
-            raw_output_directory: Directory where the Selector will write its raw output.
-                Defaults to directory / tmp
             selector_class: The Selector class to construct.
             model_class: The model class the selector will use.
+            metadata: Scenario meta data for the selector, usually provided at run time.
         """
         self.selector: AbstractModelBasedSelector =\
-            selector_class(model_class, metadata=None)
-        self.name = type(selector_class).__name__
-        self.raw_output_directory = raw_output_directory
+            selector_class(model_class,
+                           metadata=ScenarioMetadata(None, None, None, None, None))
 
-        if not self.raw_output_directory.exists():
-            self.raw_output_directory.mkdir(parents=True)
+    @property
+    def name(self: Selector) -> str:
+        """Return the name of the selector."""
+        return (f"{type(self.selector).__name__}_"
+                f"{type(self.selector.model_class).__name__}")
 
     def construct(self: Selector,
-                  target_file: Path | str,
+                  target_file: Path,
                   performance_data: PerformanceDataFrame,
                   feature_data: FeatureDataFrame,
                   objective: SparkleObjective,
@@ -63,10 +64,8 @@ class Selector:
             base_dir: The base directory to run the Selector in.
 
         Returns:
-            Path to the constructed Selector.
+            The construction Run
         """
-        if isinstance(target_file, str):
-            target_file = self.raw_output_directory / target_file
         # Convert the dataframes to Selector Format
         # Requires instances as index for both, columns as features / solvers
         # Remove redundant data
