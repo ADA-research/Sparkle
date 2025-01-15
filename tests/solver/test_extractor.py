@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import pytest
 from sparkle.solver import Extractor
+from unittest.mock import patch
 
 
 # Define test directories for 2024 and 2012 versions of the extractor
@@ -23,7 +24,7 @@ extractor_2024 = Extractor(directory=test_dir_2024)
         (extractor_2024, test_dir_2024)
     ]
 )
-def test_extractor_constructor(extractor, test_dir) -> None:
+def test_extractor_constructor(extractor: Extractor, test_dir: Path) -> None:
     """Test for constructor."""
     assert extractor.directory == test_dir
     assert extractor.name == test_dir.name
@@ -39,44 +40,49 @@ def test_extractor_constructor(extractor, test_dir) -> None:
     "extractor",
     [extractor_2012, extractor_2024]
 )
-def test_features(extractor) -> None:
+def test_features(extractor: Extractor) -> None:
     """Test for property features."""
-    first_call = extractor.features
+    # Access the features for the first time
+    first_call_features = extractor.features
 
     # Validate the features are returned as a list
-    assert isinstance(first_call, list), \
+    assert isinstance(first_call_features, list), \
         "Expected features to be a list."
 
     # Validate internal caching of features
-    assert extractor._features == first_call, \
+    assert extractor._features == first_call_features, \
         "Internal _features attribute should match the accessed value."
 
     # Check that the list is not empty
-    assert len(first_call) > 0, \
-        "Feature list should not be empty for a valid extractor."
-
-    # Access the property again to verify caching
-    second_call = extractor.features
-    assert first_call == second_call, \
-        "Features property should cache the result."
-
-    # They should be equal after the second call
-    assert extractor._features == first_call, \
-        "Internal _features attribute should match the accessed value."
-
-    # Check the length again that is not empty
-    assert len(first_call) > 0, \
+    assert len(first_call_features) > 0, \
         "Feature list should not be empty for a valid extractor."
 
     # Ensure each feature is a tuple of two strings
-    assert all(
-        isinstance(pair, tuple) and len(pair) == 2 and all(
-            isinstance(element, str) for element in pair
-        ) for pair in first_call
-    ), (
-        f"Expected each feature to be a tuple of 2 strings, "
-        f"but got {first_call}"
-    )
+    for pair in first_call_features:
+        assert isinstance(pair, tuple), (
+            f"Expected a tuple, but got {type(pair).__name__}: {pair}"
+        )
+        assert len(pair) == 2, (
+            f"Expected a tuple of length 2, but got {len(pair)}: {pair}"
+        )
+        for element in pair:
+            assert isinstance(element, str), (
+                f"Expected all elements to be strings, but got "
+                f"{type(element).__name__}: {element}"
+            )
+    # Patch subprocess.run after the first call to ensure caching is used
+    with patch("subprocess.run") as mock_subprocess_run:
+        # Access the property again to verify caching
+        second_call = extractor.features
+        assert first_call_features == second_call, \
+            "Features property should cache the result."
+
+        # Assert that `subprocess.run` was not called at all
+        mock_subprocess_run.assert_not_called()
+
+    # Verify that internal caching works
+    assert extractor._features == first_call_features, \
+        "Internal _features attribute should match the accessed value."
 
 
 def test_feature_groups() -> None:
