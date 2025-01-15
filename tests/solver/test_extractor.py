@@ -35,10 +35,48 @@ def test_extractor_constructor(extractor, test_dir) -> None:
     assert extractor._groupwise_computation is None
 
 
-def test_features() -> None:
+@pytest.mark.parametrize(
+    "extractor",
+    [extractor_2012, extractor_2024]
+)
+def test_features(extractor) -> None:
     """Test for property features."""
-    # TODO: Write test
-    pass
+    first_call = extractor.features
+
+    # Validate the features are returned as a list
+    assert isinstance(first_call, list), \
+        "Expected features to be a list."
+
+    # Validate internal caching of features
+    assert extractor._features == first_call, \
+        "Internal _features attribute should match the accessed value."
+
+    # Check that the list is not empty
+    assert len(first_call) > 0, \
+        "Feature list should not be empty for a valid extractor."
+
+    # Access the property again to verify caching
+    second_call = extractor.features
+    assert first_call == second_call, \
+        "Features property should cache the result."
+
+    # They should be equal after the second call
+    assert extractor._features == first_call, \
+        "Internal _features attribute should match the accessed value."
+
+    # Check the length again that is not empty
+    assert len(first_call) > 0, \
+        "Feature list should not be empty for a valid extractor."
+
+    # Ensure each feature is a tuple of two strings
+    assert all(
+        isinstance(pair, tuple) and len(pair) == 2 and all(
+            isinstance(element, str) for element in pair
+        ) for pair in first_call
+    ), (
+        f"Expected each feature to be a tuple of 2 strings, "
+        f"but got {first_call}"
+    )
 
 
 def test_feature_groups() -> None:
