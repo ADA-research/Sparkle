@@ -94,10 +94,58 @@ def test_features(extractor: Extractor) -> None:
         )
 
 
-def test_feature_groups() -> None:
+@pytest.mark.parametrize(
+    "extractor",
+    [extractor_2012, extractor_2024]
+)
+def test_feature_groups(extractor: Extractor) -> None:
     """Test for property feature_groups."""
-    # TODO: Write test
-    pass
+    # Access the feature_groups property for the first time
+    first_call_feature_groups = extractor.feature_groups
+
+    # Validate internal storage consistency
+    assert extractor._feature_groups == first_call_feature_groups, (
+        "Internal _feature_groups attribute should match the accessed value."
+    )
+
+    # Validate the type of the returned feature_groups
+    assert isinstance(first_call_feature_groups, list), (
+        "Expected feature_groups to be a list."
+    )
+
+    # Check for uniqueness of feature group names
+    assert len(first_call_feature_groups) == len(set(first_call_feature_groups)), (
+        f"Expected unique elements in feature_groups, "
+        f"but got duplicates: {first_call_feature_groups}"
+    )
+
+    # Ensure all feature group names are strings
+    for group in first_call_feature_groups:
+        assert isinstance(group, str), (
+            f"Each feature group should be of type str, "
+            f"but got {type(group).__name__}: {group}"
+        )
+
+    # Verify caching behavior by patching subprocess.run
+    with patch("subprocess.run") as mock_subprocess_run:
+        # Access the property again to verify caching
+        second_call_feature_groups = extractor.feature_groups
+
+        # Validate that caching works (both calls should return the same value)
+        assert first_call_feature_groups == second_call_feature_groups, (
+            "Feature groups should be cached and return consistent results."
+        )
+
+        # Ensure subprocess.run was not called during the second access
+        mock_subprocess_run.assert_not_called(), (
+            "subprocess.run should not be called again as the result should "
+            "be cached after the first access."
+        )
+
+    # Validate internal storage consistency after the second access
+    assert extractor._feature_groups == first_call_feature_groups, (
+        "Internal _feature_groups attribute should still match the accessed value."
+    )
 
 
 def test_output_dimension() -> None:
