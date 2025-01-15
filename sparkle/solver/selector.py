@@ -4,7 +4,11 @@ from pathlib import Path
 import subprocess
 import ast
 
-import runrunner as rrr
+from sklearn.base import ClassifierMixin, RegressorMixin
+from asf.predictors import AbstractPredictor
+from asf.selectors.abstract_model_based_selector import AbstractModelBasedSelector
+
+# import runrunner as rrr
 from runrunner import Runner, Run
 
 from sparkle.types import SparkleCallable, SparkleObjective
@@ -14,19 +18,22 @@ from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 class Selector(SparkleCallable):
     """The Selector class for handling Algorithm Selection."""
 
-    def __init__(self: SparkleCallable,
-                 executable_path: Path,
-                 raw_output_directory: Path) -> None:
+    def __init__(
+            self: SparkleCallable,
+            raw_output_directory: Path,
+            selector_class: AbstractModelBasedSelector,
+            model_class: AbstractPredictor | ClassifierMixin | RegressorMixin) -> None:
         """Initialize the Selector object.
 
         Args:
-            executable_path: Path of the Selector executable.
             raw_output_directory: Directory where the Selector will write its raw output.
                 Defaults to directory / tmp
+            selector_class: The Selector class to construct.
+            model_class: The model class the selector will use.
         """
-        self.selector_builder_path = executable_path
-        self.directory = self.selector_builder_path.parent
-        self.name = self.selector_builder_path.name
+        self.selector: AbstractModelBasedSelector =\
+            selector_class(model_class, metadata=None)
+        self.name = type(selector_class).__name__
         self.raw_output_directory = raw_output_directory
 
         if not self.raw_output_directory.exists():
@@ -53,18 +60,8 @@ class Selector(SparkleCallable):
         Returns:
             The command list for constructing the Selector.
         """
-        objective_function = "runtime" if objective.time else "solution_quality"
-        # Python3 to avoid execution rights
-        cmd = ["python3", self.selector_builder_path,
-               "--performance_csv", performance_data,
-               "--feature_csv", feature_data,
-               "--objective", objective_function,
-               "--save", target_file]
-        if runtime_cutoff is not None:
-            cmd.extend(["--runtime_cutoff", str(runtime_cutoff), "--tune"])
-        if wallclock_limit is not None:
-            cmd.extend(["--wallclock_limit", str(wallclock_limit)])
-        return cmd
+        # This method is to be replaced with a ASF method call
+        return
 
     def construct(self: Selector,
                   target_file: Path | str,
@@ -95,9 +92,19 @@ class Selector(SparkleCallable):
         if isinstance(target_file, str):
             target_file = self.raw_output_directory / target_file
         # Convert the dataframes to Selector Format
-        performance_csv = performance_data.to_autofolio(objective=objective,
-                                                        target=target_file.parent)
-        feature_csv = feature_data.to_autofolio(target_file.parent)
+        # performance_csv = performance_data.to_autofolio(objective=objective,
+        #                                                target=target_file.parent)
+        # feature_csv = feature_data.to_autofolio(target_file.parent)
+        """
+        self.selector.fit(feature_data, performance_data)
+        import pickle
+        some_path = Path("test.model")
+        with some_path.open("w+") as f:
+            pickle.dump(self.selector, f)
+        with some_path.open("r") as f:
+            selector = pickle.load(f)
+        #self.selector.
+        self.selector
         cmd = self.build_construction_cmd(target_file,
                                           performance_csv,
                                           feature_csv,
@@ -120,7 +127,8 @@ class Selector(SparkleCallable):
             if not target_file.is_file():
                 print(f"Selector construction of {self.name} failed!")
 
-        return construct
+        return construct"""
+        return
 
     def build_cmd(self: Selector,
                   selector_path: Path,
