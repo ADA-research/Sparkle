@@ -70,14 +70,15 @@ def test_features(extractor: Extractor) -> None:
                 f"Expected all elements to be strings, but got "
                 f"{type(element).__name__}: {element}"
             )
+
     # Patch subprocess.run after the first call to ensure caching is used
     with patch("subprocess.run") as mock_subprocess_run:
         # Access the property again to verify caching
-        second_call = extractor.features
-        assert first_call_features == second_call, \
+        second_call_features = extractor.features
+        assert first_call_features == second_call_features, \
             "Features property should cache the result."
 
-        # Assert that `subprocess.run` was not called at all
+        # Check if subprocess is called
         mock_subprocess_run.assert_not_called()
 
     # Verify that internal caching works
