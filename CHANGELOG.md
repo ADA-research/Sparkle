@@ -2,6 +2,14 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.9.3] - ??/??/2025
+
+### Added
+- Flushing completed jobs from jobs command by hitting spacebar [SPRK-313]
+- "Did you mean" functionality for typos in CLI commands [SPRK-345]
+
+### Changed
+- CI pipeline for unittest now tests for Python 3.10, 3.11 and 3.12
 
 ## [0.9.2] - 07/01/2025
 

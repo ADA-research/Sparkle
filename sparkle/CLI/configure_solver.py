@@ -169,7 +169,10 @@ def main(argv: list[str]) -> None:
     # Expand the performance dataframe so it can store the configuration
     performance_data.add_runs(configurator_runs,
                               instance_names=[
-                                  str(i) for i in instance_set_train.instance_paths])
+                                  str(i) for i in instance_set_train.instance_paths],
+                              initial_values=[PerformanceDataFrame.missing_value,
+                                              PerformanceDataFrame.missing_value,
+                                              {}])
     if instance_set_test is not None:
         # Expand the performance dataframe so it can store the test set results of the
         # found configurations
