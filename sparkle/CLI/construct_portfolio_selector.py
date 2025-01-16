@@ -31,8 +31,6 @@ def parser_function() -> argparse.ArgumentParser:
                     "solver performances.")
     parser.add_argument(*ac.RecomputePortfolioSelectorArgument.names,
                         **ac.RecomputePortfolioSelectorArgument.kwargs)
-    parser.add_argument(*ac.SelectorTimeoutArgument.names,
-                        **ac.SelectorTimeoutArgument.kwargs)
     parser.add_argument(*ac.ObjectiveArgument.names,
                         **ac.ObjectiveArgument.kwargs)
     parser.add_argument(*ac.SelectorAblationArgument.names,
@@ -73,7 +71,6 @@ def main(argv: list[str]) -> None:
 
     # Process command line arguments
     args = parser.parse_args(argv)
-    selector_timeout = args.selector_timeout
     flag_recompute_portfolio = args.recompute_portfolio_selector
     solver_ablation = args.solver_ablation
 
@@ -136,7 +133,6 @@ def main(argv: list[str]) -> None:
                                       feature_data,
                                       objective,
                                       cutoff_time,
-                                      selector_timeout,
                                       run_on=run_on,
                                       sbatch_options=sbatch_options,
                                       base_dir=sl.caller_log_dir)
@@ -163,7 +159,6 @@ def main(argv: list[str]) -> None:
                                              feature_data,
                                              objective,
                                              cutoff_time,
-                                             selector_timeout,
                                              run_on=run_on,
                                              sbatch_options=sbatch_options,
                                              base_dir=sl.caller_log_dir)

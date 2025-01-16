@@ -28,17 +28,15 @@ class Selector:
         Args:
             selector_class: The Selector class to construct.
             model_class: The model class the selector will use.
-            metadata: Scenario meta data for the selector, usually provided at run time.
         """
-        self.selector: AbstractModelBasedSelector =\
-            selector_class(model_class,
-                           metadata=ScenarioMetadata(None, None, None, None, None))
+        self.selector_class = selector_class
+        self.model_class = model_class
 
     @property
     def name(self: Selector) -> str:
         """Return the name of the selector."""
-        return (f"{type(self.selector).__name__}_"
-                f"{type(self.selector.model_class).__name__}")
+        return (f"{type(self.selector_class).__name__}_"
+                f"{type(self.model_class).__name__}")
 
     def construct(self: Selector,
                   target_file: Path,
@@ -46,7 +44,6 @@ class Selector:
                   feature_data: FeatureDataFrame,
                   objective: SparkleObjective,
                   solver_cutoff: int | float | str = None,
-                  wallclock_limit: int | float | str = None,
                   run_on: Runner = Runner.SLURM,
                   sbatch_options: list[str] = None,
                   base_dir: Path = Path()) -> Run:
@@ -58,7 +55,6 @@ class Selector:
             feature_data: Path to the feature data csv.
             objective: The objective to optimize for selection.
             runtime_cutoff: Cutoff for the runtime in seconds.
-            wallclock_limit: Cutoff for the wallclock time in seconds.
             run_on: Which runner to use. Defaults to slurm.
             sbatch_options: Additional options to pass to sbatch.
             base_dir: The base directory to run the Selector in.
@@ -81,18 +77,22 @@ class Selector:
         # Features requires instances as index, columns as feature names
         feature_csv = feature_data.dataframe.copy()
         feature_csv.index = feature_csv.index.map("_".join)  # Reduce Multi-Index
-        feature_csv = feature_csv.T  # Autofolio has feature columns and instance rows
+        feature_csv = feature_csv.T  # ASF-lib has feature columns and instance rows
         feature_path = target_file.parent / feature_data.csv_filepath.name
         feature_csv.to_csv(feature_path)
 
-        self.selector.metadata.maximize = not objective.minimise
-        self.selector.metadata.performance_metric = objective.name
-        self.selector.metadata.budget = solver_cutoff
-        self.selector.metadata.features = feature_csv.columns
-        self.selector.metadata.algorithms = performance_data.solvers
+        selector = self.selector_class(
+            self.model_class, ScenarioMetadata(
+                algorithms=performance_data.solvers,
+                features=feature_csv.columns.to_list(),
+                performance_metric=objective.name,
+                maximize=not objective.minimise,
+                budget=solver_cutoff
+            )
+        )
 
-        cmd = asf_cli.build_cli_command(self.selector,
-                                        feature_csv,
+        cmd = asf_cli.build_cli_command(selector,
+                                        feature_path,
                                         performance_path,
                                         target_file)
 
@@ -100,7 +100,7 @@ class Selector:
         construct = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
-            name=f"{self.selector.__class__.__name__} Selector Construction: "
+            name=f"{self.name} Selector Construction: "
                  f"{', '.join([Path(s).name for s in performance_data.solvers])}",
             base_dir=base_dir,
             sbatch_options=sbatch_options)
@@ -113,13 +113,17 @@ class Selector:
 
     def run(self: Selector,
             selector_path: Path,
-            feature_vector: list | str) -> list:
+            instance: str,
+            feature_data: FeatureDataFrame) -> list:
         """Run the Selector, returning the prediction schedule upon success."""
-        self.selector.load(selector_path)
-        schedule = self.selector.predict(feature_vector)
+        instance_features = feature_data.dataframe[[instance, ]]
+        instance_features.index = instance_features.index.map("_".join)  # Reduce
+        instance_features = instance_features.T  # ASF-lib dataframe structure
+        selector = self.selector_class.load(selector_path)
+        schedule = selector.predict(instance_features)
         if schedule is None:
             print(f"ERROR: Selector {self.name} failed predict schedule!")
-        return schedule
+        return schedule[instance]
 
     @staticmethod
     def process_predict_schedule_output(output: str) -> list:

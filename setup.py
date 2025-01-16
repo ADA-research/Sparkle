@@ -24,7 +24,7 @@ setup(name="SparkleAI",
           "pytermgui==7.7.2",
           "tqdm==4.66.5",
           "RunRunner==0.1.9.1",
-          "asf-lib==0.0.1.11",
+          "asf-lib==0.0.1.14",
           # Reporting packages
           "plotly==5.24.1",
           "kaleido==0.2.1",
