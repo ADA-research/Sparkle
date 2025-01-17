@@ -164,7 +164,7 @@ class Settings:
     DEFAULT_irace_max_iterations = None
 
     # Default selection settings
-    DEFAULT_selector_class = "PairwiseClassifier"
+    DEFAULT_selector_class = "MultiClassClassifier"
     DEFAULT_selector_model = "RandomForestClassifier"
 
     def __init__(self: Settings, file_path: PurePath = None) -> None:
