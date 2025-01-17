@@ -23,6 +23,7 @@ setup(name="SparkleAI",
           "tabulate==0.9.0",
           "pytermgui==7.7.2",
           "tqdm==4.66.5",
+          "smac=2.2.0",
           "RunRunner==0.1.9.1",
           "asf-lib==0.0.1.15",
           # Reporting packages
