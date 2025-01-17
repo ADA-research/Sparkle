@@ -208,7 +208,7 @@ The options below are exclusive to `srun` and are thus discouraged:
 >
 > values: Class.
 >
-> Description: The ASF-lib Algorithm selector class to use.
+> Description: The ASF Algorithm selector class to use.
 
 ---
 

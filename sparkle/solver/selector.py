@@ -76,7 +76,7 @@ class Selector:
         # Features requires instances as index, columns as feature names
         feature_csv = feature_data.dataframe.copy()
         feature_csv.index = feature_csv.index.map("_".join)  # Reduce Multi-Index
-        feature_csv = feature_csv.T  # ASF-lib has feature columns and instance rows
+        feature_csv = feature_csv.T  # ASF has feature columns and instance rows
         feature_path = target_file.parent / feature_data.csv_filepath.name
         feature_csv.to_csv(feature_path)
 
@@ -117,7 +117,7 @@ class Selector:
         """Run the Selector, returning the prediction schedule upon success."""
         instance_features = feature_data.dataframe[[instance, ]]
         instance_features.index = instance_features.index.map("_".join)  # Reduce
-        instance_features = instance_features.T  # ASF-lib dataframe structure
+        instance_features = instance_features.T  # ASF dataframe structure
         selector = self.selector_class.load(selector_path)
         schedule = selector.predict(instance_features)
         if schedule is None:

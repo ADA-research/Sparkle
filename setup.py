@@ -26,7 +26,7 @@ setup(name="SparkleAI",
           "smac==2.2.0",
           "RunRunner==0.1.9.1",
           "asf-lib==0.0.1.15",
-          # ASF-lib requirements
+          # ASF requirements
           "xgboost==2.1.3",
           # Reporting packages
           "plotly==5.24.1",
