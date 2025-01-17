@@ -35,8 +35,7 @@ class Selector:
     @property
     def name(self: Selector) -> str:
         """Return the name of the selector."""
-        return (f"{type(self.selector_class).__name__}_"
-                f"{type(self.model_class).__name__}")
+        return f"{self.selector_class.__name__}_{self.model_class.__name__}"
 
     def construct(self: Selector,
                   target_file: Path,
