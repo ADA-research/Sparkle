@@ -10,6 +10,7 @@ Notable changes to Sparkle will be documented in this file.
 
 ### Changed
 - CI pipeline for unittest now tests for Python 3.10, 3.11 and 3.12
+- Replaced AutoFolio with ASF-lib for algorithm selection [SPRK-336]
 
 ## [0.9.2] - 07/01/2025
 

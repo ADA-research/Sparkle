@@ -97,8 +97,7 @@ def main(argv: list[str]) -> None:
         gv.settings().DEFAULT_feature_data_path,
         gv.settings().DEFAULT_performance_data_path)
 
-    # Selector (AutoFolio) cannot handle cutoff time less than 2, adjust if needed
-    cutoff_time = max(gv.settings().get_general_target_cutoff_time(), 2)
+    cutoff_time = gv.settings().get_general_target_cutoff_time()
 
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
