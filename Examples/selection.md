@@ -55,10 +55,10 @@ To make sure feature computation and solver performance computation are done bef
 sparkle jobs
 ```
 
-Now we can construct a portfolio selector, using the previously computed features and the objective value results of running the solvers. We can specify an objective to select on with the `--objective` flag, but if we do not, Sparkle will default to the first objective specified in the Settings file. The `--selector-timeout` argument determines for how many seconds we will train our selector for. We can set the flag `--solver-ablation` for actual marginal contribution computation later.
+Now we can construct a portfolio selector, using the previously computed features and the objective value results of running the solvers. We can specify an objective to select on with the `--objective` flag, but if we do not, Sparkle will default to the first objective specified in the Settings file. We can set the flag `--solver-ablation` for actual marginal contribution computation later.
 
 ```bash
-sparkle construct portfolio selector --selector-timeout 1000 --solver-ablation
+sparkle construct portfolio selector --solver-ablation
 sparkle jobs  # Wait for the constructor to complete its computations
 ```
 
@@ -138,7 +138,7 @@ sparkle jobs
 Now we can train a selector based on these features.
 
 ```bash
-sparkle construct portfolio selector --selector-timeout 1000
+sparkle construct portfolio selector
 sparkle jobs  # Wait for the computation to be done
 ```
 

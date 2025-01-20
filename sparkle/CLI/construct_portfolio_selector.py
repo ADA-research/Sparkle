@@ -7,6 +7,7 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner
 
+from sparkle.solver import Selector
 from sparkle.platform.settings_objects import SettingState
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.types import resolve_objective
@@ -24,8 +25,6 @@ def parser_function() -> argparse.ArgumentParser:
                     "solver performances.")
     parser.add_argument(*ac.RecomputePortfolioSelectorArgument.names,
                         **ac.RecomputePortfolioSelectorArgument.kwargs)
-    parser.add_argument(*ac.SelectorTimeoutArgument.names,
-                        **ac.SelectorTimeoutArgument.kwargs)
     parser.add_argument(*ac.ObjectiveArgument.names,
                         **ac.ObjectiveArgument.kwargs)
     parser.add_argument(*ac.SelectorAblationArgument.names,
@@ -66,7 +65,6 @@ def main(argv: list[str]) -> None:
 
     # Process command line arguments
     args = parser.parse_args(argv)
-    selector_timeout = args.selector_timeout
     flag_recompute_portfolio = args.recompute_portfolio_selector
     solver_ablation = args.solver_ablation
 
@@ -86,14 +84,14 @@ def main(argv: list[str]) -> None:
     run_on = gv.settings().get_run_on()
 
     print("Start constructing Sparkle portfolio selector ...")
-    selector = gv.settings().get_general_sparkle_selector()
+    selector = Selector(gv.settings().get_selection_class(),
+                        gv.settings().get_selection_model())
 
     judge_exist_remaining_jobs(
         gv.settings().DEFAULT_feature_data_path,
         gv.settings().DEFAULT_performance_data_path)
 
-    # Selector (AutoFolio) cannot handle cutoff time less than 2, adjust if needed
-    cutoff_time = max(gv.settings().get_general_target_cutoff_time(), 2)
+    cutoff_time = gv.settings().get_general_target_cutoff_time()
 
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
@@ -107,10 +105,8 @@ def main(argv: list[str]) -> None:
 
     # Selector is named after the solvers it can predict, sort for permutation invariance
     solvers = sorted([s.name for s in gv.settings().DEFAULT_solver_dir.iterdir()])
-    selection_scenario_path = (
-        gv.settings().DEFAULT_selection_output
-        / gv.settings().DEFAULT_general_sparkle_selector.name
-        / "_".join(solvers))
+    selection_scenario_path =\
+        gv.settings().DEFAULT_selection_output / selector.name / "_".join(solvers)
 
     # Update latest scenario
     gv.latest_scenario().set_selection_scenario_path(selection_scenario_path)
@@ -125,13 +121,11 @@ def main(argv: list[str]) -> None:
         sys.exit()
 
     selector_path.parent.mkdir(exist_ok=True, parents=True)
-
     selector_run = selector.construct(selector_path,
                                       performance_data,
                                       feature_data,
                                       objective,
                                       cutoff_time,
-                                      selector_timeout,
                                       run_on=run_on,
                                       sbatch_options=sbatch_options,
                                       base_dir=sl.caller_log_dir)
@@ -158,7 +152,6 @@ def main(argv: list[str]) -> None:
                                              feature_data,
                                              objective,
                                              cutoff_time,
-                                             selector_timeout,
                                              run_on=run_on,
                                              sbatch_options=sbatch_options,
                                              base_dir=sl.caller_log_dir)

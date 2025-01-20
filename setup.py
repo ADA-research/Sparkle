@@ -23,15 +23,14 @@ setup(name="SparkleAI",
           "tabulate==0.9.0",
           "pytermgui==7.7.2",
           "tqdm==4.66.5",
+          "smac==2.2.0",
           "RunRunner==0.1.9.1",
+          "asf-lib==0.0.1.15",
+          # ASF requirements
+          "xgboost==2.1.3",
           # Reporting packages
           "plotly==5.24.1",
           "kaleido==0.2.1",
-          # Autofolio packages
-          "xgboost==2.0.3",
-          "scikit-learn==1.3.2",
-          "liac-arff==2.5.0",
-          "smac==2.2.0",
       ],
       include_package_data=True,
       entry_points={"console_scripts": ["sparkle=sparkle.CLI._cli_:main"], },)
