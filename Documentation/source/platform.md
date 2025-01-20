@@ -203,14 +203,21 @@ The options below are exclusive to `srun` and are thus discouraged:
 
 ---
 
-`selector`
-> aliases: `selector`
+`selector_class`
+> aliases: `selector_class`
 >
-> values: Path.
+> values: Class.
 >
-> Note: Currently only AutoFolio is supported by Sparkle. This setting is soon to be deprecated for a more flexible solution.
+> Description: The ASF Algorithm selector class to use.
+
+---
+
+`selector_model`
+> aliases: `selector_model`
 >
-> Description: The Algorithm selector to use.
+> values: Model.
+>
+> Description: The sklearn model to use for algorithm selection.
 
 ---
 

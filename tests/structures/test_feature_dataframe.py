@@ -112,9 +112,3 @@ def test_save_csv() -> None:
     """Test for method save_csv."""
     # TODO: Write test
     pass
-
-
-def test_to_autofolio() -> None:
-    """Test for method to_autofolio."""
-    # TODO: Write test
-    pass

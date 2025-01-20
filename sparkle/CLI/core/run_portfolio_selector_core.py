@@ -10,7 +10,7 @@ from runrunner.base import Runner
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from sparkle.solver import Solver
+from sparkle.solver import Solver, Selector
 from sparkle.types import SolverStatus
 
 
@@ -95,9 +95,11 @@ if __name__ == "__main__":
 
     # Run portfolio selector
     print("Sparkle portfolio selector predicting ...")
-    selector = gv.settings().get_general_sparkle_selector()
+    selector = Selector(gv.settings().get_selection_class(),
+                        gv.settings().get_selection_model())
     predict_schedule = selector.run(args.selector,
-                                    feature_data.get_instance(str(args.instance)))
+                                    args.instance,
+                                    feature_data)
 
     if predict_schedule is None:  # Selector Failed to produce prediction
         sys.exit(-1)

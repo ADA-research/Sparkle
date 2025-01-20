@@ -6,13 +6,12 @@ import ast
 from pathlib import Path
 from pathlib import PurePath
 
+from runrunner import Runner
+
 from sparkle.types import SparkleObjective, resolve_objective
 from sparkle.types.objective import PAR
-from sparkle.solver import Selector
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator import implementations as cim
-
-from runrunner import Runner
 from sparkle.platform.cli_types import VerbosityLevel
 
 
@@ -57,9 +56,6 @@ class Settings:
     DEFAULT_ablation_dir = DEFAULT_components / "ablationAnalysis-0.9.4"
     DEFAULT_ablation_exec = DEFAULT_ablation_dir / "ablationAnalysis"
     DEFAULT_ablation_validation_exec = DEFAULT_ablation_dir / "ablationValidation"
-
-    # Autofolio component
-    DEFAULT_general_sparkle_selector = DEFAULT_components / "AutoFolio/scripts/autofolio"
 
     # Report component
     DEFAULT_latex_source = DEFAULT_components / "Sparkle-latex-source"
@@ -167,6 +163,10 @@ class Settings:
     DEFAULT_irace_mu = None
     DEFAULT_irace_max_iterations = None
 
+    # Default selection settings
+    DEFAULT_selector_class = "MultiClassClassifier"
+    DEFAULT_selector_model = "RandomForestClassifier"
+
     def __init__(self: Settings, file_path: PurePath = None) -> None:
         """Initialise a settings object."""
         # Settings 'dictionary' in configparser format
@@ -175,7 +175,6 @@ class Settings:
         # Setting flags
         self.__general_sparkle_objective_set = SettingState.NOT_SET
         self.__general_sparkle_configurator_set = SettingState.NOT_SET
-        self.__general_sparkle_selector_set = SettingState.NOT_SET
         self.__general_target_cutoff_time_set = SettingState.NOT_SET
         self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
         self.__general_verbosity_set = SettingState.NOT_SET
@@ -217,6 +216,9 @@ class Settings:
         self.__irace_mu_set = SettingState.NOT_SET
         self.__irace_max_iterations_set = SettingState.NOT_SET
 
+        self.__selection_model_set = SettingState.NOT_SET
+        self.__selection_class_set = SettingState.NOT_SET
+
         self.__general_sparkle_configurator = None
 
         self.__slurm_extra_options_set = dict()
@@ -253,13 +255,6 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
                     self.set_general_sparkle_configurator(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("selector", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.get(section, option)
-                    self.set_general_sparkle_selector(value, state)
                     file_settings.remove_option(section, option)
 
             option_names = ("target_cutoff_time",
@@ -473,6 +468,22 @@ class Settings:
                     self.set_irace_max_iterations(value, state)
                     file_settings.remove_option(section, option)
 
+            section = "selection"
+
+            option_names = ("selector_class", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.get(section, option)
+                    self.set_selection_class(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("selector_model")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.get(section, option)
+                    self.set_selection_model(value, state)
+                    file_settings.remove_option(section, option)
+
             section = "slurm"
             option_names = ("number_of_jobs_in_parallel", "num_job_in_parallel")
             for option in option_names:
@@ -670,26 +681,6 @@ class Settings:
                       f'{self.__settings["general"]["configurator"]}. '
                       "Configurator not set.")
         return self.__general_sparkle_configurator
-
-    def set_general_sparkle_selector(
-            self: Settings,
-            value: Path = DEFAULT_general_sparkle_selector,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the Sparkle selector."""
-        section = "general"
-        name = "selector"
-        if value is not None and self.__check_setting_state(
-                self.__general_sparkle_selector_set, origin, name):
-            self.__init_section(section)
-            self.__general_sparkle_selector_set = origin
-            self.__settings[section][name] = str(value)
-
-    def get_general_sparkle_selector(self: Settings) -> Selector:
-        """Return the selector init method."""
-        if self.__general_sparkle_selector_set == SettingState.NOT_SET:
-            self.set_general_sparkle_selector()
-        return Selector(Path(self.__settings["general"]["selector"]),
-                        self.DEFAULT_selection_output_raw)
 
     def set_general_target_cutoff_time(
             self: Settings, value: int = DEFAULT_general_target_cutoff_time,
@@ -1380,6 +1371,54 @@ class Settings:
             self.__init_section(section)
             self.__irace_max_iterations_set = origin
             self.__settings[section][name] = str(value)
+
+    # Selection settings ###
+
+    def set_selection_class(
+            self: Settings,
+            value: str = DEFAULT_selector_class,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the Sparkle selector.
+
+        Can contain any of the class names as defined in asf.selectors.
+        """
+        section = "selection"
+        name = "selector_class"
+        if value is not None and self.__check_setting_state(
+                self.__selection_class_set, origin, name):
+            self.__init_section(section)
+            self.__selection_class_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_selection_class(self: Settings) -> type:
+        """Return the selector class."""
+        if self.__selection_class_set == SettingState.NOT_SET:
+            self.set_selection_class()
+        from asf import selectors
+        return getattr(selectors, self.__settings["selection"]["selector_class"])
+
+    def set_selection_model(
+            self: Settings,
+            value: str = DEFAULT_selector_model,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the selector model.
+
+        Can be any of the sklearn.ensemble models.
+        """
+        section = "selection"
+        name = "selector_model"
+        if value is not None and self.__check_setting_state(
+                self.__selection_model_set, origin, name):
+            self.__init_section(section)
+            self.__selection_model_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_selection_model(self: Settings) -> type:
+        """Return the selector model class."""
+        if self.__selection_model_set == SettingState.NOT_SET:
+            self.set_selection_model()
+        from sklearn import ensemble
+        return getattr(ensemble, self.__settings["selection"]["selector_model"])
 
     # Slurm settings ###
 
