@@ -147,7 +147,15 @@ class Settings:
     DEFAULT_irace_mu = None
     DEFAULT_irace_max_iterations = None
 
-    DEFAULT_portfolio_construction_timeout = None
+    # Default ParamILS settings
+    DEFAULT_paramils_focused_ils = False
+    DEFAULT_paramils_tuner_timeout = None
+    DEFAULT_paramils_focused_ils = False
+    DEFAULT_paramils_initial_configurations = False
+    DEFAULT_paramils_min_runs = False
+    DEFAULT_paramils_max_runs = False
+    DEFAULT_paramils_random_restart = False
+    DEFAULT_paramils_max_experiments = None
 
     DEFAULT_slurm_max_parallel_runs_per_node = 8
 
@@ -155,13 +163,6 @@ class Settings:
 
     DEFAULT_parallel_portfolio_check_interval = 4
     DEFAULT_parallel_portfolio_num_seeds_per_solver = 1
-
-    # Default IRACE settings
-    DEFAULT_irace_max_time = 0  # IRACE equivalent of None in this case
-    DEFAULT_irace_max_experiments = 0
-    DEFAULT_irace_first_test = None
-    DEFAULT_irace_mu = None
-    DEFAULT_irace_max_iterations = None
 
     # Default selection settings
     DEFAULT_selector_class = "MultiClassClassifier"
@@ -467,6 +468,9 @@ class Settings:
                     value = file_settings.getint(section, option)
                     self.set_irace_max_iterations(value, state)
                     file_settings.remove_option(section, option)
+
+            section = "paramils"
+            # TODO: Fetch paramils values from file
 
             section = "selection"
 
@@ -841,6 +845,9 @@ class Settings:
                     and configurator_settings["max_time"] == 0):  # Default to base
                 configurator_settings["solver_calls"] =\
                     self.get_configurator_solver_calls()
+        elif configurator_name == cim.ParamILS.__name__:
+            # TODO: Fetch ParamILS values
+            configurator_settings.update({})
         return configurator_settings
 
     def set_configurator_solver_calls(
@@ -1371,6 +1378,10 @@ class Settings:
             self.__init_section(section)
             self.__irace_max_iterations_set = origin
             self.__settings[section][name] = str(value)
+
+    # Configuration: ParamILS specific settings ###
+
+    # TODO: Add ParamILS getters and setters
 
     # Selection settings ###
 
