@@ -150,12 +150,11 @@ class Settings:
     # Default ParamILS settings
     DEFAULT_paramils_focused_ils = False
     DEFAULT_paramils_tuner_timeout = None
-    DEFAULT_paramils_focused_ils = False
-    DEFAULT_paramils_initial_configurations = False
-    DEFAULT_paramils_min_runs = False
-    DEFAULT_paramils_max_runs = False
-    DEFAULT_paramils_random_restart = False
-    DEFAULT_paramils_max_experiments = None
+    DEFAULT_paramils_focused_approach = True  # ParamILS default
+    DEFAULT_paramils_min_runs = 1  # ParamILS default
+    DEFAULT_paramils_max_runs = 2000  # ParamILS default
+    DEFAULT_paramils_random_restart = 0.05  # ParamILS default
+    DEFAULT_paramils_initial_configurations = 10  # ParamILS default
 
     DEFAULT_slurm_max_parallel_runs_per_node = 8
 
@@ -202,6 +201,12 @@ class Settings:
         self.__smac3_use_default_config_set = SettingState.NOT_SET
         self.__smac3_min_budget_set = SettingState.NOT_SET
         self.__smac3_max_budget_set = SettingState.NOT_SET
+
+        self.__paramils_min_runs_set = SettingState.NOT_SET
+        self.__paramils_max_runs_set = SettingState.NOT_SET
+        self.__paramils_tuner_timeout_set = SettingState.NOT_SET
+        self.__paramils_focused_approach_set = SettingState.NOT_SET
+        self.__paramils_random_restart_set = SettingState.NOT_SET
 
         self.__run_on_set = SettingState.NOT_SET
         self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
@@ -470,7 +475,41 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             section = "paramils"
-            # TODO: Fetch paramils values from file
+
+            option_names = ("min_runs", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_paramils_min_runs(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("max_runs", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_paramils_max_runs(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("tuner_timeout", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_paramils_tuner_timeout(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("random_restart", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getfloat(section, option)
+                    self.set_paramils_random_restart(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("focused_approach", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getboolean(section, option)
+                    self.set_paramils_focused_approach(value, state)
+                    file_settings.remove_option(section, option)
 
             section = "selection"
 
@@ -847,7 +886,10 @@ class Settings:
                     self.get_configurator_solver_calls()
         elif configurator_name == cim.ParamILS.__name__:
             # TODO: Fetch ParamILS values
-            configurator_settings.update({})
+            configurator_settings.update({
+                "min_runs": self.get_paramils_min_runs(),
+                "max_runs": self.get_paramils_max_runs(),
+            })
         return configurator_settings
 
     def set_configurator_solver_calls(
@@ -1381,7 +1423,120 @@ class Settings:
 
     # Configuration: ParamILS specific settings ###
 
-    # TODO: Add ParamILS getters and setters
+    def get_paramils_min_runs(self: Settings) -> int:
+        """Return the minimum number of runs for ParamILS."""
+        if self.__paramils_min_runs_set == SettingState.NOT_SET:
+            self.set_paramils_min_runs()
+        return int(self.__settings["paramils"]["min_runs"])
+
+    def set_paramils_min_runs(
+            self: Settings, value: int = DEFAULT_paramils_min_runs,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the minimum number of runs for ParamILS."""
+        section = "paramils"
+        name = "min_runs"
+
+        if self.__check_setting_state(
+                self.__paramils_min_runs_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_min_runs_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_max_runs(self: Settings) -> int:
+        """Return the maximum number of runs for ParamILS."""
+        if self.__paramils_max_runs_set == SettingState.NOT_SET:
+            self.set_paramils_max_runs()
+        return int(self.__settings["paramils"]["max_runs"])
+
+    def set_paramils_max_runs(
+            self: Settings, value: int = DEFAULT_paramils_max_runs,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the maximum number of runs for ParamILS."""
+        section = "paramils"
+        name = "max_runs"
+
+        if self.__check_setting_state(
+                self.__paramils_max_runs_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_max_runs_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_tuner_timeout(self: Settings) -> int | None:
+        """Return the timeout for ParamILS."""
+        if self.__paramils_tuner_timeout_set == SettingState.NOT_SET:
+            self.set_paramils_tuner_timeout()
+        tuner_timeout = self.__settings["paramils"]["tuner_timeout"]
+        return int(tuner_timeout) if tuner_timeout.isdigit() else None
+
+    def set_paramils_tuner_timeout(
+            self: Settings, value: int = DEFAULT_paramils_tuner_timeout,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the timeout for ParamILS."""
+        section = "paramils"
+        name = "tuner_timeout"
+
+        if self.__check_setting_state(
+                self.__paramils_tuner_timeout_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_tuner_timeout_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_focused_approach(self: Settings) -> bool:
+        """Return the focused approach for ParamILS."""
+        if self.__paramils_focused_approach_set == SettingState.NOT_SET:
+            self.set_paramils_focused_approach()
+        return bool(self.__settings["paramils"]["focused_approach"])
+
+    def set_paramils_focused_approach(
+            self: Settings, value: bool = DEFAULT_paramils_focused_approach,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the focused approach for ParamILS."""
+        section = "paramils"
+        name = "focused_approach"
+
+        if self.__check_setting_state(
+                self.__paramils_focused_approach_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_focused_approach_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_initial_configurations(self: Settings) -> int:
+        """Return the initial configurations for ParamILS."""
+        if self.__paramils_initial_configurations_set == SettingState.NOT_SET:
+            self.set_paramils_initial_configurations()
+        return int(self.__settings["paramils"]["initial_configurations"])
+
+    def set_paramils_initial_configurations(
+            self: Settings, value: int = DEFAULT_paramils_initial_configurations,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the initial configurations for ParamILS."""
+        section = "paramils"
+        name = "initial_configurations"
+
+        if self.__check_setting_state(
+                self.__paramils_initial_configurations_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_initial_configurations_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_random_restart(self: Settings) -> float:
+        """Return the random restart chance for ParamILS."""
+        if self.__paramils_random_restart_set == SettingState.NOT_SET:
+            self.set_paramils_random_restart()
+        return float(self.__settings["paramils"]["random_restart"])
+
+    def set_paramils_random_restart(
+            self: Settings, value: float = DEFAULT_paramils_random_restart,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the random restart chance for ParamILS."""
+        section = "paramils"
+        name = "random_restart"
+
+        if self.__check_setting_state(
+                self.__paramils_random_restart_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_random_restart_set = origin
+            self.__settings[section][name] = str(value)
 
     # Selection settings ###
 

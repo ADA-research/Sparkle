@@ -145,7 +145,7 @@ class ParamILSScenario(SMAC2Scenario):
                  use_cpu_time_in_tunertime: bool = None,
                  feature_data: FeatureDataFrame | Path = None,
                  tuner_timeout: int = None,
-                 focused_ils: bool = False,
+                 focused_ils: bool = True,
                  initial_configurations: int = 10,
                  min_runs: int = 1,
                  max_runs: int = 2000,
@@ -179,7 +179,8 @@ class ParamILSScenario(SMAC2Scenario):
                 time limit.
             feature_data: The feature data for the instances in the scenario.
             tuner_timeout: The maximum number of seconds allowed for the tuner.
-            focused_ils: Whether to use focused ILS.
+            focused_ils: Comparison approach of ParamILS.
+                True for focused ILS, false for basic.
             initial_configurations: The number of initial configurations.
             min_runs: The minimum number of runs required for a single configuration.
             max_runs: The maximum number of runs allowed for a single configuration.
@@ -205,6 +206,7 @@ class ParamILSScenario(SMAC2Scenario):
         """Create a file with the configuration scenario."""
         scenario_file = super().create_scenario_file(ParamILS.configurator_target)
         # TODO: Write extra stuff to the scenario file
+        # Add check-instances-exist = True?
         return scenario_file
 
     @staticmethod
