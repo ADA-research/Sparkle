@@ -1,31 +1,24 @@
 """Configurator class to use different configurators like SMAC."""
-
 from __future__ import annotations
-# from typing import Callable
 from pathlib import Path
-# import ast
-# from statistics import mean
-# import operator
 import fcntl
-# import glob
 import shutil
-
-# import pandas as pd
 
 from runrunner import Runner, Run
 
-from sparkle.configurator.configurator import Configurator, ConfigurationScenario
+from sparkle.configurator.configurator import Configurator
+from sparkle.configurator.implementations import SMAC2Scenario
 from sparkle.solver import Solver
-from sparkle.structures import PerformanceDataFrame
+from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.instance import InstanceSet
 from sparkle.types import SparkleObjective
 
 
 class ParamILS(Configurator):
-    """Class for ParamILS (Ruby) configurator."""
+    """Class for ParamILS (Java) configurator."""
     configurator_path = Path(__file__).parent.parent.parent.resolve() /\
-        "Components/paramils2.3.8-source"
-    configurator_executable = configurator_path / "param_ils_2_3_run.rb"
+        "Components/paramils-v3.0.0"
+    configurator_executable = configurator_path / "paramils"
     target_algorithm = "paramils_target_algorithm.py"
     configurator_target = configurator_path / target_algorithm
 
@@ -78,26 +71,27 @@ class ParamILS(Configurator):
         Returns:
             A RunRunner Run object.
         """
-        self.scenario = scenario
-        self.scenario.create_scenario(parent_directory=self.output_path)
-        output_csv = self.scenario.validation / "configurations.csv"
-        output_csv.parent.mkdir(exist_ok=True, parents=True)
+        if shutil.which("java") is None:
+            raise RuntimeError(
+                "ParamILS requires Java 1.8.0_402, but Java is not installed. "
+                "Please ensure Java is installed and try again."
+            )
+        scenario.create_scenario()
+        # We set the seed over the last n run ids in the dataframe
         seeds = data_target.run_ids[data_target.num_runs - scenario.number_of_runs:]
-        output = [f"{(self.scenario.result_directory).absolute()}/"
-                  f"{self.scenario.name}_seed_{seed}_paramils.txt"
+        output = [f"{(scenario.results_directory).absolute()}/"
+                  f"{scenario.name}_seed_{seed}_smac.txt"
                   for seed in seeds]
-        # execdir timeout should go to another place
+        # NOTE: Could add --rungroup $dirname to change the created directory name
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
-                f"{ParamILS.__name__} {output[seed]} {output_csv.absolute()} "
+                f"{ParamILS.__name__} {output_file} {data_target.csv_filepath} "
+                f"{scenario.scenario_file_path} {seed} "
                 f"{ParamILS.configurator_executable.absolute()} "
-                f"-scenariofile {(self.scenario.scenario_file_path).absolute()} "
-                f"-numRun {seed} "
-                f"-outdir {output[seed]}"
-                for seed in seeds]
-
+                f"--scenario-file {scenario.scenario_file_path} "
+                f"--seed {seed} "
+                for output_file, seed in zip(output, seeds)]
         if num_parallel_jobs is not None:
             num_parallel_jobs = max(num_parallel_jobs, len(cmds))
-
         return super().configure(
             configuration_commands=cmds,
             data_target=data_target,
@@ -132,139 +126,114 @@ class ParamILS(Configurator):
         return
 
 
-class ParamILSScenario(ConfigurationScenario):
+class ParamILSScenario(SMAC2Scenario):
     """Class to handle ParamILS configuration scenarios."""
 
-    def __init__(self: ParamILSScenario, solver: Solver,
+    def __init__(self: ParamILSScenario,
+                 solver: Solver,
                  instance_set: InstanceSet,
-                 tuner_timeout: int = None, cutoff_time: int = None,
-                 cutoff_length: int = None,
-                 sparkle_objectives: list[SparkleObjective] = None)\
+                 sparkle_objectives: list[SparkleObjective],
+                 parent_directory: Path,
+                 number_of_runs: int = None,
+                 solver_calls: int = None,
+                 max_iterations: int = None,
+                 cpu_time: int = None,
+                 wallclock_time: int = None,
+                 cutoff_time: int = None,
+                 target_cutoff_length: str = None,
+                 cli_cores: int = None,
+                 use_cpu_time_in_tunertime: bool = None,
+                 feature_data: FeatureDataFrame | Path = None,
+                 tuner_timeout: int = None,
+                 focused_ils: bool = False,
+                 initial_configurations: int = 10,
+                 min_runs: int = 1,
+                 max_runs: int = 2000,
+                 random_restart: float = 0.05,
+                 )\
             -> None:
         """Initialize scenario paths and names.
 
         Args:
             solver: Solver that should be configured.
-            execdir: The execution directroy.
-            outdir: Output directory.
             instance_set: Instances object for the scenario.
-            tuner_timeout: The time budget allocated for each configuration run. (cpu)
-            cutoff_time: The maximum time allowed for each individual run during
-                configuration.
-            cutoff_length: The maximum number of iterations allowed for each
-                individual run during configuration.
             sparkle_objectives: SparkleObjectives used for each run of the configuration.
-                Will be simplified to the first objective.
+            parent_directory: Directory in which the scenario should be created.
+            number_of_runs: The number of configurator runs to perform
+                for configuring the solver.
+            solver_calls: The number of times the solver is called for each
+                configuration run
+            max_iterations: The maximum number of iterations allowed for each
+                configuration run. [iteration-limit, numIterations, numberOfIterations]
+            cpu_time: The maximum number of seconds allowed for each
+                configuration run. [time-limit, cpu-time, wallclock-time]
+            wallclock_time: The maximum number of seconds allowed for each
+                configuration run. [time-limit, cpu-time, wallclock-time]
+            cutoff_time: The maximum number of seconds allowed for each
+                configuration run. [time-limit, cpu-time, wallclock-time]
+            target_cutoff_length: The maximum number of seconds allowed for each
+                configuration run. [time-limit, cpu-time, wallclock-time]
+            cli_cores: The maximum number of cores allowed for each
+                configuration run.
+            use_cpu_time_in_tunertime: Whether to use cpu_time in the tuner
+                time limit.
+            feature_data: The feature data for the instances in the scenario.
+            tuner_timeout: The maximum number of seconds allowed for the tuner.
+            focused_ils: Whether to use focused ILS.
+            initial_configurations: The number of initial configurations.
+            min_runs: The minimum number of runs required for a single configuration.
+            max_runs: The maximum number of runs allowed for a single configuration.
+            random_restart: The probability to restart from a random configuration.
         """
-        super().__init__(solver, instance_set, sparkle_objectives)
+        super().__init__(solver, instance_set, sparkle_objectives, parent_directory,
+                         number_of_runs, solver_calls, max_iterations, cpu_time,
+                         wallclock_time, cutoff_time, target_cutoff_length, cli_cores,
+                         use_cpu_time_in_tunertime, feature_data)
         self.solver = solver
         self.instance_set = instance_set
-        self.name = f"{self.solver.name}_{self.instance_set.name}"
-        self.sparkle_objective = sparkle_objectives[0] if sparkle_objectives else None
-
         self.tuner_timeout = tuner_timeout
         self.cutoff_time = cutoff_time
-        self.cutoff_length = cutoff_length
+        self.cutoff_length = target_cutoff_length
+        self.multi_objective = len(sparkle_objectives) > 1
+        self.approach = "BASIC" if not focused_ils else "FOCUS"
+        self.initial_configurations = initial_configurations
+        self.min_runs = min_runs
+        self.max_runs = max_runs
+        self.random_restart = random_restart
 
-        self.parent_directory = Path()
-        self.directory = Path()
-        self.result_directory = Path()
-        self.scenario_file_path = Path()
-
-    def create_scenario(self: ParamILSScenario, parent_directory: Path) -> None:
-        """Create scenario with solver and instances in the parent directory.
-
-        This prepares all the necessary subdirectories related to configuration.
-
-        Args:
-            parent_directory: Directory in which the scenario should be created.
-        """
-        self._set_paths(parent_directory)
-        self._prepare_scenario_directory()
-        self._prepare_result_directory()
-        self._prepare_instances()
-
-        if self.use_features:
-            self._create_feature_file()
-
-        self._create_scenario_file()
-
-    def _set_paths(self: ParamILSScenario, parent_directory: Path) -> None:
-        """Set the paths for the scenario based on the specified parent directory."""
-        self.parent_directory = parent_directory
-        self.directory = self.parent_directory / "scenarios" / self.name
-        self.result_directory = self.directory / "results"
-        self.outdir_train = self.directory / "outdir_train_configuration"
-        self.tmp = self.directory / "tmp"
-        self.validation = self.directory / "validation"
-
-    def _prepare_scenario_directory(self: ParamILSScenario) -> None:
-        """Delete old scenario dir, recreate it, create empty dirs inside."""
-        shutil.rmtree(self.directory, ignore_errors=True)
-        self.directory.mkdir(parents=True)
-
-        # Create empty directories as needed
-        self.outdir_train.mkdir()
-        self.tmp.mkdir()
-
-    def _prepare_result_directory(self: ParamILSScenario) -> None:
-        """Delete possible files in result directory."""
-        shutil.rmtree(self.result_directory, ignore_errors=True)
-        self.result_directory.mkdir(parents=True)
-
-    def _create_scenario_file(self: ParamILSScenario) -> None:
-        """Create a file with the configuration scenario.
-
-        Writes supplementary information to the target algorithm (algo =) as:
-        algo = {configurator_target} {solver_directory} {sparkle_objective}
-        """
-        self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
-        with self.scenario_file_path.open("w") as file:
-            file.write(f"algo = {ParamILS.configurator_target.absolute()} "
-                       f"{self.solver.directory.absolute()} {self.sparkle_objective} \n"
-                       f"execdir = {self.tmp.absolute()}/\n"
-                       f"deterministic = {1 if self.solver.deterministic else 0}\n"
-                       f"run_obj = {self._get_performance_measure()}\n"
-                       f"cutoffTime = {self.cutoff_time}\n"
-                       f"cutoff_length = {self.cutoff_length}\n"
-                       f"tunerTimeout = {self.tuner_timeout}\n"
-                       f"paramfile = {self.solver.get_pcs_file()}\n"
-                       f"outdir = {self.outdir_train.absolute()}\n"
-                       f"instance_file = {self.instance_file_path.absolute()}\n"
-                       f"test_instance_file = {self.instance_file_path.absolute()}\n")
-            # We don't let SMAC do the validation
-            # file.write("validation = false" + "\n") TODO
-
-    def _prepare_instances(self: ParamILSScenario) -> None:
-        """Create instance list file without instance specifics."""
-        self.instance_file_path.parent.mkdir(exist_ok=True, parents=True)
-        with self.instance_file_path.open("w+") as file:
-            for instance_path in self.instance_set._instance_paths:
-                file.write(f"{instance_path.absolute()}\n")
-
-    def _get_performance_measure(self: ParamILSScenario) -> str:
-        """Retrieve the ParamILS performance measure of the SparkleObjective.
-
-        Returns:
-            Performance measure of the sparkle objective
-        """
-        if self.sparkle_objective.time:
-            return "runtime"
-        return "approx"
+    def create_scenario_file(self: ParamILSScenario) -> Path:
+        """Create a file with the configuration scenario."""
+        scenario_file = super().create_scenario_file(ParamILS.configurator_target)
+        # TODO: Write extra stuff to the scenario file
+        return scenario_file
 
     @staticmethod
-    def from_file(scenario_file: Path, solver: Solver, instance_set: InstanceSet,
-                  ) -> ParamILSScenario:
+    def from_file(scenario_file: Path) -> ParamILSScenario:
         """Reads scenario file and initalises ConfigurationScenario."""
+        from sparkle.types import resolve_objective
+        from sparkle.instance import Instance_Set
         config = {}
         with scenario_file.open() as file:
+            import ast
             for line in file:
                 key, value = line.strip().split(" = ")
-                config[key] = value
+                try:
+                    config[key] = ast.literal_eval(value)
+                except Exception:
+                    config[key] = value
+        _, solver_path, _, objective_str = config["algo"].split(" ")
+        objective = resolve_objective(objective_str)
+        solver = Solver(Path(solver_path.strip()))
+        # Extract the instance set from the instance file
+        instance_file_path = Path(config["instance_file"])
+        instance_set_path = Path(instance_file_path.open().readline().strip()).parent
+        instance_set = Instance_Set(Path(instance_set_path))
 
         # Collect relevant settings
         wallclock_limit = int(config["wallclock-limit"]) if "wallclock-limit" in config \
             else None
+
+        # TODO: Collect all other parameters
 
         objective_str = config["algo"].split(" ")[-1]
         objective = SparkleObjective(objective_str)

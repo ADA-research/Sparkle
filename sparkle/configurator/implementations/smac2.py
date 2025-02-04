@@ -320,14 +320,16 @@ class SMAC2Scenario(ConfigurationScenario):
 
         self.create_scenario_file()
 
-    def create_scenario_file(self: SMAC2Scenario) -> Path:
+    def create_scenario_file(
+            self: SMAC2Scenario,
+            configurator_target: Path = SMAC2.configurator_target) -> Path:
         """Create a file with the configuration scenario.
 
         Writes supplementary information to the target algorithm (algo =) as:
         algo = {configurator_target} {solver_directory} {sparkle_objective}
         """
         with self.scenario_file_path.open("w") as file:
-            file.write(f"algo = {SMAC2.configurator_target.absolute()} "
+            file.write(f"algo = {configurator_target.absolute()} "
                        f"{self.solver.directory} {self.tmp} {self.sparkle_objective} \n"
                        f"deterministic = {1 if self.solver.deterministic else 0}\n"
                        f"run_obj = {self._get_performance_measure()}\n"

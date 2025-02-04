@@ -190,7 +190,8 @@ def initialise_sparkle(save_existing_platform: bool = True,
         # NOTE: An automatic resolution of Java at this point would be good
         # However, loading modules from Python has thusfar not been successfull.
         warnings.warn("Could not find Java as an executable! Java 1.8.0_402 is required "
-                      "to use SMAC2 as a configurator. Consider installing Java.")
+                      "to use SMAC2 or ParamILS as a configurator. "
+                      "Consider installing Java.")
 
     # Check if IRACE is installed
     if not IRACE.configurator_executable.exists():
