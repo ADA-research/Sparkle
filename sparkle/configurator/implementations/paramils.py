@@ -137,10 +137,7 @@ class ParamILSScenario(SMAC2Scenario):
                  number_of_runs: int = None,
                  solver_calls: int = None,
                  max_iterations: int = None,
-                 cpu_time: int = None,
-                 wallclock_time: int = None,
                  cutoff_time: int = None,
-                 target_cutoff_length: str = None,
                  cli_cores: int = None,
                  use_cpu_time_in_tunertime: bool = None,
                  feature_data: FeatureDataFrame | Path = None,
@@ -171,8 +168,6 @@ class ParamILSScenario(SMAC2Scenario):
                 configuration run. [time-limit, cpu-time, wallclock-time]
             cutoff_time: The maximum number of seconds allowed for each
                 configuration run. [time-limit, cpu-time, wallclock-time]
-            target_cutoff_length: The maximum number of seconds allowed for each
-                configuration run. [time-limit, cpu-time, wallclock-time]
             cli_cores: The maximum number of cores allowed for each
                 configuration run.
             use_cpu_time_in_tunertime: Whether to use cpu_time in the tuner
@@ -187,15 +182,14 @@ class ParamILSScenario(SMAC2Scenario):
             random_restart: The probability to restart from a random configuration.
         """
         super().__init__(solver, instance_set, sparkle_objectives, parent_directory,
-                         number_of_runs, solver_calls, max_iterations, cpu_time,
-                         wallclock_time, cutoff_time, target_cutoff_length, cli_cores,
+                         number_of_runs, solver_calls, max_iterations, None,
+                         None, cutoff_time, None, cli_cores,
                          use_cpu_time_in_tunertime, feature_data)
         self.solver = solver
         self.instance_set = instance_set
         self.tuner_timeout = tuner_timeout
         self.cutoff_time = cutoff_time
-        self.cutoff_length = target_cutoff_length
-        self.multi_objective = len(sparkle_objectives) > 1
+        self.multi_objective = len(sparkle_objectives) > 1  # Not using MO yet in Sparkle
         self.approach = "BASIC" if not focused_ils else "FOCUS"
         self.initial_configurations = initial_configurations
         self.min_runs = min_runs
@@ -205,8 +199,14 @@ class ParamILSScenario(SMAC2Scenario):
     def create_scenario_file(self: ParamILSScenario) -> Path:
         """Create a file with the configuration scenario."""
         scenario_file = super().create_scenario_file(ParamILS.configurator_target)
-        # TODO: Write extra stuff to the scenario file
-        # Add check-instances-exist = True?
+        with scenario_file.open("+a") as fout:
+            fout.write(f"focused_ils = {self.approach}\n")
+            fout.write(f"initial_configurations = {self.initial_configurations}\n")
+            fout.write(f"min_runs = {self.min_runs}\n")
+            fout.write(f"max_runs = {self.max_runs}\n")
+            fout.write(f"random_restart = {self.random_restart}\n")
+            # Add check-instances-exist = True?
+            fout.write("check-instances-exist = True\n")
         return scenario_file
 
     @staticmethod
