@@ -7,7 +7,7 @@ import shutil
 from runrunner import Runner, Run
 
 from sparkle.configurator.configurator import Configurator
-from sparkle.configurator.implementations import SMAC2Scenario
+from sparkle.configurator.implementations.smac2 import SMAC2Scenario
 from sparkle.solver import Solver
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.instance import InstanceSet
