@@ -120,6 +120,9 @@ def main(argv: list[str]) -> None:
 
     sparkle_objectives =\
         gv.settings().get_general_sparkle_objectives()
+    if len(sparkle_objectives) > 1:
+        print(f"WARNING: {configurator.name} does not have multi objective support. "
+              f"Only the first objective ({sparkle_objectives[0]}) will be optimised.")
     configurator_runs = gv.settings().get_configurator_number_of_runs()
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
 

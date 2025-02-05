@@ -240,9 +240,6 @@ class SMAC2Scenario(ConfigurationScenario):
 
         if sparkle_objectives is not None:
             self.sparkle_objective = sparkle_objectives[0]
-            if len(sparkle_objectives) > 1:
-                print("WARNING: SMAC2 does not have multi objective support. Only the "
-                      f"first objective ({self.sparkle_objective}) will be optimised.")
         else:
             self.sparkle_objective = None
 

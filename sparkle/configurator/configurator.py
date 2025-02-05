@@ -37,6 +37,10 @@ class Configurator:
         self.multiobjective = multi_objective_support
         self.scenario = None
 
+    def name(self: Configurator) -> str:
+        """Return the name of the configurator."""
+        return self.__class__.__name__
+
     @staticmethod
     def scenario_class() -> ConfigurationScenario:
         """Return the scenario class of the configurator."""

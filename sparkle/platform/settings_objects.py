@@ -207,6 +207,7 @@ class Settings:
         self.__paramils_tuner_timeout_set = SettingState.NOT_SET
         self.__paramils_focused_approach_set = SettingState.NOT_SET
         self.__paramils_random_restart_set = SettingState.NOT_SET
+        self.__paramils_initial_configurations_set = SettingState.NOT_SET
 
         self.__run_on_set = SettingState.NOT_SET
         self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
@@ -889,13 +890,10 @@ class Settings:
             configurator_settings.update({
                 "min_runs": self.get_paramils_min_runs(),
                 "max_runs": self.get_paramils_max_runs(),
-                "focus": self.get_paramils_focused_approach(),
+                "focused_ils": self.get_paramils_focused_approach(),
                 "initial_configurations": self.get_paramils_initial_configurations(),
                 "random_restart": self.get_paramils_random_restart(),
                 # These variables should be paramils?
-                "cpu_time": self.get_smac2_cpu_time(),
-                "wallclock_time": self.get_smac2_wallclock_time(),
-                "target_cutoff_length": self.get_smac2_target_cutoff_length(),
                 "use_cpu_time_in_tunertime": self.get_smac2_use_cpu_time_in_tunertime(),
                 "cli_cores": self.get_smac2_cli_cores(),
                 "max_iterations": self.get_smac2_max_iterations()
