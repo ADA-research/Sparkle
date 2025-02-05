@@ -162,10 +162,6 @@ class ParamILSScenario(SMAC2Scenario):
                 configuration run
             max_iterations: The maximum number of iterations allowed for each
                 configuration run. [iteration-limit, numIterations, numberOfIterations]
-            cpu_time: The maximum number of seconds allowed for each
-                configuration run. [time-limit, cpu-time, wallclock-time]
-            wallclock_time: The maximum number of seconds allowed for each
-                configuration run. [time-limit, cpu-time, wallclock-time]
             cutoff_time: The maximum number of seconds allowed for each
                 configuration run. [time-limit, cpu-time, wallclock-time]
             cli_cores: The maximum number of cores allowed for each
@@ -188,7 +184,6 @@ class ParamILSScenario(SMAC2Scenario):
         self.solver = solver
         self.instance_set = instance_set
         self.tuner_timeout = tuner_timeout
-        self.cutoff_time = cutoff_time
         self.multi_objective = len(sparkle_objectives) > 1  # Not using MO yet in Sparkle
         self.approach = "BASIC" if not focused_ils else "FOCUS"
         self.initial_configurations = initial_configurations
