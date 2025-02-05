@@ -17,6 +17,9 @@ if __name__ == "__main__":
     configurator = implementations.resolve_configurator(configurator_name)
     scenario = configurator.scenario_class().from_file(scenario)
     # 2. Execute the call, output is automatically piped to the caller's set output
+    print()
+    print(" ".join(configurator_call))
+    print()
     subprocess.run(configurator_call)
     # 3. Have the configurator implementation organise the output, standardised
     configurator.organise_output(output_source=output_source,

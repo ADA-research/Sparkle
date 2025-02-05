@@ -1,7 +1,6 @@
 """Configurator class to use different configurators like SMAC."""
 from __future__ import annotations
 from pathlib import Path
-import fcntl
 import shutil
 
 from runrunner import Runner, Run
@@ -101,25 +100,16 @@ class ParamILS(Configurator):
             validation_ids=seeds if validate_after else None,
             sbatch_options=sbatch_options,
             base_dir=base_dir,
-            run_on=run_on
+            run_on=run_on,
         )
 
     @staticmethod
-    def organise_output(output_source: Path, output_target: Path = None) -> None | str:
+    def organise_output(output_source: Path,
+                        output_target: Path = None,
+                        scenario: ParamILSScenario = None,
+                        run_id: int = None) -> None | str:
         """Retrieves configurations from SMAC files and places them in output."""
-        call_key = ParamILS.target_algorithm
-        # Last line describing a call is the best found configuration
-        for line in reversed(output_source.open("r").readlines()):
-            if call_key in line:
-                call_str = line.split(call_key, maxsplit=1)[1].strip()
-                # The Configuration appears after the first 6 arguments
-                configuration = call_str.split(" ", 7)[-1]
-                if output_target is None:
-                    return configuration
-                with output_target.open("a") as fout:
-                    fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-                    fout.write(configuration + "\n")
-                break
+        pass
 
     def get_status_from_logs(self: ParamILS) -> None:
         """Method to scan the log files of the configurator for warnings."""
@@ -185,7 +175,7 @@ class ParamILSScenario(SMAC2Scenario):
         self.instance_set = instance_set
         self.tuner_timeout = tuner_timeout
         self.multi_objective = len(sparkle_objectives) > 1  # Not using MO yet in Sparkle
-        self.approach = "BASIC" if not focused_ils else "FOCUS"
+        self.approach = "BASIC" if not focused_ils else "FOCUSED"
         self.initial_configurations = initial_configurations
         self.min_runs = min_runs
         self.max_runs = max_runs
@@ -195,11 +185,11 @@ class ParamILSScenario(SMAC2Scenario):
         """Create a file with the configuration scenario."""
         scenario_file = super().create_scenario_file(ParamILS.configurator_target)
         with scenario_file.open("+a") as fout:
-            fout.write(f"focused_ils = {self.approach}\n")
-            fout.write(f"initial_configurations = {self.initial_configurations}\n")
-            fout.write(f"min_runs = {self.min_runs}\n")
-            fout.write(f"max_runs = {self.max_runs}\n")
-            fout.write(f"random_restart = {self.random_restart}\n")
+            fout.write(f"approach = {self.approach}\n")
+            fout.write(f"R = {self.initial_configurations}\n")
+            fout.write(f"min-runs = {self.min_runs}\n")
+            fout.write(f"max-runs = {self.max_runs}\n")
+            fout.write(f"random-restart = {self.random_restart}\n")
             # Add check-instances-exist = True?
             fout.write("check-instances-exist = True\n")
         return scenario_file
@@ -214,10 +204,12 @@ class ParamILSScenario(SMAC2Scenario):
             import ast
             for line in file:
                 key, value = line.strip().split(" = ")
+                key = key.replace("-", "_")
                 try:
                     config[key] = ast.literal_eval(value)
                 except Exception:
                     config[key] = value
+
         _, solver_path, _, objective_str = config["algo"].split(" ")
         objective = resolve_objective(objective_str)
         solver = Solver(Path(solver_path.strip()))
@@ -226,17 +218,27 @@ class ParamILSScenario(SMAC2Scenario):
         instance_set_path = Path(instance_file_path.open().readline().strip()).parent
         instance_set = Instance_Set(Path(instance_set_path))
 
-        # Collect relevant settings
-        wallclock_limit = int(config["wallclock-limit"]) if "wallclock-limit" in config \
-            else None
+        del config["algo"]
+        del config["run_obj"]
+        del config["deterministic"]
+        del config["paramfile"]
+        del config["instance_file"]
+        del config["test_instance_file"]
+        del config["outdir"]
+        del config["validation"]
+        del config["check-instances-exist"]
 
-        # TODO: Collect all other parameters
+        # TODO: Convert parameter names
+        if "cutoffTime" in config:
+            config["cutoff_time"] = config.pop("cutoffTime")
+        if "runcount-limit" in config:
+            config["solver_calls"] = config.pop("runcount-limit")
+        if "approach" in config:
+            config["focused_ils"] = config.pop("approach") == "FOCUS"
 
-        objective_str = config["algo"].split(" ")[-1]
-        objective = SparkleObjective(objective_str)
         return ParamILSScenario(solver,
                                 instance_set,
-                                wallclock_limit,
-                                int(config["cutoffTime"]),
-                                config["cutoff_length"],
-                                [objective])
+                                [objective],
+                                scenario_file.parent,
+                                **config
+                                )

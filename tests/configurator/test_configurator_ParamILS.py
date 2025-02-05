@@ -1,11 +1,11 @@
 """Test public methods of ParamILS configurator."""
 import pytest
 from pathlib import Path
+from sparkle.configurator.implementations import ParamILSScenario
 
 """
 from sparkle.CLI import initialise
 
-from sparkle.configurator.implementations import ParamILS, ParamILSScenario
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
 from sparkle.types import resolve_objective
@@ -28,4 +28,9 @@ def test_paramils_scenario_file(tmp_path: Path,
 
 def test_paramils_scenario_from_file() -> None:
     """Test ParamILS scenario file creation."""
-    pass
+    scenario_file = Path("tests/test_files/Configuration/test_paramils_scenario.txt")
+    scenario = ParamILSScenario.from_file(scenario_file)
+    assert scenario.solver.name == "PbO-CCSAT-Generic"
+    assert scenario.instance_set.name == "PTN"
+    assert scenario.number_of_runs == 2
+    assert scenario.cutoff_time == 60

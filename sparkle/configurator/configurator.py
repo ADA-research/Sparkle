@@ -59,7 +59,6 @@ class Configurator:
         """Start configuration job.
 
         Args:
-
             scenario: ConfigurationScenario to execute.
             validate_after: Whether to validate the configuration on the training set
                 afterwards or not.
