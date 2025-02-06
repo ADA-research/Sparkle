@@ -522,6 +522,8 @@ class ParamILSParser(PCSParser):
 
                 lines.append(line)
 
+        lines.append("")
+
         for item in self.pcs.params:
             if item["type"] == "constraint":
                 line = f"{item['parameter']} | "
@@ -529,6 +531,8 @@ class ParamILSParser(PCSParser):
                 if item["comment"] != "":
                     line += f" #{item['comment']}"
                 lines.append(line)
+
+        lines.append("")
 
         for item in self.pcs.params:
             if item["type"] == "forbidden":

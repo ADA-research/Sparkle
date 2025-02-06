@@ -319,7 +319,8 @@ class SMAC2Scenario(ConfigurationScenario):
 
     def create_scenario_file(
             self: SMAC2Scenario,
-            configurator_target: Path = SMAC2.configurator_target) -> Path:
+            configurator_target: Path = SMAC2.configurator_target,
+            pcs_port: str = None) -> Path:
         """Create a file with the configuration scenario.
 
         Writes supplementary information to the target algorithm (algo =) as:
@@ -331,7 +332,7 @@ class SMAC2Scenario(ConfigurationScenario):
                        f"deterministic = {1 if self.solver.deterministic else 0}\n"
                        f"run_obj = {self._get_performance_measure()}\n"
                        f"cutoffTime = {self.cutoff_time}\n"
-                       f"paramfile = {self.solver.get_pcs_file()}\n"
+                       f"paramfile = {self.solver.get_pcs_file(pcs_port)}\n"
                        f"outdir = {self.outdir_train}\n"
                        f"instance_file = {self.instance_file_path}\n"
                        f"test_instance_file = {self.instance_file_path}\n")

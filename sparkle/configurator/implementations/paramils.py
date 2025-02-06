@@ -183,7 +183,8 @@ class ParamILSScenario(SMAC2Scenario):
 
     def create_scenario_file(self: ParamILSScenario) -> Path:
         """Create a file with the configuration scenario."""
-        scenario_file = super().create_scenario_file(ParamILS.configurator_target)
+        scenario_file = super().create_scenario_file(ParamILS.configurator_target,
+                                                     "paramils")
         with scenario_file.open("+a") as fout:
             fout.write(f"approach = {self.approach}\n")
             fout.write(f"R = {self.initial_configurations}\n")
@@ -226,7 +227,7 @@ class ParamILSScenario(SMAC2Scenario):
         del config["test_instance_file"]
         del config["outdir"]
         del config["validation"]
-        del config["check-instances-exist"]
+        del config["check_instances_exist"]
 
         # TODO: Convert parameter names
         if "cutoffTime" in config:
@@ -235,6 +236,10 @@ class ParamILSScenario(SMAC2Scenario):
             config["solver_calls"] = config.pop("runcount-limit")
         if "approach" in config:
             config["focused_ils"] = config.pop("approach") == "FOCUS"
+        if "R" in config:
+            config["initial_configurations"] = config.pop("R")
+        if "runcount_limit" in config:
+            config["solver_calls"] = config.pop("runcount_limit")
 
         return ParamILSScenario(solver,
                                 instance_set,
