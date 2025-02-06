@@ -1461,11 +1461,12 @@ class Settings:
 
     # Configuration: ParamILS specific settings ###
 
-    def get_paramils_min_runs(self: Settings) -> int:
+    def get_paramils_min_runs(self: Settings) -> int | None:
         """Return the minimum number of runs for ParamILS."""
         if self.__paramils_min_runs_set == SettingState.NOT_SET:
             self.set_paramils_min_runs()
-        return int(self.__settings["paramils"]["min_runs"])
+        min_runs = self.__settings["paramils"]["min_runs"]
+        return int(min_runs) if min_runs.isdigit() else None
 
     def set_paramils_min_runs(
             self: Settings, value: int = DEFAULT_paramils_min_runs,
@@ -1480,11 +1481,12 @@ class Settings:
             self.__paramils_min_runs_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_paramils_max_runs(self: Settings) -> int:
+    def get_paramils_max_runs(self: Settings) -> int | None:
         """Return the maximum number of runs for ParamILS."""
         if self.__paramils_max_runs_set == SettingState.NOT_SET:
             self.set_paramils_max_runs()
-        return int(self.__settings["paramils"]["max_runs"])
+        max_runs = self.__settings["paramils"]["min_runs"]
+        return int(max_runs) if max_runs.isdigit() else None
 
     def set_paramils_max_runs(
             self: Settings, value: int = DEFAULT_paramils_max_runs,
@@ -1538,11 +1540,12 @@ class Settings:
             self.__paramils_focused_approach_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_paramils_initial_configurations(self: Settings) -> int:
+    def get_paramils_initial_configurations(self: Settings) -> int | None:
         """Return the initial configurations for ParamILS."""
         if self.__paramils_initial_configurations_set == SettingState.NOT_SET:
             self.set_paramils_initial_configurations()
-        return int(self.__settings["paramils"]["initial_configurations"])
+        intial_confs = self.__settings["paramils"]["initial_configurations"]
+        return int(intial_confs) if intial_confs.isdigit() else None
 
     def set_paramils_initial_configurations(
             self: Settings, value: int = DEFAULT_paramils_initial_configurations,
@@ -1557,11 +1560,11 @@ class Settings:
             self.__paramils_initial_configurations_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_paramils_random_restart(self: Settings) -> float:
+    def get_paramils_random_restart(self: Settings) -> float | None:
         """Return the random restart chance for ParamILS."""
         if self.__paramils_random_restart_set == SettingState.NOT_SET:
             self.set_paramils_random_restart()
-        return float(self.__settings["paramils"]["random_restart"])
+        return ast.literal_eval(self.__settings["paramils"]["random_restart"])
 
     def set_paramils_random_restart(
             self: Settings, value: float = DEFAULT_paramils_random_restart,
