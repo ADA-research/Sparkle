@@ -171,10 +171,10 @@ class ParamILSScenario(SMAC2Scenario):
                  feature_data: FeatureDataFrame | Path = None,
                  tuner_timeout: int = None,
                  focused_ils: bool = True,
-                 initial_configurations: int = 10,
-                 min_runs: int = 1,
-                 max_runs: int = 2000,
-                 random_restart: float = 0.05,
+                 initial_configurations: int = None,
+                 min_runs: int = None,
+                 max_runs: int = None,
+                 random_restart: float = None,
                  )\
             -> None:
         """Initialize scenario paths and names.
@@ -213,7 +213,7 @@ class ParamILSScenario(SMAC2Scenario):
         self.instance_set = instance_set
         self.tuner_timeout = tuner_timeout
         self.multi_objective = len(sparkle_objectives) > 1  # Not using MO yet in Sparkle
-        self.approach = "BASIC" if not focused_ils else "FOCUSED"
+        self.focused = focused_ils
         self.initial_configurations = initial_configurations
         self.min_runs = min_runs
         self.max_runs = max_runs
@@ -224,13 +224,20 @@ class ParamILSScenario(SMAC2Scenario):
         scenario_file = super().create_scenario_file(ParamILS.configurator_target,
                                                      "paramils")
         with scenario_file.open("+a") as fout:
-            fout.write(f"approach = {self.approach}\n")
-            fout.write(f"R = {self.initial_configurations}\n")
-            fout.write(f"min-runs = {self.min_runs}\n")
-            fout.write(f"max-runs = {self.max_runs}\n")
-            fout.write(f"random-restart = {self.random_restart}\n")
-            # Add check-instances-exist = True?
             fout.write("check-instances-exist = True\n")
+            if self.focused is not None:
+                approach = "FOCUSED" if self.focused else "BASIC"
+                fout.write(f"approach = {approach}\n")
+            if self.initial_configurations:
+                fout.write(f"R = {self.initial_configurations}\n")
+            if self.min_runs:
+                fout.write(f"min-runs = {self.min_runs}\n")
+            if self.max_runs:
+                fout.write(f"max-runs = {self.max_runs}\n")
+            if self.random_restart:
+                fout.write(f"random-restart = {self.random_restart}\n")
+            if self.tuner_timeout:
+                fout.write(f"tuner-timeout = {self.tuner_timeout}\n")
         return scenario_file
 
     @staticmethod
