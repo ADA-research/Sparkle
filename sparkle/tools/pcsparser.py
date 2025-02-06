@@ -474,14 +474,14 @@ class ParamILSParser(PCSParser):
                 elif item["structure"] == "integer":
                     if len(item["domain"]) != 2:
                         raise ValueError(f"Domain {item['domain']} not supported.")
-
+                    item["default"] = int(item["default"])
                     (minval, maxval) = [int(i) for i in item["domain"]]
                     if item["scale"] != "log":
                         # domain = f"{minval}, {(minval + 1)}..{maxval}"
                         domain = list(np.linspace(minval, maxval, granularity))
                         domain = list(set(np.round(domain).astype(int)))  # Cast to int
-                        if int(item["default"]) not in domain:
-                            domain += [int(item["default"])]
+                        if item["default"] not in domain:
+                            domain += [item["default"]]
                         domain.sort()
 
                         domain = ",".join([str(i) for i in domain])
@@ -489,8 +489,8 @@ class ParamILSParser(PCSParser):
                         domain = list(np.unique(np.geomspace(minval, maxval, granularity,
                                                              dtype=int)))
                         # add default value
-                        if int(item["default"]) not in domain:
-                            domain += [int(item["default"])]
+                        if item["default"] not in domain:
+                            domain += [item["default"]]
                             domain.sort()
 
                         domain = ",".join([str(i) for i in domain])
@@ -500,14 +500,15 @@ class ParamILSParser(PCSParser):
                         raise ValueError(f"Domain {item['domain']} not supported.")
 
                     (minval, maxval) = [float(i) for i in item["domain"]]
+                    item["default"] = float(item["default"])
                     if item["scale"] != "log":
                         domain = list(np.linspace(minval, maxval, granularity))
                     else:
                         domain = list(np.unique(np.geomspace(minval, maxval, granularity,
                                                              dtype=float)))
                     # add default value
-                    if float(item["default"]) not in domain:
-                        domain += [float(item["default"])]
+                    if item["default"] not in domain:
+                        domain += [item["default"]]
                         domain.sort()
 
                     # Filter duplicated in string format
