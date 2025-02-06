@@ -21,6 +21,9 @@ class ParamILS(Configurator):
     target_algorithm = "paramils_target_algorithm.py"
     configurator_target = configurator_path / target_algorithm
 
+    version = "3.0.0"
+    full_name = "Parameter Iterated Local Search"
+
     def __init__(self: ParamILS,
                  base_dir: Path,
                  output_path: Path) -> None:
@@ -274,7 +277,6 @@ class ParamILSScenario(SMAC2Scenario):
         del config["validation"]
         del config["check_instances_exist"]
 
-        # TODO: Convert parameter names
         if "cutoffTime" in config:
             config["cutoff_time"] = config.pop("cutoffTime")
         if "runcount-limit" in config:
@@ -285,10 +287,12 @@ class ParamILSScenario(SMAC2Scenario):
             config["initial_configurations"] = config.pop("R")
         if "runcount_limit" in config:
             config["solver_calls"] = config.pop("runcount_limit")
-
+        results_folder = scenario_file.parent / "results"
+        number_of_runs = len([p for p in results_folder.iterdir() if p.is_file()])
         return ParamILSScenario(solver,
                                 instance_set,
                                 [objective],
-                                scenario_file.parent,
+                                scenario_file.parent.parent,
+                                number_of_runs=number_of_runs,
                                 **config
                                 )
