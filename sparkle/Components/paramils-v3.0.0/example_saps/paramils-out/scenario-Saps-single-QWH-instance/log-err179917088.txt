@@ -1,0 +1,15 @@
+17:15:30.106 [CLI TAE (Master Thread - #0)] ERROR c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - The following algorithm call failed: cd "/home/aymeric/git/paramils_example/example_saps" ;  ruby example_saps/saps_wrapper.rb example_data/qwh_instance/000549.cnf 0 5.0 2147483647 16158672 -alpha '1.189' -ps '0.1' -rho '0.5' -wp '0.03'  
+17:15:30.109 [main] ERROR c.u.c.b.p.executors.ParamILSExecutor - Message:  Wrapper did not output anything that matched the expected output ("Result of algorithm run:..."). Please try executing the wrapper directly
+17:15:30.112 [main] ERROR c.u.c.b.p.executors.ParamILSExecutor - A serious problem occured during target algorithm execution and we are aborting execution 
+ca.ubc.cs.beta.aeatk.targetalgorithmevaluator.exceptions.TargetAlgorithmAbortException:  Wrapper did not output anything that matched the expected output ("Result of algorithm run:..."). Please try executing the wrapper directly
+	at ca.ubc.cs.beta.aeatk.targetalgorithmevaluator.decorators.safety.AbortOnFirstRunCrashTargetAlgorithmEvaluator.validate(AbortOnFirstRunCrashTargetAlgorithmEvaluator.java:55) ~[aeatk.jar:na]
+	at ca.ubc.cs.beta.aeatk.targetalgorithmevaluator.decorators.safety.AbortOnFirstRunCrashTargetAlgorithmEvaluator.access$000(AbortOnFirstRunCrashTargetAlgorithmEvaluator.java:23) ~[aeatk.jar:na]
+	at ca.ubc.cs.beta.aeatk.targetalgorithmevaluator.decorators.safety.AbortOnFirstRunCrashTargetAlgorithmEvaluator$1.onSuccess(AbortOnFirstRunCrashTargetAlgorithmEvaluator.java:80) ~[aeatk.jar:na]
+	at ca.ubc.cs.beta.aeatk.targetalgorithmevaluator.base.cli.CommandLineTargetAlgorithmEvaluator$1$1.run(CommandLineTargetAlgorithmEvaluator.java:164) ~[aeatk.jar:na]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142) ~[na:1.8.0_121]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617) ~[na:1.8.0_121]
+	at java.lang.Thread.run(Thread.java:745) ~[na:1.8.0_121]
+17:15:30.112 [main] ERROR c.u.c.b.p.executors.ParamILSExecutor - We tried to call the target algorithm wrapper, but this call failed.
+17:15:30.112 [main] ERROR c.u.c.b.p.executors.ParamILSExecutor - The problem is (most likely) somewhere in the wrapper or with the arguments to ParamILS.
+17:15:30.113 [main] ERROR c.u.c.b.p.executors.ParamILSExecutor - The easiest way to debug this problem is to manually execute the call we tried and see why it did not return the correct result
+17:15:30.113 [main] ERROR c.u.c.b.p.executors.ParamILSExecutor - The required output of the wrapper is something like "Result for ParamILS: x,x,x,x,x".);

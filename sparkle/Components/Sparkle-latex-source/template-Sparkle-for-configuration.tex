@@ -86,7 +86,7 @@ The configurator used by \emph{Sparkle} in this scenario is @@configuratorName@@
 
 During the configuration process, \emph{Sparkle} performed @@numConfiguratorRuns@@ independent @@configuratorName@@ runs for configuring the solver @@solver@@ on the training instance set @@instanceSetTrain@@\iffeatures; the instance features of the training instance set were used for configuration\fi; the configuration objective is @@objectiveName@@ (@@objectiveType@@); the whole configuration time budget is @@wholeTimeBudget@@ seconds; the cutoff time for each run is @@eachRunCutoffTime@@ seconds.
 
-Each independent run of @@configuratorName@@ would result in one optimised configuration. As a result, \emph{Sparkle} would obtain @@numConfiguratorRuns@@ optimised configurations. Each of these was then evaluated on the entire training set, with one solver run per instance and a cutoff time of @@eachRunCutoffTime@@ seconds, and the configuration with the @@minMaxAdjective@@ @@objectiveName@@ value was selected as the result of the configuration process.
+Each independent run of @@configuratorName@@ attempts to find one optimised configuration. As a result, \emph{Sparkle} would obtain @@numConfiguratorRuns@@ optimised configurations. Each of these was then evaluated on the entire training set, with one solver run per instance and a cutoff time of @@eachRunCutoffTime@@ seconds, and the configuration with the @@minMaxAdjective@@ @@objectiveName@@ value was selected as the result of the configuration process.
 
 \section{Information about the Optimised Configuration}
 

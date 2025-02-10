@@ -56,6 +56,14 @@ This parameter can also be set through `solver_calls` in the configuration secti
 
 The MaxTime parameter specifies the budget in terms of maximum runtime of the target algorithm (e.g. your Solver in the Sparkle Platform). Sparkle measures the time spend of your solver using RunSolver, and passes the **CPU** time to IRACE to determine its spend budget. IRACE also tries to determine how much budget it has for the first run using the `budgetEstimation` parameter, which is by default set to 2%. Sparkle will attempt to recompute this based on `target_cutoff_time` (The time limit of your Solver in each call) and the `max_time` budget as ```target_cutoff_time``` / ```max_time```, but only if the fraction is less than 1.0. **Note** that IRACE differs from SMAC2 in its time usage calculations, as it does not include the time used by IRACE itself to determine how much budget is left. See the SMAC2 section on how this can be changed.
 
+## ParamILS
+
+Parameter Iterated Local Search[[4]](#4) or [ParamILS](https://www.cs.ubc.ca/labs/algorithms/Projects/ParamILS/) for short is an originally Ruby based algorithm configurator that has been ported to a multi-objective version written in Java by [Aymeric Blot](http://www0.cs.ucl.ac.uk/staff/a.blot/software/). The original documentation can be found [here](https://www.cs.ubc.ca/labs/algorithms/Projects/ParamILS/papers/09-JAIR-ParamILS.pdf) and the documentation on the adaptation [here](http://www0.cs.ucl.ac.uk/staff/a.blot/files/artefacts/paramils_quickstart.pdf).
+
+```note
+ParamILS does *not* directly support floating point ranges: If you let Sparkle automatically convert your PCS to the ParamILS standard, your floating point ranges are discretized with a granularity stepsize of 20, taking into account whether your parameter is linear or log.
+```
+
 **References**
 
 <a id="1">[1]</a>
@@ -72,3 +80,8 @@ Journal of Machine Learning Research, 2022, p1--9
 The irace package: Iterated Racing for Automatic Algorithm Configuration,
 Manuel López-Ibáñez and Jérémie Dubois-Lacoste and Leslie Pérez Cáceres and Thomas Stützle and Mauro Birattari (2016)
 Operations Research Perspectives, Volume 3, p43--58
+
+<a id="4">[4]</a>
+ParamILS: An Automatic Algorithm Configuration Framework
+Frank Hutter, Holger H. Hoos, Kevin Leyton-Brown, and Thomas Stützle. (2009)
+Journal of Artificial Research 2009, volume 36, pages 267-306.

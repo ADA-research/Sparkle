@@ -54,8 +54,8 @@ class SMAC2(Configurator):
         """Returns the SMAC2 scenario class."""
         return SMAC2Scenario
 
-    def configure(self: Configurator,
-                  scenario: ConfigurationScenario,
+    def configure(self: SMAC2,
+                  scenario: SMAC2Scenario,
                   data_target: PerformanceDataFrame,
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
@@ -66,6 +66,7 @@ class SMAC2(Configurator):
 
         Args:
             scenario: ConfigurationScenario object
+            data_target: PerformanceDataFrame where to store the found configurations
             validate_after: Whether the configurations should be validated on the
                 train set afterwards.
             sbatch_options: List of slurm batch options to use
@@ -95,7 +96,7 @@ class SMAC2(Configurator):
                 f"--seed {seed} "
                 for output_file, seed in zip(output, seeds)]
         if num_parallel_jobs is not None:
-            num_parallel_jobs = max(num_parallel_jobs, scenario.number_of_runs)
+            num_parallel_jobs = max(num_parallel_jobs, len(cmds))
         return super().configure(
             configuration_commands=cmds,
             data_target=data_target,
@@ -239,9 +240,6 @@ class SMAC2Scenario(ConfigurationScenario):
 
         if sparkle_objectives is not None:
             self.sparkle_objective = sparkle_objectives[0]
-            if len(sparkle_objectives) > 1:
-                print("WARNING: SMAC2 does not have multi objective support. Only the "
-                      f"first objective ({self.sparkle_objective}) will be optimised.")
         else:
             self.sparkle_objective = None
 
@@ -319,23 +317,27 @@ class SMAC2Scenario(ConfigurationScenario):
 
         self.create_scenario_file()
 
-    def create_scenario_file(self: SMAC2Scenario) -> Path:
+    def create_scenario_file(
+            self: SMAC2Scenario,
+            configurator_target: Path = SMAC2.configurator_target,
+            pcs_port: str = None) -> Path:
         """Create a file with the configuration scenario.
 
         Writes supplementary information to the target algorithm (algo =) as:
         algo = {configurator_target} {solver_directory} {sparkle_objective}
         """
         with self.scenario_file_path.open("w") as file:
-            file.write(f"algo = {SMAC2.configurator_target.absolute()} "
+            file.write(f"algo = {configurator_target.absolute()} "
                        f"{self.solver.directory} {self.tmp} {self.sparkle_objective} \n"
                        f"deterministic = {1 if self.solver.deterministic else 0}\n"
                        f"run_obj = {self._get_performance_measure()}\n"
                        f"cutoffTime = {self.cutoff_time}\n"
-                       f"cutoff_length = {self.cutoff_length}\n"
-                       f"paramfile = {self.solver.get_pcs_file()}\n"
+                       f"paramfile = {self.solver.get_pcs_file(pcs_port)}\n"
                        f"outdir = {self.outdir_train}\n"
                        f"instance_file = {self.instance_file_path}\n"
                        f"test_instance_file = {self.instance_file_path}\n")
+            if self.cutoff_length is not None:
+                file.write(f"cutoff_length = {self.cutoff_length}\n")
             if self.max_iterations is not None:
                 file.write(f"iteration-limit = {self.max_iterations}\n")
             if self.wallclock_time is not None:

@@ -1,0 +1,16 @@
+algo = /home/snelleman/Sparkle/sparkle/Components/paramils-v3.0.0/paramils_target_algorithm.py Examples/Resources/Solvers/PbO-CCSAT-Generic Output/Configuration/Raw_Data/ParamILS/PbO-CCSAT-Generic_PTN/tmp PAR10 
+deterministic = 0
+run_obj = RUNTIME
+cutoffTime = 60
+paramfile = Examples/Resources/Solvers/PbO-CCSAT-Generic/PbO-CCSAT-params_test_ParamILS.pcs
+outdir = Output/Configuration/Raw_Data/ParamILS/PbO-CCSAT-Generic_PTN/outdir_train_configuration
+instance_file = tests/test_files/Configuration/test_smac2_instance_file.txt
+test_instance_file = tests/test_files/Configuration/test_smac2_instance_file.txt
+runcount-limit = 100
+validation = false
+approach = FOCUSED
+R = 10
+min-runs = 1
+max-runs = 2000
+random-restart = 0.05
+check-instances-exist = True

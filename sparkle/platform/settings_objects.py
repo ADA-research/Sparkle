@@ -147,7 +147,17 @@ class Settings:
     DEFAULT_irace_mu = None
     DEFAULT_irace_max_iterations = None
 
-    DEFAULT_portfolio_construction_timeout = None
+    # Default ParamILS settings
+    DEFAULT_paramils_focused_ils = False
+    DEFAULT_paramils_tuner_timeout = None
+    DEFAULT_paramils_focused_approach = None
+    DEFAULT_paramils_min_runs = None
+    DEFAULT_paramils_max_runs = None
+    DEFAULT_paramils_random_restart = None
+    DEFAULT_paramils_initial_configurations = None
+    DEFAULT_paramils_use_cpu_time_in_tunertime = None
+    DEFAULT_paramils_cli_cores = None
+    DEFAULT_paramils_max_iterations = None
 
     DEFAULT_slurm_max_parallel_runs_per_node = 8
 
@@ -155,13 +165,6 @@ class Settings:
 
     DEFAULT_parallel_portfolio_check_interval = 4
     DEFAULT_parallel_portfolio_num_seeds_per_solver = 1
-
-    # Default IRACE settings
-    DEFAULT_irace_max_time = 0  # IRACE equivalent of None in this case
-    DEFAULT_irace_max_experiments = 0
-    DEFAULT_irace_first_test = None
-    DEFAULT_irace_mu = None
-    DEFAULT_irace_max_iterations = None
 
     # Default selection settings
     DEFAULT_selector_class = "MultiClassClassifier"
@@ -202,6 +205,22 @@ class Settings:
         self.__smac3_min_budget_set = SettingState.NOT_SET
         self.__smac3_max_budget_set = SettingState.NOT_SET
 
+        self.__irace_max_time_set = SettingState.NOT_SET
+        self.__irace_max_experiments_set = SettingState.NOT_SET
+        self.__irace_first_test_set = SettingState.NOT_SET
+        self.__irace_mu_set = SettingState.NOT_SET
+        self.__irace_max_iterations_set = SettingState.NOT_SET
+
+        self.__paramils_min_runs_set = SettingState.NOT_SET
+        self.__paramils_max_runs_set = SettingState.NOT_SET
+        self.__paramils_tuner_timeout_set = SettingState.NOT_SET
+        self.__paramils_focused_approach_set = SettingState.NOT_SET
+        self.__paramils_random_restart_set = SettingState.NOT_SET
+        self.__paramils_initial_configurations_set = SettingState.NOT_SET
+        self.__paramils_use_cpu_time_in_tunertime_set = SettingState.NOT_SET
+        self.__paramils_cli_cores_set = SettingState.NOT_SET
+        self.__paramils_max_iterations_set = SettingState.NOT_SET
+
         self.__run_on_set = SettingState.NOT_SET
         self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
         self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
@@ -209,12 +228,6 @@ class Settings:
 
         self.__parallel_portfolio_check_interval_set = SettingState.NOT_SET
         self.__parallel_portfolio_num_seeds_per_solver_set = SettingState.NOT_SET
-
-        self.__irace_max_time_set = SettingState.NOT_SET
-        self.__irace_max_experiments_set = SettingState.NOT_SET
-        self.__irace_first_test_set = SettingState.NOT_SET
-        self.__irace_mu_set = SettingState.NOT_SET
-        self.__irace_max_iterations_set = SettingState.NOT_SET
 
         self.__selection_model_set = SettingState.NOT_SET
         self.__selection_class_set = SettingState.NOT_SET
@@ -466,6 +479,66 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_irace_max_iterations(value, state)
+                    file_settings.remove_option(section, option)
+
+            section = "paramils"
+
+            option_names = ("min_runs", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_paramils_min_runs(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("max_runs", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_paramils_max_runs(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("cputime_limit", "cputime_limit", "tunertime_limit",
+                            "tuner_timeout", "tunerTimeout")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_paramils_tuner_timeout(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("random_restart", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getfloat(section, option)
+                    self.set_paramils_random_restart(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("focused_approach", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getboolean(section, option)
+                    self.set_paramils_focused_approach(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("use_cpu_time_in_tunertime", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getboolean(section, option)
+                    self.set_paramils_use_cpu_time_in_tunertime(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("cli_cores", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_paramils_cli_cores(value, state)
+                    file_settings.remove_option(section, option)
+
+            options_names = ("iteration_limit", "numIterations", "numberOfIterations",
+                             "max_iterations")
+            for option in options_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_paramils_max_iterations(value, state)
                     file_settings.remove_option(section, option)
 
             section = "selection"
@@ -841,6 +914,20 @@ class Settings:
                     and configurator_settings["max_time"] == 0):  # Default to base
                 configurator_settings["solver_calls"] =\
                     self.get_configurator_solver_calls()
+        elif configurator_name == cim.ParamILS.__name__:
+            configurator_settings.update({
+                "tuner_timeout": self.get_paramils_tuner_timeout(),
+                "min_runs": self.get_paramils_min_runs(),
+                "max_runs": self.get_paramils_max_runs(),
+                "focused_ils": self.get_paramils_focused_approach(),
+                "initial_configurations": self.get_paramils_initial_configurations(),
+                "random_restart": self.get_paramils_random_restart(),
+                "cli_cores": self.get_paramils_cli_cores(),
+                "use_cpu_time_in_tunertime":
+                self.get_paramils_use_cpu_time_in_tunertime(),
+                "max_iterations": self.set_paramils_max_iterations()
+                or configurator_settings["max_iterations"],
+            })
         return configurator_settings
 
     def set_configurator_solver_calls(
@@ -1371,6 +1458,188 @@ class Settings:
             self.__init_section(section)
             self.__irace_max_iterations_set = origin
             self.__settings[section][name] = str(value)
+
+    # Configuration: ParamILS specific settings ###
+
+    def get_paramils_min_runs(self: Settings) -> int | None:
+        """Return the minimum number of runs for ParamILS."""
+        if self.__paramils_min_runs_set == SettingState.NOT_SET:
+            self.set_paramils_min_runs()
+        min_runs = self.__settings["paramils"]["min_runs"]
+        return int(min_runs) if min_runs.isdigit() else None
+
+    def set_paramils_min_runs(
+            self: Settings, value: int = DEFAULT_paramils_min_runs,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the minimum number of runs for ParamILS."""
+        section = "paramils"
+        name = "min_runs"
+
+        if self.__check_setting_state(
+                self.__paramils_min_runs_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_min_runs_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_max_runs(self: Settings) -> int | None:
+        """Return the maximum number of runs for ParamILS."""
+        if self.__paramils_max_runs_set == SettingState.NOT_SET:
+            self.set_paramils_max_runs()
+        max_runs = self.__settings["paramils"]["min_runs"]
+        return int(max_runs) if max_runs.isdigit() else None
+
+    def set_paramils_max_runs(
+            self: Settings, value: int = DEFAULT_paramils_max_runs,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the maximum number of runs for ParamILS."""
+        section = "paramils"
+        name = "max_runs"
+
+        if self.__check_setting_state(
+                self.__paramils_max_runs_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_max_runs_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_tuner_timeout(self: Settings) -> int | None:
+        """Return the maximum CPU time for ParamILS."""
+        if self.__paramils_tuner_timeout_set == SettingState.NOT_SET:
+            self.set_paramils_tuner_timeout()
+        tuner_timeout = self.__settings["paramils"]["tuner_timeout"]
+        return int(tuner_timeout) if tuner_timeout.isdigit() else None
+
+    def set_paramils_tuner_timeout(
+            self: Settings, value: int = DEFAULT_paramils_tuner_timeout,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the maximum CPU time for ParamILS."""
+        section = "paramils"
+        name = "tuner_timeout"
+
+        if self.__check_setting_state(
+                self.__paramils_tuner_timeout_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_tuner_timeout_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_focused_approach(self: Settings) -> bool:
+        """Return the focused approach for ParamILS."""
+        if self.__paramils_focused_approach_set == SettingState.NOT_SET:
+            self.set_paramils_focused_approach()
+        return bool(self.__settings["paramils"]["focused_approach"])
+
+    def set_paramils_focused_approach(
+            self: Settings, value: bool = DEFAULT_paramils_focused_approach,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the focused approach for ParamILS."""
+        section = "paramils"
+        name = "focused_approach"
+
+        if self.__check_setting_state(
+                self.__paramils_focused_approach_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_focused_approach_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_initial_configurations(self: Settings) -> int | None:
+        """Return the initial configurations for ParamILS."""
+        if self.__paramils_initial_configurations_set == SettingState.NOT_SET:
+            self.set_paramils_initial_configurations()
+        intial_confs = self.__settings["paramils"]["initial_configurations"]
+        return int(intial_confs) if intial_confs.isdigit() else None
+
+    def set_paramils_initial_configurations(
+            self: Settings, value: int = DEFAULT_paramils_initial_configurations,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the initial configurations for ParamILS."""
+        section = "paramils"
+        name = "initial_configurations"
+
+        if self.__check_setting_state(
+                self.__paramils_initial_configurations_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_initial_configurations_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_random_restart(self: Settings) -> float | None:
+        """Return the random restart chance for ParamILS."""
+        if self.__paramils_random_restart_set == SettingState.NOT_SET:
+            self.set_paramils_random_restart()
+        return ast.literal_eval(self.__settings["paramils"]["random_restart"])
+
+    def set_paramils_random_restart(
+            self: Settings, value: float = DEFAULT_paramils_random_restart,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the random restart chance for ParamILS."""
+        section = "paramils"
+        name = "random_restart"
+
+        if self.__check_setting_state(
+                self.__paramils_random_restart_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_random_restart_set = origin
+            self.__settings[section][name] = str(value)
+
+    def set_paramils_use_cpu_time_in_tunertime(
+            self: Settings, value: bool = DEFAULT_paramils_use_cpu_time_in_tunertime,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set whether to use CPU time in tunertime."""
+        section = "paramils"
+        name = "use_cpu_time_in_tunertime"
+
+        if self.__check_setting_state(
+                self.__paramils_use_cpu_time_in_tunertime_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_use_cpu_time_in_tunertime_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_use_cpu_time_in_tunertime(self: Settings) -> bool:
+        """Return whether to use CPU time in tunertime."""
+        if self.__paramils_use_cpu_time_in_tunertime_set == SettingState.NOT_SET:
+            self.set_paramils_use_cpu_time_in_tunertime()
+        return ast.literal_eval(self.__settings["paramils"]["use_cpu_time_in_tunertime"])
+
+    def set_paramils_cli_cores(
+            self: Settings, value: int = DEFAULT_paramils_cli_cores,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the number of cores to use for ParamILS CLI."""
+        section = "paramils"
+        name = "cli_cores"
+
+        if self.__check_setting_state(
+                self.__paramils_cli_cores_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_cli_cores_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_cli_cores(self: Settings) -> int | None:
+        """Number of cores to use to execute runs.
+
+        In other words, the number of requests to run at a given time.
+        """
+        if self.__paramils_cli_cores_set == SettingState.NOT_SET:
+            self.set_paramils_cli_cores()
+        cli_cores = self.__settings["paramils"]["cli_cores"]
+        return int(cli_cores) if cli_cores.isdigit() else None
+
+    def set_paramils_max_iterations(
+            self: Settings, value: int = DEFAULT_paramils_max_iterations,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the maximum number of ParamILS iterations."""
+        section = "paramils"
+        name = "max_iterations"
+
+        if self.__check_setting_state(
+                self.__paramils_max_iterations_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_max_iterations_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_max_iterations(self: Settings) -> int | None:
+        """Get the maximum number of paramils iterations."""
+        if self.__smac2_max_iterations_set == SettingState.NOT_SET:
+            self.set_paramils_max_iterations()
+        max_iterations = self.__settings["paramils"]["max_iterations"]
+        return int(max_iterations) if max_iterations.isdigit() else None
 
     # Selection settings ###
 
