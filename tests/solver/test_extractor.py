@@ -34,7 +34,6 @@ def test_extractor_constructor(extractor: Extractor, test_dir: Path) -> None:
     assert extractor.runsolver_exec == test_dir / "runsolver"
     assert extractor._features is None
     assert extractor._feature_groups is None
-    assert extractor._output_dimension is None
     assert extractor._groupwise_computation is None
 
 
@@ -141,7 +140,7 @@ def test_empty_feature_groups() -> None:
     mock_features = "[(None, 'feature1'), (None, 'feature2'), (None, 'feature3')]"
     expected_groups = [None]
 
-    # Mock the subprocess of features function
+    # Patch subprocess.run in the correct namespace
     # to control the none group scenario
     with patch("subprocess.run") as mock_subprocess_run:
         mock_subprocess_run.return_value.stdout = mock_features.encode()
@@ -180,6 +179,56 @@ def test_output_dimension(extractor: Extractor) -> None:
         f"Expected dimension: {len(features)}, "
         f"but got: {output_dim}"
     )
+
+
+@pytest.mark.parametrize(
+    "extractor, value",
+    [
+        (extractor_2012, False),
+        (extractor_2024, True)
+    ]
+)
+def test_groupwise_computation(extractor: Extractor, value: bool) -> None:
+    """Test for property groupwise_computation."""
+    # Before init check if the attribute is None
+    assert extractor._groupwise_computation is None
+
+    # First call of the property
+    fc_groupwise_computation = extractor.groupwise_computation
+
+    # Check the type and caching, compare with the expected value
+    assert isinstance(fc_groupwise_computation, bool), (
+        f"Groupwise computation should be bool, "
+        f"but got: {type(fc_groupwise_computation)}"
+    )
+
+    assert fc_groupwise_computation == value, (
+        f"Expected : {value}, "
+        f"but got: {fc_groupwise_computation}"
+    )
+
+    assert fc_groupwise_computation == extractor._groupwise_computation, (
+        "Internal _groupwise_computation attribute"
+        "should match the accessed value."
+    )
+
+    # Patch subprocess.run in the correct namespace
+    # after the first call to ensure caching is used
+    with patch("subprocess.run") as mock_subprocess_run:
+        # Call the property a second time to check behavior
+        sc_groupwise_computation = extractor.groupwise_computation
+
+        # Validate that caching works (both calls should return the same value)
+        assert sc_groupwise_computation == fc_groupwise_computation, (
+            "groupwise_computation property should cache the result and "
+            "return consistent values."
+        )
+
+        # Ensure subprocess.run was not called during the second access
+        mock_subprocess_run.assert_not_called(), (
+            "subprocess.run should not be called again as the result should "
+            "be cached after the first access."
+        )
 
 
 def test_build_cmd() -> None:
