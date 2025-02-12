@@ -44,6 +44,9 @@ def test_extractor_constructor(extractor: Extractor, test_dir: Path) -> None:
 )
 def test_features(extractor: Extractor) -> None:
     """Test for property features."""
+    # Check if features are none before accessing
+    assert extractor._features is None
+
     # Access the features for the first time
     first_call_features = extractor.features
 
