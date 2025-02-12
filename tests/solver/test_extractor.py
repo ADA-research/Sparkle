@@ -154,10 +154,23 @@ def test_empty_feature_groups() -> None:
         assert feature_groups == expected_groups
 
 
-def test_output_dimension() -> None:
+@pytest.mark.parametrize(
+    "extractor",
+    [extractor_2012, extractor_2024]
+)
+def test_output_dimension(extractor: Extractor) -> None:
     """Test for property output_dimension."""
-    # TODO: Write test
-    pass
+    # Check if output dimension is None before accessing
+    assert extractor._output_dimension is None
+
+    # Get dimension of features by function
+    output_dim = extractor.output_dimension
+
+    # Get real features to validate the function
+    features = extractor.features
+
+    assert isinstance(output_dim, int)
+    assert output_dim == len(features)
 
 
 def test_groupwise_computation() -> None:
