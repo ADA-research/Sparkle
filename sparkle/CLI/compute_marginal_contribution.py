@@ -7,6 +7,7 @@ import operator
 
 import tabulate
 
+from sparkle.solver import Selector
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import SettingState
@@ -60,14 +61,16 @@ def compute_selector_performance(
     selector_performance_data.add_solver("portfolio_selector")
     selector_performance_data.csv_filepath =\
         actual_portfolio_selector.parent / "performance.csv"
-    selector = gv.settings().get_general_sparkle_selector()
+    selector = Selector(gv.settings().get_selection_class(),
+                        gv.settings().get_selection_model())
 
     schedule = {}
     for instance in performance_data.instances:
         # We get the performance for an instance by infering the model predicition
         # for the instance.
-        feature_vector = feature_data.get_instance(instance)
-        schedule[instance] = selector.run(actual_portfolio_selector, feature_vector)
+        schedule[instance] = selector.run(actual_portfolio_selector,
+                                          instance,
+                                          feature_data)
 
     schedule_performance = selector_performance_data.schedule_performance(
         schedule, target_solver="portfolio_selector", objective=objective)

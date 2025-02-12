@@ -178,6 +178,11 @@ class FeatureDataFrame:
         """Return the number of features in the dataframe."""
         return self.dataframe.shape[0]
 
+    @property
+    def features(self: FeatureDataFrame) -> list[str]:
+        """Return the features in the dataframe."""
+        return self.dataframe.index.get_level_values("FeatureName").unique().to_list()
+
     def save_csv(self: FeatureDataFrame, csv_filepath: Path = None) -> None:
         """Write a CSV to the given path.
 
@@ -186,16 +191,3 @@ class FeatureDataFrame:
         """
         csv_filepath = self.csv_filepath if csv_filepath is None else csv_filepath
         self.dataframe.to_csv(csv_filepath)
-
-    def to_autofolio(self: FeatureDataFrame,
-                     target: Path = None) -> Path:
-        """Port the data to a format acceptable for AutoFolio."""
-        autofolio_df = self.dataframe.copy()
-        autofolio_df.index = autofolio_df.index.map("_".join)  # Reduce Multi-Index
-        autofolio_df = autofolio_df.T  # Autofolio has feature columns and instance rows
-        if target is None:
-            path = self.csv_filepath.parent / f"autofolio_{self.csv_filepath.name}"
-        else:
-            path = target / f"autofolio_{self.csv_filepath.name}"
-        autofolio_df.to_csv(path)
-        return path

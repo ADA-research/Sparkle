@@ -1,0 +1,69 @@
+[INFO ] Logging to: /home/snelleman/Sparkle/Output/Configuration/Raw_Data/ParamILS/PbO-CCSAT-Generic_PTN/outdir_train_configuration/PbO-CCSAT-Generic_PTN_scenario/log-run2.txt
+[INFO ] Version of ParamILS is 3.0.0, running on OpenJDK 64-Bit Server VM (1.8.0_402) and Linux 5.14.0-362.24.1.el9_3.0.1.x86_64 (amd64) 
+[INFO ] Call String: paramils --scenario-file Output/Configuration/Raw_Data/ParamILS/PbO-CCSAT-Generic_PTN/PbO-CCSAT-Generic_PTN_scenario.txt --seed 2 
+[INFO ] ParamILS started at: 06-Feb-2025 11:26:19. Minimizing penalized average runtime (PAR10).
+[WARN ] Algorithm Run Result reported wallclock time of 77.988 (secs) that exceeded it's cutoff time of 60.0 (secs) by 17.988 (secs). Next warning at 18.988 (secs)  
+[INFO ] Intensifying #1 (incumbent) ... 1  bonus run
+[INFO ] Config #1 (incumbent) updated!
+[INFO ]  ∞ -> 600 (based on 0 and 1 runs)
+[INFO ] Looking for random initial solutions better than the initial incumbent
+[WARN ] Algorithm Run Result reported wallclock time of 97.014 (secs) that exceeded it's cutoff time of 60.0 (secs) by 37.013999999999996 (secs). Next warning at 38.013999999999996 (secs)  
+[INFO ] Intensifying #2 ... 1  bonus run
+[INFO ] Config #1 (incumbent) updated!
+[INFO ]  600 -> 301.9698 (based on 1 and 2 runs)
+[INFO ] Intensifying #2 ... 1  bonus run
+[INFO ] Config #1 (incumbent) updated!
+[INFO ]  301.9698 -> 401.3132 (based on 2 and 3 runs)
+[INFO ] Intensifying #2 ... 1  bonus run
+[INFO ] Config #1 (incumbent) updated!
+[INFO ]  401.3132 -> 301.2971 (based on 3 and 4 runs)
+[INFO ] Intensifying #3 ... 1  bonus run
+[INFO ] Config #1 (incumbent) updated!
+[INFO ]  301.2971 -> 242.088 (based on 4 and 5 runs)
+[INFO ] New incumbent! (#3)
+[INFO ]  beta_hscore: 1000 -> 233572 ; d_hscore: 8 -> 9 ; gamma_hscore2: 1000 -> 100 ; p_swt: 0.3 -> 0.47368421052631576 ; perform_first_div: 0 -> 1 ; prob_first_div: 0.0228 -> 0.23357214690901212 ; prob_novelty: 0.119 -> 1.0 ; prob_pac: 0.00058 -> 0.03792690190732246 ; q_swt: 0.0 -> 0.47368421052631576 ; sel_var_break_tie_greedy: 2 -> 3 ; sel_var_div: 3 -> 2 ; sp_paws: 0.8 -> 0.9210526315789473 ; sparrow_c1: 2.15 -> 10.0 ; sparrow_c2: 4 -> 1 ; sparrow_c3: 75000 -> 20000 ; threshold_swt: 300 -> 844
+[INFO ]  242.088 -> 126.2357 (based on 5 and 5 runs)
+[INFO ] == Starting Iteration 1 ==
+[INFO ] Tuner time: 9m42.19s elapsed
+[INFO ] Initial configuration (#3 (incumbent))
+[INFO ]  -> 126.2357 (based on 5 runs)
+[INFO ] Intensifying #20 ... 1  bonus run
+[INFO ] Config #3 (incumbent) updated!
+[INFO ]  126.2357 -> 105.5576 (based on 5 and 6 runs)
+[INFO ] New incumbent! (#20)
+[INFO ]  q_swt: 0.47368421052631576 -> 0.3157894736842105
+[INFO ]  105.5576 -> 102.9275 (based on 6 and 6 runs)
+[INFO ] ParamILS completed
+[INFO ] ========================================================================
+[INFO ] ParamILS has finished. Reason: algorithm run limit (100 runs) has been reached.   
+[INFO ] Total number of runs performed: 100 (100), total configurations tried: 84
+[INFO ] Total CPU time used: 1201 s, total wallclock time used: 3922 s
+[INFO ] ParamILS's final incumbent found iteration 1, ID #20
+[INFO ] Estimated penalized average runtime (PAR10) of final incumbent on training set: 102.9275
+[INFO ] Estimation based on 6 runs on 6 training instances
+[INFO ] Sample call for final incumbent:
+cd /home/snelleman/Sparkle; /home/snelleman/Sparkle/sparkle/Components/paramils-v3.0.0/paramils_target_algorithm.py Solvers/PbO-CCSAT-Generic Output/Configuration/Raw_Data/ParamILS/PbO-CCSAT-Generic_PTN/tmp PAR10 /home/snelleman/Sparkle/Instances/PTN/Ptn-7824-b03.cnf 0 60.0 2147483647 8792767 -init_solution '1' -p_swt '0.3' -perform_aspiration '1' -perform_clause_weight '1' -perform_double_cc '1' -perform_first_div '0' -perform_pac '0' -q_swt '0.0' -sel_clause_div '1' -sel_clause_weight_scheme '1' -sel_var_break_tie_greedy '2' -sel_var_div '3' -sp_paws '0.8' -threshold_swt '300' 
+[INFO ] ------------------------------------------------------------------------
+[INFO ] Differences with initial configuration: 
+ beta_hscore: 1000 -> 233572
+ d_hscore: 8 -> 9
+ gamma_hscore2: 1000 -> 100
+ p_swt: 0.3 -> 0.47368421052631576
+ perform_first_div: 0 -> 1
+ prob_first_div: 0.0228 -> 0.23357214690901212
+ prob_novelty: 0.119 -> 1.0
+ prob_pac: 0.00058 -> 0.03792690190732246
+ q_swt: 0.0 -> 0.3157894736842105
+ sel_var_break_tie_greedy: 2 -> 3
+ sel_var_div: 3 -> 2
+ sp_paws: 0.8 -> 0.9210526315789473
+ sparrow_c1: 2.15 -> 10.0
+ sparrow_c2: 4 -> 1
+ sparrow_c3: 75000 -> 20000
+ threshold_swt: 300 -> 844
+[INFO ] ========================================================================
+[INFO ] Additional information about run 2 in: /home/snelleman/Sparkle/Output/Configuration/Raw_Data/ParamILS/PbO-CCSAT-Generic_PTN/outdir_train_configuration/PbO-CCSAT-Generic_PTN_scenario
+
+/home/snelleman/Sparkle/sparkle/Components/paramils-v3.0.0/paramils --scenario-file Output/Configuration/Raw_Data/ParamILS/PbO-CCSAT-Generic_PTN/PbO-CCSAT-Generic_PTN_scenario.txt --seed 2
+
+Organising done! See Output/Performance_Data/performance_data.csv for results.

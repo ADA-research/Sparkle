@@ -7,9 +7,11 @@ Notable changes to Sparkle will be documented in this file.
 ### Added
 - Flushing completed jobs from jobs command by hitting spacebar [SPRK-313]
 - "Did you mean" functionality for typos in CLI commands [SPRK-345]
+- Added ParamILS as configurator with automatic PCS file conversion from SMAC2 [SPRK-339]
 
 ### Changed
 - CI pipeline for unittest now tests for Python 3.10, 3.11 and 3.12
+- Replaced AutoFolio with ASF for algorithm selection [SPRK-336]
 
 ## [0.9.2] - 07/01/2025
 

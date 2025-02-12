@@ -1,0 +1,335 @@
+17:15:16.916 [main] INFO  c.u.c.b.a.l.ComplexLoggingOptions - Logging to: /home/aymeric/git/paramils_example/example_saps/paramils-out/scenario-Saps-single-QWH-instance/log-run48223336.txt
+17:15:16.923 [main] INFO  c.u.c.b.a.m.version.VersionTracker - Version of Java Runtime Environment is OpenJDK 64-Bit Server VM (1.8.0_121) 
+17:15:16.923 [main] INFO  c.u.c.b.a.m.version.VersionTracker - Version of OS is Linux 4.10.13-1-ARCH (amd64) 
+17:15:16.923 [main] INFO  c.u.c.b.a.m.version.VersionTracker - Version of ParamILS is 3.0.0 
+17:15:16.923 [main] INFO  c.u.c.b.a.m.version.VersionTracker - Version of Random Forest Library is v1.05.01-master-106 (7fba58fe4271) 
+17:15:16.924 [main] INFO  c.u.c.b.a.m.version.VersionTracker - Version of SMAC is ERROR LOADING VERSION INFORMATION 
+17:15:16.924 [main] INFO  c.u.c.b.a.m.j.JCommanderHelper - Call String: paramils --MO TRUE --scenario-file example_saps/scenario-Saps-single-QWH-instance.txt --tunerTimeout 100 
+17:15:16.925 [main] INFO  c.u.c.b.p.executors.ParamILSExecutor - ********** The next bit of output can be ignored, it is merely useful for debugging **********
+17:15:16.925 [main] INFO  c.u.c.b.p.executors.ParamILSExecutor - ==========Environment Variables===========
+COLORFGBG=default;default
+COLORTERM=rxvt
+DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+DISPLAY=:0
+EDITOR=emacs
+FT2_SUBPIXEL_HINTING=0
+HISTFILE=/home/aymeric/.history
+HISTIGNORE=ls:ll:bg:fg:exit:reset:clear:cd:cd ..:cd..:..:...:make:m
+HISTSIZE=10000
+HOME=/home/aymeric
+LANG=en_US.UTF-8
+LOGNAME=aymeric
+MAIL=/var/spool/mail/aymeric
+MOZ_PLUGIN_PATH=/usr/lib/mozilla/plugins
+NLSPATH=/usr/dt/lib/nls/msg/%L/%N.cat
+OLDPWD=/home/aymeric/git
+PATH=/home/aymeric/bin:/home/aymeric/.gem/ruby/2.4.0/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl
+PWD=/home/aymeric/git/paramils_example
+SAVEHIST=1000
+SHELL=/bin/zsh
+SHLVL=3
+TERM=rxvt-unicode-256color
+USER=aymeric
+USE_EDITOR=emacs
+VISUAL=emacs
+WINDOWID=52428809
+WINDOWPATH=1
+XAUTHORITY=/home/aymeric/.Xauthority
+XDG_RUNTIME_DIR=/run/user/1000
+XDG_SEAT=seat0
+XDG_SESSION_ID=c1
+XDG_VTNR=1
+XFILESEARCHPATH=/usr/dt/app-defaults/%L/Dt
+_JAVA_AWT_WM_NONREPARENTING=1
+
+17:15:16.928 [main] INFO  c.u.c.b.p.executors.ParamILSExecutor - Hostname:[UNABLE TO DETERMINE HOSTNAME]
+17:15:16.928 [main] INFO  c.u.c.b.p.executors.ParamILSExecutor - ==========System Properties==============
+ERRLOG=/home/aymeric/git/paramils_example/example_saps/paramils-out/scenario-Saps-single-QWH-instance/log-err48223336.txt
+NUMRUN=48223336
+OUTPUTDIR=/home/aymeric/git/paramils_example/example_saps/paramils-out/scenario-Saps-single-QWH-instance
+ROOT-LEVEL=INFO
+RUNLOG=/home/aymeric/git/paramils_example/example_saps/paramils-out/scenario-Saps-single-QWH-instance/log-run48223336.txt
+STDOUT-LEVEL=INFO
+WARNLOG=/home/aymeric/git/paramils_example/example_saps/paramils-out/scenario-Saps-single-QWH-instance/log-warn48223336.txt
+awt.toolkit=sun.awt.X11.XToolkit
+file.encoding=UTF-8
+file.encoding.pkg=sun.io
+file.separator=/
+java.awt.graphicsenv=sun.awt.X11GraphicsEnvironment
+java.awt.printerjob=sun.print.PSPrinterJob
+java.class.path=./lib/jcip-annotations.jar:./lib/smac.jar:./lib/aeatk.jar:./lib/jackson-databind-2.3.1.jar:./lib/jcommander.jar:./lib/jackson-annotations-2.3.1.jar:./lib/exp4j-0.3.10.jar:./lib/paramils.jar:./lib/logback-classic-1.1.2.jar:./lib/jackson-core-2.3.1.jar:./lib/opencsv-2.3.jar:./lib/slf4j-api-1.7.5.jar:./lib/numerics4j-1.3.jar:./lib/guava-14.0.1.jar:./lib/DomainInter.jar:./lib/logback-access-1.1.2.jar:./lib/commons-math3-3.2.jar:./lib/logback-core-1.1.2.jar:./lib/Jama-1.0.2.jar:./lib/commons-io-2.1.jar:./lib/commons-collections-3.2.1.jar:./lib/fastrf.jar:./lib/commons-math-2.2.jar:./lib/jmatharray.jar:./lib/spi-0.2.4.jar
+java.class.version=52.0
+java.endorsed.dirs=/usr/lib/jvm/java-8-openjdk/jre/lib/endorsed
+java.ext.dirs=/usr/lib/jvm/java-8-openjdk/jre/lib/ext:/usr/java/packages/lib/ext
+java.home=/usr/lib/jvm/java-8-openjdk/jre
+java.io.tmpdir=/tmp
+java.library.path=/usr/java/packages/lib/amd64:/usr/lib64:/lib64:/lib:/usr/lib
+java.runtime.name=OpenJDK Runtime Environment
+java.runtime.version=1.8.0_121-b13
+java.specification.name=Java Platform API Specification
+java.specification.vendor=Oracle Corporation
+java.specification.version=1.8
+java.vendor=Oracle Corporation
+java.vendor.url=http://java.oracle.com/
+java.vendor.url.bug=http://bugreport.sun.com/bugreport/
+java.version=1.8.0_121
+java.vm.info=mixed mode
+java.vm.name=OpenJDK 64-Bit Server VM
+java.vm.specification.name=Java Virtual Machine Specification
+java.vm.specification.vendor=Oracle Corporation
+java.vm.specification.version=1.8
+java.vm.vendor=Oracle Corporation
+java.vm.version=25.121-b13
+line.separator=
+
+logback.configurationFile=ca/ubc/cs/beta/aeatk/logging/complex-logback.xml
+os.arch=amd64
+os.name=Linux
+os.version=4.10.13-1-ARCH
+path.separator=:
+sun.arch.data.model=64
+sun.boot.class.path=/usr/lib/jvm/java-8-openjdk/jre/lib/resources.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/rt.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/sunrsasign.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/jsse.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/jce.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/charsets.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/jfr.jar:/usr/lib/jvm/java-8-openjdk/jre/classes
+sun.boot.library.path=/usr/lib/jvm/java-8-openjdk/jre/lib/amd64
+sun.cpu.endian=little
+sun.cpu.isalist=
+sun.io.unicode.encoding=UnicodeLittle
+sun.java.command=ca.ubc.cs.beta.aeatk.ant.execscript.Launcher ca.ubc.cs.beta.paramils.executors.ParamILSExecutor --MO TRUE --scenario-file example_saps/scenario-Saps-single-QWH-instance.txt --tunerTimeout 100
+sun.java.launcher=SUN_STANDARD
+sun.jnu.encoding=UTF-8
+sun.management.compiler=HotSpot 64-Bit Tiered Compilers
+sun.os.patch.level=unknown
+user.country=US
+user.dir=/home/aymeric/git/paramils_example
+user.home=/home/aymeric
+user.language=en
+user.name=aymeric
+user.timezone=Europe/Paris
+
+17:15:16.930 [main] INFO  c.u.c.b.a.m.j.JCommanderHelper - ==========Configuration Options==========
+[ParamILSOptions]
+ multiObjective = true
+ initialIncumbent = DEFAULT
+ initialIncumbentFile = 
+ minRuns = 1
+ maxRuns = 2000
+ R = 10
+ perturbationLength = 3
+ randomRestartProbability = 0.05
+ approach = FOCUSED
+ bonusRunsMode = INTENSIFY
+ cappingMode = AUTO
+ aggressiveCapping = true
+ aggressiveCappingFactor = 2.0
+ cutoffThreshold = 0.1
+ cappingMinValue = 0.0
+ doValidation = true
+ validationRuns = 1000
+ compareInitialConfiguration = false
+ validateOnTrainingSet = false
+ logDetails = false
+ alwaysRunInitialConfiguration = false
+ deterministicInstanceOrdering = false
+ experimentDir = /home/aymeric/git/paramils_example/
+help = [HelpOptions]
+		 showHiddenParameters = false
+		 showHelp = false
+		 helpLevel = BASIC
+		 showVersion = false
+		 helpDefaults = /home/aymeric/.aeatk/help.opt
+
+logOptions = [ComplexLoggingOptions]
+		 consoleLogLevel = INFO
+		 logLevel = INFO
+
+ optionFile = null
+ optionFile2 = null
+runGroupOptions = [RunGroupOptions]
+		 runGroupName = %SCENARIO_NAME
+		 runGroupExit = false
+		 replacementChar = %
+
+scenarioConfig = [ScenarioOptions]
+		 _runObj = RUNTIME
+		 intraInstanceObj = MEAN
+		 interInstanceObj = MEAN
+		limitOptions = [TerminationCriteriaOptions]
+				 tunerTimeout = 100
+				 numIterations = 2147483647
+				 runtimeLimit = 2147483647
+				 totalNumRunsLimit = 9223372036854775807
+				 countSMACTimeAsTunerTime = false
+				 challengeIncumbentAttempts = 1000
+				 fileToWatch = null
+
+		instanceOptions = [ProblemInstanceOptions]
+				 instanceFile = example_data/qwh-single-inst.txt
+				 instanceFeatureFile = null
+				 testInstanceFile = example_data/qwh-single-inst.txt
+				 checkInstanceFilesExist = false
+				 useInstances = true
+				 instanceSuffix = null
+				 testInstanceSuffix = null
+				 ignoreFeatures = false
+
+		 scenarioFile = /home/aymeric/git/paramils_example/example_saps/scenario-Saps-single-QWH-instance.txt
+		 outputDirectory = example_saps/paramils-out
+		 invalidScenarioReason = null
+		algoExecOptions = [AlgorithmExecutionOptions]
+				 algoExec = ruby example_saps/saps_wrapper.rb
+				 algoExecDir = example_saps
+				 deterministic = false
+				 cutoffTime = 5.0
+				 cutoffLength = 1.7976931348623157E308
+				 additionalContext = {}
+				taeOpts = [TargetAlgorithmEvaluatorOptions]
+						 targetAlgorithmEvaluator = CLI
+						 abortOnCrash = false
+						 abortOnFirstRunCrash = true
+						 retryCount = 0
+						 cacheRuns = false
+						 cacheDebug = false
+						 useDynamicCappingExclusively = false
+						 reportStrictlyIncreasingRuntimes = false
+						 boundRuns = false
+						 maxConcurrentAlgoExecs = 1
+						 exitOnFailure = false
+						 runHashCodeFile = null
+						 leakMemory = false
+						 leakMemoryAmount = 1024
+						 verifySAT = null
+						 checkSATConsistency = true
+						 checkSATConsistencyException = true
+						 callObserverBeforeCompletion = true
+						prePostOptions = [PrePostCommandOptions]
+								 preCommand = null
+								 postCommand = null
+								 exceptionOnError = false
+								 logOutput = true
+								 directory = /home/aymeric/git/paramils_example/.
+
+						 checkResultOrderConsistent = false
+						 skipOutstandingEvaluationsTAE = false
+						 logRequestResponses = false
+						 logRequestResponsesRCOnly = false
+						 trackRunsScheduled = false
+						 trackRunsScheduledResolution = 1.0
+						 uncleanShutdownCheck = true
+						 killCaptimeExceedingRun = true
+						 killCaptimeExceedingRunFactor = 10.0
+						 checkRunConfigsUnique = true
+						 checkRunConfigsUniqueException = true
+						 observeWalltimeIfNoRuntime = true
+						 observeWalltimeScale = 0.95
+						 observeWalltimeDelay = 5.0
+						 synchronousObserver = true
+						 taeDefaults = /home/aymeric/.aeatk/tae.opt
+						ttaedo = [TransformTargetAlgorithmEvaluatorDecoratorOptions]
+								 transform = false
+								 transformValidValuesOnly = true
+								 SAT_runtime_transform = R
+								 SAT_quality_transform = Q
+								 UNSAT_runtime_transform = R
+								 UNSAT_quality_transform = Q
+								 TIMEOUT_runtime_transform = R
+								 TIMEOUT_quality_transform = Q
+								 other_runtime_transform = R
+								 other_quality_transform = Q
+
+						tForkOptions = [ForkingTargetAlgorithmEvaluatorDecoratorOptions]
+								 forkToTAE = null
+								fPolicyOptions = [ForkingTargetAlgorithmEvaluatorDecoratorPolicyOptions]
+										 fPolicy = null
+										 duplicateOnSlaveQuickTimeout = 5
+
+
+						 fileToWatch = null
+						 warnIfNoResponseFromTAE = 120
+						 taeStopProcessingOnShutdown = true
+						 filecache = false
+						 fileCacheSource = null
+						 fileCacheOutput = null
+						 fileCacheCrashOnMiss = false
+
+				paramFileDelegate = [ParamConfigurationSpaceOptions]
+						 paramFile = example_saps/saps-params.txt
+						 searchSubspace = null
+						 searchSubspaceFile = null
+						 continuousNeighbours = 4
+
+
+
+seedOptions = [SeedOptions]
+		 seedOffset = 0
+		 numRun = 48223336
+		 initialSeedMap = {}
+
+ paramilsDefaults = /home/aymeric/.aeatk/paramils.opt
+trackingOptions = [ParamConfigurationOriginTrackingOptions]
+		 configTracking = false
+
+ validationSeed = 0
+
+[AnalyticTargetAlgorithmEvaluatorOptions]
+ simulateDelay = false
+ cores = 0
+ observerFrequency = 100
+ func = CAMELBACK
+ scaleDelay = 1.0
+
+[BlackHoleTargetAlgorithmEvaluatorOptions]
+ warnings = true
+
+[CommandLineTargetAlgorithmEvaluatorOptions]
+ observerFrequency = 500
+ concurrentExecution = true
+ cores = 1
+ logAllCallStrings = false
+ logAllResultLines = false
+ logAllCallsAndResultLines = false
+ logAllProcessOutput = false
+ listenForUpdates = true
+ paramArgumentsContainQuotes = false
+ pgEnvKillCommand = null
+ pgNiceKillCommand = bash -c "kill -s TERM -%pid"
+ pgForceKillCommand = bash -c "kill -s KILL -%pid"
+ procNiceKillCommand = kill -s TERM %pid
+ procForceKillCommand = kill -s KILL %pid
+ smacDefaults = /home/aymeric/.aeatk/cli-tae.opt
+
+[IPCTargetAlgorithmEvaluatorOptions]
+ persistent = false
+ ipcMechanism = UDP
+ encodingMechanism = CALL_STRING
+ remoteHost = 127.0.0.1
+ remotePort = 5050
+ udpPacketSize = 4096
+ localPort = 0
+ execScript = null
+ execScriptOutput = false
+ poolConnections = false
+ ipcDefaults = /home/aymeric/.aeatk/ipc-tae.opt
+ asyncThreads = 5
+
+[PreloadedResponseTargetAlgorithmEvaluatorOptions]
+ preloadedResponses = 
+ runLength = -1.0
+ quality = 0.0
+ additionalRunData = 
+
+[RandomResponseTargetAlgorithmEvaluatorOptions]
+ simulateDelay = false
+ additionalRunData = 
+ cores = 0
+ maxResponse = 10.0
+ minResponse = 0.0
+ observerFrequency = 500
+ trendCoefficient = 0.0
+ seed = 1498058116603
+ persistent = false
+ scaleDelay = 1.0
+
+
+17:15:16.979 [main] ERROR c.u.c.b.p.executors.ParamILSExecutor - Message: Cannot optimize RUNTIME runObj without a --runtime parameter
+17:15:16.980 [main] INFO  c.u.c.b.p.executors.ParamILSExecutor - Note that some options are read from files in ~/.aeatk/
+17:15:16.980 [main] INFO  c.u.c.b.p.executors.ParamILSExecutor - Exiting ParamILS with failure. Log: /home/aymeric/git/paramils_example/example_saps/paramils-out/scenario-Saps-single-QWH-instance/log-run48223336.txt
+17:15:16.980 [main] INFO  c.u.c.b.p.executors.ParamILSExecutor - For a list of available commands use:  --help

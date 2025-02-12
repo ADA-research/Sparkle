@@ -1,0 +1,18 @@
+# any list of arbitrary values
+a {0,1,2,3,4,5}[0]
+b {1.0, 1.1, 1.2, 1.3, 1.4, 1.5}[1.0]
+c {foo, bar, baz}[bar]
+d {none,10,25,50,all}[10]
+
+# automatic expension
+e {0,2..10}[6] # expends to {0,2,4,6,8,10}
+f {1.0,1.1..1.5}[1.0] # same as above
+
+# no restriction on parameter and values
+my_parameter {my_first_value, 0, -1, 99.99}[0]
+
+# conditional parameter
+c | b in {1.0, 1.1} # c only exists if b is 1.0 or 1.1
+
+# forbidden combinations
+{a=0,b=1.0,c=foo} # will avoid matching configurations

@@ -134,7 +134,9 @@ def main(argv: list[str]) -> None:
     if solver.get_pcs_file() is not None:
         print("Generating missing PCS files...")
         solver.port_pcs("IRACE")  # Create PCS file for IRACE
-        print("Generating done!")
+        print("Generating IRACE done!")
+        solver.port_pcs("paramils")  # Create PCS file for ParamILS
+        print("Generating ParamILS done!")
 
     # Write used settings to file
     gv.settings().write_used_settings()

@@ -34,7 +34,6 @@ ignore = D300  # Conflicts with docstring-quotes rule
          S404  # Just a warning about the usage of subprocess
          S603  # Flags only false positives as of now
 exclude =
-    sparkle/Components/AutoFolio/,
     sparkle/Components/ablationAnalysis-0.9.4/,
     sparkle/Components/runsolver/,
     sparkle/Components/smac2-v2.10.03-master-778/

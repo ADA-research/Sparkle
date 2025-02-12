@@ -704,15 +704,15 @@ class PerformanceDataFrame(pd.DataFrame):
 
     def schedule_performance(
             self: PerformanceDataFrame,
-            schedule: dict[str: list[tuple[str, float | None]]],
+            schedule: dict[str: dict[str: (str, int)]],
             target_solver: str = None,
             objective: str | SparkleObjective = None) -> float:
         """Return the performance of a selection schedule on the portfolio.
 
         Args:
             schedule: Compute the best performance according to a selection schedule.
-                A dictionary with instances as keys and a list of tuple consisting of
-                (solver, max_runtime) or solvers if no runtime prediction should be used.
+                A schedule is a dictionary of instances, with a schedule per instance,
+                consisting of a pair of solver and maximum runtime.
             target_solver: If not None, store the values in this solver of the DF.
             objective: The objective for which we calculate the best performance
 
@@ -836,28 +836,3 @@ class PerformanceDataFrame(pd.DataFrame):
         """Set all values in Performance Data to None."""
         self[:] = PerformanceDataFrame.missing_value
         self.save_csv()
-
-    def to_autofolio(self: PerformanceDataFrame,
-                     objective: SparkleObjective = None,
-                     target: Path = None) -> Path:
-        """Port the data to a format acceptable for AutoFolio."""
-        if (objective is None and self.multi_objective or self.num_runs > 1):
-            print(f"ERROR: Currently no porting available for {self.csv_filepath} "
-                  "to Autofolio due to multi objective or number of runs.")
-            return
-        autofolio_df = super().copy()
-        # Drop Seed/Configuration, then drop the level
-        autofolio_df = autofolio_df.drop([PerformanceDataFrame.column_seed,
-                                          PerformanceDataFrame.column_configuration],
-                                         axis=1, level=1).droplevel(level=1, axis=1)
-        if objective is not None:
-            autofolio_df = autofolio_df.loc[objective.name]
-            autofolio_df.index = autofolio_df.index.droplevel("Run")
-        else:
-            autofolio_df.index = autofolio_df.index.droplevel(["Objective", "Run"])
-        if target is None:
-            path = self.csv_filepath.parent / f"autofolio_{self.csv_filepath.name}"
-        else:
-            path = target / f"autofolio_{self.csv_filepath.name}"
-        autofolio_df.to_csv(path)
-        return path
