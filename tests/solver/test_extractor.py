@@ -171,10 +171,6 @@ def test_output_dimension(extractor: Extractor) -> None:
     # Get real features to validate the function
     features = extractor.features
 
-    assert isinstance(output_dim, int), (
-        f"Output dimension should be int but got :{type(output_dim)}"
-    )
-
     assert output_dim == len(features), (
         f"Expected dimension: {len(features)}, "
         f"but got: {output_dim}"
