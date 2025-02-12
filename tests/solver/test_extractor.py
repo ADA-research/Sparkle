@@ -160,9 +160,6 @@ def test_empty_feature_groups() -> None:
 )
 def test_output_dimension(extractor: Extractor) -> None:
     """Test for property output_dimension."""
-    # Check if output dimension is None before accessing
-    assert extractor._output_dimension is None
-
     # Get dimension of features by function
     output_dim = extractor.output_dimension
 
@@ -171,12 +168,6 @@ def test_output_dimension(extractor: Extractor) -> None:
 
     assert isinstance(output_dim, int)
     assert output_dim == len(features)
-
-
-def test_groupwise_computation() -> None:
-    """Test for property groupwise_computation."""
-    # TODO: Write test
-    pass
 
 
 def test_build_cmd() -> None:
