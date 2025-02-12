@@ -133,6 +133,27 @@ def test_feature_groups(extractor: Extractor) -> None:
         )
 
 
+def test_empty_feature_groups() -> None:
+    """Test for feature_groups when groups are missing."""
+    extractor = Extractor(directory=test_dir_2012)
+
+    # Prepare a mock output where the group is None
+    mock_features = "[(None, 'feature1'), (None, 'feature2'), (None, 'feature3')]"
+    expected_groups = [None]
+
+    # Mock the subprocess of features function
+    # to control the none group scenario
+    with patch("subprocess.run") as mock_subprocess_run:
+        mock_subprocess_run.return_value.stdout = mock_features.encode()
+        mock_subprocess_run.return_value.returncode = 0
+
+        feature_groups = extractor.feature_groups
+
+        # Validate type and returned groups
+        assert isinstance(feature_groups, list)
+        assert feature_groups == expected_groups
+
+
 def test_output_dimension() -> None:
     """Test for property output_dimension."""
     # TODO: Write test
