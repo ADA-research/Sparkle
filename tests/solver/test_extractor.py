@@ -150,8 +150,14 @@ def test_empty_feature_groups() -> None:
         feature_groups = extractor.feature_groups
 
         # Validate type and returned groups
-        assert isinstance(feature_groups, list)
-        assert feature_groups == expected_groups
+        assert isinstance(feature_groups, list), (
+            f"Expected a list, got: {type(feature_groups)}"
+        )
+
+        assert feature_groups == expected_groups, (
+            f"Expected groups: {expected_groups}, "
+            f"instead got : {feature_groups}"
+        )
 
 
 @pytest.mark.parametrize(
