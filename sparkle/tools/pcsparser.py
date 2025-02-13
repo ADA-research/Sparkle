@@ -234,7 +234,21 @@ class PCSConverter:
     @staticmethod
     def parse_irace(content: list[str] | Path) -> ConfigurationSpace:
         """Parses a irace file."""
+        name = content.name if isinstance(content, Path) else "irace"
         content = content.open().readlines() if isinstance(content, Path) else content
+        cs = ConfigurationSpace(name=name)
+        for line in content:
+            if not line.strip() or line.startswith("#"):  # Empty or comment
+                continue
+            if re.match(PCSConverter.irace_params_regex, line):
+                # TODO: Parse different types of parameters
+                pass
+            elif re.match(PCSConverter.irace_forbidden_regex, line):
+                pass
+            else:
+                raise Exception(
+                    f"IRACE PCS expression not recognised on line:\n{line}")
+        return cs
 
     @staticmethod
     def export(configspace: ConfigurationSpace,
