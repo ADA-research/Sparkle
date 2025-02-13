@@ -2,6 +2,10 @@
 from __future__ import annotations
 import re
 import sys
+import ast
+import ConfigSpace.conditions
+import ConfigSpace.forbidden
+import ConfigSpace.hyperparameters
 import numpy as np
 from enum import Enum
 from abc import ABC
@@ -9,6 +13,17 @@ from pathlib import Path
 
 import tabulate
 import ConfigSpace
+from ConfigSpace import ConfigurationSpace
+from sparkle.tools.configspace import expression_to_configspace
+
+
+class PCSConvention(Enum):
+    """Internal pcs convention enum."""
+    unknown = ""
+    SMAC = "smac"
+    ParamILS = "paramils"
+    IRACE = "irace"
+    ConfigSpace = "configspace"
 
 
 class PCSObject(ABC):
@@ -77,13 +92,155 @@ class PCSObject(ABC):
         return None
 
 
-class PCSConvention(Enum):
-    """Internal pcs convention enum."""
-    unknown = ""
-    SMAC = "smac"
-    ParamILS = "paramils"
-    IRACE = "irace"
-    ConfigSpace = "configspace"
+class PCSConverter:
+    """Parser class independent file of notation."""
+    section_regex = re.compile(r"^\[[a-zA-Z]+\]")
+
+    smac2_params_regex = re.compile(r"^(?P<name>[a-zA-Z0-9_]+)\s+(?P<type>[a-zA-Z]+)\s+"
+                                    r"(?P<values>[a-zA-Z0-9 \[\]{}_,. ]+)\s+"
+                                    r"\[(?P<default>[a-zA-Z0-9._-]+)\]?\s*"
+                                    r"(?P<scale>log)?\s*(?P<comment>#.*)?$")
+    smac2_conditions_regex = re.compile(r"^(?P<parameter>[a-zA-Z0-9_]+)\s*\|\s*"
+                                        r"(?P<expression>.+)$")
+    smac2_forbidden_regex = re.compile(r"\{(?P<forbidden>.+)\}$")
+
+    irace_params_regex = re.compile(r"^(?P<name>[a-zA-Z0-9_]+)\s+"
+                                    r"(?P<switch>[\"a-zA-Z0-9_\- ]+)\s+"
+                                    r"(?P<type>[cir])\s+"
+                                    r"(?P<values>[a-zA-Z0-9()_,. ]+)\s*"
+                                    r"\|?(?P<conditions>.+)?$")
+    irace_forbidden_regex = re.compile(r"")
+
+    @staticmethod
+    def parse(file: Path) -> ConfigurationSpace:
+        """Determines the format of a pcs file and parses into Configuration Space."""
+        if file.suffix == ".yaml":
+            return ConfigSpace.ConfigurationSpace.from_yaml(file)
+        if file.suffix == ".json":
+            return ConfigSpace.ConfigurationSpace.from_json(file)
+
+        file_contents = file.open().readlines()
+        for line in file_contents:
+            if line.startswith("#"):  # Comment line
+                continue
+            if "#" in line:
+                line, _ = line.split("#", maxsplit=1)
+            if re.match(PCSConverter.smac2_params_regex, line):
+                return PCSConverter.parse_smac(file_contents)
+            elif re.match(PCSConverter.irace_params_regex, line):
+                return PCSConverter.parse_irace(file_contents)
+
+        raise Exception(
+            f"PCS convention not recognised based on line:\n{line}")
+
+    @staticmethod
+    def parse_smac(content: list[str] | Path) -> ConfigurationSpace:
+        """Parses a smac file."""
+        content = content.open().readlines() if isinstance(content, Path) else content
+        cs = ConfigurationSpace()
+        for line in content:
+            if not line.strip() or line.startswith("#"):  # Empty or comment
+                continue
+            comment = None
+            line = line.strip()
+            if re.match(PCSConverter.smac2_params_regex, line):
+                parameter = re.fullmatch(PCSConverter.smac2_params_regex, line)
+                name = parameter.group("name")
+                parameter_type = parameter.group("type")
+                values = parameter.group("values")
+                default = parameter.group("default")
+                comment = parameter.group("comment")
+                scale = parameter.group("scale")
+                if parameter_type == "integer":
+                    values = ast.literal_eval(values)
+                    csparam = ConfigSpace.UniformIntegerHyperparameter(
+                        name=name,
+                        lower=int(values[0]),
+                        upper=int(values[1]),
+                        default_value=int(default),
+                        log=scale == "log",
+                        meta=comment,
+                    )
+                elif parameter_type == "real":
+                    values = ast.literal_eval(values)
+                    csparam = ConfigSpace.UniformFloatHyperparameter(
+                        name=name,
+                        lower=float(values[0]),
+                        upper=float(values[1]),
+                        default_value=float(default),
+                        log=scale == "log",
+                        meta=comment,
+                    )
+                elif parameter_type == "categorical":
+                    values = [str(i) for i in ast.literal_eval(values)]
+                    csparam = ConfigSpace.CategoricalHyperparameter(
+                        name=name,
+                        choices=values,
+                        default_value=default,
+                        meta=comment,
+                        # Does not seem to contain any weights?
+                    )
+                elif parameter_type == "ordinal":
+                    values = [str(i) for i in ast.literal_eval(values)]
+                    csparam = ConfigSpace.OrdinalHyperparameter(
+                        name=name,
+                        sequence=values,
+                        default_value=default,
+                        meta=comment,
+                    )
+                cs.add(csparam)
+            elif re.match(PCSConverter.smac2_conditions_regex, line):
+                # Break up the expression into the smallest possible pieces
+                match = re.fullmatch(PCSConverter.smac2_conditions_regex, line)
+                parameter, condition =\
+                    match.group("parameter"), match.group("expression")
+                parameter = cs[parameter.strip()]
+                condition = condition.replace(" || ", " or ").replace(" && ", " and ")
+                condition = re.sub(r"(?<![<>!])=", "==", condition)
+                condition = re.sub(r"!==", "!=", condition)
+                condition = expression_to_configspace(condition, cs,
+                                                      target_parameter=parameter)
+                cs.add(condition)
+            elif re.match(PCSConverter.smac2_forbidden_regex, line):
+                match = re.fullmatch(PCSConverter.smac2_forbidden_regex, line)
+                forbidden = match.group("forbidden")
+                # Forbidden expressions structure <expression> <operator> <value>
+                # where expressions can contain:
+                # Logical Operators: >=, <=, >, <, ==, !=,
+                # Logical clause operators: ( ), ||, &&,
+                # Supported by SMAC2 but not by ConfigSpace?:
+                # Arithmetic Operators: +, -, *, ^, %
+                # Functions: abs, acos, asin, atan, cbrt, ceil, cos, cosh, exp, floor,
+                # log, log10, log2, sin, sinh, sqrt, tan, tanh
+                rejected_operators = ("+", "-", "*", "^", "%",
+                                      "abs", "acos", "asin", "atan", "cbrt", "ceil",
+                                      "cos", "cosh", "exp", "floor", "log", "log10",
+                                      "log2", "sin", "sinh", "sqrt", "tan", "tanh")
+                if any([r in forbidden.split(" ") for r in rejected_operators]):
+                    print("WARNING: Arithmetic operators are not supported by "
+                          "ConfigurationSpace. Skipping forbidden expression:\n"
+                          f"{forbidden}")
+                    continue
+                forbidden = forbidden.replace(" && ", " and ").replace(
+                    ", ", " and ").replace(" || ", " or ").strip()  # To AST notation
+                forbidden = re.sub(r"(?<![<>!])=", "==", forbidden)
+                forbidden = expression_to_configspace(forbidden, cs)
+                cs.add(forbidden)
+            else:
+                raise Exception(
+                    f"SMAC2 PCS expression not recognised on line:\n{line}")
+        return cs
+
+    @staticmethod
+    def parse_irace(content: list[str] | Path) -> ConfigurationSpace:
+        """Parses a irace file."""
+        content = content.open().readlines() if isinstance(content, Path) else content
+
+    @staticmethod
+    def export(configspace: ConfigurationSpace,
+               format: PCSConvention, file: Path) -> None:
+        """Exports a config space object to a specific PCS convention."""
+        pass
 
 
 class PCSParser(ABC):
@@ -316,7 +473,7 @@ class SMACParser(PCSParser):
                 self.pcs.add_param(**fields)
                 continue
 
-            # CONSTRAINTS
+            # CONDITIONS
             regex = (r"(?P<parameter>[^\s\"',]+)\s*\|\s"
                      r"*(?P<conditions>.+)\s*#*(?P<comment>.*)")
             m = re.match(regex, line)
