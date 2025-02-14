@@ -18,7 +18,9 @@ class IRACE(Configurator):
     """Class for IRACE configurator."""
     configurator_path = Path(__file__).parent.parent.parent.resolve() /\
         "Components/irace-v3.5"
-    configurator_package = configurator_path / "irace_3.5.tar.gz"
+    configurator_package = configurator_path / "irace_4.2.0.tar"
+    package_dependencies = ["codetools_0.2-20.tar", "data.table_1.16.4.tar",
+                            "matrixStats_1.5.0.tar", "spacefillr_0.3.3.tar"]
     r6_dependency_package = configurator_path / "R6_2.5.1.tar.gz"
     configurator_executable = configurator_path / "irace" / "bin" / "irace"
     configurator_ablation_executable = configurator_path / "irace" / "bin" / "ablation"

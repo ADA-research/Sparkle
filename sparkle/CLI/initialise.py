@@ -56,25 +56,30 @@ def initialise_irace() -> None:
                       "configurator. Consider installing R.")
         return
     print("Initialising IRACE ...")
-    r6_package_check = subprocess.run(["Rscript", "-e",
-                                      'library("R6")'], capture_output=True)
-    if r6_package_check.returncode != 0:  # R6 is not installed
-        print("Installing R6 package (IRACE dependency) ...")
-        r6_install = subprocess.run([
-            "Rscript", "-e",
-            f'install.packages("{IRACE.r6_dependency_package.absolute()}",'
-            f'lib="{IRACE.configurator_path.absolute()}")'], capture_output=True)
-        if r6_install.returncode != 0:
-            print("An error occured during the installation of R6:\n",
-                  r6_install.stdout.decode(), "\n",
-                  r6_install.stderr.decode(), "\n"
-                  "IRACE installation failed!")
-            return
+    for package in IRACE.package_dependencies:
+        package_name = package.split("_")[0]
+        package_check = subprocess.run(["Rscript", "-e",
+                                        f'library("{package_name}")'],
+                                       capture_output=True)
+        if package_check.returncode != 0:  # R6 is not installed
+            print(f"\t- Installing {package_name} package (IRACE dependency) ...")
+            dependency_install = subprocess.run([
+                "Rscript", "-e",
+                f'install.packages("{(IRACE.configurator_path / package).absolute()}",'
+                f'lib="{IRACE.configurator_path.absolute()}", repos = NULL)'],
+                capture_output=True)
+            if dependency_install.returncode != 0:
+                print(f"An error occured during the installation of {package_name}:\n",
+                      dependency_install.stdout.decode(), "\n",
+                      dependency_install.stderr.decode(), "\n"
+                      "IRACE installation failed!")
+                return
     # Install IRACE from tarball
     irace_install = subprocess.run(
         ["Rscript", "-e",
          f'install.packages("{IRACE.configurator_package.absolute()}",'
-         f'lib="{IRACE.configurator_path.absolute()}")'], capture_output=True)
+         f'lib="{IRACE.configurator_path.absolute()}", repos = NULL)'],
+        capture_output=True)
     if irace_install.returncode != 0 or not IRACE.configurator_executable.exists():
         print("An error occured during the installation of IRACE:\n",
               irace_install.stdout.decode(), "\n",
