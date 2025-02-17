@@ -23,3 +23,6 @@ prob_novelty              "--prob_novelty "              r       (0,1.0)        
 sparrow_c1                "--sparrow_c1 "                r       (2.0,10.0)       |  sel_var_div %in% c(7)
 sparrow_c2                "--sparrow_c2 "                i       (1,5)            |  sel_var_div %in% c(7)
 sparrow_c3                "--sparrow_c3 "                i       (20000,100000)   |  sel_var_div %in% c(7)
+
+[forbidden]
+(sel_clause_div = 2) & (perform_clause_weight = 0)

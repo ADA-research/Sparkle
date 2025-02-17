@@ -94,7 +94,7 @@ class PCSObject(ABC):
 
 class PCSConverter:
     """Parser class independent file of notation."""
-    section_regex = re.compile(r"^\[[a-zA-Z]+\]")
+    section_regex = re.compile(r"\[(?P<name>[a-zA-Z]+?)\]\s*(?P<comment>#.*)?$")
 
     smac2_params_regex = re.compile(r"^(?P<name>[a-zA-Z0-9_]+)\s+(?P<type>[a-zA-Z]+)\s+"
                                     r"(?P<values>[a-zA-Z0-9 \[\]{}_,. ]+)\s+"
@@ -106,10 +106,9 @@ class PCSConverter:
 
     irace_params_regex = re.compile(r"^(?P<name>[a-zA-Z0-9_]+)\s+"
                                     r"(?P<switch>[\"a-zA-Z0-9_\- ]+)\s+"
-                                    r"(?P<type>[cir])\s+"
+                                    r"(?P<type>[cior])(?:,)?(?P<scale>log)?\s+"
                                     r"(?P<values>[a-zA-Z0-9()_,. ]+)\s*"
-                                    r"\|?(?P<conditions>.+)?$")
-    irace_forbidden_regex = re.compile(r"")
+                                    r"\|?(?P<conditions>.+)?\s*(?P<comment>#.*)?$")
 
     @staticmethod
     def parse(file: Path) -> ConfigurationSpace:
@@ -131,13 +130,14 @@ class PCSConverter:
                 return PCSConverter.parse_irace(file_contents)
 
         raise Exception(
-            f"PCS convention not recognised based on line:\n{line}")
+            f"PCS convention not recognised based on any lines in file:\n{file}")
 
     @staticmethod
     def parse_smac(content: list[str] | Path) -> ConfigurationSpace:
         """Parses a smac file."""
+        space_name = content.name if isinstance(content, Path) else None
         content = content.open().readlines() if isinstance(content, Path) else content
-        cs = ConfigurationSpace()
+        cs = ConfigurationSpace(space_name)
         for line in content:
             if not line.strip() or line.startswith("#"):  # Empty or comment
                 continue
@@ -234,20 +234,96 @@ class PCSConverter:
     @staticmethod
     def parse_irace(content: list[str] | Path) -> ConfigurationSpace:
         """Parses a irace file."""
-        name = content.name if isinstance(content, Path) else "irace"
+        space_name = content.name if isinstance(content, Path) else None
         content = content.open().readlines() if isinstance(content, Path) else content
-        cs = ConfigurationSpace(name=name)
+        cs = ConfigurationSpace(name=space_name)
+        standardised_conditions = []
+        forbidden_flag = False
         for line in content:
-            if not line.strip() or line.startswith("#"):  # Empty or comment
+            line = line.strip()
+            if not line or line.startswith("#"):  # Empty or comment
                 continue
-            if re.match(PCSConverter.irace_params_regex, line):
-                # TODO: Parse different types of parameters
-                pass
-            elif re.match(PCSConverter.irace_forbidden_regex, line):
-                pass
+            if forbidden_flag:  # Parse forbidden statements
+                # Parse the forbidden statement to standardised format
+                forbidden_expr = re.sub(r" \&\& ", " and ", line)
+                forbidden_expr = re.sub(r" \|\| ", " or ", forbidden_expr)
+                forbidden_expr = re.sub(r" \%in\% ", " in ", forbidden_expr)
+                forbidden_expr = re.sub(r" [co]\(", " (", forbidden_expr)
+                forbidden_expr = expression_to_configspace(forbidden_expr, cs)
+                cs.add(forbidden_expr)
+            elif re.match(PCSConverter.irace_params_regex, line):
+                parameter = re.fullmatch(PCSConverter.irace_params_regex, line)
+                name = parameter.group("name")
+                parameter_type = parameter.group("type")
+                # NOTE: IRACE supports depedent parameter domains, e.g. parameters which
+                # domain relies on another parameter: p2 "--p2" r ("p1", "p1 + 10")"
+                # and is limited to the operators: +,-, *, /, %%, min, max
+                values = ast.literal_eval(parameter.group("values"))
+                scale = parameter.group("scale")
+                conditions = parameter.group("conditions")
+                comment = parameter.group("comment")
+                # Convert categorical / ordinal values to strings
+                if parameter_type == "c" or parameter_type == "o":
+                    values = [str(i) for i in values]
+                else:
+                    if any(operator in values
+                           for operator in ["+", "-", "*", "/", "%", "min", "max"]):
+                        raise ValueError("Dependent parameter domains not supported by "
+                                         "ConfigurationSpace.")
+                    lower_bound, upper_bound = values[0], values[1]
+                if parameter_type == "c":
+                    csparam = ConfigSpace.CategoricalHyperparameter(
+                        name=name,
+                        choices=values,
+                        meta=comment,
+                    )
+                elif parameter_type == "o":
+                    csparam = ConfigSpace.OrdinalHyperparameter(
+                        name=name,
+                        sequence=values,
+                        meta=comment,
+                    )
+                elif parameter_type == "r":
+                    csparam = ConfigSpace.UniformFloatHyperparameter(
+                        name=name,
+                        lower=float(lower_bound),
+                        upper=float(upper_bound),
+                        log=scale == "log",
+                        meta=comment,
+                    )
+                elif parameter_type == "i":
+                    csparam = ConfigSpace.UniformIntegerHyperparameter(
+                        name=name,
+                        lower=int(lower_bound),
+                        upper=int(upper_bound),
+                        log=scale == "log",
+                        meta=comment,
+                    )
+                cs.add(csparam)
+                if conditions:
+                    # Convert the expression to standardised format
+                    conditions = re.sub(r" \&\& ", " and ", conditions)
+                    conditions = re.sub(r" \|\| ", " or ", conditions)
+                    conditions = re.sub(r" \%in\% ", " in ", conditions)
+                    conditions = re.sub(r" [co]\(", " (", conditions)
+                    conditions = conditions.strip()
+                    standardised_conditions.append((csparam, conditions))
+            elif re.match(PCSConverter.section_regex, line):
+                section = re.fullmatch(PCSConverter.section_regex, line)
+                if section.group("name") == "forbidden":
+                    forbidden_flag = True
+                else:
+                    raise Exception(
+                        f"IRACE PCS section not recognised on line:\n{line}")
             else:
                 raise Exception(
                     f"IRACE PCS expression not recognised on line:\n{line}")
+
+        # We can only add the conditions after all parameters have been parsed:
+        for csparam, conditions in standardised_conditions:
+            conditions = expression_to_configspace(conditions, cs,
+                                                   target_parameter=csparam)
+            cs.add(conditions)
         return cs
 
     @staticmethod
