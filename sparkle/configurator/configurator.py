@@ -97,8 +97,10 @@ class Configurator:
             runs.append(validate)
 
         if run_on == Runner.LOCAL:
+            print(f"[{self.name}] Running {len(runs)} jobs locally...")
             for run in runs:
                 run.wait()
+            print(f"[{self.name}] Finished running {len(runs)} jobs locally.")
         return runs
 
     @staticmethod

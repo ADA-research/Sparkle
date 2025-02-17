@@ -107,6 +107,8 @@ def recursive_conversion(
         if isinstance(left, Hyperparameter):  # Convert to HP type
             if isinstance(right, Iterable):
                 right = [type(left.default_value)(v) for v in right]
+                if len(right) == 1:
+                    right = right[0]
             elif isinstance(right, int):
                 right = type(left.default_value)(right)
         operator = item.ops[0]

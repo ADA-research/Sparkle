@@ -28,7 +28,7 @@ sparkle configure_solver --solver RandomForest --instance-set-train Iris --objec
 
 ### Generate a report
 
-Wait for configuration to be completed
+Wait for configuration to be completed. Note that in this case, the jobs are usually extremely short, so you may find no jobs running as they've already finished.
 
 ```bash
 sparkle jobs

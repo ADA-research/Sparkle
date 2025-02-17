@@ -100,7 +100,6 @@ class IRACE(Configurator):
         )]
 
         if validate_after:
-            # TODO: Array job specific dependency, requires RunRunner update
             validate = scenario.solver.run_performance_dataframe(
                 scenario.instance_set,
                 run_ids=seeds,

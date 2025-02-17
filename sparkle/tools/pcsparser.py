@@ -3,9 +3,6 @@ from __future__ import annotations
 import re
 import sys
 import ast
-import ConfigSpace.conditions
-import ConfigSpace.forbidden
-import ConfigSpace.hyperparameters
 import numpy as np
 from enum import Enum
 from abc import ABC
@@ -97,18 +94,20 @@ class PCSConverter:
     section_regex = re.compile(r"\[(?P<name>[a-zA-Z]+?)\]\s*(?P<comment>#.*)?$")
 
     smac2_params_regex = re.compile(r"^(?P<name>[a-zA-Z0-9_]+)\s+(?P<type>[a-zA-Z]+)\s+"
-                                    r"(?P<values>[a-zA-Z0-9 \[\]{}_,. ]+)\s+"
+                                    r"(?P<values>[a-zA-Z0-9\[\]{}_,. ]+)\s+"
                                     r"\[(?P<default>[a-zA-Z0-9._-]+)\]?\s*"
                                     r"(?P<scale>log)?\s*(?P<comment>#.*)?$")
     smac2_conditions_regex = re.compile(r"^(?P<parameter>[a-zA-Z0-9_]+)\s*\|\s*"
                                         r"(?P<expression>.+)$")
     smac2_forbidden_regex = re.compile(r"\{(?P<forbidden>.+)\}$")
 
-    irace_params_regex = re.compile(r"^(?P<name>[a-zA-Z0-9_]+)\s+"
-                                    r"(?P<switch>[\"a-zA-Z0-9_\- ]+)\s+"
-                                    r"(?P<type>[cior])(?:,)?(?P<scale>log)?\s+"
-                                    r"(?P<values>[a-zA-Z0-9()_,. ]+)\s*"
-                                    r"\|?(?P<conditions>.+)?\s*(?P<comment>#.*)?$")
+    irace_params_regex = re.compile(
+        r"^(?P<name>[a-zA-Z0-9_]+)\s+"
+        r"(?P<switch>[\"a-zA-Z0-9_\- ]+)\s+"
+        r"(?P<type>[cior])(?:,)?(?P<scale>log)?\s+"
+        r"(?P<values>[a-zA-Z0-9\-()_,. ]+)\s*"
+        r"(?:\|)?(?P<conditions>[a-zA-Z-0-9_!=<>\%()\&\|\. ]*)?\s*"
+        r"(?P<comment>#.*)?$")
 
     @staticmethod
     def parse(file: Path) -> ConfigurationSpace:
@@ -238,18 +237,34 @@ class PCSConverter:
         content = content.open().readlines() if isinstance(content, Path) else content
         cs = ConfigurationSpace(name=space_name)
         standardised_conditions = []
-        forbidden_flag = False
+        forbidden_flag, global_flag = False, False
         for line in content:
             line = line.strip()
             if not line or line.startswith("#"):  # Empty or comment
                 continue
-            if forbidden_flag:  # Parse forbidden statements
+            if re.match(PCSConverter.section_regex, line):
+                section = re.fullmatch(PCSConverter.section_regex, line)
+                if section.group("name") == "forbidden":
+                    forbidden_flag, global_flag = True, False
+                    continue
+                elif section.group("name") == "global":
+                    global_flag, forbidden_flag = True, False
+                    continue
+                else:
+                    raise Exception(
+                        f"IRACE PCS section not recognised on line:\n{line}")
+            elif global_flag:  # Parse global statements
+                continue  # We do not parse global group
+            elif forbidden_flag:  # Parse forbidden statements
                 # Parse the forbidden statement to standardised format
-                forbidden_expr = re.sub(r" \&\& ", " and ", line)
-                forbidden_expr = re.sub(r" \|\| ", " or ", forbidden_expr)
+                forbidden_expr = re.sub(r" \& ", " and ", line)
+                forbidden_expr = re.sub(r" \| ", " or ", forbidden_expr)
                 forbidden_expr = re.sub(r" \%in\% ", " in ", forbidden_expr)
                 forbidden_expr = re.sub(r" [co]\(", " (", forbidden_expr)
+                print()
+                print(forbidden_expr)
                 forbidden_expr = expression_to_configspace(forbidden_expr, cs)
+                print(forbidden_expr)
                 cs.add(forbidden_expr)
             elif re.match(PCSConverter.irace_params_regex, line):
                 parameter = re.fullmatch(PCSConverter.irace_params_regex, line)
@@ -302,19 +317,12 @@ class PCSConverter:
                 cs.add(csparam)
                 if conditions:
                     # Convert the expression to standardised format
-                    conditions = re.sub(r" \&\& ", " and ", conditions)
-                    conditions = re.sub(r" \|\| ", " or ", conditions)
+                    conditions = re.sub(r" \& ", " and ", conditions)
+                    conditions = re.sub(r" \| ", " or ", conditions)
                     conditions = re.sub(r" \%in\% ", " in ", conditions)
-                    conditions = re.sub(r" [co]\(", " (", conditions)
+                    conditions = re.sub(r" [cior]\(", " (", conditions)
                     conditions = conditions.strip()
                     standardised_conditions.append((csparam, conditions))
-            elif re.match(PCSConverter.section_regex, line):
-                section = re.fullmatch(PCSConverter.section_regex, line)
-                if section.group("name") == "forbidden":
-                    forbidden_flag = True
-                else:
-                    raise Exception(
-                        f"IRACE PCS section not recognised on line:\n{line}")
             else:
                 raise Exception(
                     f"IRACE PCS expression not recognised on line:\n{line}")
@@ -328,9 +336,97 @@ class PCSConverter:
 
     @staticmethod
     def export(configspace: ConfigurationSpace,
-               format: PCSConvention, file: Path) -> None:
-        """Exports a config space object to a specific PCS convention."""
-        pass
+               pcs_format: PCSConvention, file: Path) -> str | None:
+        """Exports a config space object to a specific PCS convention.
+
+        Args:
+            configspace: ConfigurationSpace, the space to convert
+            pcs_format: PCSConvention, the convention to conver to
+            file: Path, the file to write to. If None, will return string.
+
+        Returns:
+            String in case of no file path given, otherwise None.
+        """
+        # Create pcs table
+        declaration = f"### {pcs_format.name} Parameter Configuration Space file "\
+                      "generated by Sparkle\n"
+        rows = []
+        if pcs_format == PCSConvention.ParamILS or pcs_format == PCSConvention.SMAC:
+            ...
+        elif pcs_format == PCSConvention.IRACE:
+            digits = 4  # Number of digits after decimal point required
+            parameter_map = {
+                ConfigSpace.UniformFloatHyperparameter: "r",
+                ConfigSpace.UniformIntegerHyperparameter: "i",
+                ConfigSpace.CategoricalHyperparameter: "c",
+                ConfigSpace.OrdinalHyperparameter: "o",
+            }
+            header = ["# Parameter Name", "switch", "type", "values",
+                      "[conditions (using R syntax)]", "comments"]
+            for parameter in list(configspace.values()):
+                parameter_conditions = []
+                for c in configspace.conditions:
+                    if c.child == parameter:
+                        parameter_conditions.append(c)
+                parameter_type = parameter_map[type(parameter)]
+                condition_str = " || ".join([str(c) for c in parameter_conditions])
+                condition_str = condition_str.replace(f"{parameter.name} | ", "")
+                condition_str = condition_str.replace(" in ", f" %in% {parameter_type}")
+                condition_str = condition_str.replace("{", "(").replace("}", ")")
+                condition_str = condition_str.replace("'", "")  # No quotes around string
+                condition_str = condition_str.replace(
+                    " && ", " & ").replace(" || ", " | ")
+                if isinstance(parameter,
+                              ConfigSpace.hyperparameters.NumericalHyperparameter):
+                    if parameter.log:
+                        parameter_type += ",log"
+                    domain = f"({parameter.lower}, {parameter.upper})"
+                    if isinstance(parameter,
+                                  ConfigSpace.hyperparameters.FloatHyperparameter):
+                        # Format the floats to interpret the number of digits
+                        # (Includes scientific notation)
+                        lower, upper = (format(parameter.lower, ".16f").strip("0"),
+                                        format(parameter.upper, ".16f").strip("0"))
+                        param_digits = max(len(str(lower).split(".")[1]),
+                                           len(str(upper).split(".")[1]))
+                        # Check if we need to update the global digits
+                        if param_digits > digits:
+                            digits = param_digits
+                else:
+                    domain = "(" + ",".join(parameter.choices) + ")"
+                rows.append([parameter.name,
+                             f'"--{parameter.name} "',
+                             parameter_type,
+                             domain,  # Parameter range/domain
+                             f"| {condition_str}" if condition_str else "",
+                             f"# {parameter.meta}" if parameter.meta else ""])
+            extra_rows = ["\n"]
+            if configspace.forbidden_clauses:
+                extra_rows.extend(["[forbidden]"])
+                for forbidden_expression in configspace.forbidden_clauses:
+                    forbidden_str = str(forbidden_expression).replace("Forbidden: ", "")
+                    if " in " in forbidden_str:
+                        type_char = parameter_map[
+                            type(forbidden_expression.hyperparameter)]
+                        forbidden_str.replace(" in ", f" %in% {type_char}")
+                    forbidden_str = forbidden_str.replace(
+                        " && ", " & ").replace(" || ", " | ")
+                    extra_rows.append(forbidden_str)
+            if digits > 4:  # Default digits is 4
+                extra_rows.extend(["", "[global]", f"digits={digits}"])
+            output = declaration + tabulate.tabulate(
+                rows, headers=header,
+                tablefmt="plain", numalign="left") + "\n".join(extra_rows)
+            if file is None:
+                return output
+            file.open("w+").write(output)
+
+    @staticmethod
+    def validate(file_path: Path) -> bool:
+        """Validate a pcs file."""
+        # TODO: Determine which format
+        # TODO: Verify each line, and the order in which they were written
+        return
 
 
 class PCSParser(ABC):
@@ -843,33 +939,3 @@ class IRACEParser(PCSParser):
 
     def compile(self: IRACEParser) -> tuple[str, str]:
         """Compile the PCS."""
-        # Create pcs table
-        header = ["# name", "switch", "type", "values",
-                  "[conditions (using R syntax)]"]
-        rows = []
-        forbidden = [f for f in self.pcs.params if f["type"] == "forbidden"]
-        constraints = [c for c in self.pcs.params if c["type"] == "constraint"]
-        for param in [p for p in self.pcs.params if p["type"] == "parameter"]:
-            # IRACE writes conditions on the same line as param definitions
-            param_constraint = [c for c in constraints
-                                if c["parameter"] == param["name"]]
-            condition_str = "|"
-            for constraint in param_constraint:
-                for operator, condition in constraint["conditions"]:
-                    operator = operator if operator is not None else ""
-                    condition_str +=\
-                        (f" {operator} {condition['parameter']} %in% "
-                            f"{condition['type'][0]}({','.join(condition['items'])})")
-            if condition_str == "|":
-                condition_str = ""
-            rows.append([param["name"],  # Parameter name
-                         f'"--{param["""name"""]} "',  # Parameter argument name
-                         param["structure"][0],  # Parameter type
-                         f"({','.join(param['domain'])})",  # Parameter range/domain
-                         condition_str])  # Parameter conditions
-        forbidden_rows = []
-        for f in forbidden:
-            forbidden_rows.append(" & ".join([f"({c['param']} = {c['value']})"
-                                              for c in f["clauses"]]))
-        return tabulate.tabulate(rows, headers=header, tablefmt="plain",
-                                 numalign="left"), "\n".join(forbidden_rows)
