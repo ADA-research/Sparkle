@@ -1,0 +1,341 @@
+conditions:
+- child: beta_hscore
+  conditions:
+  - child: beta_hscore
+    parent: sel_var_break_tie_greedy
+    type: IN
+    values:
+    - '3'
+  - child: beta_hscore
+    parent: sel_var_div
+    type: IN
+    values:
+    - '4'
+  type: OR
+- child: d_hscore
+  conditions:
+  - child: d_hscore
+    parent: sel_var_break_tie_greedy
+    type: IN
+    values:
+    - '3'
+  - child: d_hscore
+    parent: sel_var_div
+    type: IN
+    values:
+    - '4'
+  type: OR
+- child: gamma_hscore2
+  conditions:
+  - child: gamma_hscore2
+    parent: sel_var_break_tie_greedy
+    type: IN
+    values:
+    - '4'
+  - child: gamma_hscore2
+    parent: sel_var_div
+    type: IN
+    values:
+    - '5'
+  type: OR
+- child: prob_first_div
+  parent: perform_first_div
+  type: IN
+  values:
+  - '1'
+- child: prob_novelty
+  parent: sel_var_div
+  type: IN
+  values:
+  - '6'
+- child: prob_pac
+  parent: perform_pac
+  type: IN
+  values:
+  - '1'
+- child: sel_clause_weight_scheme
+  parent: perform_clause_weight
+  type: IN
+  values:
+  - '1'
+- child: sparrow_c1
+  parent: sel_var_div
+  type: IN
+  values:
+  - '7'
+- child: p_swt
+  conditions:
+  - child: p_swt
+    parent: perform_clause_weight
+    type: IN
+    values:
+    - '1'
+  - child: p_swt
+    parent: sel_clause_weight_scheme
+    type: IN
+    values:
+    - '1'
+  type: AND
+- child: q_swt
+  conditions:
+  - child: q_swt
+    parent: perform_clause_weight
+    type: IN
+    values:
+    - '1'
+  - child: q_swt
+    parent: sel_clause_weight_scheme
+    type: IN
+    values:
+    - '1'
+  type: AND
+- child: sp_paws
+  conditions:
+  - child: sp_paws
+    parent: perform_clause_weight
+    type: IN
+    values:
+    - '1'
+  - child: sp_paws
+    parent: sel_clause_weight_scheme
+    type: IN
+    values:
+    - '2'
+  type: AND
+- child: sparrow_c2
+  parent: sparrow_c1
+  type: GT
+  value: 3.0
+- child: threshold_swt
+  conditions:
+  - child: threshold_swt
+    parent: perform_clause_weight
+    type: IN
+    values:
+    - '1'
+  - child: threshold_swt
+    parent: sel_clause_weight_scheme
+    type: IN
+    values:
+    - '1'
+  type: AND
+- child: sparrow_c3
+  conditions:
+  - child: sparrow_c3
+    parent: sparrow_c1
+    type: NEQ
+    value: 10.0
+  - child: sparrow_c3
+    parent: sparrow_c2
+    type: GT
+    value: 2
+  type: AND
+forbiddens:
+- clauses:
+  - name: sel_clause_div
+    type: EQUALS
+    value: '2'
+  - name: perform_clause_weight
+    type: EQUALS
+    value: '0'
+  type: AND
+format_version: 0.4
+hyperparameters:
+- choices:
+  - '1'
+  - '2'
+  default_value: '1'
+  meta: '#decide which solution initialisation function would be used (1 means random
+    assignment, and 2 means assigning True to all variables if #all_pos_lit>#all_neg_lit
+    and assigning False to all variables if #all_pos_lit<=#all_neg_lit)'
+  name: init_solution
+  type: categorical
+  weights: null
+- choices:
+  - '0'
+  - '1'
+  default_value: '1'
+  meta: '#decide wehter the aspiration heuristic would be activated (0 means not activate,
+    and 1 means activate)'
+  name: perform_aspiration
+  type: categorical
+  weights: null
+- choices:
+  - '0'
+  - '1'
+  default_value: '1'
+  meta: '#decide whether the clause weight scheme would be activated (0 means not
+    activated, and 1 means activated)'
+  name: perform_clause_weight
+  type: categorical
+  weights: null
+- choices:
+  - '0'
+  - '1'
+  default_value: '1'
+  meta: '#decide whether the double configuration checking heuristic would be activated
+    (0 means not activate, and 1 means activate)'
+  name: perform_double_cc
+  type: categorical
+  weights: null
+- choices:
+  - '0'
+  - '1'
+  default_value: '0'
+  meta: '#decide whether the first diversification would be activated (0 means not
+    activate, and 1 means activate)'
+  name: perform_first_div
+  type: categorical
+  weights: null
+- choices:
+  - '0'
+  - '1'
+  default_value: '0'
+  meta: '#decide whether PAC heuristic would be activated (0 means not activate, and
+    1 means activate)'
+  name: perform_pac
+  type: categorical
+  weights: null
+- choices:
+  - '1'
+  - '2'
+  default_value: '1'
+  meta: '#decide which unsat clause selection strategy in the last diversification
+    (1 means the random selection, and 2 means clause weight based probability distribution)'
+  name: sel_clause_div
+  type: categorical
+  weights: null
+- choices:
+  - '1'
+  - '2'
+  - '3'
+  - '4'
+  default_value: '2'
+  meta: '#decide which breaking tie mechanism would be used in the greedy mode, including
+    CSCC, NVCC and aspiration heuristics (1 means randomly choose, 2 means choose
+    a variable with greatest age, 3 means choose a variable with greatest hscore,
+    and 4 means choose a variable with greatest hscore2)'
+  name: sel_var_break_tie_greedy
+  type: categorical
+  weights: null
+- choices:
+  - '1'
+  - '2'
+  - '3'
+  - '4'
+  - '5'
+  - '6'
+  - '7'
+  default_value: '3'
+  meta: '#decide which variable selection strategy in the last diversification (1
+    means randomly choose a variable in the selected clause, 2 means choose a variable
+    with greatest age in the selected clause, 3 means choose a variable with greatest
+    score in the selected clause, 4 means choose a variable with greatest hscore in
+    the selected clause, 5 means choose a variable with greatest hscore2 in the selected
+    clause, 6 means choose a variable using Novelty heuristic, and 7 means choose
+    a variable using Sparrow-like heuristic)'
+  name: sel_var_div
+  type: categorical
+  weights: null
+- default_value: 1000
+  log: true
+  lower: 100
+  meta: '#set the value of parameter beta in hscore calculation'
+  name: beta_hscore
+  type: uniform_int
+  upper: 1000000
+- default_value: 8
+  log: false
+  lower: 1
+  meta: '#set the value of parameter d in hscore calculation'
+  name: d_hscore
+  type: uniform_int
+  upper: 15
+- default_value: 1000
+  log: true
+  lower: 100
+  meta: '#set the value of parameter gamma in hscore2 calculation'
+  name: gamma_hscore2
+  type: uniform_int
+  upper: 1000000
+- default_value: 0.0228
+  log: true
+  lower: 0.001
+  meta: '#set the probability to perform the first diversification'
+  name: prob_first_div
+  type: uniform_float
+  upper: 1.0
+- default_value: 0.119
+  log: false
+  lower: 0.0
+  meta: '#set the probability in the Novelty heuristic'
+  name: prob_novelty
+  type: uniform_float
+  upper: 1.0
+- default_value: 0.00058
+  log: true
+  lower: 1.0e-05
+  meta: '#set the probability to perform PAC heuristic'
+  name: prob_pac
+  type: uniform_float
+  upper: 0.1
+- choices:
+  - '1'
+  - '2'
+  default_value: '1'
+  meta: '#decide which clause weight scheme would be used (1 means SWT scheme, and
+    2 means PAWS scheme)'
+  name: sel_clause_weight_scheme
+  type: categorical
+  weights: null
+- default_value: 2.15
+  log: false
+  lower: 2.0
+  meta: '#set the c1 parameter in the Sparrow-like heuristic'
+  name: sparrow_c1
+  type: uniform_float
+  upper: 10.0
+- default_value: 0.3
+  log: false
+  lower: 0.0
+  meta: '#set the value of parameter p in SWT scheme'
+  name: p_swt
+  type: uniform_float
+  upper: 1.0
+- default_value: 0.0
+  log: false
+  lower: 0.0
+  meta: '#set the value of parameter q in SWT scheme'
+  name: q_swt
+  type: uniform_float
+  upper: 1.0
+- default_value: 0.8
+  log: false
+  lower: 0.5
+  meta: '#set the value of parameter sp in PAWS scheme'
+  name: sp_paws
+  type: uniform_float
+  upper: 1.0
+- default_value: 4
+  log: false
+  lower: 1
+  meta: '#set the c2 parameter in the Sparrow-like heuristic'
+  name: sparrow_c2
+  type: uniform_int
+  upper: 5
+- default_value: 300
+  log: false
+  lower: 10
+  meta: '#set the value of parameter threshold in SWT scheme'
+  name: threshold_swt
+  type: uniform_int
+  upper: 1000
+- default_value: 75000
+  log: false
+  lower: 20000
+  meta: '#set the c3 parameter in the Sparrow-like heuristic'
+  name: sparrow_c3
+  type: uniform_int
+  upper: 100000
+name: null
+python_module_version: 1.2.0
