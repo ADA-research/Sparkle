@@ -37,6 +37,20 @@ def test_irace_pcs_to_configspace() -> None:
     assert str(configspace) == str(expected)
 
 
+def test_configspace_to_smac2() -> None:
+    """Test converting a ConfigSpace to SMAC2 pcs file."""
+    configspace_file = Path("tests/test_files/pcs/Test-Solver_configspace.yaml")
+    smac2_file = Path("tests/test_files/pcs/Test-Solver_SMAC2.pcs")
+    configspace = PCSConverter.parse(configspace_file)
+    smac2_export = PCSConverter.export(configspace,
+                                       pcs_format=PCSConvention.SMAC,
+                                       file=None).splitlines()
+    Path("test.txt").open("w+").write("\n".join(smac2_export))
+    expected_lines = smac2_file.open().read().splitlines()
+    for index in range(len(smac2_export)):
+        assert smac2_export[index] == expected_lines[index]
+
+
 def test_configspace_to_irace() -> None:
     """Test converting a ConfigSpace pcs file to IRACE."""
     configspace_file = Path("tests/test_files/pcs/Test-Solver_configspace.yaml")
