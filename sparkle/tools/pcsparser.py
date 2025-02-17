@@ -377,13 +377,19 @@ class PCSConverter:
                 for condition in configspace.conditions:
                     condition_str = str(condition)
                     condition_str = condition_str.replace(
+                        "(", "").replace(")", "")  # Brackets not allowed
+                    condition_str = condition_str.replace("'", "")  # No quotes needed
+                    condition_str = condition_str.replace(
                         f"{condition.child.name} | ", "").strip()
-                    condition_str = f"{condition.child.name}|" + condition_str
+                    condition_str = f"{condition.child.name} | " + condition_str
+
                     extra_rows.append(condition_str)
             if configspace.forbidden_clauses:
                 extra_rows.extend(["", "# Forbidden Expressions"])
                 for forbidden in configspace.forbidden_clauses:
                     forbidden_str = str(forbidden).replace("Forbidden: ", "")
+                    forbidden_str = forbidden_str.replace("(", "{").replace(")", "}")
+                    forbidden_str = forbidden_str.replace("'", "")
                     extra_rows.append(forbidden_str)
         elif pcs_format == PCSConvention.IRACE:
             digits = 4  # Number of digits after decimal point required
