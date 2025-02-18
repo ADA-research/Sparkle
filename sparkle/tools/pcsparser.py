@@ -407,9 +407,11 @@ class PCSConverter:
                     if c.child == parameter:
                         parameter_conditions.append(c)
                 parameter_type = parameter_map[type(parameter)]
+                condition_type = parameter_type if type(
+                    parameter) == ConfigSpace.CategoricalHyperparameter else ""
                 condition_str = " || ".join([str(c) for c in parameter_conditions])
                 condition_str = condition_str.replace(f"{parameter.name} | ", "")
-                condition_str = condition_str.replace(" in ", f" %in% {parameter_type}")
+                condition_str = condition_str.replace(" in ", f" %in% {condition_type}")
                 condition_str = condition_str.replace("{", "(").replace("}", ")")
                 condition_str = condition_str.replace("'", "")  # No quotes around string
                 condition_str = condition_str.replace(
@@ -453,7 +455,9 @@ class PCSConverter:
                 extra_rows.extend(["", "[global]", f"digits={digits}"])
         output = declaration + tabulate.tabulate(
             rows, headers=header,
-            tablefmt="plain", numalign="left") + "\n" + "\n".join(extra_rows)
+            tablefmt="plain", numalign="left") + "\n"
+        if extra_rows:
+            output += "\n".join(extra_rows) + "\n"
         if file is None:
             return output
         file.open("w+").write(output)

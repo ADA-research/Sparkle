@@ -37,7 +37,7 @@ exclude =
     sparkle/Components/ablationAnalysis-0.9.4/,
     sparkle/Components/runsolver/,
     sparkle/Components/smac2-v2.10.03-master-778/
-    sparkle/Components/irace-v3.5/,
+    sparkle/Components/irace-v4.2.0/,
     Examples/Resources/CVRP/,
     Examples/Resources/CCAG/,
     Examples/Resources/Solvers/CSCCSat/,

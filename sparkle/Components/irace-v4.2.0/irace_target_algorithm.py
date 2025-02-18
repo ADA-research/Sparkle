@@ -19,10 +19,11 @@ if __name__ == "__main__":
     cutoff_time = float(sys.argv[3])  # Third is the cutoff time
     # Argument 4,5 are configuration id and instance id
     config_id = sys.argv[4]
-    if config_id.lower().startswith("testconfig"):
-        print(0, 0)  # Test call to Solver
-        sys.exit()
+    instance_id = sys.argv[5]
     seed = int(sys.argv[6])  # Fifth is the seed
+    if str(config_id) == "1" and int(seed) == 1234567:
+        print(0, int(cutoff_time))  # Test call to Solver
+        sys.exit()
     instance = Path(sys.argv[7])  # Sixth argument is the path to the instance
     argsiter = iter(sys.argv[8:])
     args = zip(argsiter, argsiter)

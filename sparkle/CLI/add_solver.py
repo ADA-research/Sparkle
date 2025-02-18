@@ -7,6 +7,8 @@ import argparse
 import shutil
 from pathlib import Path
 
+from sparkle.tools.pcsparser import PCSConvention
+
 from sparkle.platform import file_help as sfh
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
@@ -133,9 +135,9 @@ def main(argv: list[str]) -> None:
     solver = Solver(solver_directory)  # Recreate solver from its new directory
     if solver.get_pcs_file() is not None:
         print("Generating missing PCS files...")
-        solver.port_pcs("IRACE")  # Create PCS file for IRACE
+        solver.port_pcs(PCSConvention.IRACE)  # Create PCS file for IRACE
         print("Generating IRACE done!")
-        solver.port_pcs("paramils")  # Create PCS file for ParamILS
+        solver.port_pcs(PCSConvention.ParamILS)  # Create PCS file for ParamILS
         print("Generating ParamILS done!")
 
     # Write used settings to file

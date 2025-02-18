@@ -88,7 +88,6 @@ class Solver(SparkleCallable):
         if len(pcs_files) != 1:
             # Generated PCS files present, this is a quick fix to take the original
             pcs_files = sorted(pcs_files, key=lambda p: len(p.name))
-        print(pcs_files)
         return pcs_files[0]
 
     def get_pcs_file(self: Solver, port_type: str = None) -> Path:
@@ -121,7 +120,7 @@ class Solver(SparkleCallable):
     def port_pcs(self: Solver, port_type: PCSConvention) -> None:
         """Port the parameter file to the given port type."""
         pcs_file = self.get_pcs_file()
-        target_pcs_file = pcs_file.parent / f"{pcs_file.stem}_{port_type}.pcs"
+        target_pcs_file = pcs_file.parent / f"{pcs_file.stem}_{port_type.name}.pcs"
         if target_pcs_file.exists():  # Already exists, possibly user defined
             return
         PCSConverter.export(self.get_pcs(), port_type, target_pcs_file)

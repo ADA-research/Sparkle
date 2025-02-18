@@ -12,11 +12,11 @@ Snapshots/*
 Settings/*
 tests/test_files/tmp
 
-sparkle/Components/irace-v3.5/irace/
-sparkle/Components/irace-v3.5/codetools/
-sparkle/Components/irace-v3.5/data.table/
-sparkle/Components/irace-v3.5/matrixStats/
-sparkle/Components/irace-v3.5/spacefillr/
+sparkle/Components/irace-v4.2.0/irace/
+sparkle/Components/irace-v4.2.0/codetools/
+sparkle/Components/irace-v4.2.0/data.table/
+sparkle/Components/irace-v4.2.0/matrixStats/
+sparkle/Components/irace-v4.2.0/spacefillr/
 
 sparkle/Components/runsolver/src/*.o
 sparkle/Components/runsolver/src/runsolver.d
