@@ -3,7 +3,7 @@ from pathlib import Path
 
 import ConfigSpace
 
-from sparkle.tools.parameter_configuration_space import PCSConverter, PCSConvention
+from sparkle.tools.parameters import PCSConverter, PCSConvention
 
 
 def test_from_configspace_file() -> None:

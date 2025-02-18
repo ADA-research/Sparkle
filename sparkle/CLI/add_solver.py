@@ -7,7 +7,7 @@ import argparse
 import shutil
 from pathlib import Path
 
-from sparkle.tools.parameter_configuration_space import PCSConvention
+from sparkle.tools.parameters import PCSConvention
 
 from sparkle.platform import file_help as sfh
 from sparkle.CLI.help import global_variables as gv

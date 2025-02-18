@@ -14,7 +14,7 @@ from runrunner.local import LocalRun
 from runrunner.slurm import Run, SlurmRun
 from runrunner.base import Status, Runner
 
-from sparkle.tools.parameter_configuration_space import PCSConverter, PCSConvention
+from sparkle.tools.parameters import PCSConverter, PCSConvention
 from sparkle.tools import RunSolver
 from sparkle.types import SparkleCallable, SolverStatus
 from sparkle.solver import verifiers
