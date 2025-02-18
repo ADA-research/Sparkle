@@ -45,7 +45,6 @@ def test_configspace_to_smac2() -> None:
     smac2_export = PCSConverter.export(configspace,
                                        pcs_format=PCSConvention.SMAC,
                                        file=None).splitlines()
-    Path("test.txt").open("w+").write("\n".join(smac2_export))
     expected_lines = smac2_file.open().read().splitlines()
     for index in range(len(smac2_export)):
         assert smac2_export[index] == expected_lines[index]
