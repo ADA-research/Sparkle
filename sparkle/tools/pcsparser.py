@@ -94,7 +94,7 @@ class PCSConverter:
     section_regex = re.compile(r"\[(?P<name>[a-zA-Z]+?)\]\s*(?P<comment>#.*)?$")
 
     smac2_params_regex = re.compile(r"^(?P<name>[a-zA-Z0-9_]+)\s+(?P<type>[a-zA-Z]+)\s+"
-                                    r"(?P<values>[a-zA-Z0-9\[\]{}_,. ]+)\s+"
+                                    r"(?P<values>[a-zA-Z0-9\-\[\]{}_,. ]+)\s+"
                                     r"\[(?P<default>[a-zA-Z0-9._-]+)\]?\s*"
                                     r"(?P<scale>log)?\s*(?P<comment>#.*)?$")
     smac2_conditions_regex = re.compile(r"^(?P<parameter>[a-zA-Z0-9_]+)\s*\|\s*"
@@ -195,7 +195,7 @@ class PCSConverter:
                     match.group("parameter"), match.group("expression")
                 parameter = cs[parameter.strip()]
                 condition = condition.replace(" || ", " or ").replace(" && ", " and ")
-                condition = re.sub(r"(?<![<>!])=", "==", condition)
+                condition = re.sub(r"(?<![<>!=])=(?<![=])", "==", condition)
                 condition = re.sub(r"!==", "!=", condition)
                 condition = expression_to_configspace(condition, cs,
                                                       target_parameter=parameter)
@@ -222,7 +222,7 @@ class PCSConverter:
                     continue
                 forbidden = forbidden.replace(" && ", " and ").replace(
                     ", ", " and ").replace(" || ", " or ").strip()  # To AST notation
-                forbidden = re.sub(r"(?<![<>!])=", "==", forbidden)
+                forbidden = re.sub(r"(?<![<>!=])=(?<![=])", "==", forbidden)
                 forbidden = expression_to_configspace(forbidden, cs)
                 cs.add(forbidden)
             else:
@@ -439,7 +439,7 @@ class PCSConverter:
                              f"| {condition_str}" if condition_str else "",
                              f"# {parameter.meta}" if parameter.meta else ""])
             if configspace.forbidden_clauses:
-                extra_rows.extend(["\n", "[forbidden]"])
+                extra_rows.extend(["", "[forbidden]"])
                 for forbidden_expression in configspace.forbidden_clauses:
                     forbidden_str = str(forbidden_expression).replace("Forbidden: ", "")
                     if " in " in forbidden_str:
@@ -450,7 +450,7 @@ class PCSConverter:
                         " && ", " & ").replace(" || ", " | ")
                     extra_rows.append(forbidden_str)
             if digits > 4:  # Default digits is 4
-                extra_rows.extend(["\n", "[global]", f"digits={digits}"])
+                extra_rows.extend(["", "[global]", f"digits={digits}"])
         output = declaration + tabulate.tabulate(
             rows, headers=header,
             tablefmt="plain", numalign="left") + "\n" + "\n".join(extra_rows)

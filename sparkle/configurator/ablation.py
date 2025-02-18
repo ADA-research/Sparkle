@@ -83,7 +83,7 @@ class AblationScenario:
         ablation_scenario_dir = self.scenario_dir
         objective = self.config_scenario.sparkle_objective
         pcs = self.solver.get_pcs()
-        parameter_names = [p["name"] for p in pcs]
+        parameter_names = list(pcs.values())
         # We need to remove any redundant keys that are not in PCS
         removable_keys = [key for key in best_configuration
                           if key not in parameter_names]

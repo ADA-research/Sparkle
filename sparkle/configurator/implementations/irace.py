@@ -386,8 +386,6 @@ class IRACEScenario(ConfigurationScenario):
                 f"deterministic = {1 if self.solver.deterministic else 0}\n"
                 "parameterFile = "
                 f'"{self.solver.get_pcs_file(port_type="""IRACE""").absolute()}"\n'
-                "forbiddenFile = "
-                f'"{self.solver.get_forbidden(port_type="""IRACE""").absolute()}"\n'
                 f'trainInstancesDir = "{self.instance_set.directory.absolute()}"\n'
                 f'trainInstancesFile = "{self.instance_file_path.absolute()}"\n'
                 "debugLevel = 1\n"  # The verbosity level of IRACE

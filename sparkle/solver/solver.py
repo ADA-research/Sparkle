@@ -14,7 +14,8 @@ from runrunner.local import LocalRun
 from runrunner.slurm import Run, SlurmRun
 from runrunner.base import Status, Runner
 
-from sparkle.tools import pcsparser, RunSolver
+from sparkle.tools.pcsparser import PCSConverter, PCSConvention
+from sparkle.tools import RunSolver
 from sparkle.types import SparkleCallable, SolverStatus
 from sparkle.solver import verifiers
 from sparkle.instance import InstanceSet
@@ -87,6 +88,7 @@ class Solver(SparkleCallable):
         if len(pcs_files) != 1:
             # Generated PCS files present, this is a quick fix to take the original
             pcs_files = sorted(pcs_files, key=lambda p: len(p.name))
+        print(pcs_files)
         return pcs_files[0]
 
     def get_pcs_file(self: Solver, port_type: str = None) -> Path:
@@ -103,48 +105,26 @@ class Solver(SparkleCallable):
         """Checks if the pcs file can be read."""
         pcs_file = self._get_pcs_file()
         try:
-            parser = pcsparser.PCSParser()
-            parser.load(str(pcs_file), convention="smac")
+            # TODO: Should be .validate instead
+            PCSConverter.parse(pcs_file)
             return True
         except SyntaxError:
             pass
         return False
 
-    def get_pcs(self: Solver) -> dict[str, tuple[str, str, str]]:
+    def get_pcs(self: Solver) -> ConfigurationSpace:
         """Get the parameter content of the PCS file."""
         if not (pcs_file := self.get_pcs_file()):
             return None
-        parser = pcsparser.PCSParser()
-        parser.load(str(pcs_file), convention="smac")
-        return [p for p in parser.pcs.params if p["type"] == "parameter"]
+        return PCSConverter.parse(pcs_file)
 
-    def port_pcs(self: Solver, port_type: pcsparser.PCSConvention) -> None:
+    def port_pcs(self: Solver, port_type: PCSConvention) -> None:
         """Port the parameter file to the given port type."""
         pcs_file = self.get_pcs_file()
-        parser = pcsparser.PCSParser()
-        parser.load(str(pcs_file), convention="smac")
         target_pcs_file = pcs_file.parent / f"{pcs_file.stem}_{port_type}.pcs"
         if target_pcs_file.exists():  # Already exists, possibly user defined
             return
-        parser.export(convention=port_type,
-                      destination=target_pcs_file)
-
-    def get_configspace(self: Solver) -> ConfigurationSpace:
-        """Get the parameter content of the PCS file."""
-        if not (pcs_file := self.get_pcs_file()):
-            return None
-        parser = pcsparser.PCSParser()
-        parser.load(str(pcs_file), convention="smac")
-        return parser.get_configspace()
-
-    def get_forbidden(self: Solver, port_type: pcsparser.PCSConvention) -> Path:
-        """Get the path to the file containing forbidden parameter combinations."""
-        if port_type == "IRACE":
-            forbidden = [p for p in self.directory.iterdir()
-                         if p.name.endswith("forbidden.txt")]
-            if len(forbidden) > 0:
-                return forbidden[0]
-        return None
+        PCSConverter.export(self.get_pcs(), port_type, target_pcs_file)
 
     def build_cmd(self: Solver,
                   instance: str | list[str],
