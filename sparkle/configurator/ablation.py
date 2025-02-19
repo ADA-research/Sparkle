@@ -107,7 +107,7 @@ class AblationScenario:
 
         smac_run_obj = "RUNTIME" if objective.time else "QUALITY"
         objective_str = "MEAN10" if objective.time else "MEAN"
-        pcs_file_path = f"{self.config_scenario.solver.get_pcs_file().absolute()}"
+        pcs_file_path = f"{self.config_scenario.solver.pcs_file.absolute()}"
 
         # Create config file
         config_file = Path(f"{ablation_scenario_dir}/ablation_config.txt")

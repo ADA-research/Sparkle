@@ -16,11 +16,11 @@ def test_from_configspace_file() -> None:
 def test_smac2_pcs_to_configspace() -> None:
     """Test converting a SMAC2 pcs file to ConfigSpace."""
     smac2_file = Path("tests/test_files/pcs/Test-Solver_SMAC2.pcs")
-    configspace_file = Path("tests/test_files/pcs/Test-Solver_configspace.txt")
+    configspace_file = Path("tests/test_files/pcs/Test-Solver_configspace.yaml")
     configspace = PCSConverter.parse(smac2_file)
-    lines_configspace = set(str(configspace).splitlines())
-    expected_lines = set(configspace_file.open().read().splitlines())
-    assert lines_configspace == expected_lines
+    expected = ConfigSpace.ConfigurationSpace.from_yaml(configspace_file)
+    expected.name = configspace.name
+    assert str(configspace) == str(expected)
 
 
 def test_irace_pcs_to_configspace() -> None:
@@ -29,9 +29,10 @@ def test_irace_pcs_to_configspace() -> None:
     configspace_file = Path("tests/test_files/pcs/Test-Solver_configspace.yaml")
     configspace = PCSConverter.parse(irace_file)
 
-    # IRACE does not support default values, replace with whatever is in the output
     expected = ConfigSpace.ConfigurationSpace.from_yaml(configspace_file)
+    # IRACE does not support default values, replace with whatever is in the output
     assert configspace.keys() == expected.keys()
+    expected.name = configspace.name
     for param in list(expected.keys()):
         expected[param].default_value = configspace[param].default_value
     assert str(configspace) == str(expected)

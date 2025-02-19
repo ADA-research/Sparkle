@@ -49,6 +49,7 @@ class Solver(SparkleCallable):
         super().__init__(directory, runsolver_exec, raw_output_directory)
         self.deterministic = deterministic
         self.verifier = verifier
+        self._pcs_file: Path = None
 
         meta_data_file = self.directory / Solver.meta_data
         if self.runsolver_exec is None:
@@ -74,53 +75,43 @@ class Solver(SparkleCallable):
         """Return the sting representation of the solver."""
         return self.name
 
-    def _get_pcs_file(self: Solver, port_type: str = None) -> Path | bool:
-        """Get path of the parameter file.
+    @property
+    def pcs_file(self: Solver) -> Path:
+        """Get path of the parameter file."""
+        if self._pcs_file is None:
+            files = sorted([p for p in self.directory.iterdir() if p.suffix == ".pcs"])
+            if len(files) == 0:
+                return None
+            self._pcs_file = files[0]
+        return self._pcs_file
 
-        Returns:
-            Path to the parameter file or False if the parameter file does not exist.
-        """
-        pcs_files = [p for p in self.directory.iterdir() if p.suffix == ".pcs"
-                     and (port_type is None or port_type in p.name)]
-
-        if len(pcs_files) == 0:
-            return False
-        if len(pcs_files) != 1:
-            # Generated PCS files present, this is a quick fix to take the original
-            pcs_files = sorted(pcs_files, key=lambda p: len(p.name))
-        return pcs_files[0]
-
-    def get_pcs_file(self: Solver, port_type: str = None) -> Path:
-        """Get path of the parameter file.
+    def get_pcs_file(self: Solver, port_type: PCSConvention) -> Path:
+        """Get path of the parameter file of a specific convention.
 
         Returns:
             Path to the parameter file. None if it can not be resolved.
         """
-        if not (file_path := self._get_pcs_file(port_type)):
+        pcs_files = [p for p in self.directory.iterdir() if p.suffix == ".pcs"
+                     and port_type.name in p.name]
+        if len(pcs_files) == 0:
             return None
-        return file_path
+        return pcs_files[0]
 
     def read_pcs_file(self: Solver) -> bool:
         """Checks if the pcs file can be read."""
-        pcs_file = self._get_pcs_file()
-        try:
-            # TODO: Should be .validate instead
-            PCSConverter.parse(pcs_file)
-            return True
-        except SyntaxError:
-            pass
-        return False
+        # TODO: Should be a .validate method instead
+        return PCSConverter.get_convention(self.pcs_file) is not None
 
     def get_pcs(self: Solver) -> ConfigurationSpace:
         """Get the parameter content of the PCS file."""
-        if not (pcs_file := self.get_pcs_file()):
+        if not self.pcs_file:
             return None
-        return PCSConverter.parse(pcs_file)
+        return PCSConverter.parse(self.pcs_file)
 
     def port_pcs(self: Solver, port_type: PCSConvention) -> None:
         """Port the parameter file to the given port type."""
-        pcs_file = self.get_pcs_file()
-        target_pcs_file = pcs_file.parent / f"{pcs_file.stem}_{port_type.name}.pcs"
+        target_pcs_file =\
+            self.pcs_file.parent / f"{self.pcs_file.stem}_{port_type.name}.pcs"
         if target_pcs_file.exists():  # Already exists, possibly user defined
             return
         PCSConverter.export(self.get_pcs(), port_type, target_pcs_file)

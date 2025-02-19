@@ -1,5 +1,6 @@
 """Test public methods of IRACE configurator."""
 import pytest
+
 from pathlib import Path
 from unittest.mock import Mock, patch, ANY
 
@@ -65,6 +66,10 @@ def test_irace_configure(mock_add_to_queue: Mock) -> None:
 def test_irace_organise_output(tmp_path: Path,
                                monkeypatch: pytest.MonkeyPatch) -> None:
     """Test IRACE organise output method."""
+    import shutil
+    if shutil.which("Rscript") is None:
+        import warnings
+        warnings.warn("Rscript is not installed, which is required for the IRACE")
     if cli_tools.get_cluster_name() != "kathleen":
         return  # Test does not work on Github because it can't find IRACE package
     source_path = Path("tests/test_files/Configuration/"

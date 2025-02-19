@@ -371,7 +371,9 @@ class IRACEScenario(ConfigurationScenario):
         Returns:
             Path to the created file.
         """
+        from sparkle.tools.parameters import PCSConvention
         solver_path = self.solver.directory.absolute()
+        pcs_path = self.solver.get_pcs_file(port_type=PCSConvention.IRACE).absolute()
         with self.scenario_file_path.open("w") as file:
             file.write(
                 f'execDir = "{self.directory.absolute()}"\n'
@@ -381,8 +383,7 @@ class IRACEScenario(ConfigurationScenario):
                 f"{solver_path} {self.sparkle_objective} {self.cutoff_time} "
                 '{configurationID} {instanceID} {seed} {instance} {targetRunnerArgs}"\n'
                 f"deterministic = {1 if self.solver.deterministic else 0}\n"
-                "parameterFile = "
-                f'"{self.solver.get_pcs_file(port_type="""IRACE""").absolute()}"\n'
+                f'parameterFile = "{pcs_path.absolute()}"\n'
                 f'trainInstancesDir = "{self.instance_set.directory.absolute()}"\n'
                 f'trainInstancesFile = "{self.instance_file_path.absolute()}"\n'
                 "debugLevel = 1\n"  # The verbosity level of IRACE

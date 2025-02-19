@@ -34,12 +34,12 @@ class TestSolver(TestCase):
 
         solver = Solver(self.solver_path)
 
-        self.assertEqual(solver.get_pcs_file(), self.solver_path / "paramfile.pcs")
+        self.assertEqual(solver.pcs_file, self.solver_path / "paramfile.pcs")
 
     def test_pcs_file_none(self: TestSolver) -> None:
         """Test for SystemExit if get_pcs_file() is called, but file doesn't exist."""
         solver = Solver(self.solver_path)
-        assert solver.get_pcs_file() is None
+        assert solver.pcs_file is None
 
     def test_pcs_file_multiple(self: TestSolver) -> None:
         """Test for SystemExit if get_pcs_file() is called, but multiple files exist."""
@@ -47,7 +47,7 @@ class TestSolver(TestCase):
         (self.solver_path / "paramfile_PORTED.pcs").open("a").close()
 
         solver = Solver(self.solver_path)
-        assert solver.get_pcs_file() == self.solver_path / "paramfile.pcs"
+        assert solver.pcs_file == self.solver_path / "paramfile.pcs"
 
     def test_is_deterministic(self: TestSolver) -> None:
         """Test if deterministic correctly returns value."""

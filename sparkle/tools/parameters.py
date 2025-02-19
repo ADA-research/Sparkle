@@ -13,7 +13,7 @@ from sparkle.tools.configspace import expression_to_configspace
 
 class PCSConvention(Enum):
     """Internal pcs convention enum."""
-    unknown = ""
+    UNKNOWN = "UNKNOWN"
     SMAC = "smac"
     ParamILS = "paramils"
     IRACE = "irace"
@@ -41,12 +41,18 @@ class PCSConverter:
         r"(?P<comment>#.*)?$")
 
     @staticmethod
-    def parse(file: Path) -> ConfigurationSpace:
-        """Determines the format of a pcs file and parses into Configuration Space."""
-        if file.suffix == ".yaml":
-            return ConfigSpace.ConfigurationSpace.from_yaml(file)
-        if file.suffix == ".json":
-            return ConfigSpace.ConfigurationSpace.from_json(file)
+    def get_convention(file: Path) -> PCSConvention:
+        """Determines the format of a pcs file."""
+        try:
+            ConfigSpace.ConfigurationSpace.from_yaml(file)
+            return PCSConvention.ConfigSpace
+        except Exception:
+            pass
+        try:
+            ConfigSpace.ConfigurationSpace.from_json(file)
+            return PCSConvention.ConfigSpace
+        except Exception:
+            pass
 
         file_contents = file.open().readlines()
         for line in file_contents:
@@ -55,10 +61,25 @@ class PCSConverter:
             if "#" in line:
                 line, _ = line.split("#", maxsplit=1)
             if re.match(PCSConverter.smac2_params_regex, line):
-                return PCSConverter.parse_smac(file_contents)
+                return PCSConvention.SMAC
             elif re.match(PCSConverter.irace_params_regex, line):
-                return PCSConverter.parse_irace(file_contents)
+                return PCSConvention.IRACE
+        return PCSConvention.UNKNOWN
 
+    @staticmethod
+    def parse(file: Path, convention: PCSConvention = None) -> ConfigurationSpace:
+        """Determines the format of a pcs file and parses into Configuration Space."""
+        if not convention:
+            convention = PCSConverter.get_convention(file)
+        if convention == PCSConvention.ConfigSpace:
+            if file.suffix == ".yaml":
+                return ConfigSpace.ConfigurationSpace.from_yaml(file)
+            if file.suffix == ".json":
+                return ConfigSpace.ConfigurationSpace.from_json(file)
+        if convention == PCSConvention.SMAC:
+            return PCSConverter.parse_smac(file)
+        if convention == PCSConvention.IRACE:
+            return PCSConverter.parse_irace(file)
         raise Exception(
             f"PCS convention not recognised based on any lines in file:\n{file}")
 
