@@ -174,7 +174,7 @@ class PCSConverter:
                     continue
                 forbidden = forbidden.replace(" && ", " and ").replace(
                     ", ", " and ").replace(" || ", " or ").strip()  # To AST notation
-                forbidden = re.sub(r"(?<![<>!=])=(?<![=])", "==", forbidden)
+                forbidden = re.sub(r"(?<![<>!=])=(?![=])", "==", forbidden)
                 forbidden = expression_to_configspace(forbidden, cs)
                 cs.add(forbidden)
             else:
