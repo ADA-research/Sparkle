@@ -160,6 +160,8 @@ class Settings:
     DEFAULT_paramils_max_iterations = None
 
     DEFAULT_slurm_max_parallel_runs_per_node = 8
+    DEFAULT_slurm_job_submission_limit = None
+    DEFAULT_slurm_job_prepend = None
 
     DEFAULT_ablation_racing = False
 
@@ -570,6 +572,20 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_slurm_max_parallel_runs_per_node(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("job_submission_limit", "max_jobs_submit")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_slurm_job_submission_limit(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("job_prepend", "prepend", "prepend_script")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.get(section, option)
+                    self.set_slurm_job_prepend(value, state)
                     file_settings.remove_option(section, option)
 
             section = "ablation"
@@ -1711,6 +1727,54 @@ class Settings:
             self.set_slurm_max_parallel_runs_per_node()
 
         return int(self.__settings["slurm"]["max_parallel_runs_per_node"])
+
+    def set_slurm_job_submission_limit(
+            self: Settings,
+            value: int = DEFAULT_slurm_job_submission_limit,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the number of algorithms Slurm can run in parallel per node."""
+        section = "slurm"
+        name = "job_submission_limit"
+
+        if value is not None and self.__check_setting_state(
+                self.__slurm_job_submission_limit_set, origin, name):
+            self.__init_section(section)
+            self.__slurm_job_submission_limit_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_slurm_job_submission_limit(self: Settings) -> int:
+        """Return the number of submitted jobs Slurm cluster will accept."""
+        if self.__slurm_job_submission_limit_set == SettingState.NOT_SET:
+            self.set_slurm_job_submission_limit()
+
+        return int(self.__settings["slurm"]["job_submission_limit"])
+
+    def set_slurm_job_prepend(
+            self: Settings,
+            value: str = DEFAULT_slurm_job_prepend,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the Slurm job prepend."""
+        section = "slurm"
+        name = "job_prepend"
+
+        if value is not None and self.__check_setting_state(
+                self.__slurm_job_prepend_set, origin, name):
+            try:
+                path = Path(value)
+                if path.is_file():
+                    value = path.open().read()
+            except TypeError:
+                pass
+            self.__init_section(section)
+            self.__slurm_job_prepend_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_slurm_job_prepend(self: Settings) -> str:
+        """Return the Slurm job prepend."""
+        if self.__slurm_job_prepend_set == SettingState.NOT_SET:
+            self.set_slurm_job_prepend()
+
+        return self.__settings["slurm"]["job_prepend"]
 
     # SLURM extra options
 
