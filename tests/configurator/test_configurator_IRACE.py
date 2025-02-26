@@ -70,6 +70,7 @@ def test_irace_organise_output(tmp_path: Path,
     if shutil.which("Rscript") is None:
         import warnings
         warnings.warn("Rscript is not installed, which is required for the IRACE")
+        return
     if cli_tools.get_cluster_name() != "kathleen":
         return  # Test does not work on Github because it can't find IRACE package
     source_path = Path("tests/test_files/Configuration/"
