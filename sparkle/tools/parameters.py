@@ -448,14 +448,13 @@ class PCSConverter:
                         dtype = float if isinstance(
                             parameter, ConfigSpace.UniformFloatHyperparameter) else int
                         if log:
-                            domain = list(np.linspace(
-                                parameter.lower, parameter.upper, granularity))
-                            if dtype == int:
-                                domain = list(set(np.round(domain).astype(dtype)))
-                        else:
+                            lower = 1e-5 if parameter.lower == 0 else parameter.lower
                             domain = list(np.unique(np.geomspace(
-                                parameter.lower, parameter.upper, granularity,
+                                lower, parameter.upper, granularity,
                                 dtype=dtype)))
+                        else:
+                            domain = list(np.linspace(parameter.lower, parameter.upper,
+                                                      granularity, dtype=dtype))
                         if dtype(parameter.default_value) not in domain:  # Add default
                             domain += [dtype(parameter.default_value)]
                         domain.sort()
