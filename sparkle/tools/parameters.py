@@ -23,6 +23,7 @@ class PCSConvention(Enum):
 class PCSConverter:
     """Parser class independent file of notation."""
     section_regex = re.compile(r"\[(?P<name>[a-zA-Z]+?)\]\s*(?P<comment>#.*)?$")
+    illegal_param_name = re.compile(r"[!:\-+@!#$%^&*()=<>?/\|~` ]")
 
     smac2_params_regex = re.compile(r"^(?P<name>[a-zA-Z0-9_]+)\s+(?P<type>[a-zA-Z]+)\s+"
                                     r"(?P<values>[a-zA-Z0-9\-\[\]{}_,. ]+)\s+"
@@ -31,6 +32,14 @@ class PCSConverter:
     smac2_conditions_regex = re.compile(r"^(?P<parameter>[a-zA-Z0-9_]+)\s*\|\s*"
                                         r"(?P<expression>.+)$")
     smac2_forbidden_regex = re.compile(r"\{(?P<forbidden>.+)\}$")
+
+    paramils_params_regex = re.compile(
+        r"^(?P<name>[a-zA-Z0-9@!#:_-]+)\s*"
+        r"(?P<values>{[a-zA-Z0-9._+\-\, ]+})\s*"
+        r"\[(?P<default>[a-zA-Z0-9._\-+ ]+)\]?\s*"
+        r"(?P<comment>#.*)?$")
+    paramils_conditions_regex = re.compile(r"^(?P<parameter>[a-zA-Z0-9@!#:_-]+)\s*\|\s*"
+                                           r"(?P<expression>.+)$")
 
     irace_params_regex = re.compile(
         r"^(?P<name>[a-zA-Z0-9_]+)\s+"
@@ -62,6 +71,8 @@ class PCSConverter:
                 line, _ = line.split("#", maxsplit=1)
             if re.match(PCSConverter.smac2_params_regex, line):
                 return PCSConvention.SMAC
+            elif re.match(PCSConverter.paramils_params_regex, line):
+                return PCSConvention.ParamILS
             elif re.match(PCSConverter.irace_params_regex, line):
                 return PCSConvention.IRACE
         return PCSConvention.UNKNOWN
@@ -78,6 +89,8 @@ class PCSConverter:
                 return ConfigSpace.ConfigurationSpace.from_json(file)
         if convention == PCSConvention.SMAC:
             return PCSConverter.parse_smac(file)
+        if convention == PCSConvention.ParamILS:
+            return PCSConverter.parse_paramils(file)
         if convention == PCSConvention.IRACE:
             return PCSConverter.parse_irace(file)
         raise Exception(
@@ -85,7 +98,7 @@ class PCSConverter:
 
     @staticmethod
     def parse_smac(content: list[str] | Path) -> ConfigurationSpace:
-        """Parses a smac file."""
+        """Parses a SMAC2 file."""
         space_name = content.name if isinstance(content, Path) else None
         content = content.open().readlines() if isinstance(content, Path) else content
         cs = ConfigurationSpace(space_name)
@@ -107,7 +120,7 @@ class PCSConverter:
                     csparam = ConfigSpace.UniformIntegerHyperparameter(
                         name=name,
                         lower=int(values[0]),
-                        upper=int(values[1]),
+                        upper=int(values[-1]),
                         default_value=int(default),
                         log=scale == "log",
                         meta=comment,
@@ -117,7 +130,7 @@ class PCSConverter:
                     csparam = ConfigSpace.UniformFloatHyperparameter(
                         name=name,
                         lower=float(values[0]),
-                        upper=float(values[1]),
+                        upper=float(values[-1]),
                         default_value=float(default),
                         log=scale == "log",
                         meta=comment,
@@ -163,6 +176,7 @@ class PCSConverter:
                 # Arithmetic Operators: +, -, *, ^, %
                 # Functions: abs, acos, asin, atan, cbrt, ceil, cos, cosh, exp, floor,
                 # log, log10, log2, sin, sinh, sqrt, tan, tanh
+                # NOTE: According to MA & JR, these were never actually supported
                 rejected_operators = ("+", "-", "*", "^", "%",
                                       "abs", "acos", "asin", "atan", "cbrt", "ceil",
                                       "cos", "cosh", "exp", "floor", "log", "log10",
@@ -180,6 +194,119 @@ class PCSConverter:
             else:
                 raise Exception(
                     f"SMAC2 PCS expression not recognised on line:\n{line}")
+        return cs
+
+    @staticmethod
+    def parse_paramils(content: list[str] | Path) -> ConfigurationSpace:
+        """Parses a paramils file."""
+        space_name = content.name if isinstance(content, Path) else None
+        content = content.open().readlines() if isinstance(content, Path) else content
+        cs = ConfigurationSpace(name=space_name)
+        conditions_lines = {}
+        for line in content:
+            line = line.strip()
+            if not line or line.startswith("#"):  # Empty or comment
+                continue
+            comment = None
+            if re.match(PCSConverter.paramils_params_regex, line):
+                parameter = re.fullmatch(PCSConverter.paramils_params_regex, line)
+                name = parameter.group("name")
+                if re.match(PCSConverter.illegal_param_name, name):
+                    # ParamILS is flexible to which parameters are allowed.
+                    # We do not allow it as it creates many problems with parsing
+                    # expressions
+                    raise ValueError(
+                        f"ParamILS parameter name not allowed: {name}. "
+                        "This is supported by ParamILS, but not by PCSConverter.")
+                values = parameter.group("values")
+                values = values.replace("..", ",")  # Replace automatic expansion
+                try:
+                    values = list(ast.literal_eval(values))  # Values are sets
+                    values = sorted(values)
+                    if any([isinstance(v, float) for v in values]):
+                        parameter_type = float
+                    else:
+                        parameter_type = int
+                except Exception:  # of strings (Categorical)
+                    values = values.replace("{", "").replace("}", "").split(",")
+                    parameter_type = str
+                if len(values) == 1:  # Not allowed by ConfigSpace for int / float
+                    values = [str(values[0])]
+                    parameter_type = str
+                default = parameter.group("default")
+                comment = parameter.group("comment")
+                if parameter_type == int:
+                    csparam = ConfigSpace.UniformIntegerHyperparameter(
+                        name=name,
+                        lower=int(values[0]),
+                        upper=int(values[-1]),
+                        default_value=int(default),
+                        meta=comment,
+                    )
+                elif parameter_type == float:
+                    csparam = ConfigSpace.UniformFloatHyperparameter(
+                        name=name,
+                        lower=float(values[0]),
+                        upper=float(values[-1]),
+                        default_value=float(default),
+                        meta=comment,
+                    )
+                elif parameter_type == str:
+                    csparam = ConfigSpace.CategoricalHyperparameter(
+                        name=name,
+                        choices=values,
+                        default_value=default,
+                        meta=comment,
+                    )
+                cs.add(csparam)
+            elif re.match(PCSConverter.paramils_conditions_regex, line):
+                # Break up the expression into the smallest possible pieces
+                match = re.fullmatch(PCSConverter.paramils_conditions_regex, line)
+                parameter, condition =\
+                    match.group("parameter").strip(), match.group("expression")
+                condition = condition.replace(" || ", " or ").replace(" && ", " and ")
+                condition = re.sub(r"(?<![<>!=])=(?<![=])", "==", condition)
+                condition = re.sub(r"!==", "!=", condition)
+                # ParamILS supports multiple lines of conditions for a single parameter
+                # so we collect, with the AND operator and parse + add them later
+                if parameter not in conditions_lines:
+                    conditions_lines[parameter] = condition
+                else:
+                    conditions_lines[parameter] += " and " + condition
+            elif re.match(PCSConverter.smac2_forbidden_regex, line):
+                match = re.fullmatch(PCSConverter.smac2_forbidden_regex, line)
+                forbidden = match.group("forbidden")
+                # Forbidden expressions structure <expression> <operator> <value>
+                # where expressions can contain:
+                # Logical Operators: >=, <=, >, <, ==, !=,
+                # Logical clause operators: ( ), ||, &&,
+                # Supported by SMAC2 but not by ConfigSpace?:
+                # Arithmetic Operators: +, -, *, ^, %
+                # Functions: abs, acos, asin, atan, cbrt, ceil, cos, cosh, exp, floor,
+                # log, log10, log2, sin, sinh, sqrt, tan, tanh
+                # NOTE: According to MA & JR, these were never actually supported
+                rejected_operators = ("+", "-", "*", "^", "%",
+                                      "abs", "acos", "asin", "atan", "cbrt", "ceil",
+                                      "cos", "cosh", "exp", "floor", "log", "log10",
+                                      "log2", "sin", "sinh", "sqrt", "tan", "tanh")
+                if any([r in forbidden.split(" ") for r in rejected_operators]):
+                    print("WARNING: Arithmetic operators are not supported by "
+                          "ConfigurationSpace. Skipping forbidden expression:\n"
+                          f"{forbidden}")
+                    continue
+                forbidden = forbidden.replace(" && ", " and ").replace(
+                    ", ", " and ").replace(" || ", " or ").strip()  # To AST notation
+                forbidden = re.sub(r"(?<![<>!=])=(?![=])", "==", forbidden)
+                forbidden = expression_to_configspace(forbidden, cs)
+                cs.add(forbidden)
+            else:
+                raise Exception(
+                    f"ParamILS PCS expression not recognised on line: {line}")
+        # Add the condition
+        for pname, cond in conditions_lines.items():  # Add conditions
+            condition = expression_to_configspace(cond, cs,
+                                                  target_parameter=cs[pname])
+            cs.add(condition)
         return cs
 
     @staticmethod
@@ -302,6 +429,8 @@ class PCSConverter:
         rows = []
         extra_rows = []
         if pcs_format == PCSConvention.SMAC or pcs_format == PCSConvention.ParamILS:
+            import numpy as np
+            granularity = 20  # For ParamILS. TODO: Make it parametrisable
             header = ["# Parameter Name", "type", "values",
                       "default value", "scale", "comments"]
             parameter_map = {
@@ -315,7 +444,24 @@ class PCSConverter:
                 if isinstance(parameter,
                               ConfigSpace.hyperparameters.NumericalHyperparameter):
                     log = parameter.log
-                    domain = f"[{parameter.lower}, {parameter.upper}]"
+                    if pcs_format == PCSConvention.ParamILS:  # Discretise
+                        dtype = float if isinstance(
+                            parameter, ConfigSpace.UniformFloatHyperparameter) else int
+                        if log:
+                            domain = list(np.linspace(
+                                parameter.lower, parameter.upper, granularity))
+                            if dtype == int:
+                                domain = list(set(np.round(domain).astype(dtype)))
+                        else:
+                            domain = list(np.unique(np.geomspace(
+                                parameter.lower, parameter.upper, granularity,
+                                dtype=dtype)))
+                        if dtype(parameter.default_value) not in domain:  # Add default
+                            domain += [dtype(parameter.default_value)]
+                        domain.sort()
+                        domain = "{" + ",".join([str(i) for i in domain]) + "}"
+                    else:  # SMAC2 takes ranges
+                        domain = f"[{parameter.lower}, {parameter.upper}]"
                 else:
                     domain = "{" + ",".join(parameter.choices) + "}"
                 rows.append([parameter.name,
@@ -405,6 +551,7 @@ class PCSConverter:
                     extra_rows.append(forbidden_str)
             if digits > 4:  # Default digits is 4
                 extra_rows.extend(["", "[global]", f"digits={digits}"])
+
         output = declaration + tabulate.tabulate(
             rows, headers=header,
             tablefmt="plain", numalign="left") + "\n"

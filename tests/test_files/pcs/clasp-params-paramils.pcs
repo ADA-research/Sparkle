@@ -8,153 +8,153 @@
 # l : logarithmic transformation (n > 0)
 # ---
 # --- PREPROCESSING - global options
-@0:S:sat-prepro {yes,no}[yes]
-@0:sat-prepro {0}[0]
-@0:1:sat-prepro{1,2,3,4,5,7,8,10,12,15,18,22,27,33,41,49}[10]
-@0:2:sat-prepro{1,2,3,4,5,7,8,10,12,15,18,22,25,27,33,41,49}[25]
-@0:3:sat-prepro {-1}[-1]       # timelimit -> non deterministic 
-@0:4:sat-prepro{0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100}[100]
-@0:5:sat-prepro {0,1,2}[1]     # blocked clause elimination
+p0Ssat_prepro {yes,no}[yes]
+p0sat_prepro {0}[0]
+p01sat_prepro{1,2,3,4,5,7,8,10,12,15,18,22,27,33,41,49}[10]
+p02sat_prepro{1,2,3,4,5,7,8,10,12,15,18,22,25,27,33,41,49}[25]
+p03sat_prepro {-1}[-1]       # timelimit -> non deterministic 
+p04sat_prepro{0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100}[100]
+p05sat_prepro {0,1,2}[1]     # blocked clause elimination
 # --- HEURISTICS
-@1:heuristic {Berkmin,Vmtf,Vsids,Unit,None}[Vsids]
-@1:F:init-moms {yes,no}[no]
-@1:sign-def {0,1,2,3}[1]
-@1:F:sign-fix {yes,no}[no]
-@1:berk-max{1,2,4,5,8,11,16,22,32,45,64,90,128,181,256,362,512,724,1024}[1]
-@1:F:berk-huang {yes,no}[no]   # Conditional - heuristic=berkmin
-@1:F:berk-once {yes,no}[no]    # Conditional - heuristic=berkmin
-@1:vmtf-mtf{1,2,3,4,5,6,8,11,14,18,23,29,38,48,61,78,100,127}[8]
-@1:vsids-decay{75,76,77,79,80,81,82,83,85,86,87,88,89,91,92,93,94,95,97,98,99}[95]
-@1:save-progress{0,9,18,27,36,45,54,63,72,81,90,99,108,117,126,135,144,153,162,171,180}[180]
-@1:init-watches {0,1,2}[2]
-@1:1:lookahead {atom,body,hybrid,no}[no]  
-@1:2:lookahead{1,2,8,25,73,215,630,1845,5404,15825,46340,135694,397336,1163467,3406833,9975792,29210829,85534315,250459136,733387278,2147483646}[1]
-@1:rand-freq {0.0,0.01,0.02,0.05,0.1,0.2}[0.0]
+p1heuristic {Berkmin,Vmtf,Vsids,Unit,None}[Vsids]
+p1Finit_moms {yes,no}[no]
+p1sign_def {0,1,2,3}[1]
+p1Fsign_fix {yes,no}[no]
+p1berk_max{1,2,4,5,8,11,16,22,32,45,64,90,128,181,256,362,512,724,1024}[1]
+p1Fberk_huang {yes,no}[no]   # Conditional - heuristic=berkmin
+p1Fberk_once {yes,no}[no]    # Conditional - heuristic=berkmin
+p1vmtf_mtf{1,2,3,4,5,6,8,11,14,18,23,29,38,48,61,78,100,127}[8]
+p1vsids_decay{75,76,77,79,80,81,82,83,85,86,87,88,89,91,92,93,94,95,97,98,99}[95]
+p1save_progress{0,9,18,27,36,45,54,63,72,81,90,99,108,117,126,135,144,153,162,171,180}[180]
+p1init_watches {0,1,2}[2]
+p11lookahead {atom,body,hybrid,no}[no]  
+p12lookahead{1,2,8,25,73,215,630,1845,5404,15825,46340,135694,397336,1163467,3406833,9975792,29210829,85534315,250459136,733387278,2147483646}[1]
+p1rand_freq {0.0,0.01,0.02,0.05,0.1,0.2}[0.0]
 # --- RESTARTS
-@1:0:restarts {F,L,D,x,+,no}[x]
-@1:1:Simp:restarts{1,3,5,9,15,27,48,84,128,147,255,445,776,1351,2352,4095,7131,12416,21618,37640,65534}[128]
-@1:1:Dyn:restarts{49,58,67,78,91,100,105,122,142,165,192,223,259,301,350,407,472,549,638,741,860,1000}[100]
-@1:S:Luby:aryrestarts {1,2}[1]        # Conditional - restarts=L
-@1:2:Luby:restarts{1,3,5,9,15,27,48,84,147,255,445,776,1000,1351,2352,4095,7131,12416,21618,37640,65534}[1000]
-@1:S:Geo:aryrestarts {2,3}[2]         # Conditional - restarts=x
-@1:2:Geo:restarts{1.00,1.05,1.10,1.15,1.20,1.25,1.30,1.35,1.40,1.45,1.5,1.55,1.60,1.65,1.70,1.75,1.80,1.85,1.90,1.95,2.0}[1.5]
-@1:3:Geo:restarts{1,3,5,9,15,27,48,84,147,255,445,776,1351,2352,4095,7131,12416,21618,37640,65534}[1]
-@1:S:Ari:aryrestarts {2,3}[2]         # Conditional - restarts=+
-@1:2:Ari:restarts{1,3,5,9,15,27,48,84,100,147,255,445,776,1351,2352,4095,7131,12416,21618,37640,65534}[100]
-@1:3:Ari:restarts{1,3,5,9,15,27,48,84,147,255,445,776,1351,2352,4095,7131,12416,21618,37640,65534}[1]
-@1:S:Dyn:aryrestarts {2,3}[2]         # Conditional - restarts=D
-@1:2:Dyn:restarts{0.500,0.525,0.550,0.575,0.600,0.625,0.650,0.675,0.7,0.725,0.750,0.775,0.800,0.825,0.850,0.875,0.900,0.925,0.950,0.975,1.0}[0.7]
-@1:3:Dyn:restarts{20,21,24,26,28,30,31,34,38,41,45,50,55,60,66,72,80,87,96,105,115,126}[30]
-@1:F:local-restarts {yes,no}[no]
-@1:S:counterCond {yes,no} [yes]    
-@1:counter-restarts{1,2,3,4,5,6,8,11,14,18,23,29,37,48,61,78,99,126}[3]
-@1:counter-bump{10,13,18,24,33,44,60,82,110,149,202,273,369,498,673,910,1229,1661,2244,3032,4095}[10]
+p10restarts {F,L,D,x,plus,no}[x]
+p11Simprestarts{1,3,5,9,15,27,48,84,128,147,255,445,776,1351,2352,4095,7131,12416,21618,37640,65534}[128]
+p11Dynrestarts{49,58,67,78,91,100,105,122,142,165,192,223,259,301,350,407,472,549,638,741,860,1000}[100]
+p1SLubyaryrestarts {1,2}[1]        # Conditional - restarts=L
+p12Lubyrestarts{1,3,5,9,15,27,48,84,147,255,445,776,1000,1351,2352,4095,7131,12416,21618,37640,65534}[1000]
+p1SGeoaryrestarts {2,3}[2]         # Conditional - restarts=x
+p12Georestarts{1.00,1.05,1.10,1.15,1.20,1.25,1.30,1.35,1.40,1.45,1.5,1.55,1.60,1.65,1.70,1.75,1.80,1.85,1.90,1.95,2.0}[1.5]
+p13Georestarts{1,3,5,9,15,27,48,84,147,255,445,776,1351,2352,4095,7131,12416,21618,37640,65534}[1]
+p1SAriaryrestarts {2,3}[2]         # Conditional - restarts=plus
+p12Arirestartss{1,3,5,9,15,27,48,84,100,147,255,445,776,1351,2352,4095,7131,12416,21618,37640,65534}[100]
+p13Arirestarts{1,3,5,9,15,27,48,84,147,255,445,776,1351,2352,4095,7131,12416,21618,37640,65534}[1]
+p1SDynaryrestarts {2,3}[2]         # Conditional - restarts=D
+p12Dynrestarts{0.500,0.525,0.550,0.575,0.600,0.625,0.650,0.675,0.7,0.725,0.750,0.775,0.800,0.825,0.850,0.875,0.900,0.925,0.950,0.975,1.0}[0.7]
+p13Dynrestarts{20,21,24,26,28,30,31,34,38,41,45,50,55,60,66,72,80,87,96,105,115,126}[30]
+p1Flocal_restarts {yes,no}[no]
+p1ScounterCond {yes,no} [yes]    
+p1counter_restarts{1,2,3,4,5,6,8,11,14,18,23,29,37,48,61,78,99,126}[3]
+p1counter_bump{10,13,18,24,33,44,60,82,110,149,202,273,369,498,673,910,1229,1661,2244,3032,4095}[10]
 # --- DELETION
-@1:S:deletion {yes,no}[yes]
-@1:deletion {no}[no]
-@1:1:deletion {basic,sort,ipSort,ipHeap}[basic] # Algorithm
-@1:2:deletion{10,14,19,23,28,32,37,41,46,50,55,59,64,68,73,75,77,82,86,91,95,100}[75]
-@1:3:deletion {0,1,2}[0]                        # Score function
-@1:1:del-init{1.00,3.0,3.45,5.90,8.35,10.80,13.25,15.70,18.15,20.60,23.05,25.50,27.95,30.40,32.85,35.30,37.75,40.20,42.65,45.10,47.55,50.0}[3.0]
-@1:2:del-init{10,12,15,20,25,31,40,50,63,80,101,127,160,202,255,321,405,510,644,811,1000,1023}[1000]
-@1:3:del-init{500,2113,3727,5340,6953,8567,9000,10180,11793,13407,15020,16633,18247,19860,21474,23087,24700,26314,27927,29540,31154,32767}[9000]
-@1:del-max{32767,250000,107405311,214777855,322150399,429522943,536895487,644268031,751640575,859013119,966385663,1073758207,1181130751,1288503295,1395875839,1503248383,1610620927,1717993471,1825366015,1932738559,2040111103,2147483647}[250000]
-@1:del-on-restart{0,2,5,7,10,12,15,17,20,22,25,27,30,32,35,37,40,42,45,47,50}[0]
-@1:1:del-glue{0,1,2,3,4,5,6,7,8}[2]
-@1:2:del-glue {0,1}[0]
-@1:0:del-cfl {F,L,x,+,no}[no]
-@1:1:del-cfl{1,3,5,9,15,27,48,84,128,147,255,445,776,1351,2352,4095,7131,12416,21618,37640,65534}[128]
-@1:2:G:del-cfl{1.00,1.05,1.10,1.15,1.20,1.25,1.30,1.35,1.40,1.45,1.5,1.55,1.60,1.65,1.70,1.75,1.80,1.85,1.90,1.95,2.0}[1.5]
-@1:2:A:del-cfl{1,3,5,9,15,27,48,84,100,147,255,445,776,1351,2352,4095,7131,12416,21618,37640,65534}[100]
-@1:3:del-cfl{10,15,24,37,57,89,139,216,336,521,809,1256,1949,3024,4693,7283,11302,17538,27216,42232,65534}[10]
-@1:S:del-grow {yes,no}[yes]           # Conditional: enable/disable grow strategy
-@1:del-grow {0}[0]
-@1:1:del-grow{1.0,1.1,1.2,1.4,1.6,1.8,2.0,2.2,2.4,2.6,2.8,3.0,3.2,3.4,3.6,3.8,4.0,4.2,4.4,4.6,4.8,5.0}[1.1]
-@1:2:del-grow{0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0,95.0,100.0}[20.0]
-@1:S:growSched {yes,no}[no]
-@1:3:del-grow {F,L,x,+}[+]
-@1:4:del-grow{1,3,5,9,15,27,48,84,128,147,255,445,776,1351,2352,4095,7131,12416,21618,37640,65534}[128]
-@1:5:G:del-grow{1.00,1.05,1.10,1.15,1.20,1.25,1.30,1.35,1.40,1.45,1.5,1.55,1.60,1.65,1.70,1.75,1.80,1.85,1.90,1.95,2.0}[1.5]
-@1:5:A:del-grow{1,3,5,9,15,27,48,84,100,147,255,445,776,1351,2352,4095,7131,12416,21618,37640,65534}[100]
-@1:6:del-grow{10,15,24,37,57,89,139,216,336,521,809,1256,1949,3024,4693,7283,11302,17538,27216,42232,65534}[10]
+p1Sdeletion {yes,no}[yes]
+p1deletion {no}[no]
+p11deletion {basic,sort,ipSort,ipHeap}[basic] # Algorithm
+p12deletion{10,14,19,23,28,32,37,41,46,50,55,59,64,68,73,75,77,82,86,91,95,100}[75]
+p13deletion {0,1,2}[0]                        # Score function
+p11del_init{1.00,3.0,3.45,5.90,8.35,10.80,13.25,15.70,18.15,20.60,23.05,25.50,27.95,30.40,32.85,35.30,37.75,40.20,42.65,45.10,47.55,50.0}[3.0]
+p12del_init{10,12,15,20,25,31,40,50,63,80,101,127,160,202,255,321,405,510,644,811,1000,1023}[1000]
+p13del_init{500,2113,3727,5340,6953,8567,9000,10180,11793,13407,15020,16633,18247,19860,21474,23087,24700,26314,27927,29540,31154,32767}[9000]
+p1del_max{32767,250000,107405311,214777855,322150399,429522943,536895487,644268031,751640575,859013119,966385663,1073758207,1181130751,1288503295,1395875839,1503248383,1610620927,1717993471,1825366015,1932738559,2040111103,2147483647}[250000]
+p1del_on_restart{0,2,5,7,10,12,15,17,20,22,25,27,30,32,35,37,40,42,45,47,50}[0]
+p11del_glue{0,1,2,3,4,5,6,7,8}[2]
+p12del_glue {0,1}[0]
+p10del_cfl {F,L,x,plus,no}[no]
+p11del_cfl{1,3,5,9,15,27,48,84,128,147,255,445,776,1351,2352,4095,7131,12416,21618,37640,65534}[128]
+p12Gdel_cfl{1.00,1.05,1.10,1.15,1.20,1.25,1.30,1.35,1.40,1.45,1.5,1.55,1.60,1.65,1.70,1.75,1.80,1.85,1.90,1.95,2.0}[1.5]
+p12Adel_cfl{1,3,5,9,15,27,48,84,100,147,255,445,776,1351,2352,4095,7131,12416,21618,37640,65534}[100]
+p13del_cfl{10,15,24,37,57,89,139,216,336,521,809,1256,1949,3024,4693,7283,11302,17538,27216,42232,65534}[10]
+p1Sdel_grow {yes,no}[yes]           # Conditional: enable/disable grow strategy
+p1del_grow {0}[0]
+p11del_grow{1.0,1.1,1.2,1.4,1.6,1.8,2.0,2.2,2.4,2.6,2.8,3.0,3.2,3.4,3.6,3.8,4.0,4.2,4.4,4.6,4.8,5.0}[1.1]
+p12del_grow{0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0,95.0,100.0}[20.0]
+p1SgrowSched {yes,no}[no]
+p13del_grow {F,L,x,plus}[plus]
+p14del_grow{1,3,5,9,15,27,48,84,128,147,255,445,776,1351,2352,4095,7131,12416,21618,37640,65534}[128]
+p15Gdel_grow{1.00,1.05,1.10,1.15,1.20,1.25,1.30,1.35,1.40,1.45,1.5,1.55,1.60,1.65,1.70,1.75,1.80,1.85,1.90,1.95,2.0}[1.5]
+p15Adel_grow{1,3,5,9,15,27,48,84,100,147,255,445,776,1351,2352,4095,7131,12416,21618,37640,65534}[100]
+p16del_grow{10,15,24,37,57,89,139,216,336,521,809,1256,1949,3024,4693,7283,11302,17538,27216,42232,65534}[10]
 # --- MISC    
-@1:0:strengthen {local,recursive,no}[local] # Conditional
-@1:1:strengthen {0,1,2}[0]
-@1:otfs {0,1,2}[2]
-@1:update-lbd {0,1,2,3}[0]        
-@1:F:update-act {yes,no}[no]      
-@1:reverse-arcs {0,1,2,3}[1]
-@1:S:contraction {yes,no}[no]
-@1:No:contraction {no}[no]
-@1:contraction{1,2,3,5,7,11,15,22,31,45,63,90,127,180,250,255,361,511,723,1023}[250]
+p10strengthen {local,recursive,no}[local] # Conditional
+p11strengthen {0,1,2}[0]
+p1otfs {0,1,2}[2]
+p1update_lbd {0,1,2,3}[0]        
+p1Fupdate_act {yes,no}[no]      
+p1reverse_arcs {0,1,2,3}[1]
+p1Scontraction {yes,no}[no]
+p1Nocontraction {no}[no]
+p1contraction{1,2,3,5,7,11,15,22,31,45,63,90,127,180,250,255,361,511,723,1023}[250]
 # --- CONDITIONS/CONSTRAINTS
 # sat-prepro
-@0:sat-prepro   | @0:S:sat-prepro in {no}
-@0:1:sat-prepro | @0:S:sat-prepro in {yes}
-@0:2:sat-prepro | @0:S:sat-prepro in {yes}
-@0:3:sat-prepro | @0:S:sat-prepro in {yes}
-@0:4:sat-prepro | @0:S:sat-prepro in {yes}
-@0:5:sat-prepro | @0:S:sat-prepro in {yes}
+p0sat_prepro   | p0Ssat_prepro in {no}
+p01sat_prepro | p0Ssat_prepro in {yes}
+p02sat_prepro | p0Ssat_prepro in {yes}
+p03sat_prepro | p0Ssat_prepro in {yes}
+p04sat_prepro | p0Ssat_prepro in {yes}
+p05sat_prepro | p0Ssat_prepro in {yes}
 # heuristic conds
-@1:berk-max|@1:heuristic in {Berkmin}
-@1:F:berk-huang|@1:heuristic in {Berkmin}
-@1:F:berk-once|@1:heuristic in {Berkmin}
-@1:vmtf-mtf|@1:heuristic in {Vmtf}
-@1:vsids-decay | @1:heuristic in {Vsids}
-@1:2:lookahead | @1:1:lookahead in {atom,body,hybrid}
+p1berk_max|p1heuristic in {Berkmin}
+p1Fberk_huang|p1heuristic in {Berkmin}
+p1Fberk_once|p1heuristic in {Berkmin}
+p1vmtf_mtf|p1heuristic in {Vmtf}
+p1vsids_decay | p1heuristic in {Vsids}
+p12lookahead | p11lookahead in {atom,body,hybrid}
 # lookback conds
 #... |@1:F:no-lookback in {no}
 # restarts conds
-@1:1:Simp:restarts | @1:0:restarts in {F,L,x,+} 
-@1:S:Luby:aryrestarts | @1:0:restarts in {L}
-@1:2:Luby:restarts | @1:0:restarts in {L}
-@1:2:Luby:restarts | @1:S:Luby:aryrestarts in {2}
-@1:S:Geo:aryrestarts | @1:0:restarts in {x}
-@1:2:Geo:restarts | @1:0:restarts in {x}
-@1:3:Geo:restarts | @1:0:restarts in {x}
-@1:3:Geo:restarts | @1:S:Geo:aryrestarts in {3}
-@1:S:Ari:aryrestarts | @1:0:restarts in {+}
-@1:2:Ari:restarts | @1:0:restarts in {+}
-@1:3:Ari:restarts | @1:0:restarts in {+}
-@1:3:Ari:restarts | @1:S:Ari:aryrestarts in {3}
+p11Simprestarts | p10restarts in {F,L,x,plus} 
+p1SLubyaryrestarts | p10restarts in {L}
+p12Lubyrestarts | p10restarts in {L}
+p12Lubyrestarts | p1SLubyaryrestarts in {2}
+p1SGeoaryrestarts | p10restarts in {x}
+p12Georestarts | p10restarts in {x}
+p13Georestarts | p10restarts in {x}
+p13Georestarts | p1SGeoaryrestarts in {3}
+p1SAriaryrestarts | p10restarts in {plus}
+p12Arirestartss | p10restarts in {plus}
+p13Arirestarts | p10restarts in {plus}
+p13Arirestarts | p1SAriaryrestarts in {3}
 # dynamic restarts
-@1:1:Dyn:restarts    | @1:0:restarts in {D}
-@1:S:Dyn:aryrestarts | @1:0:restarts in {D}
-@1:2:Dyn:restarts    | @1:0:restarts in {D}
-@1:3:Dyn:restarts    | @1:0:restarts in {D}
-@1:counter-restarts | @1:S:counterCond in {yes}
-@1:counter-bump | @1:S:counterCond in {yes}
-@1:counter-restarts | @1:0:restarts in {F,D,L,x,+}
-@1:counter-bump | @1:0:restarts in {F,D,L,x,+}
+p11Dynrestarts    | p10restarts in {D}
+p1SDynaryrestarts | p10restarts in {D}
+p12Dynrestarts    | p10restarts in {D}
+p13Dynrestarts    | p10restarts in {D}
+p1counter_restarts | p1ScounterCond in {yes}
+p1counter_bump | p1ScounterCond in {yes}
+p1counter_restarts | p10restarts in {F,D,L,x,plus}
+p1counter_bump | p10restarts in {F,D,L,x,plus}
 # deletion
-@1:deletion       | @1:S:deletion in {no}
-@1:1:deletion     | @1:S:deletion in {yes}
-@1:2:deletion     | @1:S:deletion in {yes}
-@1:3:deletion     | @1:S:deletion in {yes}
-@1:1:del-init     | @1:S:deletion in {yes}
-@1:2:del-init     | @1:S:deletion in {yes}
-@1:3:del-init     | @1:S:deletion in {yes}
-@1:del-max        | @1:S:deletion in {yes}
-@1:del-on-restart | @1:S:deletion in {yes}
-@1:1:del-glue     | @1:S:deletion in {yes}
-@1:2:del-glue     | @1:S:deletion in {yes}
-@1:0:del-cfl      | @1:S:deletion in {yes}
-@1:1:del-cfl      | @1:0:del-cfl in {F,L,x,+}
-@1:2:G:del-cfl    | @1:0:del-cfl in {x}
-@1:2:A:del-cfl    | @1:0:del-cfl in {+}
-@1:3:del-cfl      | @1:0:del-cfl in {x,+}
-@1:del-grow       | @1:S:del-grow in {no}
-@1:1:del-grow     | @1:S:del-grow in {yes}
-@1:2:del-grow     | @1:S:del-grow in {yes}
-@1:S:growSched    | @1:S:del-grow in {yes}
-@1:3:del-grow     | @1:S:growSched in {yes}
-@1:4:del-grow     | @1:S:growSched in {yes}
-@1:5:G:del-grow   | @1:3:del-grow in {x}
-@1:5:A:del-grow   | @1:3:del-grow in {+}
-@1:6:del-grow     | @1:3:del-grow in {x,+}
-{@1:S:deletion=yes, @1:0:del-cfl=no, @1:S:del-grow=no}
-{@1:S:deletion=no, @1:S:del-grow=yes}
+p1deletion       | p1Sdeletion in {no}
+p11deletion     | p1Sdeletion in {yes}
+p12deletion     | p1Sdeletion in {yes}
+p13deletion     | p1Sdeletion in {yes}
+p11del_init     | p1Sdeletion in {yes}
+p12del_init     | p1Sdeletion in {yes}
+p13del_init     | p1Sdeletion in {yes}
+p1del_max        | p1Sdeletion in {yes}
+p1del_on_restart | p1Sdeletion in {yes}
+p11del_glue     | p1Sdeletion in {yes}
+p12del_glue     | p1Sdeletion in {yes}
+p10del_cfl      | p1Sdeletion in {yes}
+p11del_cfl      | p10del_cfl in {F,L,x,plus}
+p12Gdel_cfl    | p10del_cfl in {x}
+p12Adel_cfl    | p10del_cfl in {plus}
+p13del_cfl      | p10del_cfl in {x,plus}
+p1del_grow       | p1Sdel_grow in {no}
+p11del_grow     | p1Sdel_grow in {yes}
+p12del_grow     | p1Sdel_grow in {yes}
+p1SgrowSched    | p1Sdel_grow in {yes}
+p13del_grow     | p1SgrowSched in {yes}
+p14del_grow     | p1SgrowSched in {yes}
+p15Gdel_grow   | p13del_grow in {x}
+p15Adel_grow   | p13del_grow in {plus}
+p16del_grow     | p13del_grow in {x,plus}
+{p1Sdeletion=yes, p10del_cfl=no, p1Sdel_grow=no}
+{p1Sdeletion=no, p1Sdel_grow=yes}
 # misc
-@1:1:strengthen | @1:0:strengthen in {local,recursive}
-@1:contraction | @1:S:contraction in {yes}
-@1:No:contraction | @1:S:contraction in {no}
+p11strengthen | p10strengthen in {local,recursive}
+p1contraction | p1Scontraction in {yes}
+p1Nocontraction | p1Scontraction in {no}

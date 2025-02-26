@@ -47,7 +47,10 @@ def expression_to_configspace(
             underwhich the parameter will be active.
     """
     if isinstance(expression, str):
-        expression = ast.parse(expression)
+        try:
+            expression = ast.parse(expression)
+        except Exception as e:
+            raise ValueError(f"Could not parse expression: '{expression}', {e}")
     if isinstance(expression, ast.Module):
         expression = expression.body[0]
     return recursive_conversion(expression, configspace,
@@ -76,14 +79,22 @@ def recursive_conversion(
     if isinstance(item, ast.Expr):
         return recursive_conversion(item.value, configspace, target_parameter)
     if isinstance(item, ast.Name):  # Convert to hyperparameter
-        return configspace.get(item.id)
+        hp = configspace.get(item.id)
+        return hp if hp is not None else item.id
     if isinstance(item, ast.Constant):
         return item.value
     if (isinstance(item, ast.Tuple)
             or isinstance(item, ast.Set) or isinstance(item, ast.List)):
-        if any([not isinstance(v, ast.Constant) for v in item.elts]):
-            raise ValueError(f"Only constants allowed in tuples. Found: {item.elts}")
-        return [v.value for v in item.elts]
+        values = []
+        for v in item.elts:
+            if isinstance(v, ast.Constant):
+                values.append(v.value)
+            elif isinstance(v, ast.Name):  # Check if its a parameter
+                if v.id in list(configspace.values()):
+                    raise ValueError("Only constants allowed in tuples. "
+                                     f"Found: {item.elts}")
+                values.append(v.id)  # String value was interpreted as parameter
+        return values
     if isinstance(item, ast.BinOp):
         raise NotImplementedError("Binary operations not supported by ConfigSpace.")
     if isinstance(item, ast.BoolOp):
@@ -104,14 +115,15 @@ def recursive_conversion(
             raise ValueError(f"Only single comparisons allowed. Found: {item.ops}")
         left = recursive_conversion(item.left, configspace, target_parameter)
         right = recursive_conversion(item.comparators, configspace, target_parameter)
+        operator = item.ops[0]
         if isinstance(left, Hyperparameter):  # Convert to HP type
-            if isinstance(right, Iterable):
+            if isinstance(right, Iterable) and not isinstance(right, str):
                 right = [type(left.default_value)(v) for v in right]
-                if len(right) == 1:
+                if len(right) == 1 and not isinstance(operator, ast.In):
                     right = right[0]
             elif isinstance(right, int):
                 right = type(left.default_value)(right)
-        operator = item.ops[0]
+
         if isinstance(operator, ast.Lt):
             if target_parameter:
                 return LessThanCondition(target_parameter, left, right)

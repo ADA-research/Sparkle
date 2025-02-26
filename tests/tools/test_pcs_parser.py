@@ -62,3 +62,11 @@ def test_configspace_to_irace() -> None:
     expected_lines = irace_file.open().read().splitlines()
     for index in range(len(irace_export)):
         assert irace_export[index] == expected_lines[index]
+
+
+def test_paramils_pcs_to_configspace() -> None:
+    """Test converting a ParamILS pcs file to ConfigSpace."""
+    paramils_file = Path("tests/test_files/pcs/clasp-params-paramils.pcs")
+    configspace = PCSConverter.parse(paramils_file)
+    assert configspace.name == paramils_file.name
+    assert len(list(configspace.values())) == 75
