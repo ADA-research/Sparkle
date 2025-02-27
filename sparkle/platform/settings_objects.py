@@ -161,7 +161,7 @@ class Settings:
 
     DEFAULT_slurm_max_parallel_runs_per_node = 8
     DEFAULT_slurm_job_submission_limit = None
-    DEFAULT_slurm_job_prepend = None
+    DEFAULT_slurm_job_prepend = ""
 
     DEFAULT_ablation_racing = False
 
@@ -225,7 +225,6 @@ class Settings:
 
         self.__run_on_set = SettingState.NOT_SET
         self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
-        self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
         self.__ablation_racing_flag_set = SettingState.NOT_SET
 
         self.__parallel_portfolio_check_interval_set = SettingState.NOT_SET
@@ -233,6 +232,10 @@ class Settings:
 
         self.__selection_model_set = SettingState.NOT_SET
         self.__selection_class_set = SettingState.NOT_SET
+
+        self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
+        self.__slurm_job_prepend_set = SettingState.NOT_SET
+        self.__slurm_job_submission_limit_set = SettingState.NOT_SET
 
         self.__general_sparkle_configurator = None
 
@@ -1757,7 +1760,7 @@ class Settings:
         section = "slurm"
         name = "job_prepend"
 
-        if value is not None and self.__check_setting_state(
+        if self.__check_setting_state(
                 self.__slurm_job_prepend_set, origin, name):
             try:
                 path = Path(value)
