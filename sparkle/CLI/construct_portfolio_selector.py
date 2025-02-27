@@ -121,7 +121,7 @@ def main(argv: list[str]) -> None:
         sys.exit()
 
     selector_path.parent.mkdir(exist_ok=True, parents=True)
-    slurm_prepend = gv.settings().get_slurm_prepend()
+    slurm_prepend = gv.settings().get_slurm_job_prepend()
     selector_run = selector.construct(selector_path,
                                       performance_data,
                                       feature_data,
