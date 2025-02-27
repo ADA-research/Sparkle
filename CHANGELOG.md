@@ -8,6 +8,7 @@ Notable changes to Sparkle will be documented in this file.
 - Flushing completed jobs from jobs command by hitting spacebar [SPRK-313]
 - "Did you mean" functionality for typos in CLI commands [SPRK-345]
 - Added ParamILS as configurator with automatic PCS file conversion from SMAC2 [SPRK-339]
+- You can now specify Slurm job prepends through sparkle settings [SPRK-346]
 
 ### Changed
 - CI pipeline for unittest now tests for Python 3.10, 3.11 and 3.12

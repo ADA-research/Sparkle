@@ -1732,7 +1732,7 @@ class Settings:
             self: Settings,
             value: int = DEFAULT_slurm_job_submission_limit,
             origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the number of algorithms Slurm can run in parallel per node."""
+        """[NOT ACTIVE YET] Set the number of jobs that can be submitted to Slurm."""
         section = "slurm"
         name = "job_submission_limit"
 
@@ -1743,7 +1743,7 @@ class Settings:
             self.__settings[section][name] = str(value)
 
     def get_slurm_job_submission_limit(self: Settings) -> int:
-        """Return the number of submitted jobs Slurm cluster will accept."""
+        """[NOT ACTIVE YET] Return the maximum number of jobs you can submit to Slurm."""
         if self.__slurm_job_submission_limit_set == SettingState.NOT_SET:
             self.set_slurm_job_submission_limit()
 
