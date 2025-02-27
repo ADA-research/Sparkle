@@ -189,12 +189,14 @@ class AblationScenario:
     def submit_ablation(self: AblationScenario,
                         log_dir: Path,
                         sbatch_options: list[str] = [],
+                        slurm_prepend: str | list[str] | Path = None,
                         run_on: Runner = Runner.SLURM) -> list[Run]:
         """Submit an ablation job.
 
         Args:
             log_dir: Directory to store job logs
             sbatch_options: Options to pass to sbatch
+            slurm_prepend: Script to prepend to sbatch script
             run_on: Determines to which RunRunner queue the job is added
 
         Returns:
@@ -212,7 +214,8 @@ class AblationScenario:
             base_dir=log_dir,
             path=self.scenario_dir,
             sbatch_options=sbatch_options,
-            srun_options=srun_options)
+            srun_options=srun_options,
+            prepend=slurm_prepend)
 
         runs = []
         if run_on == Runner.LOCAL:

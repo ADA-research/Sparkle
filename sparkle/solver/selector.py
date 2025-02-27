@@ -45,6 +45,7 @@ class Selector:
                   solver_cutoff: int | float | str = None,
                   run_on: Runner = Runner.SLURM,
                   sbatch_options: list[str] = None,
+                  slurm_prepend: str | list[str] | Path = None,
                   base_dir: Path = Path()) -> Run:
         """Construct the Selector.
 
@@ -56,6 +57,7 @@ class Selector:
             runtime_cutoff: Cutoff for the runtime in seconds.
             run_on: Which runner to use. Defaults to slurm.
             sbatch_options: Additional options to pass to sbatch.
+            slurm_prepend: Slurm script to prepend to the sbatch
             base_dir: The base directory to run the Selector in.
 
         Returns:
@@ -102,7 +104,8 @@ class Selector:
             name=f"{self.name} Selector Construction: "
                  f"{', '.join([Path(s).name for s in performance_data.solvers])}",
             base_dir=base_dir,
-            sbatch_options=sbatch_options)
+            sbatch_options=sbatch_options,
+            prepend=slurm_prepend)
         if run_on == Runner.LOCAL:
             construct.wait()
             if not target_file.is_file():

@@ -168,6 +168,7 @@ class Solver(SparkleCallable):
             configuration: dict = None,
             run_on: Runner = Runner.LOCAL,
             sbatch_options: list[str] = None,
+            slurm_prepend: str | list[str] | Path = None,
             log_dir: Path = None,
             ) -> SlurmRun | list[dict[str, Any]] | dict[str, Any]:
         """Run the solver on an instance with a certain configuration.
@@ -180,8 +181,10 @@ class Solver(SparkleCallable):
             cutoff_time: The cutoff time for the solver, measured through RunSolver.
                 If None, will be executed without RunSolver.
             configuration: The solver configuration to use. Can be empty.
-            log_dir: Path where to place output files. Defaults to
-                self.raw_output_directory.
+            run_on: Whether to run on slurm or locally.
+            sbatch_options: The sbatch options to use.
+            slurm_prepend: The script to prepend to a slurm script.
+            log_dir: The log directory to use.
 
         Returns:
             Solver output dict possibly with runsolver values.
@@ -208,7 +211,8 @@ class Solver(SparkleCallable):
                                cmd=cmds,
                                name=commandname,
                                base_dir=log_dir,
-                               sbatch_options=sbatch_options)
+                               sbatch_options=sbatch_options,
+                               prepend=slurm_prepend)
 
         if isinstance(run, LocalRun):
             run.wait()

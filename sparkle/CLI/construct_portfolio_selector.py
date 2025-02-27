@@ -121,6 +121,7 @@ def main(argv: list[str]) -> None:
         sys.exit()
 
     selector_path.parent.mkdir(exist_ok=True, parents=True)
+    slurm_prepend = gv.settings().get_slurm_prepend()
     selector_run = selector.construct(selector_path,
                                       performance_data,
                                       feature_data,
@@ -128,6 +129,7 @@ def main(argv: list[str]) -> None:
                                       cutoff_time,
                                       run_on=run_on,
                                       sbatch_options=sbatch_options,
+                                      slurm_prepend=slurm_prepend,
                                       base_dir=sl.caller_log_dir)
     if run_on == Runner.LOCAL:
         print("Sparkle portfolio selector constructed!")
@@ -154,6 +156,7 @@ def main(argv: list[str]) -> None:
                                              cutoff_time,
                                              run_on=run_on,
                                              sbatch_options=sbatch_options,
+                                             slurm_prepend=slurm_prepend,
                                              base_dir=sl.caller_log_dir)
             dependencies.append(ablated_run)
             if run_on == Runner.LOCAL:
@@ -172,7 +175,8 @@ def main(argv: list[str]) -> None:
         name=f"Marginal Contribution computation: {solver_names}",
         base_dir=sl.caller_log_dir,
         dependencies=dependencies,
-        sbatch_options=sbatch_options)
+        sbatch_options=sbatch_options,
+        prepend=gv.settings().get_slurm_job_prepend())
     dependencies.append(marginal_contribution)
     if run_on == Runner.LOCAL:
         marginal_contribution.wait()

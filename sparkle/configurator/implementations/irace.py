@@ -56,6 +56,7 @@ class IRACE(Configurator):
                   data_target: PerformanceDataFrame,
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
+                  slurm_prepend: str | list[str] | Path = None,
                   num_parallel_jobs: int = None,
                   base_dir: Path = None,
                   run_on: Runner = Runner.SLURM) -> Run:
@@ -67,6 +68,7 @@ class IRACE(Configurator):
             validate_after: Whether to validate the configuration on the training set
                 afterwards or not.
             sbatch_options: List of slurm batch options to use
+            slurm_prepend: Slurm script to prepend to the sbatch
             num_parallel_jobs: The maximum number of jobs to run in parallel
             base_dir: The base_dir of RunRunner where the sbatch scripts will be placed
             run_on: On which platform to run the jobs. Default: Slurm.
@@ -97,6 +99,7 @@ class IRACE(Configurator):
             base_dir=base_dir,
             name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
             sbatch_options=sbatch_options,
+            prepend=slurm_prepend,
         )]
 
         if validate_after:
