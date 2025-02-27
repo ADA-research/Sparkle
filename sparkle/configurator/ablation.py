@@ -82,8 +82,8 @@ class AblationScenario:
         self.concurrent_clis = concurrent_clis
         ablation_scenario_dir = self.scenario_dir
         objective = self.config_scenario.sparkle_objective
-        pcs = self.solver.get_pcs()
-        parameter_names = list(pcs.values())
+        pcs = self.solver.get_cs()
+        parameter_names = [p.name for p in pcs.values()]
         # We need to remove any redundant keys that are not in PCS
         removable_keys = [key for key in best_configuration
                           if key not in parameter_names]
@@ -91,9 +91,9 @@ class AblationScenario:
             del best_configuration[key]
         opt_config_str = " ".join([f"-{k} {v}" for k, v in best_configuration.items()])
         # We need to check which params are missing and supplement with default values
-        for p in pcs:
-            if p["name"] not in opt_config_str:
-                opt_config_str += f" -{p['name']} {p['default']}"
+        for p in list(pcs.values()):
+            if p.name not in opt_config_str:
+                opt_config_str += f" -{p.name} {p.default_value}"
 
         # Ablation cannot deal with E scientific notation in floats
         ctx = decimal.Context(prec=16)
