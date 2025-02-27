@@ -1,6 +1,7 @@
 """Test public methods of IRACE configurator."""
 import pytest
-
+import shutil
+import warnings
 from pathlib import Path
 from unittest.mock import Mock, patch, ANY
 
@@ -21,6 +22,11 @@ from tests.CLI import tools as cli_tools
 @patch("runrunner.add_to_queue")
 def test_irace_configure(mock_add_to_queue: Mock) -> None:
     """Test IRACE configure method."""
+    if shutil.which("Rscript") is None:
+        warnings.warn("Rscript is not installed, which is required for the IRACE")
+        return
+    if not IRACE.configurator_executable.exists():
+        initialise.initialise_irace()  # Ensure IRACE is compiled
     sparkle_objective = PAR(10)
     test_files = Path("tests", "test_files")
     base_dir = test_files / "tmp"
@@ -59,6 +65,7 @@ def test_irace_configure(mock_add_to_queue: Mock) -> None:
         name=f"{IRACE.__name__}: {conf_scenario.solver.name} on "
              f"{conf_scenario.instance_set.name}",
         sbatch_options=[],
+        prepend=None,
     )
     assert runs == [None]
 
@@ -66,9 +73,7 @@ def test_irace_configure(mock_add_to_queue: Mock) -> None:
 def test_irace_organise_output(tmp_path: Path,
                                monkeypatch: pytest.MonkeyPatch) -> None:
     """Test IRACE organise output method."""
-    import shutil
     if shutil.which("Rscript") is None:
-        import warnings
         warnings.warn("Rscript is not installed, which is required for the IRACE")
         return
     if cli_tools.get_cluster_name() != "kathleen":
