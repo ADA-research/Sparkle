@@ -19,6 +19,8 @@ class IRACE(Configurator):
     configurator_path = Path(__file__).parent.parent.parent.resolve() /\
         "Components/irace-v4.2.0"
     configurator_package = configurator_path / "irace_4.2.0.tar"
+    # NOTE: There are possible dependencies that we do not install here.
+    # TODO: Determine if we should add them or not.
     package_dependencies = ["codetools_0.2-20.tar", "data.table_1.16.4.tar",
                             "matrixStats_1.5.0.tar", "spacefillr_0.3.3.tar"]
     configurator_executable = configurator_path / "irace" / "bin" / "irace"
