@@ -23,10 +23,13 @@ from tests.CLI import tools as cli_tools
 def test_irace_configure(mock_add_to_queue: Mock) -> None:
     """Test IRACE configure method."""
     if shutil.which("Rscript") is None:
-        warnings.warn("Rscript is not installed, which is required for the IRACE")
+        warnings.warn("R is not installed, which is required for the IRACE")
         return
     if not IRACE.configurator_executable.exists():
-        initialise.initialise_irace()  # Ensure IRACE is compiled
+        returncode = initialise.initialise_irace()  # Ensure IRACE is compiled
+        if returncode != 0:
+            warnings.warn("Failed to install IRACE, skipping test")
+            return
     sparkle_objective = PAR(10)
     test_files = Path("tests", "test_files")
     base_dir = test_files / "tmp"
@@ -82,7 +85,10 @@ def test_irace_organise_output(tmp_path: Path,
                        "test_output_irace.Rdata").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     if not IRACE.configurator_executable.exists():
-        initialise.initialise_irace()  # Ensure IRACE is compiled
+        returncode = initialise.initialise_irace()  # Ensure IRACE is compiled
+        if returncode != 0:
+            warnings.warn("Failed to install IRACE, skipping test")
+            return
     assert IRACE.organise_output(source_path, None, None, 1) == {
         "init_solution": "1", "perform_pac": "0", "perform_first_div": "1",
         "perform_double_cc": "1", "perform_aspiration": "1",
@@ -98,7 +104,10 @@ def test_irace_scenario_file(tmp_path: Path,
     set = Instance_Set(Path("tests/test_files/Instances/Train-Instance-Set").absolute())
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     if not IRACE.configurator_executable.exists():
-        initialise.initialise_irace()  # Ensure IRACE is compiled
+        returncode = initialise.initialise_irace()  # Ensure IRACE is compiled
+        if returncode != 0:
+            warnings.warn("Failed to install IRACE, skipping test")
+            return
     obj_par, obj_acc = resolve_objective("PAR10"), resolve_objective("accuray:max")
     scenario = IRACEScenario(solver, set, [obj_par, obj_acc], Path("irace_scenario"),
                              number_of_runs=2, solver_calls=2, cutoff_time=2)

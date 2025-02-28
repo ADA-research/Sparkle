@@ -49,19 +49,19 @@ def detect_sparkle_platform_exists(check: callable = all) -> Path:
     return None
 
 
-def initialise_irace() -> None:
+def initialise_irace() -> int:
     """Initialise IRACE."""
     if shutil.which("R") is None:
         warnings.warn("R is not installed, which is required for the IRACE"
                       "configurator. Consider installing R.")
-        return
+        return 0
     print("Initialising IRACE ...")
     for package in IRACE.package_dependencies:
         package_name = package.split("_")[0]
         package_check = subprocess.run(["Rscript", "-e",
                                         f'library("{package_name}")'],
                                        capture_output=True)
-        if package_check.returncode != 0:  # R6 is not installed
+        if package_check.returncode != 0:  # Package is not installed
             print(f"\t- Installing {package_name} package (IRACE dependency) ...")
             dependency_install = subprocess.run([
                 "Rscript", "-e",
@@ -73,7 +73,7 @@ def initialise_irace() -> None:
                       dependency_install.stdout.decode(), "\n",
                       dependency_install.stderr.decode(), "\n"
                       "IRACE installation failed!")
-                return
+                return dependency_install.returncode
     # Install IRACE from tarball
     irace_install = subprocess.run(
         ["Rscript", "-e",
@@ -84,8 +84,9 @@ def initialise_irace() -> None:
         print("An error occured during the installation of IRACE:\n",
               irace_install.stdout.decode(), "\n",
               irace_install.stderr.decode())
-    else:
-        print("IRACE installed!")
+        return irace_install.returncode
+    print("IRACE installed!")
+    return 0
 
 
 def check_for_initialise() -> None:
