@@ -118,9 +118,9 @@ def main(argv: list[str]) -> None:
     performance_data = PerformanceDataFrame(
         gv.settings().DEFAULT_performance_data_path)
     best_configuration, _ = performance_data.best_configuration(
-        str(config_scenario.solver.directory),
+        str(solver.directory),
         config_scenario.sparkle_objective,
-        instances=[str(p) for p in config_scenario.instance_set.instance_paths])
+        instances=[str(p) for p in instance_set_train.instance_paths])
     if config_scenario is None:
         print("No configuration scenario found for combination:\n"
               f"{configurator.name} {solver.name} {instance_set_train.name}")
