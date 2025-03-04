@@ -69,6 +69,7 @@ class PCSConverter:
                 continue
             if "#" in line:
                 line, _ = line.split("#", maxsplit=1)
+            line = line.strip()
             if re.match(PCSConverter.smac2_params_regex, line):
                 return PCSConvention.SMAC
             elif re.match(PCSConverter.paramils_params_regex, line):

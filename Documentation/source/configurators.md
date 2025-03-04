@@ -14,7 +14,7 @@ Each configurator has its own file layout and possibilities. Luckily you do not 
 
 ## SMAC2
 
-Sequantial Model-Based Optimization for General Algorithm Configuration[[1]](#1), or [SMAC]((https://www.cs.ubc.ca/labs/algorithms/Projects/SMAC)) for short is a Java based algorithm configurator. *Note that this the second version, and not SMAC3 the Python version. For SMAC3 see below*. The original documentation of the configurator can be found [here](https://www.cs.ubc.ca/labs/algorithms/Projects/SMAC/v2.10.03/manual.pdf).
+Sequential Model-Based Optimization for General Algorithm Configuration[[1]](#1), or [SMAC]((https://www.cs.ubc.ca/labs/algorithms/Projects/SMAC)) for short is a Java based algorithm configurator. *Note that this the second version, and not SMAC3 the Python version. For SMAC3 see below*. The original documentation of the configurator can be found [here](https://www.cs.ubc.ca/labs/algorithms/Projects/SMAC/v2.10.03/manual.pdf).
 
 ```{note}
 SMAC2 is written in Java and therefore requires Java to be installed in your environment. The current tested version in Sparkle is 1.8.0_402
