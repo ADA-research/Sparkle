@@ -5,6 +5,7 @@ import ast
 from enum import Enum
 from pathlib import Path
 
+import ConfigSpace.conditions
 import tabulate
 import ConfigSpace
 from ConfigSpace import ConfigurationSpace
@@ -458,6 +459,7 @@ class PCSConverter:
                                                       granularity, dtype=dtype))
                         if dtype(parameter.default_value) not in domain:  # Add default
                             domain += [dtype(parameter.default_value)]
+                        domain = list(set(domain))  # Ensure unique values only
                         domain.sort()
                         domain = "{" + ",".join([str(i) for i in domain]) + "}"
                     else:  # SMAC2 takes ranges
@@ -465,10 +467,12 @@ class PCSConverter:
                 else:
                     domain = "{" + ",".join(parameter.choices) + "}"
                 rows.append([parameter.name,
-                             parameter_map[type(parameter)],
+                             parameter_map[type(parameter)]
+                             if not pcs_format == PCSConvention.ParamILS else "",
                              domain,
                              f"[{parameter.default_value}]",
-                             "log" if log else "",
+                             "log"
+                             if log and not pcs_format == PCSConvention.ParamILS else "",
                              f"# {parameter.meta}"])
             if configspace.conditions:
                 extra_rows.extend(["", "# Parameter Conditions"])
@@ -480,7 +484,10 @@ class PCSConverter:
                     condition_str = condition_str.replace(
                         f"{condition.child.name} | ", "").strip()
                     condition_str = f"{condition.child.name} | " + condition_str
-
+                    if (pcs_format == PCSConvention.ParamILS
+                            and re.search(r"[<>!=]+|[<>]=|[!=]=", condition_str)):
+                        # TODO: Translate condition ParamILS expression (in)
+                        continue
                     extra_rows.append(condition_str)
             if configspace.forbidden_clauses:
                 extra_rows.extend(["", "# Forbidden Expressions"])
@@ -488,6 +495,10 @@ class PCSConverter:
                     forbidden_str = str(forbidden).replace("Forbidden: ", "")
                     forbidden_str = forbidden_str.replace("(", "{").replace(")", "}")
                     forbidden_str = forbidden_str.replace("'", "")
+                    if (pcs_format == PCSConvention.ParamILS
+                            and re.search(r"[<>!=]+|[<>]=|[!=]=", forbidden_str)):
+                        # TODO: Translate condition ParamILS expression (in)
+                        continue
                     extra_rows.append(forbidden_str)
         elif pcs_format == PCSConvention.IRACE:
             digits = 4  # Number of digits after decimal point required

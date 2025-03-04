@@ -27,7 +27,7 @@ class ParamILS(Configurator):
     def __init__(self: ParamILS,
                  base_dir: Path,
                  output_path: Path) -> None:
-        """Returns the ParamILS (Ruby) configurator, V2.3.8.
+        """Returns the ParamILS (Java) configurator, V3.0.0.
 
         Args:
             base_dir: The path where the configurator will be executed in.
