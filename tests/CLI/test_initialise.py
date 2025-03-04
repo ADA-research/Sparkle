@@ -26,7 +26,7 @@ def test_initialise_command(tmp_path: Path,
     # Check RunSolver is compiled
     assert gv.settings().DEFAULT_runsolver_exec.exists()
     # Check IRACE is compiled
-    if tools.get_cluster_name != "kathleen":
+    if tools.get_cluster_name() != "kathleen":
         # Test currently does not work on Github Actions due missing packages
         return
     assert IRACE.configurator_executable.exists()

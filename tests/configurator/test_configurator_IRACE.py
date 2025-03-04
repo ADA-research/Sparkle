@@ -49,7 +49,7 @@ def test_irace_configure(mock_add_to_queue: Mock) -> None:
     assert irace_conf.tmp_path == output / IRACE.__name__ / "tmp"
     assert irace_conf.multiobjective is False
 
-    if cli_tools.get_cluster_name != "kathleen":
+    if cli_tools.get_cluster_name() != "kathleen":
         # Test currently does not work on Github Actions due missing packages
         return
 
@@ -104,7 +104,7 @@ def test_irace_organise_output(tmp_path: Path,
 def test_irace_scenario_file(tmp_path: Path,
                              monkeypatch: pytest.MonkeyPatch) -> None:
     """Test IRACE scenario file creation."""
-    if cli_tools.get_cluster_name != "kathleen":
+    if cli_tools.get_cluster_name() != "kathleen":
         # Test currently does not work on Github Actions due missing packages
         return
     solver = Solver(Path("tests/test_files/Solvers/Test-Solver").absolute())
