@@ -27,7 +27,7 @@ class PCSConverter:
     illegal_param_name = re.compile(r"[!:\-+@!#$%^&*()=<>?/\|~` ]")
 
     smac2_params_regex = re.compile(r"^(?P<name>[a-zA-Z0-9_]+)\s+(?P<type>[a-zA-Z]+)\s+"
-                                    r"(?P<values>[a-zA-Z0-9\-\[\]{}_,. ]+)\s+"
+                                    r"(?P<values>[a-zA-Z0-9\-\[\]{}_,. ]+)\s*"
                                     r"\[(?P<default>[a-zA-Z0-9._-]+)\]?\s*"
                                     r"(?P<scale>log)?\s*(?P<comment>#.*)?$")
     smac2_conditions_regex = re.compile(r"^(?P<parameter>[a-zA-Z0-9_]+)\s*\|\s*"
