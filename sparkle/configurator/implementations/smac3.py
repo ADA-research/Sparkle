@@ -167,6 +167,8 @@ class SMAC3(Configurator):
             SolverStatus.UNKNOWN: SmacStatusType.CRASHED,
             SolverStatus.ERROR: SmacStatusType.CRASHED,
             SolverStatus.KILLED: SmacStatusType.TIMEOUT,
+            SolverStatus.SAT: SmacStatusType.SUCCESS,
+            SolverStatus.UNSAT: SmacStatusType.SUCCESS
         }
         return mapping[status]
 
