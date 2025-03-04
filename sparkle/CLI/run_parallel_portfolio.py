@@ -75,7 +75,8 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         parallel_jobs=parallel_jobs,
         base_dir=sl.caller_log_dir,
         srun_options=["-N1", "-n1"] + sbatch_options,
-        sbatch_options=sbatch_options
+        sbatch_options=sbatch_options,
+        prepend=gv.settings().get_slurm_job_prepend(),
     )
     check_interval = gv.settings().get_parallel_portfolio_check_interval()
     instances_done = [False] * num_instances

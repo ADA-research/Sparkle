@@ -82,8 +82,8 @@ class AblationScenario:
         self.concurrent_clis = concurrent_clis
         ablation_scenario_dir = self.scenario_dir
         objective = self.config_scenario.sparkle_objective
-        pcs = self.solver.get_pcs()
-        parameter_names = [p["name"] for p in pcs]
+        pcs = self.solver.get_cs()
+        parameter_names = [p.name for p in pcs.values()]
         # We need to remove any redundant keys that are not in PCS
         removable_keys = [key for key in best_configuration
                           if key not in parameter_names]
@@ -91,9 +91,9 @@ class AblationScenario:
             del best_configuration[key]
         opt_config_str = " ".join([f"-{k} {v}" for k, v in best_configuration.items()])
         # We need to check which params are missing and supplement with default values
-        for p in pcs:
-            if p["name"] not in opt_config_str:
-                opt_config_str += f" -{p['name']} {p['default']}"
+        for p in list(pcs.values()):
+            if p.name not in opt_config_str:
+                opt_config_str += f" -{p.name} {p.default_value}"
 
         # Ablation cannot deal with E scientific notation in floats
         ctx = decimal.Context(prec=16)
@@ -107,7 +107,7 @@ class AblationScenario:
 
         smac_run_obj = "RUNTIME" if objective.time else "QUALITY"
         objective_str = "MEAN10" if objective.time else "MEAN"
-        pcs_file_path = f"{self.config_scenario.solver.get_pcs_file().absolute()}"
+        pcs_file_path = f"{self.config_scenario.solver.pcs_file.absolute()}"
 
         # Create config file
         config_file = Path(f"{ablation_scenario_dir}/ablation_config.txt")
@@ -189,12 +189,14 @@ class AblationScenario:
     def submit_ablation(self: AblationScenario,
                         log_dir: Path,
                         sbatch_options: list[str] = [],
+                        slurm_prepend: str | list[str] | Path = None,
                         run_on: Runner = Runner.SLURM) -> list[Run]:
         """Submit an ablation job.
 
         Args:
             log_dir: Directory to store job logs
             sbatch_options: Options to pass to sbatch
+            slurm_prepend: Script to prepend to sbatch script
             run_on: Determines to which RunRunner queue the job is added
 
         Returns:
@@ -212,7 +214,8 @@ class AblationScenario:
             base_dir=log_dir,
             path=self.scenario_dir,
             sbatch_options=sbatch_options,
-            srun_options=srun_options)
+            srun_options=srun_options,
+            prepend=slurm_prepend)
 
         runs = []
         if run_on == Runner.LOCAL:

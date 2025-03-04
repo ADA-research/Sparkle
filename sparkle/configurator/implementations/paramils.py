@@ -27,7 +27,7 @@ class ParamILS(Configurator):
     def __init__(self: ParamILS,
                  base_dir: Path,
                  output_path: Path) -> None:
-        """Returns the ParamILS (Ruby) configurator, V2.3.8.
+        """Returns the ParamILS (Java) configurator, V3.0.0.
 
         Args:
             base_dir: The path where the configurator will be executed in.
@@ -224,8 +224,9 @@ class ParamILSScenario(SMAC2Scenario):
 
     def create_scenario_file(self: ParamILSScenario) -> Path:
         """Create a file with the configuration scenario."""
+        from sparkle.tools.parameters import PCSConvention
         scenario_file = super().create_scenario_file(ParamILS.configurator_target,
-                                                     "paramils")
+                                                     PCSConvention.ParamILS)
         with scenario_file.open("+a") as fout:
             fout.write("check-instances-exist = True\n")
             if self.focused is not None:

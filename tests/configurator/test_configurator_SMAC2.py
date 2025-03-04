@@ -72,6 +72,7 @@ class TestConfiguratorSMAC2(TestCase):
             output_path=expected_outputs,
             parallel_jobs=None,
             sbatch_options=[],
+            prepend=None,
         )
         assert runs == [None]
 

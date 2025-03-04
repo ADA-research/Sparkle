@@ -180,6 +180,24 @@ The options below are exclusive to `srun` and are thus discouraged:
 
 - `-–label`
 
+#### Prepending to Slurm Jobs
+
+In case you have specific scripts that need to be executed before running your job, such as activation of environments, you can specify this in the slurm section like:
+
+```
+[slurm]
+...
+job_prepend = echo $JOB_ID
+```
+
+In case that you have a multi line script, write it down as a file in the Settings directory, for example "slurm_prepend.sh" and reference it like:
+
+```
+[slurm]
+...
+job_prepend = Settings/slurm_prepend.sh
+```
+
 (settings-details)=
 ### Options and possible values
 

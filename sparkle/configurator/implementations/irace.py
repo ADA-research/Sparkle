@@ -17,9 +17,12 @@ from runrunner import Runner, Run
 class IRACE(Configurator):
     """Class for IRACE configurator."""
     configurator_path = Path(__file__).parent.parent.parent.resolve() /\
-        "Components/irace-v3.5"
-    configurator_package = configurator_path / "irace_3.5.tar.gz"
-    r6_dependency_package = configurator_path / "R6_2.5.1.tar.gz"
+        "Components/irace-v4.2.0"
+    configurator_package = configurator_path / "irace_4.2.0.tar"
+    # NOTE: There are possible dependencies that we do not install here.
+    # TODO: Determine if we should add them or not.
+    package_dependencies = ["codetools_0.2-20.tar", "data.table_1.16.4.tar",
+                            "matrixStats_1.5.0.tar", "spacefillr_0.3.3.tar"]
     configurator_executable = configurator_path / "irace" / "bin" / "irace"
     configurator_ablation_executable = configurator_path / "irace" / "bin" / "ablation"
     configurator_target = configurator_path / "irace_target_algorithm.py"
@@ -54,6 +57,7 @@ class IRACE(Configurator):
                   data_target: PerformanceDataFrame,
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
+                  slurm_prepend: str | list[str] | Path = None,
                   num_parallel_jobs: int = None,
                   base_dir: Path = None,
                   run_on: Runner = Runner.SLURM) -> Run:
@@ -65,6 +69,7 @@ class IRACE(Configurator):
             validate_after: Whether to validate the configuration on the training set
                 afterwards or not.
             sbatch_options: List of slurm batch options to use
+            slurm_prepend: Slurm script to prepend to the sbatch
             num_parallel_jobs: The maximum number of jobs to run in parallel
             base_dir: The base_dir of RunRunner where the sbatch scripts will be placed
             run_on: On which platform to run the jobs. Default: Slurm.
@@ -95,10 +100,10 @@ class IRACE(Configurator):
             base_dir=base_dir,
             name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
             sbatch_options=sbatch_options,
+            prepend=slurm_prepend,
         )]
 
         if validate_after:
-            # TODO: Array job specific dependency, requires RunRunner update
             validate = scenario.solver.run_performance_dataframe(
                 scenario.instance_set,
                 run_ids=seeds,
@@ -321,9 +326,6 @@ class IRACEScenario(ConfigurationScenario):
         self.solver = solver
         self.instance_set = instance_set
         if sparkle_objectives is not None:
-            if len(sparkle_objectives) > 1:
-                print("WARNING: IRACE does not have multi objective support. "
-                      "Only the first objective will be used.")
             self.sparkle_objective = sparkle_objectives[0]
         else:
             self.sparkle_objective = None
@@ -373,20 +375,19 @@ class IRACEScenario(ConfigurationScenario):
         Returns:
             Path to the created file.
         """
+        from sparkle.tools.parameters import PCSConvention
         solver_path = self.solver.directory.absolute()
+        pcs_path = self.solver.get_pcs_file(port_type=PCSConvention.IRACE).absolute()
         with self.scenario_file_path.open("w") as file:
             file.write(
                 f'execDir = "{self.directory.absolute()}"\n'
                 'targetRunnerLauncher = "python3"\n'
                 f'targetRunner = "{IRACE.configurator_target.absolute()}"\n'
-                'targetRunnerLauncherArgs = "{targetRunner} '
+                'targetCmdline = "{targetRunner} '
                 f"{solver_path} {self.sparkle_objective} {self.cutoff_time} "
-                '{targetRunnerArgs}"\n'
+                '{configurationID} {instanceID} {seed} {instance} {targetRunnerArgs}"\n'
                 f"deterministic = {1 if self.solver.deterministic else 0}\n"
-                "parameterFile = "
-                f'"{self.solver.get_pcs_file(port_type="""IRACE""").absolute()}"\n'
-                "forbiddenFile = "
-                f'"{self.solver.get_forbidden(port_type="""IRACE""").absolute()}"\n'
+                f'parameterFile = "{pcs_path.absolute()}"\n'
                 f'trainInstancesDir = "{self.instance_set.directory.absolute()}"\n'
                 f'trainInstancesFile = "{self.instance_file_path.absolute()}"\n'
                 "debugLevel = 1\n"  # The verbosity level of IRACE
@@ -425,8 +426,8 @@ class IRACEScenario(ConfigurationScenario):
                   self.scenario_file_path.open("r").read(),
                   stdout_msg, "\n",
                   check_file.stderr.decode())
-        else:
-            print("IRACE scenario file is valid.")
+            return None
+        print("IRACE scenario file is valid.")
         return self.scenario_file_path
 
     def serialize(self: IRACEScenario) -> dict:
@@ -449,8 +450,8 @@ class IRACEScenario(ConfigurationScenario):
                          for keyvalue in (line.split(" = ", maxsplit=1)
                                           for line in scenario_file.open().readlines()
                                           if line.strip() != "")}
-        _, solver_path, objective, cutoff, _ =\
-            scenario_dict.pop("targetRunnerLauncherArgs").split(" ")
+        _, solver_path, objective, cutoff, _, _, _, _, _ =\
+            scenario_dict.pop("targetCmdline").split(" ")
         scenario_dict["sparkle_objectives"] = [resolve_objective(objective)]
         scenario_dict["cutoff_time"] = int(cutoff)
         scenario_dict["parent_directory"] = scenario_file.parent.parent
@@ -461,7 +462,6 @@ class IRACEScenario(ConfigurationScenario):
         scenario_dict.pop("targetRunnerLauncher")
         scenario_dict.pop("deterministic")
         scenario_dict.pop("parameterFile")
-        scenario_dict.pop("forbiddenFile")
         scenario_dict.pop("debugLevel")
         instance_set_path =\
             Path(scenario_dict.pop("trainInstancesDir").strip().strip('"'))

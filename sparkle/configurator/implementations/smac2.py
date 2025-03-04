@@ -9,6 +9,7 @@ import pandas as pd
 
 from runrunner import Runner, Run
 
+from sparkle.tools.parameters import PCSConvention
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
@@ -320,7 +321,7 @@ class SMAC2Scenario(ConfigurationScenario):
     def create_scenario_file(
             self: SMAC2Scenario,
             configurator_target: Path = SMAC2.configurator_target,
-            pcs_port: str = None) -> Path:
+            pcs_port: PCSConvention = PCSConvention.SMAC) -> Path:
         """Create a file with the configuration scenario.
 
         Writes supplementary information to the target algorithm (algo =) as:

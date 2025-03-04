@@ -81,7 +81,7 @@ def add_output(output_path: str, description: str) -> None:
 
     """
     # Prepare logging information
-    timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
+    timestamp = time.strftime("%Y-%m-%d-%H.%M.%S", time.localtime(time.time()))
     output_str = f"{timestamp}\t{output_path}\t{description}\n"
     # Write output path and description to caller file
     with Path(caller_log_path).open("a") as output_file:

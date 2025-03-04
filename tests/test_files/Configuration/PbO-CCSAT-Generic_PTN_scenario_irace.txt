@@ -1,12 +1,11 @@
-execDir = "Output/Configuration/Raw_Data/IRACE/PbO-CCSAT-Generic_PTN"
+execDir = "/home/snelleman/Sparkle/Output/Configuration/Raw_Data/IRACE/PbO-CCSAT-Generic_PTN"
 targetRunnerLauncher = "python3"
-targetRunner = "sparkle/Components/irace-v3.5/irace_target_algorithm.py"
-targetRunnerLauncherArgs = "{targetRunner} Examples/Resources/Solvers/PbO-CCSAT-Generic PAR10 60 {targetRunnerArgs}"
+targetRunner = "/home/snelleman/Sparkle/sparkle/Components/irace-v4.2.0/irace_target_algorithm.py"
+targetCmdline = "{targetRunner} Examples/Resources/Solvers/PbO-CCSAT-Generic PAR10 60 {configurationID} {instanceID} {seed} {instance} {targetRunnerArgs}"
 deterministic = 0
-parameterFile = "Examples/Resources/Solvers/PbO-CCSAT-Generic/PbO-CCSAT-params_test_IRACE.pcs"
-forbiddenFile = "Examples/Resources/Solvers/PbO-CCSAT-Generic/PbO-CCSAT-params_test_IRACE_forbidden.txt"
+parameterFile = "/home/snelleman/Sparkle/Solvers/PbO-CCSAT-Generic/PbO-CCSAT-params_test_IRACE.pcs"
 trainInstancesDir = "Examples/Resources/Instances/PTN"
-trainInstancesFile = "Output/Configuration/Raw_Data/IRACE/PbO-CCSAT-Generic_PTN/instances.txt"
+trainInstancesFile = "tests/test_files/Instances/Train-Instance-Set/instances_file.txt"
 debugLevel = 1
 maxTime = 1750
 budgetEstimation = 0.03428571428571429

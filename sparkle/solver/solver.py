@@ -14,7 +14,8 @@ from runrunner.local import LocalRun
 from runrunner.slurm import Run, SlurmRun
 from runrunner.base import Status, Runner
 
-from sparkle.tools import pcsparser, RunSolver
+from sparkle.tools.parameters import PCSConverter, PCSConvention
+from sparkle.tools import RunSolver
 from sparkle.types import SparkleCallable, SolverStatus
 from sparkle.solver import verifiers
 from sparkle.instance import InstanceSet
@@ -48,6 +49,7 @@ class Solver(SparkleCallable):
         super().__init__(directory, runsolver_exec, raw_output_directory)
         self.deterministic = deterministic
         self.verifier = verifier
+        self._pcs_file: Path = None
 
         meta_data_file = self.directory / Solver.meta_data
         if self.runsolver_exec is None:
@@ -73,78 +75,52 @@ class Solver(SparkleCallable):
         """Return the sting representation of the solver."""
         return self.name
 
-    def _get_pcs_file(self: Solver, port_type: str = None) -> Path | bool:
-        """Get path of the parameter file.
+    @property
+    def pcs_file(self: Solver) -> Path:
+        """Get path of the parameter file."""
+        if self._pcs_file is None:
+            files = sorted([p for p in self.directory.iterdir() if p.suffix == ".pcs"])
+            if len(files) == 0:
+                return None
+            self._pcs_file = files[0]
+        return self._pcs_file
 
-        Returns:
-            Path to the parameter file or False if the parameter file does not exist.
-        """
-        pcs_files = [p for p in self.directory.iterdir() if p.suffix == ".pcs"
-                     and (port_type is None or port_type in p.name)]
+    def get_pcs_file(self: Solver, port_type: PCSConvention) -> Path:
+        """Get path of the parameter file of a specific convention.
 
-        if len(pcs_files) == 0:
-            return False
-        if len(pcs_files) != 1:
-            # Generated PCS files present, this is a quick fix to take the original
-            pcs_files = sorted(pcs_files, key=lambda p: len(p.name))
-        return pcs_files[0]
-
-    def get_pcs_file(self: Solver, port_type: str = None) -> Path:
-        """Get path of the parameter file.
+        Args:
+            port_type: Port type of the parameter file. If None, will return the
+                file with the shortest name.
 
         Returns:
             Path to the parameter file. None if it can not be resolved.
         """
-        if not (file_path := self._get_pcs_file(port_type)):
-            return None
-        return file_path
+        pcs_files = sorted([p for p in self.directory.iterdir() if p.suffix == ".pcs"])
+        if port_type is None:
+            return pcs_files[0]
+        for file in pcs_files:
+            if port_type == PCSConverter.get_convention(file):
+                return file
+        return None
 
     def read_pcs_file(self: Solver) -> bool:
         """Checks if the pcs file can be read."""
-        pcs_file = self._get_pcs_file()
-        try:
-            parser = pcsparser.PCSParser()
-            parser.load(str(pcs_file), convention="smac")
-            return True
-        except SyntaxError:
-            pass
-        return False
+        # TODO: Should be a .validate method instead
+        return PCSConverter.get_convention(self.pcs_file) is not None
 
-    def get_pcs(self: Solver) -> dict[str, tuple[str, str, str]]:
-        """Get the parameter content of the PCS file."""
-        if not (pcs_file := self.get_pcs_file()):
+    def get_cs(self: Solver) -> ConfigurationSpace:
+        """Get the ConfigurationSpace of the PCS file."""
+        if not self.pcs_file:
             return None
-        parser = pcsparser.PCSParser()
-        parser.load(str(pcs_file), convention="smac")
-        return [p for p in parser.pcs.params if p["type"] == "parameter"]
+        return PCSConverter.parse(self.pcs_file)
 
-    def port_pcs(self: Solver, port_type: pcsparser.PCSConvention) -> None:
+    def port_pcs(self: Solver, port_type: PCSConvention) -> None:
         """Port the parameter file to the given port type."""
-        pcs_file = self.get_pcs_file()
-        parser = pcsparser.PCSParser()
-        parser.load(str(pcs_file), convention="smac")
-        target_pcs_file = pcs_file.parent / f"{pcs_file.stem}_{port_type}.pcs"
+        target_pcs_file =\
+            self.pcs_file.parent / f"{self.pcs_file.stem}_{port_type.name}.pcs"
         if target_pcs_file.exists():  # Already exists, possibly user defined
             return
-        parser.export(convention=port_type,
-                      destination=target_pcs_file)
-
-    def get_configspace(self: Solver) -> ConfigurationSpace:
-        """Get the parameter content of the PCS file."""
-        if not (pcs_file := self.get_pcs_file()):
-            return None
-        parser = pcsparser.PCSParser()
-        parser.load(str(pcs_file), convention="smac")
-        return parser.get_configspace()
-
-    def get_forbidden(self: Solver, port_type: pcsparser.PCSConvention) -> Path:
-        """Get the path to the file containing forbidden parameter combinations."""
-        if port_type == "IRACE":
-            forbidden = [p for p in self.directory.iterdir()
-                         if p.name.endswith("forbidden.txt")]
-            if len(forbidden) > 0:
-                return forbidden[0]
-        return None
+        PCSConverter.export(self.get_cs(), port_type, target_pcs_file)
 
     def build_cmd(self: Solver,
                   instance: str | list[str],
@@ -198,6 +174,7 @@ class Solver(SparkleCallable):
             configuration: dict = None,
             run_on: Runner = Runner.LOCAL,
             sbatch_options: list[str] = None,
+            slurm_prepend: str | list[str] | Path = None,
             log_dir: Path = None,
             ) -> SlurmRun | list[dict[str, Any]] | dict[str, Any]:
         """Run the solver on an instance with a certain configuration.
@@ -210,8 +187,10 @@ class Solver(SparkleCallable):
             cutoff_time: The cutoff time for the solver, measured through RunSolver.
                 If None, will be executed without RunSolver.
             configuration: The solver configuration to use. Can be empty.
-            log_dir: Path where to place output files. Defaults to
-                self.raw_output_directory.
+            run_on: Whether to run on slurm or locally.
+            sbatch_options: The sbatch options to use.
+            slurm_prepend: The script to prepend to a slurm script.
+            log_dir: The log directory to use.
 
         Returns:
             Solver output dict possibly with runsolver values.
@@ -238,7 +217,8 @@ class Solver(SparkleCallable):
                                cmd=cmds,
                                name=commandname,
                                base_dir=log_dir,
-                               sbatch_options=sbatch_options)
+                               sbatch_options=sbatch_options,
+                               prepend=slurm_prepend)
 
         if isinstance(run, LocalRun):
             run.wait()
