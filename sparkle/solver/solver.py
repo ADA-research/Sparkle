@@ -88,14 +88,20 @@ class Solver(SparkleCallable):
     def get_pcs_file(self: Solver, port_type: PCSConvention) -> Path:
         """Get path of the parameter file of a specific convention.
 
+        Args:
+            port_type: Port type of the parameter file. If None, will return the
+                file with the shortest name.
+
         Returns:
             Path to the parameter file. None if it can not be resolved.
         """
-        pcs_files = [p for p in self.directory.iterdir() if p.suffix == ".pcs"
-                     and port_type.name in p.name]
-        if len(pcs_files) == 0:
-            return None
-        return pcs_files[0]
+        pcs_files = sorted([p for p in self.directory.iterdir() if p.suffix == ".pcs"])
+        if port_type is None:
+            return pcs_files[0]
+        for file in pcs_files:
+            if port_type == PCSConverter.get_convention(file):
+                return file
+        return None
 
     def read_pcs_file(self: Solver) -> bool:
         """Checks if the pcs file can be read."""
