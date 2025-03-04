@@ -138,7 +138,7 @@ class PCSConverter:
                         meta=comment,
                     )
                 elif parameter_type == "categorical":
-                    values = [v.strip() for v in values[1:-2].split(",")]
+                    values = re.sub(r"[{}\s]+", "", values).split(",")
                     csparam = ConfigSpace.CategoricalHyperparameter(
                         name=name,
                         choices=values,
@@ -147,7 +147,7 @@ class PCSConverter:
                         # Does not seem to contain any weights?
                     )
                 elif parameter_type == "ordinal":
-                    values = [v.strip() for v in values[1:-2].split(",")]
+                    values = re.sub(r"[{}\s]+", "", values).split(",")
                     csparam = ConfigSpace.OrdinalHyperparameter(
                         name=name,
                         sequence=values,
