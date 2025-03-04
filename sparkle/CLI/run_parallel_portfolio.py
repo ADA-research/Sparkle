@@ -92,6 +92,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         if o.time and o.post_process:
             default_value = o.post_process(default_value, cutoff, SolverStatus.KILLED)
         default_objective_values[o.name] = default_value
+    default_objective_values[status_key] = SolverStatus.UNKNOWN  # Overwrite Status
     job_output_dict = {instance_name: {solver.name: default_objective_values.copy()
                                        for solver in solvers}
                        for instance_name in instances_set._instance_names}
@@ -148,7 +149,6 @@ def run_parallel_portfolio(instances_set: InstanceSet,
                                                    objectives=objectives,
                                                    verifier=solver_obj.verifier)
         instance_name = instances_set._instance_names[int(index / n_instance_jobs)]
-        print(solver_output)
         cpu_time = solver_output[cpu_time_key]
         cmd_output = job_output_dict[instance_name][solver_obj.name]
         if cpu_time > 0.0 and cpu_time < cmd_output[cpu_time_key]:
@@ -176,6 +176,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
             for key, value in job_output_dict[instance][solver].items():
                 objective = resolve_objective(key)
                 if objective is not None and objective.time:
+                    print(key, value)
                     if objective.use_time == UseTime.CPU_TIME:
                         value = job_output_dict[instance][solver][cpu_time_key]
                     else:
@@ -293,14 +294,18 @@ def main(argv: list[str]) -> None:
         print("Parallel Portfolio is not fully supported yet for Local runs. Exiting.")
         sys.exit(-1)
 
-    # Retrieve instance set
-    data_set = resolve_object_name(
-        args.instance_path,
-        gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir,
-        Instance_Set)
+    # Retrieve instance sets
+    instances = [resolve_object_name(instance_path,
+                 gv.file_storage_data_mapping[gv.instances_nickname_path],
+                 gv.settings().DEFAULT_instance_dir, Instance_Set)
+                 for instance_path in args.instance_path]
+    # Join them into one
+    if len(instances) > 1:
+        print("WARNING: More than one instance set specified. "
+              "Currently only supporting one.")
+    instances = instances[0]
 
-    print(f"Running on {data_set.size} instance(s)...")
+    print(f"Running on {instances.size} instance(s)...")
 
     if args.cutoff_time is not None:
         gv.settings().set_general_target_cutoff_time(args.cutoff_time,
@@ -330,12 +335,12 @@ def main(argv: list[str]) -> None:
             sys.exit()
         shutil.rmtree(portfolio_path)
     portfolio_path.mkdir(parents=True)
-    run_parallel_portfolio(data_set, portfolio_path, solvers, run_on=run_on)
+    run_parallel_portfolio(instances, portfolio_path, solvers, run_on=run_on)
 
     # Update latest scenario
     gv.latest_scenario().set_parallel_portfolio_path(portfolio_path)
     gv.latest_scenario().set_latest_scenario(Scenario.PARALLEL_PORTFOLIO)
-    gv.latest_scenario().set_parallel_portfolio_instance_path(args.instance_path)
+    gv.latest_scenario().set_parallel_portfolio_instance_path(instances.directory)
     # Write used scenario to file
     gv.latest_scenario().write_scenario_ini()
     # Write used settings to file

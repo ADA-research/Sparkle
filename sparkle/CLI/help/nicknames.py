@@ -24,18 +24,21 @@ def resolve_object_name(name: str | Path,
     if name is None:
         return None
     # First check if the name already is a path
-    if Path(name).exists():
+    if isinstance(name, (str, Path)) and Path(name).exists():
         path = Path(name)
     # Second check if its a nickname registered in Sparkle
     elif str(name) in nickname_dict:
         path = Path(nickname_dict[str(name)])
     # Third check if we can create a valid path with the name
-    elif (target_dir / name).exists():
+    elif isinstance(name, (str, Path)) and (target_dir / name).exists():
         path = (target_dir / name)
     # Finally, attempt to construct the object from the Path
     try:
-        if class_name is not None and path is not None:
-            return class_name(path)
+        if class_name is not None:
+            if path is not None:
+                return class_name(path)
+            if name is not None:
+                return class_name(name)
     except Exception:
         return None
     return path
