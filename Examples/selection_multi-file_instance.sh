@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.9.2
+# Auto-Generated .sh files from the original .md by Sparkle 0.9.3
 
 ## Algorithm selection with multi-file instances
 
