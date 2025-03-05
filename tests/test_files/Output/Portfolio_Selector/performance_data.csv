@@ -1,0 +1,13 @@
+Instance,Solvers/CSCCSat,Solvers/PbO-CCSAT-Generic,Solvers/MiniSAT
+Instances/PTN/Ptn-7824-b01.cnf,600.0,600.0,600.0
+Instances/PTN/Ptn-7824-b03.cnf,600.0,600.0,600.0
+Instances/PTN/Ptn-7824-b05.cnf,600.0,600.0,600.0
+Instances/PTN/Ptn-7824-b07.cnf,600.0,600.0,600.0
+Instances/PTN/Ptn-7824-b09.cnf,600.0,51.8656,600.0
+Instances/PTN/Ptn-7824-b11.cnf,600.0,600.0,600.0
+Instances/PTN/Ptn-7824-b13.cnf,28.6467,11.0282,600.0
+Instances/PTN/Ptn-7824-b15.cnf,4.84118,5.1656,600.0
+Instances/PTN/Ptn-7824-b17.cnf,19.0048,13.6179,600.0
+Instances/PTN/Ptn-7824-b19.cnf,1.78027,6.12788,600.0
+Instances/PTN/Ptn-7824-b21.cnf,13.6538,3.38894,600.0
+Instances/PTN/bce7824.cnf,600.0,600.0,600.0
