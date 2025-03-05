@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.9.2
+# Auto-Generated .sh files from the original .md by Sparkle 0.9.3
 
 ## Algorithm Selection
 
@@ -106,7 +106,7 @@ sparkle jobs
 
 # Now we can train a selector based on these features.
 
-sparkle construct portfolio selector 1000
+sparkle construct portfolio selector
 sparkle jobs  # Wait for the computation to be done
 
 # And generate the report. When running on the PTN/PTN2 data sets, you can compare the two to see the impact of different feature extractors.

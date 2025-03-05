@@ -59,7 +59,7 @@ structures
 tools
 ===============
 .. automodule:: sparkle.tools
-    :members: get_solver_call_params,get_time_pid_random_string,PCSParser,RunSolver,SlurmBatch
+    :members: get_solver_call_params,get_time_pid_random_string,PCSConverter,RunSolver,SlurmBatch
 ```
 
 (mod-types)=
