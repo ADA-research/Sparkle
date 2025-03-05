@@ -1,7 +1,6 @@
 """File to handle a Selector for selecting Solvers."""
 from __future__ import annotations
 from pathlib import Path
-import ast
 
 from sklearn.base import ClassifierMixin, RegressorMixin
 from asf.cli import cli_train as asf_cli
@@ -123,4 +122,3 @@ class Selector:
         if schedule is None:
             print(f"ERROR: Selector {self.name} failed predict schedule!")
         return schedule[instance]
-
