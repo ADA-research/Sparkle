@@ -1,7 +1,6 @@
 """File to handle a Selector for selecting Solvers."""
 from __future__ import annotations
 from pathlib import Path
-import ast
 
 from sklearn.base import ClassifierMixin, RegressorMixin
 from asf.cli import cli_train as asf_cli
@@ -126,18 +125,3 @@ class Selector:
         if schedule is None:
             print(f"ERROR: Selector {self.name} failed predict schedule!")
         return schedule[instance]
-
-    @staticmethod
-    def process_predict_schedule_output(output: str) -> list:
-        """Return the predicted algorithm schedule as a list."""
-        prefix_string = "Selected Schedule [(algorithm, budget)]: "
-        predict_schedule = ""
-        predict_schedule_lines = output.splitlines()
-        for line in predict_schedule_lines:
-            if line.strip().startswith(prefix_string):
-                predict_schedule = line.strip()
-                break
-        if predict_schedule == "":
-            return None
-        predict_schedule_string = predict_schedule[len(prefix_string):]
-        return ast.literal_eval(predict_schedule_string)
