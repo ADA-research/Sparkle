@@ -51,8 +51,6 @@ class ReportingScenario:
         # Initialise scenario in default file path
         self.read_scenario_ini()
 
-        return
-
     def read_scenario_ini(
             self: ReportingScenario, file_path: Path = DEFAULT_reporting_scenario_path)\
             -> None:
@@ -62,8 +60,8 @@ class ReportingScenario:
             file_path: Path of the INI file for the scenario. Defaults to
                 DEFAULT_reporting_scenario_path.
         """
-        # If the file does not exist set default values
-        if not Path(file_path).is_file():
+        # If the file does not exist or is empty set default values
+        if not Path(file_path).is_file() or Path(file_path).stat().st_size == 0:
             self.set_latest_scenario()
             self.set_selection_scenario_path()
             self.set_selection_test_case_directory()

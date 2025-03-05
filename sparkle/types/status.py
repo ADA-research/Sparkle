@@ -16,3 +16,7 @@ class SolverStatus(str, Enum):
     WRONG = "WRONG"
     ERROR = "ERROR"
     KILLED = "KILLED"
+
+    def __str__(self: SolverStatus) -> str:
+        """Return the string value of the SolverStatus."""
+        return str(self.value)

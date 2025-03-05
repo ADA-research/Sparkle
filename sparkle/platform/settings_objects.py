@@ -6,13 +6,12 @@ import ast
 from pathlib import Path
 from pathlib import PurePath
 
+from runrunner import Runner
+
 from sparkle.types import SparkleObjective, resolve_objective
 from sparkle.types.objective import PAR
-from sparkle.solver import Selector
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator import implementations as cim
-
-from runrunner import Runner
 from sparkle.platform.cli_types import VerbosityLevel
 
 
@@ -57,9 +56,6 @@ class Settings:
     DEFAULT_ablation_dir = DEFAULT_components / "ablationAnalysis-0.9.4"
     DEFAULT_ablation_exec = DEFAULT_ablation_dir / "ablationAnalysis"
     DEFAULT_ablation_validation_exec = DEFAULT_ablation_dir / "ablationValidation"
-
-    # Autofolio component
-    DEFAULT_general_sparkle_selector = DEFAULT_components / "AutoFolio/scripts/autofolio"
 
     # Report component
     DEFAULT_latex_source = DEFAULT_components / "Sparkle-latex-source"
@@ -151,21 +147,30 @@ class Settings:
     DEFAULT_irace_mu = None
     DEFAULT_irace_max_iterations = None
 
-    DEFAULT_portfolio_construction_timeout = None
+    # Default ParamILS settings
+    DEFAULT_paramils_focused_ils = False
+    DEFAULT_paramils_tuner_timeout = None
+    DEFAULT_paramils_focused_approach = None
+    DEFAULT_paramils_min_runs = None
+    DEFAULT_paramils_max_runs = None
+    DEFAULT_paramils_random_restart = None
+    DEFAULT_paramils_initial_configurations = None
+    DEFAULT_paramils_use_cpu_time_in_tunertime = None
+    DEFAULT_paramils_cli_cores = None
+    DEFAULT_paramils_max_iterations = None
 
     DEFAULT_slurm_max_parallel_runs_per_node = 8
+    DEFAULT_slurm_job_submission_limit = None
+    DEFAULT_slurm_job_prepend = ""
 
     DEFAULT_ablation_racing = False
 
     DEFAULT_parallel_portfolio_check_interval = 4
     DEFAULT_parallel_portfolio_num_seeds_per_solver = 1
 
-    # Default IRACE settings
-    DEFAULT_irace_max_time = 0  # IRACE equivalent of None in this case
-    DEFAULT_irace_max_experiments = 0
-    DEFAULT_irace_first_test = None
-    DEFAULT_irace_mu = None
-    DEFAULT_irace_max_iterations = None
+    # Default selection settings
+    DEFAULT_selector_class = "MultiClassClassifier"
+    DEFAULT_selector_model = "RandomForestClassifier"
 
     def __init__(self: Settings, file_path: PurePath = None) -> None:
         """Initialise a settings object."""
@@ -175,7 +180,6 @@ class Settings:
         # Setting flags
         self.__general_sparkle_objective_set = SettingState.NOT_SET
         self.__general_sparkle_configurator_set = SettingState.NOT_SET
-        self.__general_sparkle_selector_set = SettingState.NOT_SET
         self.__general_target_cutoff_time_set = SettingState.NOT_SET
         self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
         self.__general_verbosity_set = SettingState.NOT_SET
@@ -203,19 +207,35 @@ class Settings:
         self.__smac3_min_budget_set = SettingState.NOT_SET
         self.__smac3_max_budget_set = SettingState.NOT_SET
 
-        self.__run_on_set = SettingState.NOT_SET
-        self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
-        self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
-        self.__ablation_racing_flag_set = SettingState.NOT_SET
-
-        self.__parallel_portfolio_check_interval_set = SettingState.NOT_SET
-        self.__parallel_portfolio_num_seeds_per_solver_set = SettingState.NOT_SET
-
         self.__irace_max_time_set = SettingState.NOT_SET
         self.__irace_max_experiments_set = SettingState.NOT_SET
         self.__irace_first_test_set = SettingState.NOT_SET
         self.__irace_mu_set = SettingState.NOT_SET
         self.__irace_max_iterations_set = SettingState.NOT_SET
+
+        self.__paramils_min_runs_set = SettingState.NOT_SET
+        self.__paramils_max_runs_set = SettingState.NOT_SET
+        self.__paramils_tuner_timeout_set = SettingState.NOT_SET
+        self.__paramils_focused_approach_set = SettingState.NOT_SET
+        self.__paramils_random_restart_set = SettingState.NOT_SET
+        self.__paramils_initial_configurations_set = SettingState.NOT_SET
+        self.__paramils_use_cpu_time_in_tunertime_set = SettingState.NOT_SET
+        self.__paramils_cli_cores_set = SettingState.NOT_SET
+        self.__paramils_max_iterations_set = SettingState.NOT_SET
+
+        self.__run_on_set = SettingState.NOT_SET
+        self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
+        self.__ablation_racing_flag_set = SettingState.NOT_SET
+
+        self.__parallel_portfolio_check_interval_set = SettingState.NOT_SET
+        self.__parallel_portfolio_num_seeds_per_solver_set = SettingState.NOT_SET
+
+        self.__selection_model_set = SettingState.NOT_SET
+        self.__selection_class_set = SettingState.NOT_SET
+
+        self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
+        self.__slurm_job_prepend_set = SettingState.NOT_SET
+        self.__slurm_job_submission_limit_set = SettingState.NOT_SET
 
         self.__general_sparkle_configurator = None
 
@@ -253,13 +273,6 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
                     self.set_general_sparkle_configurator(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("selector", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.get(section, option)
-                    self.set_general_sparkle_selector(value, state)
                     file_settings.remove_option(section, option)
 
             option_names = ("target_cutoff_time",
@@ -473,6 +486,82 @@ class Settings:
                     self.set_irace_max_iterations(value, state)
                     file_settings.remove_option(section, option)
 
+            section = "paramils"
+
+            option_names = ("min_runs", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_paramils_min_runs(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("max_runs", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_paramils_max_runs(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("cputime_limit", "cputime_limit", "tunertime_limit",
+                            "tuner_timeout", "tunerTimeout")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_paramils_tuner_timeout(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("random_restart", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getfloat(section, option)
+                    self.set_paramils_random_restart(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("focused_approach", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getboolean(section, option)
+                    self.set_paramils_focused_approach(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("use_cpu_time_in_tunertime", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getboolean(section, option)
+                    self.set_paramils_use_cpu_time_in_tunertime(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("cli_cores", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_paramils_cli_cores(value, state)
+                    file_settings.remove_option(section, option)
+
+            options_names = ("iteration_limit", "numIterations", "numberOfIterations",
+                             "max_iterations")
+            for option in options_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_paramils_max_iterations(value, state)
+                    file_settings.remove_option(section, option)
+
+            section = "selection"
+
+            option_names = ("selector_class", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.get(section, option)
+                    self.set_selection_class(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("selector_model")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.get(section, option)
+                    self.set_selection_model(value, state)
+                    file_settings.remove_option(section, option)
+
             section = "slurm"
             option_names = ("number_of_jobs_in_parallel", "num_job_in_parallel")
             for option in option_names:
@@ -486,6 +575,20 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_slurm_max_parallel_runs_per_node(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("job_submission_limit", "max_jobs_submit")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_slurm_job_submission_limit(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("job_prepend", "prepend", "prepend_script")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.get(section, option)
+                    self.set_slurm_job_prepend(value, state)
                     file_settings.remove_option(section, option)
 
             section = "ablation"
@@ -671,26 +774,6 @@ class Settings:
                       "Configurator not set.")
         return self.__general_sparkle_configurator
 
-    def set_general_sparkle_selector(
-            self: Settings,
-            value: Path = DEFAULT_general_sparkle_selector,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the Sparkle selector."""
-        section = "general"
-        name = "selector"
-        if value is not None and self.__check_setting_state(
-                self.__general_sparkle_selector_set, origin, name):
-            self.__init_section(section)
-            self.__general_sparkle_selector_set = origin
-            self.__settings[section][name] = str(value)
-
-    def get_general_sparkle_selector(self: Settings) -> Selector:
-        """Return the selector init method."""
-        if self.__general_sparkle_selector_set == SettingState.NOT_SET:
-            self.set_general_sparkle_selector()
-        return Selector(Path(self.__settings["general"]["selector"]),
-                        self.DEFAULT_selection_output_raw)
-
     def set_general_target_cutoff_time(
             self: Settings, value: int = DEFAULT_general_target_cutoff_time,
             origin: SettingState = SettingState.DEFAULT) -> None:
@@ -850,6 +933,20 @@ class Settings:
                     and configurator_settings["max_time"] == 0):  # Default to base
                 configurator_settings["solver_calls"] =\
                     self.get_configurator_solver_calls()
+        elif configurator_name == cim.ParamILS.__name__:
+            configurator_settings.update({
+                "tuner_timeout": self.get_paramils_tuner_timeout(),
+                "min_runs": self.get_paramils_min_runs(),
+                "max_runs": self.get_paramils_max_runs(),
+                "focused_ils": self.get_paramils_focused_approach(),
+                "initial_configurations": self.get_paramils_initial_configurations(),
+                "random_restart": self.get_paramils_random_restart(),
+                "cli_cores": self.get_paramils_cli_cores(),
+                "use_cpu_time_in_tunertime":
+                self.get_paramils_use_cpu_time_in_tunertime(),
+                "max_iterations": self.set_paramils_max_iterations()
+                or configurator_settings["max_iterations"],
+            })
         return configurator_settings
 
     def set_configurator_solver_calls(
@@ -1381,6 +1478,236 @@ class Settings:
             self.__irace_max_iterations_set = origin
             self.__settings[section][name] = str(value)
 
+    # Configuration: ParamILS specific settings ###
+
+    def get_paramils_min_runs(self: Settings) -> int | None:
+        """Return the minimum number of runs for ParamILS."""
+        if self.__paramils_min_runs_set == SettingState.NOT_SET:
+            self.set_paramils_min_runs()
+        min_runs = self.__settings["paramils"]["min_runs"]
+        return int(min_runs) if min_runs.isdigit() else None
+
+    def set_paramils_min_runs(
+            self: Settings, value: int = DEFAULT_paramils_min_runs,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the minimum number of runs for ParamILS."""
+        section = "paramils"
+        name = "min_runs"
+
+        if self.__check_setting_state(
+                self.__paramils_min_runs_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_min_runs_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_max_runs(self: Settings) -> int | None:
+        """Return the maximum number of runs for ParamILS."""
+        if self.__paramils_max_runs_set == SettingState.NOT_SET:
+            self.set_paramils_max_runs()
+        max_runs = self.__settings["paramils"]["min_runs"]
+        return int(max_runs) if max_runs.isdigit() else None
+
+    def set_paramils_max_runs(
+            self: Settings, value: int = DEFAULT_paramils_max_runs,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the maximum number of runs for ParamILS."""
+        section = "paramils"
+        name = "max_runs"
+
+        if self.__check_setting_state(
+                self.__paramils_max_runs_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_max_runs_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_tuner_timeout(self: Settings) -> int | None:
+        """Return the maximum CPU time for ParamILS."""
+        if self.__paramils_tuner_timeout_set == SettingState.NOT_SET:
+            self.set_paramils_tuner_timeout()
+        tuner_timeout = self.__settings["paramils"]["tuner_timeout"]
+        return int(tuner_timeout) if tuner_timeout.isdigit() else None
+
+    def set_paramils_tuner_timeout(
+            self: Settings, value: int = DEFAULT_paramils_tuner_timeout,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the maximum CPU time for ParamILS."""
+        section = "paramils"
+        name = "tuner_timeout"
+
+        if self.__check_setting_state(
+                self.__paramils_tuner_timeout_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_tuner_timeout_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_focused_approach(self: Settings) -> bool:
+        """Return the focused approach for ParamILS."""
+        if self.__paramils_focused_approach_set == SettingState.NOT_SET:
+            self.set_paramils_focused_approach()
+        return bool(self.__settings["paramils"]["focused_approach"])
+
+    def set_paramils_focused_approach(
+            self: Settings, value: bool = DEFAULT_paramils_focused_approach,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the focused approach for ParamILS."""
+        section = "paramils"
+        name = "focused_approach"
+
+        if self.__check_setting_state(
+                self.__paramils_focused_approach_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_focused_approach_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_initial_configurations(self: Settings) -> int | None:
+        """Return the initial configurations for ParamILS."""
+        if self.__paramils_initial_configurations_set == SettingState.NOT_SET:
+            self.set_paramils_initial_configurations()
+        intial_confs = self.__settings["paramils"]["initial_configurations"]
+        return int(intial_confs) if intial_confs.isdigit() else None
+
+    def set_paramils_initial_configurations(
+            self: Settings, value: int = DEFAULT_paramils_initial_configurations,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the initial configurations for ParamILS."""
+        section = "paramils"
+        name = "initial_configurations"
+
+        if self.__check_setting_state(
+                self.__paramils_initial_configurations_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_initial_configurations_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_random_restart(self: Settings) -> float | None:
+        """Return the random restart chance for ParamILS."""
+        if self.__paramils_random_restart_set == SettingState.NOT_SET:
+            self.set_paramils_random_restart()
+        return ast.literal_eval(self.__settings["paramils"]["random_restart"])
+
+    def set_paramils_random_restart(
+            self: Settings, value: float = DEFAULT_paramils_random_restart,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the random restart chance for ParamILS."""
+        section = "paramils"
+        name = "random_restart"
+
+        if self.__check_setting_state(
+                self.__paramils_random_restart_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_random_restart_set = origin
+            self.__settings[section][name] = str(value)
+
+    def set_paramils_use_cpu_time_in_tunertime(
+            self: Settings, value: bool = DEFAULT_paramils_use_cpu_time_in_tunertime,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set whether to use CPU time in tunertime."""
+        section = "paramils"
+        name = "use_cpu_time_in_tunertime"
+
+        if self.__check_setting_state(
+                self.__paramils_use_cpu_time_in_tunertime_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_use_cpu_time_in_tunertime_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_use_cpu_time_in_tunertime(self: Settings) -> bool:
+        """Return whether to use CPU time in tunertime."""
+        if self.__paramils_use_cpu_time_in_tunertime_set == SettingState.NOT_SET:
+            self.set_paramils_use_cpu_time_in_tunertime()
+        return ast.literal_eval(self.__settings["paramils"]["use_cpu_time_in_tunertime"])
+
+    def set_paramils_cli_cores(
+            self: Settings, value: int = DEFAULT_paramils_cli_cores,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the number of cores to use for ParamILS CLI."""
+        section = "paramils"
+        name = "cli_cores"
+
+        if self.__check_setting_state(
+                self.__paramils_cli_cores_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_cli_cores_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_cli_cores(self: Settings) -> int | None:
+        """Number of cores to use to execute runs.
+
+        In other words, the number of requests to run at a given time.
+        """
+        if self.__paramils_cli_cores_set == SettingState.NOT_SET:
+            self.set_paramils_cli_cores()
+        cli_cores = self.__settings["paramils"]["cli_cores"]
+        return int(cli_cores) if cli_cores.isdigit() else None
+
+    def set_paramils_max_iterations(
+            self: Settings, value: int = DEFAULT_paramils_max_iterations,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the maximum number of ParamILS iterations."""
+        section = "paramils"
+        name = "max_iterations"
+
+        if self.__check_setting_state(
+                self.__paramils_max_iterations_set, origin, name):
+            self.__init_section(section)
+            self.__paramils_max_iterations_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_paramils_max_iterations(self: Settings) -> int | None:
+        """Get the maximum number of paramils iterations."""
+        if self.__smac2_max_iterations_set == SettingState.NOT_SET:
+            self.set_paramils_max_iterations()
+        max_iterations = self.__settings["paramils"]["max_iterations"]
+        return int(max_iterations) if max_iterations.isdigit() else None
+
+    # Selection settings ###
+
+    def set_selection_class(
+            self: Settings,
+            value: str = DEFAULT_selector_class,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the Sparkle selector.
+
+        Can contain any of the class names as defined in asf.selectors.
+        """
+        section = "selection"
+        name = "selector_class"
+        if value is not None and self.__check_setting_state(
+                self.__selection_class_set, origin, name):
+            self.__init_section(section)
+            self.__selection_class_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_selection_class(self: Settings) -> type:
+        """Return the selector class."""
+        if self.__selection_class_set == SettingState.NOT_SET:
+            self.set_selection_class()
+        from asf import selectors
+        return getattr(selectors, self.__settings["selection"]["selector_class"])
+
+    def set_selection_model(
+            self: Settings,
+            value: str = DEFAULT_selector_model,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the selector model.
+
+        Can be any of the sklearn.ensemble models.
+        """
+        section = "selection"
+        name = "selector_model"
+        if value is not None and self.__check_setting_state(
+                self.__selection_model_set, origin, name):
+            self.__init_section(section)
+            self.__selection_model_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_selection_model(self: Settings) -> type:
+        """Return the selector model class."""
+        if self.__selection_model_set == SettingState.NOT_SET:
+            self.set_selection_model()
+        from sklearn import ensemble
+        return getattr(ensemble, self.__settings["selection"]["selector_model"])
+
     # Slurm settings ###
 
     def set_slurm_max_parallel_runs_per_node(
@@ -1403,6 +1730,54 @@ class Settings:
             self.set_slurm_max_parallel_runs_per_node()
 
         return int(self.__settings["slurm"]["max_parallel_runs_per_node"])
+
+    def set_slurm_job_submission_limit(
+            self: Settings,
+            value: int = DEFAULT_slurm_job_submission_limit,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """[NOT ACTIVE YET] Set the number of jobs that can be submitted to Slurm."""
+        section = "slurm"
+        name = "job_submission_limit"
+
+        if value is not None and self.__check_setting_state(
+                self.__slurm_job_submission_limit_set, origin, name):
+            self.__init_section(section)
+            self.__slurm_job_submission_limit_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_slurm_job_submission_limit(self: Settings) -> int:
+        """[NOT ACTIVE YET] Return the maximum number of jobs you can submit to Slurm."""
+        if self.__slurm_job_submission_limit_set == SettingState.NOT_SET:
+            self.set_slurm_job_submission_limit()
+
+        return int(self.__settings["slurm"]["job_submission_limit"])
+
+    def set_slurm_job_prepend(
+            self: Settings,
+            value: str = DEFAULT_slurm_job_prepend,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the Slurm job prepend."""
+        section = "slurm"
+        name = "job_prepend"
+
+        if self.__check_setting_state(
+                self.__slurm_job_prepend_set, origin, name):
+            try:
+                path = Path(value)
+                if path.is_file():
+                    value = path.open().read()
+            except TypeError:
+                pass
+            self.__init_section(section)
+            self.__slurm_job_prepend_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_slurm_job_prepend(self: Settings) -> str:
+        """Return the Slurm job prepend."""
+        if self.__slurm_job_prepend_set == SettingState.NOT_SET:
+            self.set_slurm_job_prepend()
+
+        return self.__settings["slurm"]["job_prepend"]
 
     # SLURM extra options
 

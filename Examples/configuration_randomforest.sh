@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.9.2
+# Auto-Generated .sh files from the original .md by Sparkle 0.9.3
 
 ## Configuring Random Forest on Iris
 
@@ -23,7 +23,7 @@ sparkle configure_solver --solver RandomForest --instance-set-train Iris --objec
 
 ### Generate a report
 
-# Wait for configuration to be completed
+# Wait for configuration to be completed. Note that in this case, the jobs are usually extremely short, so you may find no jobs running as they've already finished.
 
 sparkle jobs
 

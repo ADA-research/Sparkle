@@ -37,6 +37,10 @@ class Configurator:
         self.multiobjective = multi_objective_support
         self.scenario = None
 
+    def name(self: Configurator) -> str:
+        """Return the name of the configurator."""
+        return self.__class__.__name__
+
     @staticmethod
     def scenario_class() -> ConfigurationScenario:
         """Return the scenario class of the configurator."""
@@ -49,17 +53,19 @@ class Configurator:
                   scenario: ConfigurationScenario,
                   validation_ids: list[int] = None,
                   sbatch_options: list[str] = None,
+                  slurm_prepend: str | list[str] | Path = None,
                   num_parallel_jobs: int = None,
                   base_dir: Path = None,
                   run_on: Runner = Runner.SLURM) -> Run:
         """Start configuration job.
 
         Args:
-
+            configuration_commands: List of configurator commands to execute
+            data_target: Performance data to store the results.
+            output: Output directory.
             scenario: ConfigurationScenario to execute.
-            validate_after: Whether to validate the configuration on the training set
-                afterwards or not.
             sbatch_options: List of slurm batch options to use
+            slurm_prepend: Slurm script to prepend to the sbatch
             num_parallel_jobs: The maximum number of jobs to run in parallel
             base_dir: The base_dir of RunRunner where the sbatch scripts will be placed
             run_on: On which platform to run the jobs. Default: Slurm.
@@ -74,7 +80,8 @@ class Configurator:
             base_dir=base_dir,
             output_path=output,
             parallel_jobs=num_parallel_jobs,
-            sbatch_options=sbatch_options)]
+            sbatch_options=sbatch_options,
+            prepend=slurm_prepend)]
 
         if validation_ids:
             validate = scenario.solver.run_performance_dataframe(
@@ -94,8 +101,10 @@ class Configurator:
             runs.append(validate)
 
         if run_on == Runner.LOCAL:
+            print(f"[{self.name}] Running {len(runs)} jobs locally...")
             for run in runs:
                 run.wait()
+            print(f"[{self.name}] Finished running {len(runs)} jobs locally.")
         return runs
 
     @staticmethod

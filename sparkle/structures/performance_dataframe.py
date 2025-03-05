@@ -261,9 +261,21 @@ class PerformanceDataFrame(pd.DataFrame):
 
     def add_instance(self: PerformanceDataFrame,
                      instance_name: str,
-                     initial_value: float = None) -> None:
-        """Add and instance to the DataFrame."""
-        initial_value = initial_value or self.missing_value
+                     initial_values: Any | list[Any] = None) -> None:
+        """Add and instance to the DataFrame.
+
+        Args:
+            instance_name: The name of the instance to be added.
+            initial_values: The values assigned for each index of the new instance.
+                If list, must match the column dimension (Value, Seed, Configuration).
+        """
+        initial_values = initial_values or self.missing_value
+        if not isinstance(initial_values, list):
+            initial_values = ([initial_values]
+                              * len(PerformanceDataFrame.multi_column_names)
+                              * self.num_solvers)
+        elif len(initial_values) == len(PerformanceDataFrame.multi_column_names):
+            initial_values = initial_values * self.num_solvers
 
         if instance_name in self.instances:
             print(f"WARNING: Tried adding already existing instance {instance_name} "
@@ -271,7 +283,7 @@ class PerformanceDataFrame(pd.DataFrame):
             return
         # Add rows for all combinations
         for objective, run in itertools.product(self.objective_names, self.run_ids):
-            self.loc[(objective, instance_name, run)] = initial_value
+            self.loc[(objective, instance_name, run)] = initial_values
         if self.num_instances == 2:  # Remove nan instance
             for instance in self.instances:
                 if not isinstance(instance, str) and math.isnan(instance):
@@ -282,20 +294,29 @@ class PerformanceDataFrame(pd.DataFrame):
 
     def add_runs(self: PerformanceDataFrame,
                  num_extra_runs: int,
-                 instance_names: list[str] = None) -> None:
+                 instance_names: list[str] = None,
+                 initial_values: Any | list[Any] = None) -> None:
         """Add runs to the DataFrame.
 
         Args:
             num_extra_runs: The number of runs to be added.
             instance_names: The instances for which runs are to be added.
               By default None, which means runs are added to all instances.
+            initial_values: The initial value for each objective of each new run.
+                If a list, needs to have a value for Value, Seed and Configuration.
         """
+        initial_values = initial_values or self.missing_value
+        if not isinstance(initial_values, list):
+            initial_values =\
+                [initial_values] * len(self.multi_column_names) * self.num_solvers
+        elif len(initial_values) == len(self.multi_column_names):
+            initial_values = initial_values * self.num_solvers
         instance_names = self.instances if instance_names is None else instance_names
         for instance in instance_names:
             for objective in self.objective_names:
                 index_runs_start = len(self.loc[(objective, instance)]) + 1
                 for run in range(index_runs_start, index_runs_start + num_extra_runs):
-                    self.loc[(objective, instance, run)] = self.missing_value
+                    self.loc[(objective, instance, run)] = initial_values
                 # Sort the index to optimize lookup speed
                 # NOTE: It would be better to do this at the end, but that results in
                 # PerformanceWarning: indexing past lexsort depth may impact performance.
@@ -683,15 +704,15 @@ class PerformanceDataFrame(pd.DataFrame):
 
     def schedule_performance(
             self: PerformanceDataFrame,
-            schedule: dict[str: list[tuple[str, float | None]]],
+            schedule: dict[str: dict[str: (str, int)]],
             target_solver: str = None,
             objective: str | SparkleObjective = None) -> float:
         """Return the performance of a selection schedule on the portfolio.
 
         Args:
             schedule: Compute the best performance according to a selection schedule.
-                A dictionary with instances as keys and a list of tuple consisting of
-                (solver, max_runtime) or solvers if no runtime prediction should be used.
+                A schedule is a dictionary of instances, with a schedule per instance,
+                consisting of a pair of solver and maximum runtime.
             target_solver: If not None, store the values in this solver of the DF.
             objective: The objective for which we calculate the best performance
 
@@ -815,28 +836,3 @@ class PerformanceDataFrame(pd.DataFrame):
         """Set all values in Performance Data to None."""
         self[:] = PerformanceDataFrame.missing_value
         self.save_csv()
-
-    def to_autofolio(self: PerformanceDataFrame,
-                     objective: SparkleObjective = None,
-                     target: Path = None) -> Path:
-        """Port the data to a format acceptable for AutoFolio."""
-        if (objective is None and self.multi_objective or self.num_runs > 1):
-            print(f"ERROR: Currently no porting available for {self.csv_filepath} "
-                  "to Autofolio due to multi objective or number of runs.")
-            return
-        autofolio_df = super().copy()
-        # Drop Seed/Configuration, then drop the level
-        autofolio_df = autofolio_df.drop([PerformanceDataFrame.column_seed,
-                                          PerformanceDataFrame.column_configuration],
-                                         axis=1, level=1).droplevel(level=1, axis=1)
-        if objective is not None:
-            autofolio_df = autofolio_df.loc[objective.name]
-            autofolio_df.index = autofolio_df.index.droplevel("Run")
-        else:
-            autofolio_df.index = autofolio_df.index.droplevel(["Objective", "Run"])
-        if target is None:
-            path = self.csv_filepath.parent / f"autofolio_{self.csv_filepath.name}"
-        else:
-            path = target / f"autofolio_{self.csv_filepath.name}"
-        autofolio_df.to_csv(path)
-        return path

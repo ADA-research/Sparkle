@@ -70,28 +70,7 @@ Note that a direct installation through Pip does not handle certain dependencies
 
 You will need to supply, asside from the other dependencies in the next section, the following in your virtual environment:
 - `Python 3.10` is required to use Sparkle
-- `libnuma` and `numactl` in order to compile RunSolver. We suggest to use `GCCcore-12.2.0`.
-- The `R6` package, in order to compile `IRACE`
-
-If your system works with [Lmod](http://lmod.readthedocs.org), we recommend loading the modules in the following order (Check that the versions are available):
-
-```bash
-module load R/4.3.2
-module load Java/8.402
-module load numactl/2.0.16-GCCcore-12.2.0
-```
-
-Whilst loading these modules you can receive various messages that module versions have changed whilst loading. Executing the loads in this order will ensure the changes are correct. Afterwards you can save your loaded modules as a set with nickname `sparkle` by typing:
-
-```bash
-module save sparkle
-```
-
-Which can then at a later point easily be loaded by typing:
-
-```bash
-module restore sparkle
-```
+- `libnuma` and `numactl` in order to compile RunSolver. We suggest to use `GCC 12.2.0`.
 
 ### Bash autocomplete
 
@@ -106,7 +85,7 @@ Asside from several package dependencies, Sparkle's package / CLI relies on a fe
 Other dependencies are handled by the Conda environment, but if that is not an option for you please ensure you have the following:
 
 - [libnuma](https://anaconda.org/esrf-bcu/libnuma) and [numactl](https://anaconda.org/brown-data-science/numactl) for [Runsolver](http://www.cril.univ-artois.fr/~roussel/runsolver/) compilation which sparkle uses to measure solvers meta data. This is restricted to Linux based systems.
-- [Swig](https://anaconda.org/conda-forge/swig/) 4.0.2 for [SMAC3](https://github.com/automl/SMAC3), which is in turn used by [AutoFolio](https://github.com/automl/AutoFolio).
+- [Swig](https://anaconda.org/conda-forge/swig/) 4.0.2 for [SMAC3](https://github.com/automl/SMAC3).
 
 For detailed installation instructions see the documentation: https://ada-research.github.io/Sparkle/
 

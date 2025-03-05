@@ -29,7 +29,6 @@ class Extractor(SparkleCallable):
         super().__init__(directory, runsolver_exec, raw_output_directory)
         self._features = None
         self._feature_groups = None
-        self._output_dimension = None
         self._groupwise_computation = None
 
     @property

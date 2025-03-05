@@ -167,6 +167,8 @@ class SMAC3(Configurator):
             SolverStatus.UNKNOWN: SmacStatusType.CRASHED,
             SolverStatus.ERROR: SmacStatusType.CRASHED,
             SolverStatus.KILLED: SmacStatusType.TIMEOUT,
+            SolverStatus.SAT: SmacStatusType.SUCCESS,
+            SolverStatus.UNSAT: SmacStatusType.SUCCESS
         }
         return mapping[status]
 
@@ -313,7 +315,7 @@ class SMAC3Scenario(ConfigurationScenario):
             else:
                 solver_calls = 100  # SMAC3 Default value
         self.smac3_scenario = SmacScenario(
-            configspace=solver.get_configspace(),
+            configspace=solver.get_cs(),
             name=self.name,
             output_directory=self.results_directory / smac3_output_directory,
             deterministic=solver.deterministic,

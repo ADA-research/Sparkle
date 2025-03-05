@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Sparkle command to generate a report for an executed experiment."""
-
 import sys
 import argparse
+import ast
 from pathlib import Path, PurePath
 
 from sparkle.CLI.help import global_variables as gv
@@ -234,11 +234,29 @@ def main(argv: list[str]) -> None:
         for i in performance_data.instances:
             if i not in used_instances:
                 performance_data.remove_instance(i)
+
+        # Verify the data in the Performance DataFrame
+        # Check that each run has produced a valid configuration
+        for instance in instance_set_train.instance_paths:
+            configurations = performance_data.get_value(
+                str(solver.directory),
+                str(instance),
+                objective=config_scenario.sparkle_objective.name,
+                solver_fields=[PerformanceDataFrame.column_configuration])
+            for i, config in enumerate(configurations):
+                try:
+                    config = ast.literal_eval(config)
+                    if config == {}:
+                        print(f"WARNING: No configuration found for {instance}, run {i}")
+                except ValueError:
+                    continue
+
+        # Check that all jobs have been executed
         configuration_jobs = performance_data.get_job_list()
         if len(configuration_jobs) > 0:
-            print(f"ERROR: {(len(configuration_jobs))} jobs for the configuration were "
-                  "not executed! Please run 'sparkle run solvers --performance-data' "
-                  "before continuing.")
+            print(f"ERROR: {(len(configuration_jobs))} jobs for configuration were not "
+                  "executed! Please run 'sparkle run solvers --performance-data' before "
+                  "continuing.")
             sys.exit(-1)
         # Create machine readable output
         output = gv.settings().DEFAULT_configuration_output_analysis

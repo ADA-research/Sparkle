@@ -7,6 +7,8 @@ import argparse
 import shutil
 from pathlib import Path
 
+from sparkle.tools.parameters import PCSConvention
+
 from sparkle.platform import file_help as sfh
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
@@ -65,12 +67,11 @@ def main(argv: list[str]) -> None:
     if args.run_checks:
         print("Running checks...")
         solver = Solver(Path(solver_source))
-        pcs_file = solver.get_pcs_file()
-        if pcs_file is None:
+        if solver.pcs_file is None:
             print("None or multiple .pcs files found. Solver "
                   "is not valid for configuration.")
         else:
-            print(f"One pcs file detected: {pcs_file.name}. ", end="")
+            print(f"PCS file detected: {solver.pcs_file.name}. ", end="")
             if solver.read_pcs_file():
                 print("Can read the pcs file.")
             else:
@@ -131,10 +132,14 @@ def main(argv: list[str]) -> None:
             key=nickname)
 
     solver = Solver(solver_directory)  # Recreate solver from its new directory
-    if solver.get_pcs_file() is not None:
+    if solver.pcs_file is not None:
+        # Generate missing PCS files
+        # TODO: Only generate missing files
         print("Generating missing PCS files...")
-        solver.port_pcs("IRACE")  # Create PCS file for IRACE
-        print("Generating done!")
+        solver.port_pcs(PCSConvention.IRACE)  # Create PCS file for IRACE
+        print("Generating IRACE done!")
+        solver.port_pcs(PCSConvention.ParamILS)  # Create PCS file for ParamILS
+        print("Generating ParamILS done!")
 
     # Write used settings to file
     gv.settings().write_used_settings()

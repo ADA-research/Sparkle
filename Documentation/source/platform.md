@@ -180,6 +180,24 @@ The options below are exclusive to `srun` and are thus discouraged:
 
 - `-–label`
 
+#### Prepending to Slurm Jobs
+
+In case you have specific scripts that need to be executed before running your job, such as activation of environments, you can specify this in the slurm section like:
+
+```
+[slurm]
+...
+job_prepend = echo $JOB_ID
+```
+
+In case that you have a multi line script, write it down as a file in the Settings directory, for example "slurm_prepend.sh" and reference it like:
+
+```
+[slurm]
+...
+job_prepend = Settings/slurm_prepend.sh
+```
+
 (settings-details)=
 ### Options and possible values
 
@@ -203,14 +221,21 @@ The options below are exclusive to `srun` and are thus discouraged:
 
 ---
 
-`selector`
-> aliases: `selector`
+`selector_class`
+> aliases: `selector_class`
 >
-> values: Path.
+> values: Class.
 >
-> Note: Currently only AutoFolio is supported by Sparkle. This setting is soon to be deprecated for a more flexible solution.
+> Description: The ASF Algorithm selector class to use.
+
+---
+
+`selector_model`
+> aliases: `selector_model`
 >
-> Description: The Algorithm selector to use.
+> values: Model.
+>
+> Description: The sklearn model to use for algorithm selection.
 
 ---
 

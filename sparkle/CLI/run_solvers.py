@@ -61,6 +61,7 @@ def run_solvers(
         cutoff_time: int,
         configuration: list[dict] = None,
         sbatch_options: list[str] = None,
+        slurm_prepend: str | list[str] | Path = None,
         log_dir: Path = None,
         run_on: Runner = Runner.SLURM,) -> list[Run]:
     """Run the solvers.
@@ -81,6 +82,8 @@ def run_solvers(
         The configuration to use for the solvers
     sbatch_options: list[str]
         The sbatch options to use for the solvers
+    slurm_prepend: str | list[str] | Path
+        The script to prepend to a slurm script
     log_dir: Path
         The directory to use for the logs
     run_on: Runner
@@ -100,6 +103,7 @@ def run_solvers(
                          cutoff_time=cutoff_time,
                          run_on=run_on,
                          sbatch_options=sbatch_options,
+                         slurm_prepend=slurm_prepend,
                          log_dir=log_dir)
         if run_on == Runner.LOCAL:
             if isinstance(run, dict):
@@ -308,6 +312,7 @@ def main(argv: list[str]) -> None:
             seed=random.randint(0, sys.maxsize),
             cutoff_time=cutoff_time,
             sbatch_options=sbatch_options,
+            slurm_prepend=gv.settings().get_slurm_job_prepend(),
             log_dir=sl.caller_log_dir,
             run_on=gv.settings().get_run_on(),
         )

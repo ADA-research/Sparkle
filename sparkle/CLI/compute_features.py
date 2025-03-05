@@ -101,7 +101,8 @@ def compute_features(
         parallel_jobs=parallel_jobs,
         base_dir=sl.caller_log_dir,
         sbatch_options=sbatch_options,
-        srun_options=srun_options)
+        srun_options=srun_options,
+        prepend=gv.settings().get_slurm_job_prepend())
 
     if run_on == Runner.SLURM:
         print(f"Running the extractors through Slurm with Job IDs: {run.run_id}")

@@ -2,6 +2,23 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.9.3] - 05/03/2025
+
+### Added
+- Flushing completed jobs from table in jobs command by hitting spacebar [SPRK-313]
+- "Did you mean" functionality for typos in CLI commands [SPRK-345]
+- Added ParamILS 3.0.0 as configurator [SPRK-339]
+- You can now specify Slurm job prepends through sparkle settings [SPRK-346]
+- Most configurators now support instance features through FeatureDataFrame [SPRK-364]
+
+### Changed
+- CI pipeline for unittest now tests for Python 3.10, 3.11 and 3.12
+- Replaced AutoFolio with ASF for algorithm selection [SPRK-336]
+- IRACE version has been updates to the latest edition (V4.2.0) [SPRK-346]
+- PCSParser has been reformatted to PCSConverter, and now supports conversion from and to all PCS formats of the supported configurators [SPRK-346]
+
+### Fixed
+- Fixed various bugs regarding running configuration multimple times in a row [SPRK-369]
 
 ## [0.9.2] - 07/01/2025
 

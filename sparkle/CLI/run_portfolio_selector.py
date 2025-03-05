@@ -117,14 +117,16 @@ def main(argv: list[str]) -> None:
                 f"--log-dir {sl.caller_log_dir}"
                 for instance_path in data_set.instance_paths]
 
+    import subprocess
     selector_run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
         name=f"Portfolio Selector: {selector_path.name} on {data_set.name}",
+        stdout=None if run_on == Runner.LOCAL else subprocess.PIPE,  # Print to screen
         base_dir=sl.caller_log_dir,
-        stdout=None,
-        dependencies=feature_run if run_on == Runner.SLURM else None,
-        sbatch_options=gv.settings().get_slurm_extra_options(as_args=True))
+        dependencies=feature_run,
+        sbatch_options=gv.settings().get_slurm_extra_options(as_args=True),
+        prepend=gv.settings().get_slurm_job_prepend())
 
     if run_on == Runner.LOCAL:
         selector_run.wait()

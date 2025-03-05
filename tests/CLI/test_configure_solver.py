@@ -4,6 +4,7 @@ from unittest.mock import patch, Mock
 from pathlib import Path
 
 from sparkle.CLI import add_solver, add_instances, configure_solver
+from sparkle.configurator.implementations import IRACE
 
 from tests.CLI import tools
 
@@ -63,6 +64,10 @@ def test_configure_solver(mock_which: Mock,
     assert pytest_wrapped_e.value.code == 0
 
     # with IRACE instead of SMAC2
+    if not IRACE.configurator_executable.exists():
+        import warnings
+        warnings.warn("WARNING: IRACE not installed, skipping test.")
+        return
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         configure_solver.main(["--configurator", "IRACE",
                                "--solver", solver_path.name,

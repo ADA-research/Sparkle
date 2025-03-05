@@ -49,38 +49,44 @@ def detect_sparkle_platform_exists(check: callable = all) -> Path:
     return None
 
 
-def initialise_irace() -> None:
+def initialise_irace() -> int:
     """Initialise IRACE."""
     if shutil.which("R") is None:
         warnings.warn("R is not installed, which is required for the IRACE"
                       "configurator. Consider installing R.")
-        return
+        return 0
     print("Initialising IRACE ...")
-    r6_package_check = subprocess.run(["Rscript", "-e",
-                                      'library("R6")'], capture_output=True)
-    if r6_package_check.returncode != 0:  # R6 is not installed
-        print("Installing R6 package (IRACE dependency) ...")
-        r6_install = subprocess.run([
-            "Rscript", "-e",
-            f'install.packages("{IRACE.r6_dependency_package.absolute()}",'
-            f'lib="{IRACE.configurator_path.absolute()}")'], capture_output=True)
-        if r6_install.returncode != 0:
-            print("An error occured during the installation of R6:\n",
-                  r6_install.stdout.decode(), "\n",
-                  r6_install.stderr.decode(), "\n"
-                  "IRACE installation failed!")
-            return
+    for package in IRACE.package_dependencies:
+        package_name = package.split("_")[0]
+        package_check = subprocess.run(["Rscript", "-e",
+                                        f'library("{package_name}")'],
+                                       capture_output=True)
+        if package_check.returncode != 0:  # Package is not installed
+            print(f"\t- Installing {package_name} package (IRACE dependency) ...")
+            dependency_install = subprocess.run([
+                "Rscript", "-e",
+                f'install.packages("{(IRACE.configurator_path / package).absolute()}",'
+                f'lib="{IRACE.configurator_path.absolute()}", repos = NULL)'],
+                capture_output=True)
+            if dependency_install.returncode != 0:
+                print(f"An error occured during the installation of {package_name}:\n",
+                      dependency_install.stdout.decode(), "\n",
+                      dependency_install.stderr.decode(), "\n"
+                      "IRACE installation failed!")
+                return dependency_install.returncode
     # Install IRACE from tarball
     irace_install = subprocess.run(
         ["Rscript", "-e",
          f'install.packages("{IRACE.configurator_package.absolute()}",'
-         f'lib="{IRACE.configurator_path.absolute()}")'], capture_output=True)
+         f'lib="{IRACE.configurator_path.absolute()}", repos = NULL)'],
+        capture_output=True)
     if irace_install.returncode != 0 or not IRACE.configurator_executable.exists():
         print("An error occured during the installation of IRACE:\n",
               irace_install.stdout.decode(), "\n",
               irace_install.stderr.decode())
-    else:
-        print("IRACE installed!")
+        return irace_install.returncode
+    print("IRACE installed!")
+    return 0
 
 
 def check_for_initialise() -> None:
@@ -190,7 +196,8 @@ def initialise_sparkle(save_existing_platform: bool = True,
         # NOTE: An automatic resolution of Java at this point would be good
         # However, loading modules from Python has thusfar not been successfull.
         warnings.warn("Could not find Java as an executable! Java 1.8.0_402 is required "
-                      "to use SMAC2 as a configurator. Consider installing Java.")
+                      "to use SMAC2 or ParamILS as a configurator. "
+                      "Consider installing Java.")
 
     # Check if IRACE is installed
     if not IRACE.configurator_executable.exists():
