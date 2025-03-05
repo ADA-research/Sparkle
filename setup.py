@@ -28,6 +28,7 @@ setup(name="SparkleAI",
           "asf-lib==0.0.1.15",
           # ASF requirements
           "xgboost==2.1.3",
+          "sklearn==1.3.2",
           # Reporting packages
           "plotly==5.24.1",
           "kaleido==0.2.1",
