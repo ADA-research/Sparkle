@@ -16,15 +16,15 @@ import pandas as pd
 
 
 @pytest.mark.parametrize(
-    "selector, selector_class, model_class", [
-        (Selector(MultiClassClassifier, RandomForestClassifier), MultiClassClassifier, RandomForestClassifier),
-        (Selector(PairwiseClassifier, GradientBoostingClassifier), PairwiseClassifier, GradientBoostingClassifier),
+    "selector_class, model_class", [
+        (MultiClassClassifier, RandomForestClassifier),
+        (PairwiseClassifier, GradientBoostingClassifier),
     ]
 )
-def test_selector_constructor(selector: Selector,
-                              selector_class: AbstractModelBasedSelector,
+def test_selector_constructor(selector_class: AbstractModelBasedSelector,
                               model_class: AbstractPredictor | ClassifierMixin | RegressorMixin) -> None:
     """Test for method constructor."""
+    selector = Selector(selector_class, model_class)
     assert selector.selector_class == selector_class
     assert selector.model_class == model_class
 
@@ -57,13 +57,12 @@ def test_construct(mock_add_queue: Mock) -> None:
     selector_feature_path = target_file.parent / feature_data.csv_filepath.name
     assert selector_feature_path.is_file()
     selector_feature_data = pd.read_csv(selector_feature_path, index_col=0)
-    assert selector_feature_data.shape[0] == feature_data.dataframe.shape[1]
+    assert selector_feature_data.shape[0] == feature_data.dataframe.shape[1]  # Feature data got transposed
     assert selector_feature_data.shape[1] == feature_data.dataframe.shape[0]
 
 
 @pytest.mark.parametrize(
-    "instance",
-    ["Instances/PTN/Ptn-7824-b03.cnf", "Instances/PTN/Ptn-7824-b15.cnf", "Instances/PTN/Ptn-7824-b21.cnf"]
+    "instance", ["Instances/PTN/Ptn-7824-b03.cnf", "Instances/PTN/Ptn-7824-b15.cnf", "Instances/PTN/Ptn-7824-b21.cnf"]
 )
 def test_run(instance: str) -> None:
     """Test for method run."""
@@ -74,5 +73,3 @@ def test_run(instance: str) -> None:
     solvers = ["Solvers/CSCCSat", "Solvers/PbO-CCSAT-Generic", "Solvers/MiniSAT"]
     schedule = selector.run(selector_path, instance, feature_data)
     assert schedule[0][0] in solvers  # Schedule has shape [(solver, budget)]
-
-    
