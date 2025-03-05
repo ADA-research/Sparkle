@@ -7,4 +7,4 @@ sphinx-copybutton
 sphinx_rtd_theme==2.0.0
 pandas # Also in environment.yml but needed for sphinx
 filelock==3.15.1
-RunRunner==0.2.0.1
+RunRunner==0.2.0.2

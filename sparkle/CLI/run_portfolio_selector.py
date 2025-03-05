@@ -121,9 +121,9 @@ def main(argv: list[str]) -> None:
         runner=run_on,
         cmd=cmd_list,
         name=f"Portfolio Selector: {selector_path.name} on {data_set.name}",
-        base_dir=sl.caller_log_dir,
-        stdout=None,
-        dependencies=feature_run if run_on == Runner.SLURM else None,
+        stdout=None,  # Print to screen for local jobs
+        log_dir=sl.caller_log_dir,
+        dependencies=feature_run,
         sbatch_options=gv.settings().get_slurm_extra_options(as_args=True),
         prepend=gv.settings().get_slurm_job_prepend())
 

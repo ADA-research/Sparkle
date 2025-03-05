@@ -40,7 +40,8 @@ def call_solver_solve_instance(
         cutoff_time=cutoff_time,
         log_dir=log_dir,
         run_on=Runner.LOCAL)
-    status = solver_output["status"]
+    status_key = [o.name for o in objectives if o.name.startswith("status")][0]
+    status = solver_output[status_key]
     flag_solved = False
     if (status == SolverStatus.SUCCESS
             or status == SolverStatus.SAT or status == SolverStatus.UNSAT):
