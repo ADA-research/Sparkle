@@ -70,6 +70,19 @@ def test_construct(mock_add_queue: Mock) -> None:
     assert selector_feature_data.shape[0] == feature_data.dataframe.shape[1]
     assert selector_feature_data.shape[1] == feature_data.dataframe.shape[0]
 
+    _, kwargs = mock_add_queue.call_args
+    assert kwargs["runner"] == run_on
+    assert kwargs["base_dir"] == base_dir
+    assert kwargs["sbatch_options"] == sbatch_options
+    cmd_str = kwargs["cmd"][0]
+    assert f"--selector {selector.selector_class.__name__}" in cmd_str
+    assert f"--model {selector.model_class.__name__}" in cmd_str
+    assert f"--budget {solver_cutoff}" in cmd_str
+    assert f"--performance-metric {objective.name}" in cmd_str
+    assert f"--feature-data {selector_feature_path}" in cmd_str
+    assert f"--performance-data {selector_performance_path}" in cmd_str
+    assert f"--model-path {target_file}" in cmd_str
+
 
 @pytest.mark.parametrize(
     "instance",
