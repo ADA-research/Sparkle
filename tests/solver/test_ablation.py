@@ -99,11 +99,29 @@ class TestAblationScenario(TestCase):
                          " present in targetConfiguration.")
         assert return_val is None
 
-    def test_create_instance_file(self: TestAblationScenario) -> None:
+    def test_create_instance_file_train_set(self: TestAblationScenario) -> None:
         """Test for method create_instance_file."""
-        # TODO: Write test for with training set
-        # TODO: Write test for with test set
-        pass
+        test = False
+        main_instance_file = \
+            self.scenario.scenario_dir / "instances_train.txt"
+        validation_instance_file = \
+            self.scenario.validation_dir / "instances_train.txt"
+
+        return_val = self.scenario.create_instance_file(test)
+
+        self.assertTrue(main_instance_file.exists(),
+                        "Main train instance file does not exist.")
+
+        self.assertTrue(validation_instance_file.exists(),
+                        "Validation train instance file does not exist.")
+
+        main_train_content = main_instance_file.read_text().splitlines()
+        validation_content = validation_instance_file.read_text().splitlines()
+
+        self.assertEqual(main_train_content, validation_content,
+                         "The instance file and its validation copy"
+                         "do not have the same content.")
+        assert return_val is None
 
     def test_check_for_ablation(self: TestAblationScenario) -> None:
         """Test for method check_for_ablation."""
