@@ -2,7 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.9.3] - ??/??/2025
+## [0.9.3] - 05/03/2025
 
 ### Added
 - Flushing completed jobs from table in jobs command by hitting spacebar [SPRK-313]
