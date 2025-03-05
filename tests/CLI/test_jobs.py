@@ -76,12 +76,6 @@ def test_cancel_command_configuration(tmp_path: Path,
     # Extract job IDs from Sparkle
     jobs = jobs_help.get_runs_from_file(gv.settings().DEFAULT_log_output,
                                         print_error=True)
-    files = [file for file in gv.settings().DEFAULT_log_output.rglob("*.json")]
-
-    for file in files:
-        print("------")
-        print(file.open().read())
-        print("------")
 
     # Cancel configuration jobs
     with pytest.raises(SystemExit) as pytest_wrapped_e:
@@ -90,9 +84,10 @@ def test_cancel_command_configuration(tmp_path: Path,
     assert pytest_wrapped_e.value.code == 0
 
     # Property checks
-    assert len(jobs) == 2  # Configuration should submit have 2 jobs
+    assert len(jobs) == 3  # Configuration should submit 3 jobs
 
     # NOTE: Here we check for killed and completed because we're not fast enough
     # TODO: Start a different job to cancel that wont be able to finish before we cancel
     for job in jobs:  # All jobs have been cancelled
+        job.get_latest_job_details()
         assert job.status in [Status.KILLED, Status.COMPLETED]
