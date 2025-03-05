@@ -1,3 +1,0 @@
-an_instance
-another_instance
-path/to/third/instance
