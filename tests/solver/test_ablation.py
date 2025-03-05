@@ -48,8 +48,56 @@ class TestAblationScenario(TestCase):
 
     def test_create_configuration_file(self: TestAblationScenario) -> None:
         """Test for method create_configuration_file."""
-        # TODO: Write test, check that written contents match with expected value
-        pass
+        cutoff_time = 2
+        cutoff_length = "3"
+        concurrent_clis = 4
+        best_configuration = {"init_solution": "2", "perform_first_div": "1", "asd": 5}
+        ablation_racing = False
+
+        return_val = self.scenario.create_configuration_file(cutoff_time,
+                                                             cutoff_length,
+                                                             concurrent_clis,
+                                                             best_configuration,
+                                                             ablation_racing)
+
+        validation_config_file = self.scenario.validation_dir / "ablation_config.txt"
+        self.assertTrue(validation_config_file.exists(),
+                        "Validation config file does not exist.")
+
+        config_dict = {}
+        with validation_config_file.open() as f:
+            for line in f:
+                if "=" in line:
+                    key, value = line.split("=", 1)
+                    config_dict[key.strip()] = value.strip()
+
+        self.assertEqual(config_dict.get("cutoffTime"),
+                         f"{cutoff_time}",
+                         "cutoffTime does not match")
+
+        self.assertEqual(config_dict.get("cutoff_length"),
+                         f"{cutoff_length}",
+                         "cutoff_length does not match")
+
+        self.assertEqual(config_dict.get("cli-cores"),
+                         f"{concurrent_clis}",
+                         "cli-cores does not match")
+
+        self.assertEqual(config_dict.get("useRacing"),
+                         f"{ablation_racing}",
+                         "useRacing does not match")
+
+        target_config = config_dict.get("targetConfiguration", "")
+        self.assertIn("-init_solution 2", target_config,
+                      "Expected 'init_solution' setting not found.")
+
+        self.assertIn("-perform_first_div 1", target_config,
+                      "Expected 'perform_first_div' setting not found.")
+
+        self.assertNotIn("asd", target_config,
+                         "Extraneous key 'asd' should not be"
+                         " present in targetConfiguration.")
+        assert return_val is None
 
     def test_create_instance_file(self: TestAblationScenario) -> None:
         """Test for method create_instance_file."""
