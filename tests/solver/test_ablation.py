@@ -123,10 +123,35 @@ class TestAblationScenario(TestCase):
                          "do not have the same content.")
         assert return_val is None
 
-    def test_check_for_ablation(self: TestAblationScenario) -> None:
+    def test_create_instance_file_test_set(self: TestAblationScenario) -> None:
+        """Test for method create_instance_file."""
+        test = True
+        return_val = self.scenario.create_instance_file(test)
+
+        main_instance_file = self.scenario.scenario_dir / "instances_test.txt"
+
+        validation_instance_file = self.scenario.validation_dir / "instances_train.txt"
+
+        self.assertTrue(main_instance_file.exists(),
+                        "Main test instance file should not exist.")
+
+        self.assertTrue(validation_instance_file.exists(),
+                        "Validation test instance file should not exist.")
+
+        main_content = main_instance_file.read_text().splitlines()
+        validation_content = validation_instance_file.read_text().splitlines()
+
+        self.assertEqual(main_content, validation_content,
+                         "The instance file and its validation copy"
+                         "do not have the same content.")
+        assert return_val is None
+
+    def test_check_for_ablation_file(self: TestAblationScenario) -> None:
         """Test for method check_for_ablation."""
         # TODO: Write test for when correct file exists
+
         # TODO: Write test for when file does not exist
+
         # TODO: Write test for when file is corrupted
         pass
 
