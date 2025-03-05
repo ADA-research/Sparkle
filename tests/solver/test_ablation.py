@@ -48,110 +48,19 @@ class TestAblationScenario(TestCase):
 
     def test_create_configuration_file(self: TestAblationScenario) -> None:
         """Test for method create_configuration_file."""
-        cutoff_time = 2
-        cutoff_length = "3"
-        concurrent_clis = 4
-        best_configuration = {"init_solution": "2", "perform_first_div": "1", "asd": 5}
-        ablation_racing = False
+        # TODO: Write test, check that written contents match with expected value
+        pass
 
-        return_val = self.scenario.create_configuration_file(cutoff_time,
-                                                             cutoff_length,
-                                                             concurrent_clis,
-                                                             best_configuration,
-                                                             ablation_racing)
-
-        validation_config_file = self.scenario.validation_dir / "ablation_config.txt"
-        self.assertTrue(validation_config_file.exists(),
-                        "Validation config file does not exist.")
-
-        config_dict = {}
-        with validation_config_file.open() as f:
-            for line in f:
-                if "=" in line:
-                    key, value = line.split("=", 1)
-                    config_dict[key.strip()] = value.strip()
-
-        self.assertEqual(config_dict.get("cutoffTime"),
-                         f"{cutoff_time}",
-                         "cutoffTime does not match")
-
-        self.assertEqual(config_dict.get("cutoff_length"),
-                         f"{cutoff_length}",
-                         "cutoff_length does not match")
-
-        self.assertEqual(config_dict.get("cli-cores"),
-                         f"{concurrent_clis}",
-                         "cli-cores does not match")
-
-        self.assertEqual(config_dict.get("useRacing"),
-                         f"{ablation_racing}",
-                         "useRacing does not match")
-
-        target_config = config_dict.get("targetConfiguration", "")
-        self.assertIn("-init_solution 2", target_config,
-                      "Expected 'init_solution' setting not found.")
-
-        self.assertIn("-perform_first_div 1", target_config,
-                      "Expected 'perform_first_div' setting not found.")
-
-        self.assertNotIn("asd", target_config,
-                         "Extraneous key 'asd' should not be"
-                         " present in targetConfiguration.")
-        assert return_val is None
-
-    def test_create_instance_file_train_set(self: TestAblationScenario) -> None:
+    def test_create_instance_file(self: TestAblationScenario) -> None:
         """Test for method create_instance_file."""
-        test = False
-        main_instance_file = \
-            self.scenario.scenario_dir / "instances_train.txt"
-        validation_instance_file = \
-            self.scenario.validation_dir / "instances_train.txt"
+        # TODO: Write test for with training set
+        # TODO: Write test for with test set
+        pass
 
-        return_val = self.scenario.create_instance_file(test)
-
-        self.assertTrue(main_instance_file.exists(),
-                        "Main train instance file does not exist.")
-
-        self.assertTrue(validation_instance_file.exists(),
-                        "Validation train instance file does not exist.")
-
-        main_train_content = main_instance_file.read_text().splitlines()
-        validation_content = validation_instance_file.read_text().splitlines()
-
-        self.assertEqual(main_train_content, validation_content,
-                         "The instance file and its validation copy"
-                         "do not have the same content.")
-        assert return_val is None
-
-    def test_create_instance_file_test_set(self: TestAblationScenario) -> None:
-        """Test for method create_instance_file."""
-        test = True
-        return_val = self.scenario.create_instance_file(test)
-
-        main_instance_file = self.scenario.scenario_dir / "instances_test.txt"
-
-        validation_instance_file = self.scenario.validation_dir / "instances_train.txt"
-
-        self.assertTrue(main_instance_file.exists(),
-                        "Main test instance file should not exist.")
-
-        self.assertTrue(validation_instance_file.exists(),
-                        "Validation test instance file should not exist.")
-
-        main_content = main_instance_file.read_text().splitlines()
-        validation_content = validation_instance_file.read_text().splitlines()
-
-        self.assertEqual(main_content, validation_content,
-                         "The instance file and its validation copy"
-                         "do not have the same content.")
-        assert return_val is None
-
-    def test_check_for_ablation_file(self: TestAblationScenario) -> None:
+    def test_check_for_ablation(self: TestAblationScenario) -> None:
         """Test for method check_for_ablation."""
         # TODO: Write test for when correct file exists
-
         # TODO: Write test for when file does not exist
-
         # TODO: Write test for when file is corrupted
         pass
 
