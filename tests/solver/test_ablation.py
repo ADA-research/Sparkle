@@ -62,10 +62,6 @@ def test_create_configuration_file() -> None:
     ablation_racing = False
     validation_config_file = scenario.validation_dir / "ablation_config.txt"
 
-    assert validation_config_file.exists() is True, (
-        "Validation config file does not exist."
-    )
-
     returned_val = scenario.create_configuration_file(
         cutoff_time,
         cutoff_length,
@@ -73,6 +69,11 @@ def test_create_configuration_file() -> None:
         best_configuration,
         ablation_racing
     )
+
+    assert validation_config_file.exists() is True, (
+        "Validation config file does not exist."
+    )
+
     assert returned_val == validation_config_file
 
     config_dict = {
