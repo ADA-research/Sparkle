@@ -44,6 +44,7 @@ class AblationScenario:
         self.config_scenario = configuration_scenario
         self.solver = configuration_scenario.solver
         self.train_set = configuration_scenario.instance_set
+        self.concurrent_clis = None
         self.test_set = test_set
         self.output_dir = output_dir
         self.scenario_name = configuration_scenario.name
@@ -68,7 +69,7 @@ class AblationScenario:
                                   cutoff_length: str,
                                   concurrent_clis: int,
                                   best_configuration: dict,
-                                  ablation_racing: bool = False) -> None:
+                                  ablation_racing: bool = False) -> Path:
         """Create a configuration file for ablation analysis.
 
         Args:
@@ -134,8 +135,9 @@ class AblationScenario:
         conf_valid = config.replace(f"execdir = {self.tmp_dir.absolute()}\n",
                                     f"execdir = {self.validation_dir_tmp.absolute()}\n")
         (self.validation_dir / config_file.name).open("w").write(conf_valid)
+        return self.validation_dir / config_file.name
 
-    def create_instance_file(self: AblationScenario, test: bool = False) -> None:
+    def create_instance_file(self: AblationScenario, test: bool = False) -> Path:
         """Create an instance file for ablation analysis."""
         file_suffix = "_train.txt"
         instance_set = self.train_set
@@ -155,6 +157,7 @@ class AblationScenario:
                     fh.write(f"{instance.absolute()}\n")
         # Copy to validation directory
         shutil.copyfile(file_instance, self.validation_dir / file_instance.name)
+        return file_instance
 
     def check_for_ablation(self: AblationScenario) -> bool:
         """Checks if ablation has terminated successfully."""
@@ -242,5 +245,4 @@ class AblationScenario:
             if run_on == Runner.LOCAL:
                 run_ablation_validation.wait()
             runs.append(run_ablation_validation)
-
         return runs
