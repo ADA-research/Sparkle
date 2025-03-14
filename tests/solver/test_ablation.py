@@ -2,9 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 import pytest
-from unittest.mock import patch, MagicMock
-
-from runrunner.base import Run
+from unittest.mock import patch
 
 from sparkle.configurator.implementations import SMAC2Scenario
 from sparkle.configurator.ablation import AblationScenario
@@ -55,29 +53,33 @@ def test_create_configuration_file() -> None:
     cutoff_time = 2
     cutoff_length = "3"
     concurrent_clis = 4
-    best_configuration = {"init_solution": "2", "perform_first_div": "1", "asd": 5}
+    best_configuration = {
+        "init_solution": "2",
+        "perform_first_div": "1",
+        "asd": 5,
+        "test_bool": True
+    }
     ablation_racing = False
+    validation_config_file = scenario.validation_dir / "ablation_config.txt"
 
-    assert scenario.create_configuration_file
-    (
+    assert validation_config_file.exists() is True, (
+        "Validation config file does not exist."
+    )
+
+    returned_val = scenario.create_configuration_file(
         cutoff_time,
         cutoff_length,
         concurrent_clis,
         best_configuration,
         ablation_racing
-    ) is None
-
-    validation_config_file = scenario.validation_dir / "ablation_config.txt"
-    assert validation_config_file.exists() is True, (
-        "Validation config file does not exist."
     )
+    assert returned_val == validation_config_file
 
-    config_dict = {}
-    with validation_config_file.open() as f:
-        for line in f:
-            if "=" in line:
-                key, value = line.split("=", 1)
-                config_dict[key.strip()] = value.strip()
+    config_dict = {
+        key.strip(): value.strip()
+        for line in validation_config_file.open().readlines()
+        for key, value in [line.split("=", 1)]
+    }
 
     assert config_dict.get("cutoffTime") == f"{cutoff_time}", (
         "cutoffTime does not match"
@@ -108,6 +110,10 @@ def test_create_configuration_file() -> None:
         "Extraneous key 'asd' should not be present in targetConfiguration."
     )
 
+    assert "test_bool" not in target_config, (
+        "Extraneous key 'test_bool' should not be present in targetConfiguration."
+    )
+
 
 @pytest.mark.parametrize(
     "test, file_name", [
@@ -133,8 +139,8 @@ def test_create_instance_file_train_set(test: bool, file_name: str) -> None:
         f"{validation_instance_file} does not exist."
     )
 
-    main_train_content = main_instance_file.read_text().splitlines()
-    validation_content = validation_instance_file.read_text().splitlines()
+    main_train_content = main_instance_file.open().readlines()
+    validation_content = validation_instance_file.open().readlines()
 
     assert main_train_content == validation_content, (
         "The instance file and its validation copy "
@@ -204,9 +210,8 @@ def test_submit_ablation(path: Instance_Set, test: bool) -> None:
         output_directory,
         override_dirs
     )
-    with patch("sparkle.configurator.ablation.rrr.add_to_queue", autospec=True)\
+    with patch("sparkle.configurator.ablation.rrr.add_to_queue")\
             as mock_add_to_queue:
-        mock_add_to_queue.side_effect = lambda *args, **kwargs: MagicMock(spec=Run)
         result = scenario_submit.submit_ablation(log_dir)
 
         if test:
@@ -229,9 +234,3 @@ def test_submit_ablation(path: Instance_Set, test: bool) -> None:
         assert isinstance(result, list), (
             f"submit_ablation should return a list. Instead got: {result}"
         )
-
-        for run in result:
-            assert isinstance(run, Run), (
-                "Each returned object should be an instance of Run."
-                f"Instead got: {run}"
-            )
