@@ -1,7 +1,10 @@
 """Test ablation scenario class."""
 from __future__ import annotations
-from unittest import TestCase
 from pathlib import Path
+import pytest
+from unittest.mock import patch, MagicMock
+
+from runrunner.base import Run
 
 from sparkle.configurator.implementations import SMAC2Scenario
 from sparkle.configurator.ablation import AblationScenario
@@ -10,175 +13,225 @@ from sparkle.types.objective import PAR
 from sparkle.instance import Instance_Set
 
 
-class TestAblationScenario(TestCase):
-    """Test ablation scenario class."""
+solver = Solver(Path("tests/test_files/Solvers/Test-Solver"))
+dataset = Instance_Set(Path(
+    "tests/test_files/Instances/Test-Instance-Set"))
+objective = PAR(10)
+test_dataset = Instance_Set(Path(
+    "tests/test_files/Instances/Test-Instance-Set"))
+output_directory: Path = Path("Output/ablation_test")
+ablation_executable: Path = None
+validation_executable: Path = None
+override_dirs: bool = False
+configuration_scenario = SMAC2Scenario(
+    solver,
+    dataset,
+    [objective],
+    Path()
+)
+scenario = AblationScenario(
+    configuration_scenario,
+    test_dataset,
+    output_directory,
+    override_dirs
+)
 
-    def setUp(self: TestAblationScenario) -> None:
-        """Setup objects for tests."""
-        self.solver = Solver(Path("tests/test_files/Solvers/Test-Solver"))
-        self.dataset = Instance_Set(Path(
-            "tests/test_files/Instances/Test-Instance-Set"))
-        self.objective = PAR(10)
-        self.test_dataset = Instance_Set(Path(
-            "tests/test_files/Instances/Test-Instance-Set"))
-        self.output_directory: Path = Path("Output/ablation_test")
-        self.ablation_executable: Path = None
-        self.validation_executable: Path = None
-        self.override_dirs: bool = False
-        self.configuration_scenario = SMAC2Scenario(
-            self.solver,
-            self.dataset,
-            [self.objective],
-            Path())
-        self.scenario = AblationScenario(
-            self.configuration_scenario, self.test_dataset, self.output_directory,
-            self.override_dirs)
 
-    def test_ablation_scenario_constructor(self: TestAblationScenario) -> None:
-        """Test for ablation scenario constructor."""
-        assert self.scenario.solver == self.solver
-        assert self.scenario.train_set == self.dataset
-        assert self.scenario.test_set == self.test_dataset
-        assert self.scenario.output_dir == self.output_directory
-        assert self.scenario.scenario_name ==\
-            f"{self.solver.name}_{self.dataset.name}_{self.test_dataset.name}"
-        assert self.scenario.scenario_dir ==\
-            self.output_directory / self.scenario.scenario_name
-        assert self.scenario.validation_dir == self.scenario.scenario_dir / "validation"
+def test_ablation_scenario_constructor() -> None:
+    """Test for ablation scenario constructor."""
+    assert scenario.solver == solver
+    assert scenario.train_set == dataset
+    assert scenario.test_set == test_dataset
+    assert scenario.output_dir == output_directory
+    assert scenario.scenario_name ==\
+        f"{solver.name}_{dataset.name}_{test_dataset.name}"
+    assert scenario.scenario_dir ==\
+        output_directory / scenario.scenario_name
+    assert scenario.validation_dir == scenario.scenario_dir / "validation"
 
-    def test_create_configuration_file(self: TestAblationScenario) -> None:
-        """Test for method create_configuration_file."""
-        cutoff_time = 2
-        cutoff_length = "3"
-        concurrent_clis = 4
-        best_configuration = {"init_solution": "2", "perform_first_div": "1", "asd": 5}
-        ablation_racing = False
 
-        return_val = self.scenario.create_configuration_file(cutoff_time,
-                                                             cutoff_length,
-                                                             concurrent_clis,
-                                                             best_configuration,
-                                                             ablation_racing)
+def test_create_configuration_file() -> None:
+    """Test for method create_configuration_file."""
+    cutoff_time = 2
+    cutoff_length = "3"
+    concurrent_clis = 4
+    best_configuration = {"init_solution": "2", "perform_first_div": "1", "asd": 5}
+    ablation_racing = False
 
-        validation_config_file = self.scenario.validation_dir / "ablation_config.txt"
-        self.assertTrue(validation_config_file.exists(),
-                        "Validation config file does not exist.")
+    assert scenario.create_configuration_file
+    (
+        cutoff_time,
+        cutoff_length,
+        concurrent_clis,
+        best_configuration,
+        ablation_racing
+    ) is None
 
-        config_dict = {}
-        with validation_config_file.open() as f:
-            for line in f:
-                if "=" in line:
-                    key, value = line.split("=", 1)
-                    config_dict[key.strip()] = value.strip()
+    validation_config_file = scenario.validation_dir / "ablation_config.txt"
+    assert validation_config_file.exists() is True, (
+        "Validation config file does not exist."
+    )
 
-        self.assertEqual(config_dict.get("cutoffTime"),
-                         f"{cutoff_time}",
-                         "cutoffTime does not match")
+    config_dict = {}
+    with validation_config_file.open() as f:
+        for line in f:
+            if "=" in line:
+                key, value = line.split("=", 1)
+                config_dict[key.strip()] = value.strip()
 
-        self.assertEqual(config_dict.get("cutoff_length"),
-                         f"{cutoff_length}",
-                         "cutoff_length does not match")
+    assert config_dict.get("cutoffTime") == f"{cutoff_time}", (
+        "cutoffTime does not match"
+    )
 
-        self.assertEqual(config_dict.get("cli-cores"),
-                         f"{concurrent_clis}",
-                         "cli-cores does not match")
+    assert config_dict.get("cutoff_length") == f"{cutoff_length}", (
+        "cutoff_length does not match"
+    )
 
-        self.assertEqual(config_dict.get("useRacing"),
-                         f"{ablation_racing}",
-                         "useRacing does not match")
+    assert config_dict.get("cli-cores") == f"{concurrent_clis}", (
+        "cli-cores does not match"
+    )
 
-        target_config = config_dict.get("targetConfiguration", "")
-        self.assertIn("-init_solution 2", target_config,
-                      "Expected 'init_solution' setting not found.")
+    assert config_dict.get("useRacing") == f"{ablation_racing}", (
+        "useRacing does not match"
+    )
 
-        self.assertIn("-perform_first_div 1", target_config,
-                      "Expected 'perform_first_div' setting not found.")
+    target_config = config_dict.get("targetConfiguration", "")
+    assert "-init_solution 2" in target_config, (
+        "Expected 'init_solution' setting not found."
+    )
 
-        self.assertNotIn("asd", target_config,
-                         "Extraneous key 'asd' should not be"
-                         " present in targetConfiguration.")
-        assert return_val is None
+    assert "-perform_first_div 1" in target_config, (
+        "Expected 'perform_first_div' setting not found."
+    )
 
-    def test_create_instance_file_train_set(self: TestAblationScenario) -> None:
-        """Test for method create_instance_file_train_set."""
-        test = False
-        main_instance_file = \
-            self.scenario.scenario_dir / "instances_train.txt"
-        validation_instance_file = \
-            self.scenario.validation_dir / "instances_train.txt"
+    assert "asd" not in target_config, (
+        "Extraneous key 'asd' should not be present in targetConfiguration."
+    )
 
-        return_val = self.scenario.create_instance_file(test)
 
-        self.assertTrue(main_instance_file.exists(),
-                        "Main train instance file does not exist.")
+@pytest.mark.parametrize(
+    "test, file_name", [
+        (False, "instances_train.txt"),
+        (True, "instances_test.txt")
+    ]
+)
+def test_create_instance_file_train_set(test: bool, file_name: str) -> None:
+    """Test for method create_instance_file_train_set."""
+    test_val = test
+    main_instance_file = \
+        scenario.scenario_dir / file_name
+    validation_instance_file = \
+        scenario.validation_dir / file_name
 
-        self.assertTrue(validation_instance_file.exists(),
-                        "Validation train instance file does not exist.")
+    assert scenario.create_instance_file(test_val) is None
 
-        main_train_content = main_instance_file.read_text().splitlines()
-        validation_content = validation_instance_file.read_text().splitlines()
+    assert main_instance_file.exists() is True, (
+        f"{main_instance_file} does not exist."
+    )
 
-        self.assertEqual(main_train_content, validation_content,
-                         "The instance file and its validation copy"
-                         "do not have the same content.")
-        assert return_val is None
+    assert validation_instance_file.exists() is True, (
+        f"{validation_instance_file} does not exist."
+    )
 
-    def test_create_instance_file_test_set(self: TestAblationScenario) -> None:
-        """Test for method create_instance_file_test_set."""
-        test = True
-        return_val = self.scenario.create_instance_file(test)
+    main_train_content = main_instance_file.read_text().splitlines()
+    validation_content = validation_instance_file.read_text().splitlines()
 
-        main_instance_file = self.scenario.scenario_dir / "instances_test.txt"
+    assert main_train_content == validation_content, (
+        "The instance file and its validation copy "
+        "do not have the same content."
+    )
 
-        validation_instance_file = self.scenario.validation_dir / "instances_train.txt"
 
-        self.assertTrue(main_instance_file.exists(),
-                        "Main test instance file should not exist.")
+@pytest.mark.parametrize(
+    "output_dir_case, case", [
+        (Path("tests/test_files/Ablation/Ablation_Correct"), "correct"),
+        (Path("tests/test_files/Ablation/No_Ablation"), "no"),
+        (Path("tests/test_files/Ablation/Ablation_Corrupted"), "corrupted")
+    ]
+)
+def test_check_for_ablation(output_dir_case: Path, case: str) -> None:
+    """Test for method check_for_ablation_file_exists."""
+    scenario_check = AblationScenario(
+        configuration_scenario,
+        test_dataset,
+        output_dir_case,
+        override_dirs
+    )
+    return_val = scenario_check.check_for_ablation()
+    if case == "correct":
+        return_val is True
+    else:
+        return_val is False
 
-        self.assertTrue(validation_instance_file.exists(),
-                        "Validation test instance file should not exist.")
 
-        main_content = main_instance_file.read_text().splitlines()
-        validation_content = validation_instance_file.read_text().splitlines()
+@pytest.mark.parametrize(
+    "output_dir_case, case", [
+        (Path("tests/test_files/Ablation/Ablation_Correct"), "correct"),
+        (Path("tests/test_files/Ablation/No_Ablation"), "no"),
+        (Path("tests/test_files/Ablation/Ablation_Corrupted"), "corrupted")
+    ]
+)
+def test_read_ablation_table_correct_file(output_dir_case: Path, case: str) -> None:
+    """Test for reading an ablation table from a valid file."""
+    scenario_read = AblationScenario(
+        configuration_scenario,
+        test_dataset,
+        output_dir_case,
+        override_dirs
+    )
+    ablation_table = scenario_read.read_ablation_table()
+    if case == "correct":
+        for line in ablation_table:
+            assert type(line) == list
+            for value in line:
+                assert type(value) is str
+    else:
+        assert ablation_table == []
 
-        self.assertEqual(main_content, validation_content,
-                         "The instance file and its validation copy"
-                         "do not have the same content.")
-        assert return_val is None
 
-    def test_check_for_ablation_file_exists(self: TestAblationScenario) -> None:
-        """Test for method check_for_ablation_file_exists."""
-        return_val = self.scenario.check_for_ablation()
-        assert return_val is False
-        # TODO: Write test for when correct file exists
+@pytest.mark.parametrize(
+    "path, test", [
+        (Instance_Set(Path("tests/test_files/Instances/Test-Instance-Set")), True),
+        (None, False),
+    ]
+)
+def test_submit_ablation(path: Instance_Set, test: bool) -> None:
+    """Test for method submit ablation."""
+    log_dir = Path("Output/Log")
+    scenario_submit = AblationScenario(
+        configuration_scenario,
+        path,
+        output_directory,
+        override_dirs
+    )
+    with patch("sparkle.configurator.ablation.rrr.add_to_queue", autospec=True)\
+            as mock_add_to_queue:
+        mock_add_to_queue.side_effect = lambda *args, **kwargs: MagicMock(spec=Run)
+        result = scenario_submit.submit_ablation(log_dir)
 
-    def test_check_for_ablation_file_not_exists(self: TestAblationScenario) -> None:
-        """Test for method check_for_ablation_file_not_exists."""
-        # TODO: Write test for when file does not exist
-        pass
+        if test:
+            assert mock_add_to_queue.call_count == 2, (
+                "Expected add_to_queue to be called twice."
+            )
+            assert len(result) == 2, (
+                "Expected two Run objects in the returned list. "
+                f"Instead got: {len(result)}"
+            )
+        else:
+            assert mock_add_to_queue.call_count == 1, (
+                "Expected add_to_queue to be called once."
+            )
+            assert len(result) == 1, (
+                "Expected one Run objects in the returned list. "
+                f"Instead got: {len(result)}"
+            )
 
-    def test_check_for_ablation_file_corrupted(self: TestAblationScenario) -> None:
-        """Test for method check_for_ablation_file_corrupted."""
-        # TODO: Write test for when file is corrupted
-        pass
+        assert isinstance(result, list), (
+            f"submit_ablation should return a list. Instead got: {result}"
+        )
 
-    def test_read_ablation_table_correct_file(self: TestAblationScenario) -> None:
-        """Test for reading an ablation table from a valid file."""
-        # TODO: Write test for correct file
-        pass
-
-    def test_read_ablation_table_no_file(self: TestAblationScenario) -> None:
-        """Test for reading an ablation table from no file."""
-        # TODO: Write test for not existant file
-        pass
-
-    def test_read_ablation_table_corrupted_file(self: TestAblationScenario) -> None:
-        """Test for reading an ablation table from corrupted file."""
-        # TODO: Write test for partially corrupted file
-        pass
-
-    def test_submit_ablation(self: TestAblationScenario) -> None:
-        """Test for method submit ablation."""
-        # NOTE: RunRunner calls must be mocked to avoid slurm job submission
-        # TODO: Write test
-        pass
+        for run in result:
+            assert isinstance(run, Run), (
+                "Each returned object should be an instance of Run."
+                f"Instead got: {run}"
+            )
