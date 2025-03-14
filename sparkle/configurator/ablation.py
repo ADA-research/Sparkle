@@ -44,6 +44,10 @@ class AblationScenario:
         self.config_scenario = configuration_scenario
         self.solver = configuration_scenario.solver
         self.train_set = configuration_scenario.instance_set
+        # This variable used in a different function
+        # and changed in create_configuration_file therefore it should exist.
+        # I couldn't decide the default value. I set 0.
+        self.concurrent_clis = 0
         self.test_set = test_set
         self.output_dir = output_dir
         self.scenario_name = configuration_scenario.name
