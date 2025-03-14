@@ -122,15 +122,14 @@ def test_create_configuration_file() -> None:
         (True, "instances_test.txt")
     ]
 )
-def test_create_instance_file_train_set(test: bool, file_name: str) -> None:
-    """Test for method create_instance_file_train_set."""
-    test_val = test
+def test_create_instance_file(test: bool, file_name: str) -> None:
+    """Test for method create_instance_file."""
     main_instance_file = \
         scenario.scenario_dir / file_name
     validation_instance_file = \
         scenario.validation_dir / file_name
 
-    assert scenario.create_instance_file(test_val) is None
+    assert scenario.create_instance_file(test) == main_instance_file
 
     assert main_instance_file.exists() is True, (
         f"{main_instance_file} does not exist."
@@ -157,7 +156,7 @@ def test_create_instance_file_train_set(test: bool, file_name: str) -> None:
     ]
 )
 def test_check_for_ablation(output_dir_case: Path, case: str) -> None:
-    """Test for method check_for_ablation_file_exists."""
+    """Test for method check_for_ablation."""
     scenario_check = AblationScenario(
         configuration_scenario,
         test_dataset,
@@ -178,8 +177,8 @@ def test_check_for_ablation(output_dir_case: Path, case: str) -> None:
         (Path("tests/test_files/Ablation/Ablation_Corrupted"), "corrupted")
     ]
 )
-def test_read_ablation_table_correct_file(output_dir_case: Path, case: str) -> None:
-    """Test for reading an ablation table from a valid file."""
+def test_read_ablation_table(output_dir_case: Path, case: str) -> None:
+    """Test for reading an ablation table."""
     scenario_read = AblationScenario(
         configuration_scenario,
         test_dataset,
