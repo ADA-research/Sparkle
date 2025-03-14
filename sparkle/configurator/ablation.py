@@ -137,7 +137,7 @@ class AblationScenario:
         (self.validation_dir / config_file.name).open("w").write(conf_valid)
         return self.validation_dir / config_file.name
 
-    def create_instance_file(self: AblationScenario, test: bool = False) -> None:
+    def create_instance_file(self: AblationScenario, test: bool = False) -> Path:
         """Create an instance file for ablation analysis."""
         file_suffix = "_train.txt"
         instance_set = self.train_set
@@ -157,6 +157,7 @@ class AblationScenario:
                     fh.write(f"{instance.absolute()}\n")
         # Copy to validation directory
         shutil.copyfile(file_instance, self.validation_dir / file_instance.name)
+        return file_instance
 
     def check_for_ablation(self: AblationScenario) -> bool:
         """Checks if ablation has terminated successfully."""
