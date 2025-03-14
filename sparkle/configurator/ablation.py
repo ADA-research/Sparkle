@@ -44,10 +44,7 @@ class AblationScenario:
         self.config_scenario = configuration_scenario
         self.solver = configuration_scenario.solver
         self.train_set = configuration_scenario.instance_set
-        # This variable used in a different function
-        # and changed in create_configuration_file therefore it should exist.
-        # I couldn't decide the default value. I set 0.
-        self.concurrent_clis = 0
+        self.concurrent_clis = None
         self.test_set = test_set
         self.output_dir = output_dir
         self.scenario_name = configuration_scenario.name
@@ -72,7 +69,7 @@ class AblationScenario:
                                   cutoff_length: str,
                                   concurrent_clis: int,
                                   best_configuration: dict,
-                                  ablation_racing: bool = False) -> None:
+                                  ablation_racing: bool = False) -> Path:
         """Create a configuration file for ablation analysis.
 
         Args:
@@ -138,6 +135,7 @@ class AblationScenario:
         conf_valid = config.replace(f"execdir = {self.tmp_dir.absolute()}\n",
                                     f"execdir = {self.validation_dir_tmp.absolute()}\n")
         (self.validation_dir / config_file.name).open("w").write(conf_valid)
+        return self.validation_dir / config_file.name
 
     def create_instance_file(self: AblationScenario, test: bool = False) -> None:
         """Create an instance file for ablation analysis."""
@@ -246,5 +244,4 @@ class AblationScenario:
             if run_on == Runner.LOCAL:
                 run_ablation_validation.wait()
             runs.append(run_ablation_validation)
-
         return runs
