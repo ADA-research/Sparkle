@@ -1,171 +1,0 @@
-60.01/66.15	WARNING: for repeatability, setting FPU to use double precision
-60.01/66.15	============================[ Problem Statistics ]=============================
-60.01/66.15	|                                                                             |
-60.01/66.15	|  Number of variables:          3737                                         |
-60.01/66.15	|  Number of clauses:           14540                                         |
-60.01/66.15	|  Parse time:                   0.00 s                                       |
-60.01/66.15	subsumption left:      14539 (         0 subsumed,          0 deleted literals)subsumption left:      13539 (         0 subsumed,          0 deleted literals)subsumption left:      12539 (         0 subsumed,          0 deleted literals)subsumption left:      11539 (         0 subsumed,          0 deleted literals)subsumption left:      10539 (         0 subsumed,          0 deleted literals)subsumption left:       9539 (         0 subsumed,          0 deleted literals)subsumption left:       8539 (         0 subsumed,          0 deleted literals)subsumption left:       7539 (         0 subsumed,          0 deleted literals)subsumption left:       6539 (         0 subsumed,          0 deleted literals)subsumption left:       5539 (         0 subsumed,          0 deleted literals)subsumption left:       4539 (         0 subsumed,          0 deleted literals)subsumption left:       3539 (         0 subsumed,          0 deleted literals)subsumption left:       2539 (         0 subsumed,          0 deleted literals)subsumption left:       1539 (         0 subsumed,          0 deleted literals)subsumption left:        539 (         0 subsumed,          0 deleted literals)elimination left:       3736elimination left:       3636elimination left:       3536elimination left:       3436elimination left:       3336elimination left:       3236elimination left:       3136elimination left:       3036elimination left:       2936elimination left:       2836elimination left:       2736elimination left:       2636elimination left:       2536elimination left:       2436elimination left:       2336elimination left:       2237elimination left:       2139elimination left:       2042elimination left:       1942elimination left:       1842elimination left:       1742elimination left:       1642elimination left:       1542elimination left:       1442elimination left:       1342elimination left:       1242elimination left:       1142elimination left:       1042elimination left:        942elimination left:        842elimination left:        742elimination left:        642elimination left:        542elimination left:        442elimination left:        342elimination left:        242elimination left:        142elimination left:         42subsumption left:      12595 (         0 subsumed,          0 deleted literals)subsumption left:      11586 (         9 subsumed,          0 deleted literals)subsumption left:      10582 (        13 subsumed,          0 deleted literals)subsumption left:       9573 (        24 subsumed,          0 deleted literals)subsumption left:       8558 (        37 subsumed,          0 deleted literals)subsumption left:       7551 (        44 subsumed,          0 deleted literals)subsumption left:       6545 (        50 subsumed,          0 deleted literals)subsumption left:       5541 (        54 subsumed,          0 deleted literals)subsumption left:       4537 (        58 subsumed,          0 deleted literals)subsumption left:       3537 (        58 subsumed,          0 deleted literals)subsumption left:       2534 (        61 subsumed,          0 deleted literals)subsumption left:       1534 (        61 subsumed,          0 deleted literals)subsumption left:        532 (        63 subsumed,          0 deleted literals)elimination left:        179elimination left:         79|  Garbage collection:         398056 bytes =>       219444 bytes             |
-60.01/66.15	|  Eliminated clauses:           0.06 Mb                                      |
-60.01/66.15	|  Simplification time:          0.01 s                                       |
-60.01/66.15	|                                                                             |
-60.01/66.15	============================[ Search Statistics ]==============================
-60.01/66.15	| Conflicts |          ORIGINAL         |          LEARNT          | Progress |
-60.01/66.15	|           |    Vars  Clauses Literals |    Limit  Clauses Lit/Cl |          |
-60.01/66.15	===============================================================================
-60.01/66.15	|       100 |    2418    12610    42251 |     4623      100     28 |  0.000 % |
-60.01/66.15	|       250 |    2418    12610    42251 |     5086      250     29 |  0.000 % |
-60.01/66.15	|       475 |    2418    12610    42251 |     5594      475     31 |  0.000 % |
-60.01/66.15	|       812 |    2418    12610    42251 |     6154      812     32 |  0.000 % |
-60.01/66.15	|      1318 |    2418    12610    42251 |     6769     1318     32 |  0.000 % |
-60.01/66.15	|      2077 |    2418    12610    42251 |     7446     2077     32 |  0.000 % |
-60.01/66.15	|      3216 |    2418    12610    42251 |     8191     3216     35 |  0.000 % |
-60.01/66.15	|      4924 |    2418    12610    42251 |     9010     4924     34 |  0.000 % |
-60.01/66.15	|      7486 |    2418    12610    42251 |     9911     7486     34 |  0.000 % |
-60.01/66.15	|  Garbage collection:        1656540 bytes =>       884420 bytes             |
-60.01/66.15	|     11330 |    2418    12610    42251 |    10902     6318     31 |  0.000 % |
-60.01/66.15	|  Garbage collection:        1753176 bytes =>       973412 bytes             |
-60.01/66.15	|     17096 |    2418    12610    42251 |    11992     6584     33 |  0.000 % |
-60.01/66.15	|  Garbage collection:        1976824 bytes =>      1059068 bytes             |
-60.01/66.15	|     25745 |    2418    12610    42251 |    13191     9212     34 |  0.000 % |
-60.01/66.15	|  Garbage collection:        2140172 bytes =>      1134364 bytes             |
-60.01/66.15	|  Garbage collection:        2152464 bytes =>      1160860 bytes             |
-60.01/66.15	|     38719 |    2418    12610    42251 |    14511     8862     35 |  0.000 % |
-60.01/66.15	|  Garbage collection:        2516872 bytes =>      1352356 bytes             |
-60.01/66.15	|  Garbage collection:        2420016 bytes =>      1202788 bytes             |
-60.01/66.15	|     58180 |    2418    12610    42251 |    15962    13649     33 |  0.000 % |
-60.01/66.15	|  Garbage collection:        2516448 bytes =>      1335184 bytes             |
-60.01/66.15	|  Garbage collection:        2578948 bytes =>      1368564 bytes             |
-60.01/66.15	|  Garbage collection:        2533132 bytes =>      1312204 bytes             |
-60.01/66.15	|  Garbage collection:        2564820 bytes =>      1382692 bytes             |
-60.01/66.15	|     87372 |    2418    12610    42251 |    17558    10730     35 |  0.000 % |
-60.01/66.15	|  Garbage collection:        2950804 bytes =>      1557976 bytes             |
-60.01/66.15	|  Garbage collection:        3039352 bytes =>      1557100 bytes             |
-60.01/66.15	|  Garbage collection:        2861824 bytes =>      1440872 bytes             |
-60.01/66.15	|  Garbage collection:        2736908 bytes =>      1417440 bytes             |
-60.01/66.15	|  Garbage collection:        2644924 bytes =>      1342476 bytes             |
-60.01/66.15	|    131161 |    2418    12610    42251 |    19314    10364     30 |  0.000 % |
-60.01/66.15	|  Garbage collection:        2884688 bytes =>      1541088 bytes             |
-60.01/66.15	|  Garbage collection:        2977072 bytes =>      1545812 bytes             |
-60.01/66.15	|  Garbage collection:        2948704 bytes =>      1522352 bytes             |
-60.01/66.15	|  Garbage collection:        3141900 bytes =>      1726148 bytes             |
-60.01/66.15	|  Garbage collection:        3140764 bytes =>      1529616 bytes             |
-60.01/66.15	|  Garbage collection:        3120232 bytes =>      1732820 bytes             |
-60.01/66.15	|    196845 |    2418    12610    42251 |    21245    17811     39 |  0.000 % |
-60.01/66.15	|  Garbage collection:        3771336 bytes =>      1946804 bytes             |
-60.01/66.15	|  Garbage collection:        3929036 bytes =>      1996924 bytes             |
-60.01/66.15	|  Garbage collection:        4063212 bytes =>      2061252 bytes             |
-60.01/66.15	|  Garbage collection:        4187516 bytes =>      2088372 bytes             |
-60.01/66.15	|  Garbage collection:        3635004 bytes =>      1690180 bytes             |
-60.01/66.15	|  Garbage collection:        3214312 bytes =>      1656476 bytes             |
-60.01/66.15	|  Garbage collection:        3243412 bytes =>      1700128 bytes             |
-60.01/66.15	|  Garbage collection:        3230456 bytes =>      1644032 bytes             |
-60.01/66.15	|  Garbage collection:        3134944 bytes =>      1591392 bytes             |
-60.01/66.15	|    295371 |    2418    12610    42251 |    23370    20174     34 |  0.000 % |
-60.01/66.15	|  Garbage collection:        3585356 bytes =>      1913948 bytes             |
-60.01/66.15	|  Garbage collection:        3627992 bytes =>      1797916 bytes             |
-60.01/66.15	|  Garbage collection:        3492860 bytes =>      1808456 bytes             |
-60.01/66.15	|  Garbage collection:        3546264 bytes =>      1815012 bytes             |
-60.01/66.15	|  Garbage collection:        3525604 bytes =>      1822784 bytes             |
-60.01/66.15	|  Garbage collection:        3625256 bytes =>      1902724 bytes             |
-60.01/66.15	|  Garbage collection:        3644668 bytes =>      1848840 bytes             |
-60.01/66.15	|  Garbage collection:        3542652 bytes =>      1769544 bytes             |
-60.01/66.15	|  Garbage collection:        3540500 bytes =>      1843652 bytes             |
-60.01/66.15	|  Garbage collection:        3747036 bytes =>      1926208 bytes             |
-60.01/66.15	|  Garbage collection:        3633900 bytes =>      1786320 bytes             |
-60.01/66.15	|  Garbage collection:        3790460 bytes =>      2104232 bytes             |
-60.01/66.15	|  Garbage collection:        4444620 bytes =>      2386908 bytes             |
-60.01/66.15	|    443160 |    2418    12610    42251 |    25707    15109     44 |  0.000 % |
-60.01/66.15	|  Garbage collection:        4956096 bytes =>      2269544 bytes             |
-60.01/66.15	|  Garbage collection:        4698816 bytes =>      2283116 bytes             |
-60.01/66.15	|  Garbage collection:        4687344 bytes =>      2334728 bytes             |
-60.01/66.15	|  Garbage collection:        5050636 bytes =>      2556456 bytes             |
-60.01/66.15	|  Garbage collection:        5011592 bytes =>      2401672 bytes             |
-60.01/66.15	|  Garbage collection:        4580280 bytes =>      2121356 bytes             |
-60.01/66.15	|  Garbage collection:        4065668 bytes =>      1856284 bytes             |
-60.01/66.15	|  Garbage collection:        3951972 bytes =>      1886108 bytes             |
-60.01/66.15	|  Garbage collection:        4127452 bytes =>      2012540 bytes             |
-60.01/66.15	|  Garbage collection:        4106712 bytes =>      1902836 bytes             |
-60.01/66.15	|  Garbage collection:        4007156 bytes =>      1871648 bytes             |
-60.01/66.15	|  Garbage collection:        3987340 bytes =>      1974424 bytes             |
-60.01/66.15	|  Garbage collection:        4098656 bytes =>      1974836 bytes             |
-60.01/66.15	|  Garbage collection:        3934384 bytes =>      1833628 bytes             |
-60.01/66.15	|  Garbage collection:        3938808 bytes =>      1914432 bytes             |
-60.01/66.15	|  Garbage collection:        4085692 bytes =>      1999112 bytes             |
-60.01/66.15	|    664843 |    2418    12610    42251 |    28277    19855     37 |  0.000 % |
-60.01/66.15	|  Garbage collection:        4620288 bytes =>      1915608 bytes             |
-60.01/66.15	|  Garbage collection:        4495024 bytes =>      1997000 bytes             |
-60.01/66.15	|  Garbage collection:        4542120 bytes =>      2049656 bytes             |
-60.01/66.15	|  Garbage collection:        4797840 bytes =>      2183288 bytes             |
-60.01/66.15	|  Garbage collection:        4956560 bytes =>      2233948 bytes             |
-60.01/66.15	|  Garbage collection:        4938732 bytes =>      1997744 bytes             |
-60.01/66.15	|  Garbage collection:        4380844 bytes =>      1927292 bytes             |
-60.01/66.15	|  Garbage collection:        4359496 bytes =>      1885920 bytes             |
-60.01/66.15	|  Garbage collection:        4374240 bytes =>      1927548 bytes             |
-60.01/66.15	|  Garbage collection:        4407392 bytes =>      1987732 bytes             |
-60.01/66.15	|  Garbage collection:        4448716 bytes =>      1997568 bytes             |
-60.01/66.15	|  Garbage collection:        4464908 bytes =>      1915036 bytes             |
-60.01/66.15	|  Garbage collection:        4370960 bytes =>      2013136 bytes             |
-60.01/66.15	|  Garbage collection:        4621044 bytes =>      2072208 bytes             |
-60.01/66.15	|  Garbage collection:        4728808 bytes =>      2011256 bytes             |
-60.01/66.15	|  Garbage collection:        4489744 bytes =>      1967524 bytes             |
-60.01/66.15	|  Garbage collection:        4493720 bytes =>      1981040 bytes             |
-60.01/66.15	|  Garbage collection:        4668792 bytes =>      2138108 bytes             |
-60.01/66.15	|  Garbage collection:        4732080 bytes =>      2054768 bytes             |
-60.01/66.15	|  Garbage collection:        4799808 bytes =>      2212728 bytes             |
-60.01/66.15	|  Garbage collection:        4977016 bytes =>      2220388 bytes             |
-60.01/66.15	|    997368 |    2418    12610    42251 |    31105    13561     37 |  0.000 % |
-60.01/66.15	|  Garbage collection:        5424968 bytes =>      2370408 bytes             |
-60.01/66.15	|  Garbage collection:        5031464 bytes =>      2042576 bytes             |
-60.01/66.15	|  Garbage collection:        4868892 bytes =>      2162712 bytes             |
-60.01/66.15	|  Garbage collection:        5060300 bytes =>      2201460 bytes             |
-60.01/66.15	|  Garbage collection:        5318920 bytes =>      2329880 bytes             |
-60.01/66.15	|  Garbage collection:        5171432 bytes =>      2226844 bytes             |
-60.01/66.15	|  Garbage collection:        5152664 bytes =>      2227708 bytes             |
-60.01/66.15	|  Garbage collection:        4725108 bytes =>      1976196 bytes             |
-60.01/66.15	|  Garbage collection:        4673000 bytes =>      1973244 bytes             |
-60.01/66.15	|  Garbage collection:        4771308 bytes =>      1935032 bytes             |
-60.01/66.15	|  Garbage collection:        4879828 bytes =>      2020748 bytes             |
-60.01/66.15	|  Garbage collection:        4877012 bytes =>      1965556 bytes             |
-60.01/66.15	|  Garbage collection:        5110792 bytes =>      2120496 bytes             |
-60.01/66.15	|  Garbage collection:        5010524 bytes =>      1972928 bytes             |
-60.01/66.15	|  Garbage collection:        4836968 bytes =>      1940448 bytes             |
-60.01/66.15	|  Garbage collection:        4869368 bytes =>      1878568 bytes             |
-60.01/66.15	|  Garbage collection:        4676616 bytes =>      1886144 bytes             |
-60.01/66.15	|  Garbage collection:        4834840 bytes =>      2085500 bytes             |
-60.01/66.15	|  Garbage collection:        5524692 bytes =>      2295124 bytes             |
-60.01/66.15	|  Garbage collection:        5787104 bytes =>      2403660 bytes             |
-60.01/66.15	|  Garbage collection:        5056772 bytes =>      1895540 bytes             |
-60.01/66.15	|  Garbage collection:        4846988 bytes =>      1898956 bytes             |
-60.01/66.15	|  Garbage collection:        4827284 bytes =>      1922788 bytes             |
-60.01/66.15	|  Garbage collection:        4757264 bytes =>      1942380 bytes             |
-60.01/66.15	|  Garbage collection:        5125112 bytes =>      2159656 bytes             |
-60.01/66.15	|  Garbage collection:        5001552 bytes =>      1931348 bytes             |
-60.01/66.15	|  Garbage collection:        4736992 bytes =>      1897668 bytes             |
-60.01/66.15	|   1496156 |    2418    12610    42251 |    34216    14764     32 |  0.000 % |
-60.01/66.15	|  Garbage collection:        5074536 bytes =>      1964480 bytes             |
-60.01/66.15	|  Garbage collection:        5246732 bytes =>      1988052 bytes             |
-60.01/66.15	|  Garbage collection:        5330072 bytes =>      1975972 bytes             |
-60.01/66.15	|  Garbage collection:        5202860 bytes =>      2017216 bytes             |
-60.01/66.15	|  Garbage collection:        5354892 bytes =>      2042472 bytes             |
-60.01/66.15	|  Garbage collection:        5439188 bytes =>      2272668 bytes             |
-60.01/66.15	|  Garbage collection:        5287976 bytes =>      2196056 bytes             |
-60.01/66.15	|  Garbage collection:        5140232 bytes =>      1899208 bytes             |
-60.01/66.15	|  Garbage collection:        5382860 bytes =>      2087964 bytes             |
-60.01/66.15	|  Garbage collection:        5447088 bytes =>      1985172 bytes             |
-60.01/66.15	|  Garbage collection:        5289184 bytes =>      1933804 bytes             |
-60.01/66.15	|  Garbage collection:        5668824 bytes =>      2135172 bytes             |
-60.01/66.15	|  Garbage collection:        5193984 bytes =>      1942968 bytes             |
-60.01/66.15	|  Garbage collection:        5073208 bytes =>      1912008 bytes             |
-60.01/66.15	|  Garbage collection:        5254916 bytes =>      2015236 bytes             |
-60.01/66.15	===============================================================================
-60.01/66.15	restarts              : 3576
-60.01/66.15	conflicts             : 1821608        (30705 /sec)
-60.01/66.15	decisions             : 2457524        (0.00 % random) (41425 /sec)
-60.01/66.15	propagations          : 315572114      (5319355 /sec)
-60.01/66.15	conflict literals     : 68230122       (24.55 % deleted)
-60.01/66.15	Memory used           : 29.35 MB
-60.01/66.15	CPU time              : 59.3253 s
-60.01/66.15	
-60.01/66.15	INDETERMINATE
-60.01/66.15	
-60.01/66.15	{'status': 'TIMEOUT', 'quality': 0, 'solver_call': ['/home/pisirici/Desktop/sparkle-dev/Solvers/MiniSAT/minisat', '-verb=2', '-rnd-seed=3798024821.0', '/home/pisirici/Desktop/sparkle-dev/tests/test_files/Instances/Train-Instance-Set/train_instance_1.cnf']}
