@@ -1,0 +1,296 @@
+runsolver version 3.4.1 (svn: 4412) Copyright (C) 2010-2013 Olivier ROUSSEL
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+NUMA information:
+  number of nodes: 8
+  memory of node 0: 128540 MiB (106209 MiB free)
+  memory of node 1: 129020 MiB (81105 MiB free)
+  memory of node 2: 129020 MiB (124593 MiB free)
+  memory of node 3: 129008 MiB (124410 MiB free)
+  memory of node 4: 129020 MiB (125090 MiB free)
+  memory of node 5: 129020 MiB (125086 MiB free)
+  memory of node 6: 129020 MiB (122389 MiB free)
+  memory of node 7: 129017 MiB (121826 MiB free)
+  node distances:
+     10  12  12  12  32  32  32  32
+     12  10  12  12  32  32  32  32
+     12  12  10  12  32  32  32  32
+     12  12  12  10  32  32  32  32
+     32  32  32  32  10  12  12  12
+     32  32  32  32  12  10  12  12
+     32  32  32  32  12  12  10  12
+     32  32  32  32  12  12  12  10
+
+command line: /home/pisirici/Desktop/sparkle-dev/Solvers/MiniSAT/runsolver --timestamp --use-pty --cpu-limit 60 -w tests/test_files/Output/Parallel_Portfolio/Raw_Data/runtime_experiment/train_instance_1.cnf_MiniSAT_2025-03-25-16:03:46_1195278_3504457597.log -v tests/test_files/Output/Parallel_Portfolio/Raw_Data/runtime_experiment/train_instance_1.cnf_MiniSAT_2025-03-25-16:03:46_1195278_3504457597.val -o tests/test_files/Output/Parallel_Portfolio/Raw_Data/runtime_experiment/train_instance_1.cnf_MiniSAT_2025-03-25-16:03:46_1195278_3504457597.rawres Solvers/MiniSAT/sparkle_solver_wrapper.py "{"solver_dir": "/home/pisirici/Desktop/sparkle-dev/Solvers/MiniSAT", "instance": "/home/pisirici/Desktop/sparkle-dev/tests/test_files/Instances/Train-Instance-Set/train_instance_1.cnf", "seed": "499236339", "objectives": "PAR10,status:metric,cpu_time:metric,wall_time:metric,memory:metric", "cutoff_time": "60"}" 
+
+running on 1 cores: 19
+
+Enforcing CPUTime limit (soft limit, will send SIGTERM then SIGKILL): 60 seconds
+Enforcing CPUTime limit (hard limit, will send SIGXCPU): 90 seconds
+Using a pseudo terminal to collect output from the solver
+Linux 5.14.0-362.24.1.el9_3.0.1.x86_64
+solver pid=517226, runsolver pid=517210
+Current StackSize limit: 8192 KiB
+
+
+[startup+0.100058 s]*
+/proc/loadavg: 2.92 2.38 2.56 9/1236 517236
+/proc/meminfo: memFree=952587168/1056430936 swapFree=0/0
+[pid=517226] ppid=517210 vsize=11016 memory=6328 CPUtime=0.02 cores=19
+/proc/517226/stat : 517226 (python3) S 517210 517226 517181 0 -1 4210688 2041 0 31 0 0 2 0 0 20 0 1 0 1036527892 11280384 1582 3145728000 94253289811968 94253291877085 140733755146480 0 0 0 0 16781312 2 1 0 0 17 19 0 0 0 0 0 94253292906416 94253293128544 94253324476416 140733755157924 140733755158288 140733755158288 140733755260866 0
+/proc/517226/statm: 2754 1582 987 505 0 1016 0
+Current children cumulated CPU time: 0.02 s
+Current children cumulated vsize: 11016 KiB
+Current children cumulated memory: 6328 KiB
+
+[startup+0.235851 s]*
+/proc/loadavg: 2.92 2.38 2.56 12/1236 517236
+/proc/meminfo: memFree=951965624/1056430936 swapFree=0/0
+[pid=517226] ppid=517210 vsize=12744 memory=9060 CPUtime=0.04 cores=19
+/proc/517226/stat : 517226 (python3) S 517210 517226 517181 0 -1 4210688 2530 0 42 0 1 3 0 0 20 0 1 0 1036527892 13049856 2265 3145728000 94253289811968 94253291877085 140733755146480 0 0 0 0 16781312 2 1 0 0 17 19 0 0 0 0 0 94253292906416 94253293128544 94253324476416 140733755157924 140733755158288 140733755158288 140733755260866 0
+/proc/517226/statm: 3186 2265 1191 505 0 1411 0
+Current children cumulated CPU time: 0.04 s
+Current children cumulated vsize: 12744 KiB
+Current children cumulated memory: 9060 KiB
+
+[startup+0.334151 s]*
+/proc/loadavg: 2.92 2.38 2.56 9/1236 517236
+/proc/meminfo: memFree=951156652/1056430936 swapFree=0/0
+[pid=517226] ppid=517210 vsize=15320 memory=11468 CPUtime=0.06 cores=19
+/proc/517226/stat : 517226 (python3) R 517210 517226 517181 0 -1 4210688 3088 0 46 0 2 4 0 0 20 0 1 0 1036527892 15687680 2867 3145728000 94253289811968 94253291877085 140733755146480 0 0 0 0 16781312 2 0 0 0 17 19 0 0 0 0 0 94253292906416 94253293128544 94253324476416 140733755157924 140733755158288 140733755158288 140733755260866 0
+/proc/517226/statm: 3830 2867 1226 505 0 2051 0
+Current children cumulated CPU time: 0.06 s
+Current children cumulated vsize: 15320 KiB
+Current children cumulated memory: 11468 KiB
+
+[startup+0.700147 s]
+/proc/loadavg: 2.92 2.38 2.56 8/1236 517236
+/proc/meminfo: memFree=949528568/1056430936 swapFree=0/0
+[pid=517226] ppid=517210 vsize=66540 memory=18404 CPUtime=0.15 cores=19
+/proc/517226/stat : 517226 (python3) S 517210 517226 517181 0 -1 4210688 4091 0 61 0 4 11 0 0 20 0 1 0 1036527892 68136960 4601 3145728000 94253289811968 94253291877085 140733755146480 0 0 0 0 16781312 2 1 0 0 17 19 0 0 0 0 0 94253292906416 94253293128544 94253324476416 140733755157924 140733755158288 140733755158288 140733755260866 0
+/proc/517226/statm: 16635 4601 2076 505 0 3199 0
+Current children cumulated CPU time: 0.15 s
+Current children cumulated vsize: 66540 KiB
+Current children cumulated memory: 18404 KiB
+
+[startup+1.50015 s]
+/proc/loadavg: 2.92 2.38 2.56 7/1236 517236
+/proc/meminfo: memFree=947441700/1056430936 swapFree=0/0
+[pid=517226] ppid=517210 vsize=88136 memory=33296 CPUtime=0.33 cores=19
+/proc/517226/stat : 517226 (python3) S 517210 517226 517181 0 -1 4210688 6482 0 135 0 8 25 0 0 20 0 1 0 1036527892 90251264 8324 3145728000 94253289811968 94253291877085 140733755146480 0 0 0 0 16781312 2 1 0 0 17 19 0 0 0 0 0 94253292906416 94253293128544 94253324476416 140733755157924 140733755158288 140733755158288 140733755260866 0
+/proc/517226/statm: 22034 8324 3571 505 0 5232 0
+Current children cumulated CPU time: 0.33 s
+Current children cumulated vsize: 88136 KiB
+Current children cumulated memory: 33296 KiB
+
+[startup+3.1328 s]
+/proc/loadavg: 2.92 2.38 2.56 5/1236 517236
+/proc/meminfo: memFree=939216468/1056430936 swapFree=0/0
+[pid=517226] ppid=517210 vsize=188516 memory=56392 CPUtime=0.59 cores=19
+/proc/517226/stat : 517226 (python3) D 517210 517226 517181 0 -1 4210688 9613 0 324 0 13 46 0 0 20 0 1 0 1036527892 193040384 14098 3145728000 94253289811968 94253291877085 140733755146480 0 0 0 0 16781312 2 1 0 0 17 19 0 0 0 0 0 94253292906416 94253293128544 94253324476416 140733755157924 140733755158288 140733755158288 140733755260866 0
+/proc/517226/statm: 47129 14098 6697 505 0 16686 0
+Current children cumulated CPU time: 0.59 s
+Current children cumulated vsize: 188516 KiB
+Current children cumulated memory: 56392 KiB
+heavy processes:
+  %CPU=64 pid=510486 uid=1012 cmd=
+  %CPU=78 pid=510487 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=99 pid=510488 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=42 pid=510489 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=49 pid=510490 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=45 pid=510491 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=42 pid=510492 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=59 pid=510493 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=82 pid=510494 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=43 pid=510495 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=46 pid=510496 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=60 pid=510497 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=45 pid=510498 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=81 pid=510499 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=99 pid=510500 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=62 pid=510501 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=12 pid=517071 uid=0 cmd=slurmstepd: [5175161.batch] 
+  %CPU=10 pid=517073 uid=0 cmd=slurmstepd: [5175163.batch] 
+  %CPU=12 pid=517075 uid=0 cmd=slurmstepd: [5175160.batch] 
+  %CPU=13 pid=517078 uid=0 cmd=slurmstepd: [5175159.batch] 
+  %CPU=11 pid=517081 uid=0 cmd=slurmstepd: [5175162.batch] 
+  %CPU=15 pid=517174 uid=0 cmd=slurmstepd: [5175159.0] 
+  %CPU=20 pid=517180 uid=0 cmd=slurmstepd: [5175164.0] 
+  %CPU=14 pid=517183 uid=0 cmd=slurmstepd: [5175163.0] 
+  %CPU=14 pid=517184 uid=0 cmd=slurmstepd: [5175161.0] 
+  %CPU=18 pid=517187 uid=0 cmd=slurmstepd: [5175162.0] 
+  %CPU=15 pid=517188 uid=0 cmd=slurmstepd: [5175160.0] 
+
+[startup+6.30016 s]
+/proc/loadavg: 3.33 2.48 2.59 11/1242 517242
+/proc/meminfo: memFree=932095264/1056430936 swapFree=0/0
+[pid=517226] ppid=517210 vsize=220488 memory=79604 CPUtime=0.88 cores=19
+/proc/517226/stat : 517226 (python3) S 517210 517226 517181 0 -1 4210688 14278 0 435 0 32 56 0 0 20 0 1 0 1036527892 225779712 19901 3145728000 94253289811968 94253291877085 140733755146480 0 0 0 0 16781312 2 1 0 0 17 19 0 0 0 0 0 94253292906416 94253293128544 94253324476416 140733755157924 140733755158288 140733755158288 140733755260866 0
+/proc/517226/statm: 55122 19901 8106 505 0 21575 0
+[pid=517241] ppid=517226 vsize=8676 memory=7836 CPUtime=1.67 cores=19
+/proc/517241/stat : 517241 (minisat) R 517226 517226 517181 0 -1 4210688 2292 0 6 0 167 0 0 0 20 0 1 0 1036528344 8884224 1959 3145728000 4194304 5387618 140727660719184 0 0 0 0 0 8404994 0 0 0 17 19 0 0 0 0 0 7487280 7497672 28499968 140727660723788 140727660723979 140727660723979 140727660826557 0
+/proc/517241/statm: 2169 1959 266 292 0 1871 0
+Current children cumulated CPU time: 2.55 s
+Current children cumulated vsize: 229164 KiB
+Current children cumulated memory: 87440 KiB
+heavy processes:
+  %CPU=64 pid=510486 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=78 pid=510487 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=99 pid=510488 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=42 pid=510489 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=49 pid=510490 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=45 pid=510491 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=42 pid=510492 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=59 pid=510493 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=82 pid=510494 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=43 pid=510495 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=46 pid=510496 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=60 pid=510497 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=45 pid=510498 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=81 pid=510499 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=99 pid=510500 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=62 pid=510501 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=12 pid=517180 uid=0 cmd=slurmstepd: [5175164.0] 
+  %CPU=11 pid=517187 uid=0 cmd=slurmstepd: [5175162.0] 
+
+[startup+12.7002 s]
+/proc/loadavg: 3.70 2.57 2.62 11/1242 517250
+/proc/meminfo: memFree=931875968/1056430936 swapFree=0/0
+[pid=517226] ppid=517210 vsize=220488 memory=79604 CPUtime=0.88 cores=19
+/proc/517226/stat : 517226 (python3) S 517210 517226 517181 0 -1 4210688 14278 0 435 0 32 56 0 0 20 0 1 0 1036527892 225779712 19901 3145728000 94253289811968 94253291877085 140733755146480 0 0 0 0 16781312 2 1 0 0 17 19 0 0 0 0 0 94253292906416 94253293128544 94253324476416 140733755157924 140733755158288 140733755158288 140733755260866 0
+/proc/517226/statm: 55122 19901 8106 505 0 21575 0
+[pid=517241] ppid=517226 vsize=14080 memory=13288 CPUtime=7.84 cores=19
+/proc/517241/stat : 517241 (minisat) R 517226 517226 517181 0 -1 4210688 3116 0 6 0 784 0 0 0 20 0 1 0 1036528344 14417920 3322 3145728000 4194304 5387618 140727660719184 0 0 0 0 0 8404994 0 0 0 17 19 0 0 0 0 0 7487280 7497672 28499968 140727660723788 140727660723979 140727660723979 140727660826557 0
+/proc/517241/statm: 3520 3322 266 292 0 3222 0
+Current children cumulated CPU time: 8.72 s
+Current children cumulated vsize: 234568 KiB
+Current children cumulated memory: 92892 KiB
+heavy processes:
+  %CPU=64 pid=510486 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=78 pid=510487 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=99 pid=510488 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=42 pid=510489 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=49 pid=510490 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=45 pid=510491 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=42 pid=510492 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=59 pid=510493 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=82 pid=510494 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=43 pid=510495 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=46 pid=510496 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=60 pid=510497 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=45 pid=510498 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=81 pid=510499 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=99 pid=510500 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+  %CPU=62 pid=510501 uid=1012 cmd=python /home/skaf/ts_mix_model_4_2/runners/py/runner_cluster_and_evaluate_raw_data.py --data_folder=/storage/work/skaf/ts_mix_mo
+
+[startup+25.5002 s]
+/proc/loadavg: 4.66 2.84 2.70 11/1242 517250
+/proc/meminfo: memFree=932071476/1056430936 swapFree=0/0
+[pid=517226] ppid=517210 vsize=220488 memory=79604 CPUtime=0.88 cores=19
+/proc/517226/stat : 517226 (python3) S 517210 517226 517181 0 -1 4210688 14278 0 435 0 32 56 0 0 20 0 1 0 1036527892 225779712 19901 3145728000 94253289811968 94253291877085 140733755146480 0 0 0 0 16781312 2 1 0 0 17 19 0 0 0 0 0 94253292906416 94253293128544 94253324476416 140733755157924 140733755158288 140733755158288 140733755260866 0
+/proc/517226/statm: 55122 19901 8106 505 0 21575 0
+[pid=517241] ppid=517226 vsize=22964 memory=17888 CPUtime=20.15 cores=19
+/proc/517241/stat : 517241 (minisat) R 517226 517226 517181 0 -1 4210688 4180 0 6 0 2015 0 0 0 20 0 1 0 1036528344 23515136 4472 3145728000 4194304 5387618 140727660719184 0 0 0 0 0 8404994 0 0 0 17 19 0 0 0 0 0 7487280 7497672 28499968 140727660723788 140727660723979 140727660723979 140727660826557 0
+/proc/517241/statm: 5741 4472 266 292 0 5443 0
+Current children cumulated CPU time: 21.03 s
+Current children cumulated vsize: 243452 KiB
+Current children cumulated memory: 97492 KiB
+
+[startup+51.1604 s]
+/proc/loadavg: 5.80 3.25 2.85 11/1245 517257
+/proc/meminfo: memFree=932049932/1056430936 swapFree=0/0
+[pid=517226] ppid=517210 vsize=220488 memory=79604 CPUtime=0.88 cores=19
+/proc/517226/stat : 517226 (python3) S 517210 517226 517181 0 -1 4210688 14278 0 435 0 32 56 0 0 20 0 1 0 1036527892 225779712 19901 3145728000 94253289811968 94253291877085 140733755146480 0 0 0 0 16781312 2 1 0 0 17 19 0 0 0 0 0 94253292906416 94253293128544 94253324476416 140733755157924 140733755158288 140733755158288 140733755260866 0
+/proc/517226/statm: 55122 19901 8106 505 0 21575 0
+[pid=517241] ppid=517226 vsize=22964 memory=22256 CPUtime=44.9 cores=19
+/proc/517241/stat : 517241 (minisat) R 517226 517226 517181 0 -1 4210688 4800 0 6 0 4490 0 0 0 20 0 1 0 1036528344 23515136 5564 3145728000 4194304 5387618 140727660719184 0 0 0 0 0 8404994 0 0 0 17 19 0 0 0 0 0 7487280 7497672 28499968 140727660723788 140727660723979 140727660723979 140727660826557 0
+/proc/517241/statm: 5741 5564 266 292 0 5443 0
+Current children cumulated CPU time: 45.78 s
+Current children cumulated vsize: 243452 KiB
+Current children cumulated memory: 101860 KiB
+
+
+
+Maximum CPU time exceeded: sending SIGTERM then SIGKILL
+
+[startup+65.9001 s]
+/proc/loadavg: 6.29 3.48 2.93 11/1246 517258
+/proc/meminfo: memFree=932072704/1056430936 swapFree=0/0
+[pid=517226] ppid=517210 vsize=220488 memory=79604 CPUtime=0.88 cores=19
+/proc/517226/stat : 517226 (python3) S 517210 517226 517181 0 -1 4210688 14278 0 435 0 32 56 0 0 20 0 1 0 1036527892 225779712 19901 3145728000 94253289811968 94253291877085 140733755146480 0 0 0 0 16781312 2 1 0 0 17 19 0 0 0 0 0 94253292906416 94253293128544 94253324476416 140733755157924 140733755158288 140733755158288 140733755260866 0
+/proc/517226/statm: 55122 19901 8106 505 0 21575 0
+[pid=517241] ppid=517226 vsize=23200 memory=22440 CPUtime=59.14 cores=19
+/proc/517241/stat : 517241 (minisat) R 517226 517226 517181 0 -1 4210688 5488 0 6 0 5913 1 0 0 20 0 1 0 1036528344 23756800 5610 3145728000 4194304 5387618 140727660719184 0 0 0 0 0 8404994 0 0 0 17 19 0 0 0 0 0 7487280 7497672 28499968 140727660723788 140727660723979 140727660723979 140727660826557 0
+/proc/517241/statm: 5800 5610 266 292 0 5502 0
+Current children cumulated CPU time: 60.02 s
+Current children cumulated vsize: 243688 KiB
+Current children cumulated memory: 102044 KiB
+
+Sending SIGTERM to process tree (bottom up)
+Sleeping 2 seconds
+
+[startup+65.9189 s]
+# the end of solver process 517226 was just reported to runsolver
+# cumulated CPU time of all completed processes:  user=59.4728 s, system=0.5842 s
+
+Solver just ended.
+??? end of watcher thread
+Dumping a history of the last processes samples
+
+[startup+65.9001 s]
+/proc/loadavg: 6.29 3.48 2.93 11/1246 517258
+/proc/meminfo: memFree=932072704/1056430936 swapFree=0/0
+[pid=517226] ppid=517210 vsize=220488 memory=79604 CPUtime=0.88 cores=19
+/proc/517226/stat : 517226 (python3) S 517210 517226 517181 0 -1 4210688 14278 0 435 0 32 56 0 0 20 0 1 0 1036527892 225779712 19901 3145728000 94253289811968 94253291877085 140733755146480 0 0 0 0 16781312 2 1 0 0 17 19 0 0 0 0 0 94253292906416 94253293128544 94253324476416 140733755157924 140733755158288 140733755158288 140733755260866 0
+/proc/517226/statm: 55122 19901 8106 505 0 21575 0
+[pid=517241] ppid=517226 vsize=23200 memory=22440 CPUtime=59.14 cores=19
+/proc/517241/stat : 517241 (minisat) R 517226 517226 517181 0 -1 4210688 5488 0 6 0 5913 1 0 0 20 0 1 0 1036528344 23756800 5610 3145728000 4194304 5387618 140727660719184 0 0 0 0 0 8404994 0 0 0 17 19 0 0 0 0 0 7487280 7497672 28499968 140727660723788 140727660723979 140727660723979 140727660826557 0
+/proc/517241/statm: 5800 5610 266 292 0 5502 0
+Current children cumulated CPU time: 60.02 s
+Current children cumulated vsize: 243688 KiB
+Current children cumulated memory: 102044 KiB
+
+Child ended because it received signal 15 (SIGTERM)
+Real time (s): 65.919
+CPU time (s): 60.057
+CPU user time (s): 59.4728
+CPU system time (s): 0.5842
+CPU usage (%): 91.1073
+Max. virtual memory (cumulated for all children) (KiB): 250540
+Max. memory (cumulated for all children) (KiB): 106176
+
+getrusage(RUSAGE_CHILDREN,...) data:
+user time used= 59.4728
+system time used= 0.5842
+maximum resident set size= 79868
+integral shared memory size= 0
+integral unshared data size= 0
+integral unshared stack size= 0
+page reclaims= 19775
+page faults= 441
+swaps= 0
+block input operations= 24793
+block output operations= 0
+messages sent= 0
+messages received= 0
+signals received= 0
+voluntary context switches= 12667
+involuntary context switches= 1638
+
+
+# summary of solver processes directly reported to runsolver:
+#   pid: 517226
+#   total CPU time (s): 60.057
+#   total CPU user time (s): 59.4728
+#   total CPU system time (s): 0.5842
+
+??? join timestamper begins
+??? join timestamper ends
+??? end of timestamper thread
+runsolver used 0.40828 second user time and 1.88689 second system time
+
+The end

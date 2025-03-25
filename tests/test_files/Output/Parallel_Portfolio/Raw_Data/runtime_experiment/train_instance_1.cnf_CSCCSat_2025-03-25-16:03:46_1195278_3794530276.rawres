@@ -1,0 +1,14 @@
+60.09/65.90	c this is CSCCSat [Version: SC2016]
+60.09/65.90	c Using DCCASat2014
+60.09/65.90	c instance = /home/pisirici/Desktop/sparkle-dev/tests/test_files/Instances/Train-Instance-Set/train_instance_1.cnf
+60.09/65.90	c seed = -422263967
+60.09/65.90	c num_vars = 3737
+60.09/65.90	c num_clauses = 14540
+60.09/65.90	c max_clause_len = 3
+60.09/65.90	c min_clause_len = 2
+60.09/65.90	c ratio = 3.89082
+60.09/65.90	c max_tries = 4500000000000000000
+60.09/65.90	c max_flips = 4000000000
+60.09/65.90	c start searching
+60.09/65.90	
+60.09/65.90	{'status': 'CRASHED', 'quality': 0, 'solver_call': ['/home/pisirici/Desktop/sparkle-dev/Solvers/CSCCSat/CSCCSat', '/home/pisirici/Desktop/sparkle-dev/tests/test_files/Instances/Train-Instance-Set/train_instance_1.cnf', '3872703329']}
