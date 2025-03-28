@@ -14,36 +14,8 @@ solver_csccsat = Solver(Path("Solvers/MiniSAT/"))
 solver_minisat = Solver(Path("Solvers/PbO-CCSAT-Generic"))
 solvers = [solver_pbo, solver_csccsat, solver_minisat]
 instance_path = Path("tests/test_files/Instances/Train-Instance-Set/")
-
-allowed_statuses = [
-    "SUCCESS",
-    "UNKNOWN",
-    "SAT",
-    "UNSAT",
-    "CRASHED",
-    "TIMEOUT",
-    "WRONG",
-    "ERROR",
-    "KILLED"
-]
-
-expected_headers = [
-    "Instance",
-    "Solver",
-    "PAR10",
-    "status:metric",
-    "cpu_time:metric",
-    "wall_time:metric",
-    "memory:metric"
-]
-
-default_objective_values = {
-    "PAR10": 600,
-    "status:metric": SolverStatus.UNKNOWN,
-    "cpu_time:metric": 9.223372036854776e+18,
-    "wall_time:metric": 9.223372036854776e+18,
-    "memory:metric": 9.223372036854776e+18
-}
+sparkle_objectives = [str(obj) for obj in gv.settings().get_general_sparkle_objectives()]
+expected_headers = ["Instance", "Solver"] + sparkle_objectives
 
 
 def test_run_parallel_portfolio() -> None:
@@ -95,7 +67,7 @@ def test_run_parallel_portfolio() -> None:
                 pytest.fail(f"PAR10 value '{row['PAR10']}' is not valid.")
 
             status_val = row["status:metric"].strip().upper()
-            assert status_val in allowed_statuses, (
+            assert SolverStatus[status_val], (
                 f"Status '{status_val}' not recognized in row {row}"
             )
 
@@ -112,13 +84,6 @@ def test_run_parallel_portfolio() -> None:
     assert not csv_path.exists(), "results.csv should have been deleted."
 
 
-sparkle_objectives = ["PAR10",
-                      "status:metric",
-                      "cpu_time:metric",
-                      "wall_time:metric",
-                      "memory:metric"
-                      ]
-
 base_string = f"--instance-path {instance_path} --portfolio-name runtime_experiment"
 
 
@@ -134,7 +99,6 @@ def test_main(argv: str, case: str) -> None:
     """Test main function from run_parallel_portfolio."""
     return
     return_val = 0
-    assert return_val is None
     if case == "seed_case":
         return_val = main(argv)
         assert gv.settings().get_parallel_portfolio_number_of_seeds_per_solver() == 3
@@ -146,3 +110,4 @@ def test_main(argv: str, case: str) -> None:
             main(argv)
         assert excinfo.value.code == -1
         assert gv.settings().get_run_on() == "local"
+    assert return_val is None
