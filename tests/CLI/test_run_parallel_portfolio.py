@@ -1,13 +1,17 @@
 """Test the parallel portfolio CLI entry point."""
+from __future__ import annotations
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 import pytest
 import csv
+
 from sparkle.solver import Solver
 from sparkle.instance import FileInstanceSet
 from sparkle.CLI.run_parallel_portfolio import run_parallel_portfolio, main
 from sparkle.types import SolverStatus
 from sparkle.CLI.help import global_variables as gv
+from runrunner.slurm import Status
+from types import SimpleNamespace
 
 solver_pbo = Solver(Path("Solvers/CSCCSat/"))
 solver_csccsat = Solver(Path("Solvers/MiniSAT/"))
@@ -18,31 +22,68 @@ sparkle_objectives = [str(obj) for obj in gv.settings().get_general_sparkle_obje
 expected_headers = ["Instance", "Solver"] + sparkle_objectives
 
 
+class FakeJob:
+    """FakeJob Class to mimick the behavior of run jobs."""
+
+    def __init__(self: FakeJob, status: Status, stdout: str = "dummy output") -> None:
+        """Initialize FakeJob.
+
+        Args:
+            status: Status of runrunner
+            stdout: Output of solver
+        """
+        self.status: Status = status
+        self.stdout: str = stdout
+
+    def kill(self: FakeJob) -> SolverStatus:
+        """If called, set status to KILLED."""
+        self.status: SolverStatus = SolverStatus.KILLED
+
+
 def test_run_parallel_portfolio() -> None:
     """Test run_parallel_portfolio function."""
     portfolio_path = Path("tests/test_files/Output/Parallel_Portfolio/"
                           "Raw_Data/runtime_experiment/")
     portfolio_path.mkdir(parents=True, exist_ok=True)
 
-    # Let the function run with mock
     instance = FileInstanceSet(instance_path)
     return_val = 0
     csv_path = portfolio_path / "results.csv"
-    assert not csv_path.exists(), "results.csv should not exist."
+    assert not csv_path.exists(), (
+        "results.csv should not exist."
+    )
     with patch("sparkle.CLI.run_parallel_portfolio.time.sleep", return_value=None), \
-         patch("sparkle.CLI.run_parallel_portfolio.tqdm") as mock_tqdm:
+         patch("sparkle.CLI.run_parallel_portfolio.tqdm") as mock_tqdm, \
+         patch("sparkle.CLI.run_parallel_portfolio.rrr.add_to_queue") as \
+         mock_add_to_queue:
 
         fake_pbar = MagicMock()
         fake_pbar.set_description.return_value = None
         fake_pbar.update.return_value = None
         mock_tqdm.return_value.__enter__.return_value = fake_pbar
+        num_jobs = len(solvers) * 2
+        fake_jobs = [
+            FakeJob(Status.COMPLETED,
+                    stdout='{"solver_dir": "/dummy/dir",'
+                    '"instance": "train_instance_1.cnf",'
+                    '"seed": "123", "objectives": "dummy",'
+                    '"cutoff_time": "60", "status": "UNKNOWN"}'
+                    ) for _ in range(num_jobs)
+        ]
+        fake_run = SimpleNamespace(jobs=fake_jobs)
+        mock_add_to_queue.return_value = fake_run
+
         return_val = run_parallel_portfolio(instance, portfolio_path, solvers)
-    assert return_val is None
+    assert return_val is None, (
+        "run_parallel_portfolio should return None."
+    )
 
     solvers_as_str = ["CSCCSat", "MiniSAT", "PbO-CCSAT-Generic"]
 
     # Check if results.csv created and results are written there as expected
-    assert csv_path.exists(), "results.csv should have been created."
+    assert csv_path.exists(), (
+        "results.csv should have been created."
+    )
     with csv_path.open("r", newline="") as csvfile:
         reader = csv.DictReader(csvfile)
         assert reader.fieldnames == expected_headers, (
@@ -81,7 +122,9 @@ def test_run_parallel_portfolio() -> None:
 
     # Delete the results.csv file and check if deleted
     csv_path.unlink()
-    assert not csv_path.exists(), "results.csv should have been deleted."
+    assert not csv_path.exists(), (
+        "results.csv should have been deleted."
+    )
 
 
 base_string = f"--instance-path {instance_path} --portfolio-name runtime_experiment"
