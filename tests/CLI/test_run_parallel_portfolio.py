@@ -1,6 +1,6 @@
 """Test the parallel portfolio CLI entry point."""
 from __future__ import annotations
-from pathlib import Path
+from pathlib import Path, PurePath
 from unittest.mock import patch, MagicMock
 import pytest
 import csv
@@ -12,6 +12,7 @@ from sparkle.CLI.run_parallel_portfolio import run_parallel_portfolio, \
     main, parser_function
 from sparkle.types import SolverStatus
 from sparkle.CLI.help import global_variables as gv
+from runrunner.base import Runner
 from runrunner.slurm import Status
 from types import SimpleNamespace
 
@@ -148,30 +149,64 @@ def test_parser_function() -> None:
     assert isinstance(returned_parser, argparse.ArgumentParser)
 
 
-base_string = f"--instance-path {instance_path} --portfolio-name runtime_experiment"
+instance_path_list = [f"--instance-path {instance_path}"]
+portfolio_name_list = ["--portfolio-name runtime_experiment"]
+solvers_str_list = ["Solvers/CSCCSat/", "Solvers/PbO-CCSAT-Generic", "Solvers/MiniSAT/"]
+solvers_list = [f"--solvers {solvers_str_list}"]
+objectives_list = [f"--objectives {sparkle_objectives}"]
+cutoff_time_list = ["--cutoff-time 55"]
+solver_seeds_list = ["--solver-seeds 2"]
+settings_list = [f"--setings-file {PurePath('Settings/latest.ini')}"]
+run_on_local_list = [f"--run-on {Runner.LOCAL}"]
+run_on_slurm_list = [f"--run-on {Runner.SLURM}"]
 
 
 @pytest.mark.parametrize(
-    "argv, case", [
-        (f"{base_string}", "base_case"),
-        (f"{base_string} --solver-seeds 3", "seed_case"),
-        (f"{base_string} --cutoff-time 59", "cutoff_case"),
-        (f"{base_string} --run-on local", "run_on_case"),
+    "case", [
+        "solver_none",
+        "run_on_local",
+        "first_objective_not_time",
+        "porfolio_name_none"
     ]
 )
-def test_main(argv: str, case: str) -> None:
+def test_main(case: str) -> None:
     """Test main function from run_parallel_portfolio."""
-    return
     return_val = 0
-    if case == "seed_case":
-        return_val = main(argv)
-        assert gv.settings().get_parallel_portfolio_number_of_seeds_per_solver() == 3
-    elif case == "cutoff_case":
-        return_val = main(argv)
-        assert gv.settings().get_general_target_cutoff_time() == 59
-    elif case == "run_on_case":
+    args = []
+    args = args + instance_path_list + cutoff_time_list + \
+        solver_seeds_list + settings_list
+    if case == "solver_none":
+        solvers.append(None)
+        solvers_list_with_none = [f"--solvers {solvers}"]
+        args = args + portfolio_name_list + run_on_slurm_list +\
+            solvers_list_with_none + objectives_list
         with pytest.raises(SystemExit) as excinfo:
-            main(argv)
-        assert excinfo.value.code == -1
+            return_val == main(args)
+        assert excinfo.value.code == -1, ("Expected value code was -1,"
+                                          f"got {excinfo.value.code}")
+        assert return_val is None, ("Expected return val was None.")
+    elif case == "run_on_local":
+        args = args + portfolio_name_list + run_on_local_list +\
+            solvers_list + objectives_list
+        with pytest.raises(SystemExit) as excinfo:
+            return_val == main(args)
+        assert excinfo.value.code == -1, ("Expected value code was -1,"
+                                          f"got {excinfo.value.code}")
+        assert return_val is None, ("Expected return val was None.")
         assert gv.settings().get_run_on() == "local"
-    assert return_val is None
+    elif case == "first_objective_not_time":
+        sparkle_objectives[0] = "TEST"
+        objectives_list_changed = [f"--objectives {sparkle_objectives}"]
+        args = args + portfolio_name_list + run_on_slurm_list +\
+            solvers_list + objectives_list_changed
+        with pytest.raises(SystemExit) as excinfo:
+            return_val == main(args)
+        assert excinfo.value.code == -1, ("Expected value code was -1,"
+                                          f"got {excinfo.value.code}")
+        assert return_val is None, ("Expected return val was None.")
+    else:
+        # portfolio name is none
+        args = args + run_on_slurm_list +\
+            solvers_list + objectives_list
+        return_val = main(args)
+        assert return_val is None, ("Expected return val was None.")
