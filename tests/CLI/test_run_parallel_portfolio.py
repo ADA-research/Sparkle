@@ -10,7 +10,7 @@ from sparkle.solver import Solver
 from sparkle.instance import FileInstanceSet
 from sparkle.CLI.run_parallel_portfolio import run_parallel_portfolio, \
     main, parser_function
-from sparkle.types import SolverStatus
+from sparkle.types import SolverStatus, UseTime
 from sparkle.CLI.help import global_variables as gv
 from runrunner.base import Runner
 from runrunner.slurm import Status
@@ -151,10 +151,10 @@ def test_parser_function() -> None:
 
 instance_path_list = [f"--instance-path {instance_path}"]
 portfolio_name_list = [f"--portfolio-name {portfolio_path}"]
-solvers_list = ["--solvers Solvers/CSCCSat/,\
-                Solvers/PbO-CCSAT-Generic,Solvers/MiniSAT/"]
-objectives_list = ["--objectives PAR10,status:metric,\
-                   cpu_time:metric,wall_time:metric,memory:metric"]
+solvers_list = ["--solvers Solvers/CSCCSat/,"
+                "Solvers/PbO-CCSAT-Generic,Solvers/MiniSAT/"]
+objectives_list = ["--objectives PAR10,status:metric,"
+                   "cpu_time:metric,wall_time:metric,memory:metric"]
 cutoff_time_list = [f"--cutoff-time {55}"]
 solver_seeds_list = [f"--solver-seeds {2}"]
 settings_list = [f"--settings-file {Path('Settings/latest.ini')}"]
@@ -173,18 +173,20 @@ run_on_slurm_list = [f"--run-on {Runner.SLURM}"]
 def test_main(case: str) -> None:
     """Test main function from run_parallel_portfolio."""
     args = []
-    args += instance_path_list + cutoff_time_list + solver_seeds_list + settings_list
     if case == "solver_none":
-        solvers_list_with_none = ["--solvers Solvers/CSCCSat/,\
-                                  Solvers/PbO-CCSAT-Generic,Solvers/MiniSAT/,None"]
-        args += portfolio_name_list + run_on_slurm_list +\
-            solvers_list_with_none + objectives_list
+        solvers_list_with_none = ["--solvers Solvers/CSCCSat/,"
+                                  "Solvers/PbO-CCSAT-Generic,Solvers/MiniSAT/,None"]
+        args += instance_path_list + portfolio_name_list + solvers_list_with_none +\
+            objectives_list + cutoff_time_list + solver_seeds_list +\
+            run_on_slurm_list + settings_list
         with pytest.raises(SystemExit) as excinfo:
             main(args)
         assert excinfo.value.code == -1, ("Expected exit code -1,"
                                           f"got {excinfo.value.code}")
     elif case == "run_on_local":
-        args += portfolio_name_list + run_on_local_list + solvers_list + objectives_list
+        args += instance_path_list + portfolio_name_list + solvers_list +\
+            objectives_list + cutoff_time_list + solver_seeds_list +\
+            run_on_local_list + settings_list
         with pytest.raises(SystemExit) as excinfo:
             main(args)
         assert excinfo.value.code == -1, ("Expected exit code -1,"
@@ -193,17 +195,20 @@ def test_main(case: str) -> None:
             f"Expected run_on setting to be 'local', got {gv.settings().get_run_on()}"
         )
     elif case == "first_objective_not_time":
-        sparkle_objectives[0] = "TEST"
-        objectives_list_changed = [f"--objectives {sparkle_objectives}"]
-        args += portfolio_name_list + run_on_slurm_list +\
-            solvers_list + objectives_list_changed
+        # Not sure if this is true, will look again
+        objectives_list_changed = [f"--objectives {UseTime.NO},status:metric,"
+                                   "cpu_time:metric,wall_time:metric,memory:metric"]
+        args += instance_path_list + portfolio_name_list + solvers_list +\
+            objectives_list_changed + cutoff_time_list + solver_seeds_list +\
+            run_on_slurm_list + settings_list
         with pytest.raises(SystemExit) as excinfo:
             main(args)
         assert excinfo.value.code == -1, ("Expected exit code -1,"
                                           f"got {excinfo.value.code}")
     else:
         # portfolio name is none
-        args = args + run_on_slurm_list +\
-            solvers_list + objectives_list
+        args += instance_path_list + solvers_list +\
+            objectives_list + cutoff_time_list + solver_seeds_list +\
+            run_on_slurm_list + settings_list
         return_val = main(args)
         assert return_val is None, ("Expected return val was None.")
