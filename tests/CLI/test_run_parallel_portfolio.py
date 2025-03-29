@@ -4,10 +4,12 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 import pytest
 import csv
+import argparse
 
 from sparkle.solver import Solver
 from sparkle.instance import FileInstanceSet
-from sparkle.CLI.run_parallel_portfolio import run_parallel_portfolio, main
+from sparkle.CLI.run_parallel_portfolio import run_parallel_portfolio, \
+    main, parser_function
 from sparkle.types import SolverStatus
 from sparkle.CLI.help import global_variables as gv
 from runrunner.slurm import Status
@@ -135,6 +137,15 @@ def test_run_parallel_portfolio(stdout: str, statuses: list[Status]) -> None:
     assert not csv_path.exists(), (
         "results.csv should have been deleted."
     )
+
+
+def test_parser_function() -> None:
+    """Test function for parser function of run_parallel_portfilio."""
+    expected_description = "Run a portfolio of solvers on an" \
+        " instance set in parallel."
+    returned_parser = parser_function()
+    assert returned_parser.description == expected_description
+    assert isinstance(returned_parser, argparse.ArgumentParser)
 
 
 base_string = f"--instance-path {instance_path} --portfolio-name runtime_experiment"
