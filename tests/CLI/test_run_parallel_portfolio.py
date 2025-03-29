@@ -1,6 +1,6 @@
 """Test the parallel portfolio CLI entry point."""
 from __future__ import annotations
-from pathlib import Path, PurePath
+from pathlib import Path
 from unittest.mock import patch, MagicMock
 import pytest
 import csv
@@ -23,6 +23,8 @@ solvers = [solver_pbo, solver_csccsat, solver_minisat]
 instance_path = Path("tests/test_files/Instances/Train-Instance-Set/")
 sparkle_objectives = [str(obj) for obj in gv.settings().get_general_sparkle_objectives()]
 expected_headers = ["Instance", "Solver"] + sparkle_objectives
+portfolio_path = Path("tests/test_files/Output/Parallel_Portfolio/"
+                      "Raw_Data/runtime_experiment/")
 
 
 class FakeJob:
@@ -59,8 +61,6 @@ class FakeJob:
 )
 def test_run_parallel_portfolio(stdout: str, statuses: list[Status]) -> None:
     """Test run_parallel_portfolio function."""
-    portfolio_path = Path("tests/test_files/Output/Parallel_Portfolio/"
-                          "Raw_Data/runtime_experiment/")
     portfolio_path.mkdir(parents=True, exist_ok=True)
 
     instance = FileInstanceSet(instance_path)
@@ -150,13 +150,14 @@ def test_parser_function() -> None:
 
 
 instance_path_list = [f"--instance-path {instance_path}"]
-portfolio_name_list = ["--portfolio-name runtime_experiment"]
-solvers_str_list = ["Solvers/CSCCSat/", "Solvers/PbO-CCSAT-Generic", "Solvers/MiniSAT/"]
-solvers_list = [f"--solvers {solvers_str_list}"]
-objectives_list = [f"--objectives {sparkle_objectives}"]
-cutoff_time_list = ["--cutoff-time 55"]
-solver_seeds_list = ["--solver-seeds 2"]
-settings_list = [f"--setings-file {PurePath('Settings/latest.ini')}"]
+portfolio_name_list = [f"--portfolio-name {portfolio_path}"]
+solvers_list = ["--solvers Solvers/CSCCSat/,\
+                Solvers/PbO-CCSAT-Generic,Solvers/MiniSAT/"]
+objectives_list = ["--objectives PAR10,status:metric,\
+                   cpu_time:metric,wall_time:metric,memory:metric"]
+cutoff_time_list = [f"--cutoff-time {55}"]
+solver_seeds_list = [f"--solver-seeds {2}"]
+settings_list = [f"--settings-file {Path('Settings/latest.ini')}"]
 run_on_local_list = [f"--run-on {Runner.LOCAL}"]
 run_on_slurm_list = [f"--run-on {Runner.SLURM}"]
 
@@ -171,39 +172,35 @@ run_on_slurm_list = [f"--run-on {Runner.SLURM}"]
 )
 def test_main(case: str) -> None:
     """Test main function from run_parallel_portfolio."""
-    return_val = 0
     args = []
-    args = args + instance_path_list + cutoff_time_list + \
-        solver_seeds_list + settings_list
+    args += instance_path_list + cutoff_time_list + solver_seeds_list + settings_list
     if case == "solver_none":
-        solvers.append(None)
-        solvers_list_with_none = [f"--solvers {solvers}"]
-        args = args + portfolio_name_list + run_on_slurm_list +\
+        solvers_list_with_none = ["--solvers Solvers/CSCCSat/,\
+                                  Solvers/PbO-CCSAT-Generic,Solvers/MiniSAT/,None"]
+        args += portfolio_name_list + run_on_slurm_list +\
             solvers_list_with_none + objectives_list
         with pytest.raises(SystemExit) as excinfo:
-            return_val == main(args)
-        assert excinfo.value.code == -1, ("Expected value code was -1,"
+            main(args)
+        assert excinfo.value.code == -1, ("Expected exit code -1,"
                                           f"got {excinfo.value.code}")
-        assert return_val is None, ("Expected return val was None.")
     elif case == "run_on_local":
-        args = args + portfolio_name_list + run_on_local_list +\
-            solvers_list + objectives_list
+        args += portfolio_name_list + run_on_local_list + solvers_list + objectives_list
         with pytest.raises(SystemExit) as excinfo:
-            return_val == main(args)
-        assert excinfo.value.code == -1, ("Expected value code was -1,"
+            main(args)
+        assert excinfo.value.code == -1, ("Expected exit code -1,"
                                           f"got {excinfo.value.code}")
-        assert return_val is None, ("Expected return val was None.")
-        assert gv.settings().get_run_on() == "local"
+        assert str(gv.settings().get_run_on()).lower() == "local", (
+            f"Expected run_on setting to be 'local', got {gv.settings().get_run_on()}"
+        )
     elif case == "first_objective_not_time":
         sparkle_objectives[0] = "TEST"
         objectives_list_changed = [f"--objectives {sparkle_objectives}"]
-        args = args + portfolio_name_list + run_on_slurm_list +\
+        args += portfolio_name_list + run_on_slurm_list +\
             solvers_list + objectives_list_changed
         with pytest.raises(SystemExit) as excinfo:
-            return_val == main(args)
-        assert excinfo.value.code == -1, ("Expected value code was -1,"
+            main(args)
+        assert excinfo.value.code == -1, ("Expected exit code -1,"
                                           f"got {excinfo.value.code}")
-        assert return_val is None, ("Expected return val was None.")
     else:
         # portfolio name is none
         args = args + run_on_slurm_list +\
