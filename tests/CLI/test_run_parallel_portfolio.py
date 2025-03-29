@@ -40,7 +40,21 @@ class FakeJob:
         self.status: SolverStatus = SolverStatus.KILLED
 
 
-def test_run_parallel_portfolio() -> None:
+@pytest.mark.parametrize(
+    "stdout, statuses", [
+        ('{"solver_dir": "/dummy/dir",'
+         '"instance": "train_instance_1.cnf",'
+         '"seed": "123", "objectives": "dummy",'
+         '"cutoff_time": "60", "status": "UNKNOWN"}',
+         [Status.COMPLETED,
+          Status.KILLED,
+          Status.COMPLETED,
+          Status.UNKNOWN,
+          Status.KILLED,
+          Status.KILLED])
+    ]
+)
+def test_run_parallel_portfolio(stdout: str, statuses: list[Status]) -> None:
     """Test run_parallel_portfolio function."""
     portfolio_path = Path("tests/test_files/Output/Parallel_Portfolio/"
                           "Raw_Data/runtime_experiment/")
@@ -63,12 +77,8 @@ def test_run_parallel_portfolio() -> None:
         mock_tqdm.return_value.__enter__.return_value = fake_pbar
         num_jobs = len(solvers) * 2
         fake_jobs = [
-            FakeJob(Status.COMPLETED,
-                    stdout='{"solver_dir": "/dummy/dir",'
-                    '"instance": "train_instance_1.cnf",'
-                    '"seed": "123", "objectives": "dummy",'
-                    '"cutoff_time": "60", "status": "UNKNOWN"}'
-                    ) for _ in range(num_jobs)
+            FakeJob(statuses[i], stdout=stdout)
+            for i in range(num_jobs)
         ]
         fake_run = SimpleNamespace(jobs=fake_jobs)
         mock_add_to_queue.return_value = fake_run
