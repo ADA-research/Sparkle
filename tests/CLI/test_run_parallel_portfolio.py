@@ -138,7 +138,10 @@ def test_parser_function() -> None:
 
 instance_path_list = ["--instance-path", f"{instance_path}"]
 portfolio_name_list = ["--portfolio-name", f"{portfolio_path}"]
-solvers_list = ["--solvers", "CSCCSat/", "PbO-CCSAT-Generic/", "MiniSAT/"]
+solvers_list = ["--solvers", "Examples/Resources/Solvers/CSCCSat/",
+                "Examples/Resources/Solvers/PbO-CCSAT-Generic/",
+                "Examples/Resources/Solvers/MiniSAT/"
+                ]
 objectives_list = ["--objectives", "PAR10,status:metric,"
                    "cpu_time:metric,wall_time:metric,memory:metric"]
 cutoff_time_list = ["--cutoff-time", f"{55}"]
@@ -161,8 +164,7 @@ def test_main(case: str) -> None:
     """Test main function from run_parallel_portfolio."""
     args = []
     if case == "solver_none":
-        solvers_list_with_none = ["--solvers", "CSCCSat/",
-                                  "PbO-CCSAT-Generic/", "MiniSAT/", f"{None}/"]
+        solvers_list_with_none = solvers_list + [f"{None}"]
         args += instance_path_list + portfolio_name_list + solvers_list_with_none +\
             objectives_list + cutoff_time_list + solver_seeds_list +\
             run_on_slurm_list + settings_list
@@ -179,12 +181,12 @@ def test_main(case: str) -> None:
         with pytest.raises(SystemExit) as excinfo:
             main(args)
         assert excinfo.value.code == -1, (
-            "Expected exit code -1,"
+            "Expected exit code -1, "
             f"got {excinfo.value.code}"
         )
         assert str(gv.settings().get_run_on()).lower() == "runner.local", (
-            "Expected run_on setting to be 'local'"
-            f"but got {gv.settings().get_run_on()}"
+            "Expected run_on setting to be 'runner.local' "
+            f"but got runner.{gv.settings().get_run_on()}"
         )
     elif case == "first_objective_not_time":
         test_object = SparkleObjective(name="TEST")
@@ -197,7 +199,7 @@ def test_main(case: str) -> None:
         with pytest.raises(SystemExit) as excinfo:
             main(args)
         assert excinfo.value.code == -1, (
-            "Expected exit code -1,"
+            "Expected exit code -1, "
             f"got {excinfo.value.code}"
         )
     elif case == "porfolio_name_none":
@@ -217,7 +219,7 @@ def test_main(case: str) -> None:
             with pytest.raises(SystemExit) as excinfo:
                 main(args)
             assert excinfo.value.code == 0, (
-                "Expected exit code 0,"
+                "Expected exit code 0, "
                 f"got {excinfo.value.code}"
             )
         current_port_path = gv.latest_scenario().get_parallel_portfolio_path().as_posix()
@@ -229,9 +231,9 @@ def test_main(case: str) -> None:
         assert gv.latest_scenario().get_latest_scenario() == "PARALLEL_PORTFOLIO"
     elif case == "empty_args":
         with pytest.raises(TypeError) as excinfo:
-            main(args)
+            main([])
         str_exception = excinfo.exconly()
         assert str_exception == "TypeError: 'NoneType' object is not iterable", (
-            "Expected: `TypeError: 'NoneType' object is not iterable`, but got"
+            "Expected: `TypeError: 'NoneType' object is not iterable`, but got "
             f"{str_exception}"
         )
