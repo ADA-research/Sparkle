@@ -169,7 +169,7 @@ def test_main(case: str) -> None:
         with pytest.raises(SystemExit) as excinfo:
             main(args)
         assert excinfo.value.code == -1, (
-            "Expected exit code -1,"
+            "Expected exit code -1, "
             f"got {excinfo.value.code}"
         )
     elif case == "run_on_local":
