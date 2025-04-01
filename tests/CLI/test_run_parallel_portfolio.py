@@ -56,7 +56,6 @@ num_jobs = len(solvers) * 2
 fake_jobs = [FakeJob(statuses[i], stdout=stdout) for i in range(num_jobs)]
 
 
-# Try to add fake isntance set and fake path (empty or none input etc.)
 def test_run_parallel_portfolio() -> None:
     """Test run_parallel_portfolio function."""
     portfolio_path.mkdir(parents=True, exist_ok=True)
@@ -238,6 +237,6 @@ def test_main(case: str) -> None:
             main(args)
         str_exception = excinfo.exconly()
         assert str_exception == "TypeError: 'NoneType' object is not iterable", (
-            "Expected: 'TypeError: 'NoneType' object is not iterable"', but got'
+            "Expected: `TypeError: 'NoneType' object is not iterable`, but got"
             f"{str_exception}"
         )
