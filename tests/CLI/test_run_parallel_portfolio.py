@@ -36,9 +36,9 @@ class FakeJob:
         self.status: SolverStatus = SolverStatus.KILLED
 
 
-solver_pbo = Solver(Path("Solvers/CSCCSat/"))
-solver_csccsat = Solver(Path("Solvers/MiniSAT/"))
-solver_minisat = Solver(Path("Solvers/PbO-CCSAT-Generic"))
+solver_pbo = Solver(Path("Examples/Resources/Solvers/CSCCSat/"))
+solver_csccsat = Solver(Path("Examples/Resources/Solvers/MiniSAT/"))
+solver_minisat = Solver(Path("Examples/Resources/Solvers/PbO-CCSAT-Generic"))
 solvers = [solver_pbo, solver_csccsat, solver_minisat]
 instance_path = Path("tests/test_files/Instances/Train-Instance-Set/")
 sparkle_objectives = [str(obj) for obj in gv.settings().get_general_sparkle_objectives()]
