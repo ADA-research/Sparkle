@@ -85,7 +85,6 @@ def test_run_parallel_portfolio() -> None:
 
     solvers_as_str = ["CSCCSat", "MiniSAT", "PbO-CCSAT-Generic"]
 
-    # Check if results.csv created and results are written there as expected
     assert csv_path.exists(), (
         "results.csv should have been created."
     )
@@ -96,17 +95,14 @@ def test_run_parallel_portfolio() -> None:
         )
 
         for row in reader:
-            # We have just 1 instance, check if all instances are that instance
             assert row["Instance"] == "train_instance_1.cnf", (
                 f"Instance column should be train_instance_1.cnf, got {row['Instance']}"
             )
 
-            # Check if current solver in used solvers list
             assert row["Solver"] in solvers_as_str, (
                 f"Solver {row['Solver']} not in allowed list {solvers_as_str}"
             )
 
-            # PAR10, cpu_time:metric, wall_time:metric, memory:metric should be numbers
             try:
                 float(row["PAR10"])
             except ValueError:
@@ -125,7 +121,6 @@ def test_run_parallel_portfolio() -> None:
                         f"Column '{col}' has non-numeric value '{row[col]}' in row {row}"
                     )
 
-    # Delete the results.csv file and check if deleted
     csv_path.unlink()
     assert not csv_path.exists(), (
         "results.csv should have been deleted."
