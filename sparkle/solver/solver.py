@@ -255,6 +255,7 @@ class Solver(SparkleCallable):
             objective: SparkleObjective = None,
             train_set: InstanceSet = None,
             sbatch_options: list[str] = None,
+            slurm_prepend: str | list[str] | Path = None,
             dependencies: list[SlurmRun] = None,
             log_dir: Path = None,
             base_dir: Path = None,
@@ -281,6 +282,7 @@ class Solver(SparkleCallable):
                 configuration of the solver using these instances and run with it on
                 all instances in the instance argument.
             sbatch_options: List of slurm batch options to use
+            slurm_prepend: Slurm script to prepend to the sbatch
             dependencies: List of slurm runs to use as dependencies
             log_dir: Path where to place output files. Defaults to
                 self.raw_output_directory.
@@ -333,6 +335,7 @@ class Solver(SparkleCallable):
             name=job_name,
             base_dir=base_dir,
             sbatch_options=sbatch_options,
+            slurm_prepend=slurm_prepend,
             dependencies=dependencies
         )
         if run_on == Runner.LOCAL:

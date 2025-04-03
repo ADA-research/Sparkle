@@ -114,6 +114,7 @@ class IRACE(Configurator):
                 log_dir=scenario.validation,
                 base_dir=base_dir,
                 dependencies=runs,
+                slurm_prepend=slurm_prepend
             )
             runs.append(validate)
 

@@ -128,6 +128,7 @@ def run_solvers_performance_data(
         solvers: list[Solver] = None,
         instances: list[str] = None,
         sbatch_options: list[str] = None,
+        slurm_prepend: str | list[str] | Path = None,
         run_on: Runner = Runner.SLURM) -> list[Run]:
     """Run the solvers for the performance data.
 
@@ -146,6 +147,8 @@ def run_solvers_performance_data(
         The instances to run the solvers on. If None, run all found instances.
     sbatch_options: list[str]
         The sbatch options to use
+    slurm_prepend: str | list[str] | Path
+        The script to prepend to a slurm script
     run_on: Runner
         Where to execute the solvers. For available values see runrunner.base.Runner
         enum. Default: "Runner.SLURM".
@@ -194,8 +197,8 @@ def run_solvers_performance_data(
             continue
         run = solver.run_performance_dataframe(
             solver_instances, runs, performance_data, cutoff_time=cutoff_time,
-            sbatch_options=sbatch_options, log_dir=sl.caller_log_dir,
-            base_dir=sl.caller_log_dir, run_on=run_on)
+            sbatch_options=sbatch_options, slurm_prepend=slurm_prepend,
+            log_dir=sl.caller_log_dir, base_dir=sl.caller_log_dir, run_on=run_on)
         runrunner_runs.append(run)
         if run_on == Runner.LOCAL:
             # Do some printing?
@@ -259,6 +262,7 @@ def main(argv: list[str]) -> None:
         instances = None  # TODO: Fix? Or its good like this
 
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
+    slurm_prepend = gv.settings().get_slurm_job_prepend()
     # Write settings to file before starting, since they are used in callback scripts
     gv.settings().write_used_settings()
     run_on = gv.settings().get_run_on()
@@ -276,6 +280,7 @@ def main(argv: list[str]) -> None:
             cutoff_time=cutoff_time,
             rerun=args.recompute,
             sbatch_options=sbatch_options,
+            slurm_prepend=slurm_prepend,
             run_on=run_on)
     else:
         configurations = [None] * len(solvers)
@@ -312,7 +317,7 @@ def main(argv: list[str]) -> None:
             seed=random.randint(0, sys.maxsize),
             cutoff_time=cutoff_time,
             sbatch_options=sbatch_options,
-            slurm_prepend=gv.settings().get_slurm_job_prepend(),
+            slurm_prepend=slurm_prepend,
             log_dir=sl.caller_log_dir,
             run_on=gv.settings().get_run_on(),
         )
