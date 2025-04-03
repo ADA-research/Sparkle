@@ -189,6 +189,7 @@ def main(argv: list[str]) -> None:
         scenario=config_scenario,
         data_target=performance_data,
         sbatch_options=sbatch_options,
+        slurm_prepend=gv.settings().get_slurm_job_prepend(),
         num_parallel_jobs=gv.settings().get_number_of_jobs_in_parallel(),
         base_dir=sl.caller_log_dir,
         run_on=run_on)
