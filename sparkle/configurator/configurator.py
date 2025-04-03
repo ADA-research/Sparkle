@@ -90,7 +90,7 @@ class Configurator:
                 performance_dataframe=data_target,
                 cutoff_time=scenario.cutoff_time,
                 sbatch_options=sbatch_options,
-                prepend=slurm_prepend,
+                slurm_prepend=slurm_prepend,
                 log_dir=scenario.validation,
                 base_dir=base_dir,
                 dependencies=runs,

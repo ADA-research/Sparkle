@@ -151,6 +151,7 @@ def main(argv: list[str]) -> None:
         configurator_settings.update({"feature_data": feature_data})
 
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
+    slurm_prepend = gv.settings().get_slurm_job_prepend()
     config_scenario = configurator.scenario_class()(
         solver, instance_set_train, sparkle_objectives,
         configurator.output_path, **configurator_settings)
@@ -189,7 +190,7 @@ def main(argv: list[str]) -> None:
         scenario=config_scenario,
         data_target=performance_data,
         sbatch_options=sbatch_options,
-        slurm_prepend=gv.settings().get_slurm_job_prepend(),
+        slurm_prepend=slurm_prepend,
         num_parallel_jobs=gv.settings().get_number_of_jobs_in_parallel(),
         base_dir=sl.caller_log_dir,
         run_on=run_on)
@@ -201,6 +202,7 @@ def main(argv: list[str]) -> None:
         default_job = solver.run_performance_dataframe(
             instances, runs, performance_data,
             sbatch_options=sbatch_options,
+            slurm_prepend=slurm_prepend,
             cutoff_time=config_scenario.cutoff_time,
             log_dir=config_scenario.validation,
             base_dir=sl.caller_log_dir,
