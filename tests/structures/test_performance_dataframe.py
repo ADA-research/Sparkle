@@ -144,7 +144,7 @@ def test_has_missing_values() -> None:
     assert not pd.has_missing_values
     assert pd_nan.has_missing_values
     assert not pd_mo.has_missing_values
-    # Seed or config should not be included as 'missing value'
+    # Seed or config should not be included as "missing value"
     copy_pd = pd.clone()
     copy_pd.set_value(PerformanceDataFrame.missing_value,
                       "AlgorithmA", "Instance1", solver_fields=["Seed"])
@@ -360,6 +360,27 @@ def test_get_list_remaining_jobs()\
     remaining = {}
     result = pd_mo.remaining_jobs()
     assert result == remaining
+
+
+def test_get_configurations() -> None:
+    """Test getting configurations."""
+    result = pd_mo.get_configurations()
+    assert result == {"RandomForest": [{"alpha": 0.05, "beta": 0.99},
+                                       {"alpha": 0.12, "beta": 0.46},
+                                       {"alpha": 0.29, "beta": 0.23},
+                                       {"alpha": 0.66, "beta": 0.11},
+                                       {"alpha": 0.69, "beta": 0.42}],
+                      "MultiLayerPerceptron": [{"kappa": 0.23, "mu": "std1"},
+                                               {"kappa": 0.46, "mu": "std2"},
+                                               {"kappa": 0.99, "mu": "std3"},
+                                               {"kappa": 1.0, "mu": "std2"},
+                                               {"kappa": 0.0005, "mu": "std1"}]}
+    result = pd.get_configurations()  # Only has default configuration
+    assert result == {"AlgorithmA": [{}], "AlgorithmB": [{}], "AlgorithmC": [{}],
+                      "AlgorithmD": [{}], "AlgorithmE": [{}]}
+    result = pd_nan.get_configurations()
+    Path("out.txt").open("w").write(str(result))
+    assert result == {}
 
 
 def test_configuration_performance() -> None:

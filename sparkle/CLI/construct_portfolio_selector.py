@@ -33,6 +33,17 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
+    # Solver Configurations arguments
+    configuration_group = parser.add_mutually_exclusive_group(
+        "Solver Configurations",
+        "Arguments for solver configurations", required=False)
+    configuration_group.add_argument(*ac.AllSolverConfigurationArgument,
+                                     **ac.AllSolverConfigurationArgument)
+    configuration_group.add_argument(*ac.BestSolverConfigurationArgument,
+                                     **ac.BestSolverConfigurationArgument)
+    configuration_group.add_argument(*ac.DefaultSolverConfigurationArgument,
+                                     **ac.DefaultSolverConfigurationArgument)
+    # TODO: Allow user to pick configurations by ?? per solver?
     return parser
 
 
@@ -96,15 +107,27 @@ def main(argv: list[str]) -> None:
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
 
+    # TODO Allow user to select solvers to construct over
+    # Selector is named after the solvers it can predict, sort for permutation invariance
+    solvers = sorted([s.name for s in gv.settings().DEFAULT_solver_dir.iterdir()])
+
     if feature_data.has_missing_value():
         print("WARNING: Missing values in the feature data, will be imputed as the mean "
               "value of all other non-missing values! Imputing all missing values...")
         feature_data.impute_missing_values()
 
+    # Check what configurations should be considered
+    if args.all_solver_configurations:
+        configurations = performance_data.get_all_solver_configurations()
+    elif args.best_solver_configurations:
+        configurations = performance_data.get_best_solver_configurations()
+    elif args.default_solver_configuration:
+        configurations = [None] * len(solvers)
+    else:  # Take the only configuration from the dataframe
+        configurations = performance_data.get_config  # ???
+
     # TODO: Allow user to specify subsets of data to be used
 
-    # Selector is named after the solvers it can predict, sort for permutation invariance
-    solvers = sorted([s.name for s in gv.settings().DEFAULT_solver_dir.iterdir()])
     selection_scenario_path =\
         gv.settings().DEFAULT_selection_output / selector.name / "_".join(solvers)
 
@@ -126,6 +149,7 @@ def main(argv: list[str]) -> None:
                                       performance_data,
                                       feature_data,
                                       objective,
+                                      configurations,
                                       cutoff_time,
                                       run_on=run_on,
                                       sbatch_options=sbatch_options,

@@ -488,6 +488,20 @@ class PerformanceDataFrame(pd.DataFrame):
         # We assume each objective has the same index for Instance/Runs
         return len(self.loc[(self.objective_names[0], instance)].index)
 
+    def get_configurations(self: PerformanceDataFrame,
+                           solvers: str | list[str] = None) -> dict[str, list[dict]]:
+        """Return a list of all configurations per Solver."""
+        solvers = [solvers] if isinstance(solvers, str) else solvers
+        solvers = self.solvers if solvers is None else solvers
+        configurations = {}
+        for s in solvers:
+            configs = self[s, self.column_configuration].values.tolist()
+            configs = [ast.literal_eval(c) for c in configs if c != "None"]
+            # Remove duplicates
+            configs = [c for n, c in enumerate(configs) if c not in configs[:n]]
+            configurations[s] = configs
+        return configurations
+
     # Calculables
 
     def mean(self: PerformanceDataFrame,

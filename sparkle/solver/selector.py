@@ -41,6 +41,7 @@ class Selector:
                   performance_data: PerformanceDataFrame,
                   feature_data: FeatureDataFrame,
                   objective: SparkleObjective,
+                  solver_configurations: dict = None,
                   solver_cutoff: int | float | str = None,
                   run_on: Runner = Runner.SLURM,
                   sbatch_options: list[str] = None,
@@ -53,6 +54,7 @@ class Selector:
             performance_data: Path to the performance data csv.
             feature_data: Path to the feature data csv.
             objective: The objective to optimize for selection.
+            solver_configurations: The configurations to use for each solver.
             runtime_cutoff: Cutoff for the runtime in seconds.
             run_on: Which runner to use. Defaults to slurm.
             sbatch_options: Additional options to pass to sbatch.
@@ -65,6 +67,8 @@ class Selector:
         # Convert the dataframes to Selector Format
         # Requires instances as index for both, columns as features / solvers
         # Remove redundant data
+        # TODO: Filter on the configurations for each solver
+
         performance_csv = performance_data.drop(
             [PerformanceDataFrame.column_seed,
              PerformanceDataFrame.column_configuration],
