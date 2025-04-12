@@ -1,0 +1,1 @@
+{"name": "Parallel Portfolio: CSCCSat, MiniSAT, PbO-CCSAT-Generic-001", "base_dir": ".", "dependencies": [], "sbatch_options": ["--mem-per-cpu=3000"], "srun_options": ["-N1", "-n1", "--mem-per-cpu=3000"], "jobs": [], "parallel_jobs": 6, "submitted": false, "run_id": null, "prepend": ""}
