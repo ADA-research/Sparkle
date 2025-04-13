@@ -57,7 +57,8 @@ def test_irace_configure(mock_add_to_queue: Mock) -> None:
     mock_add_to_queue.return_value = None
 
     # We currently cannot test these strings as they are using absolute paths
-    expected_cmds = ANY
+    cmds = ANY
+    outputs = ANY
     data_target = PerformanceDataFrame(
         Path("tests/test_files/performance/example_data_MO.csv"))
 
@@ -68,7 +69,9 @@ def test_irace_configure(mock_add_to_queue: Mock) -> None:
     mock_add_to_queue.assert_called_once_with(
         runner=rrr.Runner.SLURM,
         base_dir=base_dir,
-        cmd=expected_cmds,
+        cmd=cmds,
+        output_path=outputs,
+        parallel_jobs=None,
         name=f"{IRACE.__name__}: {conf_scenario.solver.name} on "
              f"{conf_scenario.instance_set.name}",
         sbatch_options=[],

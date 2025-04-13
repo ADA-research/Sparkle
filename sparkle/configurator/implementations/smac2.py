@@ -108,6 +108,7 @@ class SMAC2(Configurator):
             scenario=scenario,
             validation_ids=seeds if validate_after else None,
             sbatch_options=sbatch_options,
+            slurm_prepend=slurm_prepend,
             base_dir=base_dir,
             run_on=run_on
         )
