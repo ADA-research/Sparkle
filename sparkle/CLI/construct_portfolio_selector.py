@@ -182,7 +182,7 @@ def main(argv: list[str]) -> None:
         marginal_contribution.wait()
         print("Selector marginal contribution computing done!")
     else:
-        print(f"Running selector construction. Waiting for Slurm job(s) with id(s): "
+        print(f"Running selector construction through Slurm with job id(s): "
               f"{', '.join([d.run_id for d in dependencies])}")
 
     # Write used settings to file

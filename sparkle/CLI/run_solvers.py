@@ -326,7 +326,7 @@ def main(argv: list[str]) -> None:
     if runs is None or all(run is None for run in runs):
         print("Running solvers done!")
     elif run_on == Runner.SLURM:
-        print("Running solvers. Waiting for Slurm job(s) with id(s): "
+        print("Running solvers through Slurm with job id(s): "
               f'{",".join(r.run_id for r in runs if r is not None)}')
     sys.exit(0)
 

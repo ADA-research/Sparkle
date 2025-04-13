@@ -236,6 +236,7 @@ def main(argv: list[str]) -> None:
                 objective=config_scenario.sparkle_objective,
                 train_set=instance_set_train,
                 sbatch_options=sbatch_options,
+                slurm_prepend=slurm_prepend,
                 log_dir=config_scenario.validation,
                 base_dir=sl.caller_log_dir,
                 dependencies=dependency_job_list,
@@ -249,7 +250,7 @@ def main(argv: list[str]) -> None:
 
     if run_on == Runner.SLURM:
         job_id_str = ",".join([run.run_id for run in dependency_job_list])
-        print(f"Running configuration. Waiting for Slurm job(s) with id(s): "
+        print(f"Running configuration through Slurm with job id(s): "
               f"{job_id_str}")
     else:
         print("Running configuration finished!")

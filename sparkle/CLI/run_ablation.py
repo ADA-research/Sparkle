@@ -165,7 +165,7 @@ def main(argv: list[str]) -> None:
         print("Ablation analysis finished!")
     else:
         job_id_str = ",".join([run.run_id for run in runs])
-        print(f"Ablation analysis running. Waiting for Slurm job(s) with id(s): "
+        print(f"Ablation analysis running through Slurm with job id(s): "
               f"{job_id_str}")
     sys.exit(0)
 

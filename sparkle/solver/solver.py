@@ -335,7 +335,7 @@ class Solver(SparkleCallable):
             name=job_name,
             base_dir=base_dir,
             sbatch_options=sbatch_options,
-            slurm_prepend=slurm_prepend,
+            prepend=slurm_prepend,
             dependencies=dependencies
         )
         if run_on == Runner.LOCAL:
