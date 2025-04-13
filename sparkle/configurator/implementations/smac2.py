@@ -103,11 +103,11 @@ class SMAC2(Configurator):
             configuration_commands=cmds,
             data_target=data_target,
             output=output,
-            slurm_prepend=slurm_prepend,
             num_parallel_jobs=num_parallel_jobs,
             scenario=scenario,
             validation_ids=seeds if validate_after else None,
             sbatch_options=sbatch_options,
+            slurm_prepend=slurm_prepend,
             base_dir=base_dir,
             run_on=run_on
         )
