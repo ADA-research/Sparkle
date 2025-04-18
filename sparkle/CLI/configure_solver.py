@@ -151,6 +151,7 @@ def main(argv: list[str]) -> None:
         configurator_settings.update({"feature_data": feature_data})
 
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
+    slurm_prepend = gv.settings().get_slurm_job_prepend()
     config_scenario = configurator.scenario_class()(
         solver, instance_set_train, sparkle_objectives,
         configurator.output_path, **configurator_settings)
@@ -189,6 +190,7 @@ def main(argv: list[str]) -> None:
         scenario=config_scenario,
         data_target=performance_data,
         sbatch_options=sbatch_options,
+        slurm_prepend=slurm_prepend,
         num_parallel_jobs=gv.settings().get_number_of_jobs_in_parallel(),
         base_dir=sl.caller_log_dir,
         run_on=run_on)
@@ -200,6 +202,7 @@ def main(argv: list[str]) -> None:
         default_job = solver.run_performance_dataframe(
             instances, runs, performance_data,
             sbatch_options=sbatch_options,
+            slurm_prepend=slurm_prepend,
             cutoff_time=config_scenario.cutoff_time,
             log_dir=config_scenario.validation,
             base_dir=sl.caller_log_dir,
@@ -233,6 +236,7 @@ def main(argv: list[str]) -> None:
                 objective=config_scenario.sparkle_objective,
                 train_set=instance_set_train,
                 sbatch_options=sbatch_options,
+                slurm_prepend=slurm_prepend,
                 log_dir=config_scenario.validation,
                 base_dir=sl.caller_log_dir,
                 dependencies=dependency_job_list,
@@ -246,7 +250,7 @@ def main(argv: list[str]) -> None:
 
     if run_on == Runner.SLURM:
         job_id_str = ",".join([run.run_id for run in dependency_job_list])
-        print(f"Running configuration. Waiting for Slurm job(s) with id(s): "
+        print(f"Running configuration through Slurm with job id(s): "
               f"{job_id_str}")
     else:
         print("Running configuration finished!")

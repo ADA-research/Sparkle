@@ -32,6 +32,8 @@ def main() -> None:
     # Support spaces instead of _
     possible_commands = commands()
     for i in range(1, min(max_space, len(sys.argv))):
+        if "--" in sys.argv[i]:  # Parameter is never part of the command
+            break
         command = "_".join(sys.argv[1:i + 1])
         args = sys.argv[i + 1:]
         command_file = module_path / f"{command}.py"

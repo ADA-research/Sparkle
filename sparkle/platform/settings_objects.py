@@ -1765,7 +1765,9 @@ class Settings:
             try:
                 path = Path(value)
                 if path.is_file():
-                    value = path.open().read()
+                    with path.open() as f:
+                        value = f.read()
+                        f.close()
             except TypeError:
                 pass
             self.__init_section(section)

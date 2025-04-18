@@ -60,6 +60,7 @@ class SMAC2(Configurator):
                   data_target: PerformanceDataFrame,
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
+                  slurm_prepend: str | list[str] | Path = None,
                   num_parallel_jobs: int = None,
                   base_dir: Path = None,
                   run_on: Runner = Runner.SLURM) -> list[Run]:
@@ -106,6 +107,7 @@ class SMAC2(Configurator):
             scenario=scenario,
             validation_ids=seeds if validate_after else None,
             sbatch_options=sbatch_options,
+            slurm_prepend=slurm_prepend,
             base_dir=base_dir,
             run_on=run_on
         )

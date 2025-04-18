@@ -59,6 +59,9 @@ class Configurator:
                   run_on: Runner = Runner.SLURM) -> Run:
         """Start configuration job.
 
+        This method is shared by the configurators and should be called by the
+        implementation/subclass of the configurator.
+
         Args:
             configuration_commands: List of configurator commands to execute
             data_target: Performance data to store the results.
@@ -90,6 +93,7 @@ class Configurator:
                 performance_dataframe=data_target,
                 cutoff_time=scenario.cutoff_time,
                 sbatch_options=sbatch_options,
+                slurm_prepend=slurm_prepend,
                 log_dir=scenario.validation,
                 base_dir=base_dir,
                 dependencies=runs,

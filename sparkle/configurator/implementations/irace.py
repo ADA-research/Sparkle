@@ -10,7 +10,6 @@ from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.instance import InstanceSet, Instance_Set
 from sparkle.types import SparkleObjective, resolve_objective
 
-import runrunner as rrr
 from runrunner import Runner, Run
 
 
@@ -94,34 +93,18 @@ class IRACE(Configurator):
                 f"--scenario {scenario.scenario_file_path} "
                 f"--log-file {output_path} "
                 f"--seed {seed}" for seed, output_path in zip(seeds, output_files)]
-        runs = [rrr.add_to_queue(
-            runner=run_on,
-            cmd=cmds,
-            base_dir=base_dir,
-            name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
+        return super().configure(
+            configuration_commands=cmds,
+            data_target=data_target,
+            output=output_files,
+            scenario=scenario,
             sbatch_options=sbatch_options,
-            prepend=slurm_prepend,
-        )]
-
-        if validate_after:
-            validate = scenario.solver.run_performance_dataframe(
-                scenario.instance_set,
-                run_ids=seeds,
-                performance_dataframe=data_target,
-                cutoff_time=scenario.cutoff_time,
-                run_on=run_on,
-                sbatch_options=sbatch_options,
-                log_dir=scenario.validation,
-                base_dir=base_dir,
-                dependencies=runs,
-            )
-            runs.append(validate)
-
-        if run_on == Runner.LOCAL:
-            for run in runs:
-                run.wait()
-
-        return runs
+            slurm_prepend=slurm_prepend,
+            validation_ids=seeds if validate_after else None,
+            num_parallel_jobs=num_parallel_jobs,
+            base_dir=base_dir,
+            run_on=run_on
+        )
 
     @staticmethod
     def organise_output(output_source: Path,
