@@ -16,6 +16,7 @@ from sparkle.types import SolverStatus
 
 def call_solver_solve_instance(
         solver: Solver,
+        solver_config: dict,
         instance: Path,
         cutoff_time: int,
         log_dir: Path,
@@ -24,6 +25,7 @@ def call_solver_solve_instance(
 
     Args:
         solver: The solver to run on the instance
+        solver_config: The configuration of the solver
         instance: The path to the instance
         cutoff_time: The cutoff time for the solver
         log_dir: The log directory for the solver
@@ -38,6 +40,7 @@ def call_solver_solve_instance(
         objectives=objectives,
         seed=gv.get_seed(),
         cutoff_time=cutoff_time,
+        configuration=solver_config,
         log_dir=log_dir,
         run_on=Runner.LOCAL)
     status_key = [o.name for o in objectives if o.name.startswith("status")][0]
@@ -84,6 +87,8 @@ if __name__ == "__main__":
                         help="path to performance data csv")
     parser.add_argument("--performance-data-csv", required=True, type=Path,
                         help="path to performance data csv")
+    parser.add_argument("--configuration-csv", required=False, type=Path,
+                        help="path to performance data csv")
     parser.add_argument("--log-dir", type=Path, required=False,
                         help="path to the log directory")
     args = parser.parse_args()
@@ -105,11 +110,19 @@ if __name__ == "__main__":
     if predict_schedule is None:  # Selector Failed to produce prediction
         sys.exit(-1)
     print("Predicting done!")
+    if args.configuration_csv:
+        import ast
+        configurations = [ast.literal_eval(line)
+                          for line in args.configuration_csv.open().readlines()]
+    config = None
     for solver, cutoff_time in predict_schedule:
+        if args.configuration_csv:
+            solver, config_index = solver.rsplit("_", maxsplit=1)
+            config = configurations[int(config_index)]
         solver = Solver(Path(solver))
         print(f"Calling solver {solver.name} with time budget {cutoff_time} ...")
         flag_solved = call_solver_solve_instance(
-            solver, Path(args.instance), cutoff_time, log_dir, performance_data)
+            solver, config, Path(args.instance), cutoff_time, log_dir, performance_data)
         print(f"Calling solver {solver.name} done!")
 
         if flag_solved:
