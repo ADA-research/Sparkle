@@ -75,9 +75,12 @@ class Selector:
         # Write configurations to file
         if solver_configurations is not None:
             import ast
+            all_configurations = []
+            for solver in solver_configurations.keys():
+                all_configurations.extend(solver_configurations[solver])
             configurations_csv = target_file.parent / "configurations.csv"
             configurations_csv.write_text(
-                "\n".join(str(c) for c in solver_configurations.values())
+                "\n".join([str(c) for c in all_configurations])
             )
             # Create solver column per configuration
             new_col = {f"{solver}_{index}": conf
@@ -89,9 +92,6 @@ class Selector:
             performance_csv = performance_csv.pivot(columns=[
                 i + 1 for i in range(len(solver_configurations.keys()))])
             remove_columns = []
-            all_configurations = []
-            for solver in solver_configurations.keys():
-                all_configurations.extend(solver_configurations[solver])
             for column in performance_csv.columns:
                 try:
                     if ast.literal_eval(column[1]) not in all_configurations:
