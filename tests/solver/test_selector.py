@@ -84,6 +84,35 @@ def test_construct(mock_add_queue: Mock) -> None:
     assert f"--model-path {target_file}" in cmd_str
 
 
+@patch("runrunner.add_to_queue")
+def test_construct_all_configurations(mock_add_queue: Mock) -> None:
+    """Test with configuration selection."""
+    selector = Selector(MultiClassClassifier, RandomForestClassifier)
+
+    # Construct Parameters
+    target_file = Path("tests/test_files/Output/Portfolio_Selector/portfolio_selector")
+    performance_data_path = Path("tests/test_files/performance/actual-data.csv")
+    performance_data = PerformanceDataFrame(performance_data_path)
+    feature_data_path = Path("tests/test_files/Output/Feature_Data/feature_data.csv")
+    feature_data = FeatureDataFrame(feature_data_path)
+    objective = PAR()
+    solver_cutoff = 60
+    run_on = Runner.SLURM
+    sbatch_options = ["--mem-per-cpu=3000", "--qos=short", "--time=30:00"]
+    base_dir = Path(".")
+
+    configurations = performance_data.get_configurations()
+    selector.construct(target_file,
+                       performance_data,
+                       feature_data,
+                       objective,
+                       configurations,
+                       solver_cutoff,
+                       run_on,
+                       sbatch_options,
+                       base_dir)
+
+
 @pytest.mark.parametrize(
     "instance",
     ["Instances/PTN/Ptn-7824-b03.cnf",

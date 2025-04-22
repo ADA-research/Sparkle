@@ -117,16 +117,30 @@ def main(argv: list[str]) -> None:
         feature_data.impute_missing_values()
 
     # Check what configurations should be considered
-    if args.all_solver_configurations:
-        configurations = performance_data.get_all_solver_configurations()
-    elif args.best_solver_configurations:
-        configurations = performance_data.get_best_solver_configurations()
-    elif args.default_solver_configuration:
-        configurations = [None] * len(solvers)
-    else:  # Take the only configuration from the dataframe
-        configurations = performance_data.get_config  # ???
-
     # TODO: Allow user to specify subsets of data to be used
+    # TODO: Should this method also take in possible instances to consider?
+    if args.best_solver_configurations:
+        configurations = {s: performance_data.best_configuration(s, objective=objective)
+                          for s in solvers}
+    elif args.default_solver_configuration:
+        configurations = {s: [None] for s in solvers}
+    else:
+        configurations = performance_data.get_configurations()
+        if not args.all_solver_configurations:  # Take the only configuration
+            if any(len(c) > 1 for c in configurations.values()):
+                print("ERROR: More than one configuration for the following solvers:")
+                for s, c in configurations.items():
+                    if len(c) > 1:
+                        print(f"\t{s}: {c} configurations")
+                raise ValueError(
+                    "Cannot construct portfolio selector with single configuration per "
+                    "solver. Specify all_solver_configurations flag to construct the "
+                    "portfolio selector with all configurations, or the "
+                    "best-configuration flag to construct the portfolio selector with "
+                    "the best configuration per solver. Set the default-configuration "
+                    "flag to construct the portfolio selector with the default "
+                    "configuration per solver."
+                )
 
     selection_scenario_path =\
         gv.settings().DEFAULT_selection_output / selector.name / "_".join(solvers)

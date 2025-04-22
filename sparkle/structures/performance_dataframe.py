@@ -496,7 +496,7 @@ class PerformanceDataFrame(pd.DataFrame):
         configurations = {}
         for s in solvers:
             configs = self[s, self.column_configuration].values.tolist()
-            configs = [ast.literal_eval(c) for c in configs if c != "None"]
+            configs = [ast.literal_eval(c) for c in configs if isinstance(c, str)]
             # Remove duplicates
             configs = [c for n, c in enumerate(configs) if c not in configs[:n]]
             configurations[s] = configs
