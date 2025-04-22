@@ -31,7 +31,7 @@ def test_selector_constructor(
 
 
 @patch("runrunner.add_to_queue")
-def test_construct(mock_add_queue: Mock) -> None:
+def test_construct(mock_add_to_queue: Mock) -> None:
     """Test for method construct."""
     selector = Selector(MultiClassClassifier, RandomForestClassifier)
 
@@ -70,7 +70,7 @@ def test_construct(mock_add_queue: Mock) -> None:
     assert selector_feature_data.shape[0] == feature_data.dataframe.shape[1]
     assert selector_feature_data.shape[1] == feature_data.dataframe.shape[0]
 
-    _, kwargs = mock_add_queue.call_args
+    _, kwargs = mock_add_to_queue.call_args
     assert kwargs["runner"] == run_on
     assert kwargs["base_dir"] == base_dir
     assert kwargs["sbatch_options"] == sbatch_options
@@ -85,23 +85,30 @@ def test_construct(mock_add_queue: Mock) -> None:
 
 
 @patch("runrunner.add_to_queue")
-def test_construct_all_configurations(mock_add_queue: Mock) -> None:
+def test_construct_all_configurations(mock_add_queue: Mock,
+                                      tmp_path: Path,
+                                      monkeypatch: pytest.MonkeyPatch) -> None:
     """Test with configuration selection."""
     selector = Selector(MultiClassClassifier, RandomForestClassifier)
 
     # Construct Parameters
-    target_file = Path("tests/test_files/Output/Portfolio_Selector/portfolio_selector")
-    performance_data_path = Path("tests/test_files/performance/actual-data.csv")
-    performance_data = PerformanceDataFrame(performance_data_path)
-    feature_data_path = Path("tests/test_files/Output/Feature_Data/feature_data.csv")
+    performance_data_path =\
+        Path("tests/test_files/performance/actual-data.csv").absolute()
+    performance_data =\
+        PerformanceDataFrame(performance_data_path)
+    feature_data_path =\
+        Path("tests/test_files/Output/Feature_Data/feature_data.csv").absolute()
     feature_data = FeatureDataFrame(feature_data_path)
     objective = PAR()
     solver_cutoff = 60
     run_on = Runner.SLURM
     sbatch_options = ["--mem-per-cpu=3000", "--qos=short", "--time=30:00"]
     base_dir = Path(".")
-
     configurations = performance_data.get_configurations()
+
+    monkeypatch.chdir(tmp_path)
+    target_file = Path("portfolio_selector")
+
     selector.construct(target_file,
                        performance_data,
                        feature_data,
