@@ -93,6 +93,11 @@ AllJobsArgument = \
                       kwargs={"action": "store_true",
                               "help": "use all known job ID(s) for the command"})
 
+AllSolverConfigurationArgument = \
+    ArgumentContainer(names=["--all-configurations"],
+                      kwargs={"action": "store_true",
+                              "help": "use all known configurations for the command"})
+
 BestConfigurationArgument = \
     ArgumentContainer(names=["--best-configuration"],
                       kwargs={"required": False,
@@ -103,6 +108,11 @@ BestConfigurationArgument = \
                               "help": "Paths to instance(s) or instanceset(s) over "
                                       "which to determine the best configuration. If "
                                       "empty, all known instances are used."})
+
+BestSolverConfigurationArgument = \
+    ArgumentContainer(names=["--best-configuration"],
+                      kwargs={"action": "store_true",
+                              "help": "use the best configurations for the command"})
 
 CancelJobsArgument = \
     ArgumentContainer(names=["--cancel"],
@@ -148,6 +158,11 @@ CutOffTimeArgument = \
                                       "solvers within the portfolio will be stopped "
                                       "(default: "
                                       f"{Settings.DEFAULT_general_target_cutoff_time})"})
+
+DefaultSolverConfigurationArgument = \
+    ArgumentContainer(names=["--default-configuration"],
+                      kwargs={"action": "store_true",
+                              "help": "use the default configurations for the command"})
 
 DeterministicArgument =\
     ArgumentContainer(names=["--deterministic"],
@@ -208,10 +223,10 @@ InstanceSetTestAblationArgument = \
                               "type": str,
                               "help": "path to test instance set"})
 
-InstanceSetTrainAblationArgument = \
+InstanceSetTrainOptionalArgument = \
     ArgumentContainer(names=["--instance-set-train"],
                       kwargs={"required": False,
-                              "type": str,
+                              "type": Path,
                               "help": "path to training instance set"})
 
 InstanceSetTestReportArgument = \

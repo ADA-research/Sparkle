@@ -287,7 +287,7 @@ class PerformanceDataFrame(pd.DataFrame):
         if self.num_instances == 2:  # Remove nan instance
             for instance in self.instances:
                 if not isinstance(instance, str) and math.isnan(instance):
-                    self.remove_instance(instance)
+                    self.remove_instances(instance)
                     break
         # Sort the index to optimize lookup speed
         self.sort_index(axis=0, inplace=True)
@@ -331,14 +331,15 @@ class PerformanceDataFrame(pd.DataFrame):
                     PerformanceDataFrame.missing_value
         self.drop(columns=solver_name, level=0, axis=1, inplace=True)
 
-    def remove_instance(self: PerformanceDataFrame, instance_name: str) -> None:
-        """Drop an instance from the Dataframe."""
+    def remove_instances(self: PerformanceDataFrame, instances: str | list[str]) -> None:
+        """Drop instances from the Dataframe."""
         # To make sure objectives / runs are saved when no instances are present
-        if self.num_instances == 1:
+        num_instances = len(instances) if isinstance(instances, list) else 1
+        if self.num_instances - num_instances == 0:
             for objective, run in itertools.product(self.objective_names, self.run_ids):
                 self.loc[(objective, PerformanceDataFrame.missing_value, run)] =\
                     PerformanceDataFrame.missing_value
-        self.drop(instance_name,
+        self.drop(instances,
                   axis=0,
                   level=PerformanceDataFrame.index_instance, inplace=True)
         # Sort the index to optimize lookup speed

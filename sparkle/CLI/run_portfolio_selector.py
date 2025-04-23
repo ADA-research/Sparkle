@@ -87,6 +87,9 @@ def main(argv: list[str]) -> None:
     feature_dataframe.csv_filepath = test_case_path / "feature_data.csv"
     feature_dataframe.add_instances(data_set.instance_paths)
     feature_dataframe.save_csv()
+    configuration_csv = None
+    if (selector_scenario / "configurations.csv").exists():
+        configuration_csv = selector_scenario / "configurations.csv"
     feature_run = compute_features(feature_dataframe, recompute=False, run_on=run_on)
 
     if run_on == Runner.LOCAL:
@@ -114,7 +117,8 @@ def main(argv: list[str]) -> None:
                 f"--feature-data-csv {feature_dataframe.csv_filepath} "
                 f"--performance-data-csv {performance_data.csv_filepath} "
                 f"--instance {instance_path} "
-                f"--log-dir {sl.caller_log_dir}"
+                f"--log-dir {sl.caller_log_dir} "
+                f"--configuration-csv {configuration_csv}" if configuration_csv else ""
                 for instance_path in data_set.instance_paths]
 
     import subprocess

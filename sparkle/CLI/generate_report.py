@@ -233,7 +233,7 @@ def main(argv: list[str]) -> None:
             used_instances += [str(i) for i in instance_set_test.instance_paths]
         for i in performance_data.instances:
             if i not in used_instances:
-                performance_data.remove_instance(i)
+                performance_data.remove_instances(i)
 
         # Verify the data in the Performance DataFrame
         # Check that each run has produced a valid configuration

@@ -185,7 +185,7 @@ def test_add_remove_instance() -> None:
     assert "InstanceTmp" in pd_nan.instances
     assert math.isnan(pd_nan.get_values(pd_nan.solvers[0],
                                         instance="InstanceTmp")[0])
-    pd_nan.remove_instance("InstanceTmp")
+    pd_nan.remove_instances("InstanceTmp")
     assert "InstanceTmp" not in pd_nan.instances
 
 

@@ -28,8 +28,8 @@ def parser_function() -> argparse.ArgumentParser:
         epilog="Note that if no test instance set is given, the validation is performed"
                " on the training set.")
     parser.add_argument("--solver", required=False, type=str, help="path to solver")
-    parser.add_argument(*ac.InstanceSetTrainAblationArgument.names,
-                        **ac.InstanceSetTrainAblationArgument.kwargs)
+    parser.add_argument(*ac.InstanceSetTrainOptionalArgument.names,
+                        **ac.InstanceSetTrainOptionalArgument.kwargs)
     parser.add_argument(*ac.InstanceSetTestAblationArgument.names,
                         **ac.InstanceSetTestAblationArgument.kwargs)
     parser.add_argument(*ac.ObjectivesArgument.names,

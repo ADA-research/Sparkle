@@ -8,12 +8,15 @@ import runrunner as rrr
 from runrunner.base import Runner
 
 from sparkle.solver import Selector
+from sparkle.instance import Instance_Set
+
 from sparkle.platform.settings_objects import SettingState
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.types import resolve_objective
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
+from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.CLI.initialise import check_for_initialise
 
@@ -29,20 +32,20 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.ObjectiveArgument.kwargs)
     parser.add_argument(*ac.SelectorAblationArgument.names,
                         **ac.SelectorAblationArgument.kwargs)
+    parser.add_argument(*ac.InstanceSetTrainOptionalArgument.names,
+                        **ac.InstanceSetTrainOptionalArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
     # Solver Configurations arguments
-    configuration_group = parser.add_mutually_exclusive_group(
-        "Solver Configurations",
-        "Arguments for solver configurations", required=False)
-    configuration_group.add_argument(*ac.AllSolverConfigurationArgument,
-                                     **ac.AllSolverConfigurationArgument)
-    configuration_group.add_argument(*ac.BestSolverConfigurationArgument,
-                                     **ac.BestSolverConfigurationArgument)
-    configuration_group.add_argument(*ac.DefaultSolverConfigurationArgument,
-                                     **ac.DefaultSolverConfigurationArgument)
+    configuration_group = parser.add_mutually_exclusive_group(required=False)
+    configuration_group.add_argument(*ac.AllSolverConfigurationArgument.names,
+                                     **ac.AllSolverConfigurationArgument.kwargs)
+    configuration_group.add_argument(*ac.BestSolverConfigurationArgument.names,
+                                     **ac.BestSolverConfigurationArgument.kwargs)
+    configuration_group.add_argument(*ac.DefaultSolverConfigurationArgument.names,
+                                     **ac.DefaultSolverConfigurationArgument.kwargs)
     # TODO: Allow user to pick configurations by ?? per solver?
     return parser
 
@@ -102,12 +105,28 @@ def main(argv: list[str]) -> None:
         gv.settings().DEFAULT_feature_data_path,
         gv.settings().DEFAULT_performance_data_path)
 
+    instance_set = None
+    if args.instance_set_train is not None:
+        instance_set = resolve_object_name(
+            args.instance_set_train,
+            gv.file_storage_data_mapping[gv.instances_nickname_path],
+            gv.settings().DEFAULT_instance_dir, Instance_Set)
+
     cutoff_time = gv.settings().get_general_target_cutoff_time()
 
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
 
+    if instance_set is not None:
+        applicable_instances = [str(i) for i in instance_set.instance_paths]
+        removable_instances = [i for i in performance_data.instances
+                               if i not in applicable_instances]
+        performance_data.remove_instances(removable_instances)
+        feature_data.remove_instances(removable_instances)
+
     # TODO Allow user to select solvers to construct over
+    # TODO: Filter solvers/configurations that do not meet
+    # minimum marginal contribution on training set
     # Selector is named after the solvers it can predict, sort for permutation invariance
     solvers = sorted([s.name for s in gv.settings().DEFAULT_solver_dir.iterdir()])
 
@@ -117,16 +136,14 @@ def main(argv: list[str]) -> None:
         feature_data.impute_missing_values()
 
     # Check what configurations should be considered
-    # TODO: Allow user to specify subsets of data to be used
-    # TODO: Should this method also take in possible instances to consider?
-    if args.best_solver_configurations:
+    if args.best_configuration:
         configurations = {s: performance_data.best_configuration(s, objective=objective)
                           for s in solvers}
-    elif args.default_solver_configuration:
+    elif args.default_configuration:
         configurations = {s: [None] for s in solvers}
     else:
         configurations = performance_data.get_configurations()
-        if not args.all_solver_configurations:  # Take the only configuration
+        if not args.all_configurations:  # Take the only configuration
             if any(len(c) > 1 for c in configurations.values()):
                 print("ERROR: More than one configuration for the following solvers:")
                 for s, c in configurations.items():
