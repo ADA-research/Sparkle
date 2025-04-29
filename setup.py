@@ -3,9 +3,9 @@ import os
 from setuptools import setup, find_packages
 from sparkle.about import version
 
-setup(name="SparkleAI",
+setup(name="Sparkle",
       version=version,
-      url="https://github.com/thijssnelleman/Sparkle",
+      url="https://github.com/ADA-research/Sparkle",
       author="Thijs Snelleman",
       author_email="fkt_sparkle@aim.rwth-aachen.de",
       keywords="ai sat planning",

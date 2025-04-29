@@ -13,4 +13,4 @@ dependencies:
   - numactl=2.0.18 # runsolver compilation
   - pip # Sparkle installation
   - pip:
-    - SparkleAI
+    - sparkle

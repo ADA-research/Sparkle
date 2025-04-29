@@ -40,7 +40,7 @@ Make sure to also update the `CHANGELOG.md` and the version number with a minor 
 ### All other development
 The development is done on the `development` branch. Before starting your own work, make sure you have the pre-commit pipeline installed to avoid any flake8 issues on the GitHub, by running `pre-commit install` in the sparkle environment.
 To make changes to Sparkle, please create a branch from `development` and add your code there.
-If, during testing, you need to clean up local files, please do so using the custom git command `git sparkle-clean` as this preserves certain untracked files that are necessary to run Sparkle (and which would be removed when simply running `git clean -dxf`). To make this command locally available, run `git config alias.sparkle-clean "clean -dxf -e SparkleAI.egg-info"` once.
+If, during testing, you need to clean up local files, please do so using the custom git command `git sparkle-clean` as this preserves certain untracked files that are necessary to run Sparkle (and which would be removed when simply running `git clean -dxf`). To make this command locally available, run `git config alias.sparkle-clean "clean -dxf -e Sparkle.egg-info"` once.
 When ready, create a pull request towards the `development` branch.
 
 ## Pull requests, review, and merge protocol
