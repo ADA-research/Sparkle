@@ -240,7 +240,8 @@ class AblationScenario:
                 path=self.validation_dir,
                 base_dir=log_dir,
                 dependencies=run_ablation,
-                sbatch_options=sbatch_options)
+                sbatch_options=sbatch_options,
+                prepend=slurm_prepend)
 
             if run_on == Runner.LOCAL:
                 run_ablation_validation.wait()

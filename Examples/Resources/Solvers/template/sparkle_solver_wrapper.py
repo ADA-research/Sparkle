@@ -24,7 +24,7 @@ solver_name = "EXAMPLE_SOLVER"
 if solver_dir != Path("."):
     solver_exec = f"{solver_dir / solver_name}"
 else:
-    f"./{solver_name}"
+    solver_exec = f"./{solver_name}"
 solver_cmd = [solver_exec,
               "-inst", str(instance),
               "-seed", str(seed)]

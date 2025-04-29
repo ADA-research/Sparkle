@@ -56,6 +56,7 @@ class ParamILS(Configurator):
                   data_target: PerformanceDataFrame,
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
+                  slurm_prepend: str | list[str] | Path = None,
                   num_parallel_jobs: int = None,
                   base_dir: Path = None,
                   run_on: Runner = Runner.SLURM) -> list[Run]:
@@ -66,6 +67,7 @@ class ParamILS(Configurator):
             data_target: PerformanceDataFrame where to store the found configurations
             validate_after: Whether the Validator will be called after the configuration
             sbatch_options: List of slurm batch options to use
+            slurm_prepend: Slurm script to prepend to the sbatch
             num_parallel_jobs: The maximum number of jobs to run parallel.
             base_dir: The path where the sbatch scripts will be created for Slurm.
             run_on: On which platform to run the jobs. Default: Slurm.
@@ -98,6 +100,7 @@ class ParamILS(Configurator):
             configuration_commands=cmds,
             data_target=data_target,
             output=output,
+            slurm_prepend=slurm_prepend,
             num_parallel_jobs=num_parallel_jobs,
             scenario=scenario,
             validation_ids=seeds if validate_after else None,

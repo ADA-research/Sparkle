@@ -2,6 +2,16 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.9.3.2] - 13/04/2025
+
+- Bug fix regarding prepend
+- Refactor for IRACE configuration
+
+## [0.9.3.1] - 03/04/2025
+
+### Fixed
+- Bug regarding prepending to slurm scripts not working for configuration
+
 ## [0.9.3] - 05/03/2025
 
 ### Added
