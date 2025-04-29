@@ -53,6 +53,27 @@ def build_command_list(instances_set: InstanceSet,
     return cmd_list
 
 
+def init_default_objectives() -> list:
+    """Initialize default objective values and key names."""
+    # We record the 'best' of all seed results per solver-instance,
+    # setting start values for objectives that are always present
+    objectives = gv.settings().get_general_sparkle_objectives()
+    cpu_time_key = [o.name for o in objectives if o.name.startswith("cpu_time")][0]
+    status_key = [o.name for o in objectives if o.name.startswith("status")][0]
+    wall_time_key = [o.name for o in objectives if o.name.startswith("wall_time")][0]
+    cutoff = gv.settings().get_general_target_cutoff_time()
+    default_objective_values = {}
+
+    for o in objectives:
+        default_value = float(sys.maxsize) if o.minimise else 0
+        # Default values for time objectives can be linked to cutoff time
+        if o.time and o.post_process:
+            default_value = o.post_process(default_value, cutoff, SolverStatus.KILLED)
+        default_objective_values[o.name] = default_value
+    default_objective_values[status_key] = SolverStatus.UNKNOWN  # Overwrite status
+    return default_objective_values, cpu_time_key, status_key, wall_time_key
+
+
 def submit_jobs(cmd_list: list[str],
                 solvers: list[Solver],
                 instances_set: InstanceSet,
@@ -82,27 +103,6 @@ def submit_jobs(cmd_list: list[str],
         sbatch_options=sbatch_options,
         prepend=gv.settings().get_slurm_job_prepend(),
     )
-
-
-def init_default_objectives() -> list:
-    """Initialize default objective values and key names."""
-    # We record the 'best' of all seed results per solver-instance,
-    # setting start values for objectives that are always present
-    objectives = gv.settings().get_general_sparkle_objectives()
-    cpu_time_key = [o.name for o in objectives if o.name.startswith("cpu_time")][0]
-    status_key = [o.name for o in objectives if o.name.startswith("status")][0]
-    wall_time_key = [o.name for o in objectives if o.name.startswith("wall_time")][0]
-    cutoff = gv.settings().get_general_target_cutoff_time()
-    default_objective_values = {}
-
-    for o in objectives:
-        default_value = float(sys.maxsize) if o.minimise else 0
-        # Default values for time objectives can be linked to cutoff time
-        if o.time and o.post_process:
-            default_value = o.post_process(default_value, cutoff, SolverStatus.KILLED)
-        default_objective_values[o.name] = default_value
-    default_objective_values[status_key] = SolverStatus.UNKNOWN  # Overwrite status
-    return [default_objective_values, cpu_time_key, status_key, wall_time_key]
 
 
 def monitor_jobs(run: Run, instances_set: InstanceSet, solvers: list[Solver],
@@ -261,6 +261,13 @@ def print_and_write_results(job_output_dict: dict,
     header = ["Instance", "Solver"] + values_header
     result_rows = [header]
     csv_path = portfolio_path / "results.csv"
+    for instance_name in job_output_dict.keys():
+        for solver_name in job_output_dict[instance_name].keys():
+            job_o = job_output_dict[instance_name][solver_name]
+            values = [instance_name, solver_name] + [
+                job_o[key] if key in job_o else "None"
+                for key in values_header]
+            result_rows.append(values)
     with csv_path.open("w") as out:
         writer = csv.writer(out)
         writer.writerows(result_rows)
@@ -280,8 +287,8 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         run_on: Currently only supports Slurm.
     """
     returned_cmd = build_command_list(instances_set, solvers, portfolio_path)
-    [default_objective_values, cpu_time_key,
-     status_key, wall_time_key] = init_default_objectives()
+    default_objective_values, cpu_time_key,\
+        status_key, wall_time_key = init_default_objectives()
     returned_run = submit_jobs(returned_cmd, solvers, instances_set, Runner.SLURM)
     job_output_dict = monitor_jobs(returned_run, instances_set,
                                    solvers, default_objective_values)
