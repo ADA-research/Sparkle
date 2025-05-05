@@ -440,6 +440,7 @@ class PerformanceDataFrame(pd.DataFrame):
                   solver: str | list[str],
                   instance: str | list[str],
                   objective: str = None,
+                  configuration: dict | list[dict] = None,
                   run: int = None,
                   solver_fields: list[str] = ["Value"]
                   ) -> float | str | list[Any]:
@@ -451,8 +452,19 @@ class PerformanceDataFrame(pd.DataFrame):
         run = slice(run) if run is None else run
         target = self.loc[(objective, instance, run), (solver, solver_fields)].values
 
+        if configuration:  # Filter on configuration
+            configuration =\
+                [configuration] if not isinstance(configuration, list) else configuration
+            conf_target =\
+                self.loc[(objective, instance, run),
+                         (solver, PerformanceDataFrame.column_configuration)].values
+            subset =\
+                [i for i, conf in enumerate(conf_target)
+                 if isinstance(conf, str) and ast.literal_eval(conf) in configuration]
+            target = target[subset]
+
         # Reduce dimensions when relevant
-        if isinstance(target[0], np.ndarray) and len(target[0]) == 1:
+        if len(target) > 0 and isinstance(target[0], np.ndarray) and len(target[0]) == 1:
             target = target.flatten()
         target = target.tolist()
         if len(target) == 1:
@@ -740,8 +752,9 @@ class PerformanceDataFrame(pd.DataFrame):
         select = min if objective.minimise else max
         performances = [0.0] * len(schedule.keys())
         for ix, instance in enumerate(schedule.keys()):
-            for iy, (solver, max_runtime) in enumerate(schedule[instance]):
-                performance = float(self.get_value(solver, instance, objective.name))
+            for iy, (solver, max_runtime, config) in enumerate(schedule[instance]):
+                performance = float(self.get_value(
+                    solver, instance, objective.name, config))
                 if max_runtime is not None:  # We are dealing with runtime
                     performances[ix] += performance
                     if performance < max_runtime:
@@ -791,21 +804,29 @@ class PerformanceDataFrame(pd.DataFrame):
 
     def get_solver_ranking(self: PerformanceDataFrame,
                            objective: str | SparkleObjective = None
-                           ) -> list[tuple[str, float]]:
+                           ) -> list[tuple[str, dict, float]]:
         """Return a list with solvers ranked by average performance."""
         objective = self.verify_objective(objective)
         if isinstance(objective, str):
             objective = resolve_objective(objective)
-        # Drop Seed/Configuration
-        subdf = self.drop(
-            [PerformanceDataFrame.column_seed,
-             PerformanceDataFrame.column_configuration],
+        # Drop Seed
+        sub_df = self.drop(
+            [PerformanceDataFrame.column_seed],
             axis=1, level=1)
-        sub_df = subdf.loc(axis=0)[objective.name, :, :]
-        # Reduce Runs Dimension
-        sub_df = sub_df.droplevel("Run").astype(float)
+        # Reduce objective
+        sub_df: pd.DataFrame = sub_df.loc(axis=0)[objective.name, :, :]
+        # Drop Objective, Runs Dimension
+        sub_df = sub_df.droplevel([PerformanceDataFrame.index_objective,
+                                   PerformanceDataFrame.index_run])  # .astype(float)
         # By using .__name__, pandas converts it to a Pandas Aggregator function
-        sub_df = sub_df.groupby(sub_df.index).agg(func=objective.run_aggregator.__name__)
+        sub_df = sub_df.T.reset_index().T
+        print(sub_df)
+        import sys
+        sys.exit()
+        print(sub_df.groupby(sub_df.index).mean())
+        print(sub_df.groupby(sub_df.index).mean())
+        sub_df = sub_df.groupby(
+            [sub_df.index, sub_df.columns]).agg(func=objective.run_aggregator.__name__)
         solver_ranking = [(solver, objective.instance_aggregator(
             sub_df[solver].astype(float))) for solver in self.solvers]
         # Sort the list by second value (the performance)

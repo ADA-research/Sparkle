@@ -10,11 +10,10 @@ sparkle initialise
 
 ### Add instances
 
-Add train, and optionally test, instances (in this case in CNF format) in a given directory, without running solvers or feature extractors yet
+Add train instances (in this case in CNF format) in a given directory
 
 ```bash
 sparkle add_instances Examples/Resources/Instances/PTN/
-sparkle add_instances Examples/Resources/Instances/PTN2/
 ```
 
 ### Add a configurable solver

@@ -72,8 +72,8 @@ class Selector:
             axis=1, level=1)
         performance_csv = performance_csv.loc[objective.name]  # Select objective
         performance_csv.index = performance_csv.index.droplevel("Run")  # Drop runs
-        # Write configurations to file
-        if solver_configurations is not None:
+
+        if solver_configurations is not None:  # Write configurations to file
             import ast
             all_configurations = []
             for solver in solver_configurations.keys():
@@ -170,4 +170,19 @@ class Selector:
         schedule = selector.predict(instance_features)
         if schedule is None:
             print(f"ERROR: Selector {self.name} failed predict schedule!")
-        return schedule[instance]
+            return None
+        # ASF presents result as schedule per instance, we only use one in this setting
+        schedule = schedule[instance]
+        # Add configurations to the schedule
+        for index, (solver, time) in enumerate(schedule):
+            schedule[index] = (solver, time, {})
+        # Translate possible configurations from file
+        if (selector_path.parent / "configurations.csv").exists():
+            import ast
+            configurations =\
+                [ast.literal_eval(line) for line in
+                 (selector_path.parent / "configurations.csv").read_text().split("\n")]
+            for index, (solver, time, _) in enumerate(schedule):
+                solver_name, conf_index = solver.rsplit("_", maxsplit=1)
+                schedule[index] = (solver_name, time, configurations[int(conf_index)])
+        return schedule
