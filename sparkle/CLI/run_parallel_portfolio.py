@@ -29,6 +29,33 @@ from sparkle.instance import Instance_Set, InstanceSet
 from sparkle.types import SolverStatus, resolve_objective, UseTime
 
 
+def parser_function() -> argparse.ArgumentParser:
+    """Define the command line arguments.
+
+    Returns:
+        parser: The parser with the parsed command line arguments
+    """
+    parser = argparse.ArgumentParser(description="Run a portfolio of solvers on an "
+                                                 "instance set in parallel.")
+    parser.add_argument(*ac.InstanceSetPathsArgument.names,
+                        **ac.InstanceSetPathsArgument.kwargs)
+    parser.add_argument(*ac.NicknamePortfolioArgument.names,
+                        **ac.NicknamePortfolioArgument.kwargs)
+    parser.add_argument(*ac.SolversArgument.names,
+                        **ac.SolversArgument.kwargs)
+    parser.add_argument(*ac.ObjectivesArgument.names,
+                        **ac.ObjectivesArgument.kwargs)
+    parser.add_argument(*ac.CutOffTimeArgument.names,
+                        **ac.CutOffTimeArgument.kwargs)
+    parser.add_argument(*ac.SolverSeedsArgument.names,
+                        **ac.SolverSeedsArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
+    return parser
+
+
 def build_command_list(instances_set: InstanceSet,
                        solvers: list[Solver],
                        portfolio_path: Path) -> list[str]:
@@ -299,33 +326,6 @@ def run_parallel_portfolio(instances_set: InstanceSet,
                                         status_key, cpu_time_key, wall_time_key)
     print_and_write_results(job_output_dict, solvers,
                             portfolio_path, status_key, cpu_time_key, wall_time_key)
-
-
-def parser_function() -> argparse.ArgumentParser:
-    """Define the command line arguments.
-
-    Returns:
-        parser: The parser with the parsed command line arguments
-    """
-    parser = argparse.ArgumentParser(description="Run a portfolio of solvers on an "
-                                                 "instance set in parallel.")
-    parser.add_argument(*ac.InstanceSetPathsArgument.names,
-                        **ac.InstanceSetPathsArgument.kwargs)
-    parser.add_argument(*ac.NicknamePortfolioArgument.names,
-                        **ac.NicknamePortfolioArgument.kwargs)
-    parser.add_argument(*ac.SolversArgument.names,
-                        **ac.SolversArgument.kwargs)
-    parser.add_argument(*ac.ObjectivesArgument.names,
-                        **ac.ObjectivesArgument.kwargs)
-    parser.add_argument(*ac.CutOffTimeArgument.names,
-                        **ac.CutOffTimeArgument.kwargs)
-    parser.add_argument(*ac.SolverSeedsArgument.names,
-                        **ac.SolverSeedsArgument.kwargs)
-    parser.add_argument(*ac.RunOnArgument.names,
-                        **ac.RunOnArgument.kwargs)
-    parser.add_argument(*ac.SettingsFileArgument.names,
-                        **ac.SettingsFileArgument.kwargs)
-    return parser
 
 
 def main(argv: list[str]) -> None:
