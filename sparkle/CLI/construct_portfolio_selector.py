@@ -58,9 +58,11 @@ def judge_exist_remaining_jobs(feature_data_csv: Path,
     missing_features = feature_data.has_missing_vectors()
     missing_performances = performance_data.has_missing_values
     if missing_features:
-        print("There remain unperformed feature computation jobs!")
+        print("There remain unperformed feature computation jobs! Please run: "
+              "'sparkle compute features'")
     if missing_performances:
-        print("There remain unperformed performance computation jobs!")
+        print("There remain unperformed performance computation jobs! Please run: "
+              "'sparkle run solvers'")
     if missing_features or missing_performances:
         print("Please first execute all unperformed jobs before constructing Sparkle "
               "portfolio selector")
