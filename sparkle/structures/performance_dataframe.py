@@ -252,7 +252,7 @@ class PerformanceDataFrame(pd.DataFrame):
 
     def add_solver(self: PerformanceDataFrame,
                    solver_name: str,
-                   configurations: list[str] = None,
+                   configurations: list[(str, dict)] = None,
                    initial_value: float | list[str | float] = None) -> None:
         """Add a new solver to the dataframe. Initializes value to None by default.
 
@@ -269,10 +269,13 @@ class PerformanceDataFrame(pd.DataFrame):
         if not isinstance(initial_value, list):  # Single value
             initial_value = [[initial_value, initial_value]]
         if configurations is None:
-            configurations = ["Default"]
-        for config, (value, seed) in itertools.product(configurations, initial_value):
-            self[(solver_name, config, PerformanceDataFrame.column_value)] = value
-            self[(solver_name, config, PerformanceDataFrame.column_seed)] = seed
+            configurations = [("Default", {})]
+        self.attrs[solver_name] = {}
+        for (config_key, config), (value, seed) in itertools.product(configurations,
+                                                                     initial_value):
+            self[(solver_name, config_key, PerformanceDataFrame.column_value)] = value
+            self[(solver_name, config_key, PerformanceDataFrame.column_seed)] = seed
+            self.attrs[solver_name][config_key] = config
         if self.num_solvers == 2:  # Remove nan solver
             for solver in self.solvers:
                 if str(solver) == str(PerformanceDataFrame.missing_value):
@@ -382,10 +385,12 @@ class PerformanceDataFrame(pd.DataFrame):
         """Drop one or more solvers from the Dataframe."""
         # To make sure objectives / runs are saved when no solvers are present
         if self.num_solvers == 1:
-            for field in PerformanceDataFrame.multi_column_names:
-                self[PerformanceDataFrame.missing_value, field] =\
+            for field in PerformanceDataFrame.multi_column_value:
+                self[PerformanceDataFrame.missing_value,
+                     PerformanceDataFrame.missing_value, field] =\
                     PerformanceDataFrame.missing_value
         self.drop(columns=solver_name, level=0, axis=1, inplace=True)
+        del self.attrs[solver_name]
 
     def remove_configuration(self: PerformanceDataFrame,
                              solver: str, configuration: str) -> None:
