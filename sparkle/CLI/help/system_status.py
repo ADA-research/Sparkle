@@ -59,20 +59,18 @@ def print_performance_computation_jobs(performance_data_csv_path: Path,
         print("\nNo performance data found, cannot determine remaining jobs.")
         return
     performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
-    jobs = performance_data_csv.remaining_jobs()
-    total_job_num = sum([len(jobs[instance]) for instance in jobs.keys()])
+    jobs = performance_data_csv.get_job_list()
 
-    print(f"\nCurrently Sparkle has {total_job_num} remaining performance computation"
+    print(f"\nCurrently Sparkle has {len(jobs)} remaining performance computation"
           " jobs that need to be performed before creating an algorithm selector"
           + (":" if verbose else ""))
 
     if verbose:
         i = 0
-        for instance in jobs.keys():
-            for extractor in jobs[instance]:
-                print(f"[{i + 1}]: Solver: "
-                      f"{Path(extractor).name}, Instance: "
-                      f"{Path(instance).name}")
-                i += 1
+        for solver, config, instance, run in jobs:
+            print(f"[{i + 1}]: Solver: "
+                  f"{Path(solver).name}, Instance: "
+                  f"{Path(instance).name}")
+            i += 1
 
     print()

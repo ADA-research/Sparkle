@@ -54,8 +54,8 @@ def compute_selector_performance(
     if performance_path.exists():
         selector_performance_data = PerformanceDataFrame(performance_path)
         return objective.instance_aggregator(
-            selector_performance_data.get_values("portfolio_selector",
-                                                 objective=str(objective)))
+            selector_performance_data.get_value("portfolio_selector",
+                                                objective=str(objective)))
     selector_performance_data = performance_data.clone()
 
     selector_performance_data.add_solver("portfolio_selector")
