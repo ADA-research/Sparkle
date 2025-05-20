@@ -31,7 +31,7 @@ def test_from_scratch(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     empty_df.add_solver("AlgorithmC")
     assert set(empty_df.solvers) == set(["AlgorithmA", "AlgorithmB", "AlgorithmC"])
     # Test with configurations
-    empty_df.add_solver("AlgorithmD", configurations=["Config1", "Config2"])
+    empty_df.add_solver("AlgorithmD", configurations=[("Config1", {}), ("Config2", {})])
     assert set(empty_df.solvers) == set(["AlgorithmA", "AlgorithmB",
                                          "AlgorithmC", "AlgorithmD"])
     assert empty_df.get_configurations("AlgorithmD") == ["Config1", "Config2"]

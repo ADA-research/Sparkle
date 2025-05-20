@@ -286,9 +286,18 @@ class PerformanceDataFrame(pd.DataFrame):
                           solver: str,
                           config_id: str,
                           configuration: dict[str, Any] = None) -> None:
-        """Add a new configuration for a solver to the dataframe."""
-        self[(solver, config_id, PerformanceDataFrame.column_value)] = None
-        self[(solver, config_id, PerformanceDataFrame.column_seed)] = None
+        """Add a new configuration for a solver to the dataframe.
+
+        If the key already exists, update the value.
+
+        Args:
+            solver: The name of the solver to be added.
+            config_id: The name of the configuration to be added.
+            configuration: The configuration to be added.
+        """
+        if config_id not in self.get_configurations(solver):
+            self[(solver, config_id, PerformanceDataFrame.column_value)] = None
+            self[(solver, config_id, PerformanceDataFrame.column_seed)] = None
         self.attrs[solver][config_id] = configuration
 
     def add_objective(self: PerformanceDataFrame,
