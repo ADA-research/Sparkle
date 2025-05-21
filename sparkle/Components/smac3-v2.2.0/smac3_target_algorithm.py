@@ -33,7 +33,7 @@ def smac3_solver_call(config: Configuration, instance: str, seed: int) -> list[f
 class SparkleTargetFunctionRunner(AbstractSerialRunner):
     """Sparkle override class to execute target functions which are python functions.
 
-    Evaluates Solver for given configuration and resource limit.
+    Ripped from SMAC3, modified to report RunSolver measurements instead of Python time.
 
     Parameters
     ----------
@@ -176,11 +176,10 @@ class SparkleTargetFunctionRunner(AbstractSerialRunner):
             result = self(config_copy, target_function, kwargs)
             status = SMAC3.convert_status(result["status"])
             del result["status"]
-            runtime = result["cpu_time"]
-            del result["cpu_time"]
-            # RunSolver also records Wallclock time and memory in the output
-            # Maybe in the future we can communicate it to SMAC3
+            runtime = result["wall_time"]
             del result["wall_time"]
+            cpu_time = result["cpu_time"]
+            del result["cpu_time"]
             del result["memory"]
             result = {key: value
                       for key, value in result.items() if key in self._objectives}
@@ -193,7 +192,7 @@ class SparkleTargetFunctionRunner(AbstractSerialRunner):
             status = StatusType.CRASHED
 
         if status == StatusType.CRASHED:
-            return status, cost, runtime, additional_info
+            return status, cost, runtime, cpu_time, additional_info
 
         # Do some sanity checking (for multi objective)
         error = f"Returned costs {result} does not match "\
@@ -231,7 +230,7 @@ class SparkleTargetFunctionRunner(AbstractSerialRunner):
         # We want to get either a float or a list of floats.
         cost = np.asarray(cost).squeeze().tolist()
 
-        return status, cost, runtime, additional_info
+        return status, cost, runtime, cpu_time, additional_info
 
     def __call__(
         self: SparkleTargetFunctionRunner,
@@ -254,9 +253,10 @@ if __name__ == "__main__":
     # Incoming call from Sparkle:
     args = sys.argv[1:]
     scenario_file = Path(args[0])
-    run_index = int(args[1])
-    output_path = Path(args[2])
-    scenario = SMAC3Scenario.from_file(scenario_file, run_index=run_index)
+    config_id = args[1]
+    seed = int(args[2])
+    output_path = Path(args[3])
+    scenario = SMAC3Scenario.from_file(scenario_file, run_index=seed)
     global solver, objectives, cutoff, log_dir
     solver = scenario.solver
     cutoff = scenario.cutoff_time
@@ -278,10 +278,9 @@ if __name__ == "__main__":
     smac_facade._optimizer = smac_facade._get_optimizer()
 
     incumbent = smac_facade.optimize()
-    print(incumbent)
     # TODO: Fix taking first objective, how do we determine 'best configuration' from
     # a multi objective run?
     SMAC3.organise_output(scenario.smac3_scenario.output_directory / "runhistory.json",
                           output_target=output_path,
                           scenario=scenario,
-                          run_id=run_index)
+                          configuration_id=config_id)

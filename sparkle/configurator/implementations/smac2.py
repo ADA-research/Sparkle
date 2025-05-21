@@ -96,8 +96,8 @@ class SMAC2(Configurator):
         # to generate a seed per run
         seeds = [i for i in range(scenario.number_of_runs)]
         output = [f"{(scenario.results_directory).absolute()}/"
-                  f"{scenario.name}_seed_{seed}_smac.txt"
-                  for seed in seeds]
+                  f"{scenario.name}_{config_id}_smac.txt"
+                  for config_id in configuration_ids]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{SMAC2.__name__} {output_file} {data_target.csv_filepath} "
                 f"{scenario.scenario_file_path} {configuration_id} "
