@@ -240,7 +240,7 @@ def main(argv: list[str]) -> None:
             configuration = performance_data.get_full_configuration(
                 str(solver.directory), config_id)
             if config_id != "Default" and configuration == {}:
-                print(f"WARNING: No configuration found for {config_id}, run 0")
+                print(f"WARNING: No configuration found for {config_id}")
 
         # Create machine readable output
         output = gv.settings().DEFAULT_configuration_output_analysis
