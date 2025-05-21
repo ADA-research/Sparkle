@@ -282,23 +282,29 @@ class PerformanceDataFrame(pd.DataFrame):
                     self.remove_solver(solver)
                     break
 
-    def add_configuration(self: PerformanceDataFrame,
-                          solver: str,
-                          config_id: str,
-                          configuration: dict[str, Any] = None) -> None:
-        """Add a new configuration for a solver to the dataframe.
+    def add_configuration(
+            self: PerformanceDataFrame,
+            solver: str,
+            configuration_id: str | list[str],
+            configuration: dict[str, Any] | list[dict[str, Any]] = None) -> None:
+        """Add new configurations for a solver to the dataframe.
 
         If the key already exists, update the value.
 
         Args:
             solver: The name of the solver to be added.
-            config_id: The name of the configuration to be added.
+            configuration_id: The name of the configuration to be added.
             configuration: The configuration to be added.
         """
-        if config_id not in self.get_configurations(solver):
-            self[(solver, config_id, PerformanceDataFrame.column_value)] = None
-            self[(solver, config_id, PerformanceDataFrame.column_seed)] = None
-        self.attrs[solver][config_id] = configuration
+        if not isinstance(configuration_id, list):
+            configuration_id = [configuration_id]
+        if not isinstance(configuration, list):
+            configuration = [configuration]
+        for config_id, config in zip(configuration_id, configuration):
+            if config_id not in self.get_configurations(solver):
+                self[(solver, config_id, PerformanceDataFrame.column_value)] = None
+                self[(solver, config_id, PerformanceDataFrame.column_seed)] = None
+            self.attrs[solver][config_id] = config
 
     def add_objective(self: PerformanceDataFrame,
                       objective_name: str,
@@ -565,7 +571,6 @@ class PerformanceDataFrame(pd.DataFrame):
             return value.mean()
         return value
 
-    # TODO: This method should be refactored or not exist
     def get_job_list(self: PerformanceDataFrame, rerun: bool = False) \
             -> list[tuple[str, str]]:
         """Return a list of performance computation jobs there are to be done.
@@ -588,8 +593,10 @@ class PerformanceDataFrame(pd.DataFrame):
             df = df[~df.index.isin(df.dropna().index)]
         # Drop objective, we only need each combination once
         df = df.droplevel(PerformanceDataFrame.index_objective, axis=0)
+        # Drop duplicate index due to multi objective, we could miss a nan if not first
+        index = df.index.drop_duplicates(keep="first")
         return [list(column) + list(index)
-                for column, index in itertools.product(df.columns, df.index)]
+                for column, index in itertools.product(df.columns, index)]
 
     def configuration_performance(
             self: PerformanceDataFrame,
@@ -622,6 +629,8 @@ class PerformanceDataFrame(pd.DataFrame):
         subdf = subdf.drop(PerformanceDataFrame.column_seed, axis=1,
                            level=PerformanceDataFrame.column_meta)
         subdf = subdf.droplevel(PerformanceDataFrame.column_meta, axis=1)
+        # Ensure the objective is numeric
+        subdf = subdf.astype(float)
 
         if instances:  # Filter instances
             subdf = subdf.loc[instances, :]

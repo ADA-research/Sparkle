@@ -5,7 +5,6 @@ from filelock import FileLock
 import argparse
 from pathlib import Path
 import random
-import ast
 import time
 
 from runrunner import Runner
@@ -25,12 +24,16 @@ if __name__ == "__main__":
     parser.add_argument("--instance", required=True, type=str,
                         help="path to instance to run on")
     parser.add_argument("--run-index", required=True, type=int,
-                        help="run index in the dataframe.")
+                        help="run index in the dataframe to set.")
     parser.add_argument("--log-dir", type=Path, required=True,
                         help="path to the log directory")
+
+    # These two arguments should be mutually exclusive
+    parser.add_argument("--configuration-id", type=str, required=False,
+                        help="configuration id to read from the PerformanceDataFrame.")
     parser.add_argument("--configuration", type=dict, required=False,
-                        help="configuration for the solver. If not provided, read from "
-                             "the PerformanceDataFrame.")
+                        help="configuration for the solver")
+
     parser.add_argument("--seed", type=str, required=False,
                         help="seed to use for the solver. If not provided, read from "
                              "the PerformanceDataFrame or generate one.")
@@ -61,7 +64,7 @@ if __name__ == "__main__":
 
     solver = Solver(args.solver)
 
-    if not args.configuration or not args.seed:  # Read
+    if args.configuration_id or args.best_configuration_instances:  # Read
         # Desyncronize from other possible jobs writing to the same file
         time.sleep(random.random() * 10)
         lock = FileLock(f"{args.performance_dataframe}.lock")  # Lock the file
@@ -74,11 +77,13 @@ if __name__ == "__main__":
         if args.best_configuration_instances:  # Determine best configuration
             best_configuration_instances = args.best_configuration_instances.split(",")
             target_objective = resolve_objective(args.target_objective)
-            configuration, value = performance_dataframe.best_configuration(
+            config_id, value = performance_dataframe.best_configuration(
                 solver=str(args.solver),
                 objective=target_objective,
                 instances=best_configuration_instances,
             )
+            configuration = performance_dataframe.get_full_configuration(
+                str(args.solver), config_id)
             # Read the seed from the dataframe
             seed = performance_dataframe.get_value(
                 str(args.solver),
@@ -86,27 +91,20 @@ if __name__ == "__main__":
                 objective=target_objective.name,
                 run=run_index,
                 solver_fields=[PerformanceDataFrame.column_seed])
-        else:
-            target = performance_dataframe.get_value(
+        elif args.configuration_id:  # Read from DF the ID
+            config_id = args.configuration_id
+            configuration = performance_dataframe.get_full_configuration(
+                str(args.solver), config_id)
+            seed = performance_dataframe.get_value(
                 str(args.solver),
                 str(args.instance),
                 objective=None,
                 run=run_index,
-                solver_fields=[PerformanceDataFrame.column_seed,
-                               PerformanceDataFrame.column_configuration])
-            if isinstance(target[0], list):  # We take the first value we find
-                target = target[0]
-            seed, df_configuration = target
+                solver_fields=[PerformanceDataFrame.column_seed])
+        else:  # Direct config given
             configuration = args.configuration
-            if configuration is None:  # Try to read from the dataframe
-                if not isinstance(df_configuration, dict):
-                    try:
-                        configuration = ast.literal_eval(df_configuration)
-                    except Exception:
-                        print("Failed to read configuration from dataframe: "
-                              f"{df_configuration}")
-                else:
-                    configuration = df_configuration
+            config_id = configuration["config_id"]
+
         seed = args.seed or seed
         # If no seed is provided and no seed can be read, generate one
         if not isinstance(seed, int):
@@ -126,12 +124,10 @@ if __name__ == "__main__":
     result = [[solver_output[objective.name] for objective in objectives],
               [seed] * len(objectives)]
     solver_fields = [PerformanceDataFrame.column_value, PerformanceDataFrame.column_seed]
-    if args.best_configuration_instances:  # Need to specify the configuration
-        result.append([configuration] * len(objectives))
-        solver_fields.append(PerformanceDataFrame.column_configuration)
     objective_values = [f"{objective.name}: {solver_output[objective.name]}"
                         for objective in objectives]
     print(f"Appending value objective values: {', '.join(objective_values)}")
+    print(f"For Solver/config: {solver}/{config_id}")
     print(f"For index: Instance {args.instance}, Run {args.run_index}")
 
     # Desyncronize from other possible jobs writing to the same file
@@ -145,6 +141,7 @@ if __name__ == "__main__":
             result,
             solver=str(args.solver),
             instance=str(args.instance),
+            configuration=config_id,
             objective=[o.name for o in objectives],
             run=run_index,
             solver_fields=solver_fields,

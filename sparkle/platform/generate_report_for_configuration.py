@@ -12,7 +12,6 @@ from sparkle.platform import latex as stex
 from sparkle.configurator.ablation import AblationScenario
 from sparkle.configurator.configurator import ConfigurationScenario
 from sparkle.instance import InstanceSet
-from sparkle.structures import PerformanceDataFrame
 from sparkle.types import SolverStatus
 from sparkle import about
 
@@ -128,18 +127,16 @@ def get_timeouts_instanceset(config_output: ConfigurationOutput,
     # Determine status objective name
     objective = [o for o in config_output.performance_data.objectives
                  if o.stem.lower() == "status"][0]
-    _, configured_status = config_output.performance_data.configuration_performance(
+    default_status = config_output.performance_data.get_value(
         solver_key,
-        configuration=config_output.best_configuration,
-        objective=objective,
-        instances=instance_keys,
-        per_instance=True)
-    _, default_status = config_output.performance_data.configuration_performance(
+        configuration="Default",
+        objective=objective.name,
+        instance=instance_keys)
+    configured_status = config_output.performance_data.get_value(
         solver_key,
-        configuration=PerformanceDataFrame.missing_value,
-        objective=objective,
-        instances=instance_keys,
-        per_instance=True)
+        configuration=config_output.best_configuration_key,
+        objective=objective.name,
+        instance=instance_keys)
 
     default_timeouts, configured_timeouts, shared = 0, 0, 0
     for configured_status, default_status in zip(configured_status, default_status):

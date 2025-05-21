@@ -51,7 +51,8 @@ class Configurator:
                   data_target: PerformanceDataFrame,
                   output: Path,
                   scenario: ConfigurationScenario,
-                  validation_ids: list[int] = None,
+                  configuration_ids: list[str] = None,
+                  validate_after: bool = True,
                   sbatch_options: list[str] = None,
                   slurm_prepend: str | list[str] | Path = None,
                   num_parallel_jobs: int = None,
@@ -67,6 +68,8 @@ class Configurator:
             data_target: Performance data to store the results.
             output: Output directory.
             scenario: ConfigurationScenario to execute.
+            configuration_ids: List of configuration ids that are to be created
+            validate_after: Whether the configurations should be validated
             sbatch_options: List of slurm batch options to use
             slurm_prepend: Slurm script to prepend to the sbatch
             num_parallel_jobs: The maximum number of jobs to run in parallel
@@ -76,6 +79,12 @@ class Configurator:
         Returns:
             A RunRunner Run object.
         """
+        # Add the configuration IDs to the dataframe with empty configurations
+        data_target.add_configuration(str(scenario.solver.directory),
+                                      configuration_ids,
+                                      [{}] * len(configuration_ids))
+        data_target.save_csv()
+        # Submit the configuration job
         runs = [rrr.add_to_queue(
             runner=run_on,
             cmd=configuration_commands,
@@ -86,10 +95,10 @@ class Configurator:
             sbatch_options=sbatch_options,
             prepend=slurm_prepend)]
 
-        if validation_ids:
+        if validate_after:
             validate = scenario.solver.run_performance_dataframe(
                 scenario.instance_set,
-                run_ids=validation_ids,
+                config_ids=configuration_ids,
                 performance_dataframe=data_target,
                 cutoff_time=scenario.cutoff_time,
                 sbatch_options=sbatch_options,
@@ -97,7 +106,7 @@ class Configurator:
                 log_dir=scenario.validation,
                 base_dir=base_dir,
                 dependencies=runs,
-                job_name=f"{self.name}: Validating {len(validation_ids)} "
+                job_name=f"{self.name}: Validating {len(configuration_ids)} "
                          f"{scenario.solver.name} Configurations on "
                          f"{scenario.instance_set.name}",
                 run_on=run_on,
@@ -115,14 +124,14 @@ class Configurator:
     def organise_output(output_source: Path,
                         output_target: Path,
                         scenario: ConfigurationScenario,
-                        run_id: int) -> None | str:
+                        configuration_id: str) -> None | str:
         """Method to restructure and clean up after a single configurator call.
 
         Args:
             output_source: Path to the output file of the configurator run.
             output_target: Path to the Performance DataFrame to store result.
             scenario: ConfigurationScenario of the configuration.
-            run_id: ID of the run of the configuration.
+            configuration_id: ID (of the run) of the configuration.
         """
         raise NotImplementedError
 
