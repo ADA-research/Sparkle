@@ -150,22 +150,8 @@ class IRACE(Configurator):
             if not parameter == ".PARENT." and value != "NA" and value != "<NA>":
                 configuration += f"--{parameter} {value} "
         configuration = Solver.config_str_to_dict(configuration)
-        if output_target is None or not output_target.exists():
-            return configuration
-
-        from filelock import FileLock
-        lock = FileLock(f"{output_target}.lock")
-        with lock.acquire(timeout=60):
-            performance_data = PerformanceDataFrame(output_target)
-            # Resolve absolute path to Solver column
-            solver = [s for s in performance_data.solvers
-                      if Path(s).name == scenario.solver.name][0]
-            # Update the configuration ID by adding the configuration
-            performance_data.add_configuration(
-                solver=solver,
-                configuration_id=configuration_id,
-                configuration=configuration)
-            performance_data.save_csv()
+        return Configurator.save_configuration(scenario, configuration_id,
+                                               configuration, output_target)
 
     def get_status_from_logs(self: Configurator) -> None:
         """Method to scan the log files of the configurator for warnings."""

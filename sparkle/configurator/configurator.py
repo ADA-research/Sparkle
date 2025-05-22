@@ -135,6 +135,38 @@ class Configurator:
         """
         raise NotImplementedError
 
+    @staticmethod
+    def save_configuration(scenario: ConfigurationScenario,
+                           configuration_id: str,
+                           configuration: dict,
+                           output_target: Path) -> dict | None:
+        """Method to save a configuration to a file.
+
+        If the output_target is None, return the configuration.
+
+        Args:
+            scenario: ConfigurationScenario of the configuration. Should be removed.
+            configuration_id: ID (of the run) of the configuration.
+            configuration: Configuration to save.
+            output_target: Path to the Performance DataFrame to store result.
+        """
+        if output_target is None or not output_target.exists():
+            return configuration
+        # Save result to Performance DataFrame
+        from filelock import FileLock
+        lock = FileLock(f"{output_target}.lock")
+        with lock.acquire(timeout=60):
+            performance_data = PerformanceDataFrame(output_target)
+            # Resolve absolute path to Solver column
+            solver = [s for s in performance_data.solvers
+                      if Path(s).name == scenario.solver.name][0]
+            # Update the configuration ID by adding the configuration
+            performance_data.add_configuration(
+                solver=solver,
+                configuration_id=configuration_id,
+                configuration=configuration)
+            performance_data.save_csv()
+
     def get_status_from_logs(self: Configurator) -> None:
         """Method to scan the log files of the configurator for warnings."""
         raise NotImplementedError

@@ -124,7 +124,6 @@ class ParamILS(Configurator):
                         scenario: ParamILSScenario = None,
                         configuration_id: str = None) -> None | dict:
         """Retrieves configurations from SMAC files and places them in output."""
-        from filelock import FileLock
         # Extract from log file
         configuration = {}
         skipping = True
@@ -138,21 +137,8 @@ class ParamILS(Configurator):
             variable = line.split(":")[0].strip()
             value = line.split("->")[1].strip()
             configuration[variable] = value
-        if output_target is None or not output_target.exists():
-            return configuration
-        # Write to file
-        lock = FileLock(f"{output_target}.lock")
-        with lock.acquire(timeout=120):
-            performance_data = PerformanceDataFrame(output_target)
-            # Resolve absolute path to Solver column
-            solver = [s for s in performance_data.solvers
-                      if Path(s).name == scenario.solver.name][0]
-            # Update the configuration ID by adding the configuration
-            performance_data.add_configuration(
-                solver=solver,
-                configuration_id=configuration_id,
-                configuration=configuration)
-            performance_data.save_csv()
+        return Configurator.save_configuration(scenario, configuration_id,
+                                               configuration, output_target)
 
     def get_status_from_logs(self: ParamILS) -> None:
         """Method to scan the log files of the configurator for warnings."""

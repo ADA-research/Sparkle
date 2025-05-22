@@ -137,23 +137,9 @@ class SMAC2(Configurator):
                 configuration = call_str.split(" ", 8)[-1]
                 break
         configuration = Solver.config_str_to_dict(configuration)
-        if output_target is None or not output_target.exists():
-            return configuration
-        # Save result to Performance DataFrame
-        from filelock import FileLock
         configuration["configuration_id"] = configuration_id
-        lock = FileLock(f"{output_target}.lock")
-        with lock.acquire(timeout=60):
-            performance_data = PerformanceDataFrame(output_target)
-            # Resolve absolute path to Solver column
-            solver = [s for s in performance_data.solvers
-                      if Path(s).name == scenario.solver.name][0]
-            # Update the configuration ID by adding the configuration
-            performance_data.add_configuration(
-                solver=solver,
-                configuration_id=configuration_id,
-                configuration=configuration)
-            performance_data.save_csv()
+        return Configurator.save_configuration(scenario, configuration_id,
+                                               configuration, output_target)
 
     @staticmethod
     def get_smac_run_obj(objective: SparkleObjective) -> str:

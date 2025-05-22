@@ -136,24 +136,8 @@ class SMAC3(Configurator):
                         for evaluations in config_evals]
         best_config = configurations[
             config_evals.index(objective.solver_aggregator(config_evals))]
-        if output_target is None or not output_target.exists():
-            return best_config
-
-        # Save result to Performance DataFrame
-        from filelock import FileLock
-        best_config["configuration_id"] = configuration_id
-        lock = FileLock(f"{output_target}.lock")
-        with lock.acquire(timeout=60):
-            performance_data = PerformanceDataFrame(output_target)
-            # Resolve absolute path to Solver column
-            solver = [s for s in performance_data.solvers
-                      if Path(s).name == scenario.solver.name][0]
-            # Update the configuration ID by adding the configuration
-            performance_data.add_configuration(
-                solver=solver,
-                configuration_id=configuration_id,
-                configuration=best_config)
-            performance_data.save_csv()
+        return Configurator.save_configuration(scenario, configuration_id,
+                                               best_config, output_target)
 
     def get_status_from_logs(self: SMAC3) -> None:
         """Method to scan the log files of the configurator for warnings."""
