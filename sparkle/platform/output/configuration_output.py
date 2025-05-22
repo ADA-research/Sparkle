@@ -61,13 +61,13 @@ class ConfigurationOutput:
         train_instances = [str(p) for p in self.instance_set_train.instance_paths]
         # Retrieve Default (No configuration) performance
         _, self.default_performance_train = performance_data.configuration_performance(
-            solver_key, "Default",
+            solver_key, PerformanceDataFrame.default_configuration,
             objective=self.config_scenario.sparkle_objective,
             instances=train_instances)
 
         _, self.default_performance_per_instance_train =\
             performance_data.configuration_performance(
-                solver_key, "Default",
+                solver_key, PerformanceDataFrame.default_configuration,
                 objective=self.config_scenario.sparkle_objective,
                 instances=train_instances,
                 per_instance=True)
@@ -99,12 +99,12 @@ class ConfigurationOutput:
             # Retrieve default performance on the test set
             _, self.default_performance_test =\
                 performance_data.configuration_performance(
-                    solver_key, "Default",
+                    solver_key, PerformanceDataFrame.default_configuration,
                     objective=self.config_scenario.sparkle_objective,
                     instances=test_instances)
             _, self.default_performance_per_instance_test =\
                 performance_data.configuration_performance(
-                    solver_key, "Default",
+                    solver_key, PerformanceDataFrame.default_configuration,
                     objective=self.config_scenario.sparkle_objective,
                     instances=test_instances,
                     per_instance=True)

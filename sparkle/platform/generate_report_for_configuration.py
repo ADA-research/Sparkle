@@ -129,7 +129,7 @@ def get_timeouts_instanceset(config_output: ConfigurationOutput,
                  if o.stem.lower() == "status"][0]
     default_status = config_output.performance_data.get_value(
         solver_key,
-        configuration="Default",
+        configuration=config_output.performance_data.default_configuration,
         objective=objective.name,
         instance=instance_keys)
     configured_status = config_output.performance_data.get_value(

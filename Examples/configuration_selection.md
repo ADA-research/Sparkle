@@ -1,4 +1,6 @@
-## Algorithm Runtime Configuration
+## Algorithm Runtime Configuration and Selection
+
+In this example, we will use Automated Algorithm Configuration to create multiple configurations for a Solver, and afterwards treat the configurations as a portfolio to perform selection on.
 
 These steps can also be found as a Bash script in `Examples/configuration_selection.sh`
 
@@ -96,7 +98,7 @@ sparkle run portfolio selector Examples/Resources/Instances/PTN2/plain7824.cnf -
 Run the portfolio selector on a testing instance *set*
 
 ```bash
-sparkle run portfolio selector PTN2/
+sparkle run portfolio selector Examples/Resources/Instances/PTN2/
 sparkle jobs  # Wait for the portfolio selector to be done running on the testing instance set
 ```
 

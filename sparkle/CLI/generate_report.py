@@ -239,7 +239,8 @@ def main(argv: list[str]) -> None:
         for config_id in performance_data.get_configurations(str(solver.directory)):
             configuration = performance_data.get_full_configuration(
                 str(solver.directory), config_id)
-            if config_id != "Default" and configuration == {}:
+            if (config_id != PerformanceDataFrame.default_configuration
+                    and configuration == {}):
                 print(f"WARNING: No configuration found for {config_id}")
 
         # Create machine readable output

@@ -159,7 +159,8 @@ def main(argv: list[str]) -> None:
     # TODO: Hard coded string matching, should be changed
     default_jobs = [(solver, config_id, instance, run_id)
                     for solver, config_id, instance, run_id
-                    in performance_data.get_job_list() if config_id == "Default"]
+                    in performance_data.get_job_list()
+                    if config_id == PerformanceDataFrame.default_configuration]
 
     dependency_job_list = configurator.configure(
         scenario=config_scenario,
@@ -174,7 +175,8 @@ def main(argv: list[str]) -> None:
     if default_jobs:
         instances = [job[2] for job in default_jobs]
         default_job = solver.run_performance_dataframe(
-            instances, "Default", performance_data,
+            instances, PerformanceDataFrame.default_configuration,
+            performance_data,
             sbatch_options=sbatch_options,
             slurm_prepend=slurm_prepend,
             cutoff_time=config_scenario.cutoff_time,

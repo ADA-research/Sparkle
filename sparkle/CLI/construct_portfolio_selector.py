@@ -50,11 +50,9 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-def judge_exist_remaining_jobs(feature_data_csv: Path,
-                               performance_data_csv: Path) -> bool:
+def judge_exist_remaining_jobs(feature_data: FeatureDataFrame,
+                               performance_data: PerformanceDataFrame) -> bool:
     """Return whether there are remaining feature or performance computation jobs."""
-    feature_data = FeatureDataFrame(feature_data_csv)
-    performance_data = PerformanceDataFrame(performance_data_csv)
     missing_features = feature_data.has_missing_vectors()
     missing_performances = performance_data.has_missing_values
     if missing_features:
@@ -85,9 +83,8 @@ def main(argv: list[str]) -> None:
     solver_ablation = args.solver_ablation
 
     if ac.set_by_user(args, "settings_file"):
-        gv.settings().read_settings_ini(
-            args.settings_file, SettingState.CMD_LINE
-        )  # Do first, so other command line options can override settings from the file
+        # Do first, so other command line options can override settings from the file
+        gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
     if ac.set_by_user(args, "objective"):
         objective = resolve_objective(args.objective)
     else:
@@ -95,17 +92,12 @@ def main(argv: list[str]) -> None:
         print("WARNING: No objective specified, defaulting to first objective from "
               f"settings ({objective}).")
     if args.run_on is not None:
-        gv.settings().set_run_on(
-            args.run_on.value, SettingState.CMD_LINE)
+        gv.settings().set_run_on(args.run_on.value, SettingState.CMD_LINE)
     run_on = gv.settings().get_run_on()
 
     print("Start constructing Sparkle portfolio selector ...")
     selector = Selector(gv.settings().get_selection_class(),
                         gv.settings().get_selection_model())
-
-    judge_exist_remaining_jobs(
-        gv.settings().DEFAULT_feature_data_path,
-        gv.settings().DEFAULT_performance_data_path)
 
     instance_set = None
     if args.instance_set_train is not None:
@@ -126,11 +118,14 @@ def main(argv: list[str]) -> None:
         performance_data.remove_instances(removable_instances)
         feature_data.remove_instances(removable_instances)
 
+    judge_exist_remaining_jobs(feature_data, performance_data)
+
     # TODO Allow user to select solvers to construct over
     # TODO: Filter solvers/configurations that do not meet
+    # TODO: And only then call judge exist remaining jobs
     # minimum marginal contribution on training set
     # Selector is named after the solvers it can predict, sort for permutation invariance
-    solvers = sorted([s.name for s in gv.settings().DEFAULT_solver_dir.iterdir()])
+    solvers = sorted([str(s) for s in gv.settings().DEFAULT_solver_dir.iterdir()])
 
     if feature_data.has_missing_value():
         print("WARNING: Missing values in the feature data, will be imputed as the mean "
@@ -142,15 +137,15 @@ def main(argv: list[str]) -> None:
         configurations = {s: performance_data.best_configuration(s, objective=objective)
                           for s in solvers}
     elif args.default_configuration:
-        configurations = {s: [None] for s in solvers}
+        configurations = {s: PerformanceDataFrame.default_configuration for s in solvers}
     else:
-        configurations = performance_data.get_configurations()
+        configurations = {s: performance_data.get_configurations(s) for s in solvers}
         if not args.all_configurations:  # Take the only configuration
             if any(len(c) > 1 for c in configurations.values()):
                 print("ERROR: More than one configuration for the following solvers:")
-                for s, c in configurations.items():
-                    if len(c) > 1:
-                        print(f"\t{s}: {c} configurations")
+                for solver, config in configurations.items():
+                    if len(config) > 1:
+                        print(f"\t{solver}: {config} configurations")
                 raise ValueError(
                     "Cannot construct portfolio selector with single configuration per "
                     "solver. Specify all_solver_configurations flag to construct the "
@@ -160,7 +155,7 @@ def main(argv: list[str]) -> None:
                     "flag to construct the portfolio selector with the default "
                     "configuration per solver."
                 )
-
+    # TODO: Filter configurations from performance dataframe
     selection_scenario_path =\
         gv.settings().DEFAULT_selection_output / selector.name / "_".join(solvers)
 
@@ -182,7 +177,6 @@ def main(argv: list[str]) -> None:
                                       performance_data,
                                       feature_data,
                                       objective,
-                                      configurations,
                                       cutoff_time,
                                       run_on=run_on,
                                       sbatch_options=sbatch_options,
@@ -196,30 +190,36 @@ def main(argv: list[str]) -> None:
     dependencies = [selector_run]
     if solver_ablation:
         for solver in performance_data.solvers:
-            solver_name = Path(solver).name
-            ablate_solver_dir = selection_scenario_path / f"ablate_{solver_name}"
-            ablate_solver_selector = ablate_solver_dir / "portfolio_selector"
-            if (ablate_solver_selector.exists() and not flag_recompute_portfolio):
-                print(f"Portfolio selector without {solver_name} already exists. "
-                      "Set the recompute flag to re-create.")
-                continue
-            ablate_solver_dir.mkdir(exist_ok=True, parents=True)
-            ablated_performance_data = performance_data.clone()
-            ablated_performance_data.remove_solver(solver)
-            ablated_run = selector.construct(ablate_solver_selector,
-                                             ablated_performance_data,
-                                             feature_data,
-                                             objective,
-                                             cutoff_time,
-                                             run_on=run_on,
-                                             sbatch_options=sbatch_options,
-                                             slurm_prepend=slurm_prepend,
-                                             base_dir=sl.caller_log_dir)
-            dependencies.append(ablated_run)
-            if run_on == Runner.LOCAL:
-                print(f"Portfolio selector without {solver_name} constructed!")
-            else:
-                print(f"Portfolio selector without {solver_name} constructor running...")
+            for config_id in performance_data.get_configurations(solver):
+                solver_name = Path(solver).name
+                ablate_solver_dir =\
+                    selection_scenario_path / f"ablate_{solver_name}_{config_id}"
+                ablate_solver_selector = ablate_solver_dir / "portfolio_selector"
+                if (ablate_solver_selector.exists() and not flag_recompute_portfolio):
+                    print(f"Portfolio selector without {solver_name} already exists. "
+                          "Set the recompute flag to re-create.")
+                    continue
+                ablate_solver_dir.mkdir(exist_ok=True, parents=True)
+                ablated_performance_data = performance_data.clone()
+                ablated_performance_data.remove_configuration(solver, config_id)
+                ablated_run = selector.construct(
+                    ablate_solver_selector,
+                    ablated_performance_data,
+                    feature_data,
+                    objective,
+                    cutoff_time,
+                    run_on=run_on,
+                    job_name=f"Construct Selector: Ablate {solver_name} ({config_id})",
+                    sbatch_options=sbatch_options,
+                    slurm_prepend=slurm_prepend,
+                    base_dir=sl.caller_log_dir)
+                dependencies.append(ablated_run)
+                if run_on == Runner.LOCAL:
+                    print("Portfolio selector without "
+                          f"{solver_name} ({config_id}) constructed!")
+                else:
+                    print("Portfolio selector without "
+                          f"{solver_name} ({config_id}) constructor running...")
 
     # Compute the marginal contribution
     with_actual = "--actual" if solver_ablation else ""
