@@ -26,8 +26,6 @@ class TestMarginalContribution(TestCase):
             patch_selector_run: MagicMock,
             patch_save: MagicMock) -> None:
         """Test for method compute_actual_selector_performance."""
-        pth = Path("tests/CLI/test_files/Output/Selection/autofolio/PTN/"
-                   "portfolio_selector")
         perf_path = Path("tests/test_files/Selector/selector_train_performance_data.csv")
         feature_csv_path = Path("tests/test_files/Selector/"
                                 "selector_train_feature_data.csv")
@@ -35,12 +33,16 @@ class TestMarginalContribution(TestCase):
         objective = PAR(10)
         performance_df = PerformanceDataFrame(perf_path)
         feature_df = FeatureDataFrame(feature_csv_path)
-        result = 401.42862399999996
+        result = 3.505226166666667
 
         patch_exists.return_value = False  # Block loading from file
         patch_mkdir.return_value = None  # Stop creating unnecesarry dir
-        patch_selector_run.side_effect = [[("Solvers/CSCCSat", 61.0)]] * 12
+        patch_selector_run.side_effect =\
+            [[("Solvers/PbO-CCSAT-Generic",
+               "SMAC2_20250522093407_7", 60.0)]] * 12
         patch_save.return_value = None
+        # Not actually called as we patch the selector call
+        pth = Path("tests/test_files/Selection/portfolio_selector_test")
         output = cmc.compute_selector_performance(pth,
                                                   performance_df,
                                                   feature_df,
