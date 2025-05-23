@@ -57,7 +57,7 @@ class TestConfiguratorSMAC2(TestCase):
         expected_cmds = ANY
         expected_outputs = ANY
         data_target = PerformanceDataFrame(
-            Path("tests/test_files/performance/example_data_MO.csv"))
+            Path("tests/test_files/performance/example_empty_runs.csv"))
 
         runs = self.smac2_conf.configure(self.conf_scenario,
                                          data_target=data_target,
@@ -89,7 +89,8 @@ class TestConfiguratorSMAC2(TestCase):
             "perform_double_cc": "0", "perform_first_div": "0", "perform_pac": "1",
             "prob_pac": "0.005730374136488115", "q_swt": "0.6807207179674418",
             "sel_clause_div": "1", "sel_clause_weight_scheme": "1",
-            "sel_var_break_tie_greedy": "4", "sel_var_div": "2", "threshold_swt": "32"}
+            "sel_var_break_tie_greedy": "4", "sel_var_div": "2", "threshold_swt": "32",
+            "configuration_id": 1}
 
     def test_smac2_get_status_from_logs(self: TestConfiguratorSMAC2) -> None:
         """Testing status retrievel from logs."""
