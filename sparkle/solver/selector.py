@@ -147,6 +147,7 @@ class Selector:
             return None
         # ASF presents result as schedule per instance, we only use one in this setting
         schedule = schedule[instance]
+        print(schedule)
         for index, (solver, time) in enumerate(schedule):
             # Split solver name back into solver and config id
             solver_name, conf_index = solver.split("_", maxsplit=1)

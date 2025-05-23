@@ -56,8 +56,11 @@ class TestConfiguratorSMAC2(TestCase):
         # We currently cannot test these strings as they are using absolute paths
         expected_cmds = ANY
         expected_outputs = ANY
+
+        # Make a copy so we don't modify the original
         data_target = PerformanceDataFrame(
             Path("tests/test_files/performance/example_empty_runs.csv"))
+        data_target = data_target.clone(Path("tmp-pdf.csv"))
 
         runs = self.smac2_conf.configure(self.conf_scenario,
                                          data_target=data_target,
@@ -75,8 +78,9 @@ class TestConfiguratorSMAC2(TestCase):
             prepend=None,
         )
         assert runs == [None]
-
         # TODO: Test with validation_after=True
+        # TODO: Make this all happen in a tmp dir so we don't have to unlink
+        data_target.csv_filepath.unlink()
 
     def test_smac2_organise_output(self: TestConfiguratorSMAC2) -> None:
         """Testing SMAC2 ability to retrieve output from raw file."""

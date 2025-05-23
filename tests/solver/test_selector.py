@@ -54,6 +54,7 @@ def test_construct(mock_add_to_queue: Mock) -> None:
                        objective,
                        solver_cutoff,
                        run_on,
+                       "test_job",
                        sbatch_options,
                        base_dir)
 
@@ -104,7 +105,7 @@ def test_construct_all_configurations(mock_add_queue: Mock,
     run_on = Runner.SLURM
     sbatch_options = ["--mem-per-cpu=3000", "--qos=short", "--time=30:00"]
     base_dir = Path(".")
-    configurations = performance_data.get_configurations()
+    configurations = performance_data.get_configurations("Solvers/PbO-CCSAT-Generic")
 
     monkeypatch.chdir(tmp_path)
     target_file = Path("portfolio_selector")
@@ -129,10 +130,11 @@ def test_construct_all_configurations(mock_add_queue: Mock,
 def test_run(instance: str) -> None:
     """Test for method run."""
     selector = Selector(MultiClassClassifier, RandomForestClassifier)
-    selector_path = Path("tests/test_files/Output/Portfolio_Selector/portfolio_selector")
+    selector_path = Path("tests/test_files/Selector/portfolio_selector_test")
     feature_data_path = Path("tests/test_files/Output/Feature_Data/feature_data.csv")
     feature_data = FeatureDataFrame(feature_data_path)
 
     solvers = ["Solvers/CSCCSat", "Solvers/PbO-CCSAT-Generic", "Solvers/MiniSAT"]
     schedule = selector.run(selector_path, instance, feature_data)
-    assert schedule[0][0] in solvers  # Schedule has shape [(solver, budget)]
+    print(schedule)
+    assert schedule[0][0] in solvers  # Schedule has shape [(solver, config, budget)]
