@@ -69,9 +69,10 @@ class PerformanceDataFrame(pd.DataFrame):
             super().__init__(df)
             self.csv_filepath = csv_filepath
             # Load configuration mapping
-            configuration_lines = [line.strip().strip("$").split(",", maxsplit=2)
-                                   for line in self.csv_filepath.open().readlines()
-                                   if line.startswith("$")]
+            with self.csv_filepath.open() as f:
+                configuration_lines = [line.strip().strip("$").split(",", maxsplit=2)
+                                       for line in f.readlines()
+                                       if line.startswith("$")]
             configurations = {s: {} for s in self.solvers}
             for solver, config_key, config in configuration_lines[1:]:  # Skip header
                 configurations[solver][config_key] = ast.literal_eval(config.strip('"'))
@@ -319,6 +320,8 @@ class PerformanceDataFrame(pd.DataFrame):
                 self[(solver, config_id, PerformanceDataFrame.column_value)] = None
                 self[(solver, config_id, PerformanceDataFrame.column_seed)] = None
             self.attrs[solver][config_id] = config
+        # Sort the index to optimize lookup speed
+        self.sort_index(axis=1, inplace=True)
 
     def add_objective(self: PerformanceDataFrame,
                       objective_name: str,
@@ -433,6 +436,8 @@ class PerformanceDataFrame(pd.DataFrame):
         for config in configuration:
             self.drop((solver, config), axis=1, inplace=True)
             del self.attrs[solver][config]
+        # Sort the index to optimize lookup speed
+        self.sort_index(axis=1, inplace=True)
 
     def remove_instances(self: PerformanceDataFrame, instances: str | list[str]) -> None:
         """Drop instances from the Dataframe."""

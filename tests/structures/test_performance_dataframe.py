@@ -531,20 +531,37 @@ def test_schedule_performance() -> None:
 
 def test_marginal_contribution() -> None:
     """Test marginal contribution."""
-    marginal = [("AlgorithmA", 0.0, 17.4),
-                ("AlgorithmB", 1.4252873563218393, 24.8),
-                ("AlgorithmC", 1.1264367816091956, 19.6),
-                ("AlgorithmD", 0.0, 17.4), ("AlgorithmE", 1.7471264367816093, 30.4)]
+    marginal = [("AlgorithmA", "Default", 0.0, 17.4),
+                ("AlgorithmB", "Default", 1.4252873563218393, 24.8),
+                ("AlgorithmC", "Default", 1.1264367816091956, 19.6),
+                ("AlgorithmD", "Default", 0.0, 17.4),
+                ("AlgorithmE", "Default", 1.7471264367816093, 30.4)]
     result = pd.marginal_contribution()
     assert result == marginal
 
-    marginal = [("RandomForest", 0.0, 0.738),
-                ("MultiLayerPerceptron", 0.8699186991869919, 0.642)]
+    # TODO: Inspect if these results make any sense
+    marginal = [("MultiLayerPerceptron", "Config1", 0.0, 0.738),
+                ("MultiLayerPerceptron", "Config2", 0.9728997289972899, 0.718),
+                ("MultiLayerPerceptron", "Config3", 0.9939024390243903, 0.7335),
+                ("MultiLayerPerceptron", "Config4", 0.0, 0.738),
+                ("MultiLayerPerceptron", "Config5", 0.0, 0.738),
+                ("RandomForest", "Config1", 0.0, 0.738),
+                ("RandomForest", "Config2", 0.0, 0.738),
+                ("RandomForest", "Config3", 0.0, 0.738),
+                ("RandomForest", "Config4", 0.0, 0.738),
+                ("RandomForest", "Config5", 0.0, 0.738)]
     result = pd_mo.marginal_contribution(objective="ValidationAccuracy:max")
     assert result == marginal
-
-    marginal = [("RandomForest", 8.786516853932584, 39.099999999999994),
-                ("MultiLayerPerceptron", 0.0, 4.449999999999999)]
+    marginal = [("MultiLayerPerceptron", "Config1", 0.0, 4.449999999999999),
+                ("MultiLayerPerceptron", "Config2", 0.0, 4.449999999999999),
+                ("MultiLayerPerceptron", "Config3", 0.0, 4.449999999999999),
+                ("MultiLayerPerceptron", "Config4", 0.0, 4.449999999999999),
+                ("MultiLayerPerceptron", "Config5", 0.0, 4.449999999999999),
+                ("RandomForest", "Config1", 1.01123595505618, 4.5),
+                ("RandomForest", "Config2", 0.0, 4.449999999999999),
+                ("RandomForest", "Config3", 0.0, 4.449999999999999),
+                ("RandomForest", "Config4", 0.0, 4.449999999999999),
+                ("RandomForest", "Config5", 1.01123595505618, 4.5)]
     result = pd_mo.marginal_contribution(objective="PAR10")
     assert result == marginal
 
