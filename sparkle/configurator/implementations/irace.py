@@ -77,30 +77,35 @@ class IRACE(Configurator):
             A RunRunner Run object.
         """
         scenario.create_scenario()
-        output_csv = scenario.validation / "configurations.csv"
-        output_csv.parent.mkdir(exist_ok=True, parents=True)
-
-        # Create command to call IRACE. Create plural based on number of runs var
-        # We set the seed over the last n run ids in the dataframe
-        seeds = data_target.run_ids[data_target.num_runs - scenario.number_of_runs:]
+        # Generate Configuration IDs
+        from datetime import datetime
+        time_stamp = datetime.fromtimestamp(scenario.scenario_file_path.stat().st_mtime)
+        configuration_ids =\
+            [f"{self.name}_{time_stamp.strftime('%Y%m%d%H%M%S')}_{i}"
+             for i in range(scenario.number_of_runs)]
+        # Create command to call IRACE. Create plural based on number of runs
+        # TODO: Setting seeds like this is weird and should be inspected.
+        seeds = [i for i in range(scenario.number_of_runs)]
         output_files = [
             scenario.results_directory.absolute() / f"output_{job_idx}.Rdata"
-            for job_idx in seeds]
+            for job_idx in configuration_ids]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{IRACE.__name__} {output_path} {data_target.csv_filepath} "
-                f"{scenario.scenario_file_path} {seed} "
+                f"{scenario.scenario_file_path} {configuration_id} "
                 f"{IRACE.configurator_executable.absolute()} "
                 f"--scenario {scenario.scenario_file_path} "
                 f"--log-file {output_path} "
-                f"--seed {seed}" for seed, output_path in zip(seeds, output_files)]
+                f"--seed {seed}" for seed, configuration_id, output_path
+                in zip(seeds, configuration_ids, output_files)]
         return super().configure(
             configuration_commands=cmds,
             data_target=data_target,
             output=output_files,
             scenario=scenario,
+            configuration_ids=configuration_ids,
             sbatch_options=sbatch_options,
             slurm_prepend=slurm_prepend,
-            validation_ids=seeds if validate_after else None,
+            validate_after=validate_after,
             num_parallel_jobs=num_parallel_jobs,
             base_dir=base_dir,
             run_on=run_on
@@ -110,9 +115,8 @@ class IRACE(Configurator):
     def organise_output(output_source: Path,
                         output_target: Path,
                         scenario: IRACEScenario,
-                        run_id: int) -> None | dict:
+                        configuration_id: str) -> None | dict:
         """Method to restructure and clean up after a single configurator call."""
-        from filelock import FileLock
         get_config = subprocess.run(
             ["Rscript", "-e",
              'library("irace"); '
@@ -146,32 +150,8 @@ class IRACE(Configurator):
             if not parameter == ".PARENT." and value != "NA" and value != "<NA>":
                 configuration += f"--{parameter} {value} "
         configuration = Solver.config_str_to_dict(configuration)
-        if output_target is None or not output_target.exists():
-            return configuration
-
-        time_stamp = scenario.scenario_file_path.stat().st_mtime
-        configuration["configuration_id"] =\
-            f"{IRACE.__name__}_{time_stamp}_{run_id}"
-        instance_names = scenario.instance_set.instance_names
-        lock = FileLock(f"{output_target}.lock")
-        with lock.acquire(timeout=60):
-            performance_data = PerformanceDataFrame(output_target)
-            # Resolve absolute path to Solver column
-            solver = [s for s in performance_data.solvers
-                      if Path(s).name == scenario.solver.name][0]
-            # For some reason the instance paths in the instance set are absolute
-            instances = [instance for instance in performance_data.instances
-                         if Path(instance).name in instance_names]
-            # We don't set the seed in the dataframe, as that should be part of the conf
-            performance_data.set_value(
-                value=[str(configuration)],
-                solver=solver,
-                instance=instances,
-                objective=None,
-                run=run_id,
-                solver_fields=[PerformanceDataFrame.column_configuration]
-            )
-            performance_data.save_csv()
+        return Configurator.save_configuration(scenario, configuration_id,
+                                               configuration, output_target)
 
     def get_status_from_logs(self: Configurator) -> None:
         """Method to scan the log files of the configurator for warnings."""

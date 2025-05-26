@@ -23,7 +23,7 @@ setup(name="SparkleAI",
           "tabulate==0.9.0",
           "pytermgui==7.7.2",
           "tqdm==4.66.5",
-          "smac==2.2.0",
+          "smac==2.3.1",
           "RunRunner==0.2.0.3",
           "asf-lib==0.0.1.15",
           # ASF requirements

@@ -34,7 +34,7 @@ def settings() -> Settings:
     return __settings
 
 
-reference_list_dir = settings().DEFAULT_reference_dir
+reference_list_dir = Settings.DEFAULT_reference_dir
 extractor_nickname_list_path = reference_list_dir / "sparkle_extractor_nickname_list.txt"
 solver_nickname_list_path = reference_list_dir / "sparkle_solver_nickname_list.txt"
 instances_nickname_path = reference_list_dir / "sparkle_instance_nickname_list.txt"

@@ -12,7 +12,7 @@ def test_generate_report_configuration(
     """Test generate report for configuration."""
     snapshot_path = (
         Path("tests") / "CLI" / "test_files"
-        / "snapshot_configured_validated_solver_Pb0-CCSAT-Generic_PTN.zip").absolute()
+        / "snapshot_configured_solver_Pb0-CCSAT-Generic_PTN.zip").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
 
     # Set up platform

@@ -92,7 +92,7 @@ def main(argv: list[str]) -> None:
     if run_on == Runner.LOCAL:
         feature_run.wait()
     objectives = gv.settings().get_general_sparkle_objectives()
-    # Prepare performance data
+    # Prepare output performance data
     performance_data = PerformanceDataFrame(
         test_case_path / "performance_data.csv",
         objectives=objectives)
@@ -109,13 +109,15 @@ def main(argv: list[str]) -> None:
 
     run_core = Path(__file__).parent.parent.resolve() /\
         "CLI" / "core" / "run_portfolio_selector_core.py"
-    cmd_list = [f"python3 {run_core} "
-                f"--selector {selector_path} "
-                f"--feature-data-csv {feature_dataframe.csv_filepath} "
-                f"--performance-data-csv {performance_data.csv_filepath} "
-                f"--instance {instance_path} "
-                f"--log-dir {sl.caller_log_dir}"
-                for instance_path in data_set.instance_paths]
+    cmd_list = [
+        f"python3 {run_core} "
+        f"--selector {selector_path} "
+        f"--feature-data-csv {feature_dataframe.csv_filepath} "
+        f"--input-performance-data {gv.settings().DEFAULT_performance_data_path} "
+        f"--performance-data-csv {performance_data.csv_filepath} "
+        f"--instance {instance_path} "
+        f"--log-dir {sl.caller_log_dir} "
+        for instance_path in data_set.instance_paths]
 
     import subprocess
     selector_run = rrr.add_to_queue(

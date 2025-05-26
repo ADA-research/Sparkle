@@ -54,13 +54,12 @@ def compute_selector_performance(
     if performance_path.exists():
         selector_performance_data = PerformanceDataFrame(performance_path)
         return objective.instance_aggregator(
-            selector_performance_data.get_values("portfolio_selector",
-                                                 objective=str(objective)))
-    selector_performance_data = performance_data.clone()
+            selector_performance_data.get_value("portfolio_selector",
+                                                objective=str(objective)))
+    selector_performance_data = performance_data.clone(
+        actual_portfolio_selector.parent / "performance.csv")
 
     selector_performance_data.add_solver("portfolio_selector")
-    selector_performance_data.csv_filepath =\
-        actual_portfolio_selector.parent / "performance.csv"
     selector = Selector(gv.settings().get_selection_class(),
                         gv.settings().get_selection_model())
 
@@ -95,8 +94,8 @@ def compute_selector_marginal_contribution(
       objective: Objective to compute the marginal contribution for.
 
     Returns:
-      A list of 2-tuples where every 2-tuple is of the form
-        (solver name, marginal contribution, best_performance).
+      A list of 4-tuples where every 4-tuple is of the form
+        (solver_name, config_id, marginal contribution, best_performance).
     """
     portfolio_selector_path = selector_scenario / "portfolio_selector"
 
@@ -115,37 +114,40 @@ def compute_selector_marginal_contribution(
     # NOTE: This could be parallelised
     for solver in performance_data.solvers:
         solver_name = Path(solver).name
-        # 1. Copy the dataframe original df
-        tmp_performance_df = performance_data.clone()
-        # 2. Remove the solver from this copy
-        tmp_performance_df.remove_solver(solver)
-        ablated_actual_portfolio_selector =\
-            selector_scenario / f"ablate_{solver_name}" / "portfolio_selector"
-        if not ablated_actual_portfolio_selector.exists():
-            print(f"WARNING: Selector without {solver_name} does not exist! "
-                  f"Cannot compute marginal contribution of {solver_name}.")
-            continue
+        for config in performance_data.get_configurations(solver):
+            # 1. Copy the dataframe original df
+            tmp_performance_df = performance_data.clone()
+            # 2. Remove the solver configuration from this copy
+            tmp_performance_df.remove_configuration(solver, config)
+            ablated_actual_portfolio_selector = selector_scenario /\
+                f"ablate_{solver_name}_{config}" / "portfolio_selector"
+            if not ablated_actual_portfolio_selector.exists():
+                print(f"WARNING: Selector without {solver_name} does not exist! "
+                      f"Cannot compute marginal contribution of {solver_name}.")
+                continue
 
-        ablated_selector_performance = compute_selector_performance(
-            ablated_actual_portfolio_selector, tmp_performance_df,
-            feature_data, objective)
+            ablated_selector_performance = compute_selector_performance(
+                ablated_actual_portfolio_selector, tmp_performance_df,
+                feature_data, objective)
 
-        # 1. If the performance remains equal, this solver did not contribute
-        # 2. If there is a performance decay without this solver, it does contribute
-        # 3. If there is a performance improvement, we have a bad portfolio selector
-        if ablated_selector_performance == selector_performance:
-            marginal_contribution = 0.0
-        elif not compare(ablated_selector_performance, selector_performance):
-            # In the case that the performance decreases, we have a contributing solver
-            marginal_contribution = ablated_selector_performance / selector_performance
-        else:
-            print("****** WARNING DUBIOUS SELECTOR/SOLVER: "
-                  f"The omission of solver {solver_name} yields an improvement. "
-                  "The selector improves better without this solver. It may be usefull "
-                  "to construct a portfolio without this solver.")
-            marginal_contribution = 0.0
+            # 1. If the performance remains equal, this solver did not contribute
+            # 2. If there is a performance decay without this solver, it does contribute
+            # 3. If there is a performance improvement, we have a bad portfolio selector
+            if ablated_selector_performance == selector_performance:
+                marginal_contribution = 0.0
+            elif not compare(ablated_selector_performance, selector_performance):
+                # The performance decreases, we have a contributing solver
+                marginal_contribution =\
+                    ablated_selector_performance / selector_performance
+            else:
+                print("****** WARNING DUBIOUS SELECTOR/SOLVER: "
+                      f"The omission of solver {solver_name} ({config}) yields an "
+                      "improvement. The selector improves better without this solver. "
+                      "It may be usefull to construct a portfolio without this solver.")
+                marginal_contribution = 0.0
 
-        rank_list.append((solver, marginal_contribution, ablated_selector_performance))
+            rank_list.append((solver, config,
+                              marginal_contribution, ablated_selector_performance))
 
     rank_list.sort(key=lambda contribution: contribution[1], reverse=True)
     return rank_list
@@ -173,7 +175,8 @@ def compute_marginal_contribution(
             objective=objective.name, sort=True)
         table = tabulate.tabulate(
             contribution_data,
-            headers=["Solver", "Marginal Contribution", "Best Performance"],)
+            headers=["Solver", "Configuration",
+                     "Marginal Contribution", "Best Performance"],)
         print(table, "\n")
         print("Marginal contribution (perfect selector) computing done!")
 
@@ -187,7 +190,8 @@ def compute_marginal_contribution(
         )
         table = tabulate.tabulate(
             contribution_data,
-            headers=["Solver", "Marginal Contribution", "Best Performance"],)
+            headers=["Solver", "Configuration",
+                     "Marginal Contribution", "Best Performance"],)
         print(table, "\n")
         print("Marginal contribution (actual selector) computing done!")
 
