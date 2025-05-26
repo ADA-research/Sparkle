@@ -175,8 +175,6 @@ def run_solvers_performance_data(
     if len(jobs) == 0:
         return None
 
-    print(solvers)
-    print(jobs)
     if run_on == Runner.LOCAL:
         print("Running the solvers locally")
     elif run_on == Runner.SLURM:
