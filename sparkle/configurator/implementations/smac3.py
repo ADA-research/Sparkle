@@ -21,7 +21,7 @@ from sparkle.types import SparkleObjective, resolve_objective, SolverStatus
 class SMAC3(Configurator):
     """Class for SMAC3 (Python) configurator."""
     configurator_path = Path(__file__).parent.parent.parent.resolve() /\
-        "Components/smac3-v2.2.0"
+        "Components/smac3-v2.3.1"
     configurator_executable = configurator_path / "smac3_target_algorithm.py"
 
     version = smac_version
@@ -30,7 +30,7 @@ class SMAC3(Configurator):
     def __init__(self: SMAC3,
                  base_dir: Path,
                  output_path: Path) -> None:
-        """Returns the SMAC3 configurator, Python SMAC V2.2.0.
+        """Returns the SMAC3 configurator, Python SMAC V2.3.1.
 
         Args:
             objectives: The objectives to optimize. Only supports one objective.
