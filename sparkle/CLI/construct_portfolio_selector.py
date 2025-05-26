@@ -125,7 +125,8 @@ def main(argv: list[str]) -> None:
     # TODO: And only then call judge exist remaining jobs
     # minimum marginal contribution on training set
     # Selector is named after the solvers it can predict, sort for permutation invariance
-    solvers = sorted([str(s) for s in gv.settings().DEFAULT_solver_dir.iterdir()])
+    solvers = sorted([str(s) for s in gv.settings().DEFAULT_solver_dir.iterdir()
+                      if s.is_dir()])
 
     if feature_data.has_missing_value():
         print("WARNING: Missing values in the feature data, will be imputed as the mean "
