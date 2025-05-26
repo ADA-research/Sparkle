@@ -147,19 +147,8 @@ class Selector:
             return None
         # ASF presents result as schedule per instance, we only use one in this setting
         schedule = schedule[instance]
-        print(schedule)
         for index, (solver, time) in enumerate(schedule):
             # Split solver name back into solver and config id
             solver_name, conf_index = solver.split("_", maxsplit=1)
             schedule[index] = (solver_name, conf_index, time)
-        return schedule
-        # Translate possible configurations from file
-        if (selector_path.parent / "configurations.csv").exists():
-            import ast
-            configurations =\
-                [ast.literal_eval(line) for line in
-                 (selector_path.parent / "configurations.csv").read_text().split("\n")]
-            for index, (solver, time, _) in enumerate(schedule):
-                solver_name, conf_index = solver.rsplit("_", maxsplit=1)
-                schedule[index] = (solver_name, time, configurations[int(conf_index)])
         return schedule
