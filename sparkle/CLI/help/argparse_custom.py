@@ -98,6 +98,11 @@ AllSolverConfigurationArgument = \
                       kwargs={"action": "store_true",
                               "help": "use all known configurations for the command"})
 
+AllConfigurationArgument = \
+    ArgumentContainer(names=["--all-configurations"],
+                      kwargs={"action": "store_true",
+                              "help": "use all known Solver configurations"})
+
 BestConfigurationArgument = \
     ArgumentContainer(names=["--best-configuration"],
                       kwargs={"required": False,
@@ -138,8 +143,9 @@ CleanUpPerformanceDataArgument = \
 ConfigurationArgument = \
     ArgumentContainer(names=["--configuration"],
                       kwargs={"required": False,
-                              "type": int,
-                              "help": "The run index of which configuration to use"})
+                              "type": str,
+                              "nargs": "+",
+                              "help": "The indices of which configurations to use"})
 
 ConfiguratorArgument = ArgumentContainer(names=["--configurator"],
                                          kwargs={"type": str,

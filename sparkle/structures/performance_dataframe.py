@@ -173,6 +173,12 @@ class PerformanceDataFrame(pd.DataFrame):
             PerformanceDataFrame.column_solver).dropna().unique().to_list()
 
     @property
+    def configuration_ids(self: PerformanceDataFrame) -> list[str]:
+        """Return the list of configuration keys."""
+        return self.columns.get_level_values(
+            PerformanceDataFrame.column_configuration).unique().to_list()
+
+    @property
     def configurations(self: PerformanceDataFrame) -> dict[str, dict[str, dict]]:
         """Return a dictionary (copy) containing the configurations for each solver."""
         return copy.deepcopy(self.attrs)  # Deepcopy to avoid mutation of attribute

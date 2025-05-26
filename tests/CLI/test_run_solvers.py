@@ -10,7 +10,8 @@ from tests.CLI import tools as cli_tools
 def test_run_solvers_performance_dataframe(tmp_path: Path,
                                            monkeypatch: pytest.MonkeyPatch) -> None:
     """Run solvers that write to the performance dataframe."""
-    solver_path = (Path("Examples") / "Resources" / "Solvers" / "CSCCSat").absolute()
+    solver_path =\
+        (Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic").absolute()
     instances_path = (Path("Examples") / "Resources" / "Instances" / "PTN").absolute()
     settings_path = cli_tools.get_settings_path()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
@@ -53,7 +54,7 @@ def test_run_solvers_configured(tmp_path: Path,
     """Test run solvers command with a configuration."""
     configured_snapshot = (
         Path("tests") / "CLI" / "test_files"
-        / "snapshot_configured_validated_solver_Pb0-CCSAT-Generic_PTN.zip").absolute()
+        / "snapshot_configured_solver_Pb0-CCSAT-Generic_PTN.zip").absolute()
     test_instance = (Path("Examples") / "Resources" / "Instances"
                      / "PTN2" / "Ptn-7824-b20.cnf").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
@@ -63,7 +64,7 @@ def test_run_solvers_configured(tmp_path: Path,
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
-    # Test for Solver without configuration
+    # Test for Solver without configuration (Default)
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         run_solvers.main(["--instance", str(test_instance),
                           "--run-on", "local"])
@@ -78,10 +79,11 @@ def test_run_solvers_configured(tmp_path: Path,
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
-    # Test for Solver with specific configuration
+    # Test for Solver with specific configuration (2nd best)
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        run_solvers.main(["--configuration", "5",
+        run_solvers.main(["--configuration", "SMAC2_20250523115757_6",
                           "--instance", str(test_instance),
                           "--run-on", "local"])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
+    # We don't test all configurations as its too expensive

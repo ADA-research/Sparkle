@@ -250,6 +250,7 @@ class Solver(SparkleCallable):
             instances: str | list[str] | InstanceSet,
             config_ids: str | list[str],
             performance_dataframe: PerformanceDataFrame,
+            run_ids: list[int] | list[list[int]] = None,
             cutoff_time: int = None,
             objective: SparkleObjective = None,
             train_set: InstanceSet = None,
@@ -270,6 +271,8 @@ class Solver(SparkleCallable):
                 or list, will create a job for all instances in the set/list.
             config_ids: The config indices to use in the performance dataframe.
             performance_dataframe: The performance dataframe to use.
+            run_ids: List of run ids to use. If list of list, a list of runs is given
+                per instance. Otherwise, all runs are used for each instance.
             cutoff_time: The cutoff time for the solver, measured through RunSolver.
             objective: The objective to use, only relevant for train set best config
                 determining
@@ -296,10 +299,22 @@ class Solver(SparkleCallable):
             instances = [str(i) for i in instances.instance_paths]
         if not isinstance(config_ids, list):
             config_ids = [config_ids]
+        if run_ids is None:
+            run_ids = performance_dataframe.run_ids
+        if isinstance(run_ids[0], list):  # Runs per instance
+            combinations = []
+            for index, instance in enumerate(instances):
+                for run_id in run_ids[index]:
+                    combinations.extend([(instance, config_id, run_id)
+                                         for config_id in config_ids])
+        else:  # Runs for all instances
+            import itertools
+            combinations = [(instance, config_id, run_id) for instance, config_id, run_id
+                            in itertools.product(instances, config_ids,
+                                                 performance_dataframe.run_ids)]
         objective_arg = f"--target-objective {objective.name}" if objective else ""
         train_arg =\
             ",".join([str(i) for i in train_set.instance_paths]) if train_set else ""
-        import itertools
         # We run all instances/configs/runs combinations
         cmds = [
             f"python3 {Solver.solver_cli} "
@@ -312,8 +327,7 @@ class Solver(SparkleCallable):
             f"--log-dir {log_dir} "
             f"{objective_arg} "
             f"{'--best-configuration-instances' if train_set else ''} {train_arg}"
-            for instance, config_id, run_id in itertools.product(
-                instances, config_ids, performance_dataframe.run_ids)]
+            for instance, config_id, run_id in combinations]
         job_name = f"Run: {self.name} on {set_name}" if job_name is None else job_name
         r = rrr.add_to_queue(
             runner=run_on,
