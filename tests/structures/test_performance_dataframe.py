@@ -135,7 +135,7 @@ def test_solvers() -> None:
                "AlgorithmE"]
     assert pd.solvers == solvers
     assert pd_nan.solvers == solvers
-    solvers = ["RandomForest", "MultiLayerPerceptron"]
+    solvers = ["MultiLayerPerceptron", "RandomForest"]
     assert pd_mo.solvers == solvers
 
 
