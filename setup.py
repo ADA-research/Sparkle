@@ -25,7 +25,7 @@ setup(name="SparkleAI",
           "tqdm==4.66.5",
           "smac==2.3.1",
           "RunRunner==0.2.0.3",
-          "asf-lib==0.1.0",
+          "asf-lib==0.0.1.15",
           # ASF requirements
           "xgboost==2.1.3",
           "scikit-learn==1.3.2",
