@@ -128,6 +128,7 @@ class PerformanceDataFrame(pd.DataFrame):
 
         # Sort the index to optimize lookup speed
         self.sort_index(axis=0, inplace=True)
+        self.sort_index(axis=1, inplace=True)
 
         if csv_filepath and not self.csv_filepath.exists():  # New Performance DataFrame
             self.save_csv()
@@ -435,8 +436,6 @@ class PerformanceDataFrame(pd.DataFrame):
     def remove_configuration(self: PerformanceDataFrame,
                              solver: str, configuration: str | list[str]) -> None:
         """Drop one or more configurations from the Dataframe."""
-        # TODO: Make sure we can only drop a config_id from the specified solver
-        # If Solver A and B have the same config_id, they will both be removed
         if isinstance(configuration, str):
             configuration = [configuration]
         for config in configuration:
@@ -718,11 +717,10 @@ class PerformanceDataFrame(pd.DataFrame):
         objective = self.verify_objective(objective)
         if isinstance(objective, str):
             objective = resolve_objective(objective)
-        # Drop Seed
-        subdf = self.drop(
+        subdf = self.drop(  # Drop Seed, not needed
             [PerformanceDataFrame.column_seed],
             axis=1, level=PerformanceDataFrame.column_meta)
-        subdf = subdf.xs(objective.name, level=0)
+        subdf = subdf.xs(objective.name, level=0)  # Drop objective
         if exclude_solvers is not None:
             subdf = subdf.drop(exclude_solvers, axis=1)
         if run_id is not None:
@@ -904,6 +902,7 @@ class PerformanceDataFrame(pd.DataFrame):
         for column_index in self.columns:
             for index in self.index:
                 pd_copy.at[index, column_index] = self.loc[index, column_index]
+        # Ensure everything is sorted?
         return pd_copy
 
     def clean_csv(self: PerformanceDataFrame) -> None:
