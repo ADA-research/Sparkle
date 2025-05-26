@@ -26,6 +26,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Command to construct a portfolio selector over all known features "
                     "solver performances.")
+    parser.add_argument(*ac.SolversArgument.names,
+                        **ac.SolversArgument.kwargs)
     parser.add_argument(*ac.RecomputePortfolioSelectorArgument.names,
                         **ac.RecomputePortfolioSelectorArgument.kwargs)
     parser.add_argument(*ac.ObjectiveArgument.names,
@@ -46,7 +48,7 @@ def parser_function() -> argparse.ArgumentParser:
                                      **ac.BestSolverConfigurationArgument.kwargs)
     configuration_group.add_argument(*ac.DefaultSolverConfigurationArgument.names,
                                      **ac.DefaultSolverConfigurationArgument.kwargs)
-    # TODO: Allow user to pick configurations by ?? per solver?
+    # TODO: Allow user to specify configuration ids to use
     return parser
 
 
@@ -118,20 +120,13 @@ def main(argv: list[str]) -> None:
         performance_data.remove_instances(removable_instances)
         feature_data.remove_instances(removable_instances)
 
-    judge_exist_remaining_jobs(feature_data, performance_data)
-
-    # TODO Allow user to select solvers to construct over
-    # TODO: Filter solvers/configurations that do not meet
-    # TODO: And only then call judge exist remaining jobs
-    # minimum marginal contribution on training set
-    # Selector is named after the solvers it can predict, sort for permutation invariance
-    solvers = sorted([str(s) for s in gv.settings().DEFAULT_solver_dir.iterdir()
-                      if s.is_dir()])
-
-    if feature_data.has_missing_value():
-        print("WARNING: Missing values in the feature data, will be imputed as the mean "
-              "value of all other non-missing values! Imputing all missing values...")
-        feature_data.impute_missing_values()
+    if args.solvers is not None:
+        solvers = args.solvers
+        removeable_solvers = [s for s in performance_data.solvers if s not in solvers]
+        performance_data.remove_solver(removeable_solvers)
+    else:
+        solvers = sorted([str(s) for s in gv.settings().DEFAULT_solver_dir.iterdir()
+                          if s.is_dir()])
 
     # Check what configurations should be considered
     if args.best_configuration:
@@ -156,7 +151,17 @@ def main(argv: list[str]) -> None:
                     "flag to construct the portfolio selector with the default "
                     "configuration per solver."
                 )
-    # TODO: Filter configurations from performance dataframe
+    for solver in solvers:
+        removeable_configs = [c for c in performance_data.get_configurations(solver)
+                              if c not in configurations[solver]]
+        performance_data.remove_configuration(solver, removeable_configs)
+
+    judge_exist_remaining_jobs(feature_data, performance_data)
+    if feature_data.has_missing_value():
+        print("WARNING: Missing values in the feature data, will be imputed as the mean "
+              "value of all other non-missing values! Imputing all missing values...")
+        feature_data.impute_missing_values()
+    # Selector is named after the solvers it can predict, sort for permutation invariance
     selection_scenario_path =\
         gv.settings().DEFAULT_selection_output / selector.name / "_".join(solvers)
 

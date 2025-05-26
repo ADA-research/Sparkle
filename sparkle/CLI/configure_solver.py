@@ -156,7 +156,6 @@ def main(argv: list[str]) -> None:
         configurator.output_path, **configurator_settings)
 
     # Run the default configuration
-    # TODO: Hard coded string matching, should be changed
     default_jobs = [(solver, config_id, instance, run_id)
                     for solver, config_id, instance, run_id
                     in performance_data.get_job_list()
