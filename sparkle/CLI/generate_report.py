@@ -167,10 +167,6 @@ def main(argv: list[str]) -> None:
                 gv.settings().get_general_target_cutoff_time(),
                 test_data
             )
-            if test_case_dir is None:
-                print("Report generated ...")
-            else:
-                print("Report for test generated ...")
 
     elif gv.latest_scenario().get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
         # Reporting for parallel portfolio

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""CSCCSat Solver wrapper."""
+"""Example CSCCSat Solver wrapper in Python."""
 import sys
 import subprocess
 from pathlib import Path

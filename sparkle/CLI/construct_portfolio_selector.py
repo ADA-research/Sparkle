@@ -113,6 +113,12 @@ def main(argv: list[str]) -> None:
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
 
+    # Check that the feature data actually contains features (extractors)
+    if feature_data.num_features == 0:
+        print("ERROR: Feature data is empty! Please add a feature extractor and run "
+              "'sparkle compute features' first.")
+        sys.exit(-1)
+
     if instance_set is not None:
         applicable_instances = [str(i) for i in instance_set.instance_paths]
         removable_instances = [i for i in performance_data.instances
