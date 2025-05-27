@@ -29,7 +29,7 @@ cmd="${solverdir}/CSCCSat ${instance} ${seed}"
 output="$($cmd)"
 
 # Print original output so the solution can be verified by SATVerifier
-echo $output
+echo "$output"
 
 # Parse the output
 status="CRASHED"  # For possible string values here, see sparkle.types.SolverStatus
