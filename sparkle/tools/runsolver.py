@@ -174,7 +174,7 @@ class RunSolver:
                 solver_input = re.findall("{.*}", args_str)[0]
                 solver_input = ast.literal_eval(solver_input)
                 cutoff_time = float(solver_input["cutoff_time"])
-        print("Current solver output: ", solver_output)
+
         if solver_output is None:
             # Still empty, try to read from subprocess
             solver_output = process_output
