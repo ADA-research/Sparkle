@@ -159,7 +159,7 @@ class RunSolver:
                 solver_data_file = Path(runsolver_configuration[idx + 1])
                 if solver_data_file.exists():
                     solver_output = solver_data_file.open("r").read()
-                else:
+                elif process_output is None:
                     warnings.warn("[RunSolver] Could not find Solver output file: "
                                   f"{solver_data_file}")
             if "-v" in conf or "--var" in conf:

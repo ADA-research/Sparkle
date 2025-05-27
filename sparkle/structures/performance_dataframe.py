@@ -103,8 +103,8 @@ class PerformanceDataFrame(pd.DataFrame):
             for solver in configurations.keys():
                 for config_id in configurations[solver].keys():
                     column_tuples.extend([
-                        (solver, config_id, PerformanceDataFrame.column_value),
-                        (solver, config_id, PerformanceDataFrame.column_seed)])
+                        (solver, config_id, PerformanceDataFrame.column_seed),
+                        (solver, config_id, PerformanceDataFrame.column_value)])
             mcolumns = pd.MultiIndex.from_tuples(
                 column_tuples,
                 names=[PerformanceDataFrame.column_solver,
