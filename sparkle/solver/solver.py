@@ -26,7 +26,7 @@ from sparkle.types import resolve_objective, SparkleObjective, UseTime
 class Solver(SparkleCallable):
     """Class to handle a solver and its directories."""
     meta_data = "solver_meta.txt"
-    wrapper = "sparkle_solver_wrapper.py"
+    _wrapper_file = "sparkle_solver_wrapper"
     solver_cli = Path(__file__).parent / "solver_cli.py"
 
     def __init__(self: Solver,
@@ -50,6 +50,8 @@ class Solver(SparkleCallable):
         self.deterministic = deterministic
         self.verifier = verifier
         self._pcs_file: Path = None
+        self._interpreter: str = None
+        self._wrapper_extension: str = None
 
         meta_data_file = self.directory / Solver.meta_data
         if self.runsolver_exec is None:
@@ -84,6 +86,21 @@ class Solver(SparkleCallable):
                 return None
             self._pcs_file = files[0]
         return self._pcs_file
+
+    @property
+    def wrapper_extension(self: Solver) -> str:
+        """Get the extension of the wrapper file."""
+        if self._wrapper_extension is None:
+            # Determine which file is the wrapper by sorting alphabetically
+            wrapper = sorted([p for p in self.directory.iterdir()
+                              if p.stem == Solver._wrapper_file])[0]
+            self._wrapper_extension = wrapper.suffix
+        return self._wrapper_extension
+
+    @property
+    def wrapper(self: Solver) -> str:
+        """Get name of the wrapper file."""
+        return f"{Solver._wrapper_file}{self.wrapper_extension}"
 
     def get_pcs_file(self: Solver, port_type: PCSConvention) -> Path:
         """Get path of the parameter file of a specific convention.
@@ -153,7 +170,7 @@ class Solver(SparkleCallable):
             del configuration["configuration_id"]
         # Ensure stringification of dictionary will go correctly for key value pairs
         configuration = {key: str(configuration[key]) for key in configuration}
-        solver_cmd = [str((self.directory / Solver.wrapper)),
+        solver_cmd = [str(self.directory / self.wrapper),
                       f"'{json.dumps(configuration)}'"]
         if log_dir is None:
             log_dir = Path()

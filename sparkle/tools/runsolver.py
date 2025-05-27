@@ -136,8 +136,9 @@ class RunSolver:
         if runsolver_log_path.exists():
             for line in runsolver_log_path.open("r").readlines():
                 if line.startswith("command line:"):
-                    return (line.split("sparkle_solver_wrapper.py", 1)[1]
-                            .strip().strip("'"))
+                    call = line.split("sparkle_solver_wrapper", 1)[1]
+                    # Suffix is still there
+                    return call.split(" ", 1)[1].strip()
         return ""
 
     @staticmethod
@@ -158,6 +159,9 @@ class RunSolver:
                 solver_data_file = Path(runsolver_configuration[idx + 1])
                 if solver_data_file.exists():
                     solver_output = solver_data_file.open("r").read()
+                else:
+                    warnings.warn("[RunSolver] Could not find Solver output file: "
+                                  f"{solver_data_file}")
             if "-v" in conf or "--var" in conf:
                 value_data_file = Path(runsolver_configuration[idx + 1])
             if "--cpu-limit" in conf:
@@ -170,19 +174,22 @@ class RunSolver:
                 solver_input = re.findall("{.*}", args_str)[0]
                 solver_input = ast.literal_eval(solver_input)
                 cutoff_time = float(solver_input["cutoff_time"])
-
+        print("Current solver output: ", solver_output)
         if solver_output is None:
             # Still empty, try to read from subprocess
             solver_output = process_output
         # Format output to only the brackets (dict)
-        # NOTE: It should have only one match, do we want some error logging here?
         try:
+            # The solver output can be found on the last non empty line
+            solver_output = [s for s in solver_output.splitlines() if s.strip()][-1]
             solver_regex_filter = re.findall("{.*}", solver_output)[0]
             output_dict = ast.literal_eval(solver_regex_filter)
-        except Exception:
+        except Exception as ex:
             config_str = " ".join([str(c) for c in runsolver_configuration])
-            warnings.warn("Solver output decoding failed from RunSolver configuration: "
-                          f"'{config_str}'. Setting status to 'UNKNOWN'.",
+            warnings.warn("Solver output decoding failed from RunSolver configuration:\n"
+                          f"'{config_str}'\n"
+                          f"Exception: {ex}\n"
+                          "Setting status to 'UNKNOWN'.",
                           category=RuntimeWarning)
             output_dict = {"status": SolverStatus.UNKNOWN}
 

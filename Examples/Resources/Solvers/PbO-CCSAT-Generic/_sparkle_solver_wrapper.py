@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+"""Example solver wrapper for PbO-CCSAT in Python."""
 import sys
 import subprocess
 from pathlib import Path
@@ -13,6 +14,7 @@ args_dict = parse_solver_wrapper_args(sys.argv[1:])
 
 # Extract certain args from the above dict for use further below
 solver_dir = args_dict["solver_dir"]
+objectives = args_dict["objectives"]
 instance = args_dict["instance"]
 seed = args_dict["seed"]
 
@@ -24,7 +26,7 @@ solver_cmd = [solver_exec,
               "-inst", str(instance),
               "-seed", str(seed)]
 
-# Get further params for the solver call
+# Extract the parameters for the solver call
 params = get_solver_call_params(args_dict)
 
 # Execute the solver call
@@ -41,8 +43,11 @@ print(output_str)  # Print original output so it can be verified
 status = SolverStatus.CRASHED
 for line in output_str.splitlines():
     line = line.strip()
-    if (line == r's SATISFIABLE') or (line == r's UNSATISFIABLE'):
-        status = SolverStatus.SUCCESS
+    if (line == r's SATISFIABLE'):
+        status = SolverStatus.SAT
+        break
+    elif (line == r's UNSATISFIABLE'):
+        status = SolverStatus.UNSAT
         break
     elif line == r's UNKNOWN':
         status = SolverStatus.TIMEOUT
