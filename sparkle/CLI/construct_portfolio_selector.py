@@ -108,7 +108,7 @@ def main(argv: list[str]) -> None:
             gv.file_storage_data_mapping[gv.instances_nickname_path],
             gv.settings().DEFAULT_instance_dir, Instance_Set)
 
-    cutoff_time = gv.settings().get_general_target_cutoff_time()
+    cutoff_time = gv.settings().get_general_solver_cutoff_time()
 
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)

@@ -143,7 +143,7 @@ def main(argv: list[str]) -> None:
         for dir in instance_dirs:
             instance_sets.append(Instance_Set(dir))
         test_set = None if test_case_dir is None else Instance_Set(Path(test_case_dir))
-        cutoff_time = gv.settings().get_general_target_cutoff_time()
+        cutoff_time = gv.settings().get_general_solver_cutoff_time()
         output = gv.settings().DEFAULT_selection_output_analysis
         selection_output = SelectionOutput(
             selection_scenario, train_data, feature_data,
@@ -164,14 +164,14 @@ def main(argv: list[str]) -> None:
                 train_data,
                 objective,
                 gv.settings().get_general_extractor_cutoff_time(),
-                gv.settings().get_general_target_cutoff_time(),
+                gv.settings().get_general_solver_cutoff_time(),
                 test_data
             )
 
     elif gv.latest_scenario().get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
         # Reporting for parallel portfolio
         # Machine readable Output
-        cutoff_time = gv.settings().get_general_target_cutoff_time()
+        cutoff_time = gv.settings().get_general_solver_cutoff_time()
         objective = gv.settings().get_general_sparkle_objectives()[0]
         output = gv.settings().DEFAULT_parallel_portfolio_output_analysis
         parallel_portfolio_output = ParallelPortfolioOutput(parallel_portfolio_path,
@@ -188,7 +188,7 @@ def main(argv: list[str]) -> None:
                 gv.settings().DEFAULT_latex_source,
                 gv.settings().DEFAULT_latex_bib,
                 gv.settings().get_general_sparkle_objectives()[0],
-                gv.settings().get_general_target_cutoff_time(),
+                gv.settings().get_general_solver_cutoff_time(),
                 pap_instance_set)
             print("Parallel portfolio report generated ...")
     else:

@@ -16,6 +16,7 @@ Notable changes to Sparkle will be documented in this file.
 
 ### Fixed
 - Fixed various bugs regarding Solver calls by adding in KILLSIG handlers and updated templates/documentation accordingly [SPRK-162]
+- Fixed bug where default values would override user changes in settings file [SPRK-160]
 
 ## [0.9.3.2] - 13/04/2025
 

@@ -181,7 +181,7 @@ CutOffTimeArgument = \
                               "help": "The duration the portfolio will run before the "
                                       "solvers within the portfolio will be stopped "
                                       "(default: "
-                                      f"{Settings.DEFAULT_general_target_cutoff_time})"})
+                                      f"{Settings.DEFAULT_general_solver_cutoff_time})"})
 
 DefaultSolverConfigurationArgument = \
     ArgumentContainer(names=["--default-configuration"],
@@ -344,8 +344,6 @@ NumberOfRunsConfigurationArgument = \
 NumberOfRunsAblationArgument = \
     ArgumentContainer(names=["--number-of-runs"],
                       kwargs={"type": int,
-                              "default": Settings.DEFAULT_configurator_number_of_runs,
-                              "action": SetByUser,
                               "help": "Number of configuration runs to execute"})
 
 PerfectSelectorMarginalContributionArgument =\
@@ -356,9 +354,6 @@ PerfectSelectorMarginalContributionArgument =\
 
 RacingArgument = ArgumentContainer(names=["--racing"],
                                    kwargs={"type": bool,
-                                           "default": Settings.
-                                           DEFAULT_ablation_racing,
-                                           "action": SetByUser,
                                            "help": "Performs abaltion analysis with "
                                                    "racing"})
 
@@ -438,8 +433,6 @@ SelectorAblationArgument =\
 SettingsFileArgument = \
     ArgumentContainer(names=["--settings-file"],
                       kwargs={"type": Path,
-                              "default": Settings.DEFAULT_settings_path,
-                              "action": SetByUser,
                               "help": "Specify the settings file to use in case you want"
                                       " to use one other than the default"})
 
@@ -503,11 +496,9 @@ SolverReportArgument = ArgumentContainer(names=["--solver"],
                                                  "help": "path to solver for an "
                                                  "algorithm configuration report"})
 
-TargetCutOffTimeArgument = \
-    ArgumentContainer(names=["--target-cutoff-time", "--solver-cutoff-time"],
+SolverCutOffTimeArgument = \
+    ArgumentContainer(names=["--solver-cutoff-time", "--target-cutoff-time"],
                       kwargs={"type": int,
-                              "default": Settings.DEFAULT_general_target_cutoff_time,
-                              "action": SetByUser,
                               "help": "cutoff time per Solver run in seconds"})
 
 TestCaseDirectoryArgument = \

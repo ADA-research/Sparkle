@@ -52,7 +52,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
     print(f"Sparkle parallel portfolio is running {seeds_per_solver} seed(s) per solver "
           f"on {num_solvers} solvers for {num_instances} instances ...")
     cmd_list = []
-    cutoff = gv.settings().get_general_target_cutoff_time()
+    cutoff = gv.settings().get_general_solver_cutoff_time()
     objectives = gv.settings().get_general_sparkle_objectives()
     # Create a command for each instance-solver-seed combination
     for instance, solver in itertools.product(instances_set._instance_paths, solvers):
@@ -308,7 +308,7 @@ def main(argv: list[str]) -> None:
     print(f"Running on {instances.size} instance(s)...")
 
     if args.cutoff_time is not None:
-        gv.settings().set_general_target_cutoff_time(args.cutoff_time,
+        gv.settings().set_general_solver_cutoff_time(args.cutoff_time,
                                                      SettingState.CMD_LINE)
 
     if args.objectives is not None:

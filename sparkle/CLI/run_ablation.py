@@ -34,8 +34,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstanceSetTestAblationArgument.kwargs)
     parser.add_argument(*ac.ObjectivesArgument.names,
                         **ac.ObjectivesArgument.kwargs)
-    parser.add_argument(*ac.TargetCutOffTimeArgument.names,
-                        **ac.TargetCutOffTimeArgument.kwargs)
+    parser.add_argument(*ac.SolverCutOffTimeArgument.names,
+                        **ac.SolverCutOffTimeArgument.kwargs)
     parser.add_argument(*ac.WallClockTimeArgument.names,
                         **ac.WallClockTimeArgument.kwargs)
     parser.add_argument(*ac.NumberOfRunsAblationArgument.names,
@@ -71,7 +71,7 @@ def main(argv: list[str]) -> None:
             args.objectives, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "target_cutoff_time"):
-        gv.settings().set_general_target_cutoff_time(
+        gv.settings().set_general_solver_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "wallclock_time"):
@@ -151,7 +151,7 @@ def main(argv: list[str]) -> None:
 
     # Configurations
     ablation_scenario.create_configuration_file(
-        cutoff_time=gv.settings().get_general_target_cutoff_time(),
+        cutoff_time=gv.settings().get_general_solver_cutoff_time(),
         cutoff_length=gv.settings().get_smac2_target_cutoff_length(),  # NOTE: SMAC2
         concurrent_clis=gv.settings().get_slurm_max_parallel_runs_per_node(),
         best_configuration=best_configuration,

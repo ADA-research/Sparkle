@@ -45,8 +45,8 @@ def parser_function() -> argparse.ArgumentParser:
     # This one is only relevant if the argument above is given
     parser.add_argument(*ac.RecomputeRunSolversArgument.names,
                         **ac.RecomputeRunSolversArgument.kwargs)
-    parser.add_argument(*ac.TargetCutOffTimeArgument.names,
-                        **ac.TargetCutOffTimeArgument.kwargs)
+    parser.add_argument(*ac.SolverCutOffTimeArgument.names,
+                        **ac.SolverCutOffTimeArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
@@ -241,7 +241,7 @@ def main(argv: list[str]) -> None:
         # Do first, so other command line options can override settings from the file
         gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
     if args.target_cutoff_time is not None:
-        gv.settings().set_general_target_cutoff_time(
+        gv.settings().set_general_solver_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
     if args.run_on is not None:
         gv.settings().set_run_on(
@@ -282,7 +282,7 @@ def main(argv: list[str]) -> None:
     # Write settings to file before starting, since they are used in callback scripts
     gv.settings().write_used_settings()
     run_on = gv.settings().get_run_on()
-    cutoff_time = gv.settings().get_general_target_cutoff_time()
+    cutoff_time = gv.settings().get_general_solver_cutoff_time()
     # Open the performance data csv file
     performance_dataframe = PerformanceDataFrame(
         gv.settings().DEFAULT_performance_data_path)

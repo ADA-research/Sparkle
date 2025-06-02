@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Sparkle command to configure a solver."""
 from __future__ import annotations
+from pathlib import Path
 import argparse
 import sys
 
@@ -13,7 +14,7 @@ from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.CLI.help import argparse_custom as ac
 
-from sparkle.platform.settings_objects import SettingState
+from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
@@ -37,8 +38,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.TestSetRunAllConfigurationArgument.kwargs)
     parser.add_argument(*ac.ObjectivesArgument.names,
                         **ac.ObjectivesArgument.kwargs)
-    parser.add_argument(*ac.TargetCutOffTimeArgument.names,
-                        **ac.TargetCutOffTimeArgument.kwargs)
+    parser.add_argument(*ac.SolverCutOffTimeArgument.names,
+                        **ac.SolverCutOffTimeArgument.kwargs)
     parser.add_argument(*ac.SolverCallsArgument.names,
                         **ac.SolverCallsArgument.kwargs)
     parser.add_argument(*ac.NumberOfRunsConfigurationArgument.names,
@@ -66,9 +67,9 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
     if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
             args.objectives, SettingState.CMD_LINE)
-    if args.target_cutoff_time is not None:
-        gv.settings().set_general_target_cutoff_time(
-            args.target_cutoff_time, SettingState.CMD_LINE)
+    if args.solver_cutoff_time is not None:
+        gv.settings().set_general_solver_cutoff_time(
+            args.solver_cutoff_time, SettingState.CMD_LINE)
     if args.solver_calls is not None:
         gv.settings().set_configurator_solver_calls(
             args.solver_calls, SettingState.CMD_LINE)
@@ -90,8 +91,11 @@ def main(argv: list[str]) -> None:
 
     # Process command line arguments
     args = parser.parse_args(argv)
-
     apply_settings_from_args(args)
+
+    # Compare current settings to latest.ini
+    prev_settings = Settings(Path(Settings.DEFAULT_previous_settings_path))
+    Settings.check_settings_changes(gv.settings(), prev_settings)
 
     solver: Solver = resolve_object_name(
         args.solver,
