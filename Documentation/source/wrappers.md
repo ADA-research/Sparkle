@@ -3,15 +3,15 @@
 
 When using Sparkle for your specific projects, you will want to plug in your own algorithms into the platform. To that end, a piece of wrapper code of about ~50 lines must be written to make sure the platform is able to submit calls to your algorithm, as well as parse the output. This should in general not take longer than five minutes to write.
 
-A template for the wrapper that connects your algorithm with Sparkle is
-available at `Examples/Resources/Solvers/template/sparkle_solver_wrapper.py`.
-Within this template a number of `TODO`s are indicated where you are likely to need to make changes for your specific algorithm. You can also compare the different example solvers to get an idea for what kind of changes are needed.
+A template for the wrapper that connects your algorithm with Sparkle is available at `Examples/Resources/Solvers/template/` where a Python and Bash version are given. In this template a few steps need to be filled in with your own algorithm, such as setting the name of your executable and parsing its output. You can also compare the different example solvers to get an idea for what kind of changes are needed. We recommend writing your wrapper using the Bash template, as it offers the fastest execution time, unless your solver itself is written in Python.
+
+It is important to Sparkle that the last line of output is a dictionary that Sparkle can process. In the example scripts there are details on how to handle Kill Signals, s.t. you can make sure that in any call your wrapper will output a specific structure.
 
 (solver-wrapper-file)=
 
 ## Solver Wrapper Python script
 
-The `sparkle_solver_wrapper.py` receives via commandline a dictionary as its inputs. This can be easily parsed using a Sparkle tool: `from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args`. After parsing it with the Sparkle tools, the dictionary should always have the following values:
+The `sparkle_solver_wrapper` receives via commandline a dictionary as its inputs. This can be easily parsed in Python using a Sparkle tool: `from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args`. After parsing it with the Sparkle tools, the dictionary should always have the following values:
 
 ```
 solver_dir: Path
@@ -56,3 +56,13 @@ algorithm should not be configured and therefore should also not be included in 
 ```{warning}
 Although you can specify _default_ values for your parameters, it is not guaranteed each parameter will always be present in the input dictionary. It is therefore strongly encouraged to have the default/back up values available for each parameter in your wrapper.
 ```
+
+## Checking your Solver
+
+Once you feel all modifications needed have been done, you might want to test if everything is plugged into Sparkle correctly. To do so, you can run `sparkle check`. Here you can specify what you want to check (in this case `solver`, but you can use it for instance sets or feature extractors as well) and test your solver with an example instance as well. We recommend an easy instance that runs quickly. An example call:
+
+```bash
+sparkle check solver my_solvers/solverA my_instances --cutoff 60 -seed 42
+```
+
+Note that only the path to your Solver is required, all other arguments are optional (but recommended as it allows for more checks). If a PCS file is present, the check function will also generate a random configuration to test with.
