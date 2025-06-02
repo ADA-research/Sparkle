@@ -413,7 +413,8 @@ class Solver(SparkleCallable):
         if verifier is not None and used_runsolver:
             # Horrible hack to get the instance from the solver input
             solver_call_str: str = " ".join(solver_call)
-            solver_input_str = solver_call_str.split(Solver.wrapper, maxsplit=1)[1]
+            solver_input_str = solver_call_str.split(Solver._wrapper_file, maxsplit=1)[1]
+            solver_input_str = solver_input_str.split(" ", maxsplit=1)[1]
             solver_input_str = solver_input_str[solver_input_str.index("{"):
                                                 solver_input_str.index("}") + 1]
             solver_input = ast.literal_eval(solver_input_str)
