@@ -28,7 +28,6 @@ def test_extractor_constructor(extractor: Extractor, test_dir: Path) -> None:
     """Test for constructor."""
     assert extractor.directory == test_dir
     assert extractor.name == test_dir.name
-    assert extractor.raw_output_directory == test_dir / "tmp"
     assert extractor.runsolver_exec == test_dir / "runsolver"
     assert extractor._features is None
     assert extractor._feature_groups is None

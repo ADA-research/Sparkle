@@ -117,13 +117,12 @@ class Extractor(SparkleCallable):
                 extractor to use.
             output_file: Target output. If None, piped to the RunRunner job.
             cutoff_time: CPU cutoff time in seconds
-            log_dir: Directory to write logs. Defaults to self.raw_output_directory.
+            log_dir: Directory to write logs. Defaults to CWD.
 
         Returns:
             The features or None if an output file is used, or features can not be found.
         """
-        if log_dir is None:
-            log_dir = self.raw_output_directory
+        log_dir = Path() if log_dir is None else log_dir
         if feature_group is not None and not self.groupwise_computation:
             # This extractor cannot handle groups, compute all features
             feature_group = None

@@ -31,8 +31,21 @@ do
     cmd+=" -${i} ${args[$i]}"
 done
 
-# Optional, recommended: Catch SIGTERM and determine behaviour, if we get killed, set status to TIMEOUT
-trap "echo {\"status\": \"TIMEOUT\", \"quality\": 0, \"solver_call\": \"$cmd\"}; exit $?" INT TERM EXIT KILL
+# Setup default output
+status="CRASHED"  # For possible string values here, see sparkle.types.SolverStatus
+
+# Create new dictionary to communicate back to sparkle
+# We use a function to exit the script, to pass it to the bash trap function
+sparkle_output()
+{
+    # NOTE: The \" around string key/value is essential for Python to parse it
+    echo "{\"status\": \"$status\", \"quality\": 0, \"solver_call\": \"$cmd\"}"
+    exit
+}
+
+# We pepare a trigger on regular exit and some termination signals
+# This should now always execute at the end of the program, making sure we communicate back to Sparkle
+trap sparkle_output 0 SIGTERM SIGINT SIGQUIT SIGABRT SIGHUP
 
 # Execute the solver
 output="$($cmd)"
@@ -40,9 +53,7 @@ output="$($cmd)"
 # Optional: Print original output so the solution can be verified by SolutionVerifier
 echo "$output"
 
-# Parse the output
-status="CRASHED"  # For possible string values here, see sparkle.types.SolverStatus
-
+# Parse the solver output
 while IFS= read -r line; do
     if [[ $line == *"s SATISFIABLE"* ]]; then
         status="SUCCESS"
@@ -55,7 +66,3 @@ while IFS= read -r line; do
         break
     fi
 done < <(printf '%s' "$output")
-
-# Create new dictionary to communicate back to sparkle
-# NOTE: The \" around string key/value is essential for Python to parse it
-echo "{\"status\": \"$status\", \"quality\": 0, \"solver_call\": \"$cmd\"}"

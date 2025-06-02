@@ -33,20 +33,31 @@ done
 
 # Set seed
 cmd+=" -rnd-seed=${seed}"
+# Set CPU limit
+cmd+=" -cpu-lim=${cutoff_time}"
 # For minisat the instance is at the end
 cmd+=" ${instance}"
 
-# Catch SIGTERM and determine behaviour: If we get killed, set status to TIMEOUT?
-trap "echo {\"status\": \"TIMEOUT\", \"quality\": 0, \"solver_call\": \"$cmd\"}; exit $?" INT TERM EXIT KILL
+# Setup default output
+status="CRASHED"  # For possible string values here, see sparkle.types.SolverStatus
 
+# We use a function to exit the script, to pass it to the bash trap function
+sparkle_output()
+{
+    echo "{\"status\": \"$status\", \"quality\": 0, \"solver_call\": \"$cmd\"}"
+    exit
+}
+
+# We prepare trigger on regular exit and some termination signals
+trap sparkle_output 0 SIGTERM SIGINT SIGQUIT SIGABRT SIGHUP
+
+# Execute the solver
 output="$($cmd)"
 
 # Print original output so the solution can be verified by SATVerifier
 echo "$output"
 
 # Parse the output
-status="CRASHED"  # For possible string values here, see sparkle.types.SolverStatus
-
 while IFS= read -r line; do
     if [[ $line == *"SATISFIABLE"* ]]; then
         status="SAT"
@@ -59,6 +70,3 @@ while IFS= read -r line; do
         break
     fi
 done < <(printf '%s' "$output")
-
-# Create new dictionary to communicate back to sparkle
-echo "{\"status\": \"$status\", \"quality\": 0, \"solver_call\": \"$cmd\"}"

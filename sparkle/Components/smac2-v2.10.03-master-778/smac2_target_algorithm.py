@@ -28,7 +28,6 @@ if __name__ == "__main__":
 
     runsolver_binary = solver_dir / "runsolver"
     solver = Solver(solver_dir,
-                    raw_output_directory=Path(),
                     runsolver_exec=runsolver_binary)
     # Call Runsolver with the solver configurator wrapper and its arguments
     output = solver.run(instances=instance,

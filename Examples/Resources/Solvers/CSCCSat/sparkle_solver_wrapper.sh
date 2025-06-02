@@ -25,6 +25,21 @@ unset args['seed']
 # Construct call from args dictionary
 cmd="${solverdir}/CSCCSat ${instance} ${seed}"
 
+# Setup default output
+status="CRASHED"  # For possible string values here, see sparkle.types.SolverStatus
+
+# Create new dictionary to communicate back to sparkle
+# We use a function to exit the script, to pass it to the bash trap function
+sparkleoutput()
+{
+    # NOTE: The \" around string key/value is essential for Python to parse it
+    echo "{\"status\": \"$status\", \"quality\": 0, \"solver_call\": \"$cmd\"}"
+    exit
+}
+
+# We prepare a trigger on regular exit and some termination signals
+trap sparkleoutput 0 SIGTERM SIGINT SIGQUIT SIGABRT SIGHUP
+
 # This Solver does not have configurable parameters, continue to execution
 output="$($cmd)"
 
@@ -32,8 +47,6 @@ output="$($cmd)"
 echo "$output"
 
 # Parse the output
-status="CRASHED"  # For possible string values here, see sparkle.types.SolverStatus
-
 while IFS= read -r line; do
     if [[ $line == *"s SATISFIABLE"* ]]; then
         status="SAT"
@@ -46,6 +59,3 @@ while IFS= read -r line; do
         break
     fi
 done < <(printf '%s' "$output")
-
-# Create new dictionary to communicate back to sparkle
-echo "{\"status\": \"$status\", \"quality\": 0, \"solver_call\": \"$cmd\"}"

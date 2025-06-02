@@ -1,0 +1,100 @@
+"""Command to help users check if their input solvers, datasets etc. are correct."""
+import sys
+import argparse
+
+from sparkle.solver import Solver
+from sparkle.instance import Instance_Set, InstanceSet
+from sparkle.solver.extractor import Extractor
+
+from sparkle.CLI.help import logging as sl
+from sparkle.CLI.help import argparse_custom as ac
+
+
+def parser_function() -> argparse.ArgumentParser:
+    """Define the command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Command to help users check if their input solvers, instance sets "
+                    "or feature extractors are readable by Sparkle. Specify a path to "
+                    "an instance to test calling the wrapper.")
+    parser.add_argument(*ac.CheckTypeArgument.names, **ac.CheckTypeArgument.kwargs)
+    parser.add_argument(*ac.CheckPathArgument.names, **ac.CheckPathArgument.kwargs)
+    parser.add_argument(*ac.InstancePathOptional.names,
+                        **ac.InstancePathOptional.kwargs)
+    parser.add_argument(*ac.CutOffTimeArgument.names,
+                        **ac.CutOffTimeArgument.kwargs)
+    parser.add_argument(*ac.SeedArgument.names,
+                        **ac.SeedArgument.kwargs)
+    return parser
+
+
+def main(argv: list[str]) -> None:
+    """Main entry point of the Check command."""
+    # Log command call
+    sl.log_command(sys.argv)
+    parser = parser_function()
+    args = parser.parse_args(argv)
+    type_map = {"feature-extractor": Extractor,
+                "solver": Solver,
+                "instance-set": Instance_Set,
+                "Feature-Extractor": Extractor,
+                "Instance-Set": Instance_Set,
+                "Solver": Solver,
+                "FeatureExtractor": Extractor,
+                "InstanceSet": Instance_Set}
+    type = type_map[args.type]
+    print(f"Checking {type.__name__} in directory {args.path} ...")
+    object = type(args.path)
+    print("Resolved to:")
+    print(object.__repr__())
+
+    # Conduct object specific tests
+    if isinstance(object, Solver):
+        if object.pcs_file:
+            print()
+            print(object.get_cs())
+        if args.instance_path:  # Instance to test with
+            from sparkle.CLI.help import global_variables as gv
+            from runrunner import Runner
+            # Test the wrapper with a dummy call
+            print(f"\nTesting Wrapper {object.wrapper} ...")
+            # Patchfix runsolver
+            object.runsolver_exec = gv.settings().DEFAULT_runsolver_exec
+
+            objectives = gv.settings().get_general_sparkle_objectives()
+            cutoff = args.cutoff_time if args.cutoff_time else 5  # Short call
+            configuration = {}
+            if object.pcs_file:
+                print("\nSample Configuration:")
+                sample_conf = object.get_cs().sample_configuration()
+                print(sample_conf)
+                configuration = dict(sample_conf)
+            result = object.run(
+                instances=args.instance_path,
+                objectives=objectives,
+                seed=42,  # Dummy seed
+                cutoff_time=cutoff,
+                configuration=configuration,
+                log_dir=sl.caller_log_dir,
+                run_on=Runner.LOCAL)
+            print("Result:")
+            for obj in objectives:  # Check objectives
+                if obj.name not in result:
+                    print(f"\tSolver output is missing objective {obj.name}")
+                else:
+                    print(f"\t{obj.name}: {result[obj.name]}")
+    elif isinstance(object, Extractor):
+        # TODO Check getting feature groups went as intended
+        if args.instance_path:  # Test on an instance
+            from sparkle.CLI.help import global_variables as gv
+            from runrunner import Runner
+            # Patchfix runsolver
+            object.runsolver_exec = gv.settings().DEFAULT_runsolver_exec
+            print(f"\nTesting Wrapper {object.wrapper} ...")
+    elif isinstance(object, InstanceSet):
+        print("List of instances:")
+        for i_name, i_path in zip(object.instance_names, object.instance_paths):
+            print(f"\t{i_name}: {i_path}")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

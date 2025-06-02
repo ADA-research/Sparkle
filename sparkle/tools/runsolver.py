@@ -188,6 +188,7 @@ class RunSolver:
             config_str = " ".join([str(c) for c in runsolver_configuration])
             warnings.warn("Solver output decoding failed from RunSolver configuration:\n"
                           f"'{config_str}'\n"
+                          f"Output: {solver_output}\n"
                           f"Exception: {ex}\n"
                           "Setting status to 'UNKNOWN'.",
                           category=RuntimeWarning)
