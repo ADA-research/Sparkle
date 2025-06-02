@@ -110,7 +110,7 @@ def main(argv: list[str]) -> None:
             for f_group, fname in object.features:
                 print(f"\t{f_group}: {fname}")
     elif isinstance(object, InstanceSet):
-        print("List of instances:")
+        print("\nList of instances:")
         for i_name, i_path in zip(object.instance_names, object.instance_paths):
             print(f"\t{i_name}: {i_path}")
 
