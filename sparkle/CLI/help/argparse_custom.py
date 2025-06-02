@@ -125,9 +125,11 @@ CancelJobsArgument = \
 
 CheckTypeArgument = \
     ArgumentContainer(names=["type"],
-                      kwargs={"choices": ["feature-extractor",
+                      kwargs={"choices": ["extractor",
+                                          "feature-extractor",
                                           "solver",
                                           "instance-set",
+                                          "Extractor"
                                           "Feature-Extractor",
                                           "Instance-Set",
                                           "Solver",

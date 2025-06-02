@@ -2,12 +2,16 @@
 import sys
 import argparse
 
+from runrunner import Runner
+
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set, InstanceSet
 from sparkle.solver.extractor import Extractor
+from sparkle.types import SolverStatus
 
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
+from sparkle.CLI.help import global_variables as gv
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -33,14 +37,17 @@ def main(argv: list[str]) -> None:
     sl.log_command(sys.argv)
     parser = parser_function()
     args = parser.parse_args(argv)
-    type_map = {"feature-extractor": Extractor,
-                "solver": Solver,
-                "instance-set": Instance_Set,
-                "Feature-Extractor": Extractor,
-                "Instance-Set": Instance_Set,
-                "Solver": Solver,
-                "FeatureExtractor": Extractor,
-                "InstanceSet": Instance_Set}
+    type_map = {
+        "extractor": Extractor,
+        "feature-extractor": Extractor,
+        "solver": Solver,
+        "instance-set": Instance_Set,
+        "Extractor": Extractor,
+        "Feature-Extractor": Extractor,
+        "Instance-Set": Instance_Set,
+        "Solver": Solver,
+        "FeatureExtractor": Extractor,
+        "InstanceSet": Instance_Set}
     type = type_map[args.type]
     print(f"Checking {type.__name__} in directory {args.path} ...")
     object = type(args.path)
@@ -53,8 +60,6 @@ def main(argv: list[str]) -> None:
             print()
             print(object.get_cs())
         if args.instance_path:  # Instance to test with
-            from sparkle.CLI.help import global_variables as gv
-            from runrunner import Runner
             # Test the wrapper with a dummy call
             print(f"\nTesting Wrapper {object.wrapper} ...")
             # Patchfix runsolver
@@ -82,14 +87,28 @@ def main(argv: list[str]) -> None:
                     print(f"\tSolver output is missing objective {obj.name}")
                 else:
                     print(f"\t{obj.name}: {result[obj.name]}")
+            if result["status"] == SolverStatus.UNKNOWN:
+                print(f"Sparkle was unable to process {obj.name} output. "
+                      "Check that your wrapper is able to handle KILL SIGNALS. "
+                      "It is important to always communicate back to Sparkle "
+                      "on regular exit and termination signals for stability.")
+                sys.exit(-1)
     elif isinstance(object, Extractor):
-        # TODO Check getting feature groups went as intended
         if args.instance_path:  # Test on an instance
-            from sparkle.CLI.help import global_variables as gv
-            from runrunner import Runner
             # Patchfix runsolver
             object.runsolver_exec = gv.settings().DEFAULT_runsolver_exec
             print(f"\nTesting Wrapper {object.wrapper} ...")
+            # cutoff = args.cutoff_time if args.cutoff_time else 20  # Short call
+            result = object.run(instance=args.instance_path,
+                                log_dir=sl.caller_log_dir)
+            # Print feature results
+            print("Feature values:")
+            for f_group, f_name, f_value in result:
+                print(f"\t[{f_group}] {f_name}: {f_value}")
+        else:
+            print("Feature names:")
+            for f_group, fname in object.features:
+                print(f"\t{f_group}: {fname}")
     elif isinstance(object, InstanceSet):
         print("List of instances:")
         for i_name, i_path in zip(object.instance_names, object.instance_paths):
