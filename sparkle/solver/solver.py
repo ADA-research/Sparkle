@@ -109,6 +109,11 @@ class Solver(SparkleCallable):
         """Get name of the wrapper file."""
         return f"{Solver._wrapper_file}{self.wrapper_extension}"
 
+    @property
+    def wrapper_file(self: Solver) -> Path:
+        """Get path of the wrapper file."""
+        return self.directory / self.wrapper
+
     def get_pcs_file(self: Solver, port_type: PCSConvention) -> Path:
         """Get path of the parameter file of a specific convention.
 

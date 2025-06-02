@@ -1,5 +1,6 @@
 """Command to help users check if their input solvers, datasets etc. are correct."""
 import sys
+import os
 import argparse
 
 from runrunner import Runner
@@ -59,6 +60,10 @@ def main(argv: list[str]) -> None:
         if object.pcs_file:
             print()
             print(object.get_cs())
+        if not os.access(object.wrapper_path, os.X_OK):
+            print(f"Wrapper {object.wrapper_path} is not executable!"
+                  f"Check that wrapper execution rights are set for all.")
+            sys.exit(-1)
         if args.instance_path:  # Instance to test with
             # Test the wrapper with a dummy call
             print(f"\nTesting Wrapper {object.wrapper} ...")
