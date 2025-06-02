@@ -25,7 +25,7 @@ class TestGenerateConfigurationReport(TestCase):
         self.test_objective_quality = SparkleObjective("ACCURACY")
         self.configurator = SMAC2(Path(), Path())
         self.solver_path = Path("tests/test_files/Solvers/Test-Solver")
-        self.solver = Solver(self.solver_path, raw_output_directory=Path(""))
+        self.solver = Solver(self.solver_path)
         train_instance_set = Instance_Set(Path(
             "tests/test_files/Instances/Train-Instance-Set"))
         test_instance_set = Instance_Set(Path(
