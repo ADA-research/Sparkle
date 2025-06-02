@@ -77,11 +77,15 @@ def main(argv: list[str]) -> None:
             else:
                 print("WARNING: Can not read the provided pcs file format.")
 
-        configurator_wrapper_path = solver_source / Solver.wrapper
-        if not (configurator_wrapper_path.is_file()
-                and os.access(configurator_wrapper_path, os.X_OK)):
-            print(f"WARNING: Solver {solver_source.name} does not have a solver wrapper "
-                  f"(Missing file {Solver.wrapper}) or is not executable. ")
+        wrapper_path = solver.directory / solver.wrapper
+        if not wrapper_path.is_file():
+            print(f"ERROR: Solver {solver_source.name} does not have a solver wrapper "
+                  f"(Missing file {solver.wrapper}).")
+            sys.exit(-1)
+        elif not os.access(wrapper_path, os.X_OK):
+            print(f"ERROR: Solver {solver_source.name} wrapper file {solver.wrapper} "
+                  f" does not have execution rights set!")
+            sys.exit(-1)
 
     # Start add solver
     solver_directory = gv.settings().DEFAULT_solver_dir / solver_source.name

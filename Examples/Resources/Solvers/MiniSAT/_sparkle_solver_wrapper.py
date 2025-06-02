@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""MiniSAT Solver wrapper."""
+"""Example MiniSAT Solver wrapper in Python."""
 import sys
 import subprocess
 from pathlib import Path
@@ -86,8 +86,11 @@ print(output_str)  # Print original output so it can be verified
 status = SolverStatus.CRASHED
 for line in output_str.splitlines():
     line = line.strip()
-    if (line == r"SATISFIABLE") or (line == r"UNSATISFIABLE"):
-        status = SolverStatus.SUCCESS
+    if (line == r"SATISFIABLE"):
+        status = SolverStatus.SAT
+        break
+    elif (line == r"UNSATISFIABLE"):
+        status = SolverStatus.UNSAT
         break
     elif line == r"INDETERMINATE":
         status = SolverStatus.TIMEOUT

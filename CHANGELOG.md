@@ -4,9 +4,18 @@ Notable changes to Sparkle will be documented in this file.
 
 ## [0.9.4] - ??/??/2025
 
+### Added
 - Updated SMAC3 to latest version (2.3.1), which now properly measures CPU time vs Runtime/Wallclock time. This is updated in Sparkle to report the Runsolver accurate measurements to SMAC3. [SPRK-373]
-- Changed the structure of PerformanceDataFrame to now hold algorithm configuration as IDs in a column. The configurations are held in the same file and automatically read and resolved. [SPRK-373]
 - It is now possible to train a selector over various algorithm configurations [SPRK-373]
+- Sparkle has new CLI command `sparkle check` to assist users in developing Solvers/Instance Sets/Feature Extractors for the platform [SPRK-162]
+
+### Changed
+- Changed the structure of PerformanceDataFrame to now hold algorithm configuration as IDs in a column. The configurations are held in the same file and automatically read and resolved. [SPRK-373]
+- Sparkle supports both .py and .sh solver wrappers and has been updated accordingly [SPRK-162]
+- SparkleExecutable no longer has a 'raw output directory' [SPRK-162]
+
+### Fixed
+- Fixed various bugs regarding Solver calls by adding in KILLSIG handlers and updated templates/documentation accordingly [SPRK-162]
 
 ## [0.9.3.2] - 13/04/2025
 

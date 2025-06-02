@@ -1,6 +1,4 @@
 """Helper module to manage Sparkle scenarios."""
-# Keep in CLI help
-
 from __future__ import annotations
 import configparser
 from enum import Enum

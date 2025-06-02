@@ -1,8 +1,14 @@
 """Methods regarding feature extractors."""
 from __future__ import annotations
+from typing import Any
 from pathlib import Path
 import ast
 import subprocess
+
+import runrunner as rrr
+from runrunner.base import Status, Runner
+from runrunner.local import LocalRun
+
 from sparkle.types import SparkleCallable, SolverStatus
 from sparkle.structures import FeatureDataFrame
 from sparkle.tools import RunSolver
@@ -14,22 +20,31 @@ class Extractor(SparkleCallable):
 
     def __init__(self: Extractor,
                  directory: Path,
-                 runsolver_exec: Path = None,
-                 raw_output_directory: Path = None,
-                 ) -> None:
+                 runsolver_exec: Path = None) -> None:
         """Initialize solver.
 
         Args:
             directory: Directory of the solver.
             runsolver_exec: Path to the runsolver executable.
                 By default, runsolver in directory.
-            raw_output_directory: Directory where solver will write its raw output.
-                Defaults to directory / tmp
         """
-        super().__init__(directory, runsolver_exec, raw_output_directory)
+        super().__init__(directory, runsolver_exec)
         self._features = None
         self._feature_groups = None
         self._groupwise_computation = None
+
+    def __str__(self: Extractor) -> str:
+        """Return the string representation of the extractor."""
+        return self.name
+
+    def __repr__(self: Extractor) -> str:
+        """Return detailed representation of the extractor."""
+        return f"{self.name}:\n"\
+               f"\t- Directory: {self.directory}\n"\
+               f"\t- Wrapper: {self.wrapper}\n"\
+               f"\t- # Feature Groups: {len(self.feature_groups)}\n"\
+               f"\t- Output Dimension (# Features): {self.output_dimension}\n"\
+               f"\t- Groupwise Computation Enabled: {self.groupwise_computation}"
 
     @property
     def features(self: Extractor) -> list[tuple[str, str]]:
@@ -107,7 +122,7 @@ class Extractor(SparkleCallable):
             feature_group: str = None,
             output_file: Path = None,
             cutoff_time: int = None,
-            log_dir: Path = None) -> list | None:
+            log_dir: Path = None) -> list[list[Any]] | list[Any] | None:
         """Runs an extractor job with Runrunner.
 
         Args:
@@ -117,26 +132,33 @@ class Extractor(SparkleCallable):
                 extractor to use.
             output_file: Target output. If None, piped to the RunRunner job.
             cutoff_time: CPU cutoff time in seconds
-            log_dir: Directory to write logs. Defaults to self.raw_output_directory.
+            log_dir: Directory to write logs. Defaults to CWD.
 
         Returns:
             The features or None if an output file is used, or features can not be found.
         """
-        if log_dir is None:
-            log_dir = self.raw_output_directory
+        log_dir = Path() if log_dir is None else log_dir
         if feature_group is not None and not self.groupwise_computation:
             # This extractor cannot handle groups, compute all features
             feature_group = None
         cmd_extractor = self.build_cmd(
             instance, feature_group, output_file, cutoff_time, log_dir)
-        extractor = subprocess.run(cmd_extractor, capture_output=True)
-        if output_file is None:
-            try:
-                features = ast.literal_eval(
-                    extractor.stdout.decode().split(maxsplit=1)[1])
-                return features
-            except Exception:
+        run_on = Runner.LOCAL  # TODO: Let this function also handle Slurm runs
+        extractor_run = rrr.add_to_queue(runner=run_on,
+                                         cmd=" ".join(cmd_extractor))
+        if isinstance(extractor_run, LocalRun):
+            extractor_run.wait()
+            if extractor_run.status == Status.ERROR:
+                print(f"{self.name} failed to compute features for {instance}.")
+                for i, job in enumerate(extractor_run.jobs):
+                    print(f"Job {i} error yielded was:\n"
+                          f"\t-stdout: '{job.stdout}'\n"
+                          f"\t-stderr: '{job.stderr}'\n")
                 return None
+            output = [ast.literal_eval(job.stdout) for job in extractor_run.jobs]
+            if len(output) == 1:
+                return output[0]
+            return output
         return None
 
     def get_feature_vector(self: Extractor,

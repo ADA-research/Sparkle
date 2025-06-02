@@ -51,8 +51,7 @@ if __name__ == "__main__":
         instance_list = [instance_path]
 
     extractor = Extractor(extractor_path,
-                          gv.settings().DEFAULT_runsolver_exec,
-                          log_dir)
+                          gv.settings().DEFAULT_runsolver_exec)
     features = extractor.run(instance_list,
                              feature_group=args.feature_group,
                              cutoff_time=cutoff_extractor,

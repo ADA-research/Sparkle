@@ -32,19 +32,6 @@ def parse_solver_wrapper_args(args: list[str]) -> dict[Any]:
     args_dict["objectives"] = [resolve_objective(name)
                                for name in args_dict["objectives"].split(",")]
     args_dict["cutoff_time"] = float(args_dict["cutoff_time"])
-
-    if "config_path" in args_dict:
-        # The arguments were not directly given and must be parsed from a file
-        config_str = Path(args_dict["config_path"]).open("r")\
-            .readlines()[args_dict["seed"]]
-        # Extract the args without any quotes
-        config_split = [arg.strip().replace("'", "").replace('"', "").strip("-")
-                        for arg in config_str.split(" -") if arg.strip() != ""]
-        for arg in config_split:
-            varname, value = arg.strip("'").strip('"').split(" ", maxsplit=1)
-            args_dict[varname] = value
-        del args_dict["config_path"]
-
     return args_dict
 
 

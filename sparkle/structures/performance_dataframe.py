@@ -63,7 +63,7 @@ class PerformanceDataFrame(pd.DataFrame):
         if csv_filepath and csv_filepath.exists():  # Read from file
             df = pd.read_csv(csv_filepath,
                              header=[0, 1, 2], index_col=[0, 1, 2],
-                             dtype={"Value": float, "Seed": int},
+                             dtype={"Value": str, "Seed": int},
                              on_bad_lines="skip",
                              comment="$")  # $ For extra data lines
             super().__init__(df)
@@ -103,8 +103,8 @@ class PerformanceDataFrame(pd.DataFrame):
             for solver in configurations.keys():
                 for config_id in configurations[solver].keys():
                     column_tuples.extend([
-                        (solver, config_id, PerformanceDataFrame.column_value),
-                        (solver, config_id, PerformanceDataFrame.column_seed)])
+                        (solver, config_id, PerformanceDataFrame.column_seed),
+                        (solver, config_id, PerformanceDataFrame.column_value)])
             mcolumns = pd.MultiIndex.from_tuples(
                 column_tuples,
                 names=[PerformanceDataFrame.column_solver,
@@ -120,7 +120,8 @@ class PerformanceDataFrame(pd.DataFrame):
 
         if self.index.duplicated().any():  # Combine duplicate indices
             combined = self.groupby(level=[0, 1, 2]).first()
-            duplicates = self.index[self.index.duplicated(keep="first")]
+            # We keep the last to allow overwriting existing values
+            duplicates = self.index[self.index.duplicated(keep="last")]
             # Remove all duplicate entries from self
             self.drop(duplicates, inplace=True)
             for d in duplicates:  # Place combined duplicates in self
@@ -295,8 +296,8 @@ class PerformanceDataFrame(pd.DataFrame):
         self.attrs[solver_name] = {}
         for (config_key, config), (value, seed) in itertools.product(configurations,
                                                                      initial_value):
-            self[(solver_name, config_key, PerformanceDataFrame.column_value)] = value
             self[(solver_name, config_key, PerformanceDataFrame.column_seed)] = seed
+            self[(solver_name, config_key, PerformanceDataFrame.column_value)] = value
             self.attrs[solver_name][config_key] = config
         if self.num_solvers == 2:  # Remove nan solver
             for solver in self.solvers:

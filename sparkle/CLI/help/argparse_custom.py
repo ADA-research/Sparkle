@@ -71,10 +71,9 @@ class ArgumentContainer():
         """Create an ArgumentContainer.
 
         Args:
-            names: List of names for the contained argument. For positional arguments,
-                this will contain a single string. For positional arguments this will
-                typically contain two, the first one starting with '-' and the second one
-                starting with '--'.
+            names: List of names for the contained argument. For positional arguments
+                this will typically contain two, the first one starting with '-' and the
+                second one starting with '--'.
             kwargs: Keyword arguments needed by the method parser.add_argument which adds
                 the contained argument to a parser.
         """
@@ -124,6 +123,25 @@ CancelJobsArgument = \
                       kwargs={"action": "store_true",
                               "help": "cancel the job(s) with the given ID(s)"})
 
+CheckTypeArgument = \
+    ArgumentContainer(names=["type"],
+                      kwargs={"choices": ["extractor",
+                                          "feature-extractor",
+                                          "solver",
+                                          "instance-set",
+                                          "Extractor"
+                                          "Feature-Extractor",
+                                          "Instance-Set",
+                                          "Solver",
+                                          "FeatureExtractor",
+                                          "InstanceSet"],
+                              "help": "type of the object to check"})
+
+CheckPathArgument = \
+    ArgumentContainer(names=["path"],
+                      kwargs={"type": Path,
+                              "help": "path to the object to check"})
+
 CleanupArgumentAll = \
     ArgumentContainer(names=["--all"],
                       kwargs={"action": "store_true",
@@ -158,7 +176,7 @@ CPUTimeArgument = \
                                       "seconds (cpu)"})
 
 CutOffTimeArgument = \
-    ArgumentContainer(names=["--cutoff-time"],
+    ArgumentContainer(names=["--cutoff-time", "--cutoff", "--timeout"],
                       kwargs={"type": int,
                               "help": "The duration the portfolio will run before the "
                                       "solvers within the portfolio will be stopped "
@@ -196,6 +214,12 @@ GenerateJSONArgument = ArgumentContainer(names=["--only-json"],
                                                  "help": "if set to True, only generate "
                                                          "machine readable output"
                                                  })
+
+InstancePathOptional =\
+    ArgumentContainer(names=["instance_path"],
+                      kwargs={"type": Path,
+                              "nargs": "?",
+                              "help": "Path to an instance to use for the command"})
 
 InstancePathPositional = ArgumentContainer(names=["instance_path"],
                                            kwargs={"type": Path,
@@ -394,6 +418,10 @@ RunOnArgument = ArgumentContainer(names=["--run-on"],
                                           "help": "On which computer or cluster "
                                                   "environment to execute the "
                                                   "calculation."})
+
+SeedArgument = ArgumentContainer(names=["--seed"],
+                                 kwargs={"type": int,
+                                         "help": "seed to use for the command"})
 
 SelectionReportArgument = \
     ArgumentContainer(names=["--selection"],

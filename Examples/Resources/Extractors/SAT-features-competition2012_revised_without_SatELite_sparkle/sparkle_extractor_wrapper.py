@@ -132,6 +132,11 @@ executable = extractor_dir / executable_name
 extractor = subprocess.run([extractor_dir / executable_name, instance_path],
                            capture_output=True)
 
+if extractor.returncode != 0:  # Error handling
+    print(extractor.stdout.decode())
+    print(extractor.stderr.decode())
+    sys.exit(extractor.returncode)
+
 # Read all lines from the input file
 raw_lines = extractor.stdout.decode().splitlines()
 

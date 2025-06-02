@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Template for users to create Solver wrappers."""
+"""Template for users to create Python solver wrappers."""
 import sys
 import subprocess
 from pathlib import Path
 from sparkle.types import SolverStatus
-from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args
+from sparkle.tools.solver_wrapper_parsing import (parse_solver_wrapper_args,
+                                                  get_solver_call_params)
 
 # Convert the arguments to a dictionary
 args = parse_solver_wrapper_args(sys.argv[1:])
 
 # Extract and delete data that needs specific formatting
 solver_dir = Path(args["solver_dir"])
+objectives = args["objectives"]
 instance = Path(args["instance"])
 seed = args["seed"]
 
-del args["solver_dir"]
-del args["instance"]
-del args["cutoff_time"]
-del args["seed"]
+# Extract the parameters for the solver call
+solver_params = get_solver_call_params(args)
 
 solver_name = "EXAMPLE_SOLVER"
 if solver_dir != Path("."):
@@ -31,8 +31,8 @@ solver_cmd = [solver_exec,
 
 # Construct call from args dictionary
 params = []
-for key in args:
-    if args[key] is not None:
+for key in solver_params:
+    if solver_params[key] is not None:
         params.extend(["-" + str(key), str(args[key])])
 
 try:
@@ -43,7 +43,7 @@ except Exception as ex:
 
 # Convert Solver output to dictionary for configurator target algorithm script
 output_str = solver_call.stdout.decode()
-# Optional: Print original output so the solution can be verified by SATVerifier
+# Optional: Print original output so the solution can be verified by SolutionVerifier
 print(output_str)
 
 status = SolverStatus.CRASHED

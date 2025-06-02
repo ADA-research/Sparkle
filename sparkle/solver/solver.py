@@ -26,12 +26,11 @@ from sparkle.types import resolve_objective, SparkleObjective, UseTime
 class Solver(SparkleCallable):
     """Class to handle a solver and its directories."""
     meta_data = "solver_meta.txt"
-    wrapper = "sparkle_solver_wrapper.py"
+    _wrapper_file = "sparkle_solver_wrapper"
     solver_cli = Path(__file__).parent / "solver_cli.py"
 
     def __init__(self: Solver,
                  directory: Path,
-                 raw_output_directory: Path = None,
                  runsolver_exec: Path = None,
                  deterministic: bool = None,
                  verifier: verifiers.SolutionVerifier = None) -> None:
@@ -39,17 +38,18 @@ class Solver(SparkleCallable):
 
         Args:
             directory: Directory of the solver.
-            raw_output_directory: Directory where solver will write its raw output.
             runsolver_exec: Path to the runsolver executable.
                 By default, runsolver in directory.
             deterministic: Bool indicating determinism of the algorithm.
                 Defaults to False.
             verifier: The solution verifier to use. If None, no verifier is used.
         """
-        super().__init__(directory, runsolver_exec, raw_output_directory)
+        super().__init__(directory, runsolver_exec)
         self.deterministic = deterministic
         self.verifier = verifier
         self._pcs_file: Path = None
+        self._interpreter: str = None
+        self._wrapper_extension: str = None
 
         meta_data_file = self.directory / Solver.meta_data
         if self.runsolver_exec is None:
@@ -72,8 +72,17 @@ class Solver(SparkleCallable):
             self.deterministic = False
 
     def __str__(self: Solver) -> str:
-        """Return the sting representation of the solver."""
+        """Return the string representation of the solver."""
         return self.name
+
+    def __repr__(self: Solver) -> str:
+        """Return detailed representation of the solver."""
+        return f"{self.name}:\n"\
+               f"\t- Directory: {self.directory}\n"\
+               f"\t- Deterministic: {self.deterministic}\n"\
+               f"\t- Verifier: {self.verifier}\n"\
+               f"\t- PCS File: {self.pcs_file}\n"\
+               f"\t- Wrapper: {self.wrapper}"
 
     @property
     def pcs_file(self: Solver) -> Path:
@@ -84,6 +93,26 @@ class Solver(SparkleCallable):
                 return None
             self._pcs_file = files[0]
         return self._pcs_file
+
+    @property
+    def wrapper_extension(self: Solver) -> str:
+        """Get the extension of the wrapper file."""
+        if self._wrapper_extension is None:
+            # Determine which file is the wrapper by sorting alphabetically
+            wrapper = sorted([p for p in self.directory.iterdir()
+                              if p.stem == Solver._wrapper_file])[0]
+            self._wrapper_extension = wrapper.suffix
+        return self._wrapper_extension
+
+    @property
+    def wrapper(self: Solver) -> str:
+        """Get name of the wrapper file."""
+        return f"{Solver._wrapper_file}{self.wrapper_extension}"
+
+    @property
+    def wrapper_file(self: Solver) -> Path:
+        """Get path of the wrapper file."""
+        return self.directory / self.wrapper
 
     def get_pcs_file(self: Solver, port_type: PCSConvention) -> Path:
         """Get path of the parameter file of a specific convention.
@@ -153,7 +182,7 @@ class Solver(SparkleCallable):
             del configuration["configuration_id"]
         # Ensure stringification of dictionary will go correctly for key value pairs
         configuration = {key: str(configuration[key]) for key in configuration}
-        solver_cmd = [str((self.directory / Solver.wrapper)),
+        solver_cmd = [str(self.directory / self.wrapper),
                       f"'{json.dumps(configuration)}'"]
         if log_dir is None:
             log_dir = Path()
@@ -195,11 +224,10 @@ class Solver(SparkleCallable):
         Returns:
             Solver output dict possibly with runsolver values.
         """
-        if log_dir is None:
-            log_dir = self.raw_output_directory
         cmds = []
         instances = [instances] if not isinstance(instances, list) else instances
         set_label = instances.name if isinstance(instances, InstanceSet) else "instances"
+        log_dir = Path() if log_dir is None else log_dir
         for instance in instances:
             paths = instance.instace_paths if isinstance(instance,
                                                          InstanceSet) else [instance]
@@ -222,16 +250,13 @@ class Solver(SparkleCallable):
 
         if isinstance(run, LocalRun):
             run.wait()
-            import time
-            time.sleep(5)
-            # Subprocess resulted in error
-            if run.status == Status.ERROR:
+            if run.status == Status.ERROR:  # Subprocess resulted in error
                 print(f"WARNING: Solver {self.name} execution seems to have failed!\n")
                 for i, job in enumerate(run.jobs):
                     print(f"[Job {i}] The used command was: {cmds[i]}\n"
                           "The error yielded was:\n"
-                          f"\t-stdout: '{run.jobs[0]._process.stdout}'\n"
-                          f"\t-stderr: '{run.jobs[0]._process.stderr}'\n")
+                          f"\t-stdout: '{job.stdout}'\n"
+                          f"\t-stderr: '{job.stderr}'\n")
                 return {"status": SolverStatus.ERROR, }
 
             solver_outputs = []
@@ -282,8 +307,7 @@ class Solver(SparkleCallable):
             sbatch_options: List of slurm batch options to use
             slurm_prepend: Slurm script to prepend to the sbatch
             dependencies: List of slurm runs to use as dependencies
-            log_dir: Path where to place output files. Defaults to
-                self.raw_output_directory.
+            log_dir: Path where to place output files. Defaults to CWD.
             base_dir: Path where to place output files.
             job_name: Name of the job
                 If None, will generate a name based on Solver and Instances
@@ -389,7 +413,8 @@ class Solver(SparkleCallable):
         if verifier is not None and used_runsolver:
             # Horrible hack to get the instance from the solver input
             solver_call_str: str = " ".join(solver_call)
-            solver_input_str = solver_call_str.split(Solver.wrapper, maxsplit=1)[1]
+            solver_input_str = solver_call_str.split(Solver._wrapper_file, maxsplit=1)[1]
+            solver_input_str = solver_input_str.split(" ", maxsplit=1)[1]
             solver_input_str = solver_input_str[solver_input_str.index("{"):
                                                 solver_input_str.index("}") + 1]
             solver_input = ast.literal_eval(solver_input_str)

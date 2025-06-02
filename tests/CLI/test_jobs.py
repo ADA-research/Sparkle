@@ -1,4 +1,5 @@
 """Test the cancel CLI entry point."""
+import shutil
 import pytest
 from pathlib import Path
 
@@ -44,6 +45,9 @@ def test_cancel_command_configuration(tmp_path: Path,
     """Test cancel command on configuration jobs."""
     if tools.get_cluster_name() != "kathleen":
         # Test currently does not work on Github Actions due to truncating
+        return
+    if shutil.which("java") is None:
+        # Requires Java for SMAC2
         return
     # Submit configuration jobs and cancel it by ID
     solver_path =\

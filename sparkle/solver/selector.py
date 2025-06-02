@@ -65,18 +65,10 @@ class Selector:
             The construction Run
         """
         # Convert the dataframes to Selector Format
-        # Extract the configurations, reformat columns
-        configurations_csv = target_file.parent / "configurations.csv"
         new_column_names = []
-        config_csv_lines = []
         for solver, config_id, _ in performance_data.columns:
             if f"{solver}_{config_id}" not in new_column_names:
                 new_column_names.append(f"{solver}_{config_id}")
-                config_csv_lines.append(
-                    f"{solver},{config_id},"
-                    f"{performance_data.get_full_configuration(solver, config_id)}"
-                )
-        configurations_csv.write_text("\n".join(config_csv_lines))
         performance_target = performance_data.drop(
             [PerformanceDataFrame.column_seed],
             axis=1, level=2)
