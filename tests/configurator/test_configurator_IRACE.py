@@ -60,7 +60,9 @@ def test_irace_configure(mock_add_to_queue: Mock) -> None:
     cmds = ANY
     outputs = ANY
     data_target = PerformanceDataFrame(
-        Path("tests/test_files/performance/example_data_MO.csv"))
+        Path("tests/test_files/performance/example_empty_runs.csv"))
+    # Make a copy to avoid writing
+    data_target = data_target.clone(Path("tmp-pdf.csv"))
 
     runs = irace_conf.configure(conf_scenario,
                                 data_target=data_target,
@@ -78,6 +80,7 @@ def test_irace_configure(mock_add_to_queue: Mock) -> None:
         prepend=None,
     )
     assert runs == [None]
+    data_target.csv_filepath.unlink()
 
 
 def test_irace_organise_output(tmp_path: Path,

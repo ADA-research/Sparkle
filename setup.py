@@ -3,7 +3,7 @@ import os
 from setuptools import setup, find_packages
 from sparkle.about import version
 
-setup(name="SparkleAI",
+setup(name="Sparkle",
       version=version,
       url="https://github.com/thijssnelleman/Sparkle",
       author="Thijs Snelleman",
@@ -23,7 +23,7 @@ setup(name="SparkleAI",
           "tabulate==0.9.0",
           "pytermgui==7.7.2",
           "tqdm==4.66.5",
-          "smac==2.2.0",
+          "smac==2.3.1",
           "RunRunner==0.2.0.3",
           "asf-lib==0.0.1.15",
           # ASF requirements
@@ -32,6 +32,7 @@ setup(name="SparkleAI",
           # Reporting packages
           "plotly==5.24.1",
           "kaleido==0.2.1",
+          "pylatex==1.4.2",
       ],
       include_package_data=True,
       entry_points={"console_scripts": ["sparkle=sparkle.CLI._cli_:main"], },)

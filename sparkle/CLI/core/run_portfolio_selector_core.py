@@ -16,6 +16,7 @@ from sparkle.types import SolverStatus
 
 def call_solver_solve_instance(
         solver: Solver,
+        solver_config: dict,
         instance: Path,
         cutoff_time: int,
         log_dir: Path,
@@ -24,6 +25,7 @@ def call_solver_solve_instance(
 
     Args:
         solver: The solver to run on the instance
+        solver_config: The configuration of the solver
         instance: The path to the instance
         cutoff_time: The cutoff time for the solver
         log_dir: The log directory for the solver
@@ -38,6 +40,7 @@ def call_solver_solve_instance(
         objectives=objectives,
         seed=gv.get_seed(),
         cutoff_time=cutoff_time,
+        configuration=solver_config,
         log_dir=log_dir,
         run_on=Runner.LOCAL)
     status_key = [o.name for o in objectives if o.name.startswith("status")][0]
@@ -80,10 +83,12 @@ if __name__ == "__main__":
                         help="path to portfolio selector")
     parser.add_argument("--instance", required=True, type=str,
                         help="path to instance to run on")
+    parser.add_argument("--input-performance-data", required=True, type=Path,
+                        help="path to input performance data csv")
     parser.add_argument("--feature-data-csv", required=True, type=Path,
                         help="path to performance data csv")
     parser.add_argument("--performance-data-csv", required=True, type=Path,
-                        help="path to performance data csv")
+                        help="path to output performance data csv")
     parser.add_argument("--log-dir", type=Path, required=False,
                         help="path to the log directory")
     args = parser.parse_args()
@@ -92,7 +97,8 @@ if __name__ == "__main__":
     log_dir =\
         args.log_dir if args.log_dir is not None else gv.settings().DEFAULT_tmp_output
     feature_data = FeatureDataFrame(Path(args.feature_data_csv))
-    performance_data = PerformanceDataFrame(Path(args.performance_data_csv))
+    input_performance_data = PerformanceDataFrame(Path(args.input_performance_data))
+    output_performance_data = PerformanceDataFrame(Path(args.performance_data_csv))
 
     # Run portfolio selector
     print("Sparkle portfolio selector predicting ...")
@@ -104,12 +110,16 @@ if __name__ == "__main__":
 
     if predict_schedule is None:  # Selector Failed to produce prediction
         sys.exit(-1)
+
     print("Predicting done!")
-    for solver, cutoff_time in predict_schedule:
+
+    for solver, config_id, cutoff_time in predict_schedule:
+        config = input_performance_data.get_full_configuration(solver, config_id)
         solver = Solver(Path(solver))
         print(f"Calling solver {solver.name} with time budget {cutoff_time} ...")
         flag_solved = call_solver_solve_instance(
-            solver, Path(args.instance), cutoff_time, log_dir, performance_data)
+            solver, config, Path(args.instance), cutoff_time,
+            log_dir, output_performance_data)
         print(f"Calling solver {solver.name} done!")
 
         if flag_solved:

@@ -28,7 +28,6 @@ if __name__ == "__main__":
 
     runsolver_binary = solver_dir / "runsolver"
     solver = Solver(solver_dir,
-                    raw_output_directory=Path(),
                     runsolver_exec=runsolver_binary)
     # Call Runsolver with the solver configurator wrapper and its arguments
     output = solver.run(instances=instance,
@@ -36,7 +35,7 @@ if __name__ == "__main__":
                         seed=seed,
                         cutoff_time=cutoff_time,
                         configuration=configuration,
-                        log_dir=solver_log_dir,
+                        log_dir=Path(),
                         run_on=Runner.LOCAL)
 
     # Return values to SMAC

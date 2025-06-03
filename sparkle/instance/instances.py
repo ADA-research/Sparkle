@@ -48,6 +48,13 @@ class InstanceSet:
         """Get the string representation of an Instance Set."""
         return self.name
 
+    def __repr__(self: InstanceSet) -> str:
+        """Get detailed representation of an Instance Set."""
+        return f"{self.name}:\n"\
+               f"\t- Type: {type(self).__name__}\n"\
+               f"\t- Directory: {self.directory}\n"\
+               f"\t- # Instances: {self.size}"
+
     def get_path_by_name(self: InstanceSet, name: str) -> Path | list[Path]:
         """Retrieves an instance paths by its name. Returns None upon failure."""
         for idx, instance_name in enumerate(self._instance_names):

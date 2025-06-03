@@ -81,19 +81,27 @@ class ParamILS(Configurator):
                 "Please ensure Java is installed and try again."
             )
         scenario.create_scenario()
+        # Generate Configuration IDs
+        from datetime import datetime
+        time_stamp = datetime.fromtimestamp(scenario.scenario_file_path.stat().st_mtime)
+        configuration_ids =\
+            [f"{self.name}_{time_stamp.strftime('%Y%m%d%H%M%S')}_{i}"
+             for i in range(scenario.number_of_runs)]
         # We set the seed over the last n run ids in the dataframe
-        seeds = data_target.run_ids[data_target.num_runs - scenario.number_of_runs:]
+        # TODO: Setting seeds like this is weird and should be inspected.
+        seeds = [i for i in range(scenario.number_of_runs)]
         output = [f"{(scenario.results_directory).absolute()}/"
-                  f"{scenario.name}_seed_{seed}_paramils.txt"
-                  for seed in seeds]
+                  f"{scenario.name}_seed_{config_id}_paramils.txt"
+                  for config_id in configuration_ids]
         # NOTE: Could add --rungroup $dirname to change the created directory name
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{ParamILS.__name__} {output_file} {data_target.csv_filepath} "
-                f"{scenario.scenario_file_path} {seed} "
+                f"{scenario.scenario_file_path} {configuration_id} "
                 f"{ParamILS.configurator_executable.absolute()} "
                 f"--scenario-file {scenario.scenario_file_path} "
                 f"--seed {seed} "
-                for output_file, seed in zip(output, seeds)]
+                for output_file, configuration_id, seed
+                in zip(output, configuration_ids, seeds)]
         if num_parallel_jobs is not None:
             num_parallel_jobs = max(num_parallel_jobs, len(cmds))
         return super().configure(
@@ -103,7 +111,8 @@ class ParamILS(Configurator):
             slurm_prepend=slurm_prepend,
             num_parallel_jobs=num_parallel_jobs,
             scenario=scenario,
-            validation_ids=seeds if validate_after else None,
+            configuration_ids=configuration_ids,
+            validate_after=validate_after,
             sbatch_options=sbatch_options,
             base_dir=base_dir,
             run_on=run_on,
@@ -113,9 +122,8 @@ class ParamILS(Configurator):
     def organise_output(output_source: Path,
                         output_target: Path = None,
                         scenario: ParamILSScenario = None,
-                        run_id: int = None) -> None | dict:
+                        configuration_id: str = None) -> None | dict:
         """Retrieves configurations from SMAC files and places them in output."""
-        from filelock import FileLock
         # Extract from log file
         configuration = {}
         skipping = True
@@ -129,31 +137,8 @@ class ParamILS(Configurator):
             variable = line.split(":")[0].strip()
             value = line.split("->")[1].strip()
             configuration[variable] = value
-        if output_target is None or not output_target.exists():
-            return configuration
-        time_stamp = scenario.scenario_file_path.stat().st_mtime
-        configuration["configuration_id"] =\
-            f"{ParamILS.__name__}_{time_stamp}_{run_id}"
-        instance_names = scenario.instance_set.instance_names
-        lock = FileLock(f"{output_target}.lock")
-        with lock.acquire(timeout=60):
-            performance_data = PerformanceDataFrame(output_target)
-            # Resolve absolute path to Solver column
-            solver = [s for s in performance_data.solvers
-                      if Path(s).name == scenario.solver.name][0]
-            # For some reason the instance paths in the instance set are absolute
-            instances = [instance for instance in performance_data.instances
-                         if Path(instance).name in instance_names]
-            # We don't set the seed in the dataframe, as that should be part of the conf
-            performance_data.set_value(
-                value=[str(configuration)],
-                solver=solver,
-                instance=instances,
-                objective=None,
-                run=run_id,
-                solver_fields=[PerformanceDataFrame.column_configuration]
-            )
-            performance_data.save_csv()
+        return Configurator.save_configuration(scenario, configuration_id,
+                                               configuration, output_target)
 
     def get_status_from_logs(self: ParamILS) -> None:
         """Method to scan the log files of the configurator for warnings."""

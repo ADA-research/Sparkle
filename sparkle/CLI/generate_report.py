@@ -2,7 +2,6 @@
 """Sparkle command to generate a report for an executed experiment."""
 import sys
 import argparse
-import ast
 from pathlib import Path, PurePath
 
 from sparkle.CLI.help import global_variables as gv
@@ -144,7 +143,7 @@ def main(argv: list[str]) -> None:
         for dir in instance_dirs:
             instance_sets.append(Instance_Set(dir))
         test_set = None if test_case_dir is None else Instance_Set(Path(test_case_dir))
-        cutoff_time = gv.settings().get_general_target_cutoff_time()
+        cutoff_time = gv.settings().get_general_solver_cutoff_time()
         output = gv.settings().DEFAULT_selection_output_analysis
         selection_output = SelectionOutput(
             selection_scenario, train_data, feature_data,
@@ -165,18 +164,14 @@ def main(argv: list[str]) -> None:
                 train_data,
                 objective,
                 gv.settings().get_general_extractor_cutoff_time(),
-                gv.settings().get_general_target_cutoff_time(),
+                gv.settings().get_general_solver_cutoff_time(),
                 test_data
             )
-            if test_case_dir is None:
-                print("Report generated ...")
-            else:
-                print("Report for test generated ...")
 
     elif gv.latest_scenario().get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
         # Reporting for parallel portfolio
         # Machine readable Output
-        cutoff_time = gv.settings().get_general_target_cutoff_time()
+        cutoff_time = gv.settings().get_general_solver_cutoff_time()
         objective = gv.settings().get_general_sparkle_objectives()[0]
         output = gv.settings().DEFAULT_parallel_portfolio_output_analysis
         parallel_portfolio_output = ParallelPortfolioOutput(parallel_portfolio_path,
@@ -193,7 +188,7 @@ def main(argv: list[str]) -> None:
                 gv.settings().DEFAULT_latex_source,
                 gv.settings().DEFAULT_latex_bib,
                 gv.settings().get_general_sparkle_objectives()[0],
-                gv.settings().get_general_target_cutoff_time(),
+                gv.settings().get_general_solver_cutoff_time(),
                 pap_instance_set)
             print("Parallel portfolio report generated ...")
     else:
@@ -233,31 +228,17 @@ def main(argv: list[str]) -> None:
             used_instances += [str(i) for i in instance_set_test.instance_paths]
         for i in performance_data.instances:
             if i not in used_instances:
-                performance_data.remove_instance(i)
+                performance_data.remove_instances(i)
 
         # Verify the data in the Performance DataFrame
         # Check that each run has produced a valid configuration
-        for instance in instance_set_train.instance_paths:
-            configurations = performance_data.get_value(
-                str(solver.directory),
-                str(instance),
-                objective=config_scenario.sparkle_objective.name,
-                solver_fields=[PerformanceDataFrame.column_configuration])
-            for i, config in enumerate(configurations):
-                try:
-                    config = ast.literal_eval(config)
-                    if config == {}:
-                        print(f"WARNING: No configuration found for {instance}, run {i}")
-                except ValueError:
-                    continue
+        for config_id in performance_data.get_configurations(str(solver.directory)):
+            configuration = performance_data.get_full_configuration(
+                str(solver.directory), config_id)
+            if (config_id != PerformanceDataFrame.default_configuration
+                    and configuration == {}):
+                print(f"WARNING: No configuration found for {config_id}")
 
-        # Check that all jobs have been executed
-        configuration_jobs = performance_data.get_job_list()
-        if len(configuration_jobs) > 0:
-            print(f"ERROR: {(len(configuration_jobs))} jobs for configuration were not "
-                  "executed! Please run 'sparkle run solvers --performance-data' before "
-                  "continuing.")
-            sys.exit(-1)
         # Create machine readable output
         output = gv.settings().DEFAULT_configuration_output_analysis
         config_output = ConfigurationOutput(config_scenario.directory,

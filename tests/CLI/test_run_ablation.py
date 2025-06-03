@@ -15,7 +15,7 @@ def test_run_ablation_command(
     settings_path = cli_tools.get_settings_path()
     snapshot_path = (
         Path("tests") / "CLI" / "test_files"
-        / "snapshot_configured_validated_solver_Pb0-CCSAT-Generic_PTN.zip").absolute()
+        / "snapshot_configured_solver_Pb0-CCSAT-Generic_PTN.zip").absolute()
     solver_pbo_path = (
         Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic").absolute()
     train_set_path = (

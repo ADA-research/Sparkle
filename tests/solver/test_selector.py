@@ -31,7 +31,7 @@ def test_selector_constructor(
 
 
 @patch("runrunner.add_to_queue")
-def test_construct(mock_add_queue: Mock) -> None:
+def test_construct(mock_add_to_queue: Mock) -> None:
     """Test for method construct."""
     selector = Selector(MultiClassClassifier, RandomForestClassifier)
 
@@ -54,6 +54,7 @@ def test_construct(mock_add_queue: Mock) -> None:
                        objective,
                        solver_cutoff,
                        run_on,
+                       "test_job",
                        sbatch_options,
                        base_dir)
 
@@ -70,7 +71,7 @@ def test_construct(mock_add_queue: Mock) -> None:
     assert selector_feature_data.shape[0] == feature_data.dataframe.shape[1]
     assert selector_feature_data.shape[1] == feature_data.dataframe.shape[0]
 
-    _, kwargs = mock_add_queue.call_args
+    _, kwargs = mock_add_to_queue.call_args
     assert kwargs["runner"] == run_on
     assert kwargs["base_dir"] == base_dir
     assert kwargs["sbatch_options"] == sbatch_options
@@ -84,6 +85,42 @@ def test_construct(mock_add_queue: Mock) -> None:
     assert f"--model-path {target_file}" in cmd_str
 
 
+@patch("runrunner.add_to_queue")
+def test_construct_all_configurations(mock_add_queue: Mock,
+                                      tmp_path: Path,
+                                      monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test with configuration selection."""
+    selector = Selector(MultiClassClassifier, RandomForestClassifier)
+
+    # Construct Parameters
+    performance_data_path =\
+        Path("tests/test_files/performance/actual-data.csv").absolute()
+    performance_data =\
+        PerformanceDataFrame(performance_data_path)
+    feature_data_path =\
+        Path("tests/test_files/Output/Feature_Data/feature_data.csv").absolute()
+    feature_data = FeatureDataFrame(feature_data_path)
+    objective = PAR()
+    solver_cutoff = 60
+    run_on = Runner.SLURM
+    sbatch_options = ["--mem-per-cpu=3000", "--qos=short", "--time=30:00"]
+    base_dir = Path(".")
+    configurations = performance_data.get_configurations("Solvers/PbO-CCSAT-Generic")
+
+    monkeypatch.chdir(tmp_path)
+    target_file = Path("portfolio_selector")
+
+    selector.construct(target_file,
+                       performance_data,
+                       feature_data,
+                       objective,
+                       configurations,
+                       solver_cutoff,
+                       run_on,
+                       sbatch_options,
+                       base_dir)
+
+
 @pytest.mark.parametrize(
     "instance",
     ["Instances/PTN/Ptn-7824-b03.cnf",
@@ -93,10 +130,11 @@ def test_construct(mock_add_queue: Mock) -> None:
 def test_run(instance: str) -> None:
     """Test for method run."""
     selector = Selector(MultiClassClassifier, RandomForestClassifier)
-    selector_path = Path("tests/test_files/Output/Portfolio_Selector/portfolio_selector")
+    selector_path = Path("tests/test_files/Selector/portfolio_selector_test")
     feature_data_path = Path("tests/test_files/Output/Feature_Data/feature_data.csv")
     feature_data = FeatureDataFrame(feature_data_path)
 
     solvers = ["Solvers/CSCCSat", "Solvers/PbO-CCSAT-Generic", "Solvers/MiniSAT"]
     schedule = selector.run(selector_path, instance, feature_data)
-    assert schedule[0][0] in solvers  # Schedule has shape [(solver, budget)]
+    print(schedule)
+    assert schedule[0][0] in solvers  # Schedule has shape [(solver, config, budget)]

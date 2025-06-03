@@ -15,6 +15,7 @@ def test_construct_portfolio_selector_command(
     snapshot_path = (
         Path("tests") / "CLI" / "test_files"
         / "snapshot_computed_features_run_solvers_csccsat_minisat_ptn.zip").absolute()
+    test_settings_path = cli_tools.get_settings_path()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
 
     # Set up platform
@@ -25,7 +26,7 @@ def test_construct_portfolio_selector_command(
 
     # Smoke test
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        construct_portfolio_selector.main([])
+        construct_portfolio_selector.main(["--settings-file", str(test_settings_path)])
     cli_tools.kill_slurm_jobs()
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0

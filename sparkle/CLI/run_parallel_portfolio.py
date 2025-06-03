@@ -60,7 +60,7 @@ def build_command_list(instances_set: InstanceSet,
                        solvers: list[Solver],
                        portfolio_path: Path) -> list[str]:
     """Build the list of command strings for all instance-solver-seed combinations."""
-    cutoff = gv.settings().get_general_target_cutoff_time()
+    cutoff = gv.settings().get_general_solver_cutoff_time()
     objectives = gv.settings().get_general_sparkle_objectives()
     seeds_per_solver = gv.settings().get_parallel_portfolio_number_of_seeds_per_solver()
     cmd_list = []
@@ -88,7 +88,7 @@ def init_default_objectives() -> list:
     cpu_time_key = [o.name for o in objectives if o.name.startswith("cpu_time")][0]
     status_key = [o.name for o in objectives if o.name.startswith("status")][0]
     wall_time_key = [o.name for o in objectives if o.name.startswith("wall_time")][0]
-    cutoff = gv.settings().get_general_target_cutoff_time()
+    cutoff = gv.settings().get_general_solver_cutoff_time()
     default_objective_values = {}
 
     for o in objectives:
@@ -229,7 +229,7 @@ def fix_missing_times(job_output_dict: dict,
                       cpu_time_key: str,
                       wall_time_key: str) -> dict:
     """Fix CPU and wall clock times for solvers that did not produce logs."""
-    cutoff = gv.settings().get_general_target_cutoff_time()
+    cutoff = gv.settings().get_general_solver_cutoff_time()
     check_interval = gv.settings().get_parallel_portfolio_check_interval()
 
     # Fix the CPU/WC time for non existent logs to instance min time + check_interval
@@ -391,7 +391,7 @@ def main(argv: list[str]) -> None:
     print(f"Running on {instances.size} instance(s)...")
 
     if args.cutoff_time is not None:
-        gv.settings().set_general_target_cutoff_time(args.cutoff_time,
+        gv.settings().set_general_solver_cutoff_time(args.cutoff_time,
                                                      SettingState.CMD_LINE)
 
     if args.objectives is not None:

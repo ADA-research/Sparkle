@@ -71,10 +71,9 @@ class ArgumentContainer():
         """Create an ArgumentContainer.
 
         Args:
-            names: List of names for the contained argument. For positional arguments,
-                this will contain a single string. For positional arguments this will
-                typically contain two, the first one starting with '-' and the second one
-                starting with '--'.
+            names: List of names for the contained argument. For positional arguments
+                this will typically contain two, the first one starting with '-' and the
+                second one starting with '--'.
             kwargs: Keyword arguments needed by the method parser.add_argument which adds
                 the contained argument to a parser.
         """
@@ -93,6 +92,16 @@ AllJobsArgument = \
                       kwargs={"action": "store_true",
                               "help": "use all known job ID(s) for the command"})
 
+AllSolverConfigurationArgument = \
+    ArgumentContainer(names=["--all-configurations"],
+                      kwargs={"action": "store_true",
+                              "help": "use all known configurations for the command"})
+
+AllConfigurationArgument = \
+    ArgumentContainer(names=["--all-configurations"],
+                      kwargs={"action": "store_true",
+                              "help": "use all known Solver configurations"})
+
 BestConfigurationArgument = \
     ArgumentContainer(names=["--best-configuration"],
                       kwargs={"required": False,
@@ -104,10 +113,34 @@ BestConfigurationArgument = \
                                       "which to determine the best configuration. If "
                                       "empty, all known instances are used."})
 
+BestSolverConfigurationArgument = \
+    ArgumentContainer(names=["--best-configuration"],
+                      kwargs={"action": "store_true",
+                              "help": "use the best configurations for the command"})
+
 CancelJobsArgument = \
     ArgumentContainer(names=["--cancel"],
                       kwargs={"action": "store_true",
                               "help": "cancel the job(s) with the given ID(s)"})
+
+CheckTypeArgument = \
+    ArgumentContainer(names=["type"],
+                      kwargs={"choices": ["extractor",
+                                          "feature-extractor",
+                                          "solver",
+                                          "instance-set",
+                                          "Extractor"
+                                          "Feature-Extractor",
+                                          "Instance-Set",
+                                          "Solver",
+                                          "FeatureExtractor",
+                                          "InstanceSet"],
+                              "help": "type of the object to check"})
+
+CheckPathArgument = \
+    ArgumentContainer(names=["path"],
+                      kwargs={"type": Path,
+                              "help": "path to the object to check"})
 
 CleanupArgumentAll = \
     ArgumentContainer(names=["--all"],
@@ -128,8 +161,9 @@ CleanUpPerformanceDataArgument = \
 ConfigurationArgument = \
     ArgumentContainer(names=["--configuration"],
                       kwargs={"required": False,
-                              "type": int,
-                              "help": "The run index of which configuration to use"})
+                              "type": str,
+                              "nargs": "+",
+                              "help": "The indices of which configurations to use"})
 
 ConfiguratorArgument = ArgumentContainer(names=["--configurator"],
                                          kwargs={"type": str,
@@ -142,12 +176,17 @@ CPUTimeArgument = \
                                       "seconds (cpu)"})
 
 CutOffTimeArgument = \
-    ArgumentContainer(names=["--cutoff-time"],
+    ArgumentContainer(names=["--cutoff-time", "--cutoff", "--timeout"],
                       kwargs={"type": int,
                               "help": "The duration the portfolio will run before the "
                                       "solvers within the portfolio will be stopped "
                                       "(default: "
-                                      f"{Settings.DEFAULT_general_target_cutoff_time})"})
+                                      f"{Settings.DEFAULT_general_solver_cutoff_time})"})
+
+DefaultSolverConfigurationArgument = \
+    ArgumentContainer(names=["--default-configuration"],
+                      kwargs={"action": "store_true",
+                              "help": "use the default configurations for the command"})
 
 DeterministicArgument =\
     ArgumentContainer(names=["--deterministic"],
@@ -175,6 +214,12 @@ GenerateJSONArgument = ArgumentContainer(names=["--only-json"],
                                                  "help": "if set to True, only generate "
                                                          "machine readable output"
                                                  })
+
+InstancePathOptional =\
+    ArgumentContainer(names=["instance_path"],
+                      kwargs={"type": Path,
+                              "nargs": "?",
+                              "help": "Path to an instance to use for the command"})
 
 InstancePathPositional = ArgumentContainer(names=["instance_path"],
                                            kwargs={"type": Path,
@@ -208,10 +253,10 @@ InstanceSetTestAblationArgument = \
                               "type": str,
                               "help": "path to test instance set"})
 
-InstanceSetTrainAblationArgument = \
+InstanceSetTrainOptionalArgument = \
     ArgumentContainer(names=["--instance-set-train"],
                       kwargs={"required": False,
-                              "type": str,
+                              "type": Path,
                               "help": "path to training instance set"})
 
 InstanceSetTestReportArgument = \
@@ -299,8 +344,6 @@ NumberOfRunsConfigurationArgument = \
 NumberOfRunsAblationArgument = \
     ArgumentContainer(names=["--number-of-runs"],
                       kwargs={"type": int,
-                              "default": Settings.DEFAULT_configurator_number_of_runs,
-                              "action": SetByUser,
                               "help": "Number of configuration runs to execute"})
 
 PerfectSelectorMarginalContributionArgument =\
@@ -311,9 +354,6 @@ PerfectSelectorMarginalContributionArgument =\
 
 RacingArgument = ArgumentContainer(names=["--racing"],
                                    kwargs={"type": bool,
-                                           "default": Settings.
-                                           DEFAULT_ablation_racing,
-                                           "action": SetByUser,
                                            "help": "Performs abaltion analysis with "
                                                    "racing"})
 
@@ -374,6 +414,10 @@ RunOnArgument = ArgumentContainer(names=["--run-on"],
                                                   "environment to execute the "
                                                   "calculation."})
 
+SeedArgument = ArgumentContainer(names=["--seed"],
+                                 kwargs={"type": int,
+                                         "help": "seed to use for the command"})
+
 SelectionReportArgument = \
     ArgumentContainer(names=["--selection"],
                       kwargs={"action": "store_true",
@@ -389,8 +433,6 @@ SelectorAblationArgument =\
 SettingsFileArgument = \
     ArgumentContainer(names=["--settings-file"],
                       kwargs={"type": Path,
-                              "default": Settings.DEFAULT_settings_path,
-                              "action": SetByUser,
                               "help": "Specify the settings file to use in case you want"
                                       " to use one other than the default"})
 
@@ -454,11 +496,9 @@ SolverReportArgument = ArgumentContainer(names=["--solver"],
                                                  "help": "path to solver for an "
                                                  "algorithm configuration report"})
 
-TargetCutOffTimeArgument = \
-    ArgumentContainer(names=["--target-cutoff-time", "--solver-cutoff-time"],
+SolverCutOffTimeArgument = \
+    ArgumentContainer(names=["--solver-cutoff-time", "--target-cutoff-time"],
                       kwargs={"type": int,
-                              "default": Settings.DEFAULT_general_target_cutoff_time,
-                              "action": SetByUser,
                               "help": "cutoff time per Solver run in seconds"})
 
 TestCaseDirectoryArgument = \

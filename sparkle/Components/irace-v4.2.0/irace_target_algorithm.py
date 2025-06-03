@@ -30,7 +30,6 @@ if __name__ == "__main__":
     configuration = {arg.strip("-"): val for arg, val in args}
     runsolver_binary = solver_dir / "runsolver"
     solver = Solver(solver_dir,
-                    raw_output_directory=(Path.cwd() / "tmp").absolute(),
                     runsolver_exec=runsolver_binary)
     # Call Runsolver with the solver configurator wrapper and its arguments
     # IRACE cannot deal with printed warnings, we filter out missing RunSolver logs
@@ -40,7 +39,8 @@ if __name__ == "__main__":
                         seed=seed,
                         cutoff_time=cutoff_time,
                         configuration=configuration,
-                        run_on=Runner.LOCAL)
+                        run_on=Runner.LOCAL,
+                        log_dir=(Path.cwd() / "tmp"))
     warnings.resetwarnings()
     objective_value =\
         output[objective.name] if objective.minimise else -1 * output[objective.name]

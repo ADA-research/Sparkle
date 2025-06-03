@@ -28,14 +28,14 @@ def parser_function() -> argparse.ArgumentParser:
         epilog="Note that if no test instance set is given, the validation is performed"
                " on the training set.")
     parser.add_argument("--solver", required=False, type=str, help="path to solver")
-    parser.add_argument(*ac.InstanceSetTrainAblationArgument.names,
-                        **ac.InstanceSetTrainAblationArgument.kwargs)
+    parser.add_argument(*ac.InstanceSetTrainOptionalArgument.names,
+                        **ac.InstanceSetTrainOptionalArgument.kwargs)
     parser.add_argument(*ac.InstanceSetTestAblationArgument.names,
                         **ac.InstanceSetTestAblationArgument.kwargs)
     parser.add_argument(*ac.ObjectivesArgument.names,
                         **ac.ObjectivesArgument.kwargs)
-    parser.add_argument(*ac.TargetCutOffTimeArgument.names,
-                        **ac.TargetCutOffTimeArgument.kwargs)
+    parser.add_argument(*ac.SolverCutOffTimeArgument.names,
+                        **ac.SolverCutOffTimeArgument.kwargs)
     parser.add_argument(*ac.WallClockTimeArgument.names,
                         **ac.WallClockTimeArgument.kwargs)
     parser.add_argument(*ac.NumberOfRunsAblationArgument.names,
@@ -71,7 +71,7 @@ def main(argv: list[str]) -> None:
             args.objectives, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "target_cutoff_time"):
-        gv.settings().set_general_target_cutoff_time(
+        gv.settings().set_general_solver_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "wallclock_time"):
@@ -117,10 +117,13 @@ def main(argv: list[str]) -> None:
         configurator.output_path, solver, instance_set_train)
     performance_data = PerformanceDataFrame(
         gv.settings().DEFAULT_performance_data_path)
-    best_configuration, _ = performance_data.best_configuration(
+    best_configuration_key, _ = performance_data.best_configuration(
         str(solver.directory),
         config_scenario.sparkle_objective,
         instances=[str(p) for p in instance_set_train.instance_paths])
+    best_configuration = performance_data.get_full_configuration(
+        str(solver.directory),
+        best_configuration_key)
     if config_scenario is None:
         print("No configuration scenario found for combination:\n"
               f"{configurator.name} {solver.name} {instance_set_train.name}")
@@ -148,7 +151,7 @@ def main(argv: list[str]) -> None:
 
     # Configurations
     ablation_scenario.create_configuration_file(
-        cutoff_time=gv.settings().get_general_target_cutoff_time(),
+        cutoff_time=gv.settings().get_general_solver_cutoff_time(),
         cutoff_length=gv.settings().get_smac2_target_cutoff_length(),  # NOTE: SMAC2
         concurrent_clis=gv.settings().get_slurm_max_parallel_runs_per_node(),
         best_configuration=best_configuration,

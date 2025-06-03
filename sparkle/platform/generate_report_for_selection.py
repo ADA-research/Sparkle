@@ -47,7 +47,7 @@ def solver_ranked_latex_list(solver_ranking: list[tuple[str, float]],
         The list of solvers ranked as LaTeX str.
     """
     objective_str = f"{objective}: " if objective is not None else ""
-    return stex.list_to_latex([(row[0], f", {objective_str} {row[1]}")
+    return stex.list_to_latex([(row[0], f" ({row[1]}), {objective_str} {row[2]}")
                                for row in solver_ranking])
 
 
@@ -69,7 +69,8 @@ def get_figure_portfolio_selector_vs_sbs(
         objective: SparkleObjective,
         train_data: PerformanceDataFrame,
         portfolio_selector_performance: PerformanceDataFrame,
-        sbs_solver: str) -> str:
+        sbs_solver: str,
+        sbs_config: str = PerformanceDataFrame.default_configuration) -> str:
     """Create a LaTeX plot comparing the selector and the SBS.
 
     The plot compares the performance on each instance of the portfolio selector created
@@ -80,10 +81,13 @@ def get_figure_portfolio_selector_vs_sbs(
     """
     # We create a point of x,y form (SBS performance, portfolio performance)
     selector = portfolio_selector_performance.solvers[0]
-    points = [[float(train_data.get_value(sbs_solver, instance, objective.name)),
-               float(portfolio_selector_performance.get_value(selector,
-                                                              instance,
-                                                              objective.name))]
+    points = [[float(train_data.get_value(sbs_solver, instance,
+                                          sbs_config, objective.name)),
+               float(portfolio_selector_performance.get_value(
+                   selector,
+                   instance,
+                   PerformanceDataFrame.default_configuration,
+                   objective.name))]
               for instance in portfolio_selector_performance.instances]
 
     figure_filename = "figure_portfolio_selector_sparkle_vs_sbs"
@@ -118,9 +122,11 @@ def get_figure_portfolio_selector_sparkle_vs_vbs(
     instances = actual_portfolio_selector_penalty.instances
     solver = actual_portfolio_selector_penalty.solvers[0]
     points = [(vbs_performance[instance],
-               actual_portfolio_selector_penalty.get_value(solver,
-                                                           instance,
-                                                           objective.name))
+               actual_portfolio_selector_penalty.get_value(
+                   solver,
+                   instance,
+                   PerformanceDataFrame.default_configuration,
+                   objective.name))
               for instance in instances]
 
     figure_filename = "figure_portfolio_selector_sparkle_vs_vbs"
@@ -161,7 +167,7 @@ def selection_report_variables(
     actual_performance_data = get_portfolio_selector_performance(selection_scenario)
     solver_performance_ranking = performance_data.get_solver_ranking(
         objective=objective)
-    single_best_solver = solver_performance_ranking[0][0]
+    single_best_solver, single_best_config, _ = solver_performance_ranking[0]
     latex_dict = {"bibliographypath": bibliograpghy_path.absolute(),
                   "numSolvers": performance_data.num_solvers,
                   "solverList": stex.list_to_latex([(s, "")
@@ -192,7 +198,7 @@ def selection_report_variables(
     latex_dict["figure-portfolio-selector-sparkle-vs-sbs"] =\
         get_figure_portfolio_selector_vs_sbs(
             target_dir, objective, performance_data,
-            actual_performance_data, single_best_solver)
+            actual_performance_data, single_best_solver, single_best_config)
     latex_dict["figure-portfolio-selector-sparkle-vs-vbs"] =\
         get_figure_portfolio_selector_sparkle_vs_vbs(target_dir,
                                                      objective,

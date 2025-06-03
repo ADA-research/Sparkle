@@ -56,8 +56,11 @@ class TestConfiguratorSMAC2(TestCase):
         # We currently cannot test these strings as they are using absolute paths
         expected_cmds = ANY
         expected_outputs = ANY
+
+        # Make a copy so we don't modify the original
         data_target = PerformanceDataFrame(
-            Path("tests/test_files/performance/example_data_MO.csv"))
+            Path("tests/test_files/performance/example_empty_runs.csv"))
+        data_target = data_target.clone(Path("tmp-pdf.csv"))
 
         runs = self.smac2_conf.configure(self.conf_scenario,
                                          data_target=data_target,
@@ -75,8 +78,9 @@ class TestConfiguratorSMAC2(TestCase):
             prepend=None,
         )
         assert runs == [None]
-
         # TODO: Test with validation_after=True
+        # TODO: Make this all happen in a tmp dir so we don't have to unlink
+        data_target.csv_filepath.unlink()
 
     def test_smac2_organise_output(self: TestConfiguratorSMAC2) -> None:
         """Testing SMAC2 ability to retrieve output from raw file."""
@@ -89,7 +93,8 @@ class TestConfiguratorSMAC2(TestCase):
             "perform_double_cc": "0", "perform_first_div": "0", "perform_pac": "1",
             "prob_pac": "0.005730374136488115", "q_swt": "0.6807207179674418",
             "sel_clause_div": "1", "sel_clause_weight_scheme": "1",
-            "sel_var_break_tie_greedy": "4", "sel_var_div": "2", "threshold_swt": "32"}
+            "sel_var_break_tie_greedy": "4", "sel_var_div": "2", "threshold_swt": "32",
+            "configuration_id": 1}
 
     def test_smac2_get_status_from_logs(self: TestConfiguratorSMAC2) -> None:
         """Testing status retrievel from logs."""

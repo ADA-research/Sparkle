@@ -37,9 +37,12 @@ class Settings:
     analysis_dir = Path("Analysis")
     DEFAULT_settings_dir = Path("Settings")
     __settings_file = Path("sparkle_settings.ini")
+    __latest_settings_file = Path("latest.ini")
 
     # Default settings path
     DEFAULT_settings_path = PurePath(cwd_prefix / DEFAULT_settings_dir / __settings_file)
+    DEFAULT_previous_settings_path =\
+        PurePath(cwd_prefix / DEFAULT_settings_dir / __latest_settings_file)
     DEFAULT_reference_dir = DEFAULT_settings_dir / "Reference_Lists"
 
     # Default library pathing
@@ -109,7 +112,7 @@ class Settings:
     # Constant default values
     DEFAULT_general_sparkle_objective = PAR(10)
     DEFAULT_general_sparkle_configurator = cim.SMAC2.__name__
-    DEFAULT_general_target_cutoff_time = 60
+    DEFAULT_general_solver_cutoff_time = 60
     DEFAULT_general_extractor_cutoff_time = 60
     DEFAULT_number_of_jobs_in_parallel = 25
     DEFAULT_general_verbosity = VerbosityLevel.STANDARD
@@ -180,7 +183,7 @@ class Settings:
         # Setting flags
         self.__general_sparkle_objective_set = SettingState.NOT_SET
         self.__general_sparkle_configurator_set = SettingState.NOT_SET
-        self.__general_target_cutoff_time_set = SettingState.NOT_SET
+        self.__general_solver_cutoff_time_set = SettingState.NOT_SET
         self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
         self.__general_verbosity_set = SettingState.NOT_SET
         self.__general_check_interval_set = SettingState.NOT_SET
@@ -275,12 +278,12 @@ class Settings:
                     self.set_general_sparkle_configurator(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("target_cutoff_time",
+            option_names = ("solver_cutoff_time", "target_cutoff_time",
                             "cutoff_time_each_solver_call")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
-                    self.set_general_target_cutoff_time(value, state)
+                    self.set_general_solver_cutoff_time(value, state)
                     file_settings.remove_option(section, option)
 
             option_names = ("extractor_cutoff_time",
@@ -774,24 +777,23 @@ class Settings:
                       "Configurator not set.")
         return self.__general_sparkle_configurator
 
-    def set_general_target_cutoff_time(
-            self: Settings, value: int = DEFAULT_general_target_cutoff_time,
+    def set_general_solver_cutoff_time(
+            self: Settings, value: int = DEFAULT_general_solver_cutoff_time,
             origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the cutoff time in seconds for target algorithms."""
+        """Set the cutoff time in seconds for Solver."""
         section = "general"
-        name = "target_cutoff_time"
-
+        name = "solver_cutoff_time"
         if value is not None and self.__check_setting_state(
-                self.__general_target_cutoff_time_set, origin, name):
+                self.__general_solver_cutoff_time_set, origin, name):
             self.__init_section(section)
-            self.__general_target_cutoff_time_set = origin
+            self.__general_solver_cutoff_time_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_general_target_cutoff_time(self: Settings) -> int:
-        """Return the cutoff time in seconds for target algorithms."""
-        if self.__general_target_cutoff_time_set == SettingState.NOT_SET:
-            self.set_general_target_cutoff_time()
-        return int(self.__settings["general"]["target_cutoff_time"])
+    def get_general_solver_cutoff_time(self: Settings) -> int:
+        """Return the cutoff time in seconds for Solvers."""
+        if self.__general_solver_cutoff_time_set == SettingState.NOT_SET:
+            self.set_general_solver_cutoff_time()
+        return int(self.__settings["general"]["solver_cutoff_time"])
 
     def set_general_extractor_cutoff_time(
             self: Settings, value: int = DEFAULT_general_extractor_cutoff_time,
@@ -882,7 +884,7 @@ class Settings:
         configurator_settings = {
             "number_of_runs": self.get_configurator_number_of_runs(),
             "solver_calls": self.get_configurator_solver_calls(),
-            "cutoff_time": self.get_general_target_cutoff_time(),
+            "cutoff_time": self.get_general_solver_cutoff_time(),
             "max_iterations": self.get_configurator_max_iterations()
         }
         # In the settings below, we default to the configurator general settings if no

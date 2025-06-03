@@ -52,7 +52,7 @@ def main(argv: list[str]) -> None:
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     for instance in old_instance_set.instance_paths:
         feature_data.remove_instances(str(instance))
-        performance_data.remove_instance(str(instance))
+        performance_data.remove_instances(str(instance))
 
     feature_data.save_csv()
     performance_data.save_csv()

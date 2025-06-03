@@ -1,33 +1,22 @@
-,,,RandomForest,RandomForest,RandomForest,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron
-,,,Value,Seed,Configuration,Value,Seed,Configuration
-Objective,Instance,Run,,,,,,
-PAR10,flower_petals.csv,1,4.4,1,"{'alpha': 0.05, 'beta': 0.99}",23.4,1,"{'kappa': 0.23, 'mu': 'std1'}"
-PAR10,flower_petals.csv,2,4.5,1,"{'alpha': 0.12, 'beta': 0.46}",44.5,1,"{'kappa': 0.46, 'mu': 'std2'}"
-PAR10,flower_petals.csv,3,4.3,1,"{'alpha': 0.29, 'beta': 0.23}",34.3,1,"{'kappa': 0.99, 'mu': 'std3'}"
-PAR10,flower_petals.csv,4,3.9,1,"{'alpha': 0.66, 'beta': 0.11}",33.9,1,"{'kappa': 1.0, 'mu': 'std2'}"
-PAR10,flower_petals.csv,5,3.8,1,"{'alpha': 0.69, 'beta': 0.42}",59.0,1,"{'kappa': 0.0005, 'mu': 'std1'}"
-PAR10,mnist.csv,1,5.1,1,"{'alpha': 0.05, 'beta': 0.99}",600.0,1,"{'kappa': 0.23, 'mu': 'std1'}"
-PAR10,mnist.csv,2,5.2,1,"{'alpha': 0.12, 'beta': 0.46}",59.5,1,"{'kappa': 0.46, 'mu': 'std2'}"
-PAR10,mnist.csv,3,5.8,1,"{'alpha': 0.29, 'beta': 0.23}",54.8,1,"{'kappa': 0.99, 'mu': 'std3'}"
-PAR10,mnist.csv,4,6.1,1,"{'alpha': 0.66, 'beta': 0.11}",55.1,1,"{'kappa': 1.0, 'mu': 'std2'}"
-PAR10,mnist.csv,5,5.98,1,"{'alpha': 0.69, 'beta': 0.42}",57.98,1,"{'kappa': 0.0005, 'mu': 'std1'}"
-TrainAccuracy:max,flower_petals.csv,1,0.87,1,"{'alpha': 0.05, 'beta': 0.99}",0.93,1,"{'kappa': 0.23, 'mu': 'std1'}"
-TrainAccuracy:max,flower_petals.csv,2,0.88,1,"{'alpha': 0.12, 'beta': 0.46}",0.92,1,"{'kappa': 0.46, 'mu': 'std2'}"
-TrainAccuracy:max,flower_petals.csv,3,0.86,1,"{'alpha': 0.29, 'beta': 0.23}",0.9,1,"{'kappa': 0.99, 'mu': 'std3'}"
-TrainAccuracy:max,flower_petals.csv,4,0.865,1,"{'alpha': 0.66, 'beta': 0.11}",0.91,1,"{'kappa': 1.0, 'mu': 'std2'}"
-TrainAccuracy:max,flower_petals.csv,5,0.812,1,"{'alpha': 0.69, 'beta': 0.42}",0.905,1,"{'kappa': 0.0005, 'mu': 'std1'}"
-TrainAccuracy:max,mnist.csv,1,0.43,1,"{'alpha': 0.05, 'beta': 0.99}",0.75,1,"{'kappa': 0.23, 'mu': 'std1'}"
-TrainAccuracy:max,mnist.csv,2,0.4,1,"{'alpha': 0.12, 'beta': 0.46}",0.74,1,"{'kappa': 0.46, 'mu': 'std2'}"
-TrainAccuracy:max,mnist.csv,3,0.398,1,"{'alpha': 0.29, 'beta': 0.23}",0.6398,1,"{'kappa': 0.99, 'mu': 'std3'}"
-TrainAccuracy:max,mnist.csv,4,0.419,1,"{'alpha': 0.66, 'beta': 0.11}",0.819,1,"{'kappa': 1.0, 'mu': 'std2'}"
-TrainAccuracy:max,mnist.csv,5,0.448,1,"{'alpha': 0.69, 'beta': 0.42}",0.7648,1,"{'kappa': 0.0005, 'mu': 'std1'}"
-ValidationAccuracy:max,flower_petals.csv,1,0.83,1,"{'alpha': 0.05, 'beta': 0.99}",0.8125,1,"{'kappa': 0.23, 'mu': 'std1'}"
-ValidationAccuracy:max,flower_petals.csv,2,0.81,1,"{'alpha': 0.12, 'beta': 0.46}",0.88,1,"{'kappa': 0.46, 'mu': 'std2'}"
-ValidationAccuracy:max,flower_petals.csv,3,0.84,1,"{'alpha': 0.29, 'beta': 0.23}",0.8325,1,"{'kappa': 0.99, 'mu': 'std3'}"
-ValidationAccuracy:max,flower_petals.csv,4,0.82,1,"{'alpha': 0.66, 'beta': 0.11}",0.82114,1,"{'kappa': 1.0, 'mu': 'std2'}"
-ValidationAccuracy:max,flower_petals.csv,5,0.79,1,"{'alpha': 0.69, 'beta': 0.42}",0.7304,1,"{'kappa': 0.0005, 'mu': 'std1'}"
-ValidationAccuracy:max,mnist.csv,1,0.387,1,"{'alpha': 0.05, 'beta': 0.99}",0.587,1,"{'kappa': 0.23, 'mu': 'std1'}"
-ValidationAccuracy:max,mnist.csv,2,0.444,1,"{'alpha': 0.12, 'beta': 0.46}",0.544,1,"{'kappa': 0.46, 'mu': 'std2'}"
-ValidationAccuracy:max,mnist.csv,3,0.296,1,"{'alpha': 0.29, 'beta': 0.23}",0.596,1,"{'kappa': 0.99, 'mu': 'std3'}"
-ValidationAccuracy:max,mnist.csv,4,0.3348,1,"{'alpha': 0.66, 'beta': 0.11}",0.5348,1,"{'kappa': 1.0, 'mu': 'std2'}"
-ValidationAccuracy:max,mnist.csv,5,0.379,1,"{'alpha': 0.69, 'beta': 0.42}",0.579,1,"{'kappa': 0.0005, 'mu': 'std1'}"
+Solver,,,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron
+Configuration,,,Config1,Config1,Config2,Config2,Config3,Config3,Config4,Config4,Config5,Config5,Config1,Config1,Config2,Config2,Config3,Config3,Config4,Config4,Config5,Config5
+Meta,,,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed
+Objective,Instance,Run,,,,,,,,,,,,,,,,,,,,
+PAR10,flower_petals.csv,1,4.4,1,4.5,1,4.3,1,3.9,1,3.8,1,23.4,1,44.5,1,34.3,1,33.9,1,59.0,1
+PAR10,mnist.csv,1,5.1,1,5.2,1,5.8,1,6.1,1,5.98,1,600.0,1,59.5,1,54.8,1,55.1,1,57.98,1
+TrainAccuracy:max,flower_petals.csv,1,0.87,1,0.88,1,0.86,1,0.865,1,0.812,1,0.93,1,0.92,1,0.9,1,0.91,1,0.905,1
+TrainAccuracy:max,mnist.csv,1,0.43,1,0.4,1,0.398,1,0.419,1,0.448,1,0.75,1,0.74,1,0.6398,1,0.819,1,0.7648,1
+ValidationAccuracy:max,flower_petals.csv,1,0.83,1,0.81,1,0.84,1,0.82,1,0.79,1,0.8125,1,0.88,1,0.8325,1,0.82114,1,0.7304,1
+ValidationAccuracy:max,mnist.csv,1,0.387,1,0.444,1,0.296,1,0.3348,1,0.379,1,0.587,1,0.544,1,0.596,1,0.5348,1,0.579,1
+
+$Solver,configuration_id,Configuration
+$RandomForest,Config1,"{'alpha': 0.05, 'beta': 0.99}"
+$MultiLayerPerceptron,Config1,"{'kappa': 0.23, 'mu': 'std1'}"
+$RandomForest,Config2,"{'alpha': 0.12, 'beta': 0.46}"
+$MultiLayerPerceptron,Config2,"{'kappa': 0.46, 'mu': 'std2'}"
+$RandomForest,Config3,"{'alpha': 0.29, 'beta': 0.23}"
+$MultiLayerPerceptron,Config3,"{'kappa': 0.99, 'mu': 'std3'}"
+$RandomForest,Config4,"{'alpha': 0.66, 'beta': 0.11}"
+$MultiLayerPerceptron,Config4,"{'kappa': 1.0, 'mu': 'std2'}"
+$RandomForest,Config5,"{'alpha': 0.69, 'beta': 0.42}"
+$MultiLayerPerceptron,Config5,"{'kappa': 0.0005, 'mu': 'std1'}"
