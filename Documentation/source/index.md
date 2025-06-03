@@ -75,7 +75,7 @@ Sparkle can also be installed as a standalone package using Pip. We recommend cr
 To install Sparkle in the virtual environment simply type:
 
 ```bash
-pip install SparkleAI
+pip install sparkle
 ```
 
 Note that a direct installation through Pip does not handle certain dependencies of the Sparkle CLI, such as the required libraries for compiling [RunSolver](https://www.cril.univ-artois.fr/~roussel/runsolver/).
