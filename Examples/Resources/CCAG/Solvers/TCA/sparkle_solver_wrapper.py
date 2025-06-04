@@ -16,12 +16,12 @@ args_dict = parse_solver_wrapper_args(sys.argv[1:])
 solver_dir = Path(args_dict["solver_dir"])
 seed = args_dict["seed"]
 
+cutoff_time = args_dict["cutoff_time"]
+
+#TODO Why is the constraint file not used?
 # We deal with multi-file instances, but only use the .model files
-instance = ""
-for instance_file in args_dict["instance"]:
-    if Path(instance_file).suffix == ".model":
-        instance = Path(instance_file)
-        break
+instance_names = args_dict["instance"]
+instance = next((inst for inst in instance_names if ".model" in inst), None)
 
 # Construct the base solver call
 solver_name = "TCA"
@@ -30,8 +30,9 @@ if solver_dir != Path("."):
 else:
     f"./{solver_name}"
 solver_cmd = [solver_exec,
-              "-inst", str(instance),
-              "-seed", str(seed)]
+              str(instance),
+              str(cutoff_time),
+              str(seed)]
 
 # Get further params for the solver call
 params = get_solver_call_params(args_dict)
@@ -45,10 +46,22 @@ except Exception as ex:
 # Convert Solver output to dictionary for configurator target algorithm script
 output_str = solver_call.stdout.decode()
 print(output_str)  # Print original output so it can be verified
+# Exmple output
+# 0.000308        51      0
+# 0.00035 50      1
+# 0.000369        49      4
+# 0.000384        47      6
+# 0.000394        46      7
+# 0.00041 45      10
+# 0.000518        44      35
+# 0.000545        42      40
+# 0.000574        41      46
+
 
 solution_quality = sys.maxsize
 status = SolverStatus.CRASHED
 
+# TODO Improve
 for line in output_str.splitlines():
     words = line.strip().split()
     if len(words) <= 0:
@@ -59,10 +72,10 @@ for line in output_str.splitlines():
         # If no actual solution is found, we probably reach the cutoff time before
         # finding a solution
         status = SolverStatus.TIMEOUT
-    words[1].replace('.', '', 1).isdigit()
-    if len(words) == 4 and words[1].replace('.', '', 1).isdigit() and words[2]\
-       .replace('.', '', 1).isdigit() and words[3].replace('.', '', 1).isdigit():
-        temp_solution_quality = int(words[2])
+    # Make sure words consists of [time, array_size, step]
+    if len(words) == 3 and words[0].replace('.', '', 1).isdigit() and words[1]\
+       .replace('.', '', 1).isdigit() and words[2].replace('.', '', 1).isdigit():
+        temp_solution_quality = int(words[1])
         if temp_solution_quality < solution_quality:
             solution_quality = temp_solution_quality
             status = SolverStatus.SUCCESS

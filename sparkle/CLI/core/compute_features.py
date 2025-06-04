@@ -14,7 +14,7 @@ from sparkle.solver import Extractor
 if __name__ == "__main__":
     # Define command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--instance", required=True, type=str,
+    parser.add_argument("--instance", required=True, type=Path, nargs='+',
                         help="path to instance file(s) to run on")
     parser.add_argument("--extractor", required=True, type=str,
                         help="path to feature extractor")
@@ -33,13 +33,8 @@ if __name__ == "__main__":
     # Process command line arguments
     log_dir =\
         args.log_dir if args.log_dir is not None else gv.settings().DEFAULT_tmp_output
-    instance_path = Path(args.instance)
-    instance_name = instance_path
-    if not instance_path.exists():
-        # If its an instance name (Multi-file instance), retrieve path list
-        data_set = Instance_Set(instance_path.parent)
-        instance_path = data_set.get_path_by_name(Path(instance_name).name)
-
+    instance_path = args.instance
+    instance_name = instance_path.stem if isinstance(instance_path, Path) else instance_path[0].stem
     extractor_path = Path(args.extractor)
     feature_data_csv_path = Path(args.feature_csv)
     cutoff_extractor = args.cutoff
@@ -48,7 +43,7 @@ if __name__ == "__main__":
     if isinstance(instance_path, list):
         instance_list = [str(filepath) for filepath in instance_path]
     else:
-        instance_list = [instance_path]
+        instance_list = [str(instance_path)]
 
     extractor = Extractor(extractor_path,
                           gv.settings().DEFAULT_runsolver_exec)

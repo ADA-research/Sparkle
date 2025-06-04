@@ -119,7 +119,7 @@ def main(argv: list[str]) -> None:
         objective = gv.settings().get_general_sparkle_objectives()[0]
         if not objective.time:
             print("ERROR: The selection report is not implemented for "
-                  " non-runtime objectives!")
+                  "non-runtime objectives!")
             sys.exit(-1)
         selection_scenario = gv.latest_scenario().get_selection_scenario_path()
         actual_portfolio_selector_path = selection_scenario / "portfolio_selector"
@@ -223,9 +223,9 @@ def main(argv: list[str]) -> None:
                 [s for s in performance_data.solvers
                  if s != solver.directory])
 
-        used_instances = [str(i) for i in instance_set_train.instance_paths]
+        used_instances = [str(i) for i in instance_set_train.instance_names]
         if instance_set_test:
-            used_instances += [str(i) for i in instance_set_test.instance_paths]
+            used_instances += [str(i) for i in instance_set_test.instance_names]
         for i in performance_data.instances:
             if i not in used_instances:
                 performance_data.remove_instances(i)

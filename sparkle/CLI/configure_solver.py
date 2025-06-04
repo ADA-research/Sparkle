@@ -164,6 +164,36 @@ def main(argv: list[str]) -> None:
                     for solver, config_id, instance, run_id
                     in performance_data.get_job_list()
                     if config_id == PerformanceDataFrame.default_configuration]
+    
+    # Stashed changes
+    # remaining_jobs = performance_data.get_job_list()
+    # relevant_jobs = []
+    # for instance, run_id, solver_id in remaining_jobs:
+    #     # NOTE: This run_id skip will not work if we do multiple runs per configuration
+    #     if run_id != 1 or solver_id != str(solver.directory):
+    #         continue
+    #     configuration = performance_data.get_value(
+    #         solver_id, instance, sparkle_objectives[0].name, run=run_id,
+    #         solver_fields=[PerformanceDataFrame.column_configuration])
+    #     # Only run jobs with the default configuration
+    #     if not isinstance(configuration, str) and math.isnan(configuration):
+    #         relevant_jobs.append((instance, run_id, solver_id))
+
+    # # Expand the performance dataframe so it can store the configuration
+    # performance_data.add_runs(configurator_runs,
+    #                           instance_names=[
+    #                               str(i) for i in instance_set_train.instance_names],
+    #                           initial_values=[PerformanceDataFrame.missing_value,
+    #                                           PerformanceDataFrame.missing_value,
+    #                                           {}])
+    # if instance_set_test is not None:
+    #     # Expand the performance dataframe so it can store the test set results of the
+    #     # found configurations
+    #     test_set_runs = configurator_runs if args.test_set_run_all_configurations else 1
+    #     performance_data.add_runs(
+    #         test_set_runs,
+    #         instance_names=[str(i) for i in instance_set_test.instance_names])
+    # performance_data.save_csv()
 
     dependency_job_list = configurator.configure(
         scenario=config_scenario,
@@ -206,7 +236,7 @@ def main(argv: list[str]) -> None:
         else:
             # We place the results in the index we just added
             run_index = list(set([performance_data.get_instance_num_runs(str(i))
-                                  for i in instance_set_test.instance_paths]))
+                                  for i in instance_set_test.instance_names]))
             test_set_job = solver.run_performance_dataframe(
                 instance_set_test,
                 run_index,
