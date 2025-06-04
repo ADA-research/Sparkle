@@ -7,7 +7,7 @@ import operator
 
 import tabulate
 
-from sparkle.solver import Selector
+from sparkle.selector import Selector
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import SettingState

@@ -202,6 +202,11 @@ class ConfigurationScenario:
         self.tmp: Path = self.directory / "tmp"
         self.results_directory: Path = self.directory / "results"
 
+    @property
+    def configurator(self: ConfigurationScenario) -> Configurator:
+        """Return the type of configurator the scenario belongs to."""
+        return Configurator
+
     def create_scenario(self: ConfigurationScenario, parent_directory: Path) -> None:
         """Create scenario with solver and instances in the parent directory.
 
@@ -220,7 +225,7 @@ class ConfigurationScenario:
         """
         raise NotImplementedError
 
-    def serialize(self: ConfigurationScenario) -> dict:
+    def serialise(self: ConfigurationScenario) -> dict:
         """Serialize the configuration scenario."""
         raise NotImplementedError
 

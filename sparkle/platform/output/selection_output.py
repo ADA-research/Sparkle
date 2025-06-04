@@ -22,8 +22,7 @@ class SelectionOutput:
                  training_instances: list[InstanceSet],
                  test_instances: list[InstanceSet],
                  objective: SparkleObjective,
-                 cutoff_time: int,
-                 output: Path) -> None:
+                 cutoff_time: int) -> None:
         """Initialize SelectionOutput class.
 
         Args:
@@ -35,12 +34,7 @@ class SelectionOutput:
             objective: The objective of the selector
             cutoff_time: The cutoff time
             penalised_time: The penalised time
-            output: Path to the output directory
         """
-        if not output.is_file():
-            self.output = output / "selection.json"
-        else:
-            self.output = output
         if test_instances is not None and not isinstance(test_instances, list):
             test_instances = [test_instances]
 
@@ -75,7 +69,7 @@ class SelectionOutput:
         return SelectionSolverData(solver_performance_ranking,
                                    num_solvers)
 
-    def serialize_solvers(self: SelectionOutput,
+    def serialise_solvers(self: SelectionOutput,
                           sd: SelectionSolverData) -> dict:
         """Transform SelectionSolverData to dictionary format."""
         return {
@@ -90,7 +84,7 @@ class SelectionOutput:
             ]
         }
 
-    def serialize_performance(self: SelectionOutput,
+    def serialise_performance(self: SelectionOutput,
                               sp: SelectionPerformance) -> dict:
         """Transform SelectionPerformance to dictionary format."""
         return {
@@ -100,7 +94,7 @@ class SelectionOutput:
             "metric": sp.metric
         }
 
-    def serialize_instances(self: SelectionOutput,
+    def serialise_instances(self: SelectionOutput,
                             instances: list[InstanceSet]) -> dict:
         """Transform Instances to dictionary format."""
         return {
@@ -114,8 +108,8 @@ class SelectionOutput:
             ]
         }
 
-    def serialize_contribution(self: SelectionOutput) -> dict:
-        """Transform marginal contribution ranking to dictionary format."""
+    def serialise_marginal_contribution(self: SelectionOutput) -> dict:
+        """Transform performance ranking to dictionary format."""
         return {
             "marginal_contribution_actual": [
                 {
@@ -135,25 +129,21 @@ class SelectionOutput:
             ]
         }
 
-    def serialize_settings(self: SelectionOutput) -> dict:
-        """Transform settings to dictionary format."""
-        return {
-            "cutoff_time": self.cutoff_time,
-        }
-
-    def write_output(self: SelectionOutput) -> None:
-        """Write data into a JSON file."""
-        test_data = self.serialize_instances(self.test_instances) if self.test_instances\
+    def serialise(self: SelectionOutput) -> dict:
+        """Serialise the selection output."""
+        test_data = self.serialise_instances(self.test_instances) if self.test_instances\
             else None
-        output_data = {
-            "solvers": self.serialize_solvers(self.solver_data),
-            "training_instances": self.serialize_instances(self.training_instances),
+        return {
+            "solvers": self.serialise_solvers(self.solver_data),
+            "training_instances": self.serialise_instances(self.training_instances),
             "test_instances": test_data,
-            "performance": self.serialize_performance(self.performance_data),
-            "settings": self.serialize_settings(),
-            "marginal_contribution": self.serialize_contribution()
+            "performance": self.serialise_performance(self.performance_data),
+            "settings": {"cutoff_time": self.cutoff_time},
+            "marginal_contribution": self.serialise_marginal_contribution()
         }
 
-        self.output.parent.mkdir(parents=True, exist_ok=True)
-        with self.output.open("w") as f:
-            json.dump(output_data, f, indent=4)
+    def write_output(self: SelectionOutput, output: Path) -> None:
+        """Write data into a JSON file."""
+        output = output / "configuration.json" if output.is_dir() else output
+        with output.open("w") as f:
+            json.dump(self.serialise(), f, indent=4)

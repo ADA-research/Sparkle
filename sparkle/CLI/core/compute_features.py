@@ -8,7 +8,7 @@ from filelock import FileLock
 from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import FeatureDataFrame
 from sparkle.instance import Instance_Set
-from sparkle.solver import Extractor
+from sparkle.selector import Extractor
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import patch, Mock
 
 from pathlib import Path
-from sparkle.solver import Selector
+from sparkle.selector import Selector
 from sparkle.types.objective import PAR
 from runrunner.base import Runner
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame

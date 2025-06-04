@@ -210,6 +210,11 @@ class ParamILSScenario(SMAC2Scenario):
         self.max_runs = max_runs
         self.random_restart = random_restart
 
+    @property
+    def configurator(self: ParamILSScenario) -> ParamILS:
+        """Return the type of configurator the scenario belongs to."""
+        return ParamILS
+
     def create_scenario_file(self: ParamILSScenario) -> Path:
         """Create a file with the configuration scenario."""
         from sparkle.tools.parameters import PCSConvention

@@ -4,6 +4,10 @@ import ast
 
 from sparkle.CLI.help.reporting_scenario import ReportingScenario
 from sparkle.platform.settings_objects import Settings
+from sparkle.configurator.configurator import ConfigurationScenario
+from sparkle.configurator.implementations import (SMAC2Scenario, SMAC3Scenario,
+                                                  ParamILSScenario, IRACEScenario)
+from sparkle.selector import SelectionScenario
 
 
 # TODO: Handle different seed requirements; for the moment this is a dummy function
@@ -32,6 +36,43 @@ def settings() -> Settings:
     if __settings is None:
         __settings = Settings()
     return __settings
+
+
+__configuration_scenarios: list[ConfigurationScenario] = None
+__selection_scenarios: list[SelectionScenario] = None
+
+
+def configuration_scenarios(refresh: bool = False) -> list[ConfigurationScenario]:
+    """Fetch all known configuration scenarios."""
+    global __configuration_scenarios
+    config_path = settings().DEFAULT_configuration_output
+    if __configuration_scenarios is None or refresh:
+        __configuration_scenarios = []
+        for f in config_path.rglob("*/*/*"):  # We look for files at depth three
+            if "scenario" not in f.name:
+                continue
+            if "SMAC2" in str(f):
+                __configuration_scenarios.append(SMAC2Scenario.from_file(f))
+            elif "SMAC3" in str(f):
+                __configuration_scenarios.append(SMAC3Scenario.from_file(f))
+            elif "ParamILS" in str(f):
+                __configuration_scenarios.append(ParamILSScenario.from_file(f))
+            elif "IRACE" in str(f):
+                __configuration_scenarios.append(IRACEScenario.from_file(f))
+    return __configuration_scenarios
+
+
+def selection_scenarios(refresh: bool = False) -> list[SelectionScenario]:
+    """Fetch all known selection scenarios."""
+    global __selection_scenarios
+    selection_path = settings().DEFAULT_selection_output
+    if __selection_scenarios is None or refresh:
+        __selection_scenarios = []
+        for f in selection_path.rglob("*/*/*"):  # We look for files at depth three
+            if "scenario" not in f.name:
+                continue
+            __selection_scenarios.append(SelectionScenario.from_file(f))
+    return __selection_scenarios
 
 
 reference_list_dir = Settings.DEFAULT_reference_dir

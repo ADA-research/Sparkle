@@ -7,7 +7,7 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner
 
-from sparkle.solver import Selector
+from sparkle.selector import Selector, SelectionScenario
 from sparkle.instance import Instance_Set
 
 from sparkle.platform.settings_objects import SettingState
@@ -119,6 +119,10 @@ def main(argv: list[str]) -> None:
               "'sparkle compute features' first.")
         sys.exit(-1)
 
+    for obj in performance_data.objective_names:  # Filter objective
+        if obj != objective:
+            performance_data.remove_objective(obj)
+
     if instance_set is not None:
         applicable_instances = [str(i) for i in instance_set.instance_paths]
         removable_instances = [i for i in performance_data.instances
@@ -177,19 +181,28 @@ def main(argv: list[str]) -> None:
     # Set to default to overwrite possible old path
     gv.latest_scenario().set_selection_test_case_directory()
 
-    selector_path = selection_scenario_path / "portfolio_selector"
-    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
-    if selector_path.exists() and not flag_recompute_portfolio:
-        print("Portfolio selector already exists. Set the recompute flag to re-create.")
-        sys.exit()
+    selection_scenario = SelectionScenario(gv.settings().DEFAULT_selection_output,
+                                           selector,
+                                           objective,
+                                           performance_data,
+                                           feature_data,
+                                           cutoff_time,
+                                           ablate=solver_ablation)
 
-    selector_path.parent.mkdir(exist_ok=True, parents=True)
+    if selection_scenario.selector_file_path.exists():
+        if not flag_recompute_portfolio:
+            print("Portfolio selector already exists. "
+                  "Set the recompute flag to remove and reconstruct.")
+            sys.exit(-1)
+        # Delete all selectors
+        selection_scenario.selector_file_path.unlink()
+        if selection_scenario.ablation_scenarios:
+            for scenario in selection_scenario.ablation_scenarios:
+                scenario.selector_file_path.unlink()
+
+    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     slurm_prepend = gv.settings().get_slurm_job_prepend()
-    selector_run = selector.construct(selector_path,
-                                      performance_data,
-                                      feature_data,
-                                      objective,
-                                      cutoff_time,
+    selector_run = selector.construct(selection_scenario,
                                       run_on=run_on,
                                       sbatch_options=sbatch_options,
                                       slurm_prepend=slurm_prepend,
@@ -201,37 +214,14 @@ def main(argv: list[str]) -> None:
 
     dependencies = [selector_run]
     if solver_ablation:
-        for solver in performance_data.solvers:
-            for config_id in performance_data.get_configurations(solver):
-                solver_name = Path(solver).name
-                ablate_solver_dir =\
-                    selection_scenario_path / f"ablate_{solver_name}_{config_id}"
-                ablate_solver_selector = ablate_solver_dir / "portfolio_selector"
-                if (ablate_solver_selector.exists() and not flag_recompute_portfolio):
-                    print(f"Portfolio selector without {solver_name} already exists. "
-                          "Set the recompute flag to re-create.")
-                    continue
-                ablate_solver_dir.mkdir(exist_ok=True, parents=True)
-                ablated_performance_data = performance_data.clone()
-                ablated_performance_data.remove_configuration(solver, config_id)
-                ablated_run = selector.construct(
-                    ablate_solver_selector,
-                    ablated_performance_data,
-                    feature_data,
-                    objective,
-                    cutoff_time,
-                    run_on=run_on,
-                    job_name=f"Construct Selector: Ablate {solver_name} ({config_id})",
-                    sbatch_options=sbatch_options,
-                    slurm_prepend=slurm_prepend,
-                    base_dir=sl.caller_log_dir)
-                dependencies.append(ablated_run)
-                if run_on == Runner.LOCAL:
-                    print("Portfolio selector without "
-                          f"{solver_name} ({config_id}) constructed!")
-                else:
-                    print("Portfolio selector without "
-                          f"{solver_name} ({config_id}) constructor running...")
+        # TODO do this from the ablation in the scenario
+        for ablated_scenario in selection_scenario.ablation_scenarios:
+            selector_run = selector.construct(
+                ablated_scenario,
+                run_on=run_on,
+                sbatch_options=sbatch_options,
+                slurm_prepend=slurm_prepend,
+                base_dir=sl.caller_log_dir)
 
     # Compute the marginal contribution
     with_actual = "--actual" if solver_ablation else ""

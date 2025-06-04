@@ -311,6 +311,11 @@ class IRACEScenario(ConfigurationScenario):
         self.validation = self.directory / "validation"
         self.results_directory = self.directory / "results"
 
+    @property
+    def configurator(self: IRACEScenario) -> IRACE:
+        """Return the type of configurator the scenario belongs to."""
+        return IRACE
+
     def create_scenario(self: IRACEScenario) -> None:
         """Create scenario with solver and instances in the parent directory.
 
@@ -393,7 +398,7 @@ class IRACEScenario(ConfigurationScenario):
         print("IRACE scenario file is valid.")
         return self.scenario_file_path
 
-    def serialize(self: IRACEScenario) -> dict:
+    def serialise(self: IRACEScenario) -> dict:
         """Serialize the IRACE scenario."""
         return {
             "number_of_runs": self.number_of_runs,

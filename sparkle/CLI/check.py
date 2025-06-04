@@ -7,7 +7,7 @@ from runrunner import Runner
 
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set, InstanceSet
-from sparkle.solver.extractor import Extractor
+from sparkle.selector.extractor import Extractor
 from sparkle.types import SolverStatus
 
 from sparkle.CLI.help import logging as sl

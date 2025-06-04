@@ -445,6 +445,14 @@ class PerformanceDataFrame(pd.DataFrame):
         # Sort the index to optimize lookup speed
         self.sort_index(axis=1, inplace=True)
 
+    def remove_objective(self: PerformanceDataFrame,
+                         objectives: str | list[str]) -> None:
+        """Remove objective from the Dataframe."""
+        if len(objectives) < 2:
+            raise Exception("Cannot remove last objective from PerformanceDataFrame")
+        self.drop(objectives,
+                  axis=0, level=PerformanceDataFrame.index_objective, inplace=True)
+
     def remove_instances(self: PerformanceDataFrame, instances: str | list[str]) -> None:
         """Drop instances from the Dataframe."""
         # To make sure objectives / runs are saved when no instances are present

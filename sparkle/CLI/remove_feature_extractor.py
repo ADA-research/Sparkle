@@ -12,7 +12,7 @@ from sparkle.CLI.help import logging as sl
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
-from sparkle.solver import Extractor
+from sparkle.selector import Extractor
 
 
 def parser_function() -> argparse.ArgumentParser:

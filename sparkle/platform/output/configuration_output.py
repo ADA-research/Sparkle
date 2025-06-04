@@ -6,36 +6,29 @@ from pathlib import Path
 from sparkle.solver import Solver
 from sparkle.structures import PerformanceDataFrame
 from sparkle.instance import InstanceSet, Instance_Set
-from sparkle.configurator.configurator import Configurator, ConfigurationScenario
+from sparkle.configurator.configurator import ConfigurationScenario
 
 
 class ConfigurationOutput:
     """Class that collects configuration data and outputs it a JSON format."""
 
     def __init__(self: ConfigurationOutput,
-                 path: Path,
-                 configurator: Configurator,
                  config_scenario: ConfigurationScenario,
                  performance_data: PerformanceDataFrame,
-                 instance_set_test: InstanceSet,
-                 output: Path) -> None:
+                 instance_set_test: InstanceSet) -> None:
         """Initialize Configurator Output class.
 
         Args:
-            path: Path to configuration output directory
-            configurator: The configurator that was used
             config_scenario: The scenario to output
             performance_data: Performance data
             instance_set_test: Instance set used for testing
-            output: Path to the output directory
         """
         self.solver = config_scenario.solver
-        self.configurator = configurator
+        self.configurator = config_scenario.configurator
         self.instance_set_train = config_scenario.instance_set
         self.instance_set_test = instance_set_test
-        self.directory = path
+        self.directory = config_scenario.directory
         self.config_scenario = config_scenario
-        self.output = output / "configuration.json" if not output.is_file() else output
 
         # Fix relative path
         if Path.cwd() in self.solver.directory.parents:
@@ -122,14 +115,14 @@ class ConfigurationOutput:
                     per_instance=True)
         self.performance_data = performance_data
 
-    def write_output(self: ConfigurationOutput) -> None:
-        """Write data into a JSON file."""
-        output_data = {
+    def serialise(self: ConfigurationOutput) -> dict:
+        """Serialise the configuration output."""
+        return {
             "solver": self.solver.name,
             "configurator": self.configurator.name,
             "best_configuration": self.best_configuration,
             "best_performance_train": self.best_performance_train,
-            "scenario": self.config_scenario.serialize()
+            "scenario": self.config_scenario.serialise()
             if self.configurator.scenario else None,
             "train_set_results": self.performance_data[self.performance_data.index.isin(
                 [str(p) for p in self.instance_set_train.instance_paths],
@@ -139,6 +132,9 @@ class ConfigurationOutput:
                 level=PerformanceDataFrame.index_instance)].to_json()
                 if self.instance_set_test else None),
         }
-        self.output.parent.mkdir(parents=True, exist_ok=True)
-        with self.output.open("w") as f:
-            json.dump(output_data, f, indent=4)
+
+    def write_output(self: ConfigurationOutput, output: Path) -> None:
+        """Write data into a JSON file."""
+        output = output / "configuration.json" if output.is_dir() else output
+        with output.open("w") as f:
+            json.dump(self.serialise(), f, indent=4)

@@ -336,13 +336,18 @@ class SMAC3Scenario(ConfigurationScenario):
         self.validation.mkdir(parents=True, exist_ok=True)
         self.create_scenario_file()
 
+    @property
+    def configurator(self: SMAC3Scenario) -> SMAC3:
+        """Return the type of configurator the scenario belongs to."""
+        return SMAC3
+
     def create_scenario_file(self: ConfigurationScenario) -> Path:
         """Create a file with the configuration scenario."""
         with self.scenario_file_path.open("w") as file:
-            for key, value in self.serialize().items():
+            for key, value in self.serialise().items():
                 file.write(f"{key} = {value}\n")
 
-    def serialize(self: ConfigurationScenario) -> dict:
+    def serialise(self: ConfigurationScenario) -> dict:
         """Serialize the configuration scenario."""
         feature_data =\
             self.feature_data.csv_filepath if self.feature_data else None

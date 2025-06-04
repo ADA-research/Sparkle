@@ -283,6 +283,11 @@ class SMAC2Scenario(ConfigurationScenario):
         # SMAC2 Specific
         self.outdir_train = self.directory / "outdir_train_configuration"
 
+    @property
+    def configurator(self: SMAC2Scenario) -> SMAC2:
+        """Return the type of configurator the scenario belongs to."""
+        return SMAC2
+
     def create_scenario(self: SMAC2Scenario) -> None:
         """Create scenario with solver and instances in the parent directory.
 
@@ -369,7 +374,7 @@ class SMAC2Scenario(ConfigurationScenario):
             return "RUNTIME"
         return "QUALITY"
 
-    def serialize_scenario(self: SMAC2Scenario) -> dict:
+    def serialise_scenario(self: SMAC2Scenario) -> dict:
         """Transform ConfigurationScenario to dictionary format."""
         return {
             "number_of_runs": self.number_of_runs,

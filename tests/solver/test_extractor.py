@@ -2,7 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 import pytest
-from sparkle.solver import Extractor
+from sparkle.selector import Extractor
 from unittest.mock import patch
 
 

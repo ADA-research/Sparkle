@@ -8,7 +8,7 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner, Status, Run
 
-from sparkle.solver import Extractor
+from sparkle.selector import Extractor
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import SettingState
