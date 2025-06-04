@@ -70,9 +70,9 @@ def main(argv: list[str]) -> None:
         gv.settings().set_general_sparkle_objectives(
             args.objectives, SettingState.CMD_LINE
         )
-    if ac.set_by_user(args, "target_cutoff_time"):
+    if ac.set_by_user(args, "solver_cutoff_time"):
         gv.settings().set_general_solver_cutoff_time(
-            args.target_cutoff_time, SettingState.CMD_LINE
+            args.solver_cutoff_time, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "wallclock_time"):
         gv.settings().set_smac2_wallclock_time(
