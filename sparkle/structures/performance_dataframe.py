@@ -448,7 +448,7 @@ class PerformanceDataFrame(pd.DataFrame):
     def remove_objective(self: PerformanceDataFrame,
                          objectives: str | list[str]) -> None:
         """Remove objective from the Dataframe."""
-        if len(objectives) < 2:
+        if len(self.objectives) < 2:
             raise Exception("Cannot remove last objective from PerformanceDataFrame")
         self.drop(objectives,
                   axis=0, level=PerformanceDataFrame.index_objective, inplace=True)

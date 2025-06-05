@@ -423,6 +423,12 @@ SelectionReportArgument = \
                       kwargs={"action": "store_true",
                               "help": "set to generate a normal selection report"})
 
+SelectionScenarioArgument = \
+    ArgumentContainer(names=["--selection-scenario"],
+                      kwargs={"required": True,
+                              "type": Path,
+                              "help": "the selection scenario to use"})
+
 SelectorAblationArgument =\
     ArgumentContainer(names=["--solver-ablation"],
                       kwargs={"required": False,

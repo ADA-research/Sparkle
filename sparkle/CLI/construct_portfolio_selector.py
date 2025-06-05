@@ -119,9 +119,9 @@ def main(argv: list[str]) -> None:
               "'sparkle compute features' first.")
         sys.exit(-1)
 
-    for obj in performance_data.objective_names:  # Filter objective
-        if obj != objective:
-            performance_data.remove_objective(obj)
+    # Filter objective
+    performance_data.remove_objective([obj for obj in performance_data.objective_names
+                                       if obj != objective.name])
 
     if instance_set is not None:
         applicable_instances = [str(i) for i in instance_set.instance_paths]
@@ -171,12 +171,8 @@ def main(argv: list[str]) -> None:
         print("WARNING: Missing values in the feature data, will be imputed as the mean "
               "value of all other non-missing values! Imputing all missing values...")
         feature_data.impute_missing_values()
-    # Selector is named after the solvers it can predict, sort for permutation invariance
-    selection_scenario_path =\
-        gv.settings().DEFAULT_selection_output / selector.name / "_".join(solvers)
 
     # Update latest scenario
-    gv.latest_scenario().set_selection_scenario_path(selection_scenario_path)
     gv.latest_scenario().set_latest_scenario(Scenario.SELECTION)
     # Set to default to overwrite possible old path
     gv.latest_scenario().set_selection_test_case_directory()
@@ -195,10 +191,10 @@ def main(argv: list[str]) -> None:
                   "Set the recompute flag to remove and reconstruct.")
             sys.exit(-1)
         # Delete all selectors
-        selection_scenario.selector_file_path.unlink()
+        selection_scenario.selector_file_path.unlink(missing_ok=True)
         if selection_scenario.ablation_scenarios:
             for scenario in selection_scenario.ablation_scenarios:
-                scenario.selector_file_path.unlink()
+                scenario.selector_file_path.unlink(missing_ok=True)
 
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     slurm_prepend = gv.settings().get_slurm_job_prepend()
@@ -214,7 +210,6 @@ def main(argv: list[str]) -> None:
 
     dependencies = [selector_run]
     if solver_ablation:
-        # TODO do this from the ablation in the scenario
         for ablated_scenario in selection_scenario.ablation_scenarios:
             selector_run = selector.construct(
                 ablated_scenario,
@@ -225,8 +220,8 @@ def main(argv: list[str]) -> None:
 
     # Compute the marginal contribution
     with_actual = "--actual" if solver_ablation else ""
-    cmd = (f"python3 sparkle/CLI/compute_marginal_contribution.py --perfect "
-           f"{with_actual} {ac.ObjectivesArgument.names[0]} {objective}")
+    cmd = (f"python3 sparkle/CLI/compute_marginal_contribution.py --selection-scenario "
+           f"{selection_scenario.scenario_file}  --perfect {with_actual}")
     solver_names = ", ".join([Path(s).name for s in performance_data.solvers])
     marginal_contribution = rrr.add_to_queue(
         runner=run_on,
