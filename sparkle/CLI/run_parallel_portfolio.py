@@ -7,8 +7,8 @@ import argparse
 import random
 import time
 import shutil
-import csv
 import itertools
+from operator import mod
 from pathlib import Path, PurePath
 
 from tqdm import tqdm
@@ -27,6 +27,7 @@ from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set, InstanceSet
 from sparkle.types import SolverStatus, resolve_objective, UseTime
+from sparkle.structures import PerformanceDataFrame
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -59,7 +60,16 @@ def parser_function() -> argparse.ArgumentParser:
 def build_command_list(instances_set: InstanceSet,
                        solvers: list[Solver],
                        portfolio_path: Path) -> list[str]:
-    """Build the list of command strings for all instance-solver-seed combinations."""
+    """Build the list of command strings for all instance-solver-seed combinations.
+
+    Args:
+        instances_set: Set of instances to run on.
+        solvers: List of solvers to run on the instances.
+        portfolio_path: Path to the parallel portfolio.
+
+    Returns:
+        cmd_list: List of command strings for all instance-solver-seed combinations.
+    """
     cutoff = gv.settings().get_general_solver_cutoff_time()
     objectives = gv.settings().get_general_sparkle_objectives()
     seeds_per_solver = gv.settings().get_parallel_portfolio_number_of_seeds_per_solver()
@@ -81,14 +91,21 @@ def build_command_list(instances_set: InstanceSet,
 
 
 def init_default_objectives() -> list:
-    """Initialize default objective values and key names."""
+    """Initialize default objective values and key names.
+
+    Returns:
+        default_objective_values: Dictionary with default values for each objective.
+        cpu_time_key: Key for CPU time in the default values.
+        status_key: Key for status in the default values.
+        wall_time_key: Key for wall clock time in the default values.
+    """
     # We record the 'best' of all seed results per solver-instance,
     # setting start values for objectives that are always present
     objectives = gv.settings().get_general_sparkle_objectives()
+    cutoff = gv.settings().get_general_solver_cutoff_time()
     cpu_time_key = [o.name for o in objectives if o.name.startswith("cpu_time")][0]
     status_key = [o.name for o in objectives if o.name.startswith("status")][0]
     wall_time_key = [o.name for o in objectives if o.name.startswith("wall_time")][0]
-    cutoff = gv.settings().get_general_solver_cutoff_time()
     default_objective_values = {}
 
     for o in objectives:
@@ -105,7 +122,17 @@ def submit_jobs(cmd_list: list[str],
                 solvers: list[Solver],
                 instances_set: InstanceSet,
                 run_on: Runner = Runner.SLURM) -> SlurmRun:
-    """Submit jobs to the runner and return the run object."""
+    """Submit jobs to the runner and return the run object.
+
+    Args:
+        cmd_list: List of command strings for all instance-solver-seed combinations.
+        solvers: List of solvers to run on the instances.
+        instances_set: Set of instances to run on.
+        run_on: Runner to use for submitting the jobs.
+
+    Returns:
+        run: The run object containing the submitted jobs.
+    """
     seeds_per_solver = gv.settings().get_parallel_portfolio_number_of_seeds_per_solver()
     num_solvers, num_instances = len(solvers), len(instances_set._instance_paths)
     num_jobs = num_solvers * num_instances * seeds_per_solver
@@ -132,18 +159,41 @@ def submit_jobs(cmd_list: list[str],
     )
 
 
-def monitor_jobs(run: Run, instances_set: InstanceSet, solvers: list[Solver],
-                 default_objective_values: dict) -> dict:
-    """Monitor job progress and update job output dictionary."""
-    num_instances = len(instances_set._instance_paths)
+def monitor_jobs(run: Run,
+                 instances_set: InstanceSet,
+                 solvers: list[Solver],
+                 default_objective_values: dict,
+                 run_on: Runner = Runner.SLURM) -> dict:
+    """Monitor job progress and update job output dictionary.
+
+    Args:
+        run: The run object containing the submitted jobs.
+        instances_set: Set of instances to run on.
+        solvers: List of solvers to run on the instances.
+        default_objective_values: Default objective values for each solver-instance.
+
+    Returns:
+        job_output_dict: Dictionary containing the job output for each instance-solver
+                            combination.
+    """
+    num_solvers, num_instances = len(solvers), len(instances_set._instance_paths)
     seeds_per_solver = gv.settings().get_parallel_portfolio_number_of_seeds_per_solver()
-    num_solvers = len(solvers)
     n_instance_jobs = num_solvers * seeds_per_solver
+
     job_output_dict = {
         instance_name: {solver.name:
                         default_objective_values.copy() for solver in solvers}
         for instance_name in instances_set._instance_names
     }
+
+    # job_output_dict = {
+    #    instance_name: {solver.name:
+    #                        {seed: default_objective_values.copy()
+    #                         }
+    #                    for solver in solvers
+    #                    }
+    #    for instance_name in instances_set._instance_names
+    # }
     check_interval = gv.settings().get_parallel_portfolio_check_interval()
     instances_done = [False] * num_instances
 
@@ -170,7 +220,8 @@ def monitor_jobs(run: Run, instances_set: InstanceSet, solvers: list[Solver],
                         if not job_status_completed[job_index]:
                             run.jobs[job_index].kill()
                             solver_index = int(
-                                (job_index % n_instance_jobs) // seeds_per_solver)
+                                (mod(job_index, n_instance_jobs))
+                                // seeds_per_solver)
                             solver_kills[solver_index] += 1
                     for solver_index in range(num_solvers):
                         # All seeds of a solver were killed on instance, set status kill
@@ -183,7 +234,11 @@ def monitor_jobs(run: Run, instances_set: InstanceSet, solvers: list[Solver],
 
 
 def wait_for_logs(cmd_list: list[str]) -> None:
-    """Wait for all log files to be written."""
+    """Wait for all log files to be written.
+
+    Args:
+        cmd_list: List of command strings for all instance-solver-seed combinations.
+    """
     # Attempt to verify that all logs have been written (Slurm I/O latency)
     check_interval = gv.settings().get_parallel_portfolio_check_interval()
     for cmd in cmd_list:
@@ -197,14 +252,26 @@ def wait_for_logs(cmd_list: list[str]) -> None:
 def update_results_from_logs(cmd_list: list[str], run: Run, solvers: list[Solver],
                              job_output_dict: dict,
                              cpu_time_key: str) -> dict:
-    """Parse logs to update job output dictionary with best objective values."""
+    """Parse logs to update job output dictionary with best objective values.
+
+    Args:
+        cmd_list: List of command strings for all instance-solver-seed combinations.
+        run: The run object containing the submitted jobs.
+        solvers: List of solvers to run on the instances.
+        job_output_dict: Dictionary containing the job output for each intsance-solver
+                         combination.
+        cpu_time_key: Key for CPU time in the job output dictionary.
+
+    Returns:
+        job_output_dict: Updated job output dictionary with best objective values.
+    """
     seeds_per_solver = gv.settings().get_parallel_portfolio_number_of_seeds_per_solver()
     num_solvers = len(solvers)
     n_instance_jobs = num_solvers * seeds_per_solver
     objectives = gv.settings().get_general_sparkle_objectives()
 
     for index, cmd in enumerate(cmd_list):
-        solver_index = (index % n_instance_jobs) // seeds_per_solver
+        solver_index = (mod(index, n_instance_jobs)) // seeds_per_solver
         solver_obj = solvers[solver_index]
         solver_output = Solver.parse_solver_output(
             run.jobs[index].stdout,
@@ -228,7 +295,19 @@ def fix_missing_times(job_output_dict: dict,
                       status_key: str,
                       cpu_time_key: str,
                       wall_time_key: str) -> dict:
-    """Fix CPU and wall clock times for solvers that did not produce logs."""
+    """Fix CPU and wall clock times for solvers that did not produce logs.
+
+    Args:
+        job_output_dict: Dictionary containing the job output for each instance-solver
+                            combination.
+        status_key: Key for status in the job output dictionary.
+        cpu_time_key: Key for CPU time in the job output dictionary.
+        wall_time_key: Key for wall clock time in the job output dictionary.
+
+    Returns:
+        job_output_dict: Updated job output dictionary with fixed CPU and wall clock
+                            times.
+    """
     cutoff = gv.settings().get_general_solver_cutoff_time()
     check_interval = gv.settings().get_parallel_portfolio_check_interval()
 
@@ -261,6 +340,7 @@ def fix_missing_times(job_output_dict: dict,
 
 def print_and_write_results(job_output_dict: dict,
                             solvers: list[Solver],
+                            instances_set: InstanceSet,
                             portfolio_path: Path,
                             status_key: str,
                             cpu_time_key: str,
@@ -268,6 +348,8 @@ def print_and_write_results(job_output_dict: dict,
     """Print results to console and write the CSV file."""
     num_instances = len(job_output_dict)
     num_solvers = len(solvers)
+    instance_names = [i.name for i in instances_set._instance_paths]
+    solver_names = [s.name for s in solvers]
     objectives = gv.settings().get_general_sparkle_objectives()
     for index, instance_name in enumerate(job_output_dict.keys()):
         index_str = f"[{index + 1}/{num_instances}] "
@@ -278,54 +360,43 @@ def print_and_write_results(job_output_dict: dict,
             continue
         print(f"\n{index_str}{instance_name} yielded the following Solver results:")
         for sindex in range(index * num_solvers, (index + 1) * num_solvers):
-            solver_name = solvers[sindex % num_solvers].name
+            solver_name = solvers[mod(sindex, num_solvers)].name
             job_info = job_output_dict[instance_name][solver_name]
             print(f"\t- {solver_name} ended with status {job_info[status_key]} in "
                   f"{job_info[cpu_time_key]}s CPU-Time ({job_info[wall_time_key]}s "
                   "Wall clock time)")
-    # Write the results to a CSV
-    values_header = [o.name for o in objectives]
-    header = ["Instance", "Solver"] + values_header
-    result_rows = [header]
+
     csv_path = portfolio_path / "results.csv"
-    for instance_name in job_output_dict.keys():
-        for solver_name in job_output_dict[instance_name].keys():
-            job_o = job_output_dict[instance_name][solver_name]
-            values = [instance_name, solver_name] + [
-                job_o[key] if key in job_o else "None"
-                for key in values_header]
-            result_rows.append(values)
-    with csv_path.open("w") as out:
-        writer = csv.writer(out)
-        writer.writerows(result_rows)
+    pdf = PerformanceDataFrame(csv_filepath=csv_path,
+                               solvers=solver_names,
+                               objectives=objectives,
+                               instances=instance_names
+                               )
+
+    for instance in job_output_dict.keys():
+        instance_dict = job_output_dict[instance]
+        for solver in instance_dict.keys():
+            objective_dict = instance_dict[solver]
+            for objective in objectives:
+                obj_name = objective.name
+                obj_val = objective_dict.get(obj_name,
+                                             PerformanceDataFrame.missing_value
+                                             )
+                pdf.set_value(
+                    value=obj_val,
+                    solver=solver,
+                    instance=instance,
+                    objective=obj_name
+                )
+                # pdf.set_value(
+                #    value=seed_val,
+                #    solver=solver,
+                #    instance=instance,
+                #    objective=obj_name,
+                #    solver_fields="Seed"
+                # )
+    pdf.save_csv()
     print("Results written to CSV.")
-
-
-def run_parallel_portfolio(instances_set: InstanceSet,
-                           portfolio_path: Path,
-                           solvers: list[Solver],
-                           run_on: Runner = Runner.SLURM) -> None:
-    """Run the parallel algorithm portfolio.
-
-    Args:
-        instances_set: Set of instances to run on.
-        portfolio_path: Path to the parallel portfolio.
-        solvers: List of solvers to run on the instances.
-        run_on: Currently only supports Slurm.
-    """
-    returned_cmd = build_command_list(instances_set, solvers, portfolio_path)
-    default_objective_values, cpu_time_key,\
-        status_key, wall_time_key = init_default_objectives()
-    returned_run = submit_jobs(returned_cmd, solvers, instances_set, Runner.SLURM)
-    job_output_dict = monitor_jobs(returned_run, instances_set,
-                                   solvers, default_objective_values)
-    wait_for_logs(returned_cmd)
-    job_output_dict = update_results_from_logs(returned_cmd, returned_run,
-                                               solvers, job_output_dict, cpu_time_key)
-    job_output_dict = fix_missing_times(job_output_dict,
-                                        status_key, cpu_time_key, wall_time_key)
-    print_and_write_results(job_output_dict, solvers,
-                            portfolio_path, status_key, cpu_time_key, wall_time_key)
 
 
 def main(argv: list[str]) -> None:
@@ -418,7 +489,19 @@ def main(argv: list[str]) -> None:
             sys.exit()
         shutil.rmtree(portfolio_path)
     portfolio_path.mkdir(parents=True)
-    run_parallel_portfolio(instances, portfolio_path, solvers, run_on=run_on)
+    returned_cmd = build_command_list(instances, solvers, portfolio_path)
+    default_objective_values, cpu_time_key,\
+        status_key, wall_time_key = init_default_objectives()
+    returned_run = submit_jobs(returned_cmd, solvers, instances, Runner.SLURM)
+    job_output_dict = monitor_jobs(returned_run, instances,
+                                   solvers, default_objective_values)
+    wait_for_logs(returned_cmd)
+    job_output_dict = update_results_from_logs(returned_cmd, returned_run,
+                                               solvers, job_output_dict, cpu_time_key)
+    job_output_dict = fix_missing_times(job_output_dict,
+                                        status_key, cpu_time_key, wall_time_key)
+    print_and_write_results(job_output_dict, solvers, instances,
+                            portfolio_path, status_key, cpu_time_key, wall_time_key)
 
     # Update latest scenario
     gv.latest_scenario().set_parallel_portfolio_path(portfolio_path)

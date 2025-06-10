@@ -1,0 +1,14 @@
+Solver,,,CSCCSat,CSCCSat,MiniSAT,MiniSAT,PbO-CCSAT-Generic,PbO-CCSAT-Generic
+Configuration,,,Default,Default,Default,Default,Default,Default
+Meta,,,Seed,Value,Seed,Value,Seed,Value
+Objective,Instance,Run,,,,,,
+PAR10,train_instance_1.cnf,1,,600,,600,,600
+cpu_time:metric,train_instance_1.cnf,1,,64,,64,,64
+memory:metric,train_instance_1.cnf,1,,9.223372036854776e+18,,9.223372036854776e+18,,9.223372036854776e+18
+status:metric,train_instance_1.cnf,1,,UNKNOWN,,UNKNOWN,,UNKNOWN
+wall_time:metric,train_instance_1.cnf,1,,64,,64,,64
+
+$Solver,configuration_id,Configuration
+$CSCCSat,Default,{}
+$MiniSAT,Default,{}
+$PbO-CCSAT-Generic,Default,{}
