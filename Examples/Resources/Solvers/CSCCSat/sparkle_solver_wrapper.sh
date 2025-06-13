@@ -1,8 +1,8 @@
 #!/bin/bash
 # Solver wrapper for CSCCAT in Bash script. (Requires Bash 4 and jq)
 
-# Read the arguments from the commandline and parse it into a dictionary
-commandargs=("$@")
+# Read the arguments from the commandline and parse it into a dictionary, removing possible leading/trailing quotes
+commandargs=$( sed -e "s/^'//" -e "s/'$//" <<< "$*" )
 
 # A JSON parser to Bash dictionary (From https://stackoverflow.com/questions/71385680/json-dictionary-to-bash-hash-table-using-readarray)
 declare -A args="($(jq -r 'to_entries[] | @sh "[\(.key)]=\(.value)"' <<< "$commandargs"))"
