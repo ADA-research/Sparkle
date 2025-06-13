@@ -412,7 +412,6 @@ def print_and_write_results(job_output_dict: dict,
                     objective=obj_name
                 )
     pdf.save_csv()
-    print("Results written to CSV.")
 
 
 def main(argv: list[str]) -> None:
