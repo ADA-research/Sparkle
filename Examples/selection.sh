@@ -27,7 +27,7 @@ sparkle add solver Examples/Resources/Solvers/MiniSAT/
 ### Add feature extractor
 # To run the selector, we need certain features to represent our instances. To that end, we add a feature extractor to the platform that creates vector representations of our instances.
 
-sparkle add feature extractor Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/
+sparkle add feature extractor Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite/
 
 ### Compute features
 # Now we can run our features with the following command:
@@ -82,7 +82,7 @@ sparkle generate report
 
 # If you wish to compare two feature extractors against one another, you need to remove the previous extractor from the platform (Or create a new platform from scratch) by running:
 
-sparkle remove feature extractor SAT-features-competition2012_revised_without_SatELite_sparkle
+sparkle remove feature extractor SAT-features-competition2012_revised_without_SatELite
 
 # Otherwise, Sparkle will interpret adding the other feature extractor as creating a combined feature vector per instance from all present extractors in Sparkle. Now we can add SATZilla 2024 from the Examples directory
 # Note that this feature extractor requires GCC (any version, tested with 13.2.0) to run.
