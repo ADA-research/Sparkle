@@ -131,9 +131,8 @@ def test_run_parallel_portfolio() -> None:
         )
         for instance_path in pdf.instances:
             assert instance_path in single_instances_str, (
-                "Expected instances in pdf to be equal to the instances "
-                "in the instance set, "
-                f"but got {instance_path}."
+                "Expected instances in pdf to be in the instance set "
+                f"{single_instances_str}, but got {instance_path}."
             )
 
         assert pdf.num_solvers == len(solvers), (
@@ -142,7 +141,7 @@ def test_run_parallel_portfolio() -> None:
         )
         for solver in pdf.solvers:
             assert solver in solver_paths_str, (
-                f"Expected solvers in pdf to be equal to the solvers list {solvers}, "
+                f"Expected solvers in pdf to be in the solvers list {solver_paths_str}, "
                 f"but got {solver}."
             )
 
@@ -153,9 +152,9 @@ def test_run_parallel_portfolio() -> None:
         )
         for objective in pdf.objectives:
             assert objective.name in sparkle_objectives, (
-                "Expected objectives in pdf to be equal "
-                "to the objectives in the settings "
-                f"{sparkle_objectives}, but got {objective}."
+                "Expected objectives in pdf to be in "
+                "the objectives in the settings "
+                f"{sparkle_objectives}, but got {objective.name}."
             )
 
 
