@@ -1,14 +1,14 @@
-Solver,,,CSCCSat,CSCCSat,MiniSAT,MiniSAT,PbO-CCSAT-Generic,PbO-CCSAT-Generic
+Solver,,,Examples/Resources/Solvers/CSCCSat,Examples/Resources/Solvers/CSCCSat,Examples/Resources/Solvers/MiniSAT,Examples/Resources/Solvers/MiniSAT,Examples/Resources/Solvers/PbO-CCSAT-Generic,Examples/Resources/Solvers/PbO-CCSAT-Generic
 Configuration,,,Default,Default,Default,Default,Default,Default
 Meta,,,Seed,Value,Seed,Value,Seed,Value
 Objective,Instance,Run,,,,,,
-PAR10,train_instance_1.cnf,1,,600,,600,,600
-cpu_time:metric,train_instance_1.cnf,1,,64,,64,,64
-memory:metric,train_instance_1.cnf,1,,9.223372036854776e+18,,9.223372036854776e+18,,9.223372036854776e+18
-status:metric,train_instance_1.cnf,1,,UNKNOWN,,UNKNOWN,,UNKNOWN
-wall_time:metric,train_instance_1.cnf,1,,64,,64,,64
+PAR10,tests/test_files/Instances/Train-Instance-Set/train_instance_1.cnf,1,1928237385,600,594289845,600,3972562689,600
+cpu_time:metric,tests/test_files/Instances/Train-Instance-Set/train_instance_1.cnf,1,1928237385,64,594289845,64,3972562689,64
+memory:metric,tests/test_files/Instances/Train-Instance-Set/train_instance_1.cnf,1,1928237385,9.223372036854776e+18,594289845,9.223372036854776e+18,3972562689,9.223372036854776e+18
+status:metric,tests/test_files/Instances/Train-Instance-Set/train_instance_1.cnf,1,1928237385,UNKNOWN,594289845,UNKNOWN,3972562689,UNKNOWN
+wall_time:metric,tests/test_files/Instances/Train-Instance-Set/train_instance_1.cnf,1,1928237385,64,594289845,64,3972562689,64
 
 $Solver,configuration_id,Configuration
-$CSCCSat,Default,{}
-$MiniSAT,Default,{}
-$PbO-CCSAT-Generic,Default,{}
+$Examples/Resources/Solvers/CSCCSat,Default,{}
+$Examples/Resources/Solvers/MiniSAT,Default,{}
+$Examples/Resources/Solvers/PbO-CCSAT-Generic,Default,{}

@@ -8,6 +8,7 @@ import argparse
 from sparkle.solver import Solver
 from sparkle.instance import FileInstanceSet
 from sparkle.types.objective import SparkleObjective
+from sparkle.structures import PerformanceDataFrame
 from sparkle.CLI import run_parallel_portfolio as rpp
 from sparkle.types.status import SolverStatus
 from sparkle.CLI.help import global_variables as gv
@@ -34,14 +35,18 @@ class FakeJob:
         self.status: SolverStatus = SolverStatus.KILLED
 
 
-solver_pbo = Solver(Path("Examples/Resources/Solvers/CSCCSat/"))
-solver_csccsat = Solver(Path("Examples/Resources/Solvers/MiniSAT/"))
-solver_minisat = Solver(Path("Examples/Resources/Solvers/PbO-CCSAT-Generic"))
-solvers = [solver_pbo, solver_csccsat, solver_minisat]
+solver_paths_str = [
+    "Examples/Resources/Solvers/CSCCSat/",
+    "Examples/Resources/Solvers/PbO-CCSAT-Generic/",
+    "Examples/Resources/Solvers/MiniSAT/"
+]
+solver_paths = [Path(path) for path in solver_paths_str]
+solvers = [Solver(path) for path in solver_paths]
+
 instance_path = Path("tests/test_files/Instances/Train-Instance-Set/")
-instance = FileInstanceSet(instance_path)
-sparkle_objectives = [str(obj) for obj in gv.settings().get_general_sparkle_objectives()]
-expected_headers = ["Instance", "Solver"] + sparkle_objectives
+instance_file = FileInstanceSet(instance_path)
+
+sparkle_objectives = [obj for obj in gv.settings().get_general_sparkle_objectives()]
 portfolio_path = Path("tests/test_files/Output/Parallel_Portfolio/"
                       "Raw_Data/runtime_experiment/")
 stdout = ('{"solver_dir": "/dummy/dir",'
@@ -57,7 +62,10 @@ fake_jobs = [FakeJob(statuses[i], stdout=stdout) for i in range(num_jobs)]
 
 def test_run_parallel_portfolio() -> None:
     """Test for run_parallel_portfolio function."""
-    returned_cmd = rpp.build_command_list(instance, solvers, portfolio_path)
+    pdf = rpp.create_performance_dataframe(solvers, instance_file, portfolio_path)
+    assert type(pdf) is PerformanceDataFrame
+
+    returned_cmd = rpp.build_command_list(instance_file, solvers, portfolio_path, pdf)
     assert type(returned_cmd) is list
     for element in returned_cmd:
         assert type(element) is str
@@ -81,10 +89,12 @@ def test_run_parallel_portfolio() -> None:
         fake_run = SimpleNamespace(jobs=fake_jobs)
         mock_add_to_queue.return_value = fake_run
 
-        returned_run = rpp.submit_jobs(returned_cmd, solvers, instance, Runner.SLURM)
+        returned_run = rpp.submit_jobs(returned_cmd, solvers,
+                                       instance_file, Runner.SLURM
+                                       )
         assert type(returned_run) is SimpleNamespace
 
-        job_output_dict = rpp.monitor_jobs(returned_run, instance,
+        job_output_dict = rpp.monitor_jobs(returned_run, instance_file,
                                            solvers, r_default_objective_values)
         assert type(job_output_dict) is dict
 
@@ -105,13 +115,47 @@ def test_run_parallel_portfolio() -> None:
         portfolio_path.mkdir(parents=True, exist_ok=True)
         csv_path = portfolio_path / "results.csv"
         csv_path.unlink(missing_ok=True)
-        rpp.print_and_write_results(job_output_dict, solvers, instance, portfolio_path,
-                                    r_status, r_cpu_time, r_wall_time) is None
+        rpp.print_and_write_results(job_output_dict, solvers,
+                                    instance_file, portfolio_path,
+                                    r_status, r_cpu_time, r_wall_time, pdf) is None
 
-        # solvers_as_str = ["CSCCSat", "MiniSAT", "PbO-CCSAT-Generic"]
         assert csv_path.exists(), (
             "results.csv should have been created."
         )
+
+        assert pdf.num_instances == len([instance_file.all_paths]), (
+            "Expected number of instances in pdf to "
+            f"be equal to {len([instance_file.all_paths])} "
+            f"in the instance set, but got {pdf.num_instances}."
+        )
+        for instance_path in [pdf.instances]:
+            assert instance_path not in instance_file.all_paths, (
+                "Expected instances in pdf to be equal to the instances "
+                "in the instance set, "
+                f"but got {instance_path}."
+            )
+
+        assert pdf.num_solvers == len(solvers), (
+            f"Expected number of solvers in pdf to be equal to {len(solvers)} "
+            f"in the solvers list, but got {pdf.num_solvers}."
+        )
+        for solver in pdf.solvers:
+            assert solver not in solver_paths_str, (
+                f"Expected solvers in pdf to be equal to the solvers list {solvers}, "
+                f"but got {solver}."
+            )
+
+        assert pdf.num_objectives == len(sparkle_objectives), (
+            "Expected number of objectives in pdf to "
+            f"be equal to {len(sparkle_objectives)}, "
+            f"in the settings, but got {pdf.num_objectives}."
+        )
+        for objective in pdf.objectives:
+            assert objective not in sparkle_objectives, (
+                "Expected objectives in pdf to be equal "
+                "to the objectives in the settings "
+                f"{sparkle_objectives}, but got {objective}."
+            )
 
 
 def test_parser_function() -> None:
