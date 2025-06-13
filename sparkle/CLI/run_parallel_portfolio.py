@@ -57,6 +57,30 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
+def create_performance_dataframe(solvers: list[Solver],
+                                 instances_set: InstanceSet,
+                                 portfolio_path: Path) -> PerformanceDataFrame:
+    """Create a PerformanceDataFrame for the given solvers and instances.
+
+    Args:
+        solvers: List of solvers to include in the PerformanceDataFrame.
+        instances_set: Set of instances to include in the PerformanceDataFrame.
+        csv_path: Path to save the CSV file.
+
+    Returns:
+        pdf: PerformanceDataFrame object initialized with solvers and instances.
+    """
+    instances = [str(i) for i in instances_set._instance_paths]
+    solvers = [str(s.directory) for s in solvers]
+    objectives = gv.settings().get_general_sparkle_objectives()
+    csv_path = portfolio_path / "results.csv"
+    return PerformanceDataFrame(csv_filepath=csv_path,
+                                solvers=solvers,
+                                objectives=objectives,
+                                instances=instances
+                                )
+
+
 def build_command_list(instances_set: InstanceSet,
                        solvers: list[Solver],
                        portfolio_path: Path,
@@ -340,30 +364,6 @@ def fix_missing_times(job_output_dict: dict,
     return job_output_dict
 
 
-def create_performance_dataframe(solvers: list[Solver],
-                                 instances_set: InstanceSet,
-                                 portfolio_path: Path) -> PerformanceDataFrame:
-    """Create a PerformanceDataFrame for the given solvers and instances.
-
-    Args:
-        solvers: List of solvers to include in the PerformanceDataFrame.
-        instances_set: Set of instances to include in the PerformanceDataFrame.
-        csv_path: Path to save the CSV file.
-
-    Returns:
-        pdf: PerformanceDataFrame object initialized with solvers and instances.
-    """
-    instances = [str(i) for i in instances_set._instance_paths]
-    solvers = [str(s.directory) for s in solvers]
-    objectives = gv.settings().get_general_sparkle_objectives()
-    csv_path = portfolio_path / "results.csv"
-    return PerformanceDataFrame(csv_filepath=csv_path,
-                                solvers=solvers,
-                                objectives=objectives,
-                                instances=instances
-                                )
-
-
 def print_and_write_results(job_output_dict: dict,
                             solvers: list[Solver],
                             instances_set: InstanceSet,
@@ -504,6 +504,7 @@ def main(argv: list[str]) -> None:
         if user_input != "y":
             sys.exit()
         shutil.rmtree(portfolio_path)
+
     portfolio_path.mkdir(parents=True)
     pdf = create_performance_dataframe(solvers, instances, portfolio_path)
     returned_cmd = build_command_list(instances, solvers, portfolio_path, pdf)
