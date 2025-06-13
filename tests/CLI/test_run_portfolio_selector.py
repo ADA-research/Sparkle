@@ -21,7 +21,7 @@ def test_run_portfolio_selector_command(
                          / "Instances" / "PTN2" / "Ptn-7824-b20.cnf").absolute()
     extractor_path = (
         Path("Examples") / "Resources" / "Extractors"
-        / "SAT-features-competition2012_revised_without_SatELite_sparkle").absolute()
+        / "SAT-features-competition2012_revised_without_SatELite").absolute()
     solver_csccsat_path = (
         Path("Examples") / "Resources" / "Solvers" / "CSCCSat").absolute()
     solver_minisat_path = (
