@@ -36,17 +36,18 @@ class FakeJob:
 
 
 solver_paths_str = [
-    "Examples/Resources/Solvers/CSCCSat/",
-    "Examples/Resources/Solvers/PbO-CCSAT-Generic/",
-    "Examples/Resources/Solvers/MiniSAT/"
+    "Examples/Resources/Solvers/CSCCSat",
+    "Examples/Resources/Solvers/PbO-CCSAT-Generic",
+    "Examples/Resources/Solvers/MiniSAT"
 ]
 solver_paths = [Path(path) for path in solver_paths_str]
 solvers = [Solver(path) for path in solver_paths]
 
 instance_path = Path("tests/test_files/Instances/Train-Instance-Set/")
 instance_file = FileInstanceSet(instance_path)
+single_instances_str = [str(instance) for instance in instance_file.all_paths]
 
-sparkle_objectives = [obj for obj in gv.settings().get_general_sparkle_objectives()]
+sparkle_objectives = [obj.name for obj in gv.settings().get_general_sparkle_objectives()]
 portfolio_path = Path("tests/test_files/Output/Parallel_Portfolio/"
                       "Raw_Data/runtime_experiment/")
 stdout = ('{"solver_dir": "/dummy/dir",'
@@ -128,8 +129,8 @@ def test_run_parallel_portfolio() -> None:
             f"be equal to {len([instance_file.all_paths])} "
             f"in the instance set, but got {pdf.num_instances}."
         )
-        for instance_path in [pdf.instances]:
-            assert instance_path not in instance_file.all_paths, (
+        for instance_path in pdf.instances:
+            assert instance_path in single_instances_str, (
                 "Expected instances in pdf to be equal to the instances "
                 "in the instance set, "
                 f"but got {instance_path}."
@@ -140,7 +141,7 @@ def test_run_parallel_portfolio() -> None:
             f"in the solvers list, but got {pdf.num_solvers}."
         )
         for solver in pdf.solvers:
-            assert solver not in solver_paths_str, (
+            assert solver in solver_paths_str, (
                 f"Expected solvers in pdf to be equal to the solvers list {solvers}, "
                 f"but got {solver}."
             )
@@ -151,7 +152,7 @@ def test_run_parallel_portfolio() -> None:
             f"in the settings, but got {pdf.num_objectives}."
         )
         for objective in pdf.objectives:
-            assert objective not in sparkle_objectives, (
+            assert objective.name in sparkle_objectives, (
                 "Expected objectives in pdf to be equal "
                 "to the objectives in the settings "
                 f"{sparkle_objectives}, but got {objective}."
