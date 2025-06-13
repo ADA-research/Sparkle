@@ -59,7 +59,8 @@ def parser_function() -> argparse.ArgumentParser:
 
 def build_command_list(instances_set: InstanceSet,
                        solvers: list[Solver],
-                       portfolio_path: Path) -> list[str]:
+                       portfolio_path: Path,
+                       pdf: PerformanceDataFrame) -> list[str]:
     """Build the list of command strings for all instance-solver-seed combinations.
 
     Args:
@@ -86,7 +87,16 @@ def build_command_list(instances_set: InstanceSet,
                 cutoff_time=cutoff,
                 log_dir=portfolio_path
             )
-            cmd_list.append(" ".join(solver_call_list).replace("'", '"'))
+
+            cmd_list.append(" ".join(solver_call_list))
+            for objective in objectives:
+                pdf.set_value(
+                    value=seed,
+                    solver=str(solver.directory),
+                    instance=str(instance),
+                    objective=objective.name,
+                    solver_fields=["Seed"]
+                )
     return cmd_list
 
 
@@ -186,14 +196,6 @@ def monitor_jobs(run: Run,
         for instance_name in instances_set._instance_names
     }
 
-    # job_output_dict = {
-    #    instance_name: {solver.name:
-    #                        {seed: default_objective_values.copy()
-    #                         }
-    #                    for solver in solvers
-    #                    }
-    #    for instance_name in instances_set._instance_names
-    # }
     check_interval = gv.settings().get_parallel_portfolio_check_interval()
     instances_done = [False] * num_instances
 
@@ -338,18 +340,41 @@ def fix_missing_times(job_output_dict: dict,
     return job_output_dict
 
 
+def create_performance_dataframe(solvers: list[Solver],
+                                 instances_set: InstanceSet,
+                                 portfolio_path: Path) -> PerformanceDataFrame:
+    """Create a PerformanceDataFrame for the given solvers and instances.
+
+    Args:
+        solvers: List of solvers to include in the PerformanceDataFrame.
+        instances_set: Set of instances to include in the PerformanceDataFrame.
+        csv_path: Path to save the CSV file.
+
+    Returns:
+        pdf: PerformanceDataFrame object initialized with solvers and instances.
+    """
+    instances = [str(i) for i in instances_set._instance_paths]
+    solvers = [str(s.directory) for s in solvers]
+    objectives = gv.settings().get_general_sparkle_objectives()
+    csv_path = portfolio_path / "results.csv"
+    return PerformanceDataFrame(csv_filepath=csv_path,
+                                solvers=solvers,
+                                objectives=objectives,
+                                instances=instances
+                                )
+
+
 def print_and_write_results(job_output_dict: dict,
                             solvers: list[Solver],
                             instances_set: InstanceSet,
                             portfolio_path: Path,
                             status_key: str,
                             cpu_time_key: str,
-                            wall_time_key: str) -> None:
+                            wall_time_key: str,
+                            pdf: PerformanceDataFrame) -> None:
     """Print results to console and write the CSV file."""
     num_instances = len(job_output_dict)
     num_solvers = len(solvers)
-    instance_names = [i.name for i in instances_set._instance_paths]
-    solver_names = [s.name for s in solvers]
     objectives = gv.settings().get_general_sparkle_objectives()
     for index, instance_name in enumerate(job_output_dict.keys()):
         index_str = f"[{index + 1}/{num_instances}] "
@@ -366,35 +391,26 @@ def print_and_write_results(job_output_dict: dict,
                   f"{job_info[cpu_time_key]}s CPU-Time ({job_info[wall_time_key]}s "
                   "Wall clock time)")
 
-    csv_path = portfolio_path / "results.csv"
-    pdf = PerformanceDataFrame(csv_filepath=csv_path,
-                               solvers=solver_names,
-                               objectives=objectives,
-                               instances=instance_names
-                               )
-
-    for instance in job_output_dict.keys():
-        instance_dict = job_output_dict[instance]
-        for solver in instance_dict.keys():
-            objective_dict = instance_dict[solver]
+    instance_map = {Path(p).name: p for p in pdf.instances}
+    solver_map = {Path(s).name: s for s in pdf.solvers}
+    for instance, instance_dict in job_output_dict.items():
+        instance_name = Path(instance).name
+        instance_full_path = instance_map.get(instance_name, instance)
+        for solver, objective_dict in instance_dict.items():
+            solver_name = Path(solver).name
+            solver_full_path = solver_map.get(solver_name, solver)
             for objective in objectives:
                 obj_name = objective.name
-                obj_val = objective_dict.get(obj_name,
-                                             PerformanceDataFrame.missing_value
-                                             )
+                obj_val = objective_dict.get(
+                    obj_name,
+                    PerformanceDataFrame.missing_value
+                )
                 pdf.set_value(
                     value=obj_val,
-                    solver=solver,
-                    instance=instance,
+                    solver=solver_full_path,
+                    instance=instance_full_path,
                     objective=obj_name
                 )
-                # pdf.set_value(
-                #    value=seed_val,
-                #    solver=solver,
-                #    instance=instance,
-                #    objective=obj_name,
-                #    solver_fields="Seed"
-                # )
     pdf.save_csv()
     print("Results written to CSV.")
 
@@ -489,7 +505,8 @@ def main(argv: list[str]) -> None:
             sys.exit()
         shutil.rmtree(portfolio_path)
     portfolio_path.mkdir(parents=True)
-    returned_cmd = build_command_list(instances, solvers, portfolio_path)
+    pdf = create_performance_dataframe(solvers, instances, portfolio_path)
+    returned_cmd = build_command_list(instances, solvers, portfolio_path, pdf)
     default_objective_values, cpu_time_key,\
         status_key, wall_time_key = init_default_objectives()
     returned_run = submit_jobs(returned_cmd, solvers, instances, Runner.SLURM)
@@ -501,7 +518,9 @@ def main(argv: list[str]) -> None:
     job_output_dict = fix_missing_times(job_output_dict,
                                         status_key, cpu_time_key, wall_time_key)
     print_and_write_results(job_output_dict, solvers, instances,
-                            portfolio_path, status_key, cpu_time_key, wall_time_key)
+                            portfolio_path, status_key,
+                            cpu_time_key, wall_time_key, pdf
+                            )
 
     # Update latest scenario
     gv.latest_scenario().set_parallel_portfolio_path(portfolio_path)
