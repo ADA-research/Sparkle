@@ -113,13 +113,17 @@ class Selector:
 class SelectionScenario:
     """A scenario for a Selector."""
 
+    __selector_solver_name__ = "portfolio_selector"
+
     def __init__(self: SelectionScenario,
                  parent_directory: Path,
                  selector: Selector,
                  objective: SparkleObjective,
                  performance_data: PerformanceDataFrame | Path,
                  feature_data: FeatureDataFrame | Path,
+                 feature_extractors: list[str] = None,
                  solver_cutoff: int | float = None,
+                 extractor_cutoff: int | float = None,
                  ablate: bool = False,
                  subdir_path: Path = None
                  ) -> None:
@@ -127,6 +131,7 @@ class SelectionScenario:
         self.selector: Selector = selector
         self.objective: SparkleObjective = objective
         self.solver_cutoff: float = solver_cutoff
+        self.extractor_cutoff: float = extractor_cutoff
         if subdir_path is not None:
             self.directory = parent_directory / subdir_path
         elif isinstance(performance_data, PerformanceDataFrame):
@@ -138,10 +143,19 @@ class SelectionScenario:
         self.name = f"{selector.name} on {self.directory.name}"
         self.selector_file_path: Path = self.directory / "portfolio_selector"
         self.scenario_file: Path = self.directory / "scenario.txt"
+        self.selector_performance_path: Path =\
+            self.directory / "selector_performance.csv"
+        if self.selector_performance_path.exists():
+            self.selector_performance_data = PerformanceDataFrame(
+                self.selector_performance_path)
+        else:  # Create new performance data frame for selector, write to file later
+            self.selector_performance_data = performance_data.clone()
+            self.selector_performance_data.add_solver(
+                SelectionScenario.__selector_solver_name__)
 
         if isinstance(performance_data, PerformanceDataFrame):  # Convert
             # Convert the dataframes to Selector Format
-            new_column_names = []
+            new_column_names: list[str] = []
             for solver, config_id, _ in performance_data.columns:
                 if f"{solver}_{config_id}" not in new_column_names:
                     new_column_names.append(f"{solver}_{config_id}")
@@ -166,6 +180,7 @@ class SelectionScenario:
             self.performance_target_path: Path = performance_data
 
         if isinstance(feature_data, FeatureDataFrame):  # Convert
+            self.feature_extractors = feature_data.extractors
             # Features requires instances as index, columns as feature names
             feature_target = feature_data.dataframe.copy()
             feature_target.index = feature_target.index.map("_".join)  # Reduce Index
@@ -173,6 +188,7 @@ class SelectionScenario:
             self.feature_data: pd.DataFrame = feature_target.T.astype(float)
             self.feature_target_path: Path = self.directory / "feature_data.csv"
         else:  # Read from Path
+            self.feature_extractors = feature_extractors
             self.feature_data: pd.DataFrame = pd.read_csv(feature_data)
             self.feature_target_path: Path = feature_data
 
@@ -203,11 +219,33 @@ class SelectionScenario:
                     subdir_path=ablate_subdir)
                 )
 
+    @property
+    def training_instances(self: SelectionScenario) -> list[str]:
+        """Get the training instances."""
+        return self.performance_data.index.to_list()
+
+    @property
+    def test_instances(self: SelectionScenario) -> list[str]:
+        """Get the test instances."""
+        instances = self.selector_performance_data.instances
+        return [i for i in instances if i not in self.training_instances]
+
+    @property
+    def training_instance_sets(self: SelectionScenario) -> list[str]:
+        """Get the training instance sets."""
+        return list(set(Path(i).parent.name for i in self.training_instances))
+
+    @property
+    def test_instance_sets(self: SelectionScenario) -> list[str]:
+        """Get the test instance sets."""
+        return list(set(Path(i).parent.name for i in self.test_instances))
+
     def create_scenario(self: SelectionScenario) -> None:
         """Prepare the scenario directories."""
         self.directory.mkdir(parents=True, exist_ok=True)
         self.performance_data.to_csv(self.performance_target_path)
         self.feature_data.to_csv(self.feature_target_path)
+        self.selector_performance_data.save_csv(self.selector_performance_path)
         self.create_scenario_file()
 
     def create_scenario_file(self: SelectionScenario) -> None:
@@ -222,14 +260,19 @@ class SelectionScenario:
         """Serialize the scenario."""
         return f"selector: {self.selector.name}\n"\
                f"solver_cutoff: {self.solver_cutoff}\n"\
+               f"extractor_cutoff: {self.extractor_cutoff}\n"\
                f"ablate: {self.ablation_scenarios is not None}\n"\
                f"objective: {self.objective}\n"\
+               f"selector_performance_data: {self.selector_performance_path}\n"\
                f"performance_data: {self.performance_target_path}\n"\
-               f"feature_data: {self.feature_target_path}\n"
+               f"feature_data: {self.feature_target_path}\n"\
+               f"feature_extractors: {','.join(self.feature_extractors)}\n"
 
     @staticmethod
     def from_file(scenario_file: Path) -> SelectionScenario:
         """Reads scenario file and initalises SelectorScenario."""
+        if not scenario_file.is_file() and (scenario_file / "scenario.txt").is_file():
+            scenario_file = scenario_file / "scenario.txt"  # Resolve from directory
         values = {key: value.strip() for key, value in
                   [line.split(": ", maxsplit=1) for line in scenario_file.open()]}
         selector_class, selector_model = values["selector"].split("_", maxsplit=1)
@@ -245,5 +288,6 @@ class SelectionScenario:
             objective=resolve_objective(values["objective"]),
             performance_data=Path(values["performance_data"]),
             feature_data=Path(values["feature_data"]),
+            feature_extractors=values["feature_extractors"].split(","),
             solver_cutoff=float(values["solver_cutoff"]),
             ablate=bool(values["ablate"]))

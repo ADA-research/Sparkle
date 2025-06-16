@@ -1,66 +1,37 @@
 #!/usr/bin/env python3
 """Sparkle command to generate a report for an executed experiment."""
 import sys
+import shutil
 import argparse
-from pathlib import Path, PurePath
+from pathlib import Path
 
-import pylatex
-import sparkle
+import pylatex as pl
+from sparkle import __version__ as __sparkle_version__
 
 from sparkle.CLI.help import global_variables as gv
-from sparkle.configurator.ablation import AblationScenario
-from sparkle.platform import generate_report_for_selection as sgfs
-from sparkle.platform import \
-    generate_report_for_configuration as sgrfch
+from sparkle.CLI.help import resolve_object_name
 from sparkle.CLI.help import logging as sl
-from sparkle.platform.settings_objects import Settings, SettingState
+# from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.help.reporting_scenario import Scenario
-from sparkle.platform import \
-    generate_report_for_parallel_portfolio as sgrfpph
-from sparkle.solver import Solver
-from sparkle.instance import Instance_Set
+
+# from sparkle.solver import Solver
+from sparkle.selector import Extractor
+# from sparkle.instance import Instance_Set
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
+# from sparkle.configurator.ablation import AblationScenario
+from sparkle.configurator.configurator import ConfigurationScenario
+from sparkle.selector.selector import SelectionScenario
+
+from sparkle.platform import latex
 from sparkle.platform.output.configuration_output import ConfigurationOutput
 from sparkle.platform.output.selection_output import SelectionOutput
-from sparkle.platform.output.parallel_portfolio_output import ParallelPortfolioOutput
+# from sparkle.platform.output.parallel_portfolio_output import ParallelPortfolioOutput
 
-from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help.nicknames import resolve_object_name
+
+MAX_DEC = 4  # Maximum decimals used for each reported value
 
 
 def parser_function() -> argparse.ArgumentParser:
-    """Define the command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Without any arguments a report for the most recent algorithm "
-                    "selection or algorithm configuration procedure is generated.",
-        epilog="Note that if a test instance set is given, the training instance set "
-               "must also be given.")
-    # Configuration arguments
-    parser.add_argument(*ac.SolverReportArgument.names,
-                        **ac.SolverReportArgument.kwargs)
-    parser.add_argument(*ac.InstanceSetTrainReportArgument.names,
-                        **ac.InstanceSetTrainReportArgument.kwargs)
-    parser.add_argument(*ac.InstanceSetTestReportArgument.names,
-                        **ac.InstanceSetTestReportArgument.kwargs)
-    parser.add_argument(*ac.NoAblationReportArgument.names,
-                        **ac.NoAblationReportArgument.kwargs)
-    # Selection arguments
-    parser.add_argument(*ac.SelectionReportArgument.names,
-                        **ac.SelectionReportArgument.kwargs)
-    parser.add_argument(*ac.TestCaseDirectoryArgument.names,
-                        **ac.TestCaseDirectoryArgument.kwargs)
-    # Common arguments
-    parser.add_argument(*ac.ObjectivesArgument.names,
-                        **ac.ObjectivesArgument.kwargs)
-    parser.add_argument(*ac.SettingsFileArgument.names,
-                        **ac.SettingsFileArgument.kwargs)
-    parser.add_argument(*ac.GenerateJSONArgument.names,
-                        **ac.GenerateJSONArgument.kwargs)
-    return parser
-
-
-def new_parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
         description="Generates a report for all known selection, configuration and "
@@ -77,223 +48,174 @@ def new_parser_function() -> argparse.ArgumentParser:
     return parser
 
 
+def generate_configuration_section(report: pl.Document, scenario: ConfigurationScenario,
+                                   scenario_output: ConfigurationOutput) -> None:
+    """Generate a section for a configuration scenario."""
+    pass
+
+
+def generate_selection_section(report: pl.Document, scenario: SelectionScenario,
+                               scenario_output: SelectionOutput) -> None:
+    """Generate a section for a selection scenario."""
+    # TODO: Should this section name be more unique?
+    report.append(pl.Section(
+        f"Selection: {scenario.selector.model_class.__name__} on "
+        f"{' '.join([s[0] for s in scenario_output.training_instance_sets])}"))
+    report.append(f"In this scenario, a {scenario.selector.model_class.__name__} "
+                  f" ({scenario.selector.selector_class.__name__}) was trained on the "
+                  "performance and feature data using ASF-lib. The following solvers "
+                  f"were run with a cutoff time of {scenario.solver_cutoff} seconds:")
+    with report.create(pl.Itemize()) as solver_latex_list:
+        for solver_name in scenario_output.solvers.keys():
+            solver_name = solver_name.replace("_", " ")
+            solver_latex_list.add_item(
+                pl.UnsafeCommand(
+                    f"textbf{{{solver_name}}} "
+                    f"({len(scenario_output.solvers[solver_name])} configurations)"))
+    # Report training instance sets
+    report.append("The following training instance sets were used:")
+    with report.create(pl.Itemize()) as instance_set_latex_list:
+        for training_set_name, set_size in scenario_output.training_instance_sets:
+            training_set_name = training_set_name.replace("_", " ")  # Latex fix
+            instance_set_latex_list.add_item(
+                pl.UnsafeCommand(
+                    f"textbf{{{training_set_name}}} "
+                    f"({set_size} instances)"))
+    # Report feature extractors
+    report.append("The following feature extractors were used with a extractor cutoff "
+                  f"time of {scenario.extractor_cutoff} seconds:")
+    with report.create(pl.Itemize()) as feature_extractor_latex_list:
+        for feature_extractor_name in scenario.feature_extractors:
+            extractor = resolve_object_name(
+                feature_extractor_name,
+                gv.file_storage_data_mapping[gv.extractor_nickname_list_path],
+                gv.settings().DEFAULT_extractor_dir, class_name=Extractor)
+            feature_extractor_name = feature_extractor_name.replace("_", " ")  # Latex
+            feature_extractor_latex_list.add_item(
+                pl.UnsafeCommand(f"textbf{{{feature_extractor_name}}} "
+                                 f"({extractor.output_dimension} features)"))
+
+    # TODO: Report test sets
+
+    # Report results
+    report.append(pl.Subsection("Training Results"))
+    # 1. Report VBS and selector performance,  create ranking list of the solvers
+    # TODO Add ref here to the training sets section?
+    report.append(f"In this section, the {scenario.objective.name} results for the "
+                  "portfolio selector on solving the training instance set(s) listed "
+                  "is reported. ")
+    report.append(f"The {scenario.objective.name} values for the Virtual Best Solver "
+                  "(VBS), i.e., the perfect portfolio selector is ")
+    report.append(pl.utils.bold(f"{round(scenario_output.vbs_performance, MAX_DEC)}"))
+    report.append(", the actual portfolio selector performance is ")
+    report.append(
+        pl.utils.bold(f"{round(scenario_output.actual_performance, MAX_DEC)}.\n"))
+
+    report.append("Below, the solvers are ranked based on "
+                  f"{scenario.objective.name} performance:")
+    # TODO Make the solver name boldface here?
+    with report.create(pl.Enumerate()) as ranking_list:
+        for solver_name, conf_id, value in scenario_output.solver_performance_ranking:
+            value = round(value, MAX_DEC)
+            solver_name = solver_name.replace("_", " ")  # Latex fix
+            ranking_list.add_item(
+                pl.UnsafeCommand(f"textbf{{{solver_name}}} ({conf_id}): {value}"))
+
+    # 2. Marginal contribution ranking list VBS
+    report.append(pl.Subsubsection("Marginal Contribution Ranking List"))
+    report.append(
+        "The following list shows the marginal contribution ranking list for the VBS:")
+    with report.create(pl.Enumerate()) as ranking_list:
+        for (solver_name, conf_id,
+             contribution, performance) in scenario_output.marginal_contribution_perfect:
+            contribution, performance =\
+                round(contribution, MAX_DEC), round(performance, MAX_DEC)
+            ranking_list.add_item(pl.UnsafeCommand(
+                f"textbf{{{solver_name}}} ({conf_id}): {contribution} ({performance})"))
+
+    # 3. Marginal contribution ranking list actual selector
+    report.append("The following list shows the marginal contribution ranking list for "
+                  "the actual portfolio selector:")
+    with report.create(pl.Enumerate()) as ranking_list:
+        for (solver_name, conf_id,
+             contribution, performance) in scenario_output.marginal_contribution_actual:
+            contribution, performance =\
+                round(contribution, MAX_DEC), round(performance, MAX_DEC)
+            ranking_list.add_item(pl.UnsafeCommand(
+                f"textbf{{{solver_name}}} ({conf_id}): {contribution} ({performance})"))
+
+    # 4. Create scatter plot analysis
+    # TODO this variable should be more streamlined instead of redefined
+    report_directory = gv.settings().DEFAULT_output_analysis
+    report.append(pl.Subsubsection("Scatter Plot Analysis"))
+    report.append(latex.AutoRef("fig:sbsvsselector"))
+    report.append(pl.utils.bold(" "))  # Trick to force a white space
+    report.append("shows the empirical comparison between the portfolio "
+                  "selector and the single best solver (SBS). ")
+    report.append(latex.AutoRef("fig:vbsvsselector"))
+    report.append(pl.utils.bold(" "))  # Trick to force a white space
+    report.append("shows the empirical comparison between the actual portfolio selector "
+                  "and the virtual best solver (VBS).")
+    # Create figure on SBS versus the selector
+    sbs_name, sbs_config, _ = scenario_output.solver_performance_ranking[0]
+    # sbs_plot_name = f"{Path(sbs_name).name} ({sbs_config})"
+    sbs_performance = scenario_output.sbs_performance
+    selector_performance = scenario_output.actual_performance_data
+
+    # Join the data together
+    import pandas as pd
+    df = pd.DataFrame(
+        [sbs_performance, selector_performance],
+        index=[f"{Path(sbs_name).name} ({sbs_config})", "Selector"], dtype=float).T
+    plot = latex.comparison_plot(df, "Single Best Solver vs Selector")
+    plot_path = report_directory /\
+        f"{Path(sbs_name).name}_{sbs_config}_vs_"\
+        f"Selector_{scenario.selector.model_class.__name__}.pdf"
+    plot.write_image(plot_path)
+    with report.create(pl.Figure()) as figure:
+        figure.add_image(plot_path.name, width=pl.utils.NoEscape(r"0.6\textwidth"))
+        figure.add_caption("Empirical comparison between the Single Best Solver"
+                           " and the Selector")
+        figure.append(pl.UnsafeCommand(r"label{fig:sbsvsselector}"))
+
+    # Comparison between the actual portfolio selector in Sparkle and the VBS.
+    vbs_performance = scenario_output.vbs_performance_data.tolist()
+    df = pd.DataFrame([vbs_performance, selector_performance],
+                      index=["Virtual Best Solver", "Selector"], dtype=float).T
+    plot = latex.comparison_plot(df, "Virtual Best Solver vs Selector")
+    plot_path = report_directory /\
+        f"Virtual_Best_Solver_vs_Selector_{scenario.selector.model_class.__name__}.pdf"
+    plot.write_image(plot_path)
+    with report.create(pl.Figure()) as figure:
+        figure.add_image(plot_path.name, width=pl.utils.NoEscape(r"0.6\textwidth"))
+        figure.add_caption(
+            "Empirical comparison between the Virtual Best Solver and the Selector")
+        figure.append(pl.UnsafeCommand(r"label{fig:vbsvsselector}"))
+
+    if scenario_output.test_sets:
+        report.append(pl.Subsection("Test Results"))
+        report.append("The following results are reported on the test set(s):")
+        with report.create(pl.Itemize()) as latex_list:
+            for test_set_name, test_set_size in scenario_output.test_sets:
+                result = round(scenario_output.test_set_performance[test_set_name],
+                               MAX_DEC)
+                latex_list.add_item(pl.UnsafeCommand(
+                    f"textbf{{{test_set_name}}} ({test_set_size} instances): {result}"))
+
+
+# def generate_parallel_portfolio_section(report: pl.Document,
+# scenario: ParallelPortfolioScenario) -> None:
+#    """Generate a section for a parallel portfolio scenario."""
+#    pass
+
+
 def main(argv: list[str]) -> None:
-    """Generate a report for an executed experiment."""
-    # Log command call
-    sl.log_command(sys.argv)
-    check_for_initialise()
-
-    # Define command line arguments
-    parser = parser_function()
-
-    # Process command line arguments
-    args = parser.parse_args(argv)
-
-    # Do first, so other command line options can override settings from the file
-    if ac.set_by_user(args, "settings_file"):
-        gv.settings().read_settings_ini(
-            args.settings_file, SettingState.CMD_LINE
-        )
-    if args.objectives is not None:
-        gv.settings().set_general_sparkle_objectives(
-            args.objectives, SettingState.CMD_LINE)
-    selection = args.selection
-    test_case_dir = args.test_case_directory
-    only_json = args.only_json
-
-    solver = resolve_object_name(
-        args.solver,
-        gv.file_storage_data_mapping[gv.solver_nickname_list_path],
-        gv.settings().DEFAULT_solver_dir, Solver)
-    instance_set_train = resolve_object_name(
-        args.instance_set_train,
-        gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, Instance_Set)
-    instance_set_test = resolve_object_name(
-        args.instance_set_train,
-        gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, Instance_Set)
-
-    Settings.check_settings_changes(gv.settings(),
-                                    Settings(PurePath("Settings/latest.ini")))
-    # If no arguments are set get the latest scenario
-    if not selection and test_case_dir is None and solver is None:
-        scenario = gv.latest_scenario().get_latest_scenario()
-        if scenario == Scenario.SELECTION:
-            selection = True
-            test_case_dir = gv.latest_scenario().get_selection_test_case_directory()
-        elif scenario == Scenario.CONFIGURATION:
-            solver = gv.latest_scenario().get_config_solver()
-            instance_set_train = gv.latest_scenario().get_config_instance_set_train()
-            instance_set_test = gv.latest_scenario().get_config_instance_set_test()
-        elif scenario == Scenario.PARALLEL_PORTFOLIO:
-            parallel_portfolio_path = gv.latest_scenario().get_parallel_portfolio_path()
-            pap_instance_set =\
-                gv.latest_scenario().get_parallel_portfolio_instance_set()
-
-    flag_instance_set_train = instance_set_train is not None
-    flag_instance_set_test = instance_set_test is not None
-
-    # Reporting for algorithm selection
-    if selection or test_case_dir is not None:
-        objective = gv.settings().get_general_sparkle_objectives()[0]
-        if not objective.time:
-            print("ERROR: The selection report is not implemented for "
-                  " non-runtime objectives!")
-            sys.exit(-1)
-        selection_scenario = gv.latest_scenario().get_selection_scenario_path()
-        actual_portfolio_selector_path = selection_scenario / "portfolio_selector"
-        if not actual_portfolio_selector_path.is_file():
-            print("Before generating a Sparkle report, please first construct the "
-                  "Sparkle portfolio selector. Not generating a Sparkle report, stopping"
-                  " execution!")
-            sys.exit(-1)
-
-        print("Generating report for selection...")
-        train_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
-        feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
-        test_data = None
-        test_case_path = Path(test_case_dir) if test_case_dir is not None else None
-        if test_case_dir is not None and (test_case_path
-                                          / "performance_data.csv").exists():
-            test_data = PerformanceDataFrame(test_case_path / "performance_data.csv")
-        # Create machine readable selection output
-        instance_dirs = set(Path(instance).parent for instance in train_data.instances)
-        instance_sets = []
-        for dir in instance_dirs:
-            instance_sets.append(Instance_Set(dir))
-        test_set = None if test_case_dir is None else Instance_Set(Path(test_case_dir))
-        cutoff_time = gv.settings().get_general_solver_cutoff_time()
-        output = gv.settings().DEFAULT_selection_output_analysis
-        selection_output = SelectionOutput(
-            selection_scenario, train_data, feature_data,
-            instance_sets, test_set, objective, cutoff_time,
-            output)
-        selection_output.write_output()
-        print("Machine readable output is placed at:", selection_output.output)
-
-        if not only_json:
-            sgfs.generate_report_selection(
-                gv.settings().DEFAULT_selection_output_analysis,
-                gv.settings().DEFAULT_latex_source,
-                "template-Sparkle-for-selection.tex",
-                gv.settings().DEFAULT_latex_bib,
-                gv.settings().DEFAULT_extractor_dir,
-                selection_scenario,
-                feature_data,
-                train_data,
-                objective,
-                gv.settings().get_general_extractor_cutoff_time(),
-                gv.settings().get_general_solver_cutoff_time(),
-                test_data
-            )
-
-    elif gv.latest_scenario().get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
-        # Reporting for parallel portfolio
-        # Machine readable Output
-        cutoff_time = gv.settings().get_general_solver_cutoff_time()
-        objective = gv.settings().get_general_sparkle_objectives()[0]
-        output = gv.settings().DEFAULT_parallel_portfolio_output_analysis
-        parallel_portfolio_output = ParallelPortfolioOutput(parallel_portfolio_path,
-                                                            pap_instance_set,
-                                                            objective,
-                                                            output)
-        parallel_portfolio_output.write_output()
-        print("Machine readable output is placed at:", parallel_portfolio_output.output)
-
-        if not only_json:
-            sgrfpph.generate_report_parallel_portfolio(
-                parallel_portfolio_path,
-                gv.settings().DEFAULT_parallel_portfolio_output_analysis,
-                gv.settings().DEFAULT_latex_source,
-                gv.settings().DEFAULT_latex_bib,
-                gv.settings().get_general_sparkle_objectives()[0],
-                gv.settings().get_general_solver_cutoff_time(),
-                pap_instance_set)
-            print("Parallel portfolio report generated ...")
-    else:
-        # Reporting for algorithm configuration
-        if solver is None:
-            print("Error! No Solver found for configuration report generation.")
-            sys.exit(-1)
-
-        # If only the testing set is given return an error
-        if not flag_instance_set_train and flag_instance_set_test:
-            print("Argument Error! Only a testing set was provided, please also "
-                  "provide a training set")
-            print(f"Usage: {sys.argv[0]} --solver <solver> [--instance-set-train "
-                  "<instance-set-train>] [--instance-set-test <instance-set-test>]")
-            sys.exit(-1)
-        # Extract config scenario data for report, but this should be read from the
-        # scenario file instead as we can't know wether features were used or not now
-        configurator = gv.settings().get_general_sparkle_configurator()
-        config_scenario = gv.latest_scenario().get_configuration_scenario(
-            configurator.scenario_class())
-        ablation_scenario = None
-        if args.flag_ablation:
-            ablation_scenario = AblationScenario(
-                config_scenario, instance_set_test,
-                gv.settings().DEFAULT_ablation_output)
-        performance_data = PerformanceDataFrame(
-            gv.settings().DEFAULT_performance_data_path)
-        # Filter the performance data to solver/instance sets
-        performance_data = performance_data
-        if performance_data.num_solvers > 1:
-            performance_data.remove_solver(
-                [s for s in performance_data.solvers
-                 if s != solver.directory])
-
-        used_instances = [str(i) for i in instance_set_train.instance_paths]
-        if instance_set_test:
-            used_instances += [str(i) for i in instance_set_test.instance_paths]
-        for i in performance_data.instances:
-            if i not in used_instances:
-                performance_data.remove_instances(i)
-
-        # Verify the data in the Performance DataFrame
-        # Check that each run has produced a valid configuration
-        for config_id in performance_data.get_configurations(str(solver.directory)):
-            configuration = performance_data.get_full_configuration(
-                str(solver.directory), config_id)
-            if (config_id != PerformanceDataFrame.default_configuration
-                    and configuration == {}):
-                print(f"WARNING: No configuration found for {config_id}")
-
-        # Create machine readable output
-        output = gv.settings().DEFAULT_configuration_output_analysis
-        config_output = ConfigurationOutput(config_scenario.directory,
-                                            configurator,
-                                            config_scenario,
-                                            performance_data,
-                                            instance_set_test,
-                                            output)
-        config_output.write_output()
-        print("Machine readable output is placed at:", config_output.output)
-
-        if not only_json:
-            sgrfch.generate_report_for_configuration(
-                config_scenario,
-                config_output,
-                gv.settings().DEFAULT_extractor_dir,
-                gv.settings().DEFAULT_configuration_output_analysis,
-                gv.settings().DEFAULT_latex_source,
-                gv.settings().DEFAULT_latex_bib,
-                gv.settings().get_general_extractor_cutoff_time(),
-                ablation=ablation_scenario,
-            )
-
-    # Write used settings to file
-    gv.settings().write_used_settings()
-    sys.exit(0)
-
-
-def new_main(argv: list[str]) -> None:
     """Generate a report for executed experiments in the platform."""
     # Log command call
     sl.log_command(sys.argv)
 
     # Define command line arguments
-    parser = new_parser_function()
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args(argv)
@@ -317,27 +239,32 @@ def new_main(argv: list[str]) -> None:
     """
 
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
+    feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
 
-    # TODO: Fetch all known scenarios
+    # Fetch all known scenarios
     configuration_scenarios = gv.configuration_scenarios()
-    selection_scenarios = ...
+    selection_scenarios = gv.selection_scenarios()
+    # TODO: Write and fetch parallel portfolios
     # parallel_portfolio_scenarios = ...
 
     # TODO: Filter scenarios based on args
 
     # TODO: Serialize each scenario and write to output
-    serialised_scenarios = {}
+    serialised_configuration_scenarios = {}
+    serialised_selection_scenarios = {}
     for configuration_scenario in configuration_scenarios:
         # TODO: Detect test set of the configuration scenario?
         # Or should it just be in there?
         # This leaves some questions how to resolve..
-        serialised_scenarios[configuration_scenario.name] =\
-            ConfigurationOutput(configuration_scenario,
-                                performance_data).serialise()
+        serialised_configuration_scenarios[configuration_scenario.name] =\
+            (ConfigurationOutput(configuration_scenario,
+                                 performance_data), configuration_scenario)
     for selection_scenario in selection_scenarios:
-        serialised_scenarios[selection_scenario.name] =\
-            SelectionOutput(selection_scenario,
-                            performance_data).serialise()
+        # TODO: Detect test set of the selection scenario?
+        serialised_selection_scenarios[selection_scenario.name] =\
+            (SelectionOutput(selection_scenario,
+                             performance_data,
+                             feature_data), selection_scenario)
 
     if args.only_json:  # Done
         sys.exit(0)
@@ -346,29 +273,67 @@ def new_main(argv: list[str]) -> None:
     # - Configuration / Selection / Parallel Portfolio
     #   - Training Instance Set / Testing Instance Set
     #   - Configurators can be merged as long as we can match their budgets clearly
-
-    report = pylatex.document.Document()
+    report_directory = gv.settings().DEFAULT_output_analysis
+    report = pl.document.Document(document_options=["british"])
+    # BUGFIX for unknown package load in PyLatex
+    p = pl.package.Package("lastpage")
+    if p in report.packages:
+        report.packages.remove(p)
+    report.packages.append(pl.package.Package("geometry",
+                                              options=["verbose",
+                                                       "tmargin=3.5cm",
+                                                       "bmargin=3.5cm",
+                                                       "lmargin=3cm",
+                                                       "rmargin=3cm"]))
     # Unsafe command for \emph{Sparkle}
     report.preamble.extend([
-        pylatex.UnsafeCommand(
+        pl.UnsafeCommand(
             "title",
             r"\emph{Sparkle} Algorithm Portfolio report"),
-        pylatex.UnsafeCommand(
+        pl.UnsafeCommand(
             "author",
-            r"Automatically generated by \emph{Sparkle} "
-            f"(version: {sparkle.__version__})")])
-    report.append(pylatex.Command("maketitle"))
-    report.append(pylatex.Section("Introduction"))
+            r"Generated by \emph{Sparkle} "
+            f"(version: {__sparkle_version__})")])
+    report.append(pl.Command("maketitle"))
+    report.append(pl.Section("Introduction"))
     # TODO: A quick overview to the introduction on whats considered in the report
     # regarding Solvers, Instance Sets and Feature Extractors
-    report.append("Some introduction text here")
+    report.append(pl.UnsafeCommand(
+        r"emph{Sparkle}~\cite{Hoos15} is a multi-agent problem-solving platform based on"
+        r" Programming by Optimisation (PbO)~\cite{Hoos12}, and would provide a number "
+        "of effective algorithm optimisation techniques (such as automated algorithm "
+        "configuration, portfolio-based algorithm selection, etc.) to accelerate the "
+        "existing solvers."))
 
-    target_path = Path("test")
-    target_path.with_suffix(".pdf").unlink()
-    report.generate_pdf(target_path, clean_tex=False, compiler="pdflatex")
+    for scenario_name, scenario_data in serialised_configuration_scenarios.items():
+        report.append(pl.Section(f"Configuration: {scenario_name}"))
+        # generate_configuration_section(report, scenario_data)
+
+    for (scenario_output, scenario) in serialised_selection_scenarios.values():
+        generate_selection_section(report, scenario, scenario_output)
+
+    # Adding bibliography
+    # TODO cleanup hard coded path
+    bibpath = Path("sparkle/Components/latex_source/report.bib")
+    newbibpath = report_directory / "report.bib"
+    shutil.copy(bibpath, newbibpath)
+    report.append(pl.Command("bibliographystyle", arguments=["plain"]))
+    report.append(pl.Command("bibliography", arguments=[str(newbibpath)]))
+
+    target_path = report_directory / "report"
+    if target_path.with_suffix(".pdf").exists():
+        target_path.with_suffix(".pdf").unlink()
+    report.generate_pdf(target_path, clean=False, clean_tex=False, compiler="pdflatex")
+    # TODO: This should be done by PyLatex. Generate the bib and regenerate the report
+    # Reference for the (terrible) solution: https://tex.stackexchange.com/
+    # questions/63852/question-mark-or-bold-citation-key-instead-of-citation-number
+    import subprocess
+    subprocess.run(["bibtex", newbibpath.with_suffix("")],
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    report.generate_pdf(target_path, clean=False, clean_tex=False, compiler="pdflatex")
+    report.generate_pdf(target_path, clean=False, clean_tex=False, compiler="pdflatex")
     print(f"Report generated at {target_path}.pdf")
 
 
 if __name__ == "__main__":
-    # main(sys.argv[1:])
-    new_main(sys.argv[1:])
+    main(sys.argv[1:])

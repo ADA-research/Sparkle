@@ -17,7 +17,6 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
-from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.CLI.initialise import check_for_initialise
 
 
@@ -108,7 +107,8 @@ def main(argv: list[str]) -> None:
             gv.file_storage_data_mapping[gv.instances_nickname_path],
             gv.settings().DEFAULT_instance_dir, Instance_Set)
 
-    cutoff_time = gv.settings().get_general_solver_cutoff_time()
+    solver_cutoff_time = gv.settings().get_general_solver_cutoff_time()
+    extractor_cutoff_time = gv.settings().get_general_extractor_cutoff_time()
 
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
@@ -172,17 +172,13 @@ def main(argv: list[str]) -> None:
               "value of all other non-missing values! Imputing all missing values...")
         feature_data.impute_missing_values()
 
-    # Update latest scenario
-    gv.latest_scenario().set_latest_scenario(Scenario.SELECTION)
-    # Set to default to overwrite possible old path
-    gv.latest_scenario().set_selection_test_case_directory()
-
     selection_scenario = SelectionScenario(gv.settings().DEFAULT_selection_output,
                                            selector,
                                            objective,
                                            performance_data,
                                            feature_data,
-                                           cutoff_time,
+                                           solver_cutoff=solver_cutoff_time,
+                                           extractor_cutoff=extractor_cutoff_time,
                                            ablate=solver_ablation)
 
     if selection_scenario.selector_file_path.exists():

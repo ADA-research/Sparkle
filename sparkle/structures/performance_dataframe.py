@@ -212,6 +212,17 @@ class PerformanceDataFrame(pd.DataFrame):
                          level=PerformanceDataFrame.column_meta,
                          axis=1).isnull().any().any()
 
+    def is_missing(self: PerformanceDataFrame,
+                   solver: str,
+                   instance: str,) -> int:
+        """Checks if a solver/instance is missing values."""
+        return self.xs(solver, axis=1).xs(
+            instance, axis=0,
+            level=PerformanceDataFrame.index_instance).drop(
+                PerformanceDataFrame.column_seed,
+                level=PerformanceDataFrame.column_meta,
+                axis=1).isnull().any().any()
+
     def verify_objective(self: PerformanceDataFrame,
                          objective: str) -> str:
         """Method to check whether the specified objective is valid.
@@ -710,12 +721,14 @@ class PerformanceDataFrame(pd.DataFrame):
     def best_instance_performance(
             self: PerformanceDataFrame,
             objective: str | SparkleObjective = None,
+            instances: list[str] = None,
             run_id: int = None,
             exclude_solvers: list[(str, str)] = None) -> pd.Series:
         """Return the best performance for each instance in the portfolio.
 
         Args:
             objective: The objective for which we calculate the best performance
+            instances: The instances which should be selected for the evaluation
             run_id: The run for which we calculate the best performance. If None,
                 we consider all runs.
             exclude_solvers: List of (solver, config_id) to exclude in the calculation.
@@ -732,6 +745,8 @@ class PerformanceDataFrame(pd.DataFrame):
         subdf = subdf.xs(objective.name, level=0)  # Drop objective
         if exclude_solvers is not None:
             subdf = subdf.drop(exclude_solvers, axis=1)
+        if instances is not None:
+            subdf = subdf.loc[instances, :]
         if run_id is not None:
             run_id = self.verify_run_id(run_id)
             subdf = subdf.xs(run_id, level=1)
@@ -748,12 +763,15 @@ class PerformanceDataFrame(pd.DataFrame):
     def best_performance(
             self: PerformanceDataFrame,
             exclude_solvers: list[(str, str)] = [],
+            instances: list[str] = None,
             objective: str | SparkleObjective = None) -> float:
         """Return the overall best performance of the portfolio.
 
         Args:
             exclude_solvers: List of (solver, config_id) to exclude in the calculation.
                 Defaults to none.
+            instances: The instances which should be selected for the evaluation
+                If None, use all instances.
             objective: The objective for which we calculate the best performance
 
         Returns:
@@ -763,7 +781,8 @@ class PerformanceDataFrame(pd.DataFrame):
         if isinstance(objective, str):
             objective = resolve_objective(objective)
         instance_best = self.best_instance_performance(
-            objective, exclude_solvers=exclude_solvers).to_numpy(dtype=float)
+            objective, instances=instances,
+            exclude_solvers=exclude_solvers).to_numpy(dtype=float)
         return objective.instance_aggregator(instance_best)
 
     def schedule_performance(
@@ -815,11 +834,13 @@ class PerformanceDataFrame(pd.DataFrame):
     def marginal_contribution(
             self: PerformanceDataFrame,
             objective: str | SparkleObjective = None,
+            instances: list[str] = None,
             sort: bool = False) -> list[float]:
         """Return the marginal contribution of the solver configuration on the instances.
 
         Args:
             objective: The objective for which we calculate the marginal contribution.
+            instances: The instances which should be selected for the evaluation
             sort: Whether to sort the results afterwards
         Returns:
             The marginal contribution of each solver.
@@ -828,28 +849,31 @@ class PerformanceDataFrame(pd.DataFrame):
         objective = self.verify_objective(objective)
         if isinstance(objective, str):
             objective = resolve_objective(objective)
-        best_performance = self.best_performance(objective=objective)
+        best_performance = self.best_performance(objective=objective,
+                                                 instances=instances)
         for solver in self.solvers:
             for config_id in self.get_configurations(solver):
                 # By calculating the best performance excluding this Solver,
                 # we can determine its relative impact on the portfolio.
-                missing_solver_best = self.best_performance(
+                missing_solver_config_best = self.best_performance(
                     exclude_solvers=[(solver, config_id)],
+                    instances=instances,
                     objective=objective)
                 # Now we need to see how much the portfolio's best performance
                 # decreases without this solver.
-                marginal_contribution = missing_solver_best / best_performance
-                if missing_solver_best == best_performance:
+                marginal_contribution = missing_solver_config_best / best_performance
+                if missing_solver_config_best == best_performance:
                     # No change, no contribution
                     marginal_contribution = 0.0
                 output.append((solver, config_id,
-                               marginal_contribution, missing_solver_best))
+                               marginal_contribution, missing_solver_config_best))
         if sort:
             output.sort(key=lambda x: x[2], reverse=objective.minimise)
         return output
 
     def get_solver_ranking(self: PerformanceDataFrame,
-                           objective: str | SparkleObjective = None
+                           objective: str | SparkleObjective = None,
+                           instances: list[str] = None,
                            ) -> list[tuple[str, dict, float]]:
         """Return a list with solvers ranked by average performance."""
         objective = self.verify_objective(objective)
@@ -864,6 +888,8 @@ class PerformanceDataFrame(pd.DataFrame):
         # Drop Objective, Meta multi index
         sub_df = sub_df.droplevel(PerformanceDataFrame.index_objective).droplevel(
             PerformanceDataFrame.column_meta, axis=1)
+        if instances is not None:  # Select instances
+            sub_df = sub_df.loc(axis=0)[instances, ]
         # Ensure data is numeric
         sub_df = sub_df.astype(float)
         # Aggregate runs

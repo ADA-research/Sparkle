@@ -48,7 +48,7 @@ def configuration_scenarios(refresh: bool = False) -> list[ConfigurationScenario
     config_path = settings().DEFAULT_configuration_output
     if __configuration_scenarios is None or refresh:
         __configuration_scenarios = []
-        for f in config_path.rglob("*/*/*"):  # We look for files at depth three
+        for f in config_path.glob("*/*/*.*"):  # We look for files at depth three
             if "scenario" not in f.name:
                 continue
             if "SMAC2" in str(f):
@@ -68,7 +68,8 @@ def selection_scenarios(refresh: bool = False) -> list[SelectionScenario]:
     selection_path = settings().DEFAULT_selection_output
     if __selection_scenarios is None or refresh:
         __selection_scenarios = []
-        for f in selection_path.rglob("*/*/*"):  # We look for files at depth three
+        for f in selection_path.glob("*/*/*.txt"):  # We look for files at depth three
+            print(f)
             if "scenario" not in f.name:
                 continue
             __selection_scenarios.append(SelectionScenario.from_file(f))

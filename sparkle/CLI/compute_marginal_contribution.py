@@ -2,18 +2,16 @@
 """Sparkle command for the computation of the marginal contributions."""
 import sys
 import argparse
-from pathlib import Path
 import operator
 
 import tabulate
 
-from sparkle.selector import Selector, SelectionScenario
+from sparkle.selector import SelectionScenario
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from sparkle.types import SparkleObjective
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -31,52 +29,45 @@ def parser_function() -> argparse.ArgumentParser:
 
 
 def compute_selector_performance(
-        actual_portfolio_selector: Path,
-        performance_data: PerformanceDataFrame,
-        feature_data: FeatureDataFrame,
-        objective: SparkleObjective) -> float:
+        selector_scenario: SelectionScenario,
+        feature_data: FeatureDataFrame) -> float:
     """Return the performance of a selector over all instances.
 
     Args:
-      actual_portfolio_selector: Path to portfolio selector.
-      performance_data: The performance data.
-      feature_data: The feature data.
-      objective: Objective to compute the performance for
+      selector_scenario: The Selector scenario to compute the marginal contribution for.
+      feature_data: The feature data of the instances.
 
     Returns:
       The selector performance as a single floating point number.
     """
-    performance_path = actual_portfolio_selector.parent / "performance.csv"
-    if performance_path.exists():
-        selector_performance_data = PerformanceDataFrame(performance_path)
-        return objective.instance_aggregator(
-            selector_performance_data.get_value("portfolio_selector",
-                                                objective=str(objective)))
-    selector_performance_data = performance_data.clone(
-        actual_portfolio_selector.parent / "performance.csv")
-
-    selector_performance_data.add_solver("portfolio_selector")
-    selector = Selector(gv.settings().get_selection_class(),
-                        gv.settings().get_selection_model())
+    selector_performance_data = selector_scenario.selector_performance_data
+    missing_instances =\
+        [instance for instance in selector_scenario.training_instances
+         if selector_performance_data.is_missing(
+             SelectionScenario.__selector_solver_name__, instance)]
+    if not missing_instances:
+        return selector_scenario.objective.instance_aggregator(
+            selector_scenario.selector_performance_data.get_value(
+                SelectionScenario.__selector_solver_name__,
+                instance=selector_scenario.training_instances,
+                objective=selector_scenario.objective.name))
 
     schedule = {}
-    for instance in performance_data.instances:
+    for instance in missing_instances:
         # We get the performance for an instance by infering the model predicition
         # for the instance.
-        schedule[instance] = selector.run(actual_portfolio_selector,
-                                          instance,
-                                          feature_data)
-
+        schedule[instance] = selector_scenario.selector.run(
+            selector_scenario.selector_file_path,
+            instance,
+            feature_data)
     schedule_performance = selector_performance_data.schedule_performance(
-        schedule, target_solver="portfolio_selector", objective=objective)
-    # Remove solvers from the dataframe
-    selector_performance_data.remove_solver(performance_data.solvers)
+        schedule, target_solver=SelectionScenario.__selector_solver_name__,
+        objective=selector_scenario.objective)
     selector_performance_data.save_csv()  # Save the results to disk
-    return objective.instance_aggregator(schedule_performance)
+    return selector_scenario.objective.instance_aggregator(schedule_performance)
 
 
 def compute_selector_marginal_contribution(
-        performance_data: PerformanceDataFrame,
         feature_data: FeatureDataFrame,
         selection_scenario: SelectionScenario) -> list[tuple[str, float]]:
     """Compute the marginal contributions of solvers in the selector.
@@ -98,8 +89,7 @@ def compute_selector_marginal_contribution(
         sys.exit(-1)
 
     selector_performance = compute_selector_performance(
-        selection_scenario.selector_file_path, performance_data,
-        feature_data, selection_scenario.objective)
+        selection_scenario, feature_data)
 
     rank_list = []
     compare = operator.lt if selection_scenario.objective.minimise else operator.gt
@@ -111,19 +101,13 @@ def compute_selector_marginal_contribution(
         # TODO: This should be fixed through SPRK-352
         # Hacky way of reconstructing the solver id in the PDF
         solver = f"Solvers/{solver_name}"
-        # 1. Copy the dataframe original df
-        tmp_performance_df = performance_data.clone()
-        # 2. Remove the solver configuration from this copy
-        tmp_performance_df.remove_configuration(solver, config)
-        ablated_selector = ablation_scenario.selector_file_path
-        if not ablated_selector.exists():
+        if not ablation_scenario.selector_file_path.exists():
             print(f"WARNING: Selector without {solver_name} does not exist! "
                   f"Cannot compute marginal contribution of {solver_name}.")
             continue
 
         ablated_selector_performance = compute_selector_performance(
-            ablated_selector, tmp_performance_df,
-            feature_data, ablation_scenario.objective)
+            ablation_scenario, feature_data)
 
         # 1. If the performance remains equal, this solver did not contribute
         # 2. If there is a performance decay without this solver, it does contribute
@@ -179,7 +163,6 @@ def compute_marginal_contribution(
     if compute_actual:
         print("Start computing marginal contribution per Solver to actual selector...")
         contribution_data = compute_selector_marginal_contribution(
-            performance_data,
             feature_data,
             scenario
         )

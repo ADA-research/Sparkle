@@ -221,10 +221,6 @@ InstancePathOptional =\
                               "nargs": "?",
                               "help": "Path to an instance to use for the command"})
 
-InstancePathPositional = ArgumentContainer(names=["instance_path"],
-                                           kwargs={"type": Path,
-                                                   "help": "Path to an instance (set)"})
-
 InstanceSetPathsArgument =\
     ArgumentContainer(names=["--instance-path", "--instance-set-path",
                              "--instance", "--instance-set",
@@ -235,11 +231,18 @@ InstanceSetPathsArgument =\
                               "type": Path,
                               "help": "Path to an instance (set)"})
 
+InstanceSetRequiredArgument = \
+    ArgumentContainer(names=["--instance", "--instance-set"],
+                      kwargs={"required": True,
+                              "type": Path,
+                              "help": "path to instance (set)"})
+
+
 InstanceSetTestArgument = \
     ArgumentContainer(names=["--instance-set-test"],
                       kwargs={"required": False,
                               "type": Path,
-                              "help": "path to test instance set (only for validating)"})
+                              "help": "path to test instance set"})
 
 InstanceSetTrainArgument = \
     ArgumentContainer(names=["--instance-set-train"],

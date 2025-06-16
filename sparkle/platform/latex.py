@@ -8,10 +8,11 @@ from enum import Enum
 
 import numpy as np
 import pandas as pd
+import plotly
 import plotly.express as px
-import plotly.io as pio
+import pylatex as pl
 
-pio.kaleido.scope.mathjax = None  # Bug fix for kaleido
+plotly.io.kaleido.scope.mathjax = None  # Bug fix for kaleido
 
 
 class ReportType(str, Enum):
@@ -247,3 +248,79 @@ def generate_report(latex_source_path: Path,
     report_path = compile_pdf(target_path, report_name)
 
     print(f"Report is placed at: {report_path}")
+
+
+class AutoRef(pl.base_classes.CommandBase):
+    """AutoRef command for PyLateX."""
+    _latex_name = "autoref"
+    packages = [pl.Package("hyperref")]
+
+
+def comparison_plot(data_frame: pd.DataFrame,
+                    title: str) -> plotly.graph_objects.Figure:
+    """Creates a comparison plot from the given data frame.
+
+    The first column is used for the x axis, the second for the y axis.
+
+    Args:
+        data_frame: The data frame with the data
+        x_label: The label for the x axis
+        y_label: The label for the y axis
+        title: The title of the plot
+        output_plot: The path where the plot should be written to
+
+    Returns:
+        The plot object
+    """
+    from scipy import stats
+    # Determine if data is log scale, linregress tells us how linear the data is
+    linregress = stats.linregress(data_frame.to_numpy())
+    log_scale = not (linregress.rvalue > 0.65 and linregress.pvalue < 0.05)
+
+    if log_scale and (data_frame < 0).any(axis=None):
+        # Log scale cannot deal with negative and zero values, set to smallest non zero
+        data_frame[data_frame < 0] = np.nextafter(0, 1)
+
+    # Maximum value should come from the objective?
+    min_value, max_value = data_frame.min(axis=None), data_frame.max(axis=None)
+    # Slightly more than min/max for interpretability
+    plot_range = (min_value * 0.99, max_value * 1.01)
+
+    fig = px.scatter(data_frame=data_frame,
+                     x=data_frame.columns[0], y=data_frame.columns[1],
+                     range_x=plot_range, range_y=plot_range,
+                     title=title, log_x=log_scale, log_y=log_scale,
+                     width=500, height=500)
+    # Add dividing diagonal
+    fig.add_shape(type="line", x0=0, y0=0, x1=max_value, y1=max_value,
+                  line=dict(color="lightgrey", width=1))
+    # Add maximum lines
+    fig.add_shape(type="line", x0=0, y0=max_value, x1=max_value, y1=max_value,
+                  line=dict(color="red", width=1))
+    fig.add_shape(type="line", x0=max_value, y0=0, x1=max_value, y1=max_value,
+                  line=dict(color="red", width=1))
+    fig.update_traces(marker=dict(color="RoyalBlue", symbol="x"))
+    fig.update_layout(
+        plot_bgcolor="white"
+    )
+    fig.update_xaxes(
+        mirror=True,
+        tickmode="linear",
+        ticks="outside",
+        tick0=0,
+        dtick=100 if not log_scale else 1,
+        showline=True,
+        linecolor="black",
+        gridcolor="lightgrey"
+    )
+    fig.update_yaxes(
+        mirror=True,
+        tickmode="linear",
+        ticks="outside",
+        tick0=0,
+        dtick=100 if not log_scale else 1,
+        showline=True,
+        linecolor="black",
+        gridcolor="lightgrey"
+    )
+    return fig
