@@ -237,8 +237,6 @@ def main(argv: list[str]) -> None:
 
     # Write used settings to file
     gv.settings().write_used_settings()
-    # Write used scenario to file
-    gv.latest_scenario().write_scenario_ini()
     sys.exit(0)
 
 
