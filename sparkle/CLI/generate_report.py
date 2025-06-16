@@ -263,7 +263,6 @@ def main(argv: list[str]) -> None:
         # TODO: Detect test set of the selection scenario?
         serialised_selection_scenarios[selection_scenario.name] =\
             (SelectionOutput(selection_scenario,
-                             performance_data,
                              feature_data), selection_scenario)
 
     if args.only_json:  # Done

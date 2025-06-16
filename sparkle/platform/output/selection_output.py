@@ -15,7 +15,6 @@ class SelectionOutput:
 
     def __init__(self: SelectionOutput,
                  selection_scenario: SelectionScenario,
-                 performance_data: PerformanceDataFrame,
                  feature_data: FeatureDataFrame) -> None:
         """Initialize SelectionOutput class.
 
@@ -37,10 +36,15 @@ class SelectionOutput:
         self.cutoff_time = selection_scenario.solver_cutoff
         self.objective = selection_scenario.objective
 
-        self.solver_performance_ranking = performance_data.get_solver_ranking(
-            instances=self.training_instances,
-            objective=self.objective)
-        self.solver_data = self.get_solver_data(performance_data)
+        solver_performance_data = selection_scenario.selector_performance_data.clone()
+        solver_performance_data.remove_solver(SelectionScenario.__selector_solver_name__)
+
+        self.solver_performance_ranking =\
+            solver_performance_data.get_solver_ranking(
+                instances=self.training_instances,
+                objective=self.objective)
+
+        self.solver_data = self.get_solver_data(solver_performance_data)
         self.solvers = {}
         for solver_conf in selection_scenario.performance_data.columns:
             solver, conf = solver_conf.split("_", maxsplit=1)
@@ -48,23 +52,24 @@ class SelectionOutput:
                 self.solvers[solver] = []
             self.solvers[solver].append(conf)
 
-        self.sbs_performance = performance_data.get_value(
+        self.sbs_performance = solver_performance_data.get_value(
             solver=self.solver_performance_ranking[0][0],
             configuration=self.solver_performance_ranking[0][1],
             instance=self.training_instances,
             objective=self.objective.name)
 
         # Collect marginal contribution data
-        self.marginal_contribution_perfect = performance_data.marginal_contribution(
-            selection_scenario.objective,
-            instances=self.training_instances,
-            sort=True)
+        self.marginal_contribution_perfect =\
+            solver_performance_data.marginal_contribution(
+                selection_scenario.objective,
+                instances=self.training_instances,
+                sort=True)
         self.marginal_contribution_actual = \
             sgfs.compute_selector_marginal_contribution(feature_data,
                                                         selection_scenario)
 
         # Collect performance data
-        self.vbs_performance_data = performance_data.best_instance_performance(
+        self.vbs_performance_data = solver_performance_data.best_instance_performance(
             instances=self.training_instances,
             objective=selection_scenario.objective)
         self.vbs_performance = selection_scenario.objective.instance_aggregator(
@@ -75,8 +80,9 @@ class SelectionOutput:
             test_set_instances = [instance for instance in self.test_instances
                                   if test_set in instance]
             test_perf = selection_scenario.selector_performance_data.best_performance(
-                exclude_solvers=[s for s in performance_data.solvers
-                                 if s is not SelectionScenario.__selector_solver_name__],
+                exclude_solvers=[
+                    s for s in selection_scenario.selector_performance_data.solvers
+                    if s is not SelectionScenario.__selector_solver_name__],
                 instances=test_set_instances,
                 objective=selection_scenario.objective
             )
