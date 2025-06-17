@@ -37,6 +37,7 @@ class Configurator:
         self.multiobjective = multi_objective_support
         self.scenario = None
 
+    @property
     def name(self: Configurator) -> str:
         """Return the name of the configurator."""
         return self.__class__.__name__
@@ -178,6 +179,7 @@ class ConfigurationScenario:
                  solver: Solver,
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
+                 number_of_runs: int,
                  parent_directory: Path) -> None:
         """Initialize scenario paths and names.
 
@@ -185,16 +187,14 @@ class ConfigurationScenario:
             solver: Solver that should be configured.
             instance_set: Instances object for the scenario.
             sparkle_objectives: Sparkle Objectives to optimize.
+            number_of_runs: The number of configurator runs to perform.
             parent_directory: Directory in which the scenario should be placed.
         """
         self.solver = solver
         self.instance_set = instance_set
         self.sparkle_objectives = sparkle_objectives
         self.name = f"{self.solver.name}_{self.instance_set.name}"
-
-        if self.instance_set.size == 0:
-            raise Exception("Cannot configure on an empty instance set "
-                            f"('{instance_set.name}').")
+        self.number_of_runs = number_of_runs
 
         self.directory = parent_directory / self.name
         self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
@@ -206,6 +206,22 @@ class ConfigurationScenario:
     def configurator(self: ConfigurationScenario) -> Configurator:
         """Return the type of configurator the scenario belongs to."""
         return Configurator
+
+    @property
+    def configuration_ids(self: ConfigurationScenario) -> list[str]:
+        """Return the IDs of the configurations for the scenario.
+
+        Only exists after the scenario has been created.
+
+        Returns:
+            List of configuration IDs, one for each run.
+        """
+        if not self.scenario_file_path.exists():
+            return []
+        from datetime import datetime
+        time_stamp = datetime.fromtimestamp(self.scenario_file_path.stat().st_mtime)
+        return [f"{self.name}_{time_stamp.strftime('%Y%m%d%H%M%S')}_{i}"
+                for i in range(self.number_of_runs)]
 
     def create_scenario(self: ConfigurationScenario, parent_directory: Path) -> None:
         """Create scenario with solver and instances in the parent directory.

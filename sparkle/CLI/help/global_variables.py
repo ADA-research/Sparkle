@@ -48,7 +48,9 @@ def configuration_scenarios(refresh: bool = False) -> list[ConfigurationScenario
     config_path = settings().DEFAULT_configuration_output
     if __configuration_scenarios is None or refresh:
         __configuration_scenarios = []
-        for f in config_path.glob("*/*/*.*"):  # We look for files at depth three
+        print(config_path)
+        for f in config_path.glob("*/*/*/*.*"):  # We look for files at depth four
+            print(f)
             if "scenario" not in f.name:
                 continue
             if "SMAC2" in str(f):

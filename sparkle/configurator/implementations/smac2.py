@@ -85,12 +85,7 @@ class SMAC2(Configurator):
                 "Please ensure Java is installed and try again."
             )
         scenario.create_scenario()
-        # Generate Configuration IDs
-        from datetime import datetime
-        time_stamp = datetime.fromtimestamp(scenario.scenario_file_path.stat().st_mtime)
-        configuration_ids =\
-            [f"{self.name}_{time_stamp.strftime('%Y%m%d%H%M%S')}_{i}"
-             for i in range(scenario.number_of_runs)]
+        configuration_ids = scenario.configuration_ids
         # TODO: Setting seeds like this is weird and should be inspected.
         # It could be good to take perhaps a seed from the scenario and use that
         # to generate a seed per run
@@ -223,7 +218,8 @@ class SMAC2Scenario(ConfigurationScenario):
                 If it is a Path, will pass the path to SMAC2.
                 Defaults to None.
         """
-        super().__init__(solver, instance_set, sparkle_objectives, parent_directory)
+        super().__init__(solver, instance_set, sparkle_objectives,
+                         number_of_runs, parent_directory)
         self.solver = solver
         self.instance_set = instance_set
         self.name = f"{self.solver.name}_{self.instance_set.name}"
@@ -233,7 +229,6 @@ class SMAC2Scenario(ConfigurationScenario):
         else:
             self.sparkle_objective = None
 
-        self.number_of_runs = number_of_runs
         self.solver_calls = solver_calls
         self.cpu_time = cpu_time
         self.wallclock_time = wallclock_time

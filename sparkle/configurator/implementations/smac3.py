@@ -83,12 +83,7 @@ class SMAC3(Configurator):
                 == scenario.smac3_scenario.cputime_limit == np.inf):
             print("WARNING: Starting SMAC3 scenario without any time limit.")
         scenario.create_scenario()
-        # Generate Configuration IDs
-        from datetime import datetime
-        time_stamp = datetime.fromtimestamp(scenario.scenario_file_path.stat().st_mtime)
-        configuration_ids =\
-            [f"{self.name}_{time_stamp.strftime('%Y%m%d%H%M%S')}_{i}"
-             for i in range(scenario.number_of_runs)]
+        configuration_ids = scenario.configuration_ids
         # TODO: Setting seeds like this is weird and should be inspected.
         # It could be good to take perhaps a seed from the scenario and use that
         # to generate a seed per run
@@ -167,9 +162,9 @@ class SMAC3Scenario(ConfigurationScenario):
                  solver: Solver,
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
+                 number_of_runs: int,
                  parent_directory: Path,
                  cutoff_time: int = None,
-                 number_of_runs: int = None,
                  smac_facade: smacfacades.AbstractFacade | str =
                  smacfacades.AlgorithmConfigurationFacade,
                  crash_cost: float | list[float] = np.inf,
@@ -195,13 +190,13 @@ class SMAC3Scenario(ConfigurationScenario):
                 The instance set to use for configuration.
             sparkle_objectives: list[SparkleObjective]
                 The objectives to optimize.
+            number_of_runs: int
+                The number of times this scenario will be executed with different seeds.
             parent_directory: Path
                 The parent directory where the configuration files will be stored.
             cutoff_time: int
                 Maximum CPU runtime in seconds that each solver call (trial)
                 is allowed to run. Is managed by RunSolver, not pynisher.
-            number_of_runs: int
-                The number of times this scenario will be executed with different seeds.
             smac_facade: AbstractFacade, defaults to AlgorithmConfigurationFacade
                 The SMAC facade to use for Optimisation.
             crash_cost: float | list[float], defaults to np.inf
@@ -258,10 +253,10 @@ class SMAC3Scenario(ConfigurationScenario):
                 The output subdirectory for the SMAC3 scenario. Defaults to the scenario
                 results directory.
         """
-        super().__init__(solver, instance_set, sparkle_objectives, parent_directory)
+        super().__init__(solver, instance_set, sparkle_objectives,
+                         number_of_runs, parent_directory)
         # The files are saved in `./output_directory/name/seed`.
         self.log_dir = self.directory / "logs"
-        self.number_of_runs = number_of_runs
         self.feature_data = feature_data
         if isinstance(self.feature_data, Path):  # Load from file
             self.feature_data = FeatureDataFrame(self.feature_data)

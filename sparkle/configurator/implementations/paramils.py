@@ -152,8 +152,8 @@ class ParamILSScenario(SMAC2Scenario):
                  solver: Solver,
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
+                 number_of_runs: int,
                  parent_directory: Path,
-                 number_of_runs: int = None,
                  solver_calls: int = None,
                  max_iterations: int = None,
                  cutoff_time: int = None,
@@ -286,7 +286,7 @@ class ParamILSScenario(SMAC2Scenario):
         return ParamILSScenario(solver,
                                 instance_set,
                                 [objective],
+                                number_of_runs,
                                 scenario_file.parent.parent,
-                                number_of_runs=number_of_runs,
                                 **config
                                 )

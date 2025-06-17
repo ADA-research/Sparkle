@@ -21,9 +21,8 @@ def test_smac3_scenario_to_file(tmp_path: Path,
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
 
     scenario = SMAC3Scenario(
-        solver, instance_set, objectives, Path(),
+        solver, instance_set, objectives, 1, Path(),
         cutoff_time=60,
-        number_of_runs=1,
         crash_cost=15.0,
         termination_cost_threshold=24.0,
         walltime_limit=10.0,
@@ -77,9 +76,8 @@ def test_smac3_configure(tmp_path: Path,
         Path("tests/test_files/performance/example_empty_runs.csv"))
 
     scenario = SMAC3Scenario(
-        solver, instance_set, objectives, Path(),
+        solver, instance_set, objectives, 2, Path(),
         cutoff_time=60,
-        number_of_runs=2,
         crash_cost=15.0,
         termination_cost_threshold=24.0,
         walltime_limit=10.0,
@@ -111,7 +109,7 @@ def test_organise_output(tmp_path: Path,
         Path("tests/test_files/Instances/Train-Instance-Set").absolute())
     objectives = [resolve_objective("PAR10"), resolve_objective("accuray:min")]
 
-    scenario = SMAC3Scenario(solver, instance_set, objectives, Path(), solver_calls=5)
+    scenario = SMAC3Scenario(solver, instance_set, objectives, 3, Path(), solver_calls=5)
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     configuration = SMAC3.organise_output(file, None, scenario, None)
     expected = {"init_solution": "2", "perform_aspiration": "1",
