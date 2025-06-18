@@ -13,7 +13,8 @@ def parse_commandline_dict(args: list[str]) -> dict:
     return ast.literal_eval(dict_str)
 
 
-def parse_instance(instance_str: str):
+def parse_instance(instance_str: str) -> Path | list[Path]:
+    """Handles the parsing of multi file instances."""
     instance_str = instance_str.removeprefix("[")
     instance_str = instance_str.removesuffix("]")
     instance_list = instance_str.split(",")

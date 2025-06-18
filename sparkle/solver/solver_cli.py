@@ -10,7 +10,6 @@ import time
 from runrunner import Runner
 
 from sparkle.solver import Solver
-from sparkle.instance import Instance_Set
 from sparkle.types import resolve_objective
 from sparkle.structures import PerformanceDataFrame
 
@@ -21,7 +20,7 @@ if __name__ == "__main__":
     parser.add_argument("--performance-dataframe", required=True, type=Path,
                         help="path to the performance dataframe")
     parser.add_argument("--solver", required=True, type=Path, help="path to solver")
-    parser.add_argument("--instance", required=True, type=Path, nargs='+',
+    parser.add_argument("--instance", required=True, type=Path, nargs="+",
                         help="path to instance to run on")
     parser.add_argument("--run-index", required=True, type=int,
                         help="run index in the dataframe to set.")

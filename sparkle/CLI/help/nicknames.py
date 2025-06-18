@@ -45,18 +45,19 @@ def resolve_object_name(name: str | Path,
     return path
 
 
-def resolve_instance_name(name: str, target: Path | list[InstanceSet], return_path=True) -> Path | InstanceSet:
+def resolve_instance_name(name: str,
+                          target: Path | list[InstanceSet],
+                          return_path: bool = True) -> Path | InstanceSet:
     """Attempts to resolve an instance name.
 
-        Args:
-            name: The name to resolve
-            target: The target where to look for the instance 
-            return_path: Whether to return the path of the instance or the instance set
+    Args:
+        name: The name to resolve
+        target: The target where to look for the instance
+        return_path: Whether to return the path of the instance or the instance set
 
-        Returns:
-            The path or the instance set of the given instance name
+    Returns:
+        The path or the instance set of the given instance name
     """
-
     if isinstance(target, Path):
         instances = []
         for instance_dir in target.iterdir():

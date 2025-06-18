@@ -32,7 +32,8 @@ def test_iterable_file_instance_set() -> None:
     assert iterable_file_instance_set.all_paths == dir_content
     assert iterable_file_instance_set.instance_paths == dir_content
     assert iterable_file_instance_set.instance_names == ["Iris1.csv", "Iris2.npy"]
-    assert iterable_file_instance_set.instances == iterable_file_instance_set.instance_paths
+    assert iterable_file_instance_set.instances == \
+        iterable_file_instance_set.instance_paths
     assert iterable_file_instance_set.name == "Iris"
     assert str(iterable_file_instance_set) == "Iris"
     assert iterable_file_instance_set.get_path_by_name("Iris1.csv") == dir_content[0]
@@ -78,8 +79,10 @@ def test_multi_file_instance_set_directory() -> None:
     assert multi_file_instance_set.all_paths == dir_content + [instance_csv]
     assert multi_file_instance_set.instance_paths == [dir_content[:2], dir_content[2:]]
     assert multi_file_instance_set.instance_names == ["Banking1", "Healthcare1"]
-    assert multi_file_instance_set.instances == [Path(
-        "tests/test_files/Instances/CCAG/Banking1"), Path("tests/test_files/Instances/CCAG/Healthcare1")]
+    assert multi_file_instance_set.instances == [
+        Path("tests/test_files/Instances/CCAG/Banking1"),
+        Path("tests/test_files/Instances/CCAG/Healthcare1")
+    ]
     assert multi_file_instance_set.name == "CCAG"
     assert str(multi_file_instance_set) == "CCAG"
     assert multi_file_instance_set.get_path_by_name("Banking1") == dir_content[:2]
