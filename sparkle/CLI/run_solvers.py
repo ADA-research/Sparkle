@@ -182,12 +182,13 @@ def run_solvers_performance_data(
     jobs_with_paths = []
     for job in jobs:
         for instance_set in sparkle_instances:
-            instance_path = instance_set.get_path_by_name(job[0])
+            instance_path = instance_set.get_path_by_name(job[2])
             if instance_path is None:
                 continue
-            instance_path = [instance_path] if not isinstance(instance_path, list) else instance_path
+            instance_path = [instance_path] if not isinstance(
+                instance_path, list) else instance_path
             instance_path = " ".join(str(p) for p in instance_path)
-            jobs_with_paths.append((instance_path, job[1], job[2]))
+            jobs_with_paths.append((job[0], job[1], instance_path, job[3]))
             break
     jobs = jobs_with_paths
     # TODO END
