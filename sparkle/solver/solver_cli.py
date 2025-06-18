@@ -53,15 +53,16 @@ if __name__ == "__main__":
     print(f"Running Solver and read/writing results with {args.performance_dataframe}")
     # Resolve possible multi-file instance
     instance_path: list[Path] = args.instance
-    instance_name = instance_path.stem if isinstance(instance_path, Path) else instance_path[0].stem
-    instance_key = instance_path
+    instance_path = instance_path[0] if len(instance_path) == 1 else instance_path
+    instance_name = instance_path.stem if isinstance(
+        instance_path, Path) else instance_path[0].stem
     run_index = args.run_index
     # Ensure stringifcation of path objects
     if isinstance(instance_path, list):
         # Double list because of solver.run
-        instance_list = [[str(filepath) for filepath in instance_path]]
+        run_instances = [[str(filepath) for filepath in instance_path]]
     else:
-        instance_list = str(instance_path)
+        run_instances = str(instance_path)
 
     solver = Solver(args.solver)
 
@@ -76,7 +77,7 @@ if __name__ == "__main__":
         # Filter out possible errors, shouldn't occur
         objectives = [o for o in objectives if o is not None]
         if args.best_configuration_instances:  # Determine best configuration
-            #TODO What if best_configuration_instances is multi file?
+            # TODO What if best_configuration_instances is multi file?
             best_configuration_instances = args.best_configuration_instances.split(",")
             target_objective = resolve_objective(args.target_objective)
             config_id, value = performance_dataframe.best_configuration(
@@ -114,7 +115,7 @@ if __name__ == "__main__":
 
     print(f"Running Solver {solver} on instance {instance_name} with seed {seed}..")
     solver_output = solver.run(
-        instance_list,
+        run_instances,
         objectives=objectives,
         seed=seed,
         configuration=configuration.copy() if configuration else None,

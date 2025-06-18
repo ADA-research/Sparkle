@@ -15,8 +15,9 @@ from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.structures import FeatureDataFrame
-from sparkle.instance import Instance_Set
-from sparkle.instance.instances import InstanceSet
+from sparkle.instance import Instance_Set, InstanceSet
+from sparkle.CLI.help.nicknames import resolve_instance_name
+
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
@@ -62,7 +63,6 @@ def compute_features(
     for instance_dir in gv.settings().DEFAULT_instance_dir.iterdir():
         if instance_dir.is_dir():
             instances.append(Instance_Set(instance_dir))
-    
 
     # If there are no jobs, stop
     if not jobs:
@@ -77,17 +77,9 @@ def compute_features(
     # We create a job for each instance/extractor combination
     for instance_name, extractor_name, feature_group in jobs:
         extractor_path = gv.settings().DEFAULT_extractor_dir / extractor_name
+        instance_path = resolve_instance_name(instance_name, instances)
+        instance_paths.add(instance_path)
 
-        # TODO Ineffective but currently no other way
-        for instance_set in instances:
-            instance_path = instance_set.get_path_by_name(instance_name)
-            if instance_path is None:
-                continue
-            instance_path = [instance_path] if not isinstance(instance_path, list) else instance_path
-            instance_path = " ".join(str(p) for p in instance_path)
-            instance_paths.add(instance_path)
-            break
-        
         cmd = (f"python3 {features_core} "
                f"--instance {instance_path} "
                f"--extractor {extractor_path} "

@@ -17,7 +17,7 @@ from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.help.nicknames import resolve_object_name
+from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
 from sparkle.CLI.initialise import check_for_initialise
 
 
@@ -172,26 +172,12 @@ def run_solvers_performance_data(
     # List of jobs to do
     jobs = performance_data.get_job_list(rerun=rerun)
 
-    # TODO Temporary solution becuase performance dataframe does not include instance paths
-    sparkle_instances: list[InstanceSet] = []
-    for instance_dir in gv.settings().DEFAULT_instance_dir.iterdir():
-        if instance_dir.is_dir():
-            sparkle_instances.append(Instance_Set(instance_dir))
-
-    # TODO Ineffective but currently no other way
+    # Edit jobs to incorporate file paths
     jobs_with_paths = []
     for job in jobs:
-        for instance_set in sparkle_instances:
-            instance_path = instance_set.get_path_by_name(job[2])
-            if instance_path is None:
-                continue
-            instance_path = [instance_path] if not isinstance(
-                instance_path, list) else instance_path
-            instance_path = " ".join(str(p) for p in instance_path)
-            jobs_with_paths.append((job[0], job[1], instance_path, job[3]))
-            break
+        instance_path = resolve_instance_name(job[2], gv.settings().DEFAULT_instance_dir)
+        jobs_with_paths.append((job[0], job[1], instance_path, job[3]))
     jobs = jobs_with_paths
-    # TODO END
 
     print(f"Total number of jobs to run: {len(jobs)}")
     # If there are no jobs, stop

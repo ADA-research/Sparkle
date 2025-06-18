@@ -87,6 +87,7 @@ def main(argv: list[str]) -> None:
     feature_dataframe.csv_filepath = test_case_path / "feature_data.csv"
     feature_dataframe.add_instances(data_set.instance_names)
     feature_dataframe.save_csv()
+    # TODO compute features only works on added instances
     feature_run = compute_features(feature_dataframe, recompute=False, run_on=run_on)
 
     if run_on == Runner.LOCAL:

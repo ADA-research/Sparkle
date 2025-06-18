@@ -17,7 +17,7 @@ seed = args_dict["seed"]
 
 cutoff_time = args_dict["cutoff_time"]
 
-#TODO Why is the constraint file not used?
+# TODO Why is the constraint file not used?
 # We deal with multi-file instances, but only use the .model files
 instance_names = args_dict["instance"]
 instance = next((inst for inst in instance_names if ".model" in inst), None)
@@ -30,7 +30,7 @@ else:
     f"./{solver_name}"
 solver_cmd = [solver_exec,
               str(instance),
-              str(cutoff_time),
+              str(cutoff_time - 3),
               str(seed)]
 
 # Get further params for the solver call

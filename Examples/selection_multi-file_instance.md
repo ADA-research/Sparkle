@@ -41,7 +41,6 @@ Compute features for all the instances
 
 ```bash
 sparkle compute_features
-sparkle jobs
 ```
 
 ### Run the solvers
@@ -72,7 +71,7 @@ sparkle construct_portfolio_selector
 Run the portfolio selector on a *single* testing instance; the result will be printed to the command line if you add `--run-on local` to the command. We again set the objective to quality. Note: Currently only works for added instances.
 
 ```bash
-sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/Banking
+sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG/Banking1 --run-on local
 ```
 
 #### Run on an instance set
@@ -80,7 +79,7 @@ sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/Banking
 Run the portfolio selector on a testing instance *set*. We again set the objective to quality. Note: Currently only works for added instances.
 
 ```bash
-sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/ --objectives quality
+sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG/
 ```
 
 #### Generate a report including results on the test set
@@ -91,10 +90,10 @@ Wait for the portfolio selector to be done running on the testing instance set
 sparkle jobs
 ```
 
-Generate an experimental report that includes the results on the test set, and as before the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report_For_Test.pdf`. We again set the obejctive to quality.
+<!-- Generate an experimental report that includes the results on the test set, and as before the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report_For_Test.pdf`. We again set the obejctive to quality.
 
 ```bash
 sparkle generate_report --objectives quality
 ```
 
-By default the `generate_report` command will create a report for the most recent instance set. To generate a report for an older instance set, the desired instance set can be specified with: `--test-case-directory Test_Cases/CCAG2/`
+By default the `generate_report` command will create a report for the most recent instance set. To generate a report for an older instance set, the desired instance set can be specified with: `--test-case-directory Test_Cases/CCAG2/` -->
