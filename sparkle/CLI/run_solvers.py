@@ -262,9 +262,9 @@ def main(argv: list[str]) -> None:
     if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file
         gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
-    if args.target_cutoff_time is not None:
+    if args.solver_cutoff_time is not None:
         gv.settings().set_general_solver_cutoff_time(
-            args.target_cutoff_time, SettingState.CMD_LINE)
+            args.solver_cutoff_time, SettingState.CMD_LINE)
     if args.run_on is not None:
         gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
