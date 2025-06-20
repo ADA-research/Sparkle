@@ -222,7 +222,6 @@ class SMAC2Scenario(ConfigurationScenario):
                          number_of_runs, parent_directory)
         self.solver = solver
         self.instance_set = instance_set
-        self.name = f"{self.solver.name}_{self.instance_set.name}"
 
         self.sparkle_objective = sparkle_objectives[0]
         self.solver_calls = solver_calls

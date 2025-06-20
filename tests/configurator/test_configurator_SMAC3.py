@@ -22,7 +22,7 @@ def test_smac3_scenario_to_file(tmp_path: Path,
 
     scenario = SMAC3Scenario(
         solver, instance_set, objectives, 1, Path(),
-        cutoff_time=60,
+        solver_cutoff_time=60,
         crash_cost=15.0,
         termination_cost_threshold=24.0,
         walltime_limit=10.0,
@@ -77,7 +77,7 @@ def test_smac3_configure(tmp_path: Path,
 
     scenario = SMAC3Scenario(
         solver, instance_set, objectives, 2, Path(),
-        cutoff_time=60,
+        solver_cutoff_time=60,
         crash_cost=15.0,
         termination_cost_threshold=24.0,
         walltime_limit=10.0,

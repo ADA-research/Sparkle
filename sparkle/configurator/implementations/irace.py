@@ -163,7 +163,7 @@ class IRACEScenario(ConfigurationScenario):
                  number_of_runs: int,
                  parent_directory: Path,
                  solver_calls: int = None,
-                 cutoff_time: int = None,
+                 solver_cutoff_time: int = None,
                  max_time: int = None,
                  budget_estimation: float = None,
                  first_test: int = None,
@@ -184,7 +184,7 @@ class IRACEScenario(ConfigurationScenario):
             parent_directory: Path where the scenario files will be placed.
             solver_calls: The number of times the solver is called for each
                 configuration run. [MaxExperiments]
-            cutoff_time: The maximum time allowed for each individual run during
+            solver_cutoff_time: The maximum time allowed for each individual run during
                 configuration.
             max_time: The time budget (CPU) allocated for the sum of solver calls
                 done by the configurator in seconds. [MaxTime]
@@ -295,7 +295,7 @@ class IRACEScenario(ConfigurationScenario):
 
         self.solver_calls = solver_calls if solver_calls and solver_calls > 0 else None
         self.max_time = max_time if max_time and max_time > 0 else None
-        self.cutoff_time = cutoff_time
+        self.solver_cutoff_time = solver_cutoff_time
         self.budget_estimation = budget_estimation
         self.first_test = first_test
         self.mu = mu
@@ -303,7 +303,6 @@ class IRACEScenario(ConfigurationScenario):
 
         # Pathing
         self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
-        self.tmp = self.directory / "tmp"
         self.validation = self.directory / "validation"
         self.results_directory = self.directory / "results"
 
@@ -348,7 +347,7 @@ class IRACEScenario(ConfigurationScenario):
                 'targetRunnerLauncher = "python3"\n'
                 f'targetRunner = "{IRACE.configurator_target.absolute()}"\n'
                 'targetCmdline = "{targetRunner} '
-                f"{solver_path} {self.sparkle_objective} {self.cutoff_time} "
+                f"{solver_path} {self.sparkle_objective} {self.solver_cutoff_time} "
                 '{configurationID} {instanceID} {seed} {instance} {targetRunnerArgs}"\n'
                 f"deterministic = {1 if self.solver.deterministic else 0}\n"
                 f'parameterFile = "{pcs_path.absolute()}"\n'
@@ -368,8 +367,8 @@ class IRACEScenario(ConfigurationScenario):
                       "Either budget is required for the IRACE scenario.")
             if self.max_time is not None and self.budget_estimation is None:
                 # Auto Estimate
-                if self.cutoff_time < self.max_time:
-                    self.budget_estimation = self.cutoff_time / self.max_time
+                if self.solver_cutoff_time < self.max_time:
+                    self.budget_estimation = self.solver_cutoff_time / self.max_time
                     file.write(f"budgetEstimation = {self.budget_estimation}\n")
             if self.first_test is not None:
                 file.write(f"firstTest = {self.first_test}\n")
@@ -400,7 +399,7 @@ class IRACEScenario(ConfigurationScenario):
             "number_of_runs": self.number_of_runs,
             "solver_calls": self.solver_calls,
             "max_time": self.max_time,
-            "cutoff_time": self.cutoff_time,
+            "solver_cutoff_time": self.solver_cutoff_time,
             "budget_estimation": self.budget_estimation,
             "first_test": self.first_test,
             "mu": self.mu,
@@ -417,7 +416,7 @@ class IRACEScenario(ConfigurationScenario):
         _, solver_path, objective, cutoff, _, _, _, _, _ =\
             scenario_dict.pop("targetCmdline").split(" ")
         scenario_dict["sparkle_objectives"] = [resolve_objective(objective)]
-        scenario_dict["cutoff_time"] = int(cutoff)
+        scenario_dict["solver_cutoff_time"] = int(cutoff)
         scenario_dict["parent_directory"] = scenario_file.parent.parent
         scenario_dict["number_of_runs"] =\
             len([p for p in (scenario_file.parent / "results").iterdir()])

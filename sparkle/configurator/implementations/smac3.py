@@ -164,7 +164,7 @@ class SMAC3Scenario(ConfigurationScenario):
                  sparkle_objectives: list[SparkleObjective],
                  number_of_runs: int,
                  parent_directory: Path,
-                 cutoff_time: int = None,
+                 solver_cutoff_time: int = None,
                  smac_facade: smacfacades.AbstractFacade | str =
                  smacfacades.AlgorithmConfigurationFacade,
                  crash_cost: float | list[float] = np.inf,
@@ -194,7 +194,7 @@ class SMAC3Scenario(ConfigurationScenario):
                 The number of times this scenario will be executed with different seeds.
             parent_directory: Path
                 The parent directory where the configuration files will be stored.
-            cutoff_time: int
+            solver_cutoff_time: int
                 Maximum CPU runtime in seconds that each solver call (trial)
                 is allowed to run. Is managed by RunSolver, not pynisher.
             smac_facade: AbstractFacade, defaults to AlgorithmConfigurationFacade
@@ -286,13 +286,13 @@ class SMAC3Scenario(ConfigurationScenario):
         # NOTE: We don't use trial_walltime_limit as a way of managing resources
         # As it uses pynisher to do it (python based) and our targets are maybe not
         # RunSolver is the better option for accuracy.
-        self.cutoff_time = cutoff_time
+        self.solver_cutoff_time = solver_cutoff_time
         if solver_calls is None:  # If solver calls is None, try to calculate it
-            if self.cutoff_time is not None and (cputime_limit or walltime_limit):
+            if self.solver_cutoff_time is not None and (cputime_limit or walltime_limit):
                 if cputime_limit:
-                    solver_calls = int(cputime_limit / self.cutoff_time)
+                    solver_calls = int(cputime_limit / self.solver_cutoff_time)
                 elif walltime_limit:
-                    solver_calls = int(walltime_limit / self.cutoff_time)
+                    solver_calls = int(walltime_limit / self.solver_cutoff_time)
             else:
                 solver_calls = 100  # SMAC3 Default value
         self.smac3_scenario = SmacScenario(
@@ -350,7 +350,7 @@ class SMAC3Scenario(ConfigurationScenario):
             "solver": self.solver.directory,
             "instance_set": self.instance_set.directory,
             "sparkle_objectives": ",".join(self.smac3_scenario.objectives),
-            "cutoff_time": self.cutoff_time,
+            "solver_cutoff_time": self.solver_cutoff_time,
             "number_of_runs": self.number_of_runs,
             "smac_facade": self.smac_facade.__name__,
             "crash_cost": self.smac3_scenario.crash_cost,
@@ -390,7 +390,7 @@ class SMAC3Scenario(ConfigurationScenario):
             resolve_objective(o)
             for o in variables["sparkle_objectives"].split(",")]
         variables["parent_directory"] = scenario_file.parent.parent
-        variables["cutoff_time"] = int(variables["cutoff_time"])
+        variables["solver_cutoff_time"] = int(variables["solver_cutoff_time"])
         variables["number_of_runs"] = int(variables["number_of_runs"])
         variables["smac_facade"] = getattr(smacfacades, variables["smac_facade"])
 

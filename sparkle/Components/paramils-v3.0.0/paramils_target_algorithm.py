@@ -35,7 +35,7 @@ if __name__ == "__main__":
                         seed=seed,
                         cutoff_time=cutoff_time,
                         configuration=configuration,
-                        log_dir=Path(),
+                        log_dir=solver_log_dir,
                         run_on=Runner.LOCAL)
 
     # Return values to SMAC

@@ -41,7 +41,7 @@ def test_irace_configure(mock_add_to_queue: Mock) -> None:
         solver, train_set, [sparkle_objective], base_dir,
         number_of_runs=2,
         solver_calls=25,
-        cutoff_time=60,
+        solver_cutoff_time=60,
         max_time=200,
     )
     assert irace_conf.output_path == output / IRACE.__name__
@@ -123,7 +123,7 @@ def test_irace_scenario_file(tmp_path: Path,
             return
     obj_par, obj_acc = resolve_objective("PAR10"), resolve_objective("accuray:max")
     scenario = IRACEScenario(solver, set, [obj_par, obj_acc], Path("irace_scenario"),
-                             number_of_runs=2, solver_calls=2, cutoff_time=2)
+                             number_of_runs=2, solver_calls=2, solver_cutoff_time=2)
     scenario.create_scenario()
     # TODO: Add file comparison, requires variables/regex to match
 

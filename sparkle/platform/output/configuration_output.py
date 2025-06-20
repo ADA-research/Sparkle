@@ -74,17 +74,18 @@ class ConfigurationOutput:
 
         # Filter data on this scenario
         performance_data_config = performance_data.clone()
-        performance_data.remove_solver([s for s in performance_data.solvers
-                                        if s != str(self.solver.directory)])
+        performance_data_config.remove_solver([s for s in performance_data_config.solvers
+                                               if s != str(self.solver.directory)])
         used_configs = config_scenario.configuration_ids + [
             PerformanceDataFrame.default_configuration]
         removable = [c for c in performance_data_config.configuration_ids
                      if c not in used_configs]
-        performance_data.remove_configuration(str(self.solver.directory), removable)
+        performance_data_config.remove_configuration(
+            str(self.solver.directory), removable)
         test_sets = set(
-            Path(i).parent for i in performance_data.instances
-            if self.instance_set_train.name not in i
-            and not performance_data.is_missing(str(self.solver.directory), i))
+            Path(i).parent for i in performance_data_config.instances
+            if self.instance_set_train.name != Path(i).parent.name
+            and not performance_data_config.is_missing(str(self.solver.directory), i))
         # NOTE: If we only have one instance from a set, it could lead to problems
         # resolving them like this
         self.test_instance_sets = [Instance_Set(set) for set in test_sets]
@@ -93,20 +94,21 @@ class ConfigurationOutput:
 
         # Retrieve all configurations
         solver_key = str(self.solver.directory)
-        config_keys = performance_data.get_configurations(solver_key)
-        self.all_configurations = performance_data.get_full_configuration(
+        config_keys = performance_data_config.get_configurations(solver_key)
+        self.all_configurations = performance_data_config.get_full_configuration(
             solver_key, config_keys)
 
         # Retrieve configuration performances
         train_instances = [str(p) for p in self.instance_set_train.instance_paths]
         # Retrieve Default (No configuration) performance
-        _, self.default_performance_train = performance_data.configuration_performance(
-            solver_key, PerformanceDataFrame.default_configuration,
-            objective=self.config_scenario.sparkle_objectives[0],
-            instances=train_instances)
+        _, self.default_performance_train =\
+            performance_data_config.configuration_performance(
+                solver_key, PerformanceDataFrame.default_configuration,
+                objective=self.config_scenario.sparkle_objectives[0],
+                instances=train_instances)
 
         _, self.default_performance_per_instance_train =\
-            performance_data.configuration_performance(
+            performance_data_config.configuration_performance(
                 solver_key, PerformanceDataFrame.default_configuration,
                 objective=self.config_scenario.sparkle_objectives[0],
                 instances=train_instances,
@@ -114,7 +116,7 @@ class ConfigurationOutput:
 
         # Retrieve best found configuration
         self.best_configuration_key, self.best_performance_train =\
-            performance_data.best_configuration(
+            performance_data_config.best_configuration(
                 solver_key,
                 objective=self.config_scenario.sparkle_objective,
                 instances=train_instances)
@@ -124,29 +126,29 @@ class ConfigurationOutput:
         # TODO keep all instance set performance data together in a dictionary instead
         # of variables for train and test
         # Shitty hack to get status objective
-        status_objective = [o for o in performance_data.objective_names
+        status_objective = [o for o in performance_data_config.objective_names
                             if o.lower().startswith("status")][0]
         self.instance_set_results: dict[str, ConfigurationResult] = {}
         for instance_set in self.test_instance_sets + [self.instance_set_train]:
             instances = [str(p) for p in instance_set.instance_paths]
             _, default_performance_per_instance =\
-                performance_data.configuration_performance(
+                performance_data_config.configuration_performance(
                     solver_key, PerformanceDataFrame.default_configuration,
                     objective=self.config_scenario.sparkle_objective,
                     instances=instances,
                     per_instance=True)
             _, best_conf_performance_per_instance =\
-                performance_data.configuration_performance(
+                performance_data_config.configuration_performance(
                     solver_key, self.best_configuration_key,
                     objective=self.config_scenario.sparkle_objective,
                     instances=instances,
                     per_instance=True)
-            instance_status_default = {str(i): performance_data.get_value(
+            instance_status_default = {str(i): performance_data_config.get_value(
                 solver_key,
                 configuration=PerformanceDataFrame.default_configuration,
                 objective=status_objective,
                 instance=[i]) for i in instances}
-            instance_status_best_conf = {str(i): performance_data.get_value(
+            instance_status_best_conf = {str(i): performance_data_config.get_value(
                 solver_key,
                 configuration=self.best_configuration_key,
                 objective=status_objective,

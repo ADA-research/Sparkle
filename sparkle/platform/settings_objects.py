@@ -82,7 +82,6 @@ class Settings:
     # Default output subdirs
     DEFAULT_output_analysis = DEFAULT_output / analysis_dir
     DEFAULT_output_raw = DEFAULT_output_analysis / rawdata_dir
-    DEFAULT_configuration_output_raw = DEFAULT_configuration_output / rawdata_dir
     DEFAULT_configuration_output_analysis = DEFAULT_configuration_output / analysis_dir
     DEFAULT_selection_output_raw = DEFAULT_selection_output / rawdata_dir
     DEFAULT_selection_output_analysis = DEFAULT_selection_output / analysis_dir
@@ -773,7 +772,7 @@ class Settings:
             if configurator_subclass is not None:
                 self.__general_sparkle_configurator = configurator_subclass(
                     base_dir=Path(),
-                    output_path=Settings.DEFAULT_configuration_output_raw)
+                    output_path=Settings.DEFAULT_configuration_output)
             else:
                 print("WARNING: Configurator class name not recognised: "
                       f'{self.__settings["general"]["configurator"]}. '
@@ -885,9 +884,8 @@ class Settings:
                                   configurator_name: str) -> dict[str, any]:
         """Return the configurator settings."""
         configurator_settings = {
-            "number_of_runs": self.get_configurator_number_of_runs(),
             "solver_calls": self.get_configurator_solver_calls(),
-            "cutoff_time": self.get_general_solver_cutoff_time(),
+            "solver_cutoff_time": self.get_general_solver_cutoff_time(),
             "max_iterations": self.get_configurator_max_iterations()
         }
         # In the settings below, we default to the configurator general settings if no

@@ -4,6 +4,7 @@ import sys
 import shutil
 import argparse
 from pathlib import Path
+import time
 
 import pylatex as pl
 from sparkle import __version__ as __sparkle_version__
@@ -53,8 +54,10 @@ def generate_configuration_section(report: pl.Document, scenario: ConfigurationS
                                    scenario_output: ConfigurationOutput) -> None:
     """Generate a section for a configuration scenario."""
     report_dir = Path(report.default_filepath).parent
-    plot_dir = report_dir / f"{scenario.name}_plots"
-    plot_dir.mkdir()
+    time_stamp = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
+    plot_dir = report_dir /\
+        f"{scenario.configurator.__name__}_{scenario.name}_plots_{time_stamp}"
+    plot_dir.mkdir(exist_ok=True)
 
     # 1. Write section intro
     report.append(pl.Section(
@@ -119,7 +122,7 @@ def generate_configuration_section(report: pl.Document, scenario: ConfigurationS
         report.append(pl.UnsafeCommand(
             f"textbf{{{round(instance_set_results.best_performance, MAX_DEC)}}}.\n"))
         report.append("In ")
-        report.append(latex.AutoRef(f"fig:bestvsdefault{instance_set_name}"))
+        report.append(latex.AutoRef(f"fig:bestvsdefault{instance_set_name}{time_stamp}"))
         report.append(pl.utils.bold(" "))  # Force white space
         report.append("the results are plotted per instance.")
         # Create graph to compare best configuration vs default on the instance set
@@ -133,7 +136,7 @@ def generate_configuration_section(report: pl.Document, scenario: ConfigurationS
             f"{scenario_output.best_configuration_key}_vs_"\
             f"Default_{instance_set_name}.pdf"
         plot.write_image(plot_path)
-        with report.create(pl.Figure()) as figure:
+        with report.create(pl.Figure(position="h")) as figure:
             figure.add_image(str(plot_path.relative_to(report_dir)),
                              width=pl.utils.NoEscape(r"0.6\textwidth"))
             figure.add_caption(
@@ -141,7 +144,7 @@ def generate_configuration_section(report: pl.Document, scenario: ConfigurationS
                 f"({scenario.sparkle_objectives[0]})")
             figure.append(pl.UnsafeCommand(
                 r"label{"
-                f"fig:bestvsdefault{scenario.instance_set.name}"
+                f"fig:bestvsdefault{instance_set_name}{time_stamp}"
                 r"}"))
         if scenario.sparkle_objectives[0].time:  # Write status table
             report.append("The following Solver status were found per instance:")
@@ -216,8 +219,9 @@ def generate_selection_section(report: pl.Document, scenario: SelectionScenario,
     """Generate a section for a selection scenario."""
     # TODO: Should this section name be more unique?
     report_dir = Path(report.default_filepath).parent
-    plot_dir = report_dir / f"{scenario.name}_plots"
-    plot_dir.mkdir()
+    time_stamp = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
+    plot_dir = report_dir / f"{scenario.name}_plots_{time_stamp}"
+    plot_dir.mkdir(exist_ok=True)
     report.append(pl.Section(
         f"Selection: {scenario.selector.model_class.__name__} on "
         f"{' '.join([s[0] for s in scenario_output.training_instance_sets])}"))
@@ -303,7 +307,7 @@ def generate_selection_section(report: pl.Document, scenario: SelectionScenario,
 
     # 4. Create scatter plot analysis
     report.append(pl.Subsubsection("Scatter Plot Analysis"))
-    report.append(latex.AutoRef("fig:sbsvsselector"))
+    report.append(latex.AutoRef(f"fig:sbsvsselector{time_stamp}"))
     report.append(pl.utils.bold(" "))  # Trick to force a white space
     report.append("shows the empirical comparison between the portfolio "
                   "selector and the single best solver (SBS). ")
@@ -332,7 +336,8 @@ def generate_selection_section(report: pl.Document, scenario: SelectionScenario,
                          width=pl.utils.NoEscape(r"0.6\textwidth"))
         figure.add_caption("Empirical comparison between the Single Best Solver and the "
                            "Selector")
-        figure.append(pl.UnsafeCommand(r"label{fig:sbsvsselector}"))
+        label = r"label{fig:sbsvsselector" + str(time_stamp) + r"}"
+        figure.append(pl.UnsafeCommand(f"{label}"))
 
     # Comparison between the actual portfolio selector in Sparkle and the VBS.
     vbs_performance = scenario_output.vbs_performance_data.tolist()
@@ -407,20 +412,20 @@ def main(argv: list[str]) -> None:
     # TODO: Filter scenarios based on args
 
     # TODO: Serialize each scenario and write to output
-    serialised_configuration_scenarios = {}
-    serialised_selection_scenarios = {}
+    processed_configuration_scenarios = []
+    processed_selection_scenarios = []
     for configuration_scenario in configuration_scenarios:
         # TODO: Detect test set of the configuration scenario?
         # Or should it just be in there?
         # This leaves some questions how to resolve..
-        serialised_configuration_scenarios[configuration_scenario.name] =\
+        processed_configuration_scenarios.append(
             (ConfigurationOutput(configuration_scenario,
-                                 performance_data), configuration_scenario)
+                                 performance_data), configuration_scenario))
     for selection_scenario in selection_scenarios:
         # TODO: Detect test set of the selection scenario?
-        serialised_selection_scenarios[selection_scenario.name] =\
+        processed_selection_scenarios.append(
             (SelectionOutput(selection_scenario,
-                             feature_data), selection_scenario)
+                             feature_data), selection_scenario))
 
     # TODO write the serialisation
     raw_output = gv.settings().DEFAULT_output_analysis / "JSON"
@@ -479,15 +484,16 @@ def main(argv: list[str]) -> None:
         "configuration, portfolio-based algorithm selection, etc.) to accelerate the "
         "existing solvers."))
 
-    for scenario_output, scenario in serialised_configuration_scenarios.values():
+    for (scenario_output, scenario) in processed_configuration_scenarios:
         generate_configuration_section(report, scenario, scenario_output)
 
-    for (scenario_output, scenario) in serialised_selection_scenarios.values():
+    for (scenario_output, scenario) in processed_selection_scenarios:
         generate_selection_section(report, scenario, scenario_output)
 
     # TODO Parallel Portfolio sections
 
     # Adding bibliography
+    report.append(pl.NewPage())  # Ensure it starts on new page
     report.append(pl.Command("bibliographystyle", arguments=["plain"]))
     report.append(pl.Command("bibliography", arguments=[str(newbibpath)]))
     # Generate the report .tex and .pdf

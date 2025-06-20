@@ -104,7 +104,7 @@ class Configurator:
                 scenario.instance_set,
                 config_ids=configuration_ids,
                 performance_dataframe=data_target,
-                cutoff_time=scenario.cutoff_time,
+                cutoff_time=scenario.solver_cutoff_time,
                 sbatch_options=sbatch_options,
                 slurm_prepend=slurm_prepend,
                 log_dir=scenario.validation,
@@ -159,7 +159,7 @@ class Configurator:
         # Save result to Performance DataFrame
         from filelock import FileLock
         lock = FileLock(f"{output_target}.lock")
-        with lock.acquire(timeout=60):
+        with lock.acquire(timeout=600):
             performance_data = PerformanceDataFrame(output_target)
             # Resolve absolute path to Solver column
             solver = [s for s in performance_data.solvers
@@ -197,11 +197,10 @@ class ConfigurationScenario:
         self.solver = solver
         self.instance_set = instance_set
         self.sparkle_objectives = sparkle_objectives
-        self.name = f"{self.solver.name}_{self.instance_set.name}"
         self.number_of_runs = number_of_runs
 
         self.directory = parent_directory / self.name
-        self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
+        self.scenario_file_path = self.directory / "scenario.txt"
         self.validation: Path = self.directory / "validation"
         self.tmp: Path = self.directory / "tmp"
         self.results_directory: Path = self.directory / "results"
@@ -212,6 +211,20 @@ class ConfigurationScenario:
         return Configurator
 
     @property
+    def name(self: ConfigurationScenario) -> str:
+        """Return the name of the scenario."""
+        return f"{self.solver.name}_{self.instance_set.name}"
+
+    @property
+    def timestamp(self: ConfigurationScenario) -> str:
+        """Return the timestamp of the scenario."""
+        if not self.scenario_file_path.exists():
+            return None
+        from datetime import datetime
+        stamp = datetime.fromtimestamp(self.scenario_file_path.stat().st_mtime)
+        return stamp.strftime("%Y%m%d-%H%M")
+
+    @property
     def configuration_ids(self: ConfigurationScenario) -> list[str]:
         """Return the IDs of the configurations for the scenario.
 
@@ -220,11 +233,7 @@ class ConfigurationScenario:
         Returns:
             List of configuration IDs, one for each run.
         """
-        if not self.scenario_file_path.exists():
-            return []
-        from datetime import datetime
-        time_stamp = datetime.fromtimestamp(self.scenario_file_path.stat().st_mtime)
-        return [f"{self.configurator.__name__}_{time_stamp.strftime('%Y%m%d-%H%M')}_{i}"
+        return [f"{self.configurator.__name__}_{self.timestamp}_{i}"
                 for i in range(self.number_of_runs)]
 
     def create_scenario(self: ConfigurationScenario, parent_directory: Path) -> None:

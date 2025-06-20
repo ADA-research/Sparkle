@@ -369,7 +369,7 @@ class PerformanceDataFrame(pd.DataFrame):
         if not isinstance(initial_values, list):
             initial_values = ([initial_values]
                               * 2  # Value and Seed per target column
-                              * self.num_solvers)
+                              * self.num_solver_configurations)
         elif len(initial_values) == len(PerformanceDataFrame.multi_column_names):
             initial_values = initial_values * self.num_solvers
 
@@ -434,9 +434,11 @@ class PerformanceDataFrame(pd.DataFrame):
 
     def remove_solver(self: PerformanceDataFrame, solvers: str | list[str]) -> None:
         """Drop one or more solvers from the Dataframe."""
+        if not solvers:  # Bugfix for when an empty list is passed to avoid nan adding
+            return
         # To make sure objectives / runs are saved when no solvers are present
         solvers = [solvers] if isinstance(solvers, str) else solvers
-        if self.num_solvers == 1:
+        if self.num_solvers == 1:  # This would preferrably be done after removing
             for field in PerformanceDataFrame.multi_column_value:
                 self[PerformanceDataFrame.missing_value,
                      PerformanceDataFrame.missing_value, field] =\
