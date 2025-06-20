@@ -26,8 +26,8 @@ class IRACE(Configurator):
     configurator_ablation_executable = configurator_path / "irace" / "bin" / "ablation"
     configurator_target = configurator_path / "irace_target_algorithm.py"
 
-    version = "3.5"
     full_name = "Iterated Racing for Automatic Algorithm Configuration"
+    version = "3.5"
 
     def __init__(self: Configurator,
                  output_path: Path,

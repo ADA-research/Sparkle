@@ -24,8 +24,8 @@ class SMAC3(Configurator):
         "Components/smac3-v2.3.1"
     configurator_executable = configurator_path / "smac3_target_algorithm.py"
 
-    version = smac_version
     full_name = "Sequential Model-based Algorithm Configuration"
+    version = smac_version
 
     def __init__(self: SMAC3,
                  base_dir: Path,
@@ -296,7 +296,7 @@ class SMAC3Scenario(ConfigurationScenario):
             else:
                 solver_calls = 100  # SMAC3 Default value
         self.smac3_scenario = SmacScenario(
-            configspace=solver.get_cs(),
+            configspace=solver.get_configuration_space(),
             name=self.name,
             output_directory=self.results_directory / smac3_output_directory,
             deterministic=solver.deterministic,

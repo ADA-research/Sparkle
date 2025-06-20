@@ -54,4 +54,4 @@ def test_paramils_scenario_from_file() -> None:
     scenario = ParamILSScenario.from_file(scenario_file)
     assert scenario.solver.name == "PbO-CCSAT-Generic"
     assert scenario.instance_set.name == "PTN"
-    assert scenario.cutoff_time == 60
+    assert scenario.solver_cutoff_time == 60

@@ -196,8 +196,8 @@ class ParamILSScenario(SMAC2Scenario):
             max_runs: The maximum number of runs allowed for a single configuration.
             random_restart: The probability to restart from a random configuration.
         """
-        super().__init__(solver, instance_set, sparkle_objectives, parent_directory,
-                         number_of_runs, solver_calls, max_iterations, None,
+        super().__init__(solver, instance_set, sparkle_objectives, number_of_runs,
+                         parent_directory, solver_calls, max_iterations, None,
                          None, cutoff_time, None, cli_cores,
                          use_cpu_time_in_tunertime, feature_data)
         self.solver = solver

@@ -17,6 +17,9 @@ class Configurator:
     """Abstact class to use different configurators like SMAC."""
     configurator_cli_path = Path(__file__).parent.resolve() / "configurator_cli.py"
 
+    full_name = "Configurator Abstract Class"
+    version = "NaN"
+
     def __init__(self: Configurator, output_path: Path,
                  base_dir: Path, tmp_path: Path,
                  multi_objective_support: bool = False) -> None:
@@ -175,6 +178,7 @@ class Configurator:
 
 class ConfigurationScenario:
     """Template class to handle a configuration scenarios."""
+
     def __init__(self: ConfigurationScenario,
                  solver: Solver,
                  instance_set: InstanceSet,
@@ -220,7 +224,7 @@ class ConfigurationScenario:
             return []
         from datetime import datetime
         time_stamp = datetime.fromtimestamp(self.scenario_file_path.stat().st_mtime)
-        return [f"{self.name}_{time_stamp.strftime('%Y%m%d%H%M%S')}_{i}"
+        return [f"{self.configurator.__name__}_{time_stamp.strftime('%Y%m%d-%H%M')}_{i}"
                 for i in range(self.number_of_runs)]
 
     def create_scenario(self: ConfigurationScenario, parent_directory: Path) -> None:

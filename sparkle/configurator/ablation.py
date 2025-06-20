@@ -83,7 +83,7 @@ class AblationScenario:
         self.concurrent_clis = concurrent_clis
         ablation_scenario_dir = self.scenario_dir
         objective = self.config_scenario.sparkle_objective
-        pcs = self.solver.get_cs()
+        pcs = self.solver.get_configuration_space()
         parameter_names = [p.name for p in pcs.values()]
         # We need to remove any redundant keys that are not in PCS
         removable_keys = [key for key in best_configuration

@@ -76,7 +76,7 @@ def plot_configured_vs_default(
         A string containing the latex command to include the figure
     """
     instance_set_name = (config_output.instance_set_train.name
-                         if not test_mode else config_output.instance_set_test.name)
+                         if not test_mode else config_output.test_instance_sets.name)
     figure_filename =\
         f"data_{config_output.solver.name}_configured_vs_default_on_{instance_set_name}"
     if not test_mode:
@@ -222,7 +222,7 @@ def configuration_report_variables(config_scenario: ConfigurationScenario,
     Returns:
         A dictionary containing the variables and values
     """
-    has_test = config_output.instance_set_test is not None
+    has_test = config_output.test_instance_sets is not None
     full_dict = {"bibliographypath": bib_path.absolute(),
                  "sparkleVersion": about.version}
 
@@ -346,8 +346,8 @@ def get_dict_variable_to_value_test(
     Returns:
         A dictionary containting the variables and their values
     """
-    test_dict = {"instanceSetTest": config_output.instance_set_test.name}
-    test_dict["numInstanceInTestingInstanceSet"] = config_output.instance_set_test.size
+    test_dict = {"instanceSetTest": config_output.test_instance_sets.name}
+    test_dict["numInstanceInTestingInstanceSet"] = config_output.test_instance_sets.size
     test_dict["optimisedConfigurationTestingPerformance"] =\
         config_output.best_performance_test
     test_dict["defaultConfigurationTestingPerformance"] =\
@@ -361,7 +361,7 @@ def get_dict_variable_to_value_test(
     # Retrieve timeout numbers for the testing instances
     configured_timeouts_test, default_timeouts_test, overlapping_timeouts_test =\
         get_timeouts_instanceset(config_output,
-                                 config_output.instance_set_test)
+                                 config_output.test_instance_sets)
 
     test_dict["timeoutsTestDefault"] = default_timeouts_test
     test_dict["timeoutsTestConfigured"] = configured_timeouts_test

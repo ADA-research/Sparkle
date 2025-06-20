@@ -24,8 +24,8 @@ class SMAC2(Configurator):
     configurator_executable = configurator_path / "smac"
     configurator_target = configurator_path / "smac2_target_algorithm.py"
 
-    version = "2.10.03"
     full_name = "Sequential Model-based Algorithm Configuration"
+    version = "2.10.03"
 
     def __init__(self: SMAC2,
                  base_dir: Path,
@@ -176,13 +176,13 @@ class SMAC2Scenario(ConfigurationScenario):
                  solver: Solver,
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
+                 number_of_runs: int,
                  parent_directory: Path,
-                 number_of_runs: int = None,
                  solver_calls: int = None,
                  max_iterations: int = None,
                  cpu_time: int = None,
                  wallclock_time: int = None,
-                 cutoff_time: int = None,
+                 solver_cutoff_time: int = None,
                  target_cutoff_length: str = None,
                  cli_cores: int = None,
                  use_cpu_time_in_tunertime: bool = None,
@@ -195,9 +195,9 @@ class SMAC2Scenario(ConfigurationScenario):
             instance_set: Instances object for the scenario.
             sparkle_objectives: SparkleObjectives used for each run of the configuration.
                 Will be simplified to the first objective.
-            parent_directory: Directory in which the scenario should be created.
             number_of_runs: The number of configurator runs to perform
                 for configuring the solver.
+            parent_directory: Directory in which the scenario should be created.
             solver_calls: The number of times the solver is called for each
                 configuration run
             max_iterations: The maximum number of iterations allowed for each
@@ -205,7 +205,7 @@ class SMAC2Scenario(ConfigurationScenario):
             cpu_time: The time budget allocated for each configuration run. (cpu)
             wallclock_time: The time budget allocated for each configuration run.
                 (wallclock)
-            cutoff_time: The maximum time allowed for each individual run during
+            solver_cutoff_time: The maximum time allowed for each solver call run during
                 configuration.
             target_cutoff_length: A domain specific measure of when the algorithm
                 should consider itself done.
@@ -224,15 +224,11 @@ class SMAC2Scenario(ConfigurationScenario):
         self.instance_set = instance_set
         self.name = f"{self.solver.name}_{self.instance_set.name}"
 
-        if sparkle_objectives is not None:
-            self.sparkle_objective = sparkle_objectives[0]
-        else:
-            self.sparkle_objective = None
-
+        self.sparkle_objective = sparkle_objectives[0]
         self.solver_calls = solver_calls
         self.cpu_time = cpu_time
         self.wallclock_time = wallclock_time
-        self.cutoff_time = cutoff_time
+        self.solver_cutoff_time = solver_cutoff_time
         self.cutoff_length = target_cutoff_length
         self.max_iterations = max_iterations
         self.cli_cores = cli_cores
@@ -321,7 +317,7 @@ class SMAC2Scenario(ConfigurationScenario):
                        f"{self.solver.directory} {self.tmp} {self.sparkle_objective} \n"
                        f"deterministic = {1 if self.solver.deterministic else 0}\n"
                        f"run_obj = {self._get_performance_measure()}\n"
-                       f"cutoffTime = {self.cutoff_time}\n"
+                       f"cutoffTime = {self.solver_cutoff_time}\n"
                        f"paramfile = {self.solver.get_pcs_file(pcs_port)}\n"
                        f"outdir = {self.outdir_train}\n"
                        f"instance_file = {self.instance_file_path}\n"
@@ -369,18 +365,18 @@ class SMAC2Scenario(ConfigurationScenario):
             return "RUNTIME"
         return "QUALITY"
 
-    def serialise_scenario(self: SMAC2Scenario) -> dict:
+    def serialise(self: SMAC2Scenario) -> dict:
         """Transform ConfigurationScenario to dictionary format."""
         return {
             "number_of_runs": self.number_of_runs,
             "solver_calls": self.solver_calls,
             "cpu_time": self.cpu_time,
             "wallclock_time": self.wallclock_time,
-            "cutoff_time": self.cutoff_time,
+            "solver_cutoff_time": self.solver_cutoff_time,
             "cutoff_length": self.cutoff_length,
             "max_iterations": self.max_iterations,
             "sparkle_objective": self.sparkle_objective.name,
-            "feature_data": self.feature_data_path,
+            "feature_data": self.feature_file_path,
             "use_cpu_time_in_tunertime": self.use_cpu_time_in_tunertime
         }
 
@@ -420,8 +416,8 @@ class SMAC2Scenario(ConfigurationScenario):
         return SMAC2Scenario(solver,
                              instance_set,
                              [objective],
-                             instance_file_path.parent.parent,
                              number_of_runs,
+                             instance_file_path.parent.parent,
                              solver_calls,
                              max_iterations,
                              cpu_time,
