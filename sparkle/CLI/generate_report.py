@@ -15,11 +15,8 @@ from sparkle.CLI.help import logging as sl
 # from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
 
-# from sparkle.solver import Solver
 from sparkle.selector import Extractor
-# from sparkle.instance import Instance_Set
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-# from sparkle.configurator.ablation import AblationScenario
 from sparkle.configurator.configurator import ConfigurationScenario
 from sparkle.selector.selector import SelectionScenario
 from sparkle.types import SolverStatus
@@ -209,9 +206,44 @@ def generate_configuration_section(report: pl.Document, scenario: ConfigurationS
         instance_set_summary(test_set.name)
 
     # 7. Report the parameter ablation scenario if present
-    # TODO write parameter ablation if present
-    # if scenario_output.ablation_scenario:
-    #    ...
+    if scenario.ablation_scenario:
+        report.append(pl.Subsection("Parameter importance via Ablation"))
+        report.append("Ablation analysis ")
+        report.append(pl.UnsafeCommand(r"cite{FawcettHoos16} "))
+        test_set = scenario.ablation_scenario.test_set
+        if not scenario.ablation_scenario.test_set:
+            test_set = scenario.ablation_scenario.train_set
+        report.append(
+            f"is performed from the default configuration of {scenario.solver} to the "
+            f"best found configuration ({scenario_output.best_configuration_key}) "
+            "to see which parameter changes between them contribute most to the improved"
+            " performance. The ablation path uses the training set "
+            f"{scenario.ablation_scenario.train_set.name} and validation is performed "
+            f"on the test set {test_set.name}. The set of parameters that differ in the "
+            "two configurations will form the ablation path. Starting from the default "
+            "configuration, the path is computed by performing a sequence of rounds. In"
+            " a round, each available parameter is flipped in the configuration and is "
+            "validated on its performance. The flipped parameter with the best "
+            "performance in that round, is added to the configuration and the next round"
+            " starts with the remaining parameters. This repeats until all parameters "
+            "are flipped, which is the best found configuration. The analysis resulted "
+            "in the ablation presented in ")
+        report.append(latex.AutoRef("tab:ablationtable"))
+        report.append(".")
+
+        # Add ablation table
+        tabular = pl.Tabular("r|l|r|r|r")
+        data = scenario.ablation_scenario.read_ablation_table()
+        for index, row in enumerate(data):
+            tabular.add_row(*row)
+            if index == 0:
+                tabular.add_hline()
+        table_ablation = pl.Table(position="h")
+        table_ablation.append(pl.UnsafeCommand("centering"))
+        table_ablation.append(tabular)
+        table_ablation.add_caption("Ablation table")
+        table_ablation.append(pl.UnsafeCommand(r"label{tab:ablationtable}"))
+        report.append(table_ablation)
 
 
 def generate_selection_section(report: pl.Document, scenario: SelectionScenario,

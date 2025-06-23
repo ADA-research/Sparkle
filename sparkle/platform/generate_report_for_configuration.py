@@ -9,7 +9,7 @@ from pathlib import Path
 from scipy.stats import linregress
 
 from sparkle.platform import latex as stex
-from sparkle.configurator.ablation import AblationScenario
+from sparkle.configurator import AblationScenario
 from sparkle.configurator.configurator import ConfigurationScenario
 from sparkle.instance import InstanceSet
 from sparkle.types import SolverStatus

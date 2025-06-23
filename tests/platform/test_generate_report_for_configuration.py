@@ -5,7 +5,7 @@ from unittest.mock import Mock
 from unittest.mock import patch
 from pathlib import Path
 
-from sparkle.configurator.ablation import AblationScenario
+from sparkle.configurator import AblationScenario
 from sparkle.platform import generate_report_for_configuration as sgrch
 from sparkle.configurator.implementations import SMAC2
 from sparkle.types.objective import SparkleObjective, PAR
@@ -39,7 +39,7 @@ class TestGenerateConfigurationReport(TestCase):
         self.ablation_scenario = AblationScenario(
             self.configuration_scenario, test_instance_set, Path(""))
 
-    @patch("sparkle.configurator.ablation.AblationScenario.check_for_ablation")
+    @patch("sparkle.configurator.configurator.AblationScenario.check_for_ablation")
     def test_get_ablation_bool_true(
             self: TestGenerateConfigurationReport,
             mock_check: Mock) -> None:
@@ -49,7 +49,7 @@ class TestGenerateConfigurationReport(TestCase):
         mock_check.assert_called_once()
         assert ablation_bool == r"\ablationtrue"
 
-    @patch("sparkle.configurator.ablation.AblationScenario.check_for_ablation")
+    @patch("sparkle.configurator.configurator.AblationScenario.check_for_ablation")
     def test_get_ablation_bool_false(
             self: TestGenerateConfigurationReport,
             mock_check: Mock) -> None:
@@ -59,7 +59,7 @@ class TestGenerateConfigurationReport(TestCase):
         mock_check.assert_called_once()
         assert ablation_bool == r"\ablationfalse"
 
-    @patch("sparkle.configurator.ablation.AblationScenario.read_ablation_table")
+    @patch("sparkle.configurator.configurator.AblationScenario.read_ablation_table")
     def test_get_ablation_table(
             self: TestGenerateConfigurationReport,
             mock_table: Mock) -> None:

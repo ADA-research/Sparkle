@@ -7,7 +7,7 @@ from pathlib import PurePath
 
 from runrunner.base import Runner
 
-from sparkle.configurator.ablation import AblationScenario
+from sparkle.configurator import AblationScenario
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
@@ -90,6 +90,13 @@ def main(argv: list[str]) -> None:
         gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
 
+    # TODO: The structure in Sparkle has changed substantially
+    # 1. Have ablation scenarios be run on configuration scenarios instead
+    # 2. Make the output be written into the configuration scenario's directory
+    # 3. Have config scenarios auto detect the presence of this data and include it there
+    # 4. Process the data through ConfigurationOutput
+    # 5. Use this data to write the report section on ablation
+
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
     Settings.check_settings_changes(gv.settings(), prev_settings)
@@ -117,6 +124,10 @@ def main(argv: list[str]) -> None:
         configurator.output_path, solver, instance_set_train)
     performance_data = PerformanceDataFrame(
         gv.settings().DEFAULT_performance_data_path)
+    if config_scenario is None:
+        print("No configuration scenario found for combination:\n"
+              f"{configurator.name} {solver.name} {instance_set_train.name}")
+        sys.exit(-1)
     best_configuration_key, _ = performance_data.best_configuration(
         str(solver.directory),
         config_scenario.sparkle_objective,
@@ -124,10 +135,6 @@ def main(argv: list[str]) -> None:
     best_configuration = performance_data.get_full_configuration(
         str(solver.directory),
         best_configuration_key)
-    if config_scenario is None:
-        print("No configuration scenario found for combination:\n"
-              f"{configurator.name} {solver.name} {instance_set_train.name}")
-        sys.exit(-1)
     if instance_set_test is None:
         instance_set_test = instance_set_train
 
@@ -142,21 +149,15 @@ def main(argv: list[str]) -> None:
     ablation_scenario = AblationScenario(
         config_scenario,
         instance_set_test,
-        gv.settings().DEFAULT_ablation_output,
-        override_dirs=True)
-
-    # Instances
-    ablation_scenario.create_instance_file()
-    ablation_scenario.create_instance_file(test=True)
-
-    # Configurations
-    ablation_scenario.create_configuration_file(
         cutoff_time=gv.settings().get_general_solver_cutoff_time(),
         cutoff_length=gv.settings().get_smac2_target_cutoff_length(),  # NOTE: SMAC2
         concurrent_clis=gv.settings().get_slurm_max_parallel_runs_per_node(),
         best_configuration=best_configuration,
         ablation_racing=gv.settings().get_ablation_racing_flag(),
     )
+
+    # Create scenario
+    ablation_scenario.create_scenario(override_dirs=True)
 
     print("Submiting ablation run...")
     runs = ablation_scenario.submit_ablation(
