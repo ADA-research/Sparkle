@@ -81,14 +81,6 @@ class Settings:
 
     # Default output subdirs
     DEFAULT_output_analysis = DEFAULT_output / analysis_dir
-    DEFAULT_output_raw = DEFAULT_output_analysis / rawdata_dir
-    DEFAULT_configuration_output_analysis = DEFAULT_configuration_output / analysis_dir
-    DEFAULT_selection_output_raw = DEFAULT_selection_output / rawdata_dir
-    DEFAULT_selection_output_analysis = DEFAULT_selection_output / analysis_dir
-    DEFAULT_parallel_portfolio_output_raw =\
-        DEFAULT_parallel_portfolio_output / rawdata_dir
-    DEFAULT_parallel_portfolio_output_analysis =\
-        DEFAULT_parallel_portfolio_output / analysis_dir
 
     # Old default output dirs which should be part of something else
     DEFAULT_feature_data = DEFAULT_output / "Feature_Data"
@@ -99,7 +91,7 @@ class Settings:
         DEFAULT_solver_dir, DEFAULT_instance_dir, DEFAULT_extractor_dir,
         DEFAULT_output, DEFAULT_configuration_output,
         DEFAULT_selection_output,
-        DEFAULT_output_analysis, DEFAULT_output_raw,
+        DEFAULT_output_analysis,
         DEFAULT_tmp_output, DEFAULT_log_output,
         DEFAULT_feature_data, DEFAULT_performance_data,
         DEFAULT_settings_dir, DEFAULT_reference_dir,
