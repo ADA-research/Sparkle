@@ -249,7 +249,6 @@ def generate_configuration_section(report: pl.Document, scenario: ConfigurationS
 def generate_selection_section(report: pl.Document, scenario: SelectionScenario,
                                scenario_output: SelectionOutput) -> None:
     """Generate a section for a selection scenario."""
-    # TODO: Should this section name be more unique?
     report_dir = Path(report.default_filepath).parent
     time_stamp = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
     plot_dir = report_dir / f"{scenario.name}_plots_{time_stamp}"
@@ -397,10 +396,140 @@ def generate_selection_section(report: pl.Document, scenario: SelectionScenario,
                     f"textbf{{{test_set_name}}} ({test_set_size} instances): {result}"))
 
 
-# def generate_parallel_portfolio_section(report: pl.Document,
-# scenario: ParallelPortfolioScenario) -> None:
-#    """Generate a section for a parallel portfolio scenario."""
-#    pass
+def generate_parallel_portfolio_section(report: pl.Document,
+                                        scenario: PerformanceDataFrame) -> None:
+    """Generate a section for a parallel portfolio scenario."""
+    report_dir = Path(report.default_filepath).parent
+    portfolio_name = scenario.csv_filepath.parent.name
+    time_stamp = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
+    plot_dir = report_dir / f"{portfolio_name}_plots_{time_stamp}"
+    plot_dir.mkdir()
+    report.append(pl.Section(f"Parallel Portfolio {portfolio_name}"))
+    report.append(
+        "In this scenario, Sparkle runs the portfolio of Solvers on each instance in "
+        "parallel with "
+        f"{gv.settings().get_parallel_portfolio_number_of_seeds_per_solver()} different "
+        "seeds. The cutoff time for each solver run is set to "
+        f"{gv.settings().get_general_solver_cutoff_time()} seconds.")
+    report.append(pl.Subsection("Solvers & Instance Sets"))
+    report.append("The following Solvers were used in the portfolio:")
+    # 1. Report on the Solvers and Instance Sets used for the portfolio
+    with report.create(pl.Itemize()) as solver_latex_list:
+        configs = scenario.configurations
+        for solver in scenario.solvers:
+            solver_name = solver.replace("_", " ")
+            solver_latex_list.add_item(
+                pl.UnsafeCommand(
+                    f"textbf{{{solver_name}}} "
+                    f"({len(configs[solver])} configurations)"))
+    report.append("The following Instance Sets were used in the portfolio:")
+    instance_sets = set(Path(instance).parent.name for instance in scenario.instances)
+    instance_set_count = [
+        len([i for i in scenario.instances if Path(i).parent.name == s])
+        for s in instance_sets]
+    with report.create(pl.Itemize()) as instance_set_latex_list:
+        for set_name, set_size in zip(instance_sets, instance_set_count):
+            set_name = set_name.replace("_", " ")  # Latex fix
+            instance_set_latex_list.add_item(
+                pl.UnsafeCommand(
+                    f"textbf{{{set_name}}} ({set_size} instances)"))
+    # 2. List which solver was the best on how many instances
+    report.append(pl.Subsection("Portfolio Performance"))
+    objective = scenario.objectives[0]
+    report.append(f"The objective for the portfolio is {objective}. The "
+                  "following performance of the solvers was found over the instances: ")
+    best_solver_count = {solver: 0 for solver in scenario.solvers}
+    for instance in scenario.instances:
+        ranking = scenario.get_solver_ranking(objective=objective, instances=[instance])
+        best_solver_count[ranking[0][0]] += 1
+
+    with report.create(pl.Itemize()) as latex_list:
+        for solver, count in best_solver_count.items():
+            solver_name = solver.replace("_", " ")
+            latex_list.add_item(pl.UnsafeCommand(
+                f"textbf{{{solver_name}}} was the best solver on {count} instance(s)."))
+        # TODO Report how many instances remained unsolved
+
+    # 3. Create table showing the performance of the portfolio vs and all solvers,
+    # by showing the status count and number of times the solver was best
+    solver_cancelled_count = {solver: 0 for solver in scenario.solvers}
+    solver_timeout_count = {solver: 0 for solver in scenario.solvers}
+    status_objective = [o for o in scenario.objective_names
+                        if o.lower().startswith("status")][0]
+    cancelled_status = [SolverStatus.UNKNOWN, SolverStatus.CRASHED, SolverStatus.WRONG,
+                        SolverStatus.ERROR, SolverStatus.KILLED]
+    for solver in scenario.solvers:
+        status = scenario.get_value(solver=solver, objective=status_objective)
+        for status in scenario.get_value(solver=solver, objective=status_objective):
+            status = SolverStatus(status)
+            if status in cancelled_status:
+                solver_cancelled_count[solver] += 1
+            elif status == SolverStatus.TIMEOUT:
+                solver_timeout_count[solver] += 1
+
+    report.append(latex.AutoRef("tab:parallelportfoliotable"))
+    report.append(pl.utils.bold(" "))
+    report.append(" shows the performance of the portfolio on the test set(s).")
+    tabular = pl.Tabular("r|rrrr")
+    tabular.add_row(["Solver", objective, "# Timeouts", "# Cancelled", "# Best"])
+    tabular.add_hline()
+    solver_performance = {solver: round(performance, MAX_DEC)
+                          for solver, _, performance in
+                          scenario.get_solver_ranking(objective=objective)}
+    for solver in scenario.solvers:
+        tabular.add_row(solver,
+                        solver_performance[solver],
+                        solver_timeout_count[solver],
+                        solver_cancelled_count[solver],
+                        best_solver_count[solver])
+    tabular.add_hline()
+    portfolio_performance = round(
+        scenario.best_performance(objective=objective), MAX_DEC)
+    tabular.add_row(portfolio_name, portfolio_performance,
+                    sum(solver_timeout_count.values()),
+                    sum(solver_cancelled_count.values()),
+                    sum(best_solver_count.values()))
+    table_portfolio = pl.Table(position="h")
+    table_portfolio.append(pl.UnsafeCommand("centering"))
+    table_portfolio.append(tabular)
+    table_portfolio.add_caption("Parallel Portfolio Performance")
+    table_portfolio.append(pl.UnsafeCommand(r"label{tab:parallelportfoliotable}"))
+    report.append(table_portfolio)
+
+    # 4. Create scatter plot analysis between the portfolio and the single best solver
+    sbs_name = scenario.get_solver_ranking(objective=objective)[0][0]
+    sbs_instance_performance = scenario.get_value(
+        solver=sbs_name, objective=objective.name)
+    sbs_name = Path(sbs_name).name
+    report.append(latex.AutoRef("fig:portfoliovssbs"))
+    report.append(pl.utils.bold(" "))
+    report.append(" shows the emprical comparison between the portfolio and the single "
+                  f"best solver (SBS) {sbs_name}.")
+    portfolio_instance_performance = scenario.best_instance_performance(
+        objective=objective.name).tolist()
+    import pandas as pd
+    df = pd.DataFrame(
+        [sbs_instance_performance, portfolio_instance_performance],
+        index=[f"SBS ({sbs_name}) Performance", "Portfolio Performance"], dtype=float).T
+    plot = latex.comparison_plot(df, None)
+    plot_path = plot_dir /\
+        f"sbs_{sbs_name}_vs_"\
+        f"parallel_portfolio.pdf"
+    plot.write_image(plot_path)
+    with report.create(pl.Figure(position="h")) as figure:
+        figure.add_image(str(plot_path.relative_to(report_dir)),
+                         width=pl.utils.NoEscape(r"0.6\textwidth"))
+        figure.add_caption(
+            f"Portfolio vs SBS Performance ({objective})")
+        figure.append(pl.UnsafeCommand(
+            r"label{fig:portfoliovssbs}"))
+
+
+def generate_appendix(report: pl.Document) -> None:
+    """Generate an appendix for the report."""
+    report.append(pl.Section("Appendix"))
+    report.append("This is the appendix.")
+    # TODO: Add long table for the entire performance data frame
 
 
 def main(argv: list[str]) -> None:
@@ -439,7 +568,7 @@ def main(argv: list[str]) -> None:
     configuration_scenarios = gv.configuration_scenarios()
     selection_scenarios = gv.selection_scenarios()
     # TODO: Write and fetch parallel portfolios
-    # parallel_portfolio_scenarios = ...
+    parallel_portfolio_scenarios = gv.parallel_portfolio_scenarios()
 
     # TODO: Filter scenarios based on args
 
@@ -447,24 +576,18 @@ def main(argv: list[str]) -> None:
     processed_configuration_scenarios = []
     processed_selection_scenarios = []
     for configuration_scenario in configuration_scenarios:
-        # TODO: Detect test set of the configuration scenario?
-        # Or should it just be in there?
-        # This leaves some questions how to resolve..
         processed_configuration_scenarios.append(
             (ConfigurationOutput(configuration_scenario,
                                  performance_data), configuration_scenario))
     for selection_scenario in selection_scenarios:
-        # TODO: Detect test set of the selection scenario?
         processed_selection_scenarios.append(
             (SelectionOutput(selection_scenario,
                              feature_data), selection_scenario))
 
-    # TODO write the serialisation
     raw_output = gv.settings().DEFAULT_output_analysis / "JSON"
     if raw_output.exists():  # Clean
         shutil.rmtree(raw_output)
     raw_output.mkdir()
-
     # TODO Write serialisation
 
     if args.only_json:  # Done
@@ -521,6 +644,9 @@ def main(argv: list[str]) -> None:
 
     for (scenario_output, scenario) in processed_selection_scenarios:
         generate_selection_section(report, scenario, scenario_output)
+
+    for parallel_dataframe in parallel_portfolio_scenarios:
+        generate_parallel_portfolio_section(report, parallel_dataframe)
 
     # TODO Parallel Portfolio sections
 

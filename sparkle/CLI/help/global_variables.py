@@ -4,6 +4,7 @@ import ast
 
 from sparkle.CLI.help.reporting_scenario import ReportingScenario
 from sparkle.platform.settings_objects import Settings
+from sparkle.structures import PerformanceDataFrame
 from sparkle.configurator.configurator import ConfigurationScenario
 from sparkle.configurator.implementations import (SMAC2Scenario, SMAC3Scenario,
                                                   ParamILSScenario, IRACEScenario)
@@ -73,6 +74,12 @@ def selection_scenarios(refresh: bool = False) -> list[SelectionScenario]:
                 continue
             __selection_scenarios.append(SelectionScenario.from_file(f))
     return __selection_scenarios
+
+
+def parallel_portfolio_scenarios() -> list[PerformanceDataFrame]:
+    """Fetch all known parallel portfolio scenarios."""
+    parallel_portfolio_path = settings().DEFAULT_parallel_portfolio_output
+    return [PerformanceDataFrame(f) for f in parallel_portfolio_path.glob("*/*/*.csv")]
 
 
 reference_list_dir = Settings.DEFAULT_reference_dir
