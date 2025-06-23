@@ -90,13 +90,6 @@ def main(argv: list[str]) -> None:
         gv.settings().set_run_on(
             args.run_on.value, SettingState.CMD_LINE)
 
-    # TODO: The structure in Sparkle has changed substantially
-    # 1. Have ablation scenarios be run on configuration scenarios instead
-    # 2. Make the output be written into the configuration scenario's directory
-    # 3. Have config scenarios auto detect the presence of this data and include it there
-    # 4. Process the data through ConfigurationOutput
-    # 5. Use this data to write the report section on ablation
-
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))
     Settings.check_settings_changes(gv.settings(), prev_settings)
