@@ -13,10 +13,13 @@ Notable changes to Sparkle will be documented in this file.
 - Changed the structure of PerformanceDataFrame to now hold algorithm configuration as IDs in a column. The configurations are held in the same file and automatically read and resolved. [SPRK-373]
 - Sparkle supports both .py and .sh solver wrappers and has been updated accordingly [SPRK-162]
 - SparkleExecutable no longer has a 'raw output directory' [SPRK-162]
+- Sparkle generate report command has been refacored to support multiple scenarios in one report [SPRK-161]
+- Sparkle now has scenario definition for Selection [SPRK-161]
 
 ### Fixed
 - Fixed various bugs regarding Solver calls by adding in KILLSIG handlers and updated templates/documentation accordingly [SPRK-162]
 - Fixed bug where default values would override user changes in settings file [SPRK-160]
+- Fixed bug where settings file argument would not be recognised by CLI [SPRK-161]
 
 ## [0.9.3.2] - 13/04/2025
 
