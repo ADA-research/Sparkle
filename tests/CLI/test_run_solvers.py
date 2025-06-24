@@ -81,7 +81,7 @@ def test_run_solvers_configured(tmp_path: Path,
 
     # Test for Solver with specific configuration (2nd best)
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        run_solvers.main(["--configuration", "SMAC2_20250523115757_6",
+        run_solvers.main(["--configuration", "SMAC2_20250624-1659_6",
                           "--instance", str(test_instance),
                           "--run-on", "local"])
     assert pytest_wrapped_e.type is SystemExit
