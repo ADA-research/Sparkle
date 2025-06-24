@@ -97,3 +97,4 @@ for data_path in file_storage_data_mapping.keys():
             file_storage_data_mapping[data_path] = ast.literal_eval(fo.read())
 
 solver_nickname_mapping = file_storage_data_mapping[solver_nickname_list_path]
+instance_set_nickname_mapping = file_storage_data_mapping[instances_nickname_path]

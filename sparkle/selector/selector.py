@@ -240,6 +240,17 @@ class SelectionScenario:
         """Get the test instance sets."""
         return list(set(Path(i).parent.name for i in self.test_instances))
 
+    @property
+    def instance_sets(self: SelectionScenario) -> list[str]:
+        """Get all the instance sets used in this scenario."""
+        return list(set(Path(i).parent.name
+                        for i in self.selector_performance_data.instances))
+
+    @property
+    def solvers(self: SelectionScenario) -> list[str]:
+        """Get the solvers used for the selector."""
+        return self.performance_data.columns.to_list()
+
     def create_scenario(self: SelectionScenario) -> None:
         """Prepare the scenario directories."""
         self.directory.mkdir(parents=True, exist_ok=True)

@@ -257,19 +257,13 @@ InstanceSetTrainOptionalArgument = \
                               "type": Path,
                               "help": "path to training instance set"})
 
-InstanceSetTestReportArgument = \
-    ArgumentContainer(names=["--instance-set-test"],
+InstanceSetsReportArgument = \
+    ArgumentContainer(names=["--instance-sets", "--instance-set"],
                       kwargs={"required": False,
+                              "nargs": "+",
                               "type": str,
-                              "help": "path to testing instance set included in "
-                              "Sparkle for an algorithm configuration report"})
-
-InstanceSetTrainReportArgument = \
-    ArgumentContainer(names=["--instance-set-train"],
-                      kwargs={"required": False,
-                              "type": str,
-                              "help": "path to training instance set included in "
-                              "Sparkle for an algorithm configuration report"})
+                              "help": "Instance Set(s) to use for the report. If not "
+                                      "specified, all Instance Sets are used."})
 
 InstancesPathArgument = ArgumentContainer(names=["instances_path"],
                                           kwargs={"metavar": "instances-path",
@@ -309,16 +303,6 @@ NicknameSolverArgument = \
     ArgumentContainer(names=["--nickname"],
                       kwargs={"type": str,
                               "help": "set a nickname for the solver"})
-
-NoAblationReportArgument = ArgumentContainer(names=["--no-ablation"],
-                                             kwargs={"required": False,
-                                                     "dest": "flag_ablation",
-                                                     "default": True,
-                                                     "const": False,
-                                                     "nargs": "?",
-                                                     "help": "turn off reporting on "
-                                                             "ablation for an algorithm "
-                                                             "configuration report"})
 
 NoCopyArgument = ArgumentContainer(names=["--no-copy"],
                                    kwargs={"action": "store_true",
@@ -416,11 +400,6 @@ SeedArgument = ArgumentContainer(names=["--seed"],
                                  kwargs={"type": int,
                                          "help": "seed to use for the command"})
 
-SelectionReportArgument = \
-    ArgumentContainer(names=["--selection"],
-                      kwargs={"action": "store_true",
-                              "help": "set to generate a normal selection report"})
-
 SelectionScenarioArgument = \
     ArgumentContainer(names=["--selection-scenario"],
                       kwargs={"required": True,
@@ -493,24 +472,18 @@ SolverPathArgument = ArgumentContainer(names=["solver_path"],
                                                "type": str,
                                                "help": "path to the solver"})
 
-SolverReportArgument = ArgumentContainer(names=["--solver"],
-                                         kwargs={"required": False,
-                                                 "type": str,
-                                                 "default": None,
-                                                 "help": "path to solver for an "
-                                                 "algorithm configuration report"})
+SolversReportArgument = ArgumentContainer(
+    names=["--solvers", "--solver"],
+    kwargs={"nargs": "+",
+            "type": str,
+            "default": None,
+            "help": "Solver(s) to use for the report. If not specified, all solvers are "
+                    "included."})
 
 SolverCutOffTimeArgument = \
     ArgumentContainer(names=["--solver-cutoff-time", "--target-cutoff-time"],
                       kwargs={"type": int,
                               "help": "cutoff time per Solver run in seconds"})
-
-TestCaseDirectoryArgument = \
-    ArgumentContainer(names=["--test-case-directory"],
-                      kwargs={"type": str,
-                              "default": None,
-                              "help": "Path to test case directory of an instance set "
-                              + "for a selection report"})
 
 TestSetRunAllConfigurationArgument = \
     ArgumentContainer(names=["--test-set-run-all-configurations"],

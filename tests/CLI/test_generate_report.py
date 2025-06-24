@@ -31,7 +31,7 @@ def test_generate_report_configuration(
     # Generate report with training set only
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         generate_report.main(["--solver", "PbO-CCSAT-Generic",
-                              "--instance-set-train", "PTN"])
+                              "--instance-set", "PTN"])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 

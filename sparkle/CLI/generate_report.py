@@ -5,6 +5,7 @@ import shutil
 import argparse
 from pathlib import Path
 import time
+import json
 
 import pylatex as pl
 from sparkle import __version__ as __sparkle_version__
@@ -12,9 +13,10 @@ from sparkle import __version__ as __sparkle_version__
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import resolve_object_name
 from sparkle.CLI.help import logging as sl
-# from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
 
+from sparkle.solver import Solver
+from sparkle.instance import Instance_Set
 from sparkle.selector import Extractor
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.configurator.configurator import ConfigurationScenario
@@ -24,7 +26,6 @@ from sparkle.types import SolverStatus
 from sparkle.platform import latex
 from sparkle.platform.output.configuration_output import ConfigurationOutput
 from sparkle.platform.output.selection_output import SelectionOutput
-# from sparkle.platform.output.parallel_portfolio_output import ParallelPortfolioOutput
 
 
 MAX_DEC = 4  # Maximum decimals used for each reported value
@@ -38,9 +39,13 @@ def parser_function() -> argparse.ArgumentParser:
         epilog="If you wish to filter specific solvers, instance sets, ... have a look "
                "at the command line arguments.")
     # Add argument for filtering solvers
-    # Add argument for filtering instance sets (Both train and test)
-    # Add argument for filtering configurators
-    # Add argument for filtering selectors
+    parser.add_argument(*ac.SolversReportArgument.names,
+                        **ac.SolversReportArgument.kwargs)
+    # Add argument for filtering instance sets
+    parser.add_argument(*ac.InstanceSetsReportArgument.names,
+                        **ac.InstanceSetsReportArgument.kwargs)
+    # Add argument for filtering configurators?
+    # Add argument for filtering selectors?
     # Add argument for filtering ??? scenario ids? configuration ids?
     parser.add_argument(*ac.GenerateJSONArgument.names,
                         **ac.GenerateJSONArgument.kwargs)
@@ -567,12 +572,46 @@ def main(argv: list[str]) -> None:
     # Fetch all known scenarios
     configuration_scenarios = gv.configuration_scenarios()
     selection_scenarios = gv.selection_scenarios()
-    # TODO: Write and fetch parallel portfolios
     parallel_portfolio_scenarios = gv.parallel_portfolio_scenarios()
 
-    # TODO: Filter scenarios based on args
+    # Filter scenarios based on args
+    if args.solvers:
+        solvers = [resolve_object_name(s,
+                                       gv.solver_nickname_mapping,
+                                       gv.settings().DEFAULT_solver_dir,
+                                       Solver)
+                   for s in args.solvers]
+        configuration_scenarios = [
+            s for s in configuration_scenarios
+            if s.solver.directory in [s.directory for s in solvers]
+        ]
+        selection_scenarios = [
+            s for s in selection_scenarios
+            if set(s.solvers).intersection([str(s.directory) for s in solvers])
+        ]
+        parallel_portfolio_scenarios = [
+            s for s in parallel_portfolio_scenarios
+            if set(s.solvers).intersection([str(s.directory) for s in solvers])
+        ]
+    if args.instance_sets:
+        instance_sets = [resolve_object_name(s,
+                                             gv.instance_set_nickname_mapping,
+                                             gv.settings().DEFAULT_instance_dir,
+                                             Instance_Set)
+                         for s in args.instance_sets]
+        configuration_scenarios = [
+            s for s in configuration_scenarios
+            if s.instance_set.directory in [s.directory for s in instance_sets]
+        ]
+        selection_scenarios = [
+            s for s in selection_scenarios
+            if set(s.instance_sets).intersection([str(s.name) for s in instance_sets])
+        ]
+        parallel_portfolio_scenarios = [
+            s for s in parallel_portfolio_scenarios
+            if set(s.instance_sets).intersection([str(s.name) for s in instance_sets])
+        ]
 
-    # TODO: Serialize each scenario and write to output
     processed_configuration_scenarios = []
     processed_selection_scenarios = []
     for configuration_scenario in configuration_scenarios:
@@ -588,7 +627,20 @@ def main(argv: list[str]) -> None:
     if raw_output.exists():  # Clean
         shutil.rmtree(raw_output)
     raw_output.mkdir()
-    # TODO Write serialisation
+
+    # Write JSON
+    output_json = {}
+    for output, configuration_scenario in processed_configuration_scenarios:
+        output_json[configuration_scenario.name] = output.serialise()
+    for output, selection_scenario in processed_selection_scenarios:
+        output_json[selection_scenario.name] = output.serialise()
+    # TODO: We do not have an output object for parallel portfolios
+
+    raw_output_json = raw_output / "output.json"
+    with raw_output_json.open("w") as f:
+        json.dump(output_json, f, indent=4)
+
+    print(f"Machine readable output written to: {raw_output_json}")
 
     if args.only_json:  # Done
         sys.exit(0)
@@ -605,8 +657,7 @@ def main(argv: list[str]) -> None:
     report = pl.document.Document(
         default_filepath=str(target_path),
         document_options=["british"])
-    # TODO cleanup hard coded path
-    bibpath = Path("sparkle/Components/latex_source/report.bib")
+    bibpath = gv.settings().bibliography_path
     newbibpath = report_directory / "report.bib"
     shutil.copy(bibpath, newbibpath)
     # BUGFIX for unknown package load in PyLatex
@@ -666,6 +717,7 @@ def main(argv: list[str]) -> None:
     report.generate_pdf(target_path, clean=False, clean_tex=False, compiler="pdflatex")
     report.generate_pdf(target_path, clean=False, clean_tex=False, compiler="pdflatex")
     print(f"Report generated at {target_path}.pdf")
+    sys.exit(0)
 
 
 if __name__ == "__main__":

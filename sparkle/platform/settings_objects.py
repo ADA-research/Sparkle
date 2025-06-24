@@ -48,6 +48,9 @@ class Settings:
     # Default library pathing
     DEFAULT_components = lib_prefix / "Components"
 
+    # Report Component: Bilbiography
+    bibliography_path = DEFAULT_components / "latex_source" / "report.bib"
+
     # Example settings path
     DEFAULT_example_settings_path = PurePath(DEFAULT_components / "sparkle_settings.ini")
 
@@ -59,10 +62,6 @@ class Settings:
     DEFAULT_ablation_dir = DEFAULT_components / "ablationAnalysis-0.9.4"
     DEFAULT_ablation_exec = DEFAULT_ablation_dir / "ablationAnalysis"
     DEFAULT_ablation_validation_exec = DEFAULT_ablation_dir / "ablationValidation"
-
-    # Report component
-    DEFAULT_latex_source = DEFAULT_components / "Sparkle-latex-source"
-    DEFAULT_latex_bib = DEFAULT_latex_source / "SparkleReport.bib"
 
     # Default input directory pathing
     DEFAULT_solver_dir = cwd_prefix / "Solvers"
