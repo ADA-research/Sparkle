@@ -39,6 +39,7 @@ def test_paramils_organise_output(tmp_path: Path,
         "sparrow_c2": "1",
         "sparrow_c3": "20000",
         "threshold_swt": "844",
+        "configuration_id": 2,
     }
 
 
