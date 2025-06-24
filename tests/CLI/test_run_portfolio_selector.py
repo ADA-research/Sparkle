@@ -54,9 +54,13 @@ def test_run_portfolio_selector_command(
 
     # Smoke test
     # Run set test slurm
+    scenario = "Output/Selection/MultiClassClassifier_RandomForestClassifier/"\
+               "CSCCSat_MiniSAT_PbO-CCSAT-Generic/scenario.txt"
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        run_portfolio_selector.main([str(example_test_set_path),
-                                     "--settings-file", str(settings_path)])
+        run_portfolio_selector.main([
+            "--selection-scenario", scenario,
+            "--instance", str(example_test_set_path),
+            "--settings-file", str(settings_path)])
     cli_tools.kill_slurm_jobs()
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
@@ -65,7 +69,9 @@ def test_run_portfolio_selector_command(
     # NOTE: These tests only work in this order (First Slurm then Local), not sure why
     # Without this order the test doesn't fail but simply doesn't complete
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        run_portfolio_selector.main([str(example_file_path),
-                                     "--run-on", "local"])
+        run_portfolio_selector.main([
+            "--selection-scenario", scenario,
+            "--instance", str(example_file_path),
+            "--run-on", "local"])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
