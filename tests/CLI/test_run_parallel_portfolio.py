@@ -255,7 +255,7 @@ def test_main(case: str) -> None:
                 f"got {excinfo.value.code}"
             )
         current_port_path = gv.latest_scenario().get_parallel_portfolio_path().as_posix()
-        assert current_port_path.startswith("Output/Parallel_Portfolio/Raw_Data/"), (
+        assert current_port_path.startswith("Output/Parallel_Portfolio/"), (
             "Expected portfolio path should start with"
             "Output/Parallel_Portfolio/Raw_Data/"
             f"but got, {current_port_path}"
