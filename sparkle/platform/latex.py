@@ -34,7 +34,9 @@ def comparison_plot(data_frame: pd.DataFrame,
     """
     from scipy import stats
     # Determine if data is log scale, linregress tells us how linear the data is
-    linregress = stats.linregress(data_frame.to_numpy())
+    linregress = stats.linregress(
+        data_frame[data_frame.columns[0]].to_numpy(),
+        data_frame[data_frame.columns[1]].to_numpy())
     log_scale = not (linregress.rvalue > 0.65 and linregress.pvalue < 0.05)
 
     if log_scale and (data_frame < 0).any(axis=None):
