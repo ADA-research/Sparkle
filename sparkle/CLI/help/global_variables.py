@@ -79,7 +79,7 @@ def selection_scenarios(refresh: bool = False) -> list[SelectionScenario]:
 def parallel_portfolio_scenarios() -> list[PerformanceDataFrame]:
     """Fetch all known parallel portfolio scenarios."""
     parallel_portfolio_path = settings().DEFAULT_parallel_portfolio_output
-    return [PerformanceDataFrame(f) for f in parallel_portfolio_path.glob("*/*/*.csv")]
+    return [PerformanceDataFrame(f) for f in parallel_portfolio_path.glob("*/*.csv")]
 
 
 reference_list_dir = Settings.DEFAULT_reference_dir
