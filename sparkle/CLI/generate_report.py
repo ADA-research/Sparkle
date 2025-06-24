@@ -556,8 +556,8 @@ def main(argv: list[str]) -> None:
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
 
     # Fetch all known scenarios
-    configuration_scenarios = gv.configuration_scenarios()
-    selection_scenarios = gv.selection_scenarios()
+    configuration_scenarios = gv.configuration_scenarios(refresh=True)
+    selection_scenarios = gv.selection_scenarios(refresh=True)
     parallel_portfolio_scenarios = gv.parallel_portfolio_scenarios()
 
     # Filter scenarios based on args
