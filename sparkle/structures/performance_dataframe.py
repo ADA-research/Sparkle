@@ -510,6 +510,14 @@ class PerformanceDataFrame(pd.DataFrame):
             if self.loc[row_index].isna().all():
                 self.drop(row_index, inplace=True)
 
+    def filter_objective(self: PerformanceDataFrame,
+                         objective: str | list[str]) -> None:
+        """Filter the Dataframe to a subset of objectives."""
+        if isinstance(objective, str):
+            objective = [objective]
+        self.drop(list(set(self.objective_names) - set(objective)),
+                  axis=0, level=PerformanceDataFrame.index_objective, inplace=True)
+
     def reset_value(self: PerformanceDataFrame,
                     solver: str,
                     instance: str,

@@ -6,9 +6,13 @@ from pathlib import Path
 from unittest.mock import patch
 from unittest.mock import MagicMock
 
+from asf import selectors
+from sklearn import ensemble
+
 from sparkle.CLI import load_snapshot
 from sparkle.CLI import compute_marginal_contribution as cmc
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
+from sparkle.selector import Selector, SelectionScenario
 from sparkle.types.objective import PAR
 
 
@@ -16,7 +20,7 @@ class TestMarginalContribution(TestCase):
     """Tests function of Marginal Contribution help."""
 
     @patch("sparkle.structures.PerformanceDataFrame.save_csv")
-    @patch("sparkle.solver.selector.Selector.run")
+    @patch("sparkle.selector.selector.Selector.run")
     @patch("pathlib.Path.mkdir")
     @patch("pathlib.Path.exists")
     def test_compute_actual_selector_performance(
@@ -32,6 +36,8 @@ class TestMarginalContribution(TestCase):
 
         objective = PAR(10)
         performance_df = PerformanceDataFrame(perf_path)
+        # Filter performance df for selection
+        performance_df.filter_objective(objective.name)
         feature_df = FeatureDataFrame(feature_csv_path)
         result = 3.505226166666667
 
@@ -42,11 +48,13 @@ class TestMarginalContribution(TestCase):
                "SMAC2_20250522093407_7", 60.0)]] * 12
         patch_save.return_value = None
         # Not actually called as we patch the selector call
-        pth = Path("tests/test_files/Selection/portfolio_selector_test")
-        output = cmc.compute_selector_performance(pth,
-                                                  performance_df,
-                                                  feature_df,
-                                                  objective)
+        scenario = SelectionScenario(Path(),
+                                     Selector(selectors.PairwiseClassifier,
+                                              ensemble.RandomForestClassifier),
+                                     objective,
+                                     performance_df,
+                                     feature_df)
+        output = cmc.compute_selector_performance(scenario, feature_df)
         assert output == result
 
     def test_compute_actual_selector_marginal_contribution(self: TestCase
