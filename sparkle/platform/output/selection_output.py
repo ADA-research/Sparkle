@@ -174,7 +174,6 @@ class SelectionOutput:
             "solvers": self.serialise_solvers(self.solver_data),
             "training_instances": self.serialise_instances(self.training_instances),
             "test_instances": test_data,
-            "performance": self.serialise_performance(self.performance_data),
             "settings": {"cutoff_time": self.cutoff_time},
             "marginal_contribution": self.serialise_marginal_contribution()
         }

@@ -73,8 +73,9 @@ class TestMarginalContribution(TestCase):
 def test_marginal_contribution_command(tmp_path: Path,
                                        monkeypatch: pytest.MonkeyPatch) -> None:
     """Test for CLI entry point marginal_contribution."""
-    snapshot = Path("tests/CLI/test_files/"
-                    "snapshot_CSCCSat_MiniSAT_PTN_marginal_contribution.zip").absolute()
+    snapshot = Path(
+        "tests/CLI/test_files/"
+        "snapshot_constructed_portfolio_selector_csccsat_minisat_ptn.zip").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
 
     # Setup Platform
@@ -84,6 +85,9 @@ def test_marginal_contribution_command(tmp_path: Path,
     assert pytest_wrapped_e.value.code == 0
 
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        cmc.main(["--perfect", "--actual", "--objectives", "PAR10"])
+        cmc.main(["--selection-scenario",
+                  "Output/Selection/MultiClassClassifier_RandomForestClassifier/"
+                  "CSCCSat_MiniSAT_PbO-CCSAT-Generic/scenario.txt",
+                  "--perfect", "--actual"])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
