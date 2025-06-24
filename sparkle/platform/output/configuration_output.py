@@ -1,6 +1,5 @@
 """Sparkle class to organise configuration output."""
 from __future__ import annotations
-import json
 from pathlib import Path
 
 from sparkle.structures import PerformanceDataFrame
@@ -166,22 +165,8 @@ class ConfigurationOutput:
         """Serialise the configuration output."""
         return {
             "solver": self.solver.name,
-            "configurator": self.configurator.name,
+            "configurator": self.configurator.__name__,
             "best_configuration": self.best_configuration,
             "best_performance_train": self.best_performance_train,
-            "scenario": self.config_scenario.serialise()
-            if self.configurator.scenario else None,
-            "train_set_results": self.performance_data[self.performance_data.index.isin(
-                [str(p) for p in self.instance_set_train.instance_paths],
-                level=PerformanceDataFrame.index_instance)].to_json(),
-            "test_set_results": (self.performance_data[self.performance_data.index.isin(
-                [str(p) for p in self.test_instance_sets.instance_paths],
-                level=PerformanceDataFrame.index_instance)].to_json()
-                if self.test_instance_sets else None),
+            "scenario": self.config_scenario.serialise(),
         }
-
-    def write_output(self: ConfigurationOutput, output: Path) -> None:
-        """Write data into a JSON file."""
-        output = output / "configuration.json" if output.is_dir() else output
-        with output.open("w") as f:
-            json.dump(self.serialise(), f, indent=4)

@@ -530,11 +530,15 @@ def generate_parallel_portfolio_section(report: pl.Document,
             r"label{fig:portfoliovssbs}"))
 
 
-def generate_appendix(report: pl.Document) -> None:
+def generate_appendix(report: pl.Document,
+                      performance_data: PerformanceDataFrame,
+                      feature_data: FeatureDataFrame) -> None:
     """Generate an appendix for the report."""
-    report.append(pl.Section("Appendix"))
-    report.append("This is the appendix.")
+    report.append(pl.UnsafeCommand("appendix"))
+    report.append("Below are the full performance and feature data frames.")
     # TODO: Add long table for the entire performance data frame
+    # performance_data.to_latex() # maybe?
+    # TODO: Add long table for the entire feature data frame
 
 
 def main(argv: list[str]) -> None:
@@ -547,24 +551,6 @@ def main(argv: list[str]) -> None:
 
     # Process command line arguments
     args = parser.parse_args(argv)
-
-    """
-    filter_solvers = None
-    if args.solvers:
-        filter_solvers = ...
-    filter_training_sets = None
-    if args.instance_set_train:
-        filter_training_sets = ...
-    filter_testing_sets = None
-    if args.instance_set_test:
-        filter_testing_sets = ...
-    filter_configurators = None
-    if args.configurators:
-        filter_configurators = ...
-    filter_selectors = None
-    if args.selectors:
-        selectors = ...
-    """
 
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
@@ -647,8 +633,8 @@ def main(argv: list[str]) -> None:
 
     # TODO: Group scenarios based on:
     # - Configuration / Selection / Parallel Portfolio
-    #   - Training Instance Set / Testing Instance Set
-    #   - Configurators can be merged as long as we can match their budgets clearly
+    # - Training Instance Set / Testing Instance Set
+    # - Configurators can be merged as long as we can match their budgets clearly
     report_directory = gv.settings().DEFAULT_output_analysis / "report"
     if report_directory.exists():  # Clean it
         shutil.rmtree(report_directory)
@@ -699,7 +685,7 @@ def main(argv: list[str]) -> None:
     for parallel_dataframe in parallel_portfolio_scenarios:
         generate_parallel_portfolio_section(report, parallel_dataframe)
 
-    # TODO Parallel Portfolio sections
+    generate_appendix(report, performance_data, feature_data)
 
     # Adding bibliography
     report.append(pl.NewPage())  # Ensure it starts on new page
