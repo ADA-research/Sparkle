@@ -83,10 +83,10 @@ def main(argv: list[str]) -> None:
     flag_recompute_portfolio = args.recompute_portfolio_selector
     solver_ablation = args.solver_ablation
 
-    if ac.set_by_user(args, "settings_file"):
+    if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file
         gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
-    if ac.set_by_user(args, "objective"):
+    if args.objective is not None:
         objective = resolve_objective(args.objective)
     else:
         objective = gv.settings().get_general_sparkle_objectives()[0]

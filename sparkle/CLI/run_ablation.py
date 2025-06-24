@@ -61,28 +61,28 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
 
-    if ac.set_by_user(args, "settings_file"):
+    if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file
         gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )
-    if ac.set_by_user(args, "objectives"):
+    if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
             args.objectives, SettingState.CMD_LINE
         )
-    if ac.set_by_user(args, "solver_cutoff_time"):
+    if args.solver_cutoff_time is not None:
         gv.settings().set_general_solver_cutoff_time(
             args.solver_cutoff_time, SettingState.CMD_LINE
         )
-    if ac.set_by_user(args, "wallclock_time"):
+    if args.wallclock_time is not None:
         gv.settings().set_smac2_wallclock_time(
             args.wallclock_time, SettingState.CMD_LINE
         )
-    if ac.set_by_user(args, "number_of_runs"):
+    if args.number_of_runs is not None:
         gv.settings().set_configurator_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE
         )
-    if ac.set_by_user(args, "racing"):
+    if args.racing is not None:
         gv.settings().set_ablation_racing_flag(
             args.number_of_runs, SettingState.CMD_LINE
         )

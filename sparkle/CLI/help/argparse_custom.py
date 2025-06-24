@@ -59,11 +59,6 @@ def user_set_state(args: argparse.Namespace, arg_name: str) -> SettingState:
         return SettingState.DEFAULT
 
 
-def set_by_user(args: argparse.Namespace, arg_name: str) -> bool:
-    """Return whether an argument was set through the CLI by the user or not."""
-    return hasattr(args, arg_name + "_nondefault")
-
-
 class ArgumentContainer():
     """Helper class for more convenient argument packaging and access."""
     def __init__(self: ArgumentContainer, names: list[str], kwargs: dict[str, Any])\
