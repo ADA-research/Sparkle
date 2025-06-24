@@ -61,6 +61,7 @@ num_jobs = len(solvers) * 2
 fake_jobs = [FakeJob(statuses[i], stdout=stdout) for i in range(num_jobs)]
 
 
+@pytest.mark.integration
 def test_run_parallel_portfolio() -> None:
     """Test for run_parallel_portfolio function."""
     pdf = rpp.create_performance_dataframe(solvers, instance_file, portfolio_path)

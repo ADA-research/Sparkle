@@ -9,7 +9,7 @@ from sparkle.CLI import load_snapshot, generate_report
 def test_generate_report_configuration(
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch) -> None:
-    """Test generate report for configuration."""
+    """Test generate report for configuration Smoke Test."""
     snapshot_path = (
         Path("tests") / "CLI" / "test_files"
         / "snapshot_configured_solver_Pb0-CCSAT-Generic_PTN.zip").absolute()
@@ -97,3 +97,28 @@ def test_generate_report_parallel_portfolio(
         generate_report.main([])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
+
+
+@pytest.mark.integration
+def test_configuration_output(tmp_path: Path,
+                              monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test generate report configuration output (JSON)."""
+    # TODO: Write test with actual / value content checking
+    pass
+
+
+@pytest.mark.integration
+def test_selection_portfolio_output(tmp_path: Path,
+                                    monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test generate report selection output (JSON)."""
+    # TODO: Write test with actual / value content checking
+    pass
+
+
+@pytest.mark.integration
+def test_parallel_portfolio_output(tmp_path: Path,
+                                   monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test generate report parallel output (JSON)."""
+    # TODO: Write Parallel Portfolio data to JSON
+    # TODO: Write test with actual / value content checking
+    pass

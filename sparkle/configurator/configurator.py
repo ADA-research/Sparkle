@@ -299,7 +299,6 @@ class AblationScenario:
     def __init__(self: AblationScenario,
                  configuration_scenario: ConfigurationScenario,
                  test_set: InstanceSet,
-                 cutoff_time: int,
                  cutoff_length: str,
                  concurrent_clis: int,
                  best_configuration: dict,
@@ -311,7 +310,6 @@ class AblationScenario:
             configuration_scenario: Configuration scenario
             train_set: The training instance
             test_set: The test instance
-            cutoff_time: The cutoff time for ablation analysis
             cutoff_length: The cutoff length for ablation analysis
             concurrent_clis: The maximum number of concurrent jobs on a single node
             best_configuration: The configuration to ablate from.
@@ -322,7 +320,7 @@ class AblationScenario:
         self.train_set = configuration_scenario.instance_set
         self.concurrent_clis = None
         self.test_set = test_set
-        self.cutoff_time = cutoff_time
+        self.cutoff_time = configuration_scenario.solver_cutoff_time
         self.cutoff_length = cutoff_length
         self.concurrent_clis = concurrent_clis
         self.best_configuration = best_configuration
@@ -555,7 +553,6 @@ class AblationScenario:
                 test_set = Instance_Set(test_path)
         return AblationScenario(config_scenario,
                                 test_set,
-                                int(variables["cutoffTime"]),
                                 variables["cutoff_length"],
                                 int(variables["cli-cores"]),
                                 best_conf,

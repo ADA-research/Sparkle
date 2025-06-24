@@ -5,7 +5,7 @@ import pytest
 from unittest.mock import patch
 
 from sparkle.configurator.implementations import SMAC2Scenario
-from sparkle.configurator.ablation import AblationScenario
+from sparkle.configurator import AblationScenario
 from sparkle.solver import Solver
 from sparkle.types.objective import PAR
 from sparkle.instance import Instance_Set
@@ -21,17 +21,30 @@ output_directory: Path = Path("Output/ablation_test")
 ablation_executable: Path = None
 validation_executable: Path = None
 override_dirs: bool = False
+cutoff_time = 2
 configuration_scenario = SMAC2Scenario(
     solver,
     dataset,
     [objective],
+    cutoff_time,
     Path()
 )
+cutoff_length = "3"
+concurrent_clis = 4
+best_configuration = {
+    "init_solution": "2",
+    "perform_first_div": "1",
+    "asd": 5,
+    "test_bool": True
+}
+ablation_racing = False
 scenario = AblationScenario(
     configuration_scenario,
     test_dataset,
-    output_directory,
-    override_dirs
+    cutoff_length,
+    concurrent_clis,
+    best_configuration,
+    ablation_racing
 )
 
 
@@ -50,16 +63,6 @@ def test_ablation_scenario_constructor() -> None:
 
 def test_create_configuration_file() -> None:
     """Test for method create_configuration_file."""
-    cutoff_time = 2
-    cutoff_length = "3"
-    concurrent_clis = 4
-    best_configuration = {
-        "init_solution": "2",
-        "perform_first_div": "1",
-        "asd": 5,
-        "test_bool": True
-    }
-    ablation_racing = False
     validation_config_file = scenario.validation_dir / "ablation_config.txt"
 
     returned_val = scenario.create_configuration_file(

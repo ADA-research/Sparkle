@@ -3,7 +3,9 @@ from __future__ import annotations
 
 from sparkle.selector import SelectionScenario
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from sparkle.platform import generate_report_for_selection as sgfs
+# TODO: This dependency should be removed or the functionality should be moved
+from sparkle.CLI.compute_marginal_contribution import \
+    compute_selector_marginal_contribution
 from sparkle.platform.output.structures import SelectionPerformance, SelectionSolverData
 
 import json
@@ -65,8 +67,8 @@ class SelectionOutput:
                 instances=self.training_instances,
                 sort=True)
         self.marginal_contribution_actual = \
-            sgfs.compute_selector_marginal_contribution(feature_data,
-                                                        selection_scenario)
+            compute_selector_marginal_contribution(feature_data,
+                                                   selection_scenario)
 
         # Collect performance data
         self.vbs_performance_data = solver_performance_data.best_instance_performance(

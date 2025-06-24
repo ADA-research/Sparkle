@@ -142,7 +142,6 @@ def main(argv: list[str]) -> None:
     ablation_scenario = AblationScenario(
         config_scenario,
         instance_set_test,
-        cutoff_time=gv.settings().get_general_solver_cutoff_time(),
         cutoff_length=gv.settings().get_smac2_target_cutoff_length(),  # NOTE: SMAC2
         concurrent_clis=gv.settings().get_slurm_max_parallel_runs_per_node(),
         best_configuration=best_configuration,
