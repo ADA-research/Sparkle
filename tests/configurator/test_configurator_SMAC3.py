@@ -49,7 +49,7 @@ def test_smac3_scenario_from_file() -> None:
     assert scenario.smac3_scenario.name == scenario.name
     assert len(scenario.smac3_scenario.objectives) == 1
     assert scenario.directory == source.parent.parent / scenario.name
-    assert scenario.cutoff_time == 60
+    assert scenario.solver_cutoff_time == 60
     assert scenario.number_of_runs == 5
     assert scenario.smac3_scenario.crash_cost == 15.0
     assert scenario.smac3_scenario.termination_cost_threshold == 24.0
