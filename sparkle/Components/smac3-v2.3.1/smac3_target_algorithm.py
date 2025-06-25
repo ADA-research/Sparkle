@@ -259,7 +259,7 @@ if __name__ == "__main__":
     scenario = SMAC3Scenario.from_file(scenario_file, run_index=seed)
     global solver, objectives, cutoff, log_dir
     solver = scenario.solver
-    cutoff = scenario.cutoff_time
+    cutoff = scenario.solver_cutoff_time
     objectives = scenario.sparkle_objectives
     log_dir = scenario.log_dir
     kwargs = {}

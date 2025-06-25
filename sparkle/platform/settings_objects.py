@@ -48,6 +48,9 @@ class Settings:
     # Default library pathing
     DEFAULT_components = lib_prefix / "Components"
 
+    # Report Component: Bilbiography
+    bibliography_path = DEFAULT_components / "latex_source" / "report.bib"
+
     # Example settings path
     DEFAULT_example_settings_path = PurePath(DEFAULT_components / "sparkle_settings.ini")
 
@@ -59,10 +62,6 @@ class Settings:
     DEFAULT_ablation_dir = DEFAULT_components / "ablationAnalysis-0.9.4"
     DEFAULT_ablation_exec = DEFAULT_ablation_dir / "ablationAnalysis"
     DEFAULT_ablation_validation_exec = DEFAULT_ablation_dir / "ablationValidation"
-
-    # Report component
-    DEFAULT_latex_source = DEFAULT_components / "Sparkle-latex-source"
-    DEFAULT_latex_bib = DEFAULT_latex_source / "SparkleReport.bib"
 
     # Default input directory pathing
     DEFAULT_solver_dir = cwd_prefix / "Solvers"
@@ -80,14 +79,7 @@ class Settings:
     DEFAULT_log_output = DEFAULT_output / "Log"
 
     # Default output subdirs
-    DEFAULT_configuration_output_raw = DEFAULT_configuration_output / rawdata_dir
-    DEFAULT_configuration_output_analysis = DEFAULT_configuration_output / analysis_dir
-    DEFAULT_selection_output_raw = DEFAULT_selection_output / rawdata_dir
-    DEFAULT_selection_output_analysis = DEFAULT_selection_output / analysis_dir
-    DEFAULT_parallel_portfolio_output_raw =\
-        DEFAULT_parallel_portfolio_output / rawdata_dir
-    DEFAULT_parallel_portfolio_output_analysis =\
-        DEFAULT_parallel_portfolio_output / analysis_dir
+    DEFAULT_output_analysis = DEFAULT_output / analysis_dir
 
     # Old default output dirs which should be part of something else
     DEFAULT_feature_data = DEFAULT_output / "Feature_Data"
@@ -98,6 +90,7 @@ class Settings:
         DEFAULT_solver_dir, DEFAULT_instance_dir, DEFAULT_extractor_dir,
         DEFAULT_output, DEFAULT_configuration_output,
         DEFAULT_selection_output,
+        DEFAULT_output_analysis,
         DEFAULT_tmp_output, DEFAULT_log_output,
         DEFAULT_feature_data, DEFAULT_performance_data,
         DEFAULT_settings_dir, DEFAULT_reference_dir,
@@ -770,7 +763,7 @@ class Settings:
             if configurator_subclass is not None:
                 self.__general_sparkle_configurator = configurator_subclass(
                     base_dir=Path(),
-                    output_path=Settings.DEFAULT_configuration_output_raw)
+                    output_path=Settings.DEFAULT_configuration_output)
             else:
                 print("WARNING: Configurator class name not recognised: "
                       f'{self.__settings["general"]["configurator"]}. '
@@ -882,9 +875,8 @@ class Settings:
                                   configurator_name: str) -> dict[str, any]:
         """Return the configurator settings."""
         configurator_settings = {
-            "number_of_runs": self.get_configurator_number_of_runs(),
             "solver_calls": self.get_configurator_solver_calls(),
-            "cutoff_time": self.get_general_solver_cutoff_time(),
+            "solver_cutoff_time": self.get_general_solver_cutoff_time(),
             "max_iterations": self.get_configurator_max_iterations()
         }
         # In the settings below, we default to the configurator general settings if no

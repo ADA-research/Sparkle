@@ -38,10 +38,9 @@ def test_irace_configure(mock_add_to_queue: Mock) -> None:
     train_set = Instance_Set(test_files / "Instances/Train-Instance-Set")
     solver = Solver(test_files / "Solvers/Test-Solver")
     conf_scenario = IRACEScenario(
-        solver, train_set, [sparkle_objective], base_dir,
-        number_of_runs=2,
+        solver, train_set, [sparkle_objective], 2, base_dir,
         solver_calls=25,
-        cutoff_time=60,
+        solver_cutoff_time=60,
         max_time=200,
     )
     assert irace_conf.output_path == output / IRACE.__name__
@@ -122,8 +121,8 @@ def test_irace_scenario_file(tmp_path: Path,
             warnings.warn("Failed to install IRACE, skipping test")
             return
     obj_par, obj_acc = resolve_objective("PAR10"), resolve_objective("accuray:max")
-    scenario = IRACEScenario(solver, set, [obj_par, obj_acc], Path("irace_scenario"),
-                             number_of_runs=2, solver_calls=2, cutoff_time=2)
+    scenario = IRACEScenario(solver, set, [obj_par, obj_acc], 2, Path("irace_scenario"),
+                             solver_calls=2, solver_cutoff_time=2)
     scenario.create_scenario()
     # TODO: Add file comparison, requires variables/regex to match
 
@@ -138,6 +137,6 @@ def test_irace_scenario_from_file() -> None:
     assert scenario.solver.name == solver.name
     assert scenario.instance_set.name == set.name
     assert scenario.solver_calls is None
-    assert scenario.cutoff_time == 60
+    assert scenario.solver_cutoff_time == 60
     assert scenario.max_time == 1750
     assert scenario.sparkle_objective.name == "PAR10"

@@ -340,8 +340,8 @@ def main(argv: list[str]) -> None:
                 str(solver.directory)) for solver in solvers]
         else:  # Only default configurations
             configurations =\
-                [[PerformanceDataFrame.default_configuration]] * len(solvers)
-        # Look up the actual configurations
+                [[PerformanceDataFrame.default_configuration] for _ in solvers]
+        # Look up and replace with the actual configurations
         for solver_index, configs in enumerate(configurations):
             for config_index, config in enumerate(configs):
                 configurations[solver_index][config_index] = \

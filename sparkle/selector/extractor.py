@@ -155,6 +155,7 @@ class Extractor(SparkleCallable):
                           f"\t-stdout: '{job.stdout}'\n"
                           f"\t-stderr: '{job.stderr}'\n")
                 return None
+            # RunRunner adds a stamp before the statement
             output = [ast.literal_eval(job.stdout.split("\t", maxsplit=1)[-1])
                       for job in extractor_run.jobs]
             if len(output) == 1:

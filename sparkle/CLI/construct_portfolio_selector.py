@@ -7,7 +7,7 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner
 
-from sparkle.solver import Selector
+from sparkle.selector import Selector, SelectionScenario
 from sparkle.instance import Instance_Set
 
 from sparkle.platform.settings_objects import SettingState
@@ -17,7 +17,6 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
-from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.CLI.initialise import check_for_initialise
 
 
@@ -84,10 +83,10 @@ def main(argv: list[str]) -> None:
     flag_recompute_portfolio = args.recompute_portfolio_selector
     solver_ablation = args.solver_ablation
 
-    if ac.set_by_user(args, "settings_file"):
+    if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file
         gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
-    if ac.set_by_user(args, "objective"):
+    if args.objective is not None:
         objective = resolve_objective(args.objective)
     else:
         objective = gv.settings().get_general_sparkle_objectives()[0]
@@ -108,7 +107,8 @@ def main(argv: list[str]) -> None:
             gv.file_storage_data_mapping[gv.instances_nickname_path],
             gv.settings().DEFAULT_instance_dir, Instance_Set)
 
-    cutoff_time = gv.settings().get_general_solver_cutoff_time()
+    solver_cutoff_time = gv.settings().get_general_solver_cutoff_time()
+    extractor_cutoff_time = gv.settings().get_general_extractor_cutoff_time()
 
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
@@ -118,6 +118,10 @@ def main(argv: list[str]) -> None:
         print("ERROR: Feature data is empty! Please add a feature extractor and run "
               "'sparkle compute features' first.")
         sys.exit(-1)
+
+    # Filter objective
+    performance_data.remove_objective([obj for obj in performance_data.objective_names
+                                       if obj != objective.name])
 
     if instance_set is not None:
         applicable_instances = [str(i) for i in instance_set.instance_paths]
@@ -167,29 +171,30 @@ def main(argv: list[str]) -> None:
         print("WARNING: Missing values in the feature data, will be imputed as the mean "
               "value of all other non-missing values! Imputing all missing values...")
         feature_data.impute_missing_values()
-    # Selector is named after the solvers it can predict, sort for permutation invariance
-    selection_scenario_path =\
-        gv.settings().DEFAULT_selection_output / selector.name / "_".join(solvers)
 
-    # Update latest scenario
-    gv.latest_scenario().set_selection_scenario_path(selection_scenario_path)
-    gv.latest_scenario().set_latest_scenario(Scenario.SELECTION)
-    # Set to default to overwrite possible old path
-    gv.latest_scenario().set_selection_test_case_directory()
+    selection_scenario = SelectionScenario(gv.settings().DEFAULT_selection_output,
+                                           selector,
+                                           objective,
+                                           performance_data,
+                                           feature_data,
+                                           solver_cutoff=solver_cutoff_time,
+                                           extractor_cutoff=extractor_cutoff_time,
+                                           ablate=solver_ablation)
 
-    selector_path = selection_scenario_path / "portfolio_selector"
+    if selection_scenario.selector_file_path.exists():
+        if not flag_recompute_portfolio:
+            print("Portfolio selector already exists. "
+                  "Set the recompute flag to remove and reconstruct.")
+            sys.exit(-1)
+        # Delete all selectors
+        selection_scenario.selector_file_path.unlink(missing_ok=True)
+        if selection_scenario.ablation_scenarios:
+            for scenario in selection_scenario.ablation_scenarios:
+                scenario.selector_file_path.unlink(missing_ok=True)
+
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
-    if selector_path.exists() and not flag_recompute_portfolio:
-        print("Portfolio selector already exists. Set the recompute flag to re-create.")
-        sys.exit()
-
-    selector_path.parent.mkdir(exist_ok=True, parents=True)
     slurm_prepend = gv.settings().get_slurm_job_prepend()
-    selector_run = selector.construct(selector_path,
-                                      performance_data,
-                                      feature_data,
-                                      objective,
-                                      cutoff_time,
+    selector_run = selector.construct(selection_scenario,
                                       run_on=run_on,
                                       sbatch_options=sbatch_options,
                                       slurm_prepend=slurm_prepend,
@@ -201,42 +206,18 @@ def main(argv: list[str]) -> None:
 
     dependencies = [selector_run]
     if solver_ablation:
-        for solver in performance_data.solvers:
-            for config_id in performance_data.get_configurations(solver):
-                solver_name = Path(solver).name
-                ablate_solver_dir =\
-                    selection_scenario_path / f"ablate_{solver_name}_{config_id}"
-                ablate_solver_selector = ablate_solver_dir / "portfolio_selector"
-                if (ablate_solver_selector.exists() and not flag_recompute_portfolio):
-                    print(f"Portfolio selector without {solver_name} already exists. "
-                          "Set the recompute flag to re-create.")
-                    continue
-                ablate_solver_dir.mkdir(exist_ok=True, parents=True)
-                ablated_performance_data = performance_data.clone()
-                ablated_performance_data.remove_configuration(solver, config_id)
-                ablated_run = selector.construct(
-                    ablate_solver_selector,
-                    ablated_performance_data,
-                    feature_data,
-                    objective,
-                    cutoff_time,
-                    run_on=run_on,
-                    job_name=f"Construct Selector: Ablate {solver_name} ({config_id})",
-                    sbatch_options=sbatch_options,
-                    slurm_prepend=slurm_prepend,
-                    base_dir=sl.caller_log_dir)
-                dependencies.append(ablated_run)
-                if run_on == Runner.LOCAL:
-                    print("Portfolio selector without "
-                          f"{solver_name} ({config_id}) constructed!")
-                else:
-                    print("Portfolio selector without "
-                          f"{solver_name} ({config_id}) constructor running...")
+        for ablated_scenario in selection_scenario.ablation_scenarios:
+            selector_run = selector.construct(
+                ablated_scenario,
+                run_on=run_on,
+                sbatch_options=sbatch_options,
+                slurm_prepend=slurm_prepend,
+                base_dir=sl.caller_log_dir)
 
     # Compute the marginal contribution
     with_actual = "--actual" if solver_ablation else ""
-    cmd = (f"python3 sparkle/CLI/compute_marginal_contribution.py --perfect "
-           f"{with_actual} {ac.ObjectivesArgument.names[0]} {objective}")
+    cmd = (f"python3 sparkle/CLI/compute_marginal_contribution.py --selection-scenario "
+           f"{selection_scenario.scenario_file}  --perfect {with_actual}")
     solver_names = ", ".join([Path(s).name for s in performance_data.solvers])
     marginal_contribution = rrr.add_to_queue(
         runner=run_on,
@@ -256,8 +237,6 @@ def main(argv: list[str]) -> None:
 
     # Write used settings to file
     gv.settings().write_used_settings()
-    # Write used scenario to file
-    gv.latest_scenario().write_scenario_ini()
     sys.exit(0)
 
 

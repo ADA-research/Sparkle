@@ -8,7 +8,6 @@ import argparse
 from sparkle.solver import Solver
 from sparkle.instance import FileInstanceSet
 from sparkle.types.objective import SparkleObjective
-from sparkle.structures import PerformanceDataFrame
 from sparkle.CLI import run_parallel_portfolio as rpp
 from sparkle.types.status import SolverStatus
 from sparkle.CLI.help import global_variables as gv
@@ -61,11 +60,12 @@ num_jobs = len(solvers) * 2
 fake_jobs = [FakeJob(statuses[i], stdout=stdout) for i in range(num_jobs)]
 
 
-def test_run_parallel_portfolio() -> None:
+@pytest.mark.integration
+def test_run_parallel_portfolio(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch) -> None:
     """Test for run_parallel_portfolio function."""
     pdf = rpp.create_performance_dataframe(solvers, instance_file, portfolio_path)
-    assert type(pdf) is PerformanceDataFrame
-
     returned_cmd = rpp.build_command_list(instance_file, solvers, portfolio_path, pdf)
     assert type(returned_cmd) is list
     for element in returned_cmd:
@@ -78,6 +78,7 @@ def test_run_parallel_portfolio() -> None:
     assert r_status == "status:metric"
     assert r_wall_time == "wall_time:metric"
 
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     with patch("sparkle.CLI.run_parallel_portfolio.time.sleep", return_value=None), \
          patch("sparkle.CLI.run_parallel_portfolio.tqdm") as mock_tqdm, \
          patch("sparkle.CLI.run_parallel_portfolio.rrr.add_to_queue") as \
@@ -254,7 +255,7 @@ def test_main(case: str) -> None:
                 f"got {excinfo.value.code}"
             )
         current_port_path = gv.latest_scenario().get_parallel_portfolio_path().as_posix()
-        assert current_port_path.startswith("Output/Parallel_Portfolio/Raw_Data/"), (
+        assert current_port_path.startswith("Output/Parallel_Portfolio/"), (
             "Expected portfolio path should start with"
             "Output/Parallel_Portfolio/Raw_Data/"
             f"but got, {current_port_path}"

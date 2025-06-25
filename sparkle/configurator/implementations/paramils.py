@@ -81,12 +81,7 @@ class ParamILS(Configurator):
                 "Please ensure Java is installed and try again."
             )
         scenario.create_scenario()
-        # Generate Configuration IDs
-        from datetime import datetime
-        time_stamp = datetime.fromtimestamp(scenario.scenario_file_path.stat().st_mtime)
-        configuration_ids =\
-            [f"{self.name}_{time_stamp.strftime('%Y%m%d%H%M%S')}_{i}"
-             for i in range(scenario.number_of_runs)]
+        configuration_ids = scenario.configuration_ids
         # We set the seed over the last n run ids in the dataframe
         # TODO: Setting seeds like this is weird and should be inspected.
         seeds = [i for i in range(scenario.number_of_runs)]
@@ -125,7 +120,7 @@ class ParamILS(Configurator):
                         configuration_id: str = None) -> None | dict:
         """Retrieves configurations from SMAC files and places them in output."""
         # Extract from log file
-        configuration = {}
+        configuration = {"configuration_id": configuration_id}
         skipping = True
         for line in output_source.open().readlines():
             if skipping:
@@ -152,11 +147,11 @@ class ParamILSScenario(SMAC2Scenario):
                  solver: Solver,
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
+                 number_of_runs: int,
                  parent_directory: Path,
-                 number_of_runs: int = None,
                  solver_calls: int = None,
                  max_iterations: int = None,
-                 cutoff_time: int = None,
+                 solver_cutoff_time: int = None,
                  cli_cores: int = None,
                  use_cpu_time_in_tunertime: bool = None,
                  feature_data: FeatureDataFrame | Path = None,
@@ -181,8 +176,8 @@ class ParamILSScenario(SMAC2Scenario):
                 configuration run
             max_iterations: The maximum number of iterations allowed for each
                 configuration run. [iteration-limit, numIterations, numberOfIterations]
-            cutoff_time: The maximum number of seconds allowed for each
-                configuration run. [time-limit, cpu-time, wallclock-time]
+            solver_cutoff_time: The maximum number of seconds allowed for each
+                Solver call.
             cli_cores: The maximum number of cores allowed for each
                 configuration run.
             use_cpu_time_in_tunertime: Whether to use cpu_time in the tuner
@@ -196,9 +191,9 @@ class ParamILSScenario(SMAC2Scenario):
             max_runs: The maximum number of runs allowed for a single configuration.
             random_restart: The probability to restart from a random configuration.
         """
-        super().__init__(solver, instance_set, sparkle_objectives, parent_directory,
-                         number_of_runs, solver_calls, max_iterations, None,
-                         None, cutoff_time, None, cli_cores,
+        super().__init__(solver, instance_set, sparkle_objectives, number_of_runs,
+                         parent_directory, solver_calls, max_iterations, None,
+                         None, solver_cutoff_time, None, cli_cores,
                          use_cpu_time_in_tunertime, feature_data)
         self.solver = solver
         self.instance_set = instance_set
@@ -209,6 +204,11 @@ class ParamILSScenario(SMAC2Scenario):
         self.min_runs = min_runs
         self.max_runs = max_runs
         self.random_restart = random_restart
+
+    @property
+    def configurator(self: ParamILSScenario) -> ParamILS:
+        """Return the type of configurator the scenario belongs to."""
+        return ParamILS
 
     def create_scenario_file(self: ParamILSScenario) -> Path:
         """Create a file with the configuration scenario."""
@@ -267,7 +267,7 @@ class ParamILSScenario(SMAC2Scenario):
         del config["check_instances_exist"]
 
         if "cutoffTime" in config:
-            config["cutoff_time"] = config.pop("cutoffTime")
+            config["solver_cutoff_time"] = config.pop("cutoffTime")
         if "runcount-limit" in config:
             config["solver_calls"] = config.pop("runcount-limit")
         if "approach" in config:
@@ -281,7 +281,7 @@ class ParamILSScenario(SMAC2Scenario):
         return ParamILSScenario(solver,
                                 instance_set,
                                 [objective],
+                                number_of_runs,
                                 scenario_file.parent.parent,
-                                number_of_runs=number_of_runs,
                                 **config
                                 )

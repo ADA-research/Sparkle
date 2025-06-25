@@ -8,7 +8,7 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner, Status, Run
 
-from sparkle.solver import Extractor
+from sparkle.selector import Extractor
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import SettingState
@@ -30,7 +30,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.SettingsFileArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
-
     return parser
 
 
@@ -140,8 +139,7 @@ def main(argv: list[str]) -> None:
 
     # Process command line arguments
     args = parser.parse_args(argv)
-
-    if ac.set_by_user(args, "settings_file"):
+    if args.settings_file is not None:
         gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file

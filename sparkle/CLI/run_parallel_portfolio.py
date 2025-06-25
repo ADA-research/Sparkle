@@ -489,12 +489,12 @@ def main(argv: list[str]) -> None:
         sys.exit(-1)
 
     if args.portfolio_name is not None:  # Use a nickname
-        portfolio_path = gv.settings().DEFAULT_parallel_portfolio_output_raw /\
+        portfolio_path = gv.settings().DEFAULT_parallel_portfolio_output /\
             args.portfolio_name
     else:  # Generate a timestamped nickname
         timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.gmtime(time.time()))
         randintstamp = int(random.getrandbits(32))
-        portfolio_path = gv.settings().DEFAULT_parallel_portfolio_output_raw /\
+        portfolio_path = gv.settings().DEFAULT_parallel_portfolio_output /\
             f"{timestamp}_{randintstamp}"
     if portfolio_path.exists():
         print(f"[WARNING] Portfolio path {portfolio_path} already exists! "

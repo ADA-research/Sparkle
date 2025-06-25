@@ -137,7 +137,7 @@ class Solver(SparkleCallable):
         # TODO: Should be a .validate method instead
         return PCSConverter.get_convention(self.pcs_file) is not None
 
-    def get_cs(self: Solver) -> ConfigurationSpace:
+    def get_configuration_space(self: Solver) -> ConfigurationSpace:
         """Get the ConfigurationSpace of the PCS file."""
         if not self.pcs_file:
             return None
@@ -149,7 +149,7 @@ class Solver(SparkleCallable):
             self.pcs_file.parent / f"{self.pcs_file.stem}_{port_type.name}.pcs"
         if target_pcs_file.exists():  # Already exists, possibly user defined
             return
-        PCSConverter.export(self.get_cs(), port_type, target_pcs_file)
+        PCSConverter.export(self.get_configuration_space(), port_type, target_pcs_file)
 
     def build_cmd(self: Solver,
                   instance: str | list[str],
