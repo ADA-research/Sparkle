@@ -71,7 +71,7 @@ sparkle construct_portfolio_selector
 Run the portfolio selector on a *single* testing instance; the result will be printed to the command line if you add `--run-on local` to the command. We again set the objective to quality. Note: Currently only works for added instances.
 
 ```bash
-sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG/Banking1 --run-on local
+sparkle run_portfolio_selector --selection-scenario Output/Selection/MultiClassClassifier_RandomForestClassifier/FastCA_TCA/scenario.txt --instance Examples/Resources/CCAG/Instances/CCAG/Banking1 --run-on local
 ```
 
 #### Run on an instance set
@@ -79,7 +79,7 @@ sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG/Banking1 -
 Run the portfolio selector on a testing instance *set*. We again set the objective to quality. Note: Currently only works for added instances.
 
 ```bash
-sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG/
+sparkle run_portfolio_selector --selection-scenario Output/Selection/MultiClassClassifier_RandomForestClassifier/FastCA_TCA/scenario.txt --instance Examples/Resources/CCAG/Instances/CCAG/
 ```
 
 #### Generate a report including results on the test set

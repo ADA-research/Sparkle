@@ -59,7 +59,7 @@ def main(argv: list[str]) -> None:
     Settings.check_settings_changes(gv.settings(), prev_settings)
 
     data_set: InstanceSet = resolve_object_name(
-        args.instance_path,
+        args.instance,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings().DEFAULT_instance_dir, Instance_Set)
 

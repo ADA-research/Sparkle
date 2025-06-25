@@ -12,6 +12,7 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.solver import Solver
 from sparkle.selector import SelectionScenario
+from sparkle.instance import Instance_Set
 
 
 if __name__ == "__main__":
@@ -30,12 +31,13 @@ if __name__ == "__main__":
     # Process command line arguments
     selector_scenario = SelectionScenario.from_file(args.selector_scenario)
     feature_data = FeatureDataFrame(Path(args.feature_data_csv))
+    instance = Instance_Set(args.instance)
 
     # Run portfolio selector
     print("Sparkle portfolio selector predicting ...")
     predict_schedule = selector_scenario.selector.run(
         selector_scenario.selector_file_path,
-        args.instance,
+        instance.instance_names[0],
         feature_data)
 
     if predict_schedule is None:  # Selector Failed to produce prediction
@@ -50,7 +52,7 @@ if __name__ == "__main__":
         solver = Solver(Path(solver))
         print(f"Calling solver {solver.name} with time budget {cutoff_time} ...")
         solver_output = solver.run(
-            Path(args.instance).absolute(),
+            instance,
             objectives=[selector_scenario.objective],
             seed=gv.get_seed(),
             cutoff_time=cutoff_time,
@@ -83,7 +85,7 @@ if __name__ == "__main__":
             performance_data = PerformanceDataFrame(performance_data.csv_filepath)
             performance_data.set_value(selector_value,
                                        selector_scenario.__selector_solver_name__,
-                                       str(args.instance),
+                                       instance.instance_names[0],
                                        objective=selector_scenario.objective.name)
             performance_data.save_csv()
         lock.release()
