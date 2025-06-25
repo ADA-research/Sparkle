@@ -156,7 +156,7 @@ class IRACE(Configurator):
 class IRACEScenario(ConfigurationScenario):
     """Class for IRACE scenario."""
 
-    def __init__(self: ConfigurationScenario,
+    def __init__(self: IRACEScenario,
                  solver: Solver,
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
@@ -332,12 +332,13 @@ class IRACEScenario(ConfigurationScenario):
                 file.write(f"{instance_path.name}\n")
         self.create_scenario_file()
 
-    def create_scenario_file(self: ConfigurationScenario) -> Path:
+    def create_scenario_file(self: IRACEScenario) -> Path:
         """Create a file from the IRACE scenario.
 
         Returns:
             Path to the created file.
         """
+        super().create_scenario_file()
         from sparkle.tools.parameters import PCSConvention
         solver_path = self.solver.directory.absolute()
         pcs_path = self.solver.get_pcs_file(port_type=PCSConvention.IRACE).absolute()

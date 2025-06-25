@@ -6,8 +6,9 @@ import pandas as pd
 import plotly
 import plotly.express as px
 import pylatex as pl
+import kaleido
 
-plotly.io.kaleido.scope.mathjax = None  # Bug fix for kaleido
+kaleido.get_chrome_sync()  # Ensure chrome is available for Kaleido
 
 
 class AutoRef(pl.base_classes.CommandBase):
@@ -58,7 +59,7 @@ def comparison_plot(data_frame: pd.DataFrame,
                      x=data_frame.columns[0], y=data_frame.columns[1],
                      range_x=plot_range, range_y=plot_range,
                      title=title, log_x=log_scale, log_y=log_scale,
-                     width=500, height=500)
+                     width=1000, height=1000)
     # Add dividing diagonal
     fig.add_shape(type="line", x0=0, y0=0, x1=max_value, y1=max_value,
                   line=dict(color="grey", dash="dot", width=1))
@@ -71,7 +72,9 @@ def comparison_plot(data_frame: pd.DataFrame,
                   line=dict(color="red", width=0.5, dash="longdash"))
     fig.update_traces(marker=dict(color="RoyalBlue", symbol="x"))
     fig.update_layout(
-        plot_bgcolor="white"
+        plot_bgcolor="white",
+        autosize=False,
+        width=1000, height=1000
     )
     minor = dict(ticks="inside", ticklen=6, showgrid=True) if log_scale else None
     # Tick every 10^(log(max)) / 10 for linear scale, log scale is resolved by plotly

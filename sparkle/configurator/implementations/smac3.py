@@ -336,13 +336,14 @@ class SMAC3Scenario(ConfigurationScenario):
         """Return the type of configurator the scenario belongs to."""
         return SMAC3
 
-    def create_scenario_file(self: ConfigurationScenario) -> Path:
+    def create_scenario_file(self: SMAC3Scenario) -> Path:
         """Create a file with the configuration scenario."""
+        super().create_scenario_file()
         with self.scenario_file_path.open("w") as file:
             for key, value in self.serialise().items():
                 file.write(f"{key} = {value}\n")
 
-    def serialise(self: ConfigurationScenario) -> dict:
+    def serialise(self: SMAC3Scenario) -> dict:
         """Serialize the configuration scenario."""
         feature_data =\
             self.feature_data.csv_filepath if self.feature_data else None
@@ -368,7 +369,7 @@ class SMAC3Scenario(ConfigurationScenario):
 
     @staticmethod
     def from_file(scenario_file: Path,
-                  run_index: int = None) -> ConfigurationScenario:
+                  run_index: int = None) -> SMAC3Scenario:
         """Reads scenario file and initalises ConfigurationScenario.
 
         Args:
