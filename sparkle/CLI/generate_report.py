@@ -137,7 +137,7 @@ def generate_configuration_section(report: pl.Document, scenario: ConfigurationS
         plot_path = plot_dir /\
             f"{scenario_output.best_configuration_key}_vs_"\
             f"Default_{instance_set_name}.pdf"
-        plot.write_image(plot_path)
+        plot.write_image(plot_path, width=500, height=500)
         with report.create(pl.Figure(position="h")) as figure:
             figure.add_image(str(plot_path.relative_to(report_dir)),
                              width=pl.utils.NoEscape(r"0.6\textwidth"))
@@ -366,7 +366,7 @@ def generate_selection_section(report: pl.Document, scenario: SelectionScenario,
     plot_path = plot_dir /\
         f"{Path(sbs_name).name}_{sbs_config}_vs_"\
         f"Selector_{scenario.selector.model_class.__name__}.pdf"
-    plot.write_image(plot_path)
+    plot.write_image(plot_path, width=500, height=500)
     with report.create(pl.Figure()) as figure:
         figure.add_image(str(plot_path.relative_to(report_dir)),
                          width=pl.utils.NoEscape(r"0.6\textwidth"))
@@ -382,7 +382,7 @@ def generate_selection_section(report: pl.Document, scenario: SelectionScenario,
     plot = latex.comparison_plot(df, "Virtual Best Solver vs Selector")
     plot_path = plot_dir /\
         f"Virtual_Best_Solver_vs_Selector_{scenario.selector.model_class.__name__}.pdf"
-    plot.write_image(plot_path)
+    plot.write_image(plot_path, width=500, height=500)
     with report.create(pl.Figure()) as figure:
         figure.add_image(str(plot_path.relative_to(report_dir)),
                          width=pl.utils.NoEscape(r"0.6\textwidth"))
@@ -520,7 +520,7 @@ def generate_parallel_portfolio_section(report: pl.Document,
     plot_path = plot_dir /\
         f"sbs_{sbs_name}_vs_"\
         f"parallel_portfolio.pdf"
-    plot.write_image(plot_path)
+    plot.write_image(plot_path, width=500, height=500)
     with report.create(pl.Figure(position="h")) as figure:
         figure.add_image(str(plot_path.relative_to(report_dir)),
                          width=pl.utils.NoEscape(r"0.6\textwidth"))

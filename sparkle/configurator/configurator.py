@@ -202,10 +202,12 @@ class ConfigurationScenario:
 
         self.directory = parent_directory / self.name
         self.scenario_file_path = self.directory / "scenario.txt"
+        self.timestamp_path = self.directory / "timestamp"
         self.validation: Path = self.directory / "validation"
         self.tmp: Path = self.directory / "tmp"
         self.results_directory: Path = self.directory / "results"
         self._ablation_scenario: AblationScenario = None
+        self._timestamp: str = None
 
     @property
     def configurator(self: ConfigurationScenario) -> Configurator:
@@ -220,8 +222,11 @@ class ConfigurationScenario:
     @property
     def timestamp(self: ConfigurationScenario) -> str:
         """Return the timestamp of the scenario."""
-        if not self.scenario_file_path.exists():
+        if not self.timestamp_path.exists():
             return None
+        if self._timestamp is None:
+            self._timestamp = self.timestamp_path.read_text().strip()
+        return self._timestamp
         from datetime import datetime
         stamp = datetime.fromtimestamp(self.scenario_file_path.stat().st_mtime)
         return stamp.strftime("%Y%m%d-%H%M")
@@ -260,7 +265,10 @@ class ConfigurationScenario:
 
     def create_scenario_file(self: ConfigurationScenario) -> Path:
         """Create a file with the configuration scenario."""
-        raise NotImplementedError
+        with self.timestamp_path.open("w") as fout:
+            from datetime import datetime
+            stamp = datetime.fromtimestamp(datetime.now().timestamp())
+            fout.write(stamp.strftime("%Y%m%d-%H%M"))
 
     def serialise(self: ConfigurationScenario) -> dict:
         """Serialize the configuration scenario."""

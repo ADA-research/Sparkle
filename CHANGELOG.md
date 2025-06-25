@@ -15,6 +15,7 @@ Notable changes to Sparkle will be documented in this file.
 - SparkleExecutable no longer has a 'raw output directory' [SPRK-162]
 - Sparkle generate report command has been refacored to support multiple scenarios in one report [SPRK-161]
 - Sparkle now has scenario definition for Selection [SPRK-161]
+- Updated Plotly and Kaleido to latest versions (6.1.1 and 1.0.0 respectively)
 
 ### Fixed
 - Fixed various bugs regarding Solver calls by adding in KILLSIG handlers and updated templates/documentation accordingly [SPRK-162]
@@ -23,7 +24,7 @@ Notable changes to Sparkle will be documented in this file.
 
 ## [0.9.3.2] - 13/04/2025
 
-- Bug fix regarding prepend
+- Bug fix regarding Slurm prepend setting
 - Refactor for IRACE configuration
 
 ## [0.9.3.1] - 03/04/2025
