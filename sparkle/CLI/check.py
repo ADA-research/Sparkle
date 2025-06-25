@@ -7,7 +7,7 @@ from runrunner import Runner
 
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set, InstanceSet
-from sparkle.solver.extractor import Extractor
+from sparkle.selector.extractor import Extractor
 from sparkle.types import SolverStatus
 
 from sparkle.CLI.help import logging as sl
@@ -59,7 +59,7 @@ def main(argv: list[str]) -> None:
     if isinstance(object, Solver):
         if object.pcs_file:
             print()
-            print(object.get_cs())
+            print(object.get_configuration_space())
         if not os.access(object.wrapper_path, os.X_OK):
             print(f"Wrapper {object.wrapper_path} is not executable!"
                   f"Check that wrapper execution rights are set for all.")
@@ -75,7 +75,7 @@ def main(argv: list[str]) -> None:
             configuration = {}
             if object.pcs_file:
                 print("\nSample Configuration:")
-                sample_conf = object.get_cs().sample_configuration()
+                sample_conf = object.get_configuration_space().sample_configuration()
                 print(sample_conf)
                 configuration = dict(sample_conf)
             result = object.run(

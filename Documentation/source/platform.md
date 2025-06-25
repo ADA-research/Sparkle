@@ -117,7 +117,7 @@ This is a short example to show the format.
 ```
 [general]
 objective = PAR10
-target_cutoff_time = 60
+solver_cutoff_time = 60
 
 [configuration]
 number_of_runs = 25
@@ -248,7 +248,7 @@ job_prepend = Settings/slurm_prepend.sh
 
 ---
 
-`target_cutoff_time`
+`solver_cutoff_time`
 > aliases: `cutoff_time_each_solver_call`
 >
 > values: integer

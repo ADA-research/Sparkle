@@ -81,11 +81,11 @@ class ParallelPortfolioOutput:
 
         return solvers_solutions
 
-    def serialize_instances(self: ParallelPortfolioOutput,
+    def serialise_instances(self: ParallelPortfolioOutput,
                             instances: list[InstanceSet]) -> dict:
         """Transform Instances to dictionary format."""
         # Even though parallel portfolio currently doesn't support multi sets,
-        # this function is already ready to support mutliple sets
+        # this function can
         return {
             "number_of_instance_sets": len(instances),
             "instance_sets": [
@@ -97,7 +97,7 @@ class ParallelPortfolioOutput:
             ]
         }
 
-    def serialize_results(self: ParallelPortfolioOutput,
+    def serialise_results(self: ParallelPortfolioOutput,
                           pr: ParallelPortfolioResults) -> dict:
         """Transform results to dictionary format."""
         return {
@@ -108,15 +108,17 @@ class ParallelPortfolioOutput:
             "instance_results": pr.instance_results,
         }
 
-    def write_output(self: ParallelPortfolioOutput) -> None:
-        """Write data into a JSON file."""
-        output_data = {
+    def serialise(self: ParallelPortfolioOutput) -> dict:
+        """Transform to dictionary format."""
+        return {
             "number_of_solvers": len(self.solver_list),
             "solvers": self.solver_list,
-            "instances": self.serialize_instances([self.instance_set]),
-            "results": self.serialize_results(self.results),
+            "instances": self.serialise_instances([self.instance_set]),
+            "results": self.serialise_results(self.results),
         }
 
-        self.output.parent.mkdir(parents=True, exist_ok=True)
-        with self.output.open("w") as f:
-            json.dump(output_data, f, indent=4)
+    def write_output(self: ParallelPortfolioOutput, output: Path) -> None:
+        """Write data into a JSON file."""
+        output = output / "configuration.json" if output.is_dir() else output
+        with output.open("w") as f:
+            json.dump(self.serialise(), f, indent=4)

@@ -6,11 +6,11 @@ from enum import Enum
 class SolverStatus(str, Enum):
     """Possible return states for solver runs."""
     SUCCESS = "SUCCESS"  # Positive status
-    UNKNOWN = "UNKNOWN"  # Semi positive status
     SAT = "SAT"  # SAT specific positive status
     UNSAT = "UNSAT"  # SAT specific positive status
 
     # Negative status
+    UNKNOWN = "UNKNOWN"
     CRASHED = "CRASHED"
     TIMEOUT = "TIMEOUT"
     WRONG = "WRONG"
@@ -20,3 +20,8 @@ class SolverStatus(str, Enum):
     def __str__(self: SolverStatus) -> str:
         """Return the string value of the SolverStatus."""
         return str(self.value)
+
+    @property
+    def positive(self: SolverStatus) -> bool:
+        """Return whether the status is positive."""
+        return self in [SolverStatus.SUCCESS, SolverStatus.SAT, SolverStatus.UNSAT]

@@ -2,7 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 import pytest
-from sparkle.solver import Extractor
+from sparkle.selector import Extractor
 from unittest.mock import patch
 
 
@@ -11,7 +11,7 @@ test_dir_2024 = Path(
 )
 test_dir_2012 = Path(
     "Examples/Resources/Extractors/"
-    "SAT-features-competition2012_revised_without_SatELite_sparkle"
+    "SAT-features-competition2012_revised_without_SatELite"
 )
 
 extractor_2012 = Extractor(directory=test_dir_2012)

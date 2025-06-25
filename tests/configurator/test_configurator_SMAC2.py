@@ -30,11 +30,10 @@ class TestConfiguratorSMAC2(TestCase):
         self.train_set = Instance_Set(self.test_files / "Instances/Train-Instance-Set")
         self.solver = Solver(self.test_files / "Solvers/Test-Solver")
         self.conf_scenario = SMAC2Scenario(
-            self.solver, self.train_set, [sparkle_objective], self.base_dir,
-            number_of_runs=2,
+            self.solver, self.train_set, [sparkle_objective], 2, self.base_dir,
             solver_calls=25,
             wallclock_time=80,
-            cutoff_time=60,
+            solver_cutoff_time=60,
             target_cutoff_length=10,
         )
         assert self.smac2_conf.base_dir == self.base_dir
@@ -128,10 +127,10 @@ class TestConfigurationScenarioSMAC2(TestCase):
             solver=self.solver,
             instance_set=self.instance_set,
             sparkle_objectives=[self.sparkle_objective],
-            parent_directory=self.parent_directory,
             number_of_runs=self.run_number,
+            parent_directory=self.parent_directory,
             wallclock_time=self.wallclock_time,
-            cutoff_time=self.cutoff_time,
+            solver_cutoff_time=self.cutoff_time,
             target_cutoff_length=self.cutoff_length)
 
     def tearDown(self: TestConfigurationScenarioSMAC2) -> None:
@@ -168,4 +167,4 @@ class TestConfigurationScenarioSMAC2(TestCase):
         self.assertEqual(scenario.instance_set.name, "PTN")
         self.assertEqual(scenario.sparkle_objectives[0].name, "PAR10")
         self.assertEqual(scenario.wallclock_time, 600)
-        self.assertEqual(scenario.cutoff_time, 60)
+        self.assertEqual(scenario.solver_cutoff_time, 60)

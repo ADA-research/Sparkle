@@ -13,7 +13,7 @@ def test_compute_features_command(tmp_path: Path,
     settings_path = cli_tools.get_settings_path()
     extractor_path = (Path("Examples") / "Resources" / "Extractors"
                       / "SAT-features-competition2012_"
-                        "revised_without_SatELite_sparkle").absolute()
+                        "revised_without_SatELite").absolute()
     instances_path = (Path("Examples") / "Resources" / "Instances" / "PTN").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
 

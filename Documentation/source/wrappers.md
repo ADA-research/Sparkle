@@ -21,7 +21,7 @@ cutoff_time: float,
 seed: int
 ```
 
-The solver_dir specifies the Path to the Solver directory of your algorithm, where your optional additional files can be found. This can be empty, e.g. the cwd contains all your extra files. This can be useful when your algorithm is an executable that you need to run from the wrapper. The instance is the path to the instance we are going to run on. Cutoff time is the maximum amount of time your algorithm is allowed to run, which you set yourself in the `sparkle_settings.ini` under section `general` as option `target_cutoff_time`. Seed is the seed for this run.
+The solver_dir specifies the Path to the Solver directory of your algorithm, where your optional additional files can be found. This can be empty, e.g. the cwd contains all your extra files. This can be useful when your algorithm is an executable that you need to run from the wrapper. The instance is the path to the instance we are going to run on. Cutoff time is the maximum amount of time your algorithm is allowed to run, which you set yourself in the `sparkle_settings.ini` under section `general` as option `solver_cutoff_time`. Seed is the seed for this run.
 
 When using Sparkle for algorithm configuration, this dictionary will also contain the (hyper)parameter values for your solver to use. These will all be in string format. See {ref}`Parameter configuration space <pcs-file>` for more information.
 

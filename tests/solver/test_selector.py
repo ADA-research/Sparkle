@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import patch, Mock
 
 from pathlib import Path
-from sparkle.solver import Selector
+from sparkle.selector import Selector, SelectionScenario
 from sparkle.types.objective import PAR
 from runrunner.base import Runner
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
@@ -31,42 +31,50 @@ def test_selector_constructor(
 
 
 @patch("runrunner.add_to_queue")
-def test_construct(mock_add_to_queue: Mock) -> None:
+def test_construct(
+        mock_add_to_queue: Mock,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch) -> None:
     """Test for method construct."""
     selector = Selector(MultiClassClassifier, RandomForestClassifier)
 
     # Construct Parameters
-    target_file = Path("tests/test_files/Output/Portfolio_Selector/portfolio_selector")
+    objective = PAR(10)
     performance_data_path = Path(
         "tests/test_files/Output/Performance_Data/performance_data.csv")
     performance_data = PerformanceDataFrame(performance_data_path)
+    performance_data.filter_objective(objective.name)
     feature_data_path = Path("tests/test_files/Output/Feature_Data/feature_data.csv")
     feature_data = FeatureDataFrame(feature_data_path)
-    objective = PAR()
     solver_cutoff = 60
     run_on = Runner.SLURM
     sbatch_options = ["--mem-per-cpu=3000", "--qos=short", "--time=30:00"]
     base_dir = Path(".")
 
-    selector.construct(target_file,
-                       performance_data,
-                       feature_data,
-                       objective,
-                       solver_cutoff,
-                       run_on,
-                       "test_job",
-                       sbatch_options,
-                       base_dir)
+    monkeypatch.chdir(tmp_path)
 
-    selector_performance_path = target_file.parent / performance_data.csv_filepath.name
-    assert selector_performance_path.is_file()
-    selector_performance = pd.read_csv(selector_performance_path)
+    scenario = SelectionScenario(
+        Path(),
+        Selector(MultiClassClassifier, RandomForestClassifier),
+        objective,
+        performance_data,
+        feature_data,
+        solver_cutoff=solver_cutoff,
+    )
+
+    selector.construct(scenario,
+                       run_on=run_on,
+                       job_name="test_job",
+                       sbatch_options=sbatch_options,
+                       base_dir=base_dir)
+
+    assert scenario.performance_target_path.is_file()
+    selector_performance = pd.read_csv(scenario.performance_target_path)
     selector_performance.shape[0] == performance_data.num_instances
     selector_performance.shape[1] == performance_data.num_solvers + 1  # +1 instance col
 
-    selector_feature_path = target_file.parent / feature_data.csv_filepath.name
-    assert selector_feature_path.is_file()
-    selector_feature_data = pd.read_csv(selector_feature_path, index_col=0)
+    assert scenario.feature_target_path.is_file()
+    selector_feature_data = pd.read_csv(scenario.feature_target_path, index_col=0)
     # Feature data got transposed
     assert selector_feature_data.shape[0] == feature_data.dataframe.shape[1]
     assert selector_feature_data.shape[1] == feature_data.dataframe.shape[0]
@@ -80,9 +88,9 @@ def test_construct(mock_add_to_queue: Mock) -> None:
     assert f"--model {selector.model_class.__name__}" in cmd_str
     assert f"--budget {solver_cutoff}" in cmd_str
     assert f"--performance-metric {objective.name}" in cmd_str
-    assert f"--feature-data {selector_feature_path}" in cmd_str
-    assert f"--performance-data {selector_performance_path}" in cmd_str
-    assert f"--model-path {target_file}" in cmd_str
+    assert f"--feature-data {scenario.feature_target_path}" in cmd_str
+    assert f"--performance-data {scenario.performance_target_path}" in cmd_str
+    assert f"--model-path {scenario.directory / 'portfolio_selector'}" in cmd_str
 
 
 @patch("runrunner.add_to_queue")
@@ -95,30 +103,36 @@ def test_construct_all_configurations(mock_add_queue: Mock,
     # Construct Parameters
     performance_data_path =\
         Path("tests/test_files/performance/actual-data.csv").absolute()
+    objective = PAR(10)
     performance_data =\
         PerformanceDataFrame(performance_data_path)
+    # Filter performance data
+    performance_data.filter_objective(objective.name)
     feature_data_path =\
         Path("tests/test_files/Output/Feature_Data/feature_data.csv").absolute()
     feature_data = FeatureDataFrame(feature_data_path)
-    objective = PAR()
     solver_cutoff = 60
     run_on = Runner.SLURM
     sbatch_options = ["--mem-per-cpu=3000", "--qos=short", "--time=30:00"]
     base_dir = Path(".")
-    configurations = performance_data.get_configurations("Solvers/PbO-CCSAT-Generic")
 
     monkeypatch.chdir(tmp_path)
-    target_file = Path("portfolio_selector")
-
-    selector.construct(target_file,
-                       performance_data,
-                       feature_data,
-                       objective,
-                       configurations,
-                       solver_cutoff,
-                       run_on,
-                       sbatch_options,
-                       base_dir)
+    scenario = SelectionScenario(
+        Path(),
+        Selector(MultiClassClassifier, RandomForestClassifier),
+        objective,
+        performance_data,
+        feature_data,
+        solver_cutoff=solver_cutoff,
+    )
+    selector.construct(
+        scenario,
+        run_on=run_on,
+        sbatch_options=sbatch_options,
+        base_dir=base_dir,
+    )
+    # TODO: Update this to called once with and check values
+    mock_add_queue.assert_called_once()
 
 
 @pytest.mark.parametrize(

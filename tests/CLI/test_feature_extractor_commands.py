@@ -11,7 +11,7 @@ def test_add_remove_solver_command(tmp_path: Path,
     """Test initialise command."""
     extractor_path = (Path("Examples") / "Resources" / "Extractors"
                       / "SAT-features-competition2012_"
-                        "revised_without_SatELite_sparkle").absolute()
+                        "revised_without_SatELite").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     expected_target = Path("Extractors") / extractor_path.name
     # Smoke test

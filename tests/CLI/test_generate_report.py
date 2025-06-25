@@ -9,7 +9,7 @@ from sparkle.CLI import load_snapshot, generate_report
 def test_generate_report_configuration(
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch) -> None:
-    """Test generate report for configuration."""
+    """Test generate report for configuration Smoke Test."""
     snapshot_path = (
         Path("tests") / "CLI" / "test_files"
         / "snapshot_configured_solver_Pb0-CCSAT-Generic_PTN.zip").absolute()
@@ -31,7 +31,7 @@ def test_generate_report_configuration(
     # Generate report with training set only
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         generate_report.main(["--solver", "PbO-CCSAT-Generic",
-                              "--instance-set-train", "PTN"])
+                              "--instance-set", "PTN"])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
@@ -86,14 +86,41 @@ def test_generate_report_parallel_portfolio(
         / "snapshot_parallel_portfolio_"
           "pbo_csccsat_minisat_ptn.zip").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
-
     # Set up platform
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         load_snapshot.main([str(snapshot_parallel_portfolio)])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
+    print([p for p in Path("Output/Parallel_Portfolio/").iterdir()])
+    print(Path("Output/Parallel_Portfolio/"))
+
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         generate_report.main([])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
+
+
+@pytest.mark.integration
+def test_configuration_output(tmp_path: Path,
+                              monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test generate report configuration output (JSON)."""
+    # TODO: Write test with actual / value content checking
+    pass
+
+
+@pytest.mark.integration
+def test_selection_portfolio_output(tmp_path: Path,
+                                    monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test generate report selection output (JSON)."""
+    # TODO: Write test with actual / value content checking
+    pass
+
+
+@pytest.mark.integration
+def test_parallel_portfolio_output(tmp_path: Path,
+                                   monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test generate report parallel output (JSON)."""
+    # TODO: Write Parallel Portfolio data to JSON
+    # TODO: Write test with actual / value content checking
+    pass

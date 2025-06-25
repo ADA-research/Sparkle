@@ -153,10 +153,9 @@ def main(argv: list[str]) -> None:
             sys.exit(-1)
         configurator_settings.update({"feature_data": feature_data})
 
-    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
-    slurm_prepend = gv.settings().get_slurm_job_prepend()
+    number_of_runs = gv.settings().get_configurator_number_of_runs()
     config_scenario = configurator.scenario_class()(
-        solver, instance_set_train, sparkle_objectives,
+        solver, instance_set_train, sparkle_objectives, number_of_runs,
         configurator.output_path, **configurator_settings)
 
     # Run the default configuration
@@ -165,6 +164,8 @@ def main(argv: list[str]) -> None:
                     in performance_data.get_job_list()
                     if config_id == PerformanceDataFrame.default_configuration]
 
+    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
+    slurm_prepend = gv.settings().get_slurm_job_prepend()
     dependency_job_list = configurator.configure(
         scenario=config_scenario,
         data_target=performance_data,
@@ -182,7 +183,7 @@ def main(argv: list[str]) -> None:
             performance_data,
             sbatch_options=sbatch_options,
             slurm_prepend=slurm_prepend,
-            cutoff_time=config_scenario.cutoff_time,
+            cutoff_time=config_scenario.solver_cutoff_time,
             log_dir=config_scenario.validation,
             base_dir=sl.caller_log_dir,
             job_name=f"Default Configuration: {solver.name} Validation on "
@@ -211,7 +212,7 @@ def main(argv: list[str]) -> None:
                 instance_set_test,
                 run_index,
                 performance_data,
-                cutoff_time=config_scenario.cutoff_time,
+                cutoff_time=config_scenario.solver_cutoff_time,
                 objective=config_scenario.sparkle_objective,
                 train_set=instance_set_train,
                 sbatch_options=sbatch_options,

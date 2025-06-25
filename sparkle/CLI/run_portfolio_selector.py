@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Sparkle command to execute a portfolio selector."""
-
 import sys
 import argparse
 from pathlib import PurePath, Path
@@ -12,21 +11,23 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from sparkle.CLI.help.reporting_scenario import Scenario
+from sparkle.structures import FeatureDataFrame
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.instance import Instance_Set
 from sparkle.CLI.compute_features import compute_features
+from sparkle.selector import SelectionScenario, Extractor
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Run a portfolio selector on instance (set), determine which solver "
+        description="Run a portfolio selector on instance (set): Determine which solver "
                     "is most likely to perform well and run it on the instance (set).")
-    parser.add_argument(*ac.InstancePathPositional.names,
-                        **ac.InstancePathPositional.kwargs)
+    parser.add_argument(*ac.SelectionScenarioArgument.names,
+                        **ac.SelectionScenarioArgument.kwargs)
+    parser.add_argument(*ac.InstanceSetRequiredArgument.names,
+                        **ac.InstanceSetRequiredArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
@@ -46,7 +47,7 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
 
-    if ac.set_by_user(args, "settings_file"):
+    if args.settings_file is not None:
         gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
@@ -58,7 +59,7 @@ def main(argv: list[str]) -> None:
     Settings.check_settings_changes(gv.settings(), prev_settings)
 
     data_set = resolve_object_name(
-        args.instance_path,
+        args.instance,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings().DEFAULT_instance_dir, Instance_Set)
 
@@ -68,53 +69,36 @@ def main(argv: list[str]) -> None:
         sys.exit(-1)
 
     run_on = gv.settings().get_run_on()
-
-    selector_scenario = gv.latest_scenario().get_selection_scenario_path()
-    selector_path = selector_scenario / "portfolio_selector"
-    if not selector_path.exists() or not selector_path.is_file():
-        print("ERROR: The portfolio selector could not be found. Please make sure to "
-              "first construct a portfolio selector.")
-        sys.exit(-1)
-    if len([p for p in gv.settings().DEFAULT_extractor_dir.iterdir()]) == 0:
-        print("ERROR: No feature extractor added to Sparkle.")
-        sys.exit(-1)
-
-    # Compute the features of the incoming instances
-    test_case_path = selector_scenario / data_set.name
+    selector_scenario = SelectionScenario.from_file(args.selection_scenario)
+    # Create a new feature dataframe for this run, compute the features
+    test_case_path = selector_scenario.directory / data_set.name
     test_case_path.mkdir(exist_ok=True)
-    feature_dataframe = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
-    feature_dataframe.remove_instances(feature_dataframe.instances)
-    feature_dataframe.csv_filepath = test_case_path / "feature_data.csv"
+    feature_dataframe = FeatureDataFrame(test_case_path / "feature_data.csv")
+    for extractor_name in selector_scenario.feature_extractors:
+        extractor = resolve_object_name(
+            extractor_name,
+            gv.file_storage_data_mapping[gv.instances_nickname_path],
+            gv.settings().DEFAULT_extractor_dir, Extractor)
+        feature_dataframe.add_extractor(extractor_name, extractor.features)
+
     feature_dataframe.add_instances(data_set.instance_paths)
     feature_dataframe.save_csv()
     feature_run = compute_features(feature_dataframe, recompute=False, run_on=run_on)
 
     if run_on == Runner.LOCAL:
         feature_run.wait()
-    objectives = gv.settings().get_general_sparkle_objectives()
-    # Prepare output performance data
-    performance_data = PerformanceDataFrame(
-        test_case_path / "performance_data.csv",
-        objectives=objectives)
-    for instance_name in data_set.instance_names:
-        if instance_name not in performance_data.instances:
-            performance_data.add_instance(instance_name)
-    performance_data.add_solver(selector_path.name)
-    performance_data.save_csv()
-    # Update latest scenario
-    gv.latest_scenario().set_selection_test_case_directory(test_case_path)
-    gv.latest_scenario().set_latest_scenario(Scenario.SELECTION)
-    # Write used scenario to file
-    gv.latest_scenario().write_scenario_ini()
+    # Results need to be stored in the performance data object of the scenario:
+    # Add the instance set to it
+    for instance in data_set.instance_paths:
+        selector_scenario.selector_performance_data.add_instance(str(instance))
+    selector_scenario.selector_performance_data.save_csv()
 
     run_core = Path(__file__).parent.parent.resolve() /\
         "CLI" / "core" / "run_portfolio_selector_core.py"
     cmd_list = [
         f"python3 {run_core} "
-        f"--selector {selector_path} "
+        f"--selector-scenario {args.selection_scenario} "
         f"--feature-data-csv {feature_dataframe.csv_filepath} "
-        f"--input-performance-data {gv.settings().DEFAULT_performance_data_path} "
-        f"--performance-data-csv {performance_data.csv_filepath} "
         f"--instance {instance_path} "
         f"--log-dir {sl.caller_log_dir} "
         for instance_path in data_set.instance_paths]
@@ -123,8 +107,9 @@ def main(argv: list[str]) -> None:
     selector_run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
-        name=f"Portfolio Selector: {selector_path.name} on {data_set.name}",
+        name=f"Portfolio Selector: {selector_scenario.selector.name} on {data_set.name}",
         stdout=None if run_on == Runner.LOCAL else subprocess.PIPE,  # Print to screen
+        stderr=None if run_on == Runner.LOCAL else subprocess.PIPE,  # Print to screen
         base_dir=sl.caller_log_dir,
         dependencies=feature_run,
         sbatch_options=gv.settings().get_slurm_extra_options(as_args=True),

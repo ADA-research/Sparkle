@@ -8,7 +8,8 @@ def Instance_Set(target: any) -> InstanceSet:
     """The combined interface for all instance set types."""
     if ((isinstance(target, Path)
             and (target / MultiFileInstanceSet.instance_csv).exists())
-            or isinstance(target, list)):
+            or (isinstance(target, list) and isinstance(target[0], Path)
+                and (target[0].parent / MultiFileInstanceSet.instance_csv).exists())):
         return MultiFileInstanceSet(target)
     elif (isinstance(target, Path) and target.is_dir()
           and all([p.suffix in IterableFileInstanceSet.supported_filetypes

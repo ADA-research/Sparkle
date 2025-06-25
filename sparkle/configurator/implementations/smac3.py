@@ -24,8 +24,8 @@ class SMAC3(Configurator):
         "Components/smac3-v2.3.1"
     configurator_executable = configurator_path / "smac3_target_algorithm.py"
 
-    version = smac_version
     full_name = "Sequential Model-based Algorithm Configuration"
+    version = smac_version
 
     def __init__(self: SMAC3,
                  base_dir: Path,
@@ -83,12 +83,7 @@ class SMAC3(Configurator):
                 == scenario.smac3_scenario.cputime_limit == np.inf):
             print("WARNING: Starting SMAC3 scenario without any time limit.")
         scenario.create_scenario()
-        # Generate Configuration IDs
-        from datetime import datetime
-        time_stamp = datetime.fromtimestamp(scenario.scenario_file_path.stat().st_mtime)
-        configuration_ids =\
-            [f"{self.name}_{time_stamp.strftime('%Y%m%d%H%M%S')}_{i}"
-             for i in range(scenario.number_of_runs)]
+        configuration_ids = scenario.configuration_ids
         # TODO: Setting seeds like this is weird and should be inspected.
         # It could be good to take perhaps a seed from the scenario and use that
         # to generate a seed per run
@@ -167,9 +162,9 @@ class SMAC3Scenario(ConfigurationScenario):
                  solver: Solver,
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
+                 number_of_runs: int,
                  parent_directory: Path,
-                 cutoff_time: int = None,
-                 number_of_runs: int = None,
+                 solver_cutoff_time: int = None,
                  smac_facade: smacfacades.AbstractFacade | str =
                  smacfacades.AlgorithmConfigurationFacade,
                  crash_cost: float | list[float] = np.inf,
@@ -195,13 +190,13 @@ class SMAC3Scenario(ConfigurationScenario):
                 The instance set to use for configuration.
             sparkle_objectives: list[SparkleObjective]
                 The objectives to optimize.
-            parent_directory: Path
-                The parent directory where the configuration files will be stored.
-            cutoff_time: int
-                Maximum CPU runtime in seconds that each solver call (trial)
-                is allowed to run. Is managed by RunSolver, not pynisher.
             number_of_runs: int
                 The number of times this scenario will be executed with different seeds.
+            parent_directory: Path
+                The parent directory where the configuration files will be stored.
+            solver_cutoff_time: int
+                Maximum CPU runtime in seconds that each solver call (trial)
+                is allowed to run. Is managed by RunSolver, not pynisher.
             smac_facade: AbstractFacade, defaults to AlgorithmConfigurationFacade
                 The SMAC facade to use for Optimisation.
             crash_cost: float | list[float], defaults to np.inf
@@ -258,10 +253,10 @@ class SMAC3Scenario(ConfigurationScenario):
                 The output subdirectory for the SMAC3 scenario. Defaults to the scenario
                 results directory.
         """
-        super().__init__(solver, instance_set, sparkle_objectives, parent_directory)
+        super().__init__(solver, instance_set, sparkle_objectives,
+                         number_of_runs, parent_directory)
         # The files are saved in `./output_directory/name/seed`.
         self.log_dir = self.directory / "logs"
-        self.number_of_runs = number_of_runs
         self.feature_data = feature_data
         if isinstance(self.feature_data, Path):  # Load from file
             self.feature_data = FeatureDataFrame(self.feature_data)
@@ -291,17 +286,17 @@ class SMAC3Scenario(ConfigurationScenario):
         # NOTE: We don't use trial_walltime_limit as a way of managing resources
         # As it uses pynisher to do it (python based) and our targets are maybe not
         # RunSolver is the better option for accuracy.
-        self.cutoff_time = cutoff_time
+        self.solver_cutoff_time = solver_cutoff_time
         if solver_calls is None:  # If solver calls is None, try to calculate it
-            if self.cutoff_time is not None and (cputime_limit or walltime_limit):
+            if self.solver_cutoff_time is not None and (cputime_limit or walltime_limit):
                 if cputime_limit:
-                    solver_calls = int(cputime_limit / self.cutoff_time)
+                    solver_calls = int(cputime_limit / self.solver_cutoff_time)
                 elif walltime_limit:
-                    solver_calls = int(walltime_limit / self.cutoff_time)
+                    solver_calls = int(walltime_limit / self.solver_cutoff_time)
             else:
                 solver_calls = 100  # SMAC3 Default value
         self.smac3_scenario = SmacScenario(
-            configspace=solver.get_cs(),
+            configspace=solver.get_configuration_space(),
             name=self.name,
             output_directory=self.results_directory / smac3_output_directory,
             deterministic=solver.deterministic,
@@ -336,13 +331,18 @@ class SMAC3Scenario(ConfigurationScenario):
         self.validation.mkdir(parents=True, exist_ok=True)
         self.create_scenario_file()
 
+    @property
+    def configurator(self: SMAC3Scenario) -> SMAC3:
+        """Return the type of configurator the scenario belongs to."""
+        return SMAC3
+
     def create_scenario_file(self: ConfigurationScenario) -> Path:
         """Create a file with the configuration scenario."""
         with self.scenario_file_path.open("w") as file:
-            for key, value in self.serialize().items():
+            for key, value in self.serialise().items():
                 file.write(f"{key} = {value}\n")
 
-    def serialize(self: ConfigurationScenario) -> dict:
+    def serialise(self: ConfigurationScenario) -> dict:
         """Serialize the configuration scenario."""
         feature_data =\
             self.feature_data.csv_filepath if self.feature_data else None
@@ -350,7 +350,7 @@ class SMAC3Scenario(ConfigurationScenario):
             "solver": self.solver.directory,
             "instance_set": self.instance_set.directory,
             "sparkle_objectives": ",".join(self.smac3_scenario.objectives),
-            "cutoff_time": self.cutoff_time,
+            "solver_cutoff_time": self.solver_cutoff_time,
             "number_of_runs": self.number_of_runs,
             "smac_facade": self.smac_facade.__name__,
             "crash_cost": self.smac3_scenario.crash_cost,
@@ -390,7 +390,7 @@ class SMAC3Scenario(ConfigurationScenario):
             resolve_objective(o)
             for o in variables["sparkle_objectives"].split(",")]
         variables["parent_directory"] = scenario_file.parent.parent
-        variables["cutoff_time"] = int(variables["cutoff_time"])
+        variables["solver_cutoff_time"] = int(variables["solver_cutoff_time"])
         variables["number_of_runs"] = int(variables["number_of_runs"])
         variables["smac_facade"] = getattr(smacfacades, variables["smac_facade"])
 
