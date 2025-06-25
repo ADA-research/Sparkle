@@ -50,7 +50,7 @@ def main(argv: list[str]) -> None:
     # Remove from feature data and performance data
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
-    for instance in old_instance_set.instance_paths:
+    for instance in old_instance_set.instance_names:
         feature_data.remove_instances(str(instance))
         performance_data.remove_instances(str(instance))
 
