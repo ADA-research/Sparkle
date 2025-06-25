@@ -174,9 +174,10 @@ def run_solvers_performance_data(
 
     # Edit jobs to incorporate file paths
     jobs_with_paths = []
-    for job in jobs:
-        instance_path = resolve_instance_name(job[2], gv.settings().DEFAULT_instance_dir)
-        jobs_with_paths.append((job[0], job[1], instance_path, job[3]))
+    for solver, config, instance, run in jobs:
+        instance_path = resolve_instance_name(
+            instance, gv.settings().DEFAULT_instance_dir)
+        jobs_with_paths.append((solver, config, instance_path, run))
     jobs = jobs_with_paths
 
     print(f"Total number of jobs to run: {len(jobs)}")

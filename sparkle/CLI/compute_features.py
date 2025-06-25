@@ -58,6 +58,7 @@ def compute_features(
         feature_data.reset_dataframe()
     jobs = feature_data.remaining_jobs()
 
+    # Lookup all instances to resolve the instance paths later
     instances: list[InstanceSet] = []
     for instance_dir in gv.settings().DEFAULT_instance_dir.iterdir():
         if instance_dir.is_dir():
@@ -76,6 +77,7 @@ def compute_features(
     # We create a job for each instance/extractor combination
     for instance_name, extractor_name, feature_group in jobs:
         extractor_path = gv.settings().DEFAULT_extractor_dir / extractor_name
+        # Pass instances to avoid looking it up for every iteration
         instance_path = resolve_instance_name(instance_name, instances)
         instance_paths.add(instance_path)
 

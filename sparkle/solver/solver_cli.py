@@ -40,7 +40,7 @@ if __name__ == "__main__":
                         help="the cutoff time for the solver.")
     parser.add_argument("--target-objective", required=False, type=str,
                         help="The objective to use to determine the best configuration.")
-    parser.add_argument("--best-configuration-instances", required=False, type=str,
+    parser.add_argument("--best-configuration-instances", required=False, type=str, nargs="+",
                         help="If given, will ignore any given configurations, and try to"
                              " determine the best found configurations over the given "
                              "instances. Defaults to the first objective given in the "
@@ -52,6 +52,7 @@ if __name__ == "__main__":
     print(f"Running Solver and read/writing results with {args.performance_dataframe}")
     # Resolve possible multi-file instance
     instance_path: list[Path] = args.instance
+    # If instance is only one file then we don't need a list
     instance_path = instance_path[0] if len(instance_path) == 1 else instance_path
     instance_name = instance_path.stem if isinstance(
         instance_path, Path) else instance_path[0].stem
@@ -76,8 +77,14 @@ if __name__ == "__main__":
         # Filter out possible errors, shouldn't occur
         objectives = [o for o in objectives if o is not None]
         if args.best_configuration_instances:  # Determine best configuration
-            # TODO What if best_configuration_instances is multi file?
-            best_configuration_instances = args.best_configuration_instances.split(",")
+            best_configuration_instances: list[str] = args.best_configuration_instances
+            # Handle multifile instances e.g. i1.model,i1.constraints i2.model,i2.constraints...
+            best_configuration_instances = [instance_str.split(
+                ",") for instance_str in best_configuration_instances]
+            # Get the instance names
+            best_configuration_instances = [
+                Path(instance_list[0]).stem for instance_list in best_configuration_instances]
+
             target_objective = resolve_objective(args.target_objective)
             config_id, value = performance_dataframe.best_configuration(
                 solver=str(args.solver),

@@ -52,12 +52,19 @@ def resolve_instance_name(name: str,
 
     Args:
         name: The name to resolve
-        target: The target where to look for the instance
+        target: Path to look for instance sets or the instance sets directly
         return_path: Whether to return the path of the instance or the instance set
 
     Returns:
         The path or the instance set of the given instance name
     """
+    # TODO check if name exists in target
+    # if Path(name).exists and Path(name).is_file():
+    #     return name
+
+    # TODO check if name exists in target without file ending
+
+    # Target is a path to a directory that contains instance directories
     if isinstance(target, Path):
         instances = []
         for instance_dir in target.iterdir():

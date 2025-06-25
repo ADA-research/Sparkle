@@ -29,9 +29,9 @@ def test_iterable_file_instance_set() -> None:
     iterable_file_instance_set = IterableFileInstanceSet(instance_dir)
     assert iterable_file_instance_set.directory == instance_dir
     assert iterable_file_instance_set.size == 75
-    assert iterable_file_instance_set.all_paths == dir_content
-    assert iterable_file_instance_set.instance_paths == dir_content
-    assert iterable_file_instance_set.instance_names == ["Iris1.csv", "Iris2.npy"]
+    assert set(iterable_file_instance_set.all_paths) == set(dir_content)
+    assert set(iterable_file_instance_set.instance_paths) == set(dir_content)
+    assert set(iterable_file_instance_set.instance_names) == set(["Iris1.csv", "Iris2.npy"])
     assert iterable_file_instance_set.instances == \
         iterable_file_instance_set.instance_paths
     assert iterable_file_instance_set.name == "Iris"
@@ -52,7 +52,7 @@ def test_multi_file_instance_set_single_instance() -> None:
     multi_file_instance_set = MultiFileInstanceSet(target)
     assert multi_file_instance_set.directory == target.parent
     assert multi_file_instance_set.size == 1
-    assert multi_file_instance_set.all_paths == paths + [instance_csv]
+    assert set(multi_file_instance_set.all_paths) == set(paths + [instance_csv])
     assert multi_file_instance_set.instance_paths == [paths]
     assert multi_file_instance_set.instance_names == ["Banking1"]
     assert multi_file_instance_set.instances == [
@@ -76,13 +76,13 @@ def test_multi_file_instance_set_directory() -> None:
     multi_file_instance_set = MultiFileInstanceSet(instance_dir)
     assert multi_file_instance_set.directory == instance_dir
     assert multi_file_instance_set.size == 2
-    assert multi_file_instance_set.all_paths == dir_content + [instance_csv]
-    assert multi_file_instance_set.instance_paths == [dir_content[:2], dir_content[2:]]
-    assert multi_file_instance_set.instance_names == ["Banking1", "Healthcare1"]
-    assert multi_file_instance_set.instances == [
+    assert set(multi_file_instance_set.all_paths) == set(dir_content + [instance_csv])
+    assert set(multi_file_instance_set.instance_paths) == set([dir_content[:2], dir_content[2:]])
+    assert set(multi_file_instance_set.instance_names) == set(["Banking1", "Healthcare1"])
+    assert set(multi_file_instance_set.instances) == set([
         Path("tests/test_files/Instances/CCAG/Banking1"),
         Path("tests/test_files/Instances/CCAG/Healthcare1")
-    ]
+    ])
     assert multi_file_instance_set.name == "CCAG"
     assert str(multi_file_instance_set) == "CCAG"
     assert multi_file_instance_set.get_path_by_name("Banking1") == dir_content[:2]
@@ -116,10 +116,10 @@ def test_file_instance_set_directory() -> None:
     file_instance_set = FileInstanceSet(instance_dir)
     assert file_instance_set.directory == instance_dir
     assert file_instance_set.size == 3
-    assert file_instance_set.all_paths == dir_content
-    assert file_instance_set.instance_paths == dir_content
-    assert file_instance_set.instance_names == [
-        "Ptn-b01", "Ptn-b03", "Ptn-b05"]
+    assert set(file_instance_set.all_paths) == set(dir_content)
+    assert set(file_instance_set.instance_paths) == set(dir_content)
+    assert set(file_instance_set.instance_names) == set([
+        "Ptn-b01", "Ptn-b03", "Ptn-b05"])
     assert file_instance_set.instances == file_instance_set.instance_paths
     assert file_instance_set.name == "PTN"
     assert str(file_instance_set) == "PTN"

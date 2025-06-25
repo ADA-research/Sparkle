@@ -32,6 +32,8 @@ if __name__ == "__main__":
     selector_scenario = SelectionScenario.from_file(args.selector_scenario)
     feature_data = FeatureDataFrame(Path(args.feature_data_csv))
     instance = Instance_Set(args.instance)
+    # Note: Following code could be adjusted to run entire instance set
+
 
     # Run portfolio selector
     print("Sparkle portfolio selector predicting ...")
