@@ -73,9 +73,9 @@ class SMAC2(Configurator):
 
     @staticmethod
     def download_requirements(
-        # TODO: Fix URL
-        smac2_zip_url: str = "https://github.com/ADA-research/Sparkle/"
-                             "releases/download/v2.10.03/SMAC2-2.10.03.zip"
+        # TODO: Fix URL to Dev/Main
+        smac2_zip_url: str = "https://github.com/ADA-research/Sparkle/blob/SPRK-171/"
+                             "Resources/Configurators/SMAC2-v2.10.03.zip"
     ) -> None:
         """Download SMAC2."""
         if SMAC2.configurator_executable.exists():
