@@ -69,20 +69,21 @@ class SMAC2(Configurator):
                 warnings.warn(
                     "SMAC2 executable not found. Please ensure SMAC2 is installed "
                     f"in the expected Path ({SMAC2.configurator_path}).")
-        return no_java or no_smac
+        return not (no_java or no_smac)
 
     @staticmethod
     def download_requirements(
         # TODO: Fix URL to Dev/Main
-        smac2_zip_url: str = "https://github.com/ADA-research/Sparkle/blob/SPRK-171/"
-                             "Resources/Configurators/SMAC2-v2.10.03.zip"
+        smac2_zip_url: str = "https://github.com/ADA-research/Sparkle/raw/refs/heads/"
+                             "SPRK-171/Resources/Configurators//SMAC2-v2.10.03.zip"
     ) -> None:
         """Download SMAC2."""
         if SMAC2.configurator_executable.exists():
             return  # Already installed
-        import requests, zipfile, io
-        r = requests.get(smac2_zip_url, timeout=60)
-        z = zipfile.ZipFile(io.BytesIO(r.content))
+        from urllib.request import urlopen
+        import zipfile, io
+        r = urlopen(smac2_zip_url, timeout=60)
+        z = zipfile.ZipFile(io.BytesIO(r.read()))
         z.extractall(SMAC2.configurator_path)
 
     def configure(self: SMAC2,

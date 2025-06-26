@@ -35,6 +35,7 @@ ignore = D300  # Conflicts with docstring-quotes rule
          S404  # Just a warning about the usage of subprocess
          S603  # Flags only false positives as of now
          E401  # Allow multiple imports on one line
+         S310  # Triggers on URL request without http(s) in front but no fix available
 exclude =
     sparkle/Components/ablationAnalysis-0.9.4/,
     sparkle/Components/runsolver/,

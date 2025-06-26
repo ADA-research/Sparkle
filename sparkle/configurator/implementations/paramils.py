@@ -15,8 +15,7 @@ from sparkle.types import SparkleObjective
 
 class ParamILS(Configurator):
     """Class for ParamILS (Java) configurator."""
-    configurator_path = Path(__file__).parent.parent.parent.resolve() /\
-        "Components/paramils-v3.0.0"
+    configurator_path = Path(__file__).parent / "ParamILS"
     configurator_executable = configurator_path / "paramils"
     target_algorithm = "paramils_target_algorithm.py"
     configurator_target = configurator_path / target_algorithm
@@ -73,15 +72,16 @@ class ParamILS(Configurator):
     @staticmethod
     def download_requirements(
         # TODO: Fix URL to Dev/Main
-        paramils_zip_url: str = "https://github.com/ADA-research/Sparkle/blob/SPRK-171/"
-                                "Resources/Configurators/ParamILS-v.3.0.0.zip"
+        paramils_zip_url: str = "https://github.com/ADA-research/Sparkle/raw/refs/heads/"
+                                "SPRK-171/Resources/Configurators/ParamILS-v.3.0.0.zip"
     ) -> None:
         """Download ParamILS."""
         if ParamILS.configurator_executable.exists():
             return  # Already installed
-        import requests, zipfile, io
-        r = requests.get(paramils_zip_url, timeout=60)
-        z = zipfile.ZipFile(io.BytesIO(r.content))
+        from urllib.request import urlopen
+        import zipfile, io
+        r = urlopen(paramils_zip_url, timeout=60)
+        z = zipfile.ZipFile(io.BytesIO(r.read()))
         z.extractall(ParamILS.configurator_path)
 
     def configure(self: ParamILS,

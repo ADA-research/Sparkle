@@ -11,7 +11,7 @@ from pathlib import Path
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help import snapshot_help as snh
 from sparkle.CLI.help import global_variables as gv
-from sparkle.configurator.implementations.irace import IRACE
+from sparkle.configurator.implementations import IRACE, SMAC2, ParamILS
 from sparkle.platform import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 
@@ -191,6 +191,27 @@ def initialise_sparkle(save_existing_platform: bool = True,
                   "Please verify the following error messages:\n"
                   f"{runsolver_check.stderr.decode()}")
 
+    # Check for each configurator that it is available
+    if not SMAC2.check_requirements():
+        print("SMAC2 is not installed, would you like to install? (Y/n) ...")
+        if input().lower() == "y":
+            print("Installing SMAC2 ...")
+            SMAC2.download_requirements()
+    if not ParamILS.check_requirements():
+        print("ParamILS is not installed, would you like to install? (Y/n) ...")
+        if input().lower() == "y":
+            print("Installing ParamILS ...")
+            ParamILS.download_requirements()
+    if not IRACE.check_requirements():
+        if shutil.which("R") is None:
+            print("R is not installed, which is required for the IRACE "
+                  "configurator. Consider installing R.")
+        else:
+            print("IRACE is not installed, would you like to install? (Y/n) ...")
+            if input().lower() == "y":
+                print("Installing IRACE ...")
+                IRACE.download_requirements()
+
     # Check that java is available for SMAC2
     if shutil.which("java") is None:
         # NOTE: An automatic resolution of Java at this point would be good
@@ -198,10 +219,6 @@ def initialise_sparkle(save_existing_platform: bool = True,
         warnings.warn("Could not find Java as an executable! Java 1.8.0_402 is required "
                       "to use SMAC2 or ParamILS as a configurator. "
                       "Consider installing Java.")
-
-    # Check if IRACE is installed
-    if not IRACE.configurator_executable.exists():
-        initialise_irace()
 
     if download_examples:
         # Download Sparkle examples from Github
