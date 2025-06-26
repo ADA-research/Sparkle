@@ -78,7 +78,7 @@ def compute_features(
     for instance_name, extractor_name, feature_group in jobs:
         extractor_path = gv.settings().DEFAULT_extractor_dir / extractor_name
         # Pass instances to avoid looking it up for every iteration
-        instance_path = resolve_instance_name(instance_name, instances)
+        instance_path = resolve_instance_name(str(instance_name), instances)
         instance_paths.add(instance_path)
 
         cmd = (f"python3 {features_core} "
@@ -100,7 +100,8 @@ def compute_features(
 
     print(f"The number of compute jobs: {len(cmd_list)}")
 
-    parallel_jobs = min(len(cmd_list), gv.settings().get_number_of_jobs_in_parallel())
+    parallel_jobs = min(
+        len(cmd_list), gv.settings().get_number_of_jobs_in_parallel())
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     srun_options = ["-N1", "-n1"] + sbatch_options
     run = rrr.add_to_queue(

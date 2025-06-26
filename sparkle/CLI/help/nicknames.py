@@ -2,6 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import Callable
+import glob
 from sparkle.instance import Instance_Set, InstanceSet
 
 
@@ -47,7 +48,7 @@ def resolve_object_name(name: str | Path,
 
 def resolve_instance_name(name: str,
                           target: Path | list[InstanceSet],
-                          return_path: bool = True) -> Path | InstanceSet:
+                          return_path: bool = True) -> str | InstanceSet:
     """Attempts to resolve an instance name.
 
     Args:
@@ -58,14 +59,18 @@ def resolve_instance_name(name: str,
     Returns:
         The path or the instance set of the given instance name
     """
-    # TODO check if name exists in target
-    # if Path(name).exists and Path(name).is_file():
-    #     return name
+    # Check if name is a multi file instance path
+    matches = glob.glob(name + ".*")
 
-    # TODO check if name exists in target without file ending
-
+    # Check if the name is already an instance file path
+    name_path = Path(name)
+    if name_path.exists() and name_path.is_file():
+        return name
+    # Concat multi file instance
+    elif matches:
+        return " ".join(str(p) for p in matches)
     # Target is a path to a directory that contains instance directories
-    if isinstance(target, Path):
+    elif isinstance(target, Path):
         instances = []
         for instance_dir in target.iterdir():
             if instance_dir.is_dir():

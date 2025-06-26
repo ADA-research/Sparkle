@@ -34,12 +34,11 @@ if __name__ == "__main__":
     instance = Instance_Set(args.instance)
     # Note: Following code could be adjusted to run entire instance set
 
-
     # Run portfolio selector
     print("Sparkle portfolio selector predicting ...")
     predict_schedule = selector_scenario.selector.run(
         selector_scenario.selector_file_path,
-        instance.instance_names[0],
+        str(instance.instances[0]),
         feature_data)
 
     if predict_schedule is None:  # Selector Failed to produce prediction

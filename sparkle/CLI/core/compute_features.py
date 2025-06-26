@@ -32,7 +32,7 @@ if __name__ == "__main__":
     # Process command line arguments
     log_dir =\
         args.log_dir if args.log_dir is not None else gv.settings().DEFAULT_tmp_output
-    
+
     # Instance agument is a list to allow for multifile instances
     instance_path: list[Path] = args.instance
     instance_name = instance_path[0].stem
@@ -59,8 +59,10 @@ if __name__ == "__main__":
         print(f"Writing features to CSV: {instance_name}, {extractor_path.name}")
         with lock.acquire(timeout=60):
             feature_data = FeatureDataFrame(feature_data_csv_path)
+            instance_key = instance_name if instance_name in feature_data.instances else\
+                str(instance_path[0].with_suffix(""))
             for feature_group, feature_name, value in features:
-                feature_data.set_value(str(instance_name), extractor_path.name,
+                feature_data.set_value(instance_key, extractor_path.name,
                                        feature_group, feature_name, float(value))
             feature_data.save_csv()
         lock.release()

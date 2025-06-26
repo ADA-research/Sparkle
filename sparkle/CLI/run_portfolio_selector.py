@@ -74,6 +74,7 @@ def main(argv: list[str]) -> None:
     test_case_path = selector_scenario.directory / data_set.name
     test_case_path.mkdir(exist_ok=True)
     feature_dataframe = FeatureDataFrame(test_case_path / "feature_data.csv")
+    feature_dataframe.remove_instances(feature_dataframe.instances)
     for extractor_name in selector_scenario.feature_extractors:
         extractor = resolve_object_name(
             extractor_name,
@@ -81,16 +82,15 @@ def main(argv: list[str]) -> None:
             gv.settings().DEFAULT_extractor_dir, Extractor)
         feature_dataframe.add_extractor(extractor_name, extractor.features)
 
-    feature_dataframe.add_instances(data_set.instance_names)
+    feature_dataframe.add_instances(data_set.instances)
     feature_dataframe.save_csv()
-    # TODO compute features only works on added instances
     feature_run = compute_features(feature_dataframe, recompute=False, run_on=run_on)
 
     if run_on == Runner.LOCAL:
         feature_run.wait()
     # Results need to be stored in the performance data object of the scenario:
     # Add the instance set to it
-    for instance in data_set.instance_paths:
+    for instance in data_set.instance_names:
         selector_scenario.selector_performance_data.add_instance(str(instance))
     selector_scenario.selector_performance_data.save_csv()
 

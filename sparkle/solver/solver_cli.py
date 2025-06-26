@@ -40,7 +40,8 @@ if __name__ == "__main__":
                         help="the cutoff time for the solver.")
     parser.add_argument("--target-objective", required=False, type=str,
                         help="The objective to use to determine the best configuration.")
-    parser.add_argument("--best-configuration-instances", required=False, type=str, nargs="+",
+    parser.add_argument("--best-configuration-instances",
+                        required=False, type=str, nargs="+",
                         help="If given, will ignore any given configurations, and try to"
                              " determine the best found configurations over the given "
                              "instances. Defaults to the first objective given in the "
@@ -78,12 +79,13 @@ if __name__ == "__main__":
         objectives = [o for o in objectives if o is not None]
         if args.best_configuration_instances:  # Determine best configuration
             best_configuration_instances: list[str] = args.best_configuration_instances
-            # Handle multifile instances e.g. i1.model,i1.constraints i2.model,i2.constraints...
+            # Handle multifile instances: i1.model,i1.const i2.model,i2.const...
             best_configuration_instances = [instance_str.split(
                 ",") for instance_str in best_configuration_instances]
             # Get the instance names
             best_configuration_instances = [
-                Path(instance_list[0]).stem for instance_list in best_configuration_instances]
+                Path(instance_list[0]).stem
+                for instance_list in best_configuration_instances]
 
             target_objective = resolve_objective(args.target_objective)
             config_id, value = performance_dataframe.best_configuration(
