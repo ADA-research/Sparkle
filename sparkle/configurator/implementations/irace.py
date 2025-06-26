@@ -19,13 +19,16 @@ class IRACE(Configurator):
     configurator_target = configurator_path / "irace_target_algorithm.py"
 
     full_name = "Iterated Racing for Automatic Algorithm Configuration"
-    version = "3.5"
+    version = None
+
+    r_regex = r'\[\d+\]\s*"(?P<data>[^"]+)"'
 
     def __init__(self: Configurator,
                  output_path: Path,
                  base_dir: Path,
                  ) -> None:
         """Initialize IRACE configurator."""
+        self._version: str = None
         output_path = output_path / IRACE.__name__
         output_path.mkdir(parents=True, exist_ok=True)
         super().__init__(output_path=output_path,
@@ -39,8 +42,30 @@ class IRACE(Configurator):
         return IRACE.__name__
 
     @property
-    def configurator_executable(self: IRACE) -> Path:
-        """Returns the path to the IRACE executable."""
+    def version(self: IRACE) -> str:
+        """Returns the version of the configurator."""
+        if self._version is None:
+            import re
+            version_call = subprocess.run(["Rscript", "-e", "packageVersion('irace')"],
+                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if version_call.returncode == 0:
+                r_path = re.search(IRACE.r_regex,
+                                   version_call.stdout.decode().strip())
+                if r_path is not None and r_path.group("data") is not None:
+                    self._version = r_path.group("data")
+        return self._version
+
+    @staticmethod
+    def configurator_executable() -> Path:
+        """Returns the path to the IRACE executable.
+
+        # NOTE: For the base class this is a class property.
+        However as it must be calculated in this case, it is a class method as calculated
+        class properties do not exist in Python.
+
+        Returns:
+            Path to the executable if it can be found, else None.
+        """
         if shutil.which("R") is None:
             return None  # Not installed
         r_call = subprocess.run(
@@ -50,11 +75,11 @@ class IRACE(Configurator):
         if r_call.returncode != 0:
             return None  # Not installed
         import re
-        r_path = re.search(r'\[\d+\]\s*"(?P<path>[^"]+)"',
+        r_path = re.search(IRACE.r_regex,
                            r_call.stdout.decode().strip())
-        if r_path is None or r_path.group("path") is None:
+        if r_path is None or r_path.group("data") is None:
             return  # Could not find IRACE?
-        path = Path(r_path.group("path"))
+        path = Path(r_path.group("data"))
         return path / "bin" / "irace"
 
     @staticmethod
@@ -72,7 +97,7 @@ class IRACE(Configurator):
                     "IRACE requires R, but R is not installed. "
                     "Please ensure R is installed.")
             return False
-        if not IRACE.configurator_executable.exists():
+        if not IRACE.configurator_executable():
             if verbose:
                 warnings.warn(
                     "IRACE executable not found. Please ensure IRACE is installed "
@@ -83,7 +108,25 @@ class IRACE(Configurator):
     @staticmethod
     def download_requirements() -> None:
         """Download IRACE."""
-        pass
+        if shutil.which("R") is None:
+            raise RuntimeError("IRACE requires R, but R is not installed.")
+        install_irace = subprocess.run(
+            ["Rscript", "-e",
+             # Ensure personal library exists, do not raise warnings
+             "dir.create(path = Sys.getenv('R_LIBS_USER'), "
+             "showWarnings = FALSE, recursive = TRUE); ",
+             # Install R
+             "install.packages('irace', "
+             "lib=Sys.getenv('R_LIBS_USER'), "  # Install in user library
+             "repos='https://cloud.r-project.org', "  # Set source
+             "dependencies = TRUE)"],  # Ensure dependencies are installed
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print(install_irace)
+        if install_irace.returncode != 0:
+            import warnings
+            warnings.warn("IRACE had a non-zero return code during installation! "
+                          f"{install_irace.stdout.decode()}\n"
+                          f"{install_irace.stderr.decode()}")
 
     def configure(self: IRACE,
                   scenario: ConfigurationScenario,

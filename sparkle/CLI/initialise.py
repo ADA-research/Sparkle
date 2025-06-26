@@ -191,6 +191,13 @@ def initialise_sparkle(save_existing_platform: bool = True,
                   "Please verify the following error messages:\n"
                   f"{runsolver_check.stderr.decode()}")
 
+    # Check that java is available for SMAC2
+    if shutil.which("java") is None:
+        # NOTE: An automatic resolution of Java at this point would be good
+        # However, loading modules from Python has thusfar not been successfull.
+        print("WARNING: Could not find Java as an executable! Java 1.8.0_402 is required"
+              " to use SMAC2 or ParamILS as a configurator. Consider installing Java.")
+
     # Check for each configurator that it is available
     if not SMAC2.check_requirements():
         print("SMAC2 is not installed, would you like to install? (Y/n) ...")
@@ -205,20 +212,12 @@ def initialise_sparkle(save_existing_platform: bool = True,
     if not IRACE.check_requirements():
         if shutil.which("R") is None:
             print("R is not installed, which is required for the IRACE "
-                  "configurator. Consider installing R.")
+                  "configurator (installation). Consider installing R.")
         else:
             print("IRACE is not installed, would you like to install? (Y/n) ...")
             if input().lower() == "y":
                 print("Installing IRACE ...")
                 IRACE.download_requirements()
-
-    # Check that java is available for SMAC2
-    if shutil.which("java") is None:
-        # NOTE: An automatic resolution of Java at this point would be good
-        # However, loading modules from Python has thusfar not been successfull.
-        warnings.warn("Could not find Java as an executable! Java 1.8.0_402 is required "
-                      "to use SMAC2 or ParamILS as a configurator. "
-                      "Consider installing Java.")
 
     if download_examples:
         # Download Sparkle examples from Github
