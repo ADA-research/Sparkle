@@ -51,6 +51,16 @@ class Configurator:
         """Return the scenario class of the configurator."""
         return ConfigurationScenario
 
+    @staticmethod
+    def check_requirements(verbose: bool = False) -> bool:
+        """Check if the configurator is installed."""
+        raise NotImplementedError
+
+    @staticmethod
+    def download_requirements() -> None:
+        """Download the configurator."""
+        raise NotImplementedError
+
     def configure(self: Configurator,
                   configuration_commands: list[str],
                   data_target: PerformanceDataFrame,
@@ -84,6 +94,10 @@ class Configurator:
         Returns:
             A RunRunner Run object.
         """
+        if not self.check_requirements(verbose=True):
+            raise RuntimeError(
+                f"{self.name} is not installed. Please install {self.name} "
+                "and try again.")
         # Add the configuration IDs to the dataframe with empty configurations
         data_target.add_configuration(str(scenario.solver.directory),
                                       configuration_ids,

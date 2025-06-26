@@ -19,8 +19,7 @@ from sparkle.types import SparkleObjective, resolve_objective
 
 class SMAC2(Configurator):
     """Class for SMAC2 (Java) configurator."""
-    configurator_path = Path(__file__).parent.parent.parent.resolve() /\
-        "Components/smac2-v2.10.03-master-778"
+    configurator_path = Path(__file__).parent.resolve() / "SMAC2"
     configurator_executable = configurator_path / "smac"
     configurator_target = configurator_path / "smac2_target_algorithm.py"
 
@@ -55,6 +54,37 @@ class SMAC2(Configurator):
         """Returns the SMAC2 scenario class."""
         return SMAC2Scenario
 
+    @staticmethod
+    def check_requirements(verbose: bool = False) -> bool:
+        """Check that SMAC2 is installed."""
+        import warnings
+        if no_java := shutil.which("java") is None:
+            if verbose:
+                warnings.warn(
+                    "SMAC2 requires Java 1.8.0_402, but Java is not installed. "
+                    "Please ensure Java is installed."
+                )
+        if no_smac := not SMAC2.configurator_executable.exists():
+            if verbose:
+                warnings.warn(
+                    "SMAC2 executable not found. Please ensure SMAC2 is installed "
+                    f"in the expected Path ({SMAC2.configurator_path}).")
+        return no_java or no_smac
+
+    @staticmethod
+    def download_requirements(
+        # TODO: Fix URL
+        smac2_zip_url: str = "https://github.com/ADA-research/Sparkle/"
+                             "releases/download/v2.10.03/SMAC2-2.10.03.zip"
+    ) -> None:
+        """Download SMAC2."""
+        if SMAC2.configurator_executable.exists():
+            return  # Already installed
+        import requests, zipfile, io
+        r = requests.get(smac2_zip_url, timeout=60)
+        z = zipfile.ZipFile(io.BytesIO(r.content))
+        z.extractall(SMAC2.configurator_path)
+
     def configure(self: SMAC2,
                   scenario: SMAC2Scenario,
                   data_target: PerformanceDataFrame,
@@ -79,11 +109,6 @@ class SMAC2(Configurator):
         Returns:
             A RunRunner Run object.
         """
-        if shutil.which("java") is None:
-            raise RuntimeError(
-                "SMAC2 requires Java 1.8.0_402, but Java is not installed. "
-                "Please ensure Java is installed and try again."
-            )
         scenario.create_scenario()
         configuration_ids = scenario.configuration_ids
         # TODO: Setting seeds like this is weird and should be inspected.

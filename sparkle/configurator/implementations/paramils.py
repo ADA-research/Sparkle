@@ -51,6 +51,39 @@ class ParamILS(Configurator):
         """Returns the ParamILS scenario class."""
         return ParamILSScenario
 
+    @staticmethod
+    def check_requirements(verbose: bool = False) -> bool:
+        """Check that ParamILS is installed."""
+        import warnings
+        if shutil.which("java") is None:
+            if verbose:
+                warnings.warn(
+                    "ParamILS requires Java 1.8.0_402, but Java is not installed. "
+                    "Please ensure Java is installed."
+                )
+            return False
+        if not ParamILS.configurator_executable.exists():
+            if verbose:
+                warnings.warn(
+                    "ParamILS executable not found. Please ensure ParamILS is installed "
+                    f"in the expected Path ({ParamILS.configurator_path}).")
+            return False
+        return True
+
+    @staticmethod
+    def download_requirements(
+        # TODO: Fix URL
+        paramils_zip_url: str = "https://github.com/ADA-research/Sparkle/"
+                                "releases/download/v2.10.03/ParamILS-3.0.0.zip"
+    ) -> None:
+        """Download ParamILS."""
+        if ParamILS.configurator_executable.exists():
+            return  # Already installed
+        import requests, zipfile, io
+        r = requests.get(paramils_zip_url, timeout=60)
+        z = zipfile.ZipFile(io.BytesIO(r.content))
+        z.extractall(ParamILS.configurator_path)
+
     def configure(self: ParamILS,
                   scenario: ParamILSScenario,
                   data_target: PerformanceDataFrame,

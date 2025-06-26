@@ -15,15 +15,7 @@ from runrunner import Runner, Run
 
 class IRACE(Configurator):
     """Class for IRACE configurator."""
-    configurator_path = Path(__file__).parent.parent.parent.resolve() /\
-        "Components/irace-v4.2.0"
-    configurator_package = configurator_path / "irace_4.2.0.tar"
-    # NOTE: There are possible dependencies that we do not install here.
-    # TODO: Determine if we should add them or not.
-    package_dependencies = ["codetools_0.2-20.tar", "data.table_1.16.4.tar",
-                            "matrixStats_1.5.0.tar", "spacefillr_0.3.3.tar"]
-    configurator_executable = configurator_path / "irace" / "bin" / "irace"
-    configurator_ablation_executable = configurator_path / "irace" / "bin" / "ablation"
+    configurator_path = Path(__file__).parent.resolve() / "IRACE"
     configurator_target = configurator_path / "irace_target_algorithm.py"
 
     full_name = "Iterated Racing for Automatic Algorithm Configuration"
@@ -46,10 +38,52 @@ class IRACE(Configurator):
         """Returns the name of the configurator."""
         return IRACE.__name__
 
+    @property
+    def configurator_executable(self: IRACE) -> Path:
+        """Returns the path to the IRACE executable."""
+        if shutil.which("R") is None:
+            return None  # Not installed
+        r_call = subprocess.run(
+            ["Rscript", "-e", "find.package('irace')"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        if r_call.returncode != 0:
+            return None  # Not installed
+        import re
+        r_path = re.search(r'\[\d+\]\s*"(?P<path>[^"]+)"',
+                           r_call.stdout.decode().strip())
+        if r_path is None or r_path.group("path") is None:
+            return  # Could not find IRACE?
+        path = Path(r_path.group("path"))
+        return path / "bin" / "irace"
+
     @staticmethod
     def scenario_class() -> ConfigurationScenario:
         """Returns the IRACE scenario class."""
         return IRACEScenario
+
+    @staticmethod
+    def check_requirements(verbose: bool = False) -> bool:
+        """Check that IRACE is installed."""
+        import warnings
+        if shutil.which("R") is None:
+            if verbose:
+                warnings.warn(
+                    "IRACE requires R, but R is not installed. "
+                    "Please ensure R is installed.")
+            return False
+        if not IRACE.configurator_executable.exists():
+            if verbose:
+                warnings.warn(
+                    "IRACE executable not found. Please ensure IRACE is installed "
+                    f"in the expected Path ({IRACE.configurator_path}).")
+            return False
+        return True
+
+    @staticmethod
+    def download_requirements() -> None:
+        """Download IRACE."""
+        pass
 
     def configure(self: IRACE,
                   scenario: ConfigurationScenario,
