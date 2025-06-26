@@ -19,9 +19,8 @@ class IRACE(Configurator):
     configurator_target = configurator_path / "irace_target_algorithm.py"
 
     full_name = "Iterated Racing for Automatic Algorithm Configuration"
-    version = None
 
-    r_regex = r'\[\d+\]\s*"(?P<data>[^"]+)"'
+    r_regex = r'\[\d+\]\s*["‘](?P<data>[^"`]+)["’]'
 
     def __init__(self: Configurator,
                  output_path: Path,
@@ -49,10 +48,10 @@ class IRACE(Configurator):
             version_call = subprocess.run(["Rscript", "-e", "packageVersion('irace')"],
                                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if version_call.returncode == 0:
-                r_path = re.search(IRACE.r_regex,
+                r_data = re.search(IRACE.r_regex,
                                    version_call.stdout.decode().strip())
-                if r_path is not None and r_path.group("data") is not None:
-                    self._version = r_path.group("data")
+                if r_data is not None and r_data.group("data") is not None:
+                    self._version = r_data.group("data")
         return self._version
 
     @staticmethod
@@ -110,22 +109,26 @@ class IRACE(Configurator):
         """Download IRACE."""
         if shutil.which("R") is None:
             raise RuntimeError("IRACE requires R, but R is not installed.")
+        # Ensure personal library exists, do not raise warnings
+        subprocess.run([
+            "Rscript", "-e",
+            "dir.create(path = Sys.getenv('R_LIBS_USER'), "
+            "showWarnings = FALSE, recursive = TRUE)"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         install_irace = subprocess.run(
             ["Rscript", "-e",
-             # Ensure personal library exists, do not raise warnings
-             "dir.create(path = Sys.getenv('R_LIBS_USER'), "
-             "showWarnings = FALSE, recursive = TRUE); ",
              # Install R
              "install.packages('irace', "
              "lib=Sys.getenv('R_LIBS_USER'), "  # Install in user library
-             "repos='https://cloud.r-project.org', "  # Set source
-             "dependencies = TRUE)"],  # Ensure dependencies are installed
+             "dependencies = TRUE, "  # Ensure dependencies are installed
+             "repos='https://cloud.r-project.org')"],  # Set source
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print(install_irace)
+        print(f"{install_irace.stdout.decode()}\n\n"
+              f"{install_irace.stderr.decode()}")
         if install_irace.returncode != 0:
             import warnings
-            warnings.warn("IRACE had a non-zero return code during installation! "
-                          f"{install_irace.stdout.decode()}\n"
+            warnings.warn("IRACE had a non-zero return code during installation!\n\n"
+                          f"{install_irace.stdout.decode()}\n\n"
                           f"{install_irace.stderr.decode()}")
 
     def configure(self: IRACE,
