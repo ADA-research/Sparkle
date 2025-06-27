@@ -93,7 +93,7 @@ def test_smac3_configure(tmp_path: Path,
     # Make a copy to not touch the original
     data_target = data_target.clone(Path("tmp-pdf.csv"))
     scenario.create_scenario()
-    smac_configurator = SMAC3(Path(), Path())
+    smac_configurator = SMAC3()
     with patch("runrunner.add_to_queue", new=lambda *args, **kwargs: None):
         runs = smac_configurator.configure(scenario, data_target)
     assert runs == [None, None]

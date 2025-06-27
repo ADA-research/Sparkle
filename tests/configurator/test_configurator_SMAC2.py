@@ -25,8 +25,7 @@ class TestConfiguratorSMAC2(TestCase):
         sparkle_objective = PAR(10)
         self.test_files = Path("tests", "test_files")
         self.base_dir = self.test_files / "tmp"
-        output = Path("Output")
-        self.smac2_conf = SMAC2(self.base_dir, output)
+        self.smac2_conf = SMAC2()
         self.train_set = Instance_Set(self.test_files / "Instances/Train-Instance-Set")
         self.solver = Solver(self.test_files / "Solvers/Test-Solver")
         self.conf_scenario = SMAC2Scenario(
@@ -119,7 +118,7 @@ class TestConfigurationScenarioSMAC2(TestCase):
         self.cutoff_time = 60
         self.cutoff_length = "max"
         self.sparkle_objective = PAR(10)
-        self.configurator = SMAC2(Path(), Path())
+        self.configurator = SMAC2()
         self.scenario = SMAC2Scenario(
             solver=self.solver,
             instance_set=self.instance_set,

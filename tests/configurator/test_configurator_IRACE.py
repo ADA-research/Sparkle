@@ -7,8 +7,6 @@ from unittest.mock import Mock, patch, ANY
 
 import runrunner as rrr
 
-from sparkle.CLI import initialise
-
 from sparkle.configurator.implementations import IRACE, IRACEScenario
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
@@ -25,16 +23,12 @@ def test_irace_configure(mock_add_to_queue: Mock) -> None:
     if shutil.which("Rscript") is None:
         warnings.warn("R is not installed, which is required for the IRACE")
         return
-    if not IRACE.configurator_executable.exists():
-        returncode = initialise.initialise_irace()  # Ensure IRACE is compiled
-        if returncode != 0:
-            warnings.warn("Failed to install IRACE, skipping test")
-            return
+    if not IRACE.check_requirements():
+        IRACE.download_requirements()
     sparkle_objective = PAR(10)
     test_files = Path("tests", "test_files")
     base_dir = test_files / "tmp"
-    output = Path("Output")
-    irace_conf = IRACE(output, base_dir)
+    irace_conf = IRACE()
     train_set = Instance_Set(test_files / "Instances/Train-Instance-Set")
     solver = Solver(test_files / "Solvers/Test-Solver")
     conf_scenario = IRACEScenario(
@@ -90,11 +84,8 @@ def test_irace_organise_output(tmp_path: Path,
     source_path = Path("tests/test_files/Configuration/"
                        "test_output_irace.Rdata").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
-    if not IRACE.configurator_executable.exists():
-        returncode = initialise.initialise_irace()  # Ensure IRACE is compiled
-        if returncode != 0:
-            warnings.warn("Failed to install IRACE, skipping test")
-            return
+    if not IRACE.check_requirements():
+        IRACE.download_requirements()  # Ensure IRACE is installed
     assert IRACE.organise_output(source_path, None, None, 1) == {
         "init_solution": "1", "perform_pac": "0", "perform_first_div": "1",
         "perform_double_cc": "1", "perform_aspiration": "1",
@@ -112,11 +103,8 @@ def test_irace_scenario_file(tmp_path: Path,
     solver = Solver(Path("tests/test_files/Solvers/Test-Solver").absolute())
     set = Instance_Set(Path("tests/test_files/Instances/Train-Instance-Set").absolute())
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
-    if not IRACE.configurator_executable.exists():
-        returncode = initialise.initialise_irace()  # Ensure IRACE is compiled
-        if returncode != 0:
-            warnings.warn("Failed to install IRACE, skipping test")
-            return
+    if not IRACE.check_requirements():  # Ensure IRACE is installed
+        IRACE.download_requirements()
     obj_par, obj_acc = resolve_objective("PAR10"), resolve_objective("accuray:max")
     scenario = IRACEScenario(solver, set, [obj_par, obj_acc], 2, Path("irace_scenario"),
                              solver_calls=2, solver_cutoff_time=2)
