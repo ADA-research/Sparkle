@@ -25,6 +25,7 @@ class SetByUser(argparse.Action):
 # Taken from https://stackoverflow.com/a/60750535
 class EnumAction(argparse.Action):
     """Argparse action for handling Enums."""
+
     def __init__(self: EnumAction, **kwargs: str) -> None:
         """Initialise the EnumAction."""
         # Pop off the type value
@@ -61,6 +62,7 @@ def user_set_state(args: argparse.Namespace, arg_name: str) -> SettingState:
 
 class ArgumentContainer():
     """Helper class for more convenient argument packaging and access."""
+
     def __init__(self: ArgumentContainer, names: list[str], kwargs: dict[str, Any])\
             -> None:
         """Create an ArgumentContainer.

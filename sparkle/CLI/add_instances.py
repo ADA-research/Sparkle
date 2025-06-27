@@ -78,14 +78,14 @@ def main(argv: list[str]) -> None:
     performance_data = PerformanceDataFrame(
         gv.settings().DEFAULT_performance_data_path,
         objectives=gv.settings().get_general_sparkle_objectives())
-    for instance_path in new_instance_set.instance_paths:
+    for instance_name in new_instance_set.instance_names:
         # Construct a name path due to multi-file instances
-        feature_data.add_instances(str(instance_path))
-        performance_data.add_instance(str(instance_path))
+        feature_data.add_instances(str(instance_name))
+        performance_data.add_instance(str(instance_name))
     feature_data.save_csv()
     performance_data.save_csv()
 
-    print(f"\nAdding instance set {new_instance_set.name} done!")
+    print(f"Adding instance set {new_instance_set.name} done!")
 
     # Write used settings to file
     gv.settings().write_used_settings()

@@ -10,7 +10,7 @@ sparkle initialise
 
 ### Add instances
 
-Add instance files in a given directory, without running solvers or feature extractors yet. In addition to the instance files, the directory should contain a file `sparkle_instance_list.txt` where each line contains a space separated list of files that together form an instance.
+Add instance files in a given directory, without running solvers or feature extractors yet. In addition to the instance files, the directory should contain a file `instances.csv` where each line contains a space separated list of files that together form an instance.
 
 ```bash
 sparkle add_instances Examples/Resources/CCAG/Instances/CCAG/
@@ -44,15 +44,15 @@ sparkle compute_features
 ```
 
 ### Run the solvers
-Run the solvers on all instances. For the CCAG (Constrained Covering Array Generation) problem we measure the quality objective by setting the `--objectives` option, to avoid needing this for every command it can also be set in `Settings/sparkle_settings.ini`.
+Run the solvers on all instances. For the CCAG (Constrained Covering Array Generation) problem we measure the quality by setting the objective in `Settings/sparkle_settings.ini` to quality.
 
 ```bash
-sparkle run_solvers --objectives quality
+sparkle run_solvers --performance-data
 ```
 
 ### Construct a portfolio selector
 
-To make sure feature computation and solver performance computation are done before constructing the portfolio use the `wait` command
+Make sure feature computation and solver performance computation are done before constructing the portfolio.
 
 ```bash
 sparkle jobs
@@ -61,25 +61,25 @@ sparkle jobs
 Construct a portfolio selector, using the previously computed features and the results of running the solvers. We again set the objective measure to quality.
 
 ```bash
-sparkle construct_portfolio_selector --objectives quality
+sparkle construct_portfolio_selector
 ```
 
 ### Running the selector
 
 #### Run on a single instance
 
-Run the portfolio selector on a *single* testing instance; the result will be printed to the command line if you add `--run-on local` to the command. We again set the objective to quality.
+Run the portfolio selector on a *single* testing instance; the result will be printed to the command line if you add `--run-on local` to the command. We again set the objective to quality. Note: Currently only works for added instances.
 
 ```bash
-sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/Banking2.model Examples/Resources/CCAG/Instances/CCAG2/Banking2.constraints --objectives quality
+sparkle run_portfolio_selector --selection-scenario Output/Selection/MultiClassClassifier_RandomForestClassifier/FastCA_TCA/scenario.txt --instance Examples/Resources/CCAG/Instances/CCAG/Banking1 --run-on local
 ```
 
 #### Run on an instance set
 
-Run the portfolio selector on a testing instance *set*. We again set the objective to quality.
+Run the portfolio selector on a testing instance *set*. We again set the objective to quality. Note: Currently only works for added instances.
 
 ```bash
-sparkle run_portfolio_selector Examples/Resources/CCAG/Instances/CCAG2/ --objectives quality
+sparkle run_portfolio_selector --selection-scenario Output/Selection/MultiClassClassifier_RandomForestClassifier/FastCA_TCA/scenario.txt --instance Examples/Resources/CCAG/Instances/CCAG/
 ```
 
 #### Generate a report including results on the test set
@@ -90,10 +90,10 @@ Wait for the portfolio selector to be done running on the testing instance set
 sparkle jobs
 ```
 
-Generate an experimental report that includes the results on the test set, and as before the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report_For_Test.pdf`. We again set the obejctive to quality.
+<!-- Generate an experimental report that includes the results on the test set, and as before the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report_For_Test.pdf`. We again set the obejctive to quality.
 
 ```bash
-sparkle generate_report --objectives quality`
+sparkle generate_report --objectives quality
 ```
 
-By default the `generate_report` command will create a report for the most recent instance set. To generate a report for an older instance set, the desired instance set can be specified with: `--test-case-directory Test_Cases/CCAG2/`
+By default the `generate_report` command will create a report for the most recent instance set. To generate a report for an older instance set, the desired instance set can be specified with: `--test-case-directory Test_Cases/CCAG2/` -->

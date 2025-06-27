@@ -11,8 +11,12 @@ def Instance_Set(target: any) -> InstanceSet:
             or (isinstance(target, list) and isinstance(target[0], Path)
                 and (target[0].parent / MultiFileInstanceSet.instance_csv).exists())):
         return MultiFileInstanceSet(target)
-    elif (isinstance(target, Path) and target.is_dir()
-          and all([p.suffix in IterableFileInstanceSet.supported_filetypes
-                   for p in target.iterdir()])):
+    elif (not target.exists()) and \
+            (target.parent / MultiFileInstanceSet.instance_csv).exists():
+        # Single instance
+        return MultiFileInstanceSet(target)
+    elif isinstance(target, Path) and target.is_dir() and \
+            all([p.suffix in IterableFileInstanceSet.supported_filetypes
+                 for p in target.iterdir()]):
         return IterableFileInstanceSet(target)
     return FileInstanceSet(target)
