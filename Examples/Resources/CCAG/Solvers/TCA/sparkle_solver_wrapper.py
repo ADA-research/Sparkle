@@ -46,22 +46,10 @@ except Exception as ex:
 # Convert Solver output to dictionary for configurator target algorithm script
 output_str = solver_call.stdout.decode()
 print(output_str)  # Print original output so it can be verified
-# Exmple output
-# 0.000308        51      0
-# 0.00035 50      1
-# 0.000369        49      4
-# 0.000384        47      6
-# 0.000394        46      7
-# 0.00041 45      10
-# 0.000518        44      35
-# 0.000545        42      40
-# 0.000574        41      46
-
 
 solution_quality = sys.maxsize
 status = SolverStatus.CRASHED
 
-# TODO Improve
 for line in output_str.splitlines():
     words = line.strip().split()
     if len(words) <= 0:
