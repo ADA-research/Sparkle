@@ -35,8 +35,8 @@ def test_configure_solver(mock_which: Mock,
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
-    # Mock shlex to avoid Sparkle throwing an exception because Java is not loaded
-    mock_which.return_value("Java")
+    # Mock shlex to avoid throwing an exception because Configurator is not installed
+    mock_which.return_value("SMAC2.check_requirements", True)
 
     # Submit configure solver job and validation job
     with pytest.raises(SystemExit) as pytest_wrapped_e:
