@@ -26,23 +26,9 @@ class SMAC3(Configurator):
     full_name = "Sequential Model-based Algorithm Configuration"
     version = smac_version
 
-    def __init__(self: SMAC3,
-                 base_dir: Path,
-                 output_path: Path) -> None:
-        """Returns the SMAC3 configurator, Python SMAC V2.3.1.
-
-        Args:
-            objectives: The objectives to optimize. Only supports one objective.
-            base_dir: The path where the configurator will be executed in.
-            output_path: The path where the output will be placed.
-        """
-        output_path = output_path / SMAC3.__name__
-        output_path.mkdir(parents=True, exist_ok=True)
-        return super().__init__(
-            output_path=output_path,
-            base_dir=base_dir,
-            tmp_path=output_path / "tmp",
-            multi_objective_support=False)
+    def __init__(self: SMAC3) -> None:
+        """Returns the SMAC3 configurator, Python SMAC V2.3.1."""
+        return super().__init__(multi_objective_support=False)
 
     @property
     def name(self: SMAC3) -> str:
@@ -55,7 +41,7 @@ class SMAC3(Configurator):
         return SMAC3Scenario
 
     @staticmethod
-    def check_requirements() -> bool:
+    def check_requirements(verbose: bool = False) -> bool:
         """Check that SMAC3 is installed."""
         return True  # Is automatically installed with Sparkle
 

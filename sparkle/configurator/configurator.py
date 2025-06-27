@@ -21,25 +21,15 @@ class Configurator:
     full_name = "Configurator Abstract Class"
     version = "NaN"
 
-    def __init__(self: Configurator, output_path: Path,
-                 base_dir: Path, tmp_path: Path,
+    def __init__(self: Configurator,
                  multi_objective_support: bool = False) -> None:
         """Initialize Configurator.
 
         Args:
-            output_path: Output directory of the Configurator.
-            objectives: The list of Sparkle Objectives the configurator has to
-                optimize.
-            base_dir: Where to execute the configuration
-            tmp_path: Path for the temporary files of the configurator, optional
             multi_objective_support: Whether the configurator supports
                 multi objective optimization for solvers.
         """
-        self.output_path = output_path
-        self.base_dir = base_dir
-        self.tmp_path = tmp_path
         self.multiobjective = multi_objective_support
-        self.scenario = None
 
     @property
     def name(self: Configurator) -> str:
@@ -310,11 +300,10 @@ class AblationScenario:
     """Class for ablation analysis."""
 
     # We use the SMAC2 target algorithm for solver output handling
-    configurator_target = Path(__file__).parent.parent.resolve() /\
-        "Components" / "smac2-v2.10.03-master-778" / "smac2_target_algorithm.py"
+    configurator_target = Path(__file__).parent.resolve() /\
+        "SMAC2" / "smac2_target_algorithm.py"
 
-    ablation_dir = Path(__file__).parent.parent / "Components" /\
-        "ablationAnalysis-0.9.4"
+    ablation_dir = Path(__file__).parent / "ablationAnalysis-0.9.4"
     ablation_executable = ablation_dir / "ablationAnalysis"
     ablation_validation_executable = ablation_dir / "ablationValidation"
 
@@ -357,6 +346,49 @@ class AblationScenario:
         self.validation_dir = self.scenario_dir / "validation"
         self.validation_dir_tmp = self.validation_dir / "tmp"
         self.table_file = self.validation_dir / "log" / "ablation-validation-run1234.txt"
+
+    @staticmethod
+    def check_requirements(verbose: bool = False) -> bool:
+        """Check if Ablation Analysis is installed."""
+        import warnings
+        if no_java := shutil.which("java") is None:
+            if verbose:
+                warnings.warn(
+                    "AblationAnalysis requires Java 1.8.0_402, but Java is not installed"
+                    ". Please ensure Java is installed."
+                )
+        if no_exec := not AblationScenario.ablation_executable.exists():
+            if verbose:
+                warnings.warn(
+                    "AblationAnalysis executable not found. Please ensure Ablation"
+                    " Analysis is installed in the expected Path "
+                    f"({AblationScenario.ablation_executable}).")
+        if no_validation := not AblationScenario.ablation_validation_executable.exists():
+            if verbose:
+                warnings.warn(
+                    "AblationAnalysis Validation executable not found. Please ensure "
+                    "Ablation Analysis is installed in the expected Path "
+                    f"({AblationScenario.ablation_validation_executable}).")
+        return not (no_java or no_exec or no_validation)
+
+    @staticmethod
+    def download_requirements(
+        # TODO: Fix URL to Dev/Main
+        ablation_url: str = "https://github.com/ADA-research/Sparkle/raw/refs/heads/"
+                            "SPRK-171/Resources/Other/ablationAnalysis-0.9.4.zip"
+    ) -> None:
+        """Download Ablation Analysis executable."""
+        if AblationScenario.ablation_executable.exists():
+            return  # Already installed
+        from urllib.request import urlopen
+        import zipfile, io
+        AblationScenario.ablation_dir.mkdir(parents=True, exist_ok=True)
+        r = urlopen(ablation_url, timeout=60)
+        z = zipfile.ZipFile(io.BytesIO(r.read()))
+        z.extractall(AblationScenario.ablation_dir)
+        # Ensure execution rights
+        AblationScenario.ablation_executable.chmod(0o755)
+        AblationScenario.ablation_validation_executable.chmod(0o755)
 
     def create_configuration_file(self: AblationScenario) -> Path:
         """Create a configuration file for ablation analysis.
@@ -503,10 +535,10 @@ class AblationScenario:
         Returns:
             A  list of Run objects. Empty when running locally.
         """
-        if shutil.which("java") is None:
+        if not self.check_requirements(verbose=True):
             raise RuntimeError(
-                "Ablation Analysis requires Java 1.8.0_402, but Java is not installed. "
-                "Please ensure Java is installed and try again."
+                "Ablation Analysis is not available. Please ensure Java and Ablation "
+                "Analysis is installed and try again."
             )
         # 1. submit the ablation to the runrunner queue
         cmd = (f"{AblationScenario.ablation_executable.absolute()} "

@@ -43,9 +43,6 @@ def test_irace_configure(mock_add_to_queue: Mock) -> None:
         solver_cutoff_time=60,
         max_time=200,
     )
-    assert irace_conf.output_path == output / IRACE.__name__
-    assert irace_conf.base_dir == base_dir
-    assert irace_conf.tmp_path == output / IRACE.__name__ / "tmp"
     assert irace_conf.multiobjective is False
 
     if cli_tools.get_cluster_name() != "kathleen":

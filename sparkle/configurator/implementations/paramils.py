@@ -23,21 +23,9 @@ class ParamILS(Configurator):
     version = "3.0.0"
     full_name = "Parameter Iterated Local Search"
 
-    def __init__(self: ParamILS,
-                 base_dir: Path,
-                 output_path: Path) -> None:
-        """Returns the ParamILS (Java) configurator, V3.0.0.
-
-        Args:
-            base_dir: The path where the configurator will be executed in.
-            output_path: The path where the output will be placed.
-        """
-        output_path = output_path / ParamILS.__name__
-        output_path.mkdir(parents=True, exist_ok=True)
+    def __init__(self: ParamILS) -> None:
+        """Returns the ParamILS (Java) configurator, V3.0.0."""
         return super().__init__(
-            output_path=output_path,
-            base_dir=base_dir,
-            tmp_path=output_path / "tmp",
             multi_objective_support=False)
 
     @property
@@ -83,6 +71,7 @@ class ParamILS(Configurator):
         r = urlopen(paramils_zip_url, timeout=60)
         z = zipfile.ZipFile(io.BytesIO(r.read()))
         z.extractall(ParamILS.configurator_path)
+        ParamILS.configurator_executable.chmod(0o755)
 
     def configure(self: ParamILS,
                   scenario: ParamILSScenario,

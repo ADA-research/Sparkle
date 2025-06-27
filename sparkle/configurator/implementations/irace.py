@@ -22,18 +22,10 @@ class IRACE(Configurator):
 
     r_regex = r'\[\d+\]\s*["‘](?P<data>[^"`]+)["’]'
 
-    def __init__(self: Configurator,
-                 output_path: Path,
-                 base_dir: Path,
-                 ) -> None:
+    def __init__(self: IRACE) -> None:
         """Initialize IRACE configurator."""
         self._version: str = None
-        output_path = output_path / IRACE.__name__
-        output_path.mkdir(parents=True, exist_ok=True)
-        super().__init__(output_path=output_path,
-                         base_dir=base_dir,
-                         tmp_path=output_path / "tmp",
-                         multi_objective_support=False)
+        super().__init__(multi_objective_support=False)
 
     @property
     def name(self: IRACE) -> str:
@@ -167,7 +159,7 @@ class IRACE(Configurator):
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{IRACE.__name__} {output_path} {data_target.csv_filepath} "
                 f"{scenario.scenario_file_path} {configuration_id} "
-                f"{IRACE.configurator_executable.absolute()} "
+                f"{IRACE.configurator_executable().absolute()} "
                 f"--scenario {scenario.scenario_file_path} "
                 f"--log-file {output_path} "
                 f"--seed {seed}" for seed, configuration_id, output_path
@@ -459,7 +451,7 @@ class IRACEScenario(ConfigurationScenario):
                 file.write(f"nbIterations = {self.max_iterations}\n")
         print("Verifying contents of IRACE scenario file and testing solver call...")
         check_file = subprocess.run(
-            [f"{IRACE.configurator_executable.absolute()}",
+            [f"{IRACE.configurator_executable().absolute()}",
              "-s", f"{self.scenario_file_path.absolute()}", "--check"],
             capture_output=True)
         if check_file.returncode != 0:

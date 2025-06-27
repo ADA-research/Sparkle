@@ -154,9 +154,10 @@ def main(argv: list[str]) -> None:
         configurator_settings.update({"feature_data": feature_data})
 
     number_of_runs = gv.settings().get_configurator_number_of_runs()
+    output_path = gv.settings().get_configurator_output_path(configurator)
     config_scenario = configurator.scenario_class()(
         solver, instance_set_train, sparkle_objectives, number_of_runs,
-        configurator.output_path, **configurator_settings)
+        output_path, **configurator_settings)
 
     # Run the default configuration
     default_jobs = [(solver, config_id, instance, run_id)

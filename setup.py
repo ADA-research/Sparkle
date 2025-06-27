@@ -31,6 +31,7 @@ setup(name="Sparkle",
           "scikit-learn==1.3.2",
           # Reporting packages
           "plotly==6.1.2",
+          "kaleido==1.0.0",
           "pylatex==1.4.2",
       ],
       include_package_data=True,

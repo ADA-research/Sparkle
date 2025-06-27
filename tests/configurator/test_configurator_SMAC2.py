@@ -36,10 +36,7 @@ class TestConfiguratorSMAC2(TestCase):
             solver_cutoff_time=60,
             target_cutoff_length=10,
         )
-        assert self.smac2_conf.base_dir == self.base_dir
-        assert self.smac2_conf.output_path == output / SMAC2.__name__
         assert self.smac2_conf.multiobjective is False
-        assert self.smac2_conf.tmp_path == output / SMAC2.__name__ / "tmp"
 
     @patch("shutil.which")
     @patch("runrunner.add_to_queue")

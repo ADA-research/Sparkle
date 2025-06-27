@@ -26,22 +26,9 @@ class SMAC2(Configurator):
     full_name = "Sequential Model-based Algorithm Configuration"
     version = "2.10.03"
 
-    def __init__(self: SMAC2,
-                 base_dir: Path,
-                 output_path: Path) -> None:
-        """Returns the SMAC2 configurator, Java SMAC V2.10.03.
-
-        Args:
-            objectives: The objectives to optimize. Only supports one objective.
-            base_dir: The path where the configurator will be executed in.
-            output_path: The path where the output will be placed.
-        """
-        output_path = output_path / SMAC2.__name__
-        output_path.mkdir(parents=True, exist_ok=True)
+    def __init__(self: SMAC2) -> None:
+        """Returns the SMAC2 configurator, Java SMAC V2.10.03."""
         return super().__init__(
-            output_path=output_path,
-            base_dir=base_dir,
-            tmp_path=output_path / "tmp",
             multi_objective_support=False)
 
     @property
@@ -85,6 +72,8 @@ class SMAC2(Configurator):
         r = urlopen(smac2_zip_url, timeout=60)
         z = zipfile.ZipFile(io.BytesIO(r.read()))
         z.extractall(SMAC2.configurator_path)
+        # Ensure execution rights
+        SMAC2.configurator_executable.chmod(0o755)
 
     def configure(self: SMAC2,
                   scenario: SMAC2Scenario,
@@ -173,9 +162,8 @@ class SMAC2(Configurator):
             return "RUNTIME"
         return "QUALITY"
 
-    def get_status_from_logs(self: SMAC2) -> None:
+    def get_status_from_logs(self: SMAC2, base_dir: Path) -> None:
         """Method to scan the log files of the configurator for warnings."""
-        base_dir = self.output_path / "scenarios"
         if not base_dir.exists():
             return
         print(f"Checking the log files of configurator {type(self).__name__} for "

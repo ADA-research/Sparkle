@@ -28,6 +28,9 @@ sparkle/configurator/implementations/SMAC2/*
 sparkle/configurator/implementations/ParamILS/*
 !sparkle/configurator/implementations/ParamILS/paramils_target_algorithm.py
 
+# Downloaded AblationAnalysis
+sparkle/configurator/implementations/ablationAnalysis-0.9.4/*
+
 # Generated documentation 
 Documentation/source/_generated/
 Documentation/build
