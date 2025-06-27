@@ -71,12 +71,14 @@ def check_for_initialise() -> None:
 
 
 def initialise_sparkle(save_existing_platform: bool = True,
+                       interactive: bool = False,
                        download_examples: bool = False,
                        rebuild_runsolver: bool = False) -> None:
     """Initialize a new Sparkle platform.
 
     Args:
         save_existing_platform: If present, save the current platform as a snapshot.
+        interactive: Ask for user input or not.
         download_examples: Downloads examples from the Sparkle Github.
             WARNING: May take a some time to complete due to the large amount of data.
         rebuild_runsolver: Will clean the RunSolver executable and rebuild it.
@@ -159,17 +161,17 @@ def initialise_sparkle(save_existing_platform: bool = True,
               " to use SMAC2 or ParamILS as a configurator. Consider installing Java.")
 
     # Check for each configurator that it is available
-    if not SMAC2.check_requirements():
+    if interactive and not SMAC2.check_requirements():
         print("SMAC2 is not installed, would you like to install? (Y/n) ...")
         if input().lower() == "y":
             print("Installing SMAC2 ...")
             SMAC2.download_requirements()
-    if not ParamILS.check_requirements():
+    if interactive and not ParamILS.check_requirements():
         print("ParamILS is not installed, would you like to install? (Y/n) ...")
         if input().lower() == "y":
             print("Installing ParamILS ...")
             ParamILS.download_requirements()
-    if not IRACE.check_requirements():
+    if interactive and not IRACE.check_requirements():
         if shutil.which("R") is None:
             print("R is not installed, which is required for the IRACE "
                   "configurator (installation). Consider installing R.")
@@ -205,6 +207,7 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
     initialise_sparkle(save_existing_platform=args.no_save,
+                       interactive=True,
                        download_examples=args.download_examples,
                        rebuild_runsolver=args.rebuild_runsolver)
     sys.exit(0)
