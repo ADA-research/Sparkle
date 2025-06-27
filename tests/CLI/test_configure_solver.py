@@ -64,7 +64,7 @@ def test_configure_solver(mock_which: Mock,
     assert pytest_wrapped_e.value.code == 0
 
     # with IRACE instead of SMAC2
-    if not IRACE.configurator_executable.exists():
+    if not IRACE.check_requirements():
         import warnings
         warnings.warn("WARNING: IRACE not installed, skipping test.")
         return

@@ -303,7 +303,7 @@ class AblationScenario:
     configurator_target = Path(__file__).parent.resolve() /\
         "SMAC2" / "smac2_target_algorithm.py"
 
-    ablation_dir = Path(__file__).parent / "ablationAnalysis-0.9.4"
+    ablation_dir = Path(__file__).parent / "implementations" / "ablationAnalysis-0.9.4"
     ablation_executable = ablation_dir / "ablationAnalysis"
     ablation_validation_executable = ablation_dir / "ablationValidation"
 

@@ -3,6 +3,7 @@ import pytest
 from pathlib import Path
 
 from sparkle.CLI import load_snapshot, run_ablation
+from sparkle.configurator import AblationScenario
 
 from tests.CLI import tools as cli_tools
 
@@ -12,6 +13,8 @@ def test_run_ablation_command(
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch) -> None:
     """Test run ablation command."""
+    if not AblationScenario.check_requirements():
+        AblationScenario.download_requirements()
     settings_path = cli_tools.get_settings_path()
     snapshot_path = (
         Path("tests") / "CLI" / "test_files"
