@@ -11,6 +11,9 @@ def test_initialise_command(tmp_path: Path,
                             monkeypatch: pytest.MonkeyPatch) -> None:
     """Test initialise command."""
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+    # Fix input calls
+    monkeypatch.setattr("builtins.input", lambda _: "Y")
+
     # Smoke test
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         # Call the command
