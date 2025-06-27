@@ -10,7 +10,6 @@ import time
 from runrunner import Runner
 
 from sparkle.solver import Solver
-from sparkle.instance import Instance_Set
 from sparkle.types import resolve_objective
 from sparkle.structures import PerformanceDataFrame
 
@@ -21,7 +20,7 @@ if __name__ == "__main__":
     parser.add_argument("--performance-dataframe", required=True, type=Path,
                         help="path to the performance dataframe")
     parser.add_argument("--solver", required=True, type=Path, help="path to solver")
-    parser.add_argument("--instance", required=True, type=str,
+    parser.add_argument("--instance", required=True, type=Path, nargs="+",
                         help="path to instance to run on")
     parser.add_argument("--run-index", required=True, type=int,
                         help="run index in the dataframe to set.")
@@ -41,7 +40,8 @@ if __name__ == "__main__":
                         help="the cutoff time for the solver.")
     parser.add_argument("--target-objective", required=False, type=str,
                         help="The objective to use to determine the best configuration.")
-    parser.add_argument("--best-configuration-instances", required=False, type=str,
+    parser.add_argument("--best-configuration-instances",
+                        required=False, type=str, nargs="+",
                         help="If given, will ignore any given configurations, and try to"
                              " determine the best found configurations over the given "
                              "instances. Defaults to the first objective given in the "
@@ -52,15 +52,18 @@ if __name__ == "__main__":
     log_dir = args.log_dir
     print(f"Running Solver and read/writing results with {args.performance_dataframe}")
     # Resolve possible multi-file instance
-    instance_path = Path(args.instance)
-    instance_name = instance_path.name
-    instance_key = instance_path
+    instance_path: list[Path] = args.instance
+    # If instance is only one file then we don't need a list
+    instance_path = instance_path[0] if len(instance_path) == 1 else instance_path
+    instance_name = instance_path.stem if isinstance(
+        instance_path, Path) else instance_path[0].stem
     run_index = args.run_index
-    if not instance_path.exists():
-        # If its an instance name (Multi-file instance), retrieve path list
-        data_set = Instance_Set(instance_path.parent)
-        instance_path = data_set.get_path_by_name(instance_name)
-        instance_key = instance_name
+    # Ensure stringifcation of path objects
+    if isinstance(instance_path, list):
+        # Double list because of solver.run
+        run_instances = [[str(filepath) for filepath in instance_path]]
+    else:
+        run_instances = str(instance_path)
 
     solver = Solver(args.solver)
 
@@ -75,7 +78,15 @@ if __name__ == "__main__":
         # Filter out possible errors, shouldn't occur
         objectives = [o for o in objectives if o is not None]
         if args.best_configuration_instances:  # Determine best configuration
-            best_configuration_instances = args.best_configuration_instances.split(",")
+            best_configuration_instances: list[str] = args.best_configuration_instances
+            # Handle multifile instances: i1.model,i1.const i2.model,i2.const...
+            best_configuration_instances = [instance_str.split(
+                ",") for instance_str in best_configuration_instances]
+            # Get the instance names
+            best_configuration_instances = [
+                Path(instance_list[0]).stem
+                for instance_list in best_configuration_instances]
+
             target_objective = resolve_objective(args.target_objective)
             config_id, value = performance_dataframe.best_configuration(
                 solver=str(args.solver),
@@ -87,7 +98,7 @@ if __name__ == "__main__":
             # Read the seed from the dataframe
             seed = performance_dataframe.get_value(
                 str(args.solver),
-                str(args.instance),
+                instance_name,
                 objective=target_objective.name,
                 run=run_index,
                 solver_fields=[PerformanceDataFrame.column_seed])
@@ -97,7 +108,7 @@ if __name__ == "__main__":
                 str(args.solver), config_id)
             seed = performance_dataframe.get_value(
                 str(args.solver),
-                str(args.instance),
+                instance_name,
                 objective=None,
                 run=run_index,
                 solver_fields=[PerformanceDataFrame.column_seed])
@@ -110,9 +121,9 @@ if __name__ == "__main__":
         if not isinstance(seed, int):
             seed = random.randint(0, 2**32 - 1)
 
-    print(f"Running Solver {solver} on instance {instance_path.name} with seed {seed}..")
+    print(f"Running Solver {solver} on instance {instance_name} with seed {seed}..")
     solver_output = solver.run(
-        instance_path.absolute(),
+        run_instances,
         objectives=objectives,
         seed=seed,
         configuration=configuration.copy() if configuration else None,
@@ -128,7 +139,7 @@ if __name__ == "__main__":
                         for objective in objectives]
     print(f"Appending value objective values: {', '.join(objective_values)}")
     print(f"For Solver/config: {solver}/{config_id}")
-    print(f"For index: Instance {args.instance}, Run {args.run_index}")
+    print(f"For index: Instance {instance_name}, Run {args.run_index}")
 
     # Desyncronize from other possible jobs writing to the same file
     time.sleep(random.random() * 10)
@@ -140,7 +151,7 @@ if __name__ == "__main__":
         performance_dataframe.set_value(
             result,
             solver=str(args.solver),
-            instance=str(args.instance),
+            instance=instance_name,
             configuration=config_id,
             objective=[o.name for o in objectives],
             run=run_index,

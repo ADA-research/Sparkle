@@ -12,11 +12,12 @@ from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
 from sparkle.structures import PerformanceDataFrame
 from sparkle.types import SparkleObjective, resolve_objective
+from sparkle.instance import InstanceSet
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.help.nicknames import resolve_object_name
+from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
 from sparkle.CLI.initialise import check_for_initialise
 
 
@@ -56,7 +57,7 @@ def parser_function() -> argparse.ArgumentParser:
 
 def run_solvers(
         solvers: list[Solver],
-        instances: list[str],
+        instances: list[str] | list[InstanceSet],
         objectives: list[SparkleObjective],
         seed: int,
         cutoff_time: int,
@@ -71,7 +72,7 @@ def run_solvers(
     ----------
     solvers: list[solvers]
         The solvers to run
-    instances: list[str]
+    instances: list[str] | list[InstanceSet]
         The instances to run the solvers on
     objectives: list[SparkleObjective]
         The objective values to retrieve from the solvers
@@ -170,6 +171,15 @@ def run_solvers_performance_data(
     """
     # List of jobs to do
     jobs = performance_data.get_job_list(rerun=rerun)
+
+    # Edit jobs to incorporate file paths
+    jobs_with_paths = []
+    for solver, config, instance, run in jobs:
+        instance_path = resolve_instance_name(
+            instance, gv.settings().DEFAULT_instance_dir)
+        jobs_with_paths.append((solver, config, instance_path, run))
+    jobs = jobs_with_paths
+
     print(f"Total number of jobs to run: {len(jobs)}")
     # If there are no jobs, stop
     if len(jobs) == 0:
@@ -339,7 +349,12 @@ def main(argv: list[str]) -> None:
                     performance_dataframe.get_full_configuration(
                         str(solvers[solver_index].directory), config)
         if instances is None:
-            instances = performance_dataframe.instances
+            instances = []
+            for instance_dir in gv.settings().DEFAULT_instance_dir.iterdir():
+                if instance_dir.is_dir():
+                    instances.append(Instance_Set(instance_dir))
+
+        # TODO Objective arg not used in Multi-file-instances case?
         runs = run_solvers(
             solvers=solvers,
             configurations=configurations,

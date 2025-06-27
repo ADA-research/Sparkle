@@ -70,7 +70,7 @@ def create_performance_dataframe(solvers: list[Solver],
     Returns:
         pdf: PerformanceDataFrame object initialized with solvers and instances.
     """
-    instances = [str(i) for i in instances_set._instance_paths]
+    instances = instances_set.instance_names
     solvers = [str(s.directory) for s in solvers]
     objectives = gv.settings().get_general_sparkle_objectives()
     csv_path = portfolio_path / "results.csv"
@@ -117,7 +117,7 @@ def build_command_list(instances_set: InstanceSet,
                 pdf.set_value(
                     value=seed,
                     solver=str(solver.directory),
-                    instance=str(instance),
+                    instance=instance.stem,
                     objective=objective.name,
                     solver_fields=["Seed"]
                 )
@@ -253,7 +253,7 @@ def monitor_jobs(run: Run,
                         # All seeds of a solver were killed on instance, set status kill
                         if solver_kills[solver_index] == seeds_per_solver:
                             solver_name = solvers[solver_index].name
-                            job_output_dict[instance.name][solver_name]["status"] =\
+                            job_output_dict[instance.stem][solver_name]["status"] =\
                                 SolverStatus.KILLED
             pbar.update(sum(instances_done) - prev_done)
     return job_output_dict
@@ -507,7 +507,7 @@ def main(argv: list[str]) -> None:
     portfolio_path.mkdir(parents=True)
     pdf = create_performance_dataframe(solvers, instances, portfolio_path)
     returned_cmd = build_command_list(instances, solvers, portfolio_path, pdf)
-    default_objective_values, cpu_time_key,\
+    default_objective_values, cpu_time_key, \
         status_key, wall_time_key = init_default_objectives()
     returned_run = submit_jobs(returned_cmd, solvers, instances, Runner.SLURM)
     job_output_dict = monitor_jobs(returned_run, instances,

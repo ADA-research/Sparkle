@@ -44,7 +44,7 @@ solvers = [Solver(path) for path in solver_paths]
 
 instance_path = Path("tests/test_files/Instances/Train-Instance-Set/")
 instance_file = FileInstanceSet(instance_path)
-single_instances_str = [str(instance) for instance in instance_file.all_paths]
+single_instances_str = [str(instance) for instance in instance_file.instance_names]
 
 sparkle_objectives = [obj.name for obj in gv.settings().get_general_sparkle_objectives()]
 portfolio_path = Path("tests/test_files/Output/Parallel_Portfolio/"

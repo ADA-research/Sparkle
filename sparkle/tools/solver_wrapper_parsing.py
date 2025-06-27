@@ -13,6 +13,15 @@ def parse_commandline_dict(args: list[str]) -> dict:
     return ast.literal_eval(dict_str)
 
 
+def parse_instance(instance_str: str) -> Path | list[Path]:
+    """Handles the parsing of multi file instances."""
+    instance_str = instance_str.removeprefix("[")
+    instance_str = instance_str.removesuffix("]")
+    instance_list = instance_str.split(",")
+    instance_list = [inst_str.strip(' "') for inst_str in instance_list]
+    return Path(instance_list[0]) if len(instance_list) == 1 else instance_list
+
+
 def parse_solver_wrapper_args(args: list[str]) -> dict[Any]:
     """Parse the arguments passed to the solver wrapper.
 
@@ -27,7 +36,8 @@ def parse_solver_wrapper_args(args: list[str]) -> dict[Any]:
 
     # Some data needs specific formatting
     args_dict["solver_dir"] = Path(args_dict["solver_dir"])
-    args_dict["instance"] = Path(args_dict["instance"])
+    instance = args_dict["instance"]
+    args_dict["instance"] = parse_instance(instance)
     args_dict["seed"] = int(args_dict["seed"])
     args_dict["objectives"] = [resolve_objective(name)
                                for name in args_dict["objectives"].split(",")]

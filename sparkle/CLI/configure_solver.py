@@ -207,7 +207,7 @@ def main(argv: list[str]) -> None:
         else:
             # We place the results in the index we just added
             run_index = list(set([performance_data.get_instance_num_runs(str(i))
-                                  for i in instance_set_test.instance_paths]))
+                                  for i in instance_set_test.instance_names]))
             test_set_job = solver.run_performance_dataframe(
                 instance_set_test,
                 run_index,

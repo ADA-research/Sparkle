@@ -187,7 +187,8 @@ class Solver(SparkleCallable):
         if log_dir is None:
             log_dir = Path()
         if cutoff_time is not None:  # Use RunSolver
-            log_name_base = f"{Path(instance).name}_{self.name}"
+            log_path_str = instance[0] if isinstance(instance, list) else instance
+            log_name_base = f"{Path(log_path_str).name}_{self.name}"
             return RunSolver.wrap_command(self.runsolver_exec,
                                           solver_cmd,
                                           cutoff_time,
@@ -225,13 +226,16 @@ class Solver(SparkleCallable):
             Solver output dict possibly with runsolver values.
         """
         cmds = []
+        set_label = instances.name if isinstance(
+            instances, InstanceSet) else "instances"
         instances = [instances] if not isinstance(instances, list) else instances
-        set_label = instances.name if isinstance(instances, InstanceSet) else "instances"
         log_dir = Path() if log_dir is None else log_dir
         for instance in instances:
-            paths = instance.instace_paths if isinstance(instance,
-                                                         InstanceSet) else [instance]
+            paths = instance.instance_paths if isinstance(instance,
+                                                          InstanceSet) else [instance]
             for instance_path in paths:
+                instance_path = [str(p) for p in instance_path] if isinstance(
+                    instance_path, list) else instance_path
                 solver_cmd = self.build_cmd(instance_path,
                                             objectives=objectives,
                                             seed=seed,

@@ -16,6 +16,7 @@ Notable changes to Sparkle will be documented in this file.
 - Sparkle generate report command has been refacored to support multiple scenarios in one report [SPRK-161]
 - Sparkle now has scenario definition for Selection [SPRK-161]
 - Updated Plotly and Kaleido to latest versions (6.1.1 and 1.0.0 respectively)
+- Added better support for Multi File instance (sets) [SPRK-352]
 
 ### Fixed
 - Fixed various bugs regarding Solver calls by adding in KILLSIG handlers and updated templates/documentation accordingly [SPRK-162]
