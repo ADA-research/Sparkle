@@ -20,6 +20,8 @@ def test_cancel_command_no_jobs(tmp_path: Path,
                                 monkeypatch: pytest.MonkeyPatch) -> None:
     """Test cancel command with no jobs."""
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+    # Fix input calls to test with NO (e.g. no download)
+    monkeypatch.setattr("builtins.input", lambda: "N")
     # Smoke test
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         # Call the command
