@@ -180,7 +180,7 @@ def initialise_sparkle(save_existing_platform: bool = True,
             if input().lower() == "y":
                 print("Installing IRACE ...")
                 IRACE.download_requirements()
-                irace = IRACE(Path(), Path())
+                irace = IRACE()
                 print(f"Installed IRACE version {irace.version}")
 
     if download_examples:
