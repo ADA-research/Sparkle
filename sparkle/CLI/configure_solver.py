@@ -93,6 +93,21 @@ def main(argv: list[str]) -> None:
     args = parser.parse_args(argv)
     apply_settings_from_args(args)
 
+    configurator = gv.settings().get_general_sparkle_configurator()
+
+    # Check configurator is available
+    if not configurator.check_requirements(verbose=True):
+        print(f"{configurator.name} is not available. "
+              "Please inspect possible warnings above.")
+        print(f"Would you like to install {configurator.name}? (Y/n)")
+        if input().lower().strip() == "y":
+            configurator.install_requirements()
+        else:
+            sys.exit()
+        if not configurator.check_requirements(verbose=True):
+            raise RuntimeError(f"Failed to install {configurator.name}.")
+        sys.exit(-1)
+
     # Compare current settings to latest.ini
     prev_settings = Settings(Path(Settings.DEFAULT_previous_settings_path))
     Settings.check_settings_changes(gv.settings(), prev_settings)
@@ -118,7 +133,6 @@ def main(argv: list[str]) -> None:
     use_features = args.use_features
     run_on = gv.settings().get_run_on()
 
-    configurator = gv.settings().get_general_sparkle_configurator()
     configurator_settings = gv.settings().get_configurator_settings(configurator.name)
 
     sparkle_objectives =\
