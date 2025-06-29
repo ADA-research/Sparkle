@@ -3,6 +3,8 @@ import shutil
 import pytest
 from pathlib import Path
 
+from sparkle.configurator.implementations import SMAC2
+
 from sparkle.CLI import initialise, add_solver, add_instances, configure_solver
 from sparkle.CLI import jobs as sparkle_jobs
 from sparkle.CLI.help import jobs as jobs_help
@@ -49,6 +51,8 @@ def test_cancel_command_configuration(tmp_path: Path,
     if shutil.which("java") is None:
         # Requires Java for SMAC2
         return
+    if not SMAC2.check_requirements():
+        SMAC2.download_requirements()
     # Submit configuration jobs and cancel it by ID
     solver_path =\
         (Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic").absolute()

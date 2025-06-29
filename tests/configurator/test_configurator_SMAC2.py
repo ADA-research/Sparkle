@@ -37,16 +37,15 @@ class TestConfiguratorSMAC2(TestCase):
         )
         assert self.smac2_conf.multiobjective is False
 
-    @patch("shutil.which")
+    @patch("sparkle.configurator.implementations.SMAC2.check_requirements")
     @patch("runrunner.add_to_queue")
     def test_smac2_configure(self: TestConfiguratorSMAC2,
                              mock_add_to_queue: Mock,
-                             mock_which: Mock) -> None:
+                             mock_requirements: Mock) -> None:
         """Testing configure call of SMAC2."""
         # Testing without validation afterwards
-        # Mock shlex to avoid Sparkle throwing an exception because Java is not loaded
-        mock_which.return_value("Java")
-        mock_add_to_queue.return_value = None
+        # Mock requirements to avoid throwing an exception
+        mock_requirements.return_value(True)
 
         # We currently cannot test these strings as they are using absolute paths
         expected_cmds = ANY
