@@ -10,8 +10,8 @@ from tests.CLI import tools
 
 
 @pytest.mark.integration
-@patch("shutil.which")
-def test_configure_solver(mock_which: Mock,
+@patch("sparkle.configurator.implementations.SMAC2.check_requirements")
+def test_configure_solver(mock_requirements: Mock,
                           tmp_path: Path,
                           monkeypatch: pytest.MonkeyPatch) -> None:
     """Test cancel command on configuration jobs."""
@@ -36,7 +36,7 @@ def test_configure_solver(mock_which: Mock,
     assert pytest_wrapped_e.value.code == 0
 
     # Mock shlex to avoid throwing an exception because Configurator is not installed
-    mock_which.return_value("SMAC2.check_requirements", True)
+    mock_requirements.return_value(True)
 
     # Submit configure solver job and validation job
     with pytest.raises(SystemExit) as pytest_wrapped_e:
