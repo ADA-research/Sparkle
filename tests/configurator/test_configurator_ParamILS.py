@@ -3,16 +3,6 @@ import pytest
 from pathlib import Path
 from sparkle.configurator.implementations import ParamILS, ParamILSScenario
 
-"""
-from sparkle.CLI import initialise
-
-from sparkle.solver import Solver
-from sparkle.instance import Instance_Set
-from sparkle.types import resolve_objective
-
-from tests.CLI import tools as cli_tools
-"""
-
 
 def test_paramils_organise_output(tmp_path: Path,
                                   monkeypatch: pytest.MonkeyPatch) -> None:

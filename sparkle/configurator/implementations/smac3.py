@@ -20,30 +20,15 @@ from sparkle.types import SparkleObjective, resolve_objective, SolverStatus
 
 class SMAC3(Configurator):
     """Class for SMAC3 (Python) configurator."""
-    configurator_path = Path(__file__).parent.parent.parent.resolve() /\
-        "Components/smac3-v2.3.1"
-    configurator_executable = configurator_path / "smac3_target_algorithm.py"
+    configurator_path = Path(__file__).parent.resolve() / "SMAC3"
+    configurator_target = configurator_path / "smac3_target_algorithm.py"
 
     full_name = "Sequential Model-based Algorithm Configuration"
     version = smac_version
 
-    def __init__(self: SMAC3,
-                 base_dir: Path,
-                 output_path: Path) -> None:
-        """Returns the SMAC3 configurator, Python SMAC V2.3.1.
-
-        Args:
-            objectives: The objectives to optimize. Only supports one objective.
-            base_dir: The path where the configurator will be executed in.
-            output_path: The path where the output will be placed.
-        """
-        output_path = output_path / SMAC3.__name__
-        output_path.mkdir(parents=True, exist_ok=True)
-        return super().__init__(
-            output_path=output_path,
-            base_dir=base_dir,
-            tmp_path=output_path / "tmp",
-            multi_objective_support=False)
+    def __init__(self: SMAC3) -> None:
+        """Returns the SMAC3 configurator, Python SMAC V2.3.1."""
+        return super().__init__(multi_objective_support=False)
 
     @property
     def name(self: SMAC3) -> str:
@@ -54,6 +39,16 @@ class SMAC3(Configurator):
     def scenario_class() -> ConfigurationScenario:
         """Returns the SMAC3 scenario class."""
         return SMAC3Scenario
+
+    @staticmethod
+    def check_requirements(verbose: bool = False) -> bool:
+        """Check that SMAC3 is installed."""
+        return True  # Is automatically installed with Sparkle
+
+    @staticmethod
+    def download_requirements() -> None:
+        """Download SMAC3."""
+        return  # Nothing to do
 
     def configure(self: SMAC3,
                   scenario: SMAC3Scenario,
@@ -90,7 +85,7 @@ class SMAC3(Configurator):
         seeds = [i for i in range(scenario.number_of_runs)]
         num_parallel_jobs = num_parallel_jobs or scenario.number_of_runs
         # We do not require the configurator CLI as its already our own python wrapper
-        cmds = [f"python3 {self.configurator_executable.absolute()} "
+        cmds = [f"python3 {self.configurator_target.absolute()} "
                 f"{scenario.scenario_file_path.absolute()} {configuration_id} {seed} "
                 f"{data_target.csv_filepath}"
                 for configuration_id, seed in zip(configuration_ids, seeds)]

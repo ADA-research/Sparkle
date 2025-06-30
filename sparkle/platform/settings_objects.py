@@ -761,14 +761,16 @@ class Settings:
             configurator_subclass =\
                 cim.resolve_configurator(self.__settings["general"]["configurator"])
             if configurator_subclass is not None:
-                self.__general_sparkle_configurator = configurator_subclass(
-                    base_dir=Path(),
-                    output_path=Settings.DEFAULT_configuration_output)
+                self.__general_sparkle_configurator = configurator_subclass()
             else:
                 print("WARNING: Configurator class name not recognised: "
                       f'{self.__settings["general"]["configurator"]}. '
                       "Configurator not set.")
         return self.__general_sparkle_configurator
+
+    def get_configurator_output_path(self: Settings, configurator: Configurator) -> Path:
+        """Return the configurator output path."""
+        return self.DEFAULT_configuration_output / configurator.name
 
     def set_general_solver_cutoff_time(
             self: Settings, value: int = DEFAULT_general_solver_cutoff_time,

@@ -25,8 +25,7 @@ class TestConfiguratorSMAC2(TestCase):
         sparkle_objective = PAR(10)
         self.test_files = Path("tests", "test_files")
         self.base_dir = self.test_files / "tmp"
-        output = Path("Output")
-        self.smac2_conf = SMAC2(self.base_dir, output)
+        self.smac2_conf = SMAC2()
         self.train_set = Instance_Set(self.test_files / "Instances/Train-Instance-Set")
         self.solver = Solver(self.test_files / "Solvers/Test-Solver")
         self.conf_scenario = SMAC2Scenario(
@@ -36,20 +35,17 @@ class TestConfiguratorSMAC2(TestCase):
             solver_cutoff_time=60,
             target_cutoff_length=10,
         )
-        assert self.smac2_conf.base_dir == self.base_dir
-        assert self.smac2_conf.output_path == output / SMAC2.__name__
         assert self.smac2_conf.multiobjective is False
-        assert self.smac2_conf.tmp_path == output / SMAC2.__name__ / "tmp"
 
-    @patch("shutil.which")
+    @patch("sparkle.configurator.implementations.SMAC2.check_requirements")
     @patch("runrunner.add_to_queue")
     def test_smac2_configure(self: TestConfiguratorSMAC2,
                              mock_add_to_queue: Mock,
-                             mock_which: Mock) -> None:
+                             mock_requirements: Mock) -> None:
         """Testing configure call of SMAC2."""
         # Testing without validation afterwards
-        # Mock shlex to avoid Sparkle throwing an exception because Java is not loaded
-        mock_which.return_value("Java")
+        # Mock requirements to avoid throwing an exception
+        mock_requirements.return_value = True
         mock_add_to_queue.return_value = None
 
         # We currently cannot test these strings as they are using absolute paths
@@ -59,6 +55,7 @@ class TestConfiguratorSMAC2(TestCase):
         # Make a copy so we don't modify the original
         data_target = PerformanceDataFrame(
             Path("tests/test_files/performance/example_empty_runs.csv"))
+        # TODO: Make this all happen in a tmp dir so we don't have to unlink
         data_target = data_target.clone(Path("tmp-pdf.csv"))
 
         runs = self.smac2_conf.configure(self.conf_scenario,
@@ -122,7 +119,7 @@ class TestConfigurationScenarioSMAC2(TestCase):
         self.cutoff_time = 60
         self.cutoff_length = "max"
         self.sparkle_objective = PAR(10)
-        self.configurator = SMAC2(Path(), Path())
+        self.configurator = SMAC2()
         self.scenario = SMAC2Scenario(
             solver=self.solver,
             instance_set=self.instance_set,

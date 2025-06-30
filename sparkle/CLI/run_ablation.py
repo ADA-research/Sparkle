@@ -55,6 +55,18 @@ def main(argv: list[str]) -> None:
     sl.log_command(sys.argv)
     check_for_initialise()
 
+    if not AblationScenario.check_requirements(verbose=True):
+        print("Ablation Analysis is not available.")
+        if not AblationScenario.ablation_executable.exists():
+            print("Would you like to download it? (Y/n)")
+            if input().lower().strip() == "y":
+                AblationScenario.download_requirements()
+            else:
+                sys.exit()
+        else:
+            print("Check that Java is available on your system.")
+            sys.exit(-1)
+
     # Define command line arguments
     parser = parser_function()
 
@@ -113,8 +125,9 @@ def main(argv: list[str]) -> None:
         gv.settings().DEFAULT_instance_dir, Instance_Set)
 
     configurator = gv.settings().get_general_sparkle_configurator()
+    output_path = gv.settings().get_configurator_output_path(configurator)
     config_scenario = configurator.scenario_class().find_scenario(
-        configurator.output_path, solver, instance_set_train)
+        output_path, solver, instance_set_train)
     performance_data = PerformanceDataFrame(
         gv.settings().DEFAULT_performance_data_path)
     if config_scenario is None:

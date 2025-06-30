@@ -15,41 +15,113 @@ from runrunner import Runner, Run
 
 class IRACE(Configurator):
     """Class for IRACE configurator."""
-    configurator_path = Path(__file__).parent.parent.parent.resolve() /\
-        "Components/irace-v4.2.0"
-    configurator_package = configurator_path / "irace_4.2.0.tar"
-    # NOTE: There are possible dependencies that we do not install here.
-    # TODO: Determine if we should add them or not.
-    package_dependencies = ["codetools_0.2-20.tar", "data.table_1.16.4.tar",
-                            "matrixStats_1.5.0.tar", "spacefillr_0.3.3.tar"]
-    configurator_executable = configurator_path / "irace" / "bin" / "irace"
-    configurator_ablation_executable = configurator_path / "irace" / "bin" / "ablation"
+    configurator_path = Path(__file__).parent.resolve() / "IRACE"
     configurator_target = configurator_path / "irace_target_algorithm.py"
 
     full_name = "Iterated Racing for Automatic Algorithm Configuration"
-    version = "3.5"
 
-    def __init__(self: Configurator,
-                 output_path: Path,
-                 base_dir: Path,
-                 ) -> None:
+    r_regex = r'\[\d+\]\s*["‘](?P<data>[^"`]+)["’]'
+
+    def __init__(self: IRACE) -> None:
         """Initialize IRACE configurator."""
-        output_path = output_path / IRACE.__name__
-        output_path.mkdir(parents=True, exist_ok=True)
-        super().__init__(output_path=output_path,
-                         base_dir=base_dir,
-                         tmp_path=output_path / "tmp",
-                         multi_objective_support=False)
+        self._version: str = None
+        super().__init__(multi_objective_support=False)
 
     @property
     def name(self: IRACE) -> str:
         """Returns the name of the configurator."""
         return IRACE.__name__
 
+    @property
+    def version(self: IRACE) -> str:
+        """Returns the version of the configurator."""
+        if self._version is None:
+            import re
+            version_call = subprocess.run(["Rscript", "-e", "packageVersion('irace')"],
+                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if version_call.returncode == 0:
+                r_data = re.search(IRACE.r_regex,
+                                   version_call.stdout.decode().strip())
+                if r_data is not None and r_data.group("data") is not None:
+                    self._version = r_data.group("data")
+        return self._version
+
+    @staticmethod
+    def configurator_executable() -> Path:
+        """Returns the path to the IRACE executable.
+
+        # NOTE: For the base class this is a class property.
+        However as it must be calculated in this case, it is a class method as calculated
+        class properties do not exist in Python.
+
+        Returns:
+            Path to the executable if it can be found, else None.
+        """
+        if shutil.which("R") is None:
+            return None  # Not installed
+        r_call = subprocess.run(
+            ["Rscript", "-e", "find.package('irace')"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        if r_call.returncode != 0:
+            return None  # Not installed
+        import re
+        r_path = re.search(IRACE.r_regex,
+                           r_call.stdout.decode().strip())
+        if r_path is None or r_path.group("data") is None:
+            return  # Could not find IRACE?
+        path = Path(r_path.group("data"))
+        return path / "bin" / "irace"
+
     @staticmethod
     def scenario_class() -> ConfigurationScenario:
         """Returns the IRACE scenario class."""
         return IRACEScenario
+
+    @staticmethod
+    def check_requirements(verbose: bool = False) -> bool:
+        """Check that IRACE is installed."""
+        import warnings
+        if shutil.which("R") is None:
+            if verbose:
+                warnings.warn(
+                    "IRACE requires R, but R is not installed. "
+                    "Please ensure R is installed.")
+            return False
+        if not IRACE.configurator_executable():
+            if verbose:
+                warnings.warn(
+                    "IRACE executable not found. Please ensure IRACE is installed "
+                    f"in the expected Path ({IRACE.configurator_path}).")
+            return False
+        return True
+
+    @staticmethod
+    def download_requirements() -> None:
+        """Download IRACE."""
+        if shutil.which("R") is None:
+            raise RuntimeError("IRACE requires R, but R is not installed.")
+        # Ensure personal library exists, do not raise warnings
+        subprocess.run([
+            "Rscript", "-e",
+            "dir.create(path = Sys.getenv('R_LIBS_USER'), "
+            "showWarnings = FALSE, recursive = TRUE)"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        install_irace = subprocess.run(
+            ["Rscript", "-e",
+             # Install R
+             "install.packages('irace', "
+             "lib=Sys.getenv('R_LIBS_USER'), "  # Install in user library
+             "dependencies = TRUE, "  # Ensure dependencies are installed
+             "repos='https://cloud.r-project.org')"],  # Set source
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print(f"{install_irace.stdout.decode()}\n\n"
+              f"{install_irace.stderr.decode()}")
+        if install_irace.returncode != 0:
+            import warnings
+            warnings.warn("IRACE had a non-zero return code during installation!\n\n"
+                          f"{install_irace.stdout.decode()}\n\n"
+                          f"{install_irace.stderr.decode()}")
 
     def configure(self: IRACE,
                   scenario: ConfigurationScenario,
@@ -87,7 +159,7 @@ class IRACE(Configurator):
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{IRACE.__name__} {output_path} {data_target.csv_filepath} "
                 f"{scenario.scenario_file_path} {configuration_id} "
-                f"{IRACE.configurator_executable.absolute()} "
+                f"{IRACE.configurator_executable().absolute()} "
                 f"--scenario {scenario.scenario_file_path} "
                 f"--log-file {output_path} "
                 f"--seed {seed}" for seed, configuration_id, output_path
@@ -379,7 +451,7 @@ class IRACEScenario(ConfigurationScenario):
                 file.write(f"nbIterations = {self.max_iterations}\n")
         print("Verifying contents of IRACE scenario file and testing solver call...")
         check_file = subprocess.run(
-            [f"{IRACE.configurator_executable.absolute()}",
+            [f"{IRACE.configurator_executable().absolute()}",
              "-s", f"{self.scenario_file_path.absolute()}", "--check"],
             capture_output=True)
         if check_file.returncode != 0:

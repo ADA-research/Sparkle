@@ -12,20 +12,24 @@ Snapshots/*
 Settings/*
 tests/test_files/tmp
 
-sparkle/Components/irace-v4.2.0/irace/
-sparkle/Components/irace-v4.2.0/codetools/
-sparkle/Components/irace-v4.2.0/data.table/
-sparkle/Components/irace-v4.2.0/matrixStats/
-sparkle/Components/irace-v4.2.0/spacefillr/
-
+# RunSolver compilation
 sparkle/Components/runsolver/src/*.o
 sparkle/Components/runsolver/src/runsolver.d
 sparkle/Components/runsolver/src/runsolver
-smac3_output/*
 
+# Example source files
 Examples/Resources/CCAG/Solvers/TCA/src/
 Examples/Resources/CCAG/Solvers/FastCA/src/
 Examples/Resources/CVRP/Solvers/VRP_SISRs/src/
+
+# Downloaded Configurators, but do not ignore the target algorithms
+sparkle/configurator/implementations/SMAC2/*
+!sparkle/configurator/implementations/SMAC2/smac2_target_algorithm.py
+sparkle/configurator/implementations/ParamILS/*
+!sparkle/configurator/implementations/ParamILS/paramils_target_algorithm.py
+
+# Downloaded AblationAnalysis
+sparkle/configurator/implementations/ablationAnalysis-0.9.4/*
 
 # Generated documentation 
 Documentation/source/_generated/
@@ -34,37 +38,6 @@ Documentation/build
 # Common IDE
 .idea
 .vscode
-
-# LaTeX stuff
-
-# Exclude intermediate files generated when compiling latex
-*.eps
-*.bbl
-
-## Core latex/pdflatex auxiliary files:
-*.aux
-*.lof
-*.lot
-*.fls
-*.out
-*.toc
-*.fmt
-*.fot
-*.cb
-*.cb2
-.*.lb
-
-## Intermediate documents:
-*.dvi
-*.xdv
-
-## Bibliography auxiliary files (bibtex/biblatex/biber):
-*.bbl
-*.bcf
-*.blg
-*-blx.aux
-*-blx.bib
-*.run.xml
 
 ## Build tool auxiliary files:
 *.fdb_latexmk

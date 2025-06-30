@@ -19,30 +19,16 @@ from sparkle.types import SparkleObjective, resolve_objective
 
 class SMAC2(Configurator):
     """Class for SMAC2 (Java) configurator."""
-    configurator_path = Path(__file__).parent.parent.parent.resolve() /\
-        "Components/smac2-v2.10.03-master-778"
+    configurator_path = Path(__file__).parent.resolve() / "SMAC2"
     configurator_executable = configurator_path / "smac"
     configurator_target = configurator_path / "smac2_target_algorithm.py"
 
     full_name = "Sequential Model-based Algorithm Configuration"
     version = "2.10.03"
 
-    def __init__(self: SMAC2,
-                 base_dir: Path,
-                 output_path: Path) -> None:
-        """Returns the SMAC2 configurator, Java SMAC V2.10.03.
-
-        Args:
-            objectives: The objectives to optimize. Only supports one objective.
-            base_dir: The path where the configurator will be executed in.
-            output_path: The path where the output will be placed.
-        """
-        output_path = output_path / SMAC2.__name__
-        output_path.mkdir(parents=True, exist_ok=True)
+    def __init__(self: SMAC2) -> None:
+        """Returns the SMAC2 configurator, Java SMAC V2.10.03."""
         return super().__init__(
-            output_path=output_path,
-            base_dir=base_dir,
-            tmp_path=output_path / "tmp",
             multi_objective_support=False)
 
     @property
@@ -54,6 +40,40 @@ class SMAC2(Configurator):
     def scenario_class() -> ConfigurationScenario:
         """Returns the SMAC2 scenario class."""
         return SMAC2Scenario
+
+    @staticmethod
+    def check_requirements(verbose: bool = False) -> bool:
+        """Check that SMAC2 is installed."""
+        import warnings
+        if no_java := shutil.which("java") is None:
+            if verbose:
+                warnings.warn(
+                    "SMAC2 requires Java 1.8.0_402, but Java is not installed. "
+                    "Please ensure Java is installed."
+                )
+        if no_smac := not SMAC2.configurator_executable.exists():
+            if verbose:
+                warnings.warn(
+                    "SMAC2 executable not found. Please ensure SMAC2 is installed "
+                    f"in the expected Path ({SMAC2.configurator_path}).")
+        return not (no_java or no_smac)
+
+    @staticmethod
+    def download_requirements(
+        # TODO: Fix URL to Dev/Main
+        smac2_zip_url: str = "https://github.com/ADA-research/Sparkle/raw/refs/heads/"
+                             "SPRK-171/Resources/Configurators//SMAC2-v2.10.03.zip"
+    ) -> None:
+        """Download SMAC2."""
+        if SMAC2.configurator_executable.exists():
+            return  # Already installed
+        from urllib.request import urlopen
+        import zipfile, io
+        r = urlopen(smac2_zip_url, timeout=60)
+        z = zipfile.ZipFile(io.BytesIO(r.read()))
+        z.extractall(SMAC2.configurator_path)
+        # Ensure execution rights
+        SMAC2.configurator_executable.chmod(0o755)
 
     def configure(self: SMAC2,
                   scenario: SMAC2Scenario,
@@ -79,11 +99,6 @@ class SMAC2(Configurator):
         Returns:
             A RunRunner Run object.
         """
-        if shutil.which("java") is None:
-            raise RuntimeError(
-                "SMAC2 requires Java 1.8.0_402, but Java is not installed. "
-                "Please ensure Java is installed and try again."
-            )
         scenario.create_scenario()
         configuration_ids = scenario.configuration_ids
         # TODO: Setting seeds like this is weird and should be inspected.
@@ -147,9 +162,8 @@ class SMAC2(Configurator):
             return "RUNTIME"
         return "QUALITY"
 
-    def get_status_from_logs(self: SMAC2) -> None:
+    def get_status_from_logs(self: SMAC2, base_dir: Path) -> None:
         """Method to scan the log files of the configurator for warnings."""
-        base_dir = self.output_path / "scenarios"
         if not base_dir.exists():
             return
         print(f"Checking the log files of configurator {type(self).__name__} for "
