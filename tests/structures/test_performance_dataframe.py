@@ -57,33 +57,42 @@ def test_get_job_list() -> None:
     result = pd.get_job_list()
     assert result == job_list
 
-    job_list = [["AlgorithmA", "Default", "Instance1", 1],
-                ["AlgorithmA", "Default", "Instance2", 1],
-                ["AlgorithmA", "Default", "Instance3", 1],
-                ["AlgorithmA", "Default", "Instance4", 1],
-                ["AlgorithmA", "Default", "Instance5", 1],
-                ["AlgorithmB", "Default", "Instance1", 1],
-                ["AlgorithmB", "Default", "Instance2", 1],
-                ["AlgorithmB", "Default", "Instance3", 1],
-                ["AlgorithmB", "Default", "Instance4", 1],
-                ["AlgorithmB", "Default", "Instance5", 1],
-                ["AlgorithmC", "Default", "Instance1", 1],
-                ["AlgorithmC", "Default", "Instance2", 1],
-                ["AlgorithmC", "Default", "Instance3", 1],
-                ["AlgorithmC", "Default", "Instance4", 1],
-                ["AlgorithmC", "Default", "Instance5", 1],
-                ["AlgorithmD", "Default", "Instance1", 1],
-                ["AlgorithmD", "Default", "Instance2", 1],
-                ["AlgorithmD", "Default", "Instance3", 1],
-                ["AlgorithmD", "Default", "Instance4", 1],
-                ["AlgorithmD", "Default", "Instance5", 1],
-                ["AlgorithmE", "Default", "Instance1", 1],
-                ["AlgorithmE", "Default", "Instance2", 1],
-                ["AlgorithmE", "Default", "Instance3", 1],
-                ["AlgorithmE", "Default", "Instance4", 1],
-                ["AlgorithmE", "Default", "Instance5", 1]]
+    job_list = [("AlgorithmA", "Default", "Instance1", 1),
+                ("AlgorithmA", "Default", "Instance2", 1),
+                ("AlgorithmA", "Default", "Instance3", 1),
+                ("AlgorithmA", "Default", "Instance4", 1),
+                ("AlgorithmA", "Default", "Instance5", 1),
+                ("AlgorithmB", "Default", "Instance1", 1),
+                ("AlgorithmB", "Default", "Instance2", 1),
+                ("AlgorithmB", "Default", "Instance3", 1),
+                ("AlgorithmB", "Default", "Instance4", 1),
+                ("AlgorithmB", "Default", "Instance5", 1),
+                ("AlgorithmC", "Default", "Instance1", 1),
+                ("AlgorithmC", "Default", "Instance2", 1),
+                ("AlgorithmC", "Default", "Instance3", 1),
+                ("AlgorithmC", "Default", "Instance4", 1),
+                ("AlgorithmC", "Default", "Instance5", 1),
+                ("AlgorithmD", "Default", "Instance1", 1),
+                ("AlgorithmD", "Default", "Instance2", 1),
+                ("AlgorithmD", "Default", "Instance3", 1),
+                ("AlgorithmD", "Default", "Instance4", 1),
+                ("AlgorithmD", "Default", "Instance5", 1),
+                ("AlgorithmE", "Default", "Instance1", 1),
+                ("AlgorithmE", "Default", "Instance2", 1),
+                ("AlgorithmE", "Default", "Instance3", 1),
+                ("AlgorithmE", "Default", "Instance4", 1),
+                ("AlgorithmE", "Default", "Instance5", 1)]
     result = pd.get_job_list(rerun=True)
-    assert result == job_list
+    assert set(result) == set(job_list)
+
+    csv_actual_path = Path("tests/test_files/performance/"
+                           "actual-data-job-list.csv")
+    actual_df = PerformanceDataFrame(csv_actual_path)
+    result = actual_df.get_job_list()
+    # Only default was run in this data case
+    for solver, config, instance, run in result:
+        assert config != PerformanceDataFrame.default_configuration
+    assert len(result) == 18 * 23  # 18 new configuration, 23 instances
 
 
 def test_num_objectives() -> None:

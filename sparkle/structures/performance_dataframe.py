@@ -645,20 +645,27 @@ class PerformanceDataFrame(pd.DataFrame):
             rerun: Boolean indicating if we want to rerun all jobs
 
         Returns:
-            A list of [solver, config, instance, run] combinations
+            A tuple of (solver, config, instance, run) combinations
         """
         # Drop the seed as we are looking for nan values, not seeds
         df = self.drop(PerformanceDataFrame.column_seed, axis=1,
                        level=PerformanceDataFrame.column_meta)
         df = df.droplevel(PerformanceDataFrame.column_meta, axis=1)
-        if not rerun:  # Filter the nan values
-            df = df[~df.index.isin(df.dropna().index)]
-        # Drop objective, we only need each combination once
-        df = df.droplevel(PerformanceDataFrame.index_objective, axis=0)
-        # Drop duplicate index due to multi objective, we could miss a nan if not first
-        index = df.index.drop_duplicates(keep="first")
-        return [list(column) + list(index)
-                for column, index in itertools.product(df.columns, index)]
+        if rerun:  # Return all combinations
+            # Drop objective, not needed
+            df = df.droplevel(PerformanceDataFrame.index_objective, axis=0)
+            result = [tuple(column) + tuple(index)
+                      for column, index in itertools.product(df.columns, df.index)]
+        else:
+            result = []
+            for (solver, config), (objective, instance, run) in itertools.product(
+                    df.columns, df.index):
+                value = df.loc[(objective, instance, run), (solver, config)]
+                if not isinstance(value, str) and math.isnan(value):
+                    result.append(tuple([solver, config, instance, run]))
+        # Filter duplicates
+        result = list(set(result))
+        return result
 
     def configuration_performance(
             self: PerformanceDataFrame,
