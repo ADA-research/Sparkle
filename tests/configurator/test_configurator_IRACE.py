@@ -97,9 +97,11 @@ def test_irace_organise_output(tmp_path: Path,
 def test_irace_scenario_file(tmp_path: Path,
                              monkeypatch: pytest.MonkeyPatch) -> None:
     """Test IRACE scenario file creation."""
-    if cli_tools.get_cluster_name() != "kathleen":
-        # Test currently does not work on Github Actions due missing packages
+    if shutil.which("R") is None:
+        # Test requires R to be present
         return
+    if not IRACE.check_requirements():  # Ensure IRACE is installed
+        IRACE.download_requirements()
     solver = Solver(Path("tests/test_files/Solvers/Test-Solver").absolute())
     set = Instance_Set(Path("tests/test_files/Instances/Train-Instance-Set").absolute())
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir

@@ -2,7 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 import pytest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 from sparkle.configurator.implementations import SMAC2Scenario
 from sparkle.configurator import AblationScenario
@@ -216,8 +216,12 @@ def test_read_ablation_table(output_dir_case: Path, case: str) -> None:
         None,
     ]
 )
-def test_submit_ablation(test_set: Instance_Set) -> None:
+@patch("sparkle.configurator.configurator.AblationScenario.check_requirements")
+def test_submit_ablation(
+        mock_requirements: Mock,
+        test_set: Instance_Set) -> None:
     """Test for method submit ablation."""
+    mock_requirements.return_value = True  # Mock requirements to avoid exception
     log_dir = Path("Output/Log")
     scenario_submit = AblationScenario(
         configuration_scenario,
