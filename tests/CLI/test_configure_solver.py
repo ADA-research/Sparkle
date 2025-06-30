@@ -35,8 +35,8 @@ def test_configure_solver(mock_requirements: Mock,
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
-    # Mock shlex to avoid throwing an exception because Configurator is not installed
-    mock_requirements.return_value(True)
+    # Mock to avoid throwing an exception because Configurator is not installed
+    mock_requirements.return_value = True
 
     # Submit configure solver job and validation job
     with pytest.raises(SystemExit) as pytest_wrapped_e:
