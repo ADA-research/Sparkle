@@ -373,9 +373,9 @@ class AblationScenario:
 
     @staticmethod
     def download_requirements(
-        # TODO: Fix URL to Dev/Main
-        ablation_url: str = "https://github.com/ADA-research/Sparkle/raw/refs/heads/"
-                            "SPRK-171/Resources/Other/ablationAnalysis-0.9.4.zip"
+        ablation_url: str =
+            "https://github.com/ADA-research/Sparkle/raw/refs/heads/development"
+            "/Resources/Other/ablationAnalysis-0.9.4.zip"
     ) -> None:
         """Download Ablation Analysis executable."""
         if AblationScenario.ablation_executable.exists():

@@ -59,9 +59,9 @@ class ParamILS(Configurator):
 
     @staticmethod
     def download_requirements(
-        # TODO: Fix URL to Dev/Main
-        paramils_zip_url: str = "https://github.com/ADA-research/Sparkle/raw/refs/heads/"
-                                "SPRK-171/Resources/Configurators/ParamILS-v.3.0.0.zip"
+        paramils_zip_url: str =
+            "https://github.com/ADA-research/Sparkle/raw/refs/heads/"
+            "development/Resources/Configurators/ParamILS-v.3.0.0.zip"
     ) -> None:
         """Download ParamILS."""
         if ParamILS.configurator_executable.exists():

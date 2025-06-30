@@ -161,12 +161,12 @@ def initialise_sparkle(save_existing_platform: bool = True,
               " to use SMAC2 or ParamILS as a configurator. Consider installing Java.")
 
     # Check for each configurator that it is available
-    if interactive and not SMAC2.check_requirements():
+    if interactive and not SMAC2.configurator_executable.exists():
         print("SMAC2 is not installed, would you like to install? (Y/n) ...")
         if input().lower() == "y":
             print("Installing SMAC2 ...")
             SMAC2.download_requirements()
-    if interactive and not ParamILS.check_requirements():
+    if interactive and not ParamILS.configurator_executable.exists():
         print("ParamILS is not installed, would you like to install? (Y/n) ...")
         if input().lower() == "y":
             print("Installing ParamILS ...")
