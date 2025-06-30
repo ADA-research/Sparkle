@@ -45,7 +45,8 @@ class TestConfiguratorSMAC2(TestCase):
         """Testing configure call of SMAC2."""
         # Testing without validation afterwards
         # Mock requirements to avoid throwing an exception
-        mock_requirements.return_value(True)
+        mock_requirements.return_value = True
+        mock_add_to_queue.return_value = None
 
         # We currently cannot test these strings as they are using absolute paths
         expected_cmds = ANY
@@ -54,6 +55,7 @@ class TestConfiguratorSMAC2(TestCase):
         # Make a copy so we don't modify the original
         data_target = PerformanceDataFrame(
             Path("tests/test_files/performance/example_empty_runs.csv"))
+        # TODO: Make this all happen in a tmp dir so we don't have to unlink
         data_target = data_target.clone(Path("tmp-pdf.csv"))
 
         runs = self.smac2_conf.configure(self.conf_scenario,
