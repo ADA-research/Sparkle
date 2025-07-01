@@ -35,7 +35,7 @@ def test_iterable_file_instance_set() -> None:
     assert set(iterable_file_instance_set.instance_names) == set(
         ["Iris1.csv", "Iris2.npy"])
     assert iterable_file_instance_set.instances == \
-        iterable_file_instance_set.instance_paths
+        [str(p.with_suffix("")) for p in iterable_file_instance_set.instance_paths]
     assert iterable_file_instance_set.name == "Iris"
     assert str(iterable_file_instance_set) == "Iris"
     assert iterable_file_instance_set.get_path_by_name("Iris1.csv") == dir_content[0]
@@ -101,7 +101,8 @@ def test_file_instance_set_single_file() -> None:
     assert single_instance_set.all_paths == [single_instance]
     assert single_instance_set.instance_paths == [single_instance]
     assert single_instance_set.instance_names == ["Ptn-7824-b01"]
-    assert single_instance_set.instances == single_instance_set.instance_paths
+    assert single_instance_set.instances == [str(p.with_suffix(""))
+                                             for p in single_instance_set.instance_paths]
     assert single_instance_set.name == "Ptn-7824-b01"
     assert str(single_instance_set) == "Ptn-7824-b01"
     assert single_instance_set.get_path_by_name("Ptn-7824-b01") == single_instance
@@ -118,7 +119,8 @@ def test_file_instance_set_directory() -> None:
     assert set(file_instance_set.all_paths) == set(dir_content)
     assert set(file_instance_set.instance_paths) == set(dir_content)
     assert set(file_instance_set.instance_names) == set([f.stem for f in dir_content])
-    assert file_instance_set.instances == file_instance_set.instance_paths
+    assert file_instance_set.instances == [str(p.with_suffix(""))
+                                           for p in file_instance_set.instance_paths]
     assert file_instance_set.name == "PTN"
     assert str(file_instance_set) == "PTN"
     assert file_instance_set.get_path_by_name(
