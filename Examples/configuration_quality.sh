@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.9.3
+# Auto-Generated .sh files from the original .md by Sparkle 0.9.4
 
 ## Algorithm Quality Configuration
 # We can configure an algorithm too based on some quality objective, that can be defined by the user. See the {ref}`SparkleObjective <sparkle-objective>` page for all options regarding objective defintions.
@@ -38,9 +38,6 @@ sparkle configure_solver --solver Solvers/VRP_SISRs/ --instance-set-train Instan
 
 sparkle jobs
 
-# Generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in `Output/Configuration/Analysis`. The configuration scenario is saved by Sparkle, including the specified objective.
+# Generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in `Output/Analysis`. The configuration scenario is saved by Sparkle, including the specified objective.
 
 sparkle generate_report
-
-# By default the `generate_report` command will create a report for the most recent solver and instance set(s). To generate a report for older solver-instance set combinations, the desired solver can be specified with `--solver Solvers/VRP_SISRs/`, the training instance set with `--instance-set-train Instances/X-1-10/`, and the testing instance set with `--instance-set-test Instances/X-11-20/`.
-

@@ -2,6 +2,7 @@
 - {ref}`cmd-add-feature-extractor`
 - {ref}`cmd-add-instances`
 - {ref}`cmd-add-solver`
+- {ref}`cmd-check`
 - {ref}`cmd-cleanup`
 - {ref}`cmd-compute-features`
 - {ref}`cmd-compute-marginal-contribution`
