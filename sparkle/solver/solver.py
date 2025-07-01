@@ -342,7 +342,7 @@ class Solver(SparkleCallable):
                                                  performance_dataframe.run_ids)]
         objective_arg = f"--target-objective {objective.name}" if objective else ""
         train_arg =\
-            ",".join([str(i) for i in train_set.instance_paths]) if train_set else ""
+            " ".join([str(i) for i in train_set.instance_paths]) if train_set else ""
         # We run all instances/configs/runs combinations
         cmds = [
             f"python3 {Solver.solver_cli} "

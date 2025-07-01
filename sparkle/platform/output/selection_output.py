@@ -66,10 +66,10 @@ class SelectionOutput:
                 selection_scenario.objective,
                 instances=self.training_instances,
                 sort=True)
+
         self.marginal_contribution_actual = \
             compute_selector_marginal_contribution(feature_data,
                                                    selection_scenario)
-
         # Collect performance data
         self.vbs_performance_data = solver_performance_data.best_instance_performance(
             instances=self.training_instances,

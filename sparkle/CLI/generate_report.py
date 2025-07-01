@@ -256,7 +256,7 @@ def generate_selection_section(report: pl.Document, scenario: SelectionScenario,
     """Generate a section for a selection scenario."""
     report_dir = Path(report.default_filepath).parent
     time_stamp = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
-    plot_dir = report_dir / f"{scenario.name}_plots_{time_stamp}"
+    plot_dir = report_dir / f"{scenario.name.replace(' ', '_')}_plots_{time_stamp}"
     plot_dir.mkdir(exist_ok=True)
     report.append(pl.Section(
         f"Selection: {scenario.selector.model_class.__name__} on "
@@ -294,7 +294,6 @@ def generate_selection_section(report: pl.Document, scenario: SelectionScenario,
             feature_extractor_latex_list.add_item(
                 pl.UnsafeCommand(f"textbf{{{feature_extractor_name}}} "
                                  f"({extractor.output_dimension} features)"))
-
     # Report Training results
     report.append(pl.Subsection("Training Results"))
     # 1. Report VBS and selector performance,  create ranking list of the solvers
@@ -315,6 +314,7 @@ def generate_selection_section(report: pl.Document, scenario: SelectionScenario,
         for solver_name, conf_id, value in scenario_output.solver_performance_ranking:
             value = round(value, MAX_DEC)
             solver_name = solver_name.replace("_", " ")  # Latex fix
+            conf_id = conf_id.replace("_", " ")  # Latex fix
             ranking_list.add_item(
                 pl.UnsafeCommand(f"textbf{{{solver_name}}} ({conf_id}): {value}"))
 
@@ -327,6 +327,8 @@ def generate_selection_section(report: pl.Document, scenario: SelectionScenario,
              contribution, performance) in scenario_output.marginal_contribution_perfect:
             contribution, performance =\
                 round(contribution, MAX_DEC), round(performance, MAX_DEC)
+            solver_name = solver_name.replace("_", " ")  # Latex fix
+            conf_id = conf_id.replace("_", " ")  # Latex fix
             ranking_list.add_item(pl.UnsafeCommand(
                 f"textbf{{{solver_name}}} ({conf_id}): {contribution} ({performance})"))
 
@@ -338,6 +340,8 @@ def generate_selection_section(report: pl.Document, scenario: SelectionScenario,
              contribution, performance) in scenario_output.marginal_contribution_actual:
             contribution, performance =\
                 round(contribution, MAX_DEC), round(performance, MAX_DEC)
+            solver_name = solver_name.replace("_", " ")  # Latex fix
+            conf_id = conf_id.replace("_", " ")  # Latex fix
             ranking_list.add_item(pl.UnsafeCommand(
                 f"textbf{{{solver_name}}} ({conf_id}): {contribution} ({performance})"))
 
@@ -407,7 +411,7 @@ def generate_parallel_portfolio_section(report: pl.Document,
     report_dir = Path(report.default_filepath).parent
     portfolio_name = scenario.csv_filepath.parent.name
     time_stamp = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
-    plot_dir = report_dir / f"{portfolio_name}_plots_{time_stamp}"
+    plot_dir = report_dir / f"{portfolio_name.replace(' ', '_')}_plots_{time_stamp}"
     plot_dir.mkdir()
     report.append(pl.Section(f"Parallel Portfolio {portfolio_name}"))
     report.append(
@@ -534,8 +538,8 @@ def generate_appendix(report: pl.Document,
                       performance_data: PerformanceDataFrame,
                       feature_data: FeatureDataFrame) -> None:
     """Generate an appendix for the report."""
-    report.append(pl.UnsafeCommand("appendix"))
-    report.append("Below are the full performance and feature data frames.")
+    # report.append(pl.UnsafeCommand("appendix"))
+    # report.append("Below are the full performance and feature data frames.")
     # TODO: Add long table for the entire performance data frame
     # performance_data.to_latex() # maybe?
     # TODO: Add long table for the entire feature data frame
@@ -600,10 +604,13 @@ def main(argv: list[str]) -> None:
 
     processed_configuration_scenarios = []
     processed_selection_scenarios = []
+    possible_test_sets = [Instance_Set(p)
+                          for p in gv.settings().DEFAULT_instance_dir.iterdir()]
     for configuration_scenario in configuration_scenarios:
         processed_configuration_scenarios.append(
-            (ConfigurationOutput(configuration_scenario,
-                                 performance_data), configuration_scenario))
+            (ConfigurationOutput(
+                configuration_scenario, performance_data, possible_test_sets),
+             configuration_scenario))
     for selection_scenario in selection_scenarios:
         processed_selection_scenarios.append(
             (SelectionOutput(selection_scenario,

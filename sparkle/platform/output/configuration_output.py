@@ -1,9 +1,8 @@
 """Sparkle class to organise configuration output."""
 from __future__ import annotations
-from pathlib import Path
 
 from sparkle.structures import PerformanceDataFrame
-from sparkle.instance import Instance_Set
+from sparkle.instance import InstanceSet
 from sparkle.configurator.configurator import ConfigurationScenario
 from sparkle.types import SparkleObjective, SolverStatus
 
@@ -59,13 +58,15 @@ class ConfigurationOutput:
 
     def __init__(self: ConfigurationOutput,
                  config_scenario: ConfigurationScenario,
-                 performance_data: PerformanceDataFrame) -> None:
+                 performance_data: PerformanceDataFrame,
+                 possible_test_sets: list[InstanceSet] = None,
+                 ) -> None:
         """Initialize Configurator Output class.
 
         Args:
             config_scenario: The scenario to output
             performance_data: Performance data
-            instance_set_test: Instance set used for testing
+            possible_test_sets: Instance Sets possibly used for testing
         """
         self.solver = config_scenario.solver
         self.configurator = config_scenario.configurator
@@ -81,13 +82,16 @@ class ConfigurationOutput:
                      if c not in used_configs]
         performance_data_config.remove_configuration(
             str(self.solver.directory), removable)
-        test_sets = set(
-            Path(i).parent for i in performance_data_config.instances
-            if self.instance_set_train.name != Path(i).parent.name
-            and not performance_data_config.is_missing(str(self.solver.directory), i))
-        # NOTE: If we only have one instance from a set, it could lead to problems
-        # resolving them like this
-        self.test_instance_sets = [Instance_Set(set) for set in test_sets]
+        self.test_instance_sets = []
+        for test_set in possible_test_sets:
+            if test_set.name == self.instance_set_train.name:
+                continue
+            for instance in test_set.instance_names:
+                if instance not in performance_data_config.instances or\
+                    performance_data_config.is_missing(
+                        str(self.solver.directory), instance):
+                    continue
+            self.test_instance_sets.append(test_set)
         self.directory = config_scenario.directory
         self.config_scenario = config_scenario
 
@@ -98,7 +102,7 @@ class ConfigurationOutput:
             solver_key, config_keys)
 
         # Retrieve configuration performances
-        train_instances = [str(p) for p in self.instance_set_train.instance_paths]
+        train_instances = self.instance_set_train.instance_names
         # Retrieve Default (No configuration) performance
         _, self.default_performance_train =\
             performance_data_config.configuration_performance(
@@ -129,7 +133,7 @@ class ConfigurationOutput:
                             if o.lower().startswith("status")][0]
         self.instance_set_results: dict[str, ConfigurationResult] = {}
         for instance_set in self.test_instance_sets + [self.instance_set_train]:
-            instances = [str(p) for p in instance_set.instance_paths]
+            instances = instance_set.instance_names
             _, default_performance_per_instance =\
                 performance_data_config.configuration_performance(
                     solver_key, PerformanceDataFrame.default_configuration,

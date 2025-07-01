@@ -661,7 +661,8 @@ class PerformanceDataFrame(pd.DataFrame):
             for (solver, config), (objective, instance, run) in itertools.product(
                     df.columns, df.index):
                 value = df.loc[(objective, instance, run), (solver, config)]
-                if not isinstance(value, str) and math.isnan(value):
+                if value is None or (
+                        isinstance(value, (int, float)) and math.isnan(value)):
                     result.append(tuple([solver, config, instance, run]))
         # Filter duplicates
         result = list(set(result))
@@ -710,7 +711,6 @@ class PerformanceDataFrame(pd.DataFrame):
         # Aggregate the runs
         subdf = subdf.groupby(PerformanceDataFrame.index_instance).agg(
             func=objective.run_aggregator.__name__)
-
         # Aggregate the instances
         sub_series = subdf.agg(func=objective.instance_aggregator.__name__)
         # Select the best configuration

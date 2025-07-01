@@ -79,14 +79,10 @@ if __name__ == "__main__":
         objectives = [o for o in objectives if o is not None]
         if args.best_configuration_instances:  # Determine best configuration
             best_configuration_instances: list[str] = args.best_configuration_instances
-            # Handle multifile instances: i1.model,i1.const i2.model,i2.const...
-            best_configuration_instances = [instance_str.split(
-                ",") for instance_str in best_configuration_instances]
-            # Get the instance names
-            best_configuration_instances = [
-                Path(instance_list[0]).stem
-                for instance_list in best_configuration_instances]
-
+            # Get the unique instance names
+            best_configuration_instances = list(set([
+                Path(instance).stem
+                for instance in best_configuration_instances]))
             target_objective = resolve_objective(args.target_objective)
             config_id, value = performance_dataframe.best_configuration(
                 solver=str(args.solver),

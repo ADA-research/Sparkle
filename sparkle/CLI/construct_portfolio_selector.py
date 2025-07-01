@@ -122,11 +122,9 @@ def main(argv: list[str]) -> None:
     # Filter objective
     performance_data.remove_objective([obj for obj in performance_data.objective_names
                                        if obj != objective.name])
-
     if instance_set is not None:
-        applicable_instances = [str(i) for i in instance_set.instance_paths]
         removable_instances = [i for i in performance_data.instances
-                               if i not in applicable_instances]
+                               if i not in instance_set.instance_names]
         performance_data.remove_instances(removable_instances)
         feature_data.remove_instances(removable_instances)
 
@@ -153,14 +151,8 @@ def main(argv: list[str]) -> None:
                     if len(config) > 1:
                         print(f"\t{solver}: {config} configurations")
                 raise ValueError(
-                    "Cannot construct portfolio selector with single configuration per "
-                    "solver. Specify all_solver_configurations flag to construct the "
-                    "portfolio selector with all configurations, or the "
-                    "best-configuration flag to construct the portfolio selector with "
-                    "the best configuration per solver. Set the default-configuration "
-                    "flag to construct the portfolio selector with the default "
-                    "configuration per solver."
-                )
+                    "Please set the --all-configurations flag if you wish to use more "
+                    "than one configuration per solver.")
     for solver in solvers:
         removeable_configs = [c for c in performance_data.get_configurations(solver)
                               if c not in configurations[solver]]

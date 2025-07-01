@@ -11,7 +11,7 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.reporting_scenario import Scenario
-from sparkle.CLI.help.nicknames import resolve_object_name
+from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
 from sparkle.CLI.help import argparse_custom as ac
 
 from sparkle.platform.settings_objects import Settings, SettingState
@@ -101,7 +101,7 @@ def main(argv: list[str]) -> None:
               "Please inspect possible warnings above.")
         print(f"Would you like to install {configurator.name}? (Y/n)")
         if input().lower().strip() == "y":
-            configurator.install_requirements()
+            configurator.download_requirements()
         else:
             sys.exit()
         if not configurator.check_requirements(verbose=True):
@@ -192,7 +192,12 @@ def main(argv: list[str]) -> None:
 
     # If we have default configurations that need to be run, schedule them too
     if default_jobs:
-        instances = [job[2] for job in default_jobs]
+        # Edit jobs to incorporate file paths
+        instances = []
+        for _, _, instance, _ in default_jobs:
+            instance_path = resolve_instance_name(
+                instance, gv.settings().DEFAULT_instance_dir)
+            instances.append(instance_path)
         default_job = solver.run_performance_dataframe(
             instances, PerformanceDataFrame.default_configuration,
             performance_data,
@@ -245,8 +250,8 @@ def main(argv: list[str]) -> None:
 
     if run_on == Runner.SLURM:
         job_id_str = ",".join([run.run_id for run in dependency_job_list])
-        print(f"Running configuration through Slurm with job id(s): "
-              f"{job_id_str}")
+        print(f"Running {configurator.name} configuration through Slurm with job "
+              f"id(s): {job_id_str}")
     else:
         print("Running configuration finished!")
 

@@ -128,7 +128,7 @@ def compute_selector_marginal_contribution(
         rank_list.append((solver, config,
                           marginal_contribution, ablated_selector_performance))
 
-    rank_list.sort(key=lambda contribution: contribution[1], reverse=True)
+    rank_list.sort(key=lambda contribution: contribution[2], reverse=True)
     return rank_list
 
 
@@ -152,7 +152,8 @@ def compute_marginal_contribution(
         # Perfect selector is the computation of the best performance per instance
         print("Computing each solver's marginal contribution to perfect selector ...")
         contribution_data = performance_data.marginal_contribution(
-            objective=scenario.objective.name, sort=True)
+            objective=scenario.objective.name,
+            instances=scenario.training_instances, sort=True)
         table = tabulate.tabulate(
             contribution_data,
             headers=["Solver", "Configuration",

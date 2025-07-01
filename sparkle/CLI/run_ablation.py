@@ -13,7 +13,7 @@ from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
 from sparkle.structures import PerformanceDataFrame
-from sparkle.instance import Instance_Set
+from sparkle.instance import Instance_Set, InstanceSet
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_object_name
@@ -115,7 +115,7 @@ def main(argv: list[str]) -> None:
         print([p for p in gv.settings().DEFAULT_solver_dir.iterdir()])
         sys.exit(-1)
 
-    instance_set_train = resolve_object_name(
+    instance_set_train: InstanceSet = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.settings().DEFAULT_instance_dir, Instance_Set)
@@ -137,7 +137,7 @@ def main(argv: list[str]) -> None:
     best_configuration_key, _ = performance_data.best_configuration(
         str(solver.directory),
         config_scenario.sparkle_objective,
-        instances=[str(p) for p in instance_set_train.instance_paths])
+        instances=instance_set_train.instance_names)
     best_configuration = performance_data.get_full_configuration(
         str(solver.directory),
         best_configuration_key)
