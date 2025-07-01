@@ -30,6 +30,14 @@
 
 ```
 
+(cmd-check)=
+
+```{eval-rst}
+.. autoprogram:: sparkle.CLI.check:parser_function()
+   :prog: check
+
+```
+
 (cmd-cleanup)=
 
 ```{eval-rst}

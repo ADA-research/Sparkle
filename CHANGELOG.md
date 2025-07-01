@@ -2,7 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.9.4] - ??/??/2025
+## [0.9.4] - 01/06/2025
 
 ### Added
 - Updated SMAC3 to latest version (2.3.1), which now properly measures CPU time vs Runtime/Wallclock time. This is updated in Sparkle to report the Runsolver accurate measurements to SMAC3. [SPRK-373]

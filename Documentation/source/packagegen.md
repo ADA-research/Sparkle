@@ -38,12 +38,20 @@ platform
     :members: SettingState,Settings
 ```
 
+(mod-selector)=
+```{eval-rst}
+selector
+===============
+.. automodule:: sparkle.selector
+    :members: Extractor,SelectionScenario,Selector
+```
+
 (mod-solver)=
 ```{eval-rst}
 solver
 ===============
 .. automodule:: sparkle.solver
-    :members: Extractor,SATVerifier,Selector,SolutionVerifier,Solver
+    :members: SATVerifier,SolutionVerifier,Solver
 ```
 
 (mod-structures)=
