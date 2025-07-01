@@ -4,7 +4,7 @@ import configparser
 from enum import Enum
 import ast
 from pathlib import Path
-from pathlib import PurePath
+from typing import Any
 
 from runrunner import Runner
 
@@ -40,9 +40,9 @@ class Settings:
     __latest_settings_file = Path("latest.ini")
 
     # Default settings path
-    DEFAULT_settings_path = PurePath(cwd_prefix / DEFAULT_settings_dir / __settings_file)
+    DEFAULT_settings_path = Path(cwd_prefix / DEFAULT_settings_dir / __settings_file)
     DEFAULT_previous_settings_path =\
-        PurePath(cwd_prefix / DEFAULT_settings_dir / __latest_settings_file)
+        Path(cwd_prefix / DEFAULT_settings_dir / __latest_settings_file)
     DEFAULT_reference_dir = DEFAULT_settings_dir / "Reference_Lists"
 
     # Default library pathing
@@ -52,7 +52,7 @@ class Settings:
     bibliography_path = DEFAULT_components / "latex_source" / "report.bib"
 
     # Example settings path
-    DEFAULT_example_settings_path = PurePath(DEFAULT_components / "sparkle_settings.ini")
+    DEFAULT_example_settings_path = Path(DEFAULT_components / "sparkle_settings.ini")
 
     # Runsolver component
     DEFAULT_runsolver_dir = DEFAULT_components / "runsolver" / "src"
@@ -168,10 +168,34 @@ class Settings:
     DEFAULT_selector_class = "MultiClassClassifier"
     DEFAULT_selector_model = "RandomForestClassifier"
 
-    def __init__(self: Settings, file_path: PurePath = None) -> None:
+    # TODO: Check if this is good and we miss anything
+    sections_options: dict[str, dict[str, tuple[str]]] = {
+        "general": {
+            "sparkle_objective": (str, DEFAULT_general_sparkle_objective),
+            "sparkle_configurator": (str, DEFAULT_general_sparkle_configurator),
+            "solver_cutoff_time": (int, DEFAULT_general_solver_cutoff_time),
+            "extractor_cutoff_time": (int, DEFAULT_general_extractor_cutoff_time),
+            "verbosity": (str, DEFAULT_general_verbosity),
+            "check_interval": (int, DEFAULT_general_check_interval),
+            "run_on": (str, DEFAULT_general_run_on),
+        },
+        "config": {},
+        "smac2": {},
+        "smac3": {},
+        "irace": {},
+        "paramils": {},
+        "slurm": {},
+        "ablation": {},
+        "parallel_portfolio": {},
+        "selection": {},
+    }
+
+    def __init__(self: Settings, file_path: Path = None) -> None:
         """Initialise a settings object."""
         # Settings 'dictionary' in configparser format
         self.__settings = configparser.ConfigParser()
+        for section in self.sections:
+            self.__settings.add_section(section)
 
         # Setting flags
         self.__general_sparkle_objective_set = SettingState.NOT_SET
@@ -231,7 +255,6 @@ class Settings:
 
         self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
         self.__slurm_job_prepend_set = SettingState.NOT_SET
-        self.__slurm_job_submission_limit_set = SettingState.NOT_SET
 
         self.__general_sparkle_configurator = None
 
@@ -244,7 +267,7 @@ class Settings:
             # Initialise settings from a given file path
             self.read_settings_ini(file_path)
 
-    def read_settings_ini(self: Settings, file_path: PurePath = DEFAULT_settings_path,
+    def read_settings_ini(self: Settings, file_path: Path = DEFAULT_settings_path,
                           state: SettingState = SettingState.FILE) -> None:
         """Read the settings from an INI file."""
         # Read file
@@ -253,381 +276,385 @@ class Settings:
 
         # Set internal settings based on data read from FILE if they were read
         # successfully
-        if file_settings.sections() != []:
-            section = "general"
-            option_names = ("objectives", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = [resolve_objective(obj) for obj in
-                             file_settings.get(section, option).split(",")]
-                    self.set_general_sparkle_objectives(value, state)
-                    file_settings.remove_option(section, option)
+        if file_settings.sections() == []:
+            # Print error if unable to read the settings
+            if file_path.exists():
+                print(f"ERROR: Failed to read settings from {file_path} The file may "
+                      "have been empty or be in another format than INI. Default Setting"
+                      " values will be used.")
+            else:
+                print(f"ERROR: Failed to read settings from {file_path} The file does "
+                      "not exist. Default Setting values will be used.")
+            return
 
-            # Comma so python understands it's a tuple...
-            option_names = ("configurator", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
+        section = "general"
+        option_names = ("objectives", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = [resolve_objective(obj) for obj in
+                         file_settings.get(section, option).split(",")]
+                self.set_general_sparkle_objectives(value, state)
+                file_settings.remove_option(section, option)
+
+        # Comma so python understands it's a tuple...
+        option_names = ("configurator", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.get(section, option)
+                self.set_general_sparkle_configurator(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("solver_cutoff_time", "target_cutoff_time",
+                        "cutoff_time_each_solver_call")
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_general_solver_cutoff_time(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("extractor_cutoff_time",
+                        "cutoff_time_each_feature_computation")
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_general_extractor_cutoff_time(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("run_on", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.get(section, option)
+                self.set_run_on(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("verbosity", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = VerbosityLevel.from_string(
+                    file_settings.get(section, option))
+                self.set_general_verbosity(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("check_interval", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = int(file_settings.get(section, option))
+                self.set_general_check_interval(value, state)
+                file_settings.remove_option(section, option)
+
+        section = "configuration"
+        option_names = ("solver_calls", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_configurator_solver_calls(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("number_of_runs", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_configurator_number_of_runs(value, state)
+                file_settings.remove_option(section, option)
+
+        option_name = "max_iterations"
+        if file_settings.has_option(section, option_name):
+            value = file_settings.getint(section, option_name)
+            self.set_configurator_max_iterations(value, state)
+            file_settings.remove_option(section, option_name)
+
+        section = "smac2"
+        option_names = ("wallclock_time", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_smac2_wallclock_time(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("cpu_time", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_smac2_cpu_time(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("target_cutoff_length", "each_run_cutoff_length")
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.get(section, option)
+                self.set_smac2_target_cutoff_length(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("use_cpu_time_in_tunertime", "countSMACTimeAsTunerTime")
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getboolean(section, option)
+                self.set_smac2_use_cpu_time_in_tunertime(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("cli_cores", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_smac2_cli_cores(value, state)
+                file_settings.remove_option(section, option)
+
+        options_names = ("iteration_limit", "numIterations", "numberOfIterations",
+                         "max_iterations")
+        for option in options_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_smac2_max_iterations(value, state)
+                file_settings.remove_option(section, option)
+
+        section = "smac3"
+
+        option_names = ("n_trials", "number_of_trials", "solver_calls")
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_smac3_number_of_trials(value, state)
+                file_settings.remove_option(section, option)
+
+        options_names = ("facade", "smac_facade", "smac3_facade")
+        for option in options_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.get(section, option)
+                self.set_smac3_smac_facade(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("max_ratio", "facade_max_ratio", "initial_trials_max_ratio")
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getfloat(section, option)
+                self.set_smac3_facade_max_ratio(value, state)
+                file_settings.remove_option(section, option)
+
+        options_names = ("crash_cost", )
+        for option in options_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.get(section, option)
+                self.set_smac3_crash_cost(value, state)
+                file_settings.remove_option(section, option)
+
+        options_names = ("termination_cost_threshold", )
+        for option in options_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.get(section, option)
+                self.set_smac3_termination_cost_threshold(value, state)
+                file_settings.remove_option(section, option)
+
+        options_names = ("walltime_limit", "wallclock_time")
+        for option in options_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getfloat(section, option)
+                self.set_smac3_walltime_limit(value, state)
+                file_settings.remove_option(section, option)
+
+        options_names = ("cputime_limit", )
+        for option in options_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getfloat(section, option)
+                self.set_smac3_cputime_limit(value, state)
+                file_settings.remove_option(section, option)
+
+        options_names = ("use_default_config", )
+        for option in options_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getboolean(section, option)
+                self.set_smac3_use_default_config(value, state)
+                file_settings.remove_option(section, option)
+
+        options_names = ("min_budget", )
+        for option in options_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getfloat(section, option)
+                self.set_smac3_min_budget(value, state)
+                file_settings.remove_option(section, option)
+
+        options_names = ("max_budget", )
+        for option in options_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getfloat(section, option)
+                self.set_smac3_max_budget(value, state)
+                file_settings.remove_option(section, option)
+
+        section = "irace"
+        option_names = ("max_time", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_irace_max_time(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("max_experiments", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_irace_max_experiments(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("first_test", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_irace_first_test(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("mu", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_irace_mu(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("nb_iterations", "iterations", "max_iterations")
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_irace_max_iterations(value, state)
+                file_settings.remove_option(section, option)
+
+        section = "paramils"
+
+        option_names = ("min_runs", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_paramils_min_runs(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("max_runs", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_paramils_max_runs(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("cputime_limit", "cputime_limit", "tunertime_limit",
+                        "tuner_timeout", "tunerTimeout")
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_paramils_tuner_timeout(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("random_restart", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getfloat(section, option)
+                self.set_paramils_random_restart(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("focused_approach", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getboolean(section, option)
+                self.set_paramils_focused_approach(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("use_cpu_time_in_tunertime", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getboolean(section, option)
+                self.set_paramils_use_cpu_time_in_tunertime(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("cli_cores", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_paramils_cli_cores(value, state)
+                file_settings.remove_option(section, option)
+
+        options_names = ("iteration_limit", "numIterations", "numberOfIterations",
+                         "max_iterations")
+        for option in options_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_paramils_max_iterations(value, state)
+                file_settings.remove_option(section, option)
+
+        section = "selection"
+
+        option_names = ("selector_class", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.get(section, option)
+                self.set_selection_class(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("selector_model")
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.get(section, option)
+                self.set_selection_model(value, state)
+                file_settings.remove_option(section, option)
+
+        section = "slurm"
+        option_names = ("number_of_jobs_in_parallel", "num_job_in_parallel")
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_number_of_jobs_in_parallel(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("max_parallel_runs_per_node", "clis_per_node")
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_slurm_max_parallel_runs_per_node(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("job_submission_limit", "max_jobs_submit")
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getint(section, option)
+                self.set_slurm_job_submission_limit(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("job_prepend", "prepend", "prepend_script")
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.get(section, option)
+                self.set_slurm_job_prepend(value, state)
+                file_settings.remove_option(section, option)
+
+        section = "ablation"
+        option_names = ("racing", "ablation_racing")
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = file_settings.getboolean(section, option)
+                self.set_ablation_racing_flag(value, state)
+                file_settings.remove_option(section, option)
+
+        section = "parallel_portfolio"
+        option_names = ("check_interval", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = int(file_settings.get(section, option))
+                self.set_parallel_portfolio_check_interval(value, state)
+                file_settings.remove_option(section, option)
+
+        option_names = ("num_seeds_per_solver", )
+        for option in option_names:
+            if file_settings.has_option(section, option):
+                value = int(file_settings.get(section, option))
+                self.set_parallel_portfolio_number_of_seeds_per_solver(value, state)
+                file_settings.remove_option(section, option)
+
+        # TODO: Report on any unknown settings that were read
+        sections = file_settings.sections()
+
+        for section in sections:
+            for option in file_settings[section]:
+                # TODO: Should check the options are valid Slurm options
+                if section == "slurm":
                     value = file_settings.get(section, option)
-                    self.set_general_sparkle_configurator(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("solver_cutoff_time", "target_cutoff_time",
-                            "cutoff_time_each_solver_call")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_general_solver_cutoff_time(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("extractor_cutoff_time",
-                            "cutoff_time_each_feature_computation")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_general_extractor_cutoff_time(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("run_on", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.get(section, option)
-                    self.set_run_on(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("verbosity", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = VerbosityLevel.from_string(
-                        file_settings.get(section, option))
-                    self.set_general_verbosity(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("check_interval", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = int(file_settings.get(section, option))
-                    self.set_general_check_interval(value, state)
-                    file_settings.remove_option(section, option)
-
-            section = "configuration"
-            option_names = ("solver_calls", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_configurator_solver_calls(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("number_of_runs", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_configurator_number_of_runs(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_name = "max_iterations"
-            if file_settings.has_option(section, option_name):
-                value = file_settings.getint(section, option_name)
-                self.set_configurator_max_iterations(value, state)
-                file_settings.remove_option(section, option_name)
-
-            section = "smac2"
-            option_names = ("wallclock_time", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_smac2_wallclock_time(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("cpu_time", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_smac2_cpu_time(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("target_cutoff_length", "each_run_cutoff_length")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.get(section, option)
-                    self.set_smac2_target_cutoff_length(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("use_cpu_time_in_tunertime", "countSMACTimeAsTunerTime")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getboolean(section, option)
-                    self.set_smac2_use_cpu_time_in_tunertime(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("cli_cores", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_smac2_cli_cores(value, state)
-                    file_settings.remove_option(section, option)
-
-            options_names = ("iteration_limit", "numIterations", "numberOfIterations",
-                             "max_iterations")
-            for option in options_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_smac2_max_iterations(value, state)
-                    file_settings.remove_option(section, option)
-
-            section = "smac3"
-
-            option_names = ("n_trials", "number_of_trials", "solver_calls")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_smac3_number_of_trials(value, state)
-                    file_settings.remove_option(section, option)
-
-            options_names = ("facade", "smac_facade", "smac3_facade")
-            for option in options_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.get(section, option)
-                    self.set_smac3_smac_facade(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("max_ratio", "facade_max_ratio", "initial_trials_max_ratio")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getfloat(section, option)
-                    self.set_smac3_facade_max_ratio(value, state)
-                    file_settings.remove_option(section, option)
-
-            options_names = ("crash_cost", )
-            for option in options_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.get(section, option)
-                    self.set_smac3_crash_cost(value, state)
-                    file_settings.remove_option(section, option)
-
-            options_names = ("termination_cost_threshold", )
-            for option in options_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.get(section, option)
-                    self.set_smac3_termination_cost_threshold(value, state)
-                    file_settings.remove_option(section, option)
-
-            options_names = ("walltime_limit", "wallclock_time")
-            for option in options_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getfloat(section, option)
-                    self.set_smac3_walltime_limit(value, state)
-                    file_settings.remove_option(section, option)
-
-            options_names = ("cputime_limit", )
-            for option in options_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getfloat(section, option)
-                    self.set_smac3_cputime_limit(value, state)
-                    file_settings.remove_option(section, option)
-
-            options_names = ("use_default_config", )
-            for option in options_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getboolean(section, option)
-                    self.set_smac3_use_default_config(value, state)
-                    file_settings.remove_option(section, option)
-
-            options_names = ("min_budget", )
-            for option in options_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getfloat(section, option)
-                    self.set_smac3_min_budget(value, state)
-                    file_settings.remove_option(section, option)
-
-            options_names = ("max_budget", )
-            for option in options_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getfloat(section, option)
-                    self.set_smac3_max_budget(value, state)
-                    file_settings.remove_option(section, option)
-
-            section = "irace"
-            option_names = ("max_time", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_irace_max_time(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("max_experiments", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_irace_max_experiments(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("first_test", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_irace_first_test(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("mu", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_irace_mu(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("nb_iterations", "iterations", "max_iterations")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_irace_max_iterations(value, state)
-                    file_settings.remove_option(section, option)
-
-            section = "paramils"
-
-            option_names = ("min_runs", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_paramils_min_runs(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("max_runs", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_paramils_max_runs(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("cputime_limit", "cputime_limit", "tunertime_limit",
-                            "tuner_timeout", "tunerTimeout")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_paramils_tuner_timeout(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("random_restart", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getfloat(section, option)
-                    self.set_paramils_random_restart(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("focused_approach", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getboolean(section, option)
-                    self.set_paramils_focused_approach(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("use_cpu_time_in_tunertime", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getboolean(section, option)
-                    self.set_paramils_use_cpu_time_in_tunertime(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("cli_cores", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_paramils_cli_cores(value, state)
-                    file_settings.remove_option(section, option)
-
-            options_names = ("iteration_limit", "numIterations", "numberOfIterations",
-                             "max_iterations")
-            for option in options_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_paramils_max_iterations(value, state)
-                    file_settings.remove_option(section, option)
-
-            section = "selection"
-
-            option_names = ("selector_class", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.get(section, option)
-                    self.set_selection_class(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("selector_model")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.get(section, option)
-                    self.set_selection_model(value, state)
-                    file_settings.remove_option(section, option)
-
-            section = "slurm"
-            option_names = ("number_of_jobs_in_parallel", "num_job_in_parallel")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_number_of_jobs_in_parallel(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("max_parallel_runs_per_node", "clis_per_node")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_slurm_max_parallel_runs_per_node(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("job_submission_limit", "max_jobs_submit")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_slurm_job_submission_limit(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("job_prepend", "prepend", "prepend_script")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.get(section, option)
-                    self.set_slurm_job_prepend(value, state)
-                    file_settings.remove_option(section, option)
-
-            section = "ablation"
-            option_names = ("racing", "ablation_racing")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getboolean(section, option)
-                    self.set_ablation_racing_flag(value, state)
-                    file_settings.remove_option(section, option)
-
-            section = "parallel_portfolio"
-            option_names = ("check_interval", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = int(file_settings.get(section, option))
-                    self.set_parallel_portfolio_check_interval(value, state)
-                    file_settings.remove_option(section, option)
-
-            option_names = ("num_seeds_per_solver", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = int(file_settings.get(section, option))
-                    self.set_parallel_portfolio_number_of_seeds_per_solver(value, state)
-                    file_settings.remove_option(section, option)
-
-            # TODO: Report on any unknown settings that were read
-            sections = file_settings.sections()
-
-            for section in sections:
-                for option in file_settings[section]:
-                    # TODO: Should check the options are valid Slurm options
-                    if section == "slurm":
-                        value = file_settings.get(section, option)
-                        self.add_slurm_extra_option(option, value, state)
-                    else:
-                        print(f'Unrecognised section - option combination: "{section} '
-                              f'{option}" in file {file_path} ignored')
-
-        # Print error if unable to read the settings
-        elif Path(file_path).exists():
-            print(f"ERROR: Failed to read settings from {file_path} The file may have "
-                  "been empty or be in another format than INI. Default Setting values "
-                  "will be used.")
+                    self.add_slurm_extra_option(option, value, state)
+                else:
+                    print(f'Unrecognised section - option combination: "{section} '
+                          f'{option}" in file {file_path} ignored')
 
     def write_used_settings(self: Settings) -> None:
         """Write the used settings to the default locations."""
@@ -671,6 +698,17 @@ class Settings:
     def __init_section(self: Settings, section: str) -> None:
         if section not in self.__settings:
             self.__settings[section] = {}
+
+    def _abstract_setter(self: Settings, section: str, name: str, value: str) -> Any:
+        """Abstract setter method."""
+        if value:
+            self.__settings[section][name] = value
+
+    def _abstract_getter(self: Settings, section: str, name: str, type: Any) -> Any:
+        """Abstract getter method."""
+        if self.__settings.has_option(section, name):
+            return self.__settings.get(section, name)
+        raise NotImplementedError
 
     @staticmethod
     def __check_setting_state(current_state: SettingState,
@@ -1726,27 +1764,6 @@ class Settings:
             self.set_slurm_max_parallel_runs_per_node()
 
         return int(self.__settings["slurm"]["max_parallel_runs_per_node"])
-
-    def set_slurm_job_submission_limit(
-            self: Settings,
-            value: int = DEFAULT_slurm_job_submission_limit,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """[NOT ACTIVE YET] Set the number of jobs that can be submitted to Slurm."""
-        section = "slurm"
-        name = "job_submission_limit"
-
-        if value is not None and self.__check_setting_state(
-                self.__slurm_job_submission_limit_set, origin, name):
-            self.__init_section(section)
-            self.__slurm_job_submission_limit_set = origin
-            self.__settings[section][name] = str(value)
-
-    def get_slurm_job_submission_limit(self: Settings) -> int:
-        """[NOT ACTIVE YET] Return the maximum number of jobs you can submit to Slurm."""
-        if self.__slurm_job_submission_limit_set == SettingState.NOT_SET:
-            self.set_slurm_job_submission_limit()
-
-        return int(self.__settings["slurm"]["job_submission_limit"])
 
     def set_slurm_job_prepend(
             self: Settings,

@@ -1,5 +1,4 @@
 """Custom helper class and functions to process CLI arguments with argparse."""
-
 from __future__ import annotations
 import argparse
 import enum
@@ -7,19 +6,6 @@ from pathlib import Path
 from typing import Any
 
 from runrunner.base import Runner
-
-from sparkle.platform.settings_objects import SettingState, Settings
-
-
-class SetByUser(argparse.Action):
-    """Possible action to execute for CLI argument."""
-
-    def __call__(self: SetByUser, parser: argparse.ArgumentParser,
-                 namespace: argparse.Namespace, values: str, option_string: str = None)\
-            -> None:
-        """Set attributes when called."""
-        setattr(namespace, self.dest, values)
-        setattr(namespace, self.dest + "_nondefault", True)
 
 
 # Taken from https://stackoverflow.com/a/60750535
@@ -50,14 +36,6 @@ class EnumAction(argparse.Action):
         """Converts value back to Enum."""
         value = self._enum(values)
         setattr(namespace, self.dest, value)
-
-
-def user_set_state(args: argparse.Namespace, arg_name: str) -> SettingState:
-    """Return the SettingState of an argument."""
-    if hasattr(args, arg_name + "_nondefault"):
-        return SettingState.CMD_LINE
-    else:
-        return SettingState.DEFAULT
 
 
 class ArgumentContainer():
@@ -166,19 +144,11 @@ ConfiguratorArgument = ArgumentContainer(names=["--configurator"],
                                          kwargs={"type": str,
                                                  "help": "name of the configurator"})
 
-CPUTimeArgument = \
-    ArgumentContainer(names=["--cpu-time"],
-                      kwargs={"type": int,
-                              "help": "configuration budget per configurator run in "
-                                      "seconds (cpu)"})
-
 CutOffTimeArgument = \
     ArgumentContainer(names=["--cutoff-time", "--cutoff", "--timeout"],
                       kwargs={"type": int,
                               "help": "The duration the portfolio will run before the "
-                                      "solvers within the portfolio will be stopped "
-                                      "(default: "
-                                      f"{Settings.DEFAULT_general_solver_cutoff_time})"})
+                                      "solvers within the portfolio will be stopped."})
 
 DefaultSolverConfigurationArgument = \
     ArgumentContainer(names=["--default-configuration"],
@@ -233,7 +203,6 @@ InstanceSetRequiredArgument = \
                       kwargs={"required": True,
                               "type": Path,
                               "help": "path to instance (set)"})
-
 
 InstanceSetTestArgument = \
     ArgumentContainer(names=["--instance-set-test"],
@@ -320,16 +289,6 @@ NoSavePlatformArgument = ArgumentContainer(names=["--no-save"],
                                                    "help": "do not save the platform "
                                                            "upon re-initialisation."})
 
-NumberOfRunsConfigurationArgument = \
-    ArgumentContainer(names=["--number-of-runs"],
-                      kwargs={"type": int,
-                              "help": "number of configuration runs to execute"})
-
-NumberOfRunsAblationArgument = \
-    ArgumentContainer(names=["--number-of-runs"],
-                      kwargs={"type": int,
-                              "help": "Number of configuration runs to execute"})
-
 PerfectSelectorMarginalContributionArgument =\
     ArgumentContainer(names=["--perfect"],
                       kwargs={"action": "store_true",
@@ -346,20 +305,6 @@ RecomputeFeaturesArgument = \
                       kwargs={"action": "store_true",
                               "help": "Re-run feature extractor for instances with "
                                       "previously computed features"})
-
-RecomputeMarginalContributionArgument = \
-    ArgumentContainer(names=["--recompute"],
-                      kwargs={"action": "store_true",
-                              "help": "force marginal contribution to be recomputed even"
-                                      " when it already exists in file for the current "
-                                      "selector"})
-
-RecomputeMarginalContributionForSelectorArgument = \
-    ArgumentContainer(names=["--recompute-marginal-contribution"],
-                      kwargs={"action": "store_true",
-                              "help": "force marginal contribution to be recomputed even"
-                                      " when it already exists in file for the current "
-                                      "selector"})
 
 RecomputePortfolioSelectorArgument = \
     ArgumentContainer(names=["--recompute-portfolio-selector"],
@@ -502,12 +447,6 @@ UseFeaturesArgument = ArgumentContainer(names=["--use-features"],
 VerboseArgument = ArgumentContainer(names=["--verbose", "-v"],
                                     kwargs={"action": "store_true",
                                             "help": "output status in verbose mode"})
-
-WallClockTimeArgument = \
-    ArgumentContainer(names=["--wallclock-time"],
-                      kwargs={"type": int,
-                              "help": "configuration budget per configurator run in "
-                                      "seconds (wallclock)"})
 
 SolutionVerifierArgument = \
     ArgumentContainer(names=["--solution-verifier"],

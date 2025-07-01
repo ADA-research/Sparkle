@@ -34,12 +34,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstanceSetTestAblationArgument.kwargs)
     parser.add_argument(*ac.ObjectivesArgument.names,
                         **ac.ObjectivesArgument.kwargs)
-    parser.add_argument(*ac.SolverCutOffTimeArgument.names,
-                        **ac.SolverCutOffTimeArgument.kwargs)
-    parser.add_argument(*ac.WallClockTimeArgument.names,
-                        **ac.WallClockTimeArgument.kwargs)
-    parser.add_argument(*ac.NumberOfRunsAblationArgument.names,
-                        **ac.NumberOfRunsAblationArgument.kwargs)
     parser.add_argument(*ac.RacingArgument.names,
                         **ac.RacingArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
@@ -81,18 +75,6 @@ def main(argv: list[str]) -> None:
     if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
             args.objectives, SettingState.CMD_LINE
-        )
-    if args.solver_cutoff_time is not None:
-        gv.settings().set_general_solver_cutoff_time(
-            args.solver_cutoff_time, SettingState.CMD_LINE
-        )
-    if args.wallclock_time is not None:
-        gv.settings().set_smac2_wallclock_time(
-            args.wallclock_time, SettingState.CMD_LINE
-        )
-    if args.number_of_runs is not None:
-        gv.settings().set_configurator_number_of_runs(
-            args.number_of_runs, SettingState.CMD_LINE
         )
     if args.racing is not None:
         gv.settings().set_ablation_racing_flag(
