@@ -8,6 +8,8 @@ We can also run Sparkle on problems with instances that use multiple files. In t
 sparkle initialise
 ```
 
+Afterwards, update the objective in the `Settings/sparkle_settings.ini` (See general section): Replace `PAR10` with `quality`.
+
 ### Add instances
 
 Add instance files in a given directory, without running solvers or feature extractors yet. In addition to the instance files, the directory should contain a file `instances.csv` where each line contains a space separated list of files that together form an instance.
@@ -44,7 +46,7 @@ sparkle compute_features
 ```
 
 ### Run the solvers
-Run the solvers on all instances. For the CCAG (Constrained Covering Array Generation) problem we measure the quality by setting the objective in `Settings/sparkle_settings.ini` to quality.
+Run the solvers on all instances. For the CCAG (Constrained Covering Array Generation) problem we measure the quality by setting the objective in `Settings/sparkle_settings.ini` to quality. Note that you need to set this right after initialising the platform, see the instructions at the top.
 
 ```bash
 sparkle run_solvers --performance-data
@@ -71,7 +73,7 @@ sparkle construct_portfolio_selector
 Run the portfolio selector on a *single* testing instance; the result will be printed to the command line if you add `--run-on local` to the command. We again set the objective to quality. Note: Currently only works for added instances.
 
 ```bash
-sparkle run_portfolio_selector --selection-scenario Output/Selection/MultiClassClassifier_RandomForestClassifier/FastCA_TCA/scenario.txt --instance Examples/Resources/CCAG/Instances/CCAG/Banking1 --run-on local
+sparkle run_portfolio_selector --selection-scenario Output/Selection/MultiClassClassifier_RandomForestClassifier/FastCA_TCA/ --instance Examples/Resources/CCAG/Instances/CCAG/Banking1 --run-on local
 ```
 
 #### Run on an instance set
@@ -82,7 +84,7 @@ Run the portfolio selector on a testing instance *set*. We again set the objecti
 sparkle run_portfolio_selector --selection-scenario Output/Selection/MultiClassClassifier_RandomForestClassifier/FastCA_TCA/scenario.txt --instance Examples/Resources/CCAG/Instances/CCAG/
 ```
 
-#### Generate a report including results on the test set
+#### Generate a report
 
 Wait for the portfolio selector to be done running on the testing instance set
 
@@ -90,10 +92,8 @@ Wait for the portfolio selector to be done running on the testing instance set
 sparkle jobs
 ```
 
-<!-- Generate an experimental report that includes the results on the test set, and as before the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report_For_Test.pdf`. We again set the obejctive to quality.
+And run the generate report command
 
 ```bash
-sparkle generate_report --objectives quality
+sparkle generate report
 ```
-
-By default the `generate_report` command will create a report for the most recent instance set. To generate a report for an older instance set, the desired instance set can be specified with: `--test-case-directory Test_Cases/CCAG2/` -->

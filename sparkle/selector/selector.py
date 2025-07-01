@@ -192,9 +192,8 @@ class SelectionScenario:
             self.feature_data: pd.DataFrame = pd.read_csv(feature_data)
             self.feature_target_path: Path = feature_data
 
-        self.ablation_scenarios = None
+        self.ablation_scenarios: list[SelectionScenario] = []
         if ablate and len(self.performance_data.columns) > 2:
-            self.ablation_scenarios: list[SelectionScenario] = []
             for solver in self.performance_data.columns:
                 solver_key, conf_id = solver.split("_", maxsplit=1)
                 ablate_subdir = Path(f"ablated_{Path(solver).name}")
