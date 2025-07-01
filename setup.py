@@ -1,11 +1,14 @@
 """Setup file for Sparkle."""
-import os
+from pathlib import Path
 from setuptools import setup, find_packages
 from sparkle.about import version
 
+# read the contents of README file
+long_description = (Path(__file__).parent / "README.md").read_text()
+
 setup(name="Sparkle",
       version=version,
-      url="https://github.com/thijssnelleman/Sparkle",
+      url="https://github.com/ADA-research/Sparkle",
       author="Thijs Snelleman",
       author_email="fkt_sparkle@aim.rwth-aachen.de",
       keywords="ai sat planning",
@@ -13,7 +16,7 @@ setup(name="Sparkle",
                   "platform designed to enable the widespread and effective use of PbO "
                   "techniques for improving the state-of-the-art in solving a broad "
                   "range of prominent AI problems, including SAT and AI Planning.",
-      long_description=open("README.MD", "r").read() if os.path.exists("README.MD") else "",
+      long_description=long_description,
       long_description_content_type="text/markdown",
       packages=find_packages(exclude=["tests"]),
       install_requires=[
@@ -35,4 +38,5 @@ setup(name="Sparkle",
           "pylatex==1.4.2",
       ],
       include_package_data=True,
+      # Setup 'sparkle' as a CLI command
       entry_points={"console_scripts": ["sparkle=sparkle.CLI._cli_:main"], },)
