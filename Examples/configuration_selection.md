@@ -90,7 +90,8 @@ sparkle generate report
 Run the portfolio selector on a *single* testing instance; the result will be printed to the command line if you add `--run-on local` to the command.
 
 ```bash
-sparkle run portfolio selector Examples/Resources/Instances/PTN2/plain7824.cnf --run-on local
+sparkle run portfolio selector --selection-scenario Output/Selection/MultiClassClassifier_RandomForestClassifier/PbO-CCSAT-G
+eneric/ --instance Examples/Resources/Instances/PTN2/plain7824.cnf --run-on local
 ```
 
 ### Run on an instance set
@@ -98,16 +99,15 @@ sparkle run portfolio selector Examples/Resources/Instances/PTN2/plain7824.cnf -
 Run the portfolio selector on a testing instance *set*
 
 ```bash
-sparkle run portfolio selector Examples/Resources/Instances/PTN2/
+ sparkle run portfolio selector --selection-scenario Output/Selection/MultiClassClassifier_RandomForestClassifier/PbO-CCSAT-G
+eneric/ --instance-set Examples/Resources/Instances/PTN2/
 sparkle jobs  # Wait for the portfolio selector to be done running on the testing instance set
 ```
 
 #### Generate a report including results on the test set
 
-Generate an experimental report that includes the results on the test set, and as before the experimental procedure and performance information; this will be located at `Output/Selection/Sparkle_Report_For_Test.pdf`
+Generate an experimental report that includes the results on the test set, and as before the experimental procedure and performance information; this will be located at `Output/Analysis/report.pdf`
 
 ```bash
 sparkle generate report
 ```
-
-By default the `generate_report` command will create a report for the most recent instance set. To generate a report for an older instance set, the desired instance set can be specified with: `--test-case-directory Test_Cases/PTN2/`

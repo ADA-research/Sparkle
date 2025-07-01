@@ -19,4 +19,10 @@ def Instance_Set(target: any) -> InstanceSet:
             all([p.suffix in IterableFileInstanceSet.supported_filetypes
                  for p in target.iterdir()]):
         return IterableFileInstanceSet(target)
+    elif not target.exists():  # Resolve suffix
+        alternatives = [p for p in target.parent.iterdir()]
+        for alt in alternatives:
+            if target.name == alt.stem:
+                target = alt
+                break
     return FileInstanceSet(target)

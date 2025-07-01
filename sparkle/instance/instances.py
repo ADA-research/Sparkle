@@ -36,13 +36,13 @@ class InstanceSet:
 
     @property
     def instance_names(self: InstanceSet) -> list[str]:
-        """Get processed instance names for multi-file instances."""
+        """Get processed instance names for instances."""
         return self._instance_names
 
     @property
     def instances(self: InstanceSet) -> list[str]:
-        """Get instance names with relative path for multi-file instances."""
-        return self._instance_paths
+        """Get instance names with relative path."""
+        return [str(p.with_suffix("")) for p in self._instance_paths]
 
     @property
     def name(self: InstanceSet) -> str:

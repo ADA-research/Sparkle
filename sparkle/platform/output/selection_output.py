@@ -84,7 +84,7 @@ class SelectionOutput:
             test_perf = selection_scenario.selector_performance_data.best_performance(
                 exclude_solvers=[
                     s for s in selection_scenario.selector_performance_data.solvers
-                    if s is not SelectionScenario.__selector_solver_name__],
+                    if s != SelectionScenario.__selector_solver_name__],
                 instances=test_set_instances,
                 objective=selection_scenario.objective
             )
