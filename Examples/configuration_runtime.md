@@ -72,13 +72,11 @@ Wait for ablation to be completed
 sparkle jobs
 ```
 
-Generate a report including ablation, and as before the results on the train (and optionally test) set, the experimental procedure and performance information; this will be located in a `Configuration_Reports/` subdirectory for the solver, training set, and optionally test set like `PbO-CCSAT-Generic_PTN/Sparkle-latex-generator-for-configuration/`
+Generate a report including ablation, and as before the results on the train (and optionally test) set, the experimental procedure and performance information; this will be located in `Output/Analysis` directory.
 
 ```bash
 sparkle generate_report
 ```
-
-The ablation section can be suppressed with `--no-ablation` 
 
 ### Run configured solver
 

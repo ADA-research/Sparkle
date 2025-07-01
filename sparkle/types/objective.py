@@ -72,7 +72,8 @@ class PAR(SparkleObjective):
                        SolverStatus.KILLED,
                        SolverStatus.ERROR,
                        SolverStatus.TIMEOUT,
-                       SolverStatus.WRONG}
+                       SolverStatus.WRONG,
+                       SolverStatus.UNKNOWN}
 
     def __init__(self: PAR, k: int = 10,
                  minimise: bool = True,

@@ -2,9 +2,34 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.9.4] - 01/06/2025
+
+### Added
+- Updated SMAC3 to latest version (2.3.1), which now properly measures CPU time vs Runtime/Wallclock time. This is updated in Sparkle to report the Runsolver accurate measurements to SMAC3. [SPRK-373]
+- It is now possible to train a selector over various algorithm configurations [SPRK-373]
+- Sparkle has new CLI command `sparkle check` to assist users in developing Solvers/Instance Sets/Feature Extractors for the platform [SPRK-162]
+
+### Changed
+- Changed the structure of PerformanceDataFrame to now hold algorithm configuration as IDs in a column. The configurations are held in the same file and automatically read and resolved. [SPRK-373]
+- Sparkle supports both .py and .sh solver wrappers and has been updated accordingly [SPRK-162]
+- SparkleExecutable no longer has a 'raw output directory' [SPRK-162]
+- Sparkle generate report command has been refacored to support multiple scenarios in one report [SPRK-161]
+- Sparkle now has scenario definition for Selection [SPRK-161]
+- Updated Plotly and Kaleido to latest versions (6.1.1 and 1.0.0 respectively)
+- Added better support for Multi File instance (sets) [SPRK-352]
+- Sparkle now has modular support for configurators, e.g. they are no longer shipped by default but only downloaded and installed upon request [SPRK-171]
+
+### Fixed
+- Fixed various bugs regarding Solver calls by adding in KILLSIG handlers and updated templates/documentation accordingly [SPRK-162]
+- Fixed bug where default values would override user changes in settings file [SPRK-160]
+- Fixed bug where settings file argument would not be recognised by CLI [SPRK-161]
+
+### [Known issues]
+- IRACE configuration currently does not work as the IRACE .rdata output files cannot be read by R/IRACE.
+
 ## [0.9.3.2] - 13/04/2025
 
-- Bug fix regarding prepend
+- Bug fix regarding Slurm prepend setting
 - Refactor for IRACE configuration
 
 ## [0.9.3.1] - 03/04/2025

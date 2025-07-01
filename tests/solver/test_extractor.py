@@ -2,7 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 import pytest
-from sparkle.solver import Extractor
+from sparkle.selector import Extractor
 from unittest.mock import patch
 
 
@@ -11,7 +11,7 @@ test_dir_2024 = Path(
 )
 test_dir_2012 = Path(
     "Examples/Resources/Extractors/"
-    "SAT-features-competition2012_revised_without_SatELite_sparkle"
+    "SAT-features-competition2012_revised_without_SatELite"
 )
 
 extractor_2012 = Extractor(directory=test_dir_2012)
@@ -28,7 +28,6 @@ def test_extractor_constructor(extractor: Extractor, test_dir: Path) -> None:
     """Test for constructor."""
     assert extractor.directory == test_dir
     assert extractor.name == test_dir.name
-    assert extractor.raw_output_directory == test_dir / "tmp"
     assert extractor.runsolver_exec == test_dir / "runsolver"
     assert extractor._features is None
     assert extractor._feature_groups is None

@@ -11,7 +11,7 @@ from pathlib import Path
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help import snapshot_help as snh
 from sparkle.CLI.help import global_variables as gv
-from sparkle.configurator.implementations.irace import IRACE
+from sparkle.configurator.implementations import IRACE, SMAC2, ParamILS
 from sparkle.platform import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 
@@ -49,46 +49,6 @@ def detect_sparkle_platform_exists(check: callable = all) -> Path:
     return None
 
 
-def initialise_irace() -> int:
-    """Initialise IRACE."""
-    if shutil.which("R") is None:
-        warnings.warn("R is not installed, which is required for the IRACE"
-                      "configurator. Consider installing R.")
-        return 0
-    print("Initialising IRACE ...")
-    for package in IRACE.package_dependencies:
-        package_name = package.split("_")[0]
-        package_check = subprocess.run(["Rscript", "-e",
-                                        f'library("{package_name}")'],
-                                       capture_output=True)
-        if package_check.returncode != 0:  # Package is not installed
-            print(f"\t- Installing {package_name} package (IRACE dependency) ...")
-            dependency_install = subprocess.run([
-                "Rscript", "-e",
-                f'install.packages("{(IRACE.configurator_path / package).absolute()}",'
-                f'lib="{IRACE.configurator_path.absolute()}", repos = NULL)'],
-                capture_output=True)
-            if dependency_install.returncode != 0:
-                print(f"An error occured during the installation of {package_name}:\n",
-                      dependency_install.stdout.decode(), "\n",
-                      dependency_install.stderr.decode(), "\n"
-                      "IRACE installation failed!")
-                return dependency_install.returncode
-    # Install IRACE from tarball
-    irace_install = subprocess.run(
-        ["Rscript", "-e",
-         f'install.packages("{IRACE.configurator_package.absolute()}",'
-         f'lib="{IRACE.configurator_path.absolute()}", repos = NULL)'],
-        capture_output=True)
-    if irace_install.returncode != 0 or not IRACE.configurator_executable.exists():
-        print("An error occured during the installation of IRACE:\n",
-              irace_install.stdout.decode(), "\n",
-              irace_install.stderr.decode())
-        return irace_install.returncode
-    print("IRACE installed!")
-    return 0
-
-
 def check_for_initialise() -> None:
     """Function to check if initialize command was executed and execute it otherwise.
 
@@ -111,12 +71,14 @@ def check_for_initialise() -> None:
 
 
 def initialise_sparkle(save_existing_platform: bool = True,
+                       interactive: bool = False,
                        download_examples: bool = False,
                        rebuild_runsolver: bool = False) -> None:
     """Initialize a new Sparkle platform.
 
     Args:
         save_existing_platform: If present, save the current platform as a snapshot.
+        interactive: Ask for user input or not.
         download_examples: Downloads examples from the Sparkle Github.
             WARNING: May take a some time to complete due to the large amount of data.
         rebuild_runsolver: Will clean the RunSolver executable and rebuild it.
@@ -138,9 +100,6 @@ def initialise_sparkle(save_existing_platform: bool = True,
         print("Settings file does not exist, initializing default settings ...")
         gv.__settings = Settings(Settings.DEFAULT_example_settings_path)
         gv.settings().write_settings_ini(Path(Settings.DEFAULT_settings_path))
-
-    # Initialise latest scenario file
-    gv.ReportingScenario.DEFAULT_reporting_scenario_path.open("w+")
 
     # Initialise the FeatureDataFrame
     FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
@@ -195,13 +154,31 @@ def initialise_sparkle(save_existing_platform: bool = True,
     if shutil.which("java") is None:
         # NOTE: An automatic resolution of Java at this point would be good
         # However, loading modules from Python has thusfar not been successfull.
-        warnings.warn("Could not find Java as an executable! Java 1.8.0_402 is required "
-                      "to use SMAC2 or ParamILS as a configurator. "
-                      "Consider installing Java.")
+        print("WARNING: Could not find Java as an executable! Java 1.8.0_402 is required"
+              " to use SMAC2 or ParamILS as a configurator. Consider installing Java.")
 
-    # Check if IRACE is installed
-    if not IRACE.configurator_executable.exists():
-        initialise_irace()
+    # Check for each configurator that it is available
+    if interactive and not SMAC2.configurator_executable.exists():
+        print("SMAC2 is not installed, would you like to install? (Y/n) ...")
+        if input().lower() == "y":
+            print("Installing SMAC2 ...")
+            SMAC2.download_requirements()
+    if interactive and not ParamILS.configurator_executable.exists():
+        print("ParamILS is not installed, would you like to install? (Y/n) ...")
+        if input().lower() == "y":
+            print("Installing ParamILS ...")
+            ParamILS.download_requirements()
+    if interactive and not IRACE.check_requirements():
+        if shutil.which("R") is None:
+            print("R is not installed, which is required for the IRACE "
+                  "configurator (installation). Consider installing R.")
+        else:
+            print("IRACE is not installed, would you like to install? (Y/n) ...")
+            if input().lower() == "y":
+                print("Installing IRACE ...")
+                IRACE.download_requirements()
+                irace = IRACE()
+                print(f"Installed IRACE version {irace.version}")
 
     if download_examples:
         # Download Sparkle examples from Github
@@ -227,6 +204,7 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
     initialise_sparkle(save_existing_platform=args.no_save,
+                       interactive=True,
                        download_examples=args.download_examples,
                        rebuild_runsolver=args.rebuild_runsolver)
     sys.exit(0)

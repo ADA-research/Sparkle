@@ -31,6 +31,7 @@ def main() -> None:
         sys.exit(1)
     # Support spaces instead of _
     possible_commands = commands()
+    command, command_file = "", Path()
     for i in range(1, min(max_space, len(sys.argv))):
         if "--" in sys.argv[i]:  # Parameter is never part of the command
             break

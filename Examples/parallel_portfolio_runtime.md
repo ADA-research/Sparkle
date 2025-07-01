@@ -43,8 +43,8 @@ sparkle run_parallel_portfolio --instance-path Instances/PTN/ --portfolio-name r
 ### Generate the report
 
 The report details the experimental procedure and performance information. 
-This will be located at `Output/Parallel_Portfolio/Sparkle_Report.pdf`
+This will be located at `Output/Analysis/report.pdf`
 
 ```bash
-sparkle generate_report
+sparkle generate report
 ```

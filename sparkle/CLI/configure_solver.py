@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 """Sparkle command to configure a solver."""
 from __future__ import annotations
+from pathlib import Path
 import argparse
 import sys
-import math
 
 from runrunner import Runner
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help.reporting_scenario import Scenario
-from sparkle.CLI.help.nicknames import resolve_object_name
+from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
 from sparkle.CLI.help import argparse_custom as ac
 
-from sparkle.platform.settings_objects import SettingState
+from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
@@ -38,8 +37,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.TestSetRunAllConfigurationArgument.kwargs)
     parser.add_argument(*ac.ObjectivesArgument.names,
                         **ac.ObjectivesArgument.kwargs)
-    parser.add_argument(*ac.TargetCutOffTimeArgument.names,
-                        **ac.TargetCutOffTimeArgument.kwargs)
+    parser.add_argument(*ac.SolverCutOffTimeArgument.names,
+                        **ac.SolverCutOffTimeArgument.kwargs)
     parser.add_argument(*ac.SolverCallsArgument.names,
                         **ac.SolverCallsArgument.kwargs)
     parser.add_argument(*ac.NumberOfRunsConfigurationArgument.names,
@@ -67,9 +66,9 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
     if args.objectives is not None:
         gv.settings().set_general_sparkle_objectives(
             args.objectives, SettingState.CMD_LINE)
-    if args.target_cutoff_time is not None:
-        gv.settings().set_general_target_cutoff_time(
-            args.target_cutoff_time, SettingState.CMD_LINE)
+    if args.solver_cutoff_time is not None:
+        gv.settings().set_general_solver_cutoff_time(
+            args.solver_cutoff_time, SettingState.CMD_LINE)
     if args.solver_calls is not None:
         gv.settings().set_configurator_solver_calls(
             args.solver_calls, SettingState.CMD_LINE)
@@ -91,8 +90,26 @@ def main(argv: list[str]) -> None:
 
     # Process command line arguments
     args = parser.parse_args(argv)
-
     apply_settings_from_args(args)
+
+    configurator = gv.settings().get_general_sparkle_configurator()
+
+    # Check configurator is available
+    if not configurator.check_requirements(verbose=True):
+        print(f"{configurator.name} is not available. "
+              "Please inspect possible warnings above.")
+        print(f"Would you like to install {configurator.name}? (Y/n)")
+        if input().lower().strip() == "y":
+            configurator.download_requirements()
+        else:
+            sys.exit()
+        if not configurator.check_requirements(verbose=True):
+            raise RuntimeError(f"Failed to install {configurator.name}.")
+        sys.exit(-1)
+
+    # Compare current settings to latest.ini
+    prev_settings = Settings(Path(Settings.DEFAULT_previous_settings_path))
+    Settings.check_settings_changes(gv.settings(), prev_settings)
 
     solver: Solver = resolve_object_name(
         args.solver,
@@ -115,7 +132,6 @@ def main(argv: list[str]) -> None:
     use_features = args.use_features
     run_on = gv.settings().get_run_on()
 
-    configurator = gv.settings().get_general_sparkle_configurator()
     configurator_settings = gv.settings().get_configurator_settings(configurator.name)
 
     sparkle_objectives =\
@@ -123,7 +139,7 @@ def main(argv: list[str]) -> None:
     if len(sparkle_objectives) > 1:
         print(f"WARNING: {configurator.name} does not have multi objective support. "
               f"Only the first objective ({sparkle_objectives[0]}) will be optimised.")
-    configurator_runs = gv.settings().get_configurator_number_of_runs()
+
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
 
     # Check if given objectives are in the data frame
@@ -150,42 +166,20 @@ def main(argv: list[str]) -> None:
             sys.exit(-1)
         configurator_settings.update({"feature_data": feature_data})
 
-    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
-    slurm_prepend = gv.settings().get_slurm_job_prepend()
+    number_of_runs = gv.settings().get_configurator_number_of_runs()
+    output_path = gv.settings().get_configurator_output_path(configurator)
     config_scenario = configurator.scenario_class()(
-        solver, instance_set_train, sparkle_objectives,
-        configurator.output_path, **configurator_settings)
+        solver, instance_set_train, sparkle_objectives, number_of_runs,
+        output_path, **configurator_settings)
 
     # Run the default configuration
-    remaining_jobs = performance_data.get_job_list()
-    relevant_jobs = []
-    for instance, run_id, solver_id in remaining_jobs:
-        # NOTE: This run_id skip will not work if we do multiple runs per configuration
-        if run_id != 1 or solver_id != str(solver.directory):
-            continue
-        configuration = performance_data.get_value(
-            solver_id, instance, sparkle_objectives[0].name, run=run_id,
-            solver_fields=[PerformanceDataFrame.column_configuration])
-        # Only run jobs with the default configuration
-        if not isinstance(configuration, str) and math.isnan(configuration):
-            relevant_jobs.append((instance, run_id, solver_id))
+    default_jobs = [(solver, config_id, instance, run_id)
+                    for solver, config_id, instance, run_id
+                    in performance_data.get_job_list()
+                    if config_id == PerformanceDataFrame.default_configuration]
 
-    # Expand the performance dataframe so it can store the configuration
-    performance_data.add_runs(configurator_runs,
-                              instance_names=[
-                                  str(i) for i in instance_set_train.instance_paths],
-                              initial_values=[PerformanceDataFrame.missing_value,
-                                              PerformanceDataFrame.missing_value,
-                                              {}])
-    if instance_set_test is not None:
-        # Expand the performance dataframe so it can store the test set results of the
-        # found configurations
-        test_set_runs = configurator_runs if args.test_set_run_all_configurations else 1
-        performance_data.add_runs(
-            test_set_runs,
-            instance_names=[str(i) for i in instance_set_test.instance_paths])
-    performance_data.save_csv()
-
+    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
+    slurm_prepend = gv.settings().get_slurm_job_prepend()
     dependency_job_list = configurator.configure(
         scenario=config_scenario,
         data_target=performance_data,
@@ -196,14 +190,19 @@ def main(argv: list[str]) -> None:
         run_on=run_on)
 
     # If we have default configurations that need to be run, schedule them too
-    if len(relevant_jobs) > 0:
-        instances = [job[0] for job in relevant_jobs]
-        runs = list(set([job[1] for job in relevant_jobs]))
+    if default_jobs:
+        # Edit jobs to incorporate file paths
+        instances = []
+        for _, _, instance, _ in default_jobs:
+            instance_path = resolve_instance_name(
+                instance, gv.settings().DEFAULT_instance_dir)
+            instances.append(instance_path)
         default_job = solver.run_performance_dataframe(
-            instances, runs, performance_data,
+            instances, PerformanceDataFrame.default_configuration,
+            performance_data,
             sbatch_options=sbatch_options,
             slurm_prepend=slurm_prepend,
-            cutoff_time=config_scenario.cutoff_time,
+            cutoff_time=config_scenario.solver_cutoff_time,
             log_dir=config_scenario.validation,
             base_dir=sl.caller_log_dir,
             job_name=f"Default Configuration: {solver.name} Validation on "
@@ -211,14 +210,7 @@ def main(argv: list[str]) -> None:
             run_on=run_on)
         dependency_job_list.append(default_job)
 
-    # Update latest scenario
-    gv.latest_scenario().set_config_solver(solver)
-    gv.latest_scenario().set_config_instance_set_train(instance_set_train.directory)
-    gv.latest_scenario().set_configuration_scenario(config_scenario.scenario_file_path)
-    gv.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
-
     if instance_set_test is not None:
-        gv.latest_scenario().set_config_instance_set_test(instance_set_test.directory)
         # Schedule test set jobs
         if args.test_set_run_all_configurations:
             # TODO: Schedule test set runs for all configurations
@@ -227,12 +219,12 @@ def main(argv: list[str]) -> None:
         else:
             # We place the results in the index we just added
             run_index = list(set([performance_data.get_instance_num_runs(str(i))
-                                  for i in instance_set_test.instance_paths]))
+                                  for i in instance_set_test.instance_names]))
             test_set_job = solver.run_performance_dataframe(
                 instance_set_test,
                 run_index,
                 performance_data,
-                cutoff_time=config_scenario.cutoff_time,
+                cutoff_time=config_scenario.solver_cutoff_time,
                 objective=config_scenario.sparkle_objective,
                 train_set=instance_set_train,
                 sbatch_options=sbatch_options,
@@ -244,21 +236,17 @@ def main(argv: list[str]) -> None:
                          f"{instance_set_test.name}",
                 run_on=run_on)
             dependency_job_list.append(test_set_job)
-    else:
-        # Set to default to overwrite possible old path
-        gv.latest_scenario().set_config_instance_set_test()
 
     if run_on == Runner.SLURM:
         job_id_str = ",".join([run.run_id for run in dependency_job_list])
-        print(f"Running configuration through Slurm with job id(s): "
-              f"{job_id_str}")
+        print(f"Running {configurator.name} configuration through Slurm with job "
+              f"id(s): {job_id_str}")
     else:
         print("Running configuration finished!")
 
     # Write used settings to file
     gv.settings().write_used_settings()
     # Write used scenario to file
-    gv.latest_scenario().write_scenario_ini()
     sys.exit(0)
 
 

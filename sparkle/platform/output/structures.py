@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle output structures."""
 from __future__ import annotations
-import sys
 from pathlib import Path
 
 from runrunner.base import Status
@@ -62,13 +61,13 @@ class SelectionPerformance:
             vbs_performance: The performance of the virtual best selector
             objective: The objective (Performance type)
         """
-        if not performance_path.exists():
-            print(f"ERROR: {performance_path} does not exist.")
-            sys.exit(-1)
-        actual_performance_data = PerformanceDataFrame(performance_path)
-        self.vbs_performance = vbs_performance
-        self.actual_performance = actual_performance_data.mean(
+        performance_data = PerformanceDataFrame(performance_path)
+        from sparkle.selector import SelectionScenario
+        self.actual_performance_data = performance_data.get_value(
+            solver=SelectionScenario.__selector_solver_name__,
             objective=objective.name)
+        self.vbs_performance = vbs_performance
+        self.actual_performance = performance_data.mean(objective=objective.name)
         self.metric = objective.name
 
 

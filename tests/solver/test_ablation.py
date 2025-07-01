@@ -2,36 +2,49 @@
 from __future__ import annotations
 from pathlib import Path
 import pytest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 from sparkle.configurator.implementations import SMAC2Scenario
-from sparkle.configurator.ablation import AblationScenario
+from sparkle.configurator import AblationScenario
 from sparkle.solver import Solver
 from sparkle.types.objective import PAR
 from sparkle.instance import Instance_Set
 
 
-solver = Solver(Path("tests/test_files/Solvers/Test-Solver"))
+solver = Solver(Path("tests/test_files/Solvers/Test-Solver").absolute())
 dataset = Instance_Set(Path(
-    "tests/test_files/Instances/Test-Instance-Set"))
+    "tests/test_files/Instances/Test-Instance-Set").absolute())
 objective = PAR(10)
 test_dataset = Instance_Set(Path(
-    "tests/test_files/Instances/Test-Instance-Set"))
-output_directory: Path = Path("Output/ablation_test")
+    "tests/test_files/Instances/Test-Instance-Set").absolute())
 ablation_executable: Path = None
 validation_executable: Path = None
 override_dirs: bool = False
+cutoff_time = 2
 configuration_scenario = SMAC2Scenario(
     solver,
     dataset,
     [objective],
-    Path()
+    1,
+    Path(),
+    solver_cutoff_time=cutoff_time
 )
+cutoff_length = "3"
+concurrent_clis = 4
+best_configuration = {
+    "init_solution": "2",
+    "perform_first_div": "1",
+    "asd": 5,
+    "test_bool": True
+}
+ablation_racing = False
 scenario = AblationScenario(
     configuration_scenario,
     test_dataset,
-    output_directory,
-    override_dirs
+    cutoff_length,
+    concurrent_clis,
+    best_configuration,
+    ablation_racing
 )
 
 
@@ -40,35 +53,21 @@ def test_ablation_scenario_constructor() -> None:
     assert scenario.solver == solver
     assert scenario.train_set == dataset
     assert scenario.test_set == test_dataset
-    assert scenario.output_dir == output_directory
     assert scenario.scenario_name ==\
-        f"{solver.name}_{dataset.name}_{test_dataset.name}"
+        f"ablation_{solver.name}_{dataset.name}_{test_dataset.name}"
     assert scenario.scenario_dir ==\
-        output_directory / scenario.scenario_name
+        configuration_scenario.directory / scenario.scenario_name
     assert scenario.validation_dir == scenario.scenario_dir / "validation"
 
 
-def test_create_configuration_file() -> None:
+def test_create_configuration_file(tmp_path: Path,
+                                   monkeypatch: pytest.MonkeyPatch) -> None:
     """Test for method create_configuration_file."""
-    cutoff_time = 2
-    cutoff_length = "3"
-    concurrent_clis = 4
-    best_configuration = {
-        "init_solution": "2",
-        "perform_first_div": "1",
-        "asd": 5,
-        "test_bool": True
-    }
-    ablation_racing = False
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+    scenario.scenario_dir.mkdir(parents=True, exist_ok=True)
+    scenario.validation_dir.mkdir(parents=True, exist_ok=True)
     validation_config_file = scenario.validation_dir / "ablation_config.txt"
-
-    returned_val = scenario.create_configuration_file(
-        cutoff_time,
-        cutoff_length,
-        concurrent_clis,
-        best_configuration,
-        ablation_racing
-    )
+    returned_val = scenario.create_configuration_file()
 
     assert validation_config_file.exists() is True, (
         "Validation config file does not exist."
@@ -81,7 +80,6 @@ def test_create_configuration_file() -> None:
         for line in validation_config_file.open().readlines()
         for key, value in [line.split("=", 1)]
     }
-
     assert config_dict.get("cutoffTime") == f"{cutoff_time}", (
         "cutoffTime does not match"
     )
@@ -122,8 +120,14 @@ def test_create_configuration_file() -> None:
         (True, "instances_test.txt")
     ]
 )
-def test_create_instance_file(test: bool, file_name: str) -> None:
+def test_create_instance_file(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        test: bool, file_name: str) -> None:
     """Test for method create_instance_file."""
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+    scenario.scenario_dir.mkdir(parents=True, exist_ok=True)
+    scenario.validation_dir.mkdir(parents=True, exist_ok=True)
     main_instance_file = \
         scenario.scenario_dir / file_name
     validation_instance_file = \
@@ -160,14 +164,19 @@ def test_check_for_ablation(output_dir_case: Path, case: str) -> None:
     scenario_check = AblationScenario(
         configuration_scenario,
         test_dataset,
-        output_dir_case,
-        override_dirs
+        cutoff_length,
+        concurrent_clis,
+        best_configuration,
+        ablation_racing
     )
+    # Override table file to check test file
+    scenario_check.table_file =\
+        output_dir_case / scenario_check.table_file.name
     return_val = scenario_check.check_for_ablation()
     if case == "correct":
-        return_val is True
+        assert return_val is True
     else:
-        return_val is False
+        assert return_val is False
 
 
 @pytest.mark.parametrize(
@@ -182,13 +191,19 @@ def test_read_ablation_table(output_dir_case: Path, case: str) -> None:
     scenario_read = AblationScenario(
         configuration_scenario,
         test_dataset,
-        output_dir_case,
-        override_dirs
+        cutoff_length,
+        concurrent_clis,
+        best_configuration,
+        ablation_racing
     )
+    # Override table file to check test file
+    scenario_read.table_file =\
+        output_dir_case / scenario_read.table_file.name
     ablation_table = scenario_read.read_ablation_table()
     if case == "correct":
         for line in ablation_table:
             assert type(line) == list
+            assert len(line) == 5  # Always same length
             for value in line:
                 assert type(value) is str
     else:
@@ -196,25 +211,31 @@ def test_read_ablation_table(output_dir_case: Path, case: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "path, test", [
-        (Instance_Set(Path("tests/test_files/Instances/Test-Instance-Set")), True),
-        (None, False),
+    "test_set", [
+        Instance_Set(Path("tests/test_files/Instances/Test-Instance-Set")),
+        None,
     ]
 )
-def test_submit_ablation(path: Instance_Set, test: bool) -> None:
+@patch("sparkle.configurator.configurator.AblationScenario.check_requirements")
+def test_submit_ablation(
+        mock_requirements: Mock,
+        test_set: Instance_Set) -> None:
     """Test for method submit ablation."""
+    mock_requirements.return_value = True  # Mock requirements to avoid exception
     log_dir = Path("Output/Log")
     scenario_submit = AblationScenario(
         configuration_scenario,
-        path,
-        output_directory,
-        override_dirs
+        test_set,
+        cutoff_length,
+        concurrent_clis,
+        best_configuration,
+        ablation_racing
     )
-    with patch("sparkle.configurator.ablation.rrr.add_to_queue")\
+    with patch("runrunner.add_to_queue")\
             as mock_add_to_queue:
         result = scenario_submit.submit_ablation(log_dir)
 
-        if test:
+        if test_set:
             assert mock_add_to_queue.call_count == 2, (
                 "Expected add_to_queue to be called twice."
             )

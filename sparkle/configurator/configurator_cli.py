@@ -11,7 +11,7 @@ if __name__ == "__main__":
     output_source = Path(args[2])
     output_target = Path(args[3])
     scenario = Path(args[4])
-    run_id = int(args[5])
+    configuration_id = args[5]
     configurator_call = args[6:]
     # 1. Resolve for which Configurator we are standardising
     configurator = implementations.resolve_configurator(configurator_name)
@@ -22,5 +22,5 @@ if __name__ == "__main__":
     configurator.organise_output(output_source=output_source,
                                  output_target=output_target,
                                  scenario=scenario,
-                                 run_id=run_id)
+                                 configuration_id=configuration_id)
     print(f"Organising done! See {output_target} for results.")

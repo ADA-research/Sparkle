@@ -1,21 +1,28 @@
 """Test the run ablation CLI entry point."""
 import pytest
+from unittest.mock import patch, Mock
 from pathlib import Path
 
 from sparkle.CLI import load_snapshot, run_ablation
+from sparkle.configurator import AblationScenario
 
 from tests.CLI import tools as cli_tools
 
 
 @pytest.mark.integration
+@patch("sparkle.configurator.configurator.AblationScenario.check_requirements")
 def test_run_ablation_command(
+        mock_requirements: Mock,
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch) -> None:
     """Test run ablation command."""
+    mock_requirements.return_value = True  # Mock requirements to avoid exception
+    if not AblationScenario.check_requirements():
+        AblationScenario.download_requirements()
     settings_path = cli_tools.get_settings_path()
     snapshot_path = (
         Path("tests") / "CLI" / "test_files"
-        / "snapshot_configured_validated_solver_Pb0-CCSAT-Generic_PTN.zip").absolute()
+        / "snapshot_configured_solver_Pb0-CCSAT-Generic_PTN.zip").absolute()
     solver_pbo_path = (
         Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic").absolute()
     train_set_path = (

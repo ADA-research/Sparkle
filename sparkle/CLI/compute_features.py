@@ -8,13 +8,15 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner, Status, Run
 
-from sparkle.solver import Extractor
+from sparkle.selector import Extractor
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.platform.settings_objects import SettingState
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.structures import FeatureDataFrame
+from sparkle.instance import Instance_Set, InstanceSet
+from sparkle.CLI.help.nicknames import resolve_instance_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -28,7 +30,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.SettingsFileArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
-
     return parser
 
 
@@ -57,6 +58,12 @@ def compute_features(
         feature_data.reset_dataframe()
     jobs = feature_data.remaining_jobs()
 
+    # Lookup all instances to resolve the instance paths later
+    instances: list[InstanceSet] = []
+    for instance_dir in gv.settings().DEFAULT_instance_dir.iterdir():
+        if instance_dir.is_dir():
+            instances.append(Instance_Set(instance_dir))
+
     # If there are no jobs, stop
     if not jobs:
         print("No feature computation jobs to run; stopping execution! To recompute "
@@ -68,9 +75,12 @@ def compute_features(
     instance_paths = set()
     features_core = Path(__file__).parent.resolve() / "core" / "compute_features.py"
     # We create a job for each instance/extractor combination
-    for instance_path, extractor_name, feature_group in jobs:
+    for instance_name, extractor_name, feature_group in jobs:
         extractor_path = gv.settings().DEFAULT_extractor_dir / extractor_name
+        # Pass instances to avoid looking it up for every iteration
+        instance_path = resolve_instance_name(str(instance_name), instances)
         instance_paths.add(instance_path)
+
         cmd = (f"python3 {features_core} "
                f"--instance {instance_path} "
                f"--extractor {extractor_path} "
@@ -90,7 +100,8 @@ def compute_features(
 
     print(f"The number of compute jobs: {len(cmd_list)}")
 
-    parallel_jobs = min(len(cmd_list), gv.settings().get_number_of_jobs_in_parallel())
+    parallel_jobs = min(
+        len(cmd_list), gv.settings().get_number_of_jobs_in_parallel())
     sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
     srun_options = ["-N1", "-n1"] + sbatch_options
     run = rrr.add_to_queue(
@@ -131,8 +142,7 @@ def main(argv: list[str]) -> None:
 
     # Process command line arguments
     args = parser.parse_args(argv)
-
-    if ac.set_by_user(args, "settings_file"):
+    if args.settings_file is not None:
         gv.settings().read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file

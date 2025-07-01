@@ -15,8 +15,7 @@ from sparkle.types import SparkleObjective
 
 class ParamILS(Configurator):
     """Class for ParamILS (Java) configurator."""
-    configurator_path = Path(__file__).parent.parent.parent.resolve() /\
-        "Components/paramils-v3.0.0"
+    configurator_path = Path(__file__).parent / "ParamILS"
     configurator_executable = configurator_path / "paramils"
     target_algorithm = "paramils_target_algorithm.py"
     configurator_target = configurator_path / target_algorithm
@@ -24,21 +23,9 @@ class ParamILS(Configurator):
     version = "3.0.0"
     full_name = "Parameter Iterated Local Search"
 
-    def __init__(self: ParamILS,
-                 base_dir: Path,
-                 output_path: Path) -> None:
-        """Returns the ParamILS (Java) configurator, V3.0.0.
-
-        Args:
-            base_dir: The path where the configurator will be executed in.
-            output_path: The path where the output will be placed.
-        """
-        output_path = output_path / ParamILS.__name__
-        output_path.mkdir(parents=True, exist_ok=True)
+    def __init__(self: ParamILS) -> None:
+        """Returns the ParamILS (Java) configurator, V3.0.0."""
         return super().__init__(
-            output_path=output_path,
-            base_dir=base_dir,
-            tmp_path=output_path / "tmp",
             multi_objective_support=False)
 
     @property
@@ -50,6 +37,41 @@ class ParamILS(Configurator):
     def scenario_class() -> ParamILSScenario:
         """Returns the ParamILS scenario class."""
         return ParamILSScenario
+
+    @staticmethod
+    def check_requirements(verbose: bool = False) -> bool:
+        """Check that ParamILS is installed."""
+        import warnings
+        if shutil.which("java") is None:
+            if verbose:
+                warnings.warn(
+                    "ParamILS requires Java 1.8.0_402, but Java is not installed. "
+                    "Please ensure Java is installed."
+                )
+            return False
+        if not ParamILS.configurator_executable.exists():
+            if verbose:
+                warnings.warn(
+                    "ParamILS executable not found. Please ensure ParamILS is installed "
+                    f"in the expected Path ({ParamILS.configurator_path}).")
+            return False
+        return True
+
+    @staticmethod
+    def download_requirements(
+        paramils_zip_url: str =
+            "https://github.com/ADA-research/Sparkle/raw/refs/heads/"
+            "development/Resources/Configurators/ParamILS-v.3.0.0.zip"
+    ) -> None:
+        """Download ParamILS."""
+        if ParamILS.configurator_executable.exists():
+            return  # Already installed
+        from urllib.request import urlopen
+        import zipfile, io
+        r = urlopen(paramils_zip_url, timeout=60)
+        z = zipfile.ZipFile(io.BytesIO(r.read()))
+        z.extractall(ParamILS.configurator_path)
+        ParamILS.configurator_executable.chmod(0o755)
 
     def configure(self: ParamILS,
                   scenario: ParamILSScenario,
@@ -81,19 +103,22 @@ class ParamILS(Configurator):
                 "Please ensure Java is installed and try again."
             )
         scenario.create_scenario()
+        configuration_ids = scenario.configuration_ids
         # We set the seed over the last n run ids in the dataframe
-        seeds = data_target.run_ids[data_target.num_runs - scenario.number_of_runs:]
+        # TODO: Setting seeds like this is weird and should be inspected.
+        seeds = [i for i in range(scenario.number_of_runs)]
         output = [f"{(scenario.results_directory).absolute()}/"
-                  f"{scenario.name}_seed_{seed}_paramils.txt"
-                  for seed in seeds]
+                  f"{scenario.name}_seed_{config_id}_paramils.txt"
+                  for config_id in configuration_ids]
         # NOTE: Could add --rungroup $dirname to change the created directory name
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{ParamILS.__name__} {output_file} {data_target.csv_filepath} "
-                f"{scenario.scenario_file_path} {seed} "
+                f"{scenario.scenario_file_path} {configuration_id} "
                 f"{ParamILS.configurator_executable.absolute()} "
                 f"--scenario-file {scenario.scenario_file_path} "
                 f"--seed {seed} "
-                for output_file, seed in zip(output, seeds)]
+                for output_file, configuration_id, seed
+                in zip(output, configuration_ids, seeds)]
         if num_parallel_jobs is not None:
             num_parallel_jobs = max(num_parallel_jobs, len(cmds))
         return super().configure(
@@ -103,7 +128,8 @@ class ParamILS(Configurator):
             slurm_prepend=slurm_prepend,
             num_parallel_jobs=num_parallel_jobs,
             scenario=scenario,
-            validation_ids=seeds if validate_after else None,
+            configuration_ids=configuration_ids,
+            validate_after=validate_after,
             sbatch_options=sbatch_options,
             base_dir=base_dir,
             run_on=run_on,
@@ -113,11 +139,10 @@ class ParamILS(Configurator):
     def organise_output(output_source: Path,
                         output_target: Path = None,
                         scenario: ParamILSScenario = None,
-                        run_id: int = None) -> None | dict:
+                        configuration_id: str = None) -> None | dict:
         """Retrieves configurations from SMAC files and places them in output."""
-        from filelock import FileLock
         # Extract from log file
-        configuration = {}
+        configuration = {"configuration_id": configuration_id}
         skipping = True
         for line in output_source.open().readlines():
             if skipping:
@@ -129,31 +154,8 @@ class ParamILS(Configurator):
             variable = line.split(":")[0].strip()
             value = line.split("->")[1].strip()
             configuration[variable] = value
-        if output_target is None or not output_target.exists():
-            return configuration
-        time_stamp = scenario.scenario_file_path.stat().st_mtime
-        configuration["configuration_id"] =\
-            f"{ParamILS.__name__}_{time_stamp}_{run_id}"
-        instance_names = scenario.instance_set.instance_names
-        lock = FileLock(f"{output_target}.lock")
-        with lock.acquire(timeout=60):
-            performance_data = PerformanceDataFrame(output_target)
-            # Resolve absolute path to Solver column
-            solver = [s for s in performance_data.solvers
-                      if Path(s).name == scenario.solver.name][0]
-            # For some reason the instance paths in the instance set are absolute
-            instances = [instance for instance in performance_data.instances
-                         if Path(instance).name in instance_names]
-            # We don't set the seed in the dataframe, as that should be part of the conf
-            performance_data.set_value(
-                value=[str(configuration)],
-                solver=solver,
-                instance=instances,
-                objective=None,
-                run=run_id,
-                solver_fields=[PerformanceDataFrame.column_configuration]
-            )
-            performance_data.save_csv()
+        return Configurator.save_configuration(scenario, configuration_id,
+                                               configuration, output_target)
 
     def get_status_from_logs(self: ParamILS) -> None:
         """Method to scan the log files of the configurator for warnings."""
@@ -167,11 +169,11 @@ class ParamILSScenario(SMAC2Scenario):
                  solver: Solver,
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
+                 number_of_runs: int,
                  parent_directory: Path,
-                 number_of_runs: int = None,
                  solver_calls: int = None,
                  max_iterations: int = None,
-                 cutoff_time: int = None,
+                 solver_cutoff_time: int = None,
                  cli_cores: int = None,
                  use_cpu_time_in_tunertime: bool = None,
                  feature_data: FeatureDataFrame | Path = None,
@@ -196,8 +198,8 @@ class ParamILSScenario(SMAC2Scenario):
                 configuration run
             max_iterations: The maximum number of iterations allowed for each
                 configuration run. [iteration-limit, numIterations, numberOfIterations]
-            cutoff_time: The maximum number of seconds allowed for each
-                configuration run. [time-limit, cpu-time, wallclock-time]
+            solver_cutoff_time: The maximum number of seconds allowed for each
+                Solver call.
             cli_cores: The maximum number of cores allowed for each
                 configuration run.
             use_cpu_time_in_tunertime: Whether to use cpu_time in the tuner
@@ -211,9 +213,9 @@ class ParamILSScenario(SMAC2Scenario):
             max_runs: The maximum number of runs allowed for a single configuration.
             random_restart: The probability to restart from a random configuration.
         """
-        super().__init__(solver, instance_set, sparkle_objectives, parent_directory,
-                         number_of_runs, solver_calls, max_iterations, None,
-                         None, cutoff_time, None, cli_cores,
+        super().__init__(solver, instance_set, sparkle_objectives, number_of_runs,
+                         parent_directory, solver_calls, max_iterations, None,
+                         None, solver_cutoff_time, None, cli_cores,
                          use_cpu_time_in_tunertime, feature_data)
         self.solver = solver
         self.instance_set = instance_set
@@ -225,8 +227,14 @@ class ParamILSScenario(SMAC2Scenario):
         self.max_runs = max_runs
         self.random_restart = random_restart
 
+    @property
+    def configurator(self: ParamILSScenario) -> ParamILS:
+        """Return the type of configurator the scenario belongs to."""
+        return ParamILS
+
     def create_scenario_file(self: ParamILSScenario) -> Path:
         """Create a file with the configuration scenario."""
+        super().create_scenario_file()
         from sparkle.tools.parameters import PCSConvention
         scenario_file = super().create_scenario_file(ParamILS.configurator_target,
                                                      PCSConvention.ParamILS)
@@ -282,7 +290,7 @@ class ParamILSScenario(SMAC2Scenario):
         del config["check_instances_exist"]
 
         if "cutoffTime" in config:
-            config["cutoff_time"] = config.pop("cutoffTime")
+            config["solver_cutoff_time"] = config.pop("cutoffTime")
         if "runcount-limit" in config:
             config["solver_calls"] = config.pop("runcount-limit")
         if "approach" in config:
@@ -296,7 +304,7 @@ class ParamILSScenario(SMAC2Scenario):
         return ParamILSScenario(solver,
                                 instance_set,
                                 [objective],
+                                number_of_runs,
                                 scenario_file.parent.parent,
-                                number_of_runs=number_of_runs,
                                 **config
                                 )

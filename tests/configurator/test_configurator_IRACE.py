@@ -7,8 +7,6 @@ from unittest.mock import Mock, patch, ANY
 
 import runrunner as rrr
 
-from sparkle.CLI import initialise
-
 from sparkle.configurator.implementations import IRACE, IRACEScenario
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
@@ -25,28 +23,20 @@ def test_irace_configure(mock_add_to_queue: Mock) -> None:
     if shutil.which("Rscript") is None:
         warnings.warn("R is not installed, which is required for the IRACE")
         return
-    if not IRACE.configurator_executable.exists():
-        returncode = initialise.initialise_irace()  # Ensure IRACE is compiled
-        if returncode != 0:
-            warnings.warn("Failed to install IRACE, skipping test")
-            return
+    if not IRACE.check_requirements():
+        IRACE.download_requirements()
     sparkle_objective = PAR(10)
     test_files = Path("tests", "test_files")
     base_dir = test_files / "tmp"
-    output = Path("Output")
-    irace_conf = IRACE(output, base_dir)
+    irace_conf = IRACE()
     train_set = Instance_Set(test_files / "Instances/Train-Instance-Set")
     solver = Solver(test_files / "Solvers/Test-Solver")
     conf_scenario = IRACEScenario(
-        solver, train_set, [sparkle_objective], base_dir,
-        number_of_runs=2,
+        solver, train_set, [sparkle_objective], 2, base_dir,
         solver_calls=25,
-        cutoff_time=60,
+        solver_cutoff_time=60,
         max_time=200,
     )
-    assert irace_conf.output_path == output / IRACE.__name__
-    assert irace_conf.base_dir == base_dir
-    assert irace_conf.tmp_path == output / IRACE.__name__ / "tmp"
     assert irace_conf.multiobjective is False
 
     if cli_tools.get_cluster_name() != "kathleen":
@@ -60,7 +50,9 @@ def test_irace_configure(mock_add_to_queue: Mock) -> None:
     cmds = ANY
     outputs = ANY
     data_target = PerformanceDataFrame(
-        Path("tests/test_files/performance/example_data_MO.csv"))
+        Path("tests/test_files/performance/example_empty_runs.csv"))
+    # Make a copy to avoid writing
+    data_target = data_target.clone(Path("tmp-pdf.csv"))
 
     runs = irace_conf.configure(conf_scenario,
                                 data_target=data_target,
@@ -78,6 +70,7 @@ def test_irace_configure(mock_add_to_queue: Mock) -> None:
         prepend=None,
     )
     assert runs == [None]
+    data_target.csv_filepath.unlink()
 
 
 def test_irace_organise_output(tmp_path: Path,
@@ -91,11 +84,8 @@ def test_irace_organise_output(tmp_path: Path,
     source_path = Path("tests/test_files/Configuration/"
                        "test_output_irace.Rdata").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
-    if not IRACE.configurator_executable.exists():
-        returncode = initialise.initialise_irace()  # Ensure IRACE is compiled
-        if returncode != 0:
-            warnings.warn("Failed to install IRACE, skipping test")
-            return
+    if not IRACE.check_requirements():
+        IRACE.download_requirements()  # Ensure IRACE is installed
     assert IRACE.organise_output(source_path, None, None, 1) == {
         "init_solution": "1", "perform_pac": "0", "perform_first_div": "1",
         "perform_double_cc": "1", "perform_aspiration": "1",
@@ -107,20 +97,19 @@ def test_irace_organise_output(tmp_path: Path,
 def test_irace_scenario_file(tmp_path: Path,
                              monkeypatch: pytest.MonkeyPatch) -> None:
     """Test IRACE scenario file creation."""
-    if cli_tools.get_cluster_name() != "kathleen":
-        # Test currently does not work on Github Actions due missing packages
+    if shutil.which("R") is None:
+        # Test requires R to be present
         return
+    if not IRACE.check_requirements():  # Ensure IRACE is installed
+        IRACE.download_requirements()
     solver = Solver(Path("tests/test_files/Solvers/Test-Solver").absolute())
     set = Instance_Set(Path("tests/test_files/Instances/Train-Instance-Set").absolute())
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
-    if not IRACE.configurator_executable.exists():
-        returncode = initialise.initialise_irace()  # Ensure IRACE is compiled
-        if returncode != 0:
-            warnings.warn("Failed to install IRACE, skipping test")
-            return
+    if not IRACE.check_requirements():  # Ensure IRACE is installed
+        IRACE.download_requirements()
     obj_par, obj_acc = resolve_objective("PAR10"), resolve_objective("accuray:max")
-    scenario = IRACEScenario(solver, set, [obj_par, obj_acc], Path("irace_scenario"),
-                             number_of_runs=2, solver_calls=2, cutoff_time=2)
+    scenario = IRACEScenario(solver, set, [obj_par, obj_acc], 2, Path("irace_scenario"),
+                             solver_calls=2, solver_cutoff_time=2)
     scenario.create_scenario()
     # TODO: Add file comparison, requires variables/regex to match
 
@@ -135,6 +124,6 @@ def test_irace_scenario_from_file() -> None:
     assert scenario.solver.name == solver.name
     assert scenario.instance_set.name == set.name
     assert scenario.solver_calls is None
-    assert scenario.cutoff_time == 60
+    assert scenario.solver_cutoff_time == 60
     assert scenario.max_time == 1750
     assert scenario.sparkle_objective.name == "PAR10"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.9.3
+# Auto-Generated .sh files from the original .md by Sparkle 0.9.4
 
 ## Running a Parallel Portfolio
 # In this tutorial we will measure the runtime performance of several algorithms in parallel. The general idea is that we consider the algorithms as a portfolio that we run in parallel (hence the name) and terminate all running algorithms once a solution is found.
@@ -38,6 +38,6 @@ sparkle run_parallel_portfolio --instance-path Instances/PTN/ --portfolio-name r
 ### Generate the report
 
 # The report details the experimental procedure and performance information. 
-# This will be located at `Output/Parallel_Portfolio/Sparkle_Report.pdf`
+# This will be located at `Output/Analysis/report.pdf`
 
-sparkle generate_report
+sparkle generate report

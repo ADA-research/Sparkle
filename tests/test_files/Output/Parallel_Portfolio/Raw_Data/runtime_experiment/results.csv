@@ -1,0 +1,14 @@
+Solver,,,Examples/Resources/Solvers/CSCCSat,Examples/Resources/Solvers/CSCCSat,Examples/Resources/Solvers/MiniSAT,Examples/Resources/Solvers/MiniSAT,Examples/Resources/Solvers/PbO-CCSAT-Generic,Examples/Resources/Solvers/PbO-CCSAT-Generic
+Configuration,,,Default,Default,Default,Default,Default,Default
+Meta,,,Seed,Value,Seed,Value,Seed,Value
+Objective,Instance,Run,,,,,,
+PAR10,train_instance_1,1,2188290601.0,600,295373658.0,600,4020869660.0,600
+cpu_time:metric,train_instance_1,1,2188290601.0,64,295373658.0,64,4020869660.0,64
+memory:metric,train_instance_1,1,2188290601.0,9.223372036854776e+18,295373658.0,9.223372036854776e+18,4020869660.0,9.223372036854776e+18
+status:metric,train_instance_1,1,2188290601.0,UNKNOWN,295373658.0,UNKNOWN,4020869660.0,UNKNOWN
+wall_time:metric,train_instance_1,1,2188290601.0,64,295373658.0,64,4020869660.0,64
+
+$Solver,configuration_id,Configuration
+$Examples/Resources/Solvers/CSCCSat,Default,{}
+$Examples/Resources/Solvers/MiniSAT,Default,{}
+$Examples/Resources/Solvers/PbO-CCSAT-Generic,Default,{}

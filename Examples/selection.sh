@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Auto-Generated .sh files from the original .md by Sparkle 0.9.3
+# Auto-Generated .sh files from the original .md by Sparkle 0.9.4
 
 ## Algorithm Selection
 
@@ -27,7 +27,7 @@ sparkle add solver Examples/Resources/Solvers/MiniSAT/
 ### Add feature extractor
 # To run the selector, we need certain features to represent our instances. To that end, we add a feature extractor to the platform that creates vector representations of our instances.
 
-sparkle add feature extractor Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/
+sparkle add feature extractor Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite/
 
 ### Compute features
 # Now we can run our features with the following command:
@@ -61,7 +61,7 @@ sparkle generate report
 
 # Run the portfolio selector on a *single* testing instance; the result will be printed to the command line if you add `--run-on local` to the command.
 
-sparkle run portfolio selector Examples/Resources/Instances/PTN2/plain7824.cnf --run-on local
+sparkle run portfolio selector --selection-scenario Output/Selection/MultiClassClassifier_RandomForestClassifier/CSCCSat_MiniSAT_PbO-CCSAT-Generic/ --instance-set Examples/Resources/Instances/PTN2/
 
 ### Run on an instance set
 
@@ -72,17 +72,15 @@ sparkle jobs  # Wait for the portfolio selector to be done running on the testin
 
 #### Generate a report including results on the test set
 
-# Generate an experimental report that includes the results on the test set, and as before the experimental procedure and performance information; this will be located at `Output/Selection/Sparkle_Report_For_Test.pdf`
+# Generate an experimental report that includes the results on the test set, and as before the experimental procedure and performance information; this will be located at `Output/Analysis/report.pdf`
 
 sparkle generate report
-
-# By default the `generate_report` command will create a report for the most recent instance set. To generate a report for an older instance set, the desired instance set can be specified with: `--test-case-directory Test_Cases/PTN2/`
 
 ### Comparing against SATZilla 2024
 
 # If you wish to compare two feature extractors against one another, you need to remove the previous extractor from the platform (Or create a new platform from scratch) by running:
 
-sparkle remove feature extractor SAT-features-competition2012_revised_without_SatELite_sparkle
+sparkle remove feature extractor SAT-features-competition2012_revised_without_SatELite
 
 # Otherwise, Sparkle will interpret adding the other feature extractor as creating a combined feature vector per instance from all present extractors in Sparkle. Now we can add SATZilla 2024 from the Examples directory
 # Note that this feature extractor requires GCC (any version, tested with 13.2.0) to run.

@@ -13,6 +13,15 @@ def parse_commandline_dict(args: list[str]) -> dict:
     return ast.literal_eval(dict_str)
 
 
+def parse_instance(instance_str: str) -> Path | list[Path]:
+    """Handles the parsing of multi file instances."""
+    instance_str = instance_str.removeprefix("[")
+    instance_str = instance_str.removesuffix("]")
+    instance_list = instance_str.split(",")
+    instance_list = [inst_str.strip(' "') for inst_str in instance_list]
+    return Path(instance_list[0]) if len(instance_list) == 1 else instance_list
+
+
 def parse_solver_wrapper_args(args: list[str]) -> dict[Any]:
     """Parse the arguments passed to the solver wrapper.
 
@@ -27,24 +36,12 @@ def parse_solver_wrapper_args(args: list[str]) -> dict[Any]:
 
     # Some data needs specific formatting
     args_dict["solver_dir"] = Path(args_dict["solver_dir"])
-    args_dict["instance"] = Path(args_dict["instance"])
+    instance = args_dict["instance"]
+    args_dict["instance"] = parse_instance(instance)
     args_dict["seed"] = int(args_dict["seed"])
     args_dict["objectives"] = [resolve_objective(name)
                                for name in args_dict["objectives"].split(",")]
     args_dict["cutoff_time"] = float(args_dict["cutoff_time"])
-
-    if "config_path" in args_dict:
-        # The arguments were not directly given and must be parsed from a file
-        config_str = Path(args_dict["config_path"]).open("r")\
-            .readlines()[args_dict["seed"]]
-        # Extract the args without any quotes
-        config_split = [arg.strip().replace("'", "").replace('"', "").strip("-")
-                        for arg in config_str.split(" -") if arg.strip() != ""]
-        for arg in config_split:
-            varname, value = arg.strip("'").strip('"').split(" ", maxsplit=1)
-            args_dict[varname] = value
-        del args_dict["config_path"]
-
     return args_dict
 
 

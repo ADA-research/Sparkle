@@ -25,39 +25,38 @@ class TestConfiguratorSMAC2(TestCase):
         sparkle_objective = PAR(10)
         self.test_files = Path("tests", "test_files")
         self.base_dir = self.test_files / "tmp"
-        output = Path("Output")
-        self.smac2_conf = SMAC2(self.base_dir, output)
+        self.smac2_conf = SMAC2()
         self.train_set = Instance_Set(self.test_files / "Instances/Train-Instance-Set")
         self.solver = Solver(self.test_files / "Solvers/Test-Solver")
         self.conf_scenario = SMAC2Scenario(
-            self.solver, self.train_set, [sparkle_objective], self.base_dir,
-            number_of_runs=2,
+            self.solver, self.train_set, [sparkle_objective], 2, self.base_dir,
             solver_calls=25,
             wallclock_time=80,
-            cutoff_time=60,
+            solver_cutoff_time=60,
             target_cutoff_length=10,
         )
-        assert self.smac2_conf.base_dir == self.base_dir
-        assert self.smac2_conf.output_path == output / SMAC2.__name__
         assert self.smac2_conf.multiobjective is False
-        assert self.smac2_conf.tmp_path == output / SMAC2.__name__ / "tmp"
 
-    @patch("shutil.which")
+    @patch("sparkle.configurator.implementations.SMAC2.check_requirements")
     @patch("runrunner.add_to_queue")
     def test_smac2_configure(self: TestConfiguratorSMAC2,
                              mock_add_to_queue: Mock,
-                             mock_which: Mock) -> None:
+                             mock_requirements: Mock) -> None:
         """Testing configure call of SMAC2."""
         # Testing without validation afterwards
-        # Mock shlex to avoid Sparkle throwing an exception because Java is not loaded
-        mock_which.return_value("Java")
+        # Mock requirements to avoid throwing an exception
+        mock_requirements.return_value = True
         mock_add_to_queue.return_value = None
 
         # We currently cannot test these strings as they are using absolute paths
         expected_cmds = ANY
         expected_outputs = ANY
+
+        # Make a copy so we don't modify the original
         data_target = PerformanceDataFrame(
-            Path("tests/test_files/performance/example_data_MO.csv"))
+            Path("tests/test_files/performance/example_empty_runs.csv"))
+        # TODO: Make this all happen in a tmp dir so we don't have to unlink
+        data_target = data_target.clone(Path("tmp-pdf.csv"))
 
         runs = self.smac2_conf.configure(self.conf_scenario,
                                          data_target=data_target,
@@ -75,8 +74,9 @@ class TestConfiguratorSMAC2(TestCase):
             prepend=None,
         )
         assert runs == [None]
-
         # TODO: Test with validation_after=True
+        # TODO: Make this all happen in a tmp dir so we don't have to unlink
+        data_target.csv_filepath.unlink()
 
     def test_smac2_organise_output(self: TestConfiguratorSMAC2) -> None:
         """Testing SMAC2 ability to retrieve output from raw file."""
@@ -89,7 +89,8 @@ class TestConfiguratorSMAC2(TestCase):
             "perform_double_cc": "0", "perform_first_div": "0", "perform_pac": "1",
             "prob_pac": "0.005730374136488115", "q_swt": "0.6807207179674418",
             "sel_clause_div": "1", "sel_clause_weight_scheme": "1",
-            "sel_var_break_tie_greedy": "4", "sel_var_div": "2", "threshold_swt": "32"}
+            "sel_var_break_tie_greedy": "4", "sel_var_div": "2", "threshold_swt": "32",
+            "configuration_id": 1}
 
     def test_smac2_get_status_from_logs(self: TestConfiguratorSMAC2) -> None:
         """Testing status retrievel from logs."""
@@ -118,15 +119,15 @@ class TestConfigurationScenarioSMAC2(TestCase):
         self.cutoff_time = 60
         self.cutoff_length = "max"
         self.sparkle_objective = PAR(10)
-        self.configurator = SMAC2(Path(), Path())
+        self.configurator = SMAC2()
         self.scenario = SMAC2Scenario(
             solver=self.solver,
             instance_set=self.instance_set,
             sparkle_objectives=[self.sparkle_objective],
-            parent_directory=self.parent_directory,
             number_of_runs=self.run_number,
+            parent_directory=self.parent_directory,
             wallclock_time=self.wallclock_time,
-            cutoff_time=self.cutoff_time,
+            solver_cutoff_time=self.cutoff_time,
             target_cutoff_length=self.cutoff_length)
 
     def tearDown(self: TestConfigurationScenarioSMAC2) -> None:
@@ -163,4 +164,4 @@ class TestConfigurationScenarioSMAC2(TestCase):
         self.assertEqual(scenario.instance_set.name, "PTN")
         self.assertEqual(scenario.sparkle_objectives[0].name, "PAR10")
         self.assertEqual(scenario.wallclock_time, 600)
-        self.assertEqual(scenario.cutoff_time, 60)
+        self.assertEqual(scenario.solver_cutoff_time, 60)

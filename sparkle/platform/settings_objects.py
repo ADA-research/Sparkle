@@ -37,13 +37,19 @@ class Settings:
     analysis_dir = Path("Analysis")
     DEFAULT_settings_dir = Path("Settings")
     __settings_file = Path("sparkle_settings.ini")
+    __latest_settings_file = Path("latest.ini")
 
     # Default settings path
     DEFAULT_settings_path = PurePath(cwd_prefix / DEFAULT_settings_dir / __settings_file)
+    DEFAULT_previous_settings_path =\
+        PurePath(cwd_prefix / DEFAULT_settings_dir / __latest_settings_file)
     DEFAULT_reference_dir = DEFAULT_settings_dir / "Reference_Lists"
 
     # Default library pathing
     DEFAULT_components = lib_prefix / "Components"
+
+    # Report Component: Bilbiography
+    bibliography_path = DEFAULT_components / "latex_source" / "report.bib"
 
     # Example settings path
     DEFAULT_example_settings_path = PurePath(DEFAULT_components / "sparkle_settings.ini")
@@ -56,10 +62,6 @@ class Settings:
     DEFAULT_ablation_dir = DEFAULT_components / "ablationAnalysis-0.9.4"
     DEFAULT_ablation_exec = DEFAULT_ablation_dir / "ablationAnalysis"
     DEFAULT_ablation_validation_exec = DEFAULT_ablation_dir / "ablationValidation"
-
-    # Report component
-    DEFAULT_latex_source = DEFAULT_components / "Sparkle-latex-source"
-    DEFAULT_latex_bib = DEFAULT_latex_source / "SparkleReport.bib"
 
     # Default input directory pathing
     DEFAULT_solver_dir = cwd_prefix / "Solvers"
@@ -77,14 +79,7 @@ class Settings:
     DEFAULT_log_output = DEFAULT_output / "Log"
 
     # Default output subdirs
-    DEFAULT_configuration_output_raw = DEFAULT_configuration_output / rawdata_dir
-    DEFAULT_configuration_output_analysis = DEFAULT_configuration_output / analysis_dir
-    DEFAULT_selection_output_raw = DEFAULT_selection_output / rawdata_dir
-    DEFAULT_selection_output_analysis = DEFAULT_selection_output / analysis_dir
-    DEFAULT_parallel_portfolio_output_raw =\
-        DEFAULT_parallel_portfolio_output / rawdata_dir
-    DEFAULT_parallel_portfolio_output_analysis =\
-        DEFAULT_parallel_portfolio_output / analysis_dir
+    DEFAULT_output_analysis = DEFAULT_output / analysis_dir
 
     # Old default output dirs which should be part of something else
     DEFAULT_feature_data = DEFAULT_output / "Feature_Data"
@@ -95,6 +90,7 @@ class Settings:
         DEFAULT_solver_dir, DEFAULT_instance_dir, DEFAULT_extractor_dir,
         DEFAULT_output, DEFAULT_configuration_output,
         DEFAULT_selection_output,
+        DEFAULT_output_analysis,
         DEFAULT_tmp_output, DEFAULT_log_output,
         DEFAULT_feature_data, DEFAULT_performance_data,
         DEFAULT_settings_dir, DEFAULT_reference_dir,
@@ -109,7 +105,7 @@ class Settings:
     # Constant default values
     DEFAULT_general_sparkle_objective = PAR(10)
     DEFAULT_general_sparkle_configurator = cim.SMAC2.__name__
-    DEFAULT_general_target_cutoff_time = 60
+    DEFAULT_general_solver_cutoff_time = 60
     DEFAULT_general_extractor_cutoff_time = 60
     DEFAULT_number_of_jobs_in_parallel = 25
     DEFAULT_general_verbosity = VerbosityLevel.STANDARD
@@ -180,7 +176,7 @@ class Settings:
         # Setting flags
         self.__general_sparkle_objective_set = SettingState.NOT_SET
         self.__general_sparkle_configurator_set = SettingState.NOT_SET
-        self.__general_target_cutoff_time_set = SettingState.NOT_SET
+        self.__general_solver_cutoff_time_set = SettingState.NOT_SET
         self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
         self.__general_verbosity_set = SettingState.NOT_SET
         self.__general_check_interval_set = SettingState.NOT_SET
@@ -275,12 +271,12 @@ class Settings:
                     self.set_general_sparkle_configurator(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ("target_cutoff_time",
+            option_names = ("solver_cutoff_time", "target_cutoff_time",
                             "cutoff_time_each_solver_call")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
-                    self.set_general_target_cutoff_time(value, state)
+                    self.set_general_solver_cutoff_time(value, state)
                     file_settings.remove_option(section, option)
 
             option_names = ("extractor_cutoff_time",
@@ -765,33 +761,34 @@ class Settings:
             configurator_subclass =\
                 cim.resolve_configurator(self.__settings["general"]["configurator"])
             if configurator_subclass is not None:
-                self.__general_sparkle_configurator = configurator_subclass(
-                    base_dir=Path(),
-                    output_path=Settings.DEFAULT_configuration_output_raw)
+                self.__general_sparkle_configurator = configurator_subclass()
             else:
                 print("WARNING: Configurator class name not recognised: "
                       f'{self.__settings["general"]["configurator"]}. '
                       "Configurator not set.")
         return self.__general_sparkle_configurator
 
-    def set_general_target_cutoff_time(
-            self: Settings, value: int = DEFAULT_general_target_cutoff_time,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the cutoff time in seconds for target algorithms."""
-        section = "general"
-        name = "target_cutoff_time"
+    def get_configurator_output_path(self: Settings, configurator: Configurator) -> Path:
+        """Return the configurator output path."""
+        return self.DEFAULT_configuration_output / configurator.name
 
+    def set_general_solver_cutoff_time(
+            self: Settings, value: int = DEFAULT_general_solver_cutoff_time,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the cutoff time in seconds for Solver."""
+        section = "general"
+        name = "solver_cutoff_time"
         if value is not None and self.__check_setting_state(
-                self.__general_target_cutoff_time_set, origin, name):
+                self.__general_solver_cutoff_time_set, origin, name):
             self.__init_section(section)
-            self.__general_target_cutoff_time_set = origin
+            self.__general_solver_cutoff_time_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_general_target_cutoff_time(self: Settings) -> int:
-        """Return the cutoff time in seconds for target algorithms."""
-        if self.__general_target_cutoff_time_set == SettingState.NOT_SET:
-            self.set_general_target_cutoff_time()
-        return int(self.__settings["general"]["target_cutoff_time"])
+    def get_general_solver_cutoff_time(self: Settings) -> int:
+        """Return the cutoff time in seconds for Solvers."""
+        if self.__general_solver_cutoff_time_set == SettingState.NOT_SET:
+            self.set_general_solver_cutoff_time()
+        return int(self.__settings["general"]["solver_cutoff_time"])
 
     def set_general_extractor_cutoff_time(
             self: Settings, value: int = DEFAULT_general_extractor_cutoff_time,
@@ -880,9 +877,8 @@ class Settings:
                                   configurator_name: str) -> dict[str, any]:
         """Return the configurator settings."""
         configurator_settings = {
-            "number_of_runs": self.get_configurator_number_of_runs(),
             "solver_calls": self.get_configurator_solver_calls(),
-            "cutoff_time": self.get_general_target_cutoff_time(),
+            "solver_cutoff_time": self.get_general_solver_cutoff_time(),
             "max_iterations": self.get_configurator_max_iterations()
         }
         # In the settings below, we default to the configurator general settings if no
@@ -1916,13 +1912,13 @@ class Settings:
         prev_sections_set = set(prev_dict.keys())
         sections_removed = prev_sections_set - cur_sections_set
         if sections_removed:
-            print("Warning: the following sections have been removed:")
+            print("[INFO] The following sections have been removed:")
             for section in sections_removed:
                 print(f"  - Section '{section}'")
 
         sections_added = cur_sections_set - prev_sections_set
         if sections_added:
-            print("Warning: the following sections have been added:")
+            print("[INFO] The following sections have been added:")
             for section in sections_added:
                 print(f"  - Section '{section}'")
 
@@ -1940,7 +1936,7 @@ class Settings:
                 if cur_val is not None and cur_val != prev_val:
                     # Have we printed the initial warning?
                     if not option_changed:
-                        print("Warning: The following attributes/options have changed:")
+                        print("[INFO] The following attributes/options have changed:")
                         option_changed = True
 
                     # do we have yet to print the section?

@@ -19,30 +19,16 @@ from sparkle.types import SparkleObjective, resolve_objective
 
 class SMAC2(Configurator):
     """Class for SMAC2 (Java) configurator."""
-    configurator_path = Path(__file__).parent.parent.parent.resolve() /\
-        "Components/smac2-v2.10.03-master-778"
+    configurator_path = Path(__file__).parent.resolve() / "SMAC2"
     configurator_executable = configurator_path / "smac"
     configurator_target = configurator_path / "smac2_target_algorithm.py"
 
-    version = "2.10.03"
     full_name = "Sequential Model-based Algorithm Configuration"
+    version = "2.10.03"
 
-    def __init__(self: SMAC2,
-                 base_dir: Path,
-                 output_path: Path) -> None:
-        """Returns the SMAC2 configurator, Java SMAC V2.10.03.
-
-        Args:
-            objectives: The objectives to optimize. Only supports one objective.
-            base_dir: The path where the configurator will be executed in.
-            output_path: The path where the output will be placed.
-        """
-        output_path = output_path / SMAC2.__name__
-        output_path.mkdir(parents=True, exist_ok=True)
+    def __init__(self: SMAC2) -> None:
+        """Returns the SMAC2 configurator, Java SMAC V2.10.03."""
         return super().__init__(
-            output_path=output_path,
-            base_dir=base_dir,
-            tmp_path=output_path / "tmp",
             multi_objective_support=False)
 
     @property
@@ -54,6 +40,39 @@ class SMAC2(Configurator):
     def scenario_class() -> ConfigurationScenario:
         """Returns the SMAC2 scenario class."""
         return SMAC2Scenario
+
+    @staticmethod
+    def check_requirements(verbose: bool = False) -> bool:
+        """Check that SMAC2 is installed."""
+        import warnings
+        if no_java := shutil.which("java") is None:
+            if verbose:
+                warnings.warn(
+                    "SMAC2 requires Java 1.8.0_402, but Java is not installed. "
+                    "Please ensure Java is installed."
+                )
+        if no_smac := not SMAC2.configurator_executable.exists():
+            if verbose:
+                warnings.warn(
+                    "SMAC2 executable not found. Please ensure SMAC2 is installed "
+                    f"in the expected Path ({SMAC2.configurator_path}).")
+        return not (no_java or no_smac)
+
+    @staticmethod
+    def download_requirements(
+        smac2_zip_url: str = "https://github.com/ADA-research/Sparkle/raw/refs/heads/"
+                             "development/Resources/Configurators/SMAC2-v2.10.03.zip"
+    ) -> None:
+        """Download SMAC2."""
+        if SMAC2.configurator_executable.exists():
+            return  # Already installed
+        from urllib.request import urlopen
+        import zipfile, io
+        r = urlopen(smac2_zip_url, timeout=60)
+        z = zipfile.ZipFile(io.BytesIO(r.read()))
+        z.extractall(SMAC2.configurator_path)
+        # Ensure execution rights
+        SMAC2.configurator_executable.chmod(0o755)
 
     def configure(self: SMAC2,
                   scenario: SMAC2Scenario,
@@ -79,24 +98,23 @@ class SMAC2(Configurator):
         Returns:
             A RunRunner Run object.
         """
-        if shutil.which("java") is None:
-            raise RuntimeError(
-                "SMAC2 requires Java 1.8.0_402, but Java is not installed. "
-                "Please ensure Java is installed and try again."
-            )
         scenario.create_scenario()
-        # We set the seed over the last n run ids in the dataframe
-        seeds = data_target.run_ids[data_target.num_runs - scenario.number_of_runs:]
+        configuration_ids = scenario.configuration_ids
+        # TODO: Setting seeds like this is weird and should be inspected.
+        # It could be good to take perhaps a seed from the scenario and use that
+        # to generate a seed per run
+        seeds = [i for i in range(scenario.number_of_runs)]
         output = [f"{(scenario.results_directory).absolute()}/"
-                  f"{scenario.name}_seed_{seed}_smac.txt"
-                  for seed in seeds]
+                  f"{scenario.name}_{config_id}_smac.txt"
+                  for config_id in configuration_ids]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{SMAC2.__name__} {output_file} {data_target.csv_filepath} "
-                f"{scenario.scenario_file_path} {seed} "
+                f"{scenario.scenario_file_path} {configuration_id} "
                 f"{SMAC2.configurator_executable.absolute()} "
                 f"--scenario-file {scenario.scenario_file_path} "
                 f"--seed {seed} "
-                for output_file, seed in zip(output, seeds)]
+                for output_file, configuration_id, seed
+                in zip(output, configuration_ids, seeds)]
         if num_parallel_jobs is not None:
             num_parallel_jobs = max(num_parallel_jobs, len(cmds))
         return super().configure(
@@ -105,7 +123,8 @@ class SMAC2(Configurator):
             output=output,
             num_parallel_jobs=num_parallel_jobs,
             scenario=scenario,
-            validation_ids=seeds if validate_after else None,
+            configuration_ids=configuration_ids,
+            validate_after=validate_after,
             sbatch_options=sbatch_options,
             slurm_prepend=slurm_prepend,
             base_dir=base_dir,
@@ -116,9 +135,8 @@ class SMAC2(Configurator):
     def organise_output(output_source: Path,
                         output_target: Path,
                         scenario: SMAC2Scenario,
-                        run_id: int) -> None | dict:
+                        configuration_id: str) -> None | dict:
         """Retrieves configuration from SMAC file and places them in output."""
-        from filelock import FileLock
         call_key = SMAC2.configurator_target.name
         # Last line describing a call is the best found configuration
         for line in reversed(output_source.open("r").readlines()):
@@ -128,31 +146,9 @@ class SMAC2(Configurator):
                 configuration = call_str.split(" ", 8)[-1]
                 break
         configuration = Solver.config_str_to_dict(configuration)
-        if output_target is None or not output_target.exists():
-            return configuration
-        time_stamp = scenario.scenario_file_path.stat().st_mtime
-        configuration["configuration_id"] =\
-            f"{SMAC2.__name__}_{time_stamp}_{run_id}"
-        instance_names = scenario.instance_set.instance_names
-        lock = FileLock(f"{output_target}.lock")
-        with lock.acquire(timeout=60):
-            performance_data = PerformanceDataFrame(output_target)
-            # Resolve absolute path to Solver column
-            solver = [s for s in performance_data.solvers
-                      if Path(s).name == scenario.solver.name][0]
-            # For some reason the instance paths in the instance set are absolute
-            instances = [instance for instance in performance_data.instances
-                         if Path(instance).name in instance_names]
-            # We don't set the seed in the dataframe, as that should be part of the conf
-            performance_data.set_value(
-                value=[str(configuration)],
-                solver=solver,
-                instance=instances,
-                objective=None,
-                run=run_id,
-                solver_fields=[PerformanceDataFrame.column_configuration]
-            )
-            performance_data.save_csv()
+        configuration["configuration_id"] = configuration_id
+        return Configurator.save_configuration(scenario, configuration_id,
+                                               configuration, output_target)
 
     @staticmethod
     def get_smac_run_obj(objective: SparkleObjective) -> str:
@@ -165,9 +161,8 @@ class SMAC2(Configurator):
             return "RUNTIME"
         return "QUALITY"
 
-    def get_status_from_logs(self: SMAC2) -> None:
+    def get_status_from_logs(self: SMAC2, base_dir: Path) -> None:
         """Method to scan the log files of the configurator for warnings."""
-        base_dir = self.output_path / "scenarios"
         if not base_dir.exists():
             return
         print(f"Checking the log files of configurator {type(self).__name__} for "
@@ -194,13 +189,13 @@ class SMAC2Scenario(ConfigurationScenario):
                  solver: Solver,
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
+                 number_of_runs: int,
                  parent_directory: Path,
-                 number_of_runs: int = None,
                  solver_calls: int = None,
                  max_iterations: int = None,
                  cpu_time: int = None,
                  wallclock_time: int = None,
-                 cutoff_time: int = None,
+                 solver_cutoff_time: int = None,
                  target_cutoff_length: str = None,
                  cli_cores: int = None,
                  use_cpu_time_in_tunertime: bool = None,
@@ -213,9 +208,9 @@ class SMAC2Scenario(ConfigurationScenario):
             instance_set: Instances object for the scenario.
             sparkle_objectives: SparkleObjectives used for each run of the configuration.
                 Will be simplified to the first objective.
-            parent_directory: Directory in which the scenario should be created.
             number_of_runs: The number of configurator runs to perform
                 for configuring the solver.
+            parent_directory: Directory in which the scenario should be created.
             solver_calls: The number of times the solver is called for each
                 configuration run
             max_iterations: The maximum number of iterations allowed for each
@@ -223,7 +218,7 @@ class SMAC2Scenario(ConfigurationScenario):
             cpu_time: The time budget allocated for each configuration run. (cpu)
             wallclock_time: The time budget allocated for each configuration run.
                 (wallclock)
-            cutoff_time: The maximum time allowed for each individual run during
+            solver_cutoff_time: The maximum time allowed for each solver call run during
                 configuration.
             target_cutoff_length: A domain specific measure of when the algorithm
                 should consider itself done.
@@ -236,21 +231,16 @@ class SMAC2Scenario(ConfigurationScenario):
                 If it is a Path, will pass the path to SMAC2.
                 Defaults to None.
         """
-        super().__init__(solver, instance_set, sparkle_objectives, parent_directory)
+        super().__init__(solver, instance_set, sparkle_objectives,
+                         number_of_runs, parent_directory)
         self.solver = solver
         self.instance_set = instance_set
-        self.name = f"{self.solver.name}_{self.instance_set.name}"
 
-        if sparkle_objectives is not None:
-            self.sparkle_objective = sparkle_objectives[0]
-        else:
-            self.sparkle_objective = None
-
-        self.number_of_runs = number_of_runs
+        self.sparkle_objective = sparkle_objectives[0]
         self.solver_calls = solver_calls
         self.cpu_time = cpu_time
         self.wallclock_time = wallclock_time
-        self.cutoff_time = cutoff_time
+        self.solver_cutoff_time = solver_cutoff_time
         self.cutoff_length = target_cutoff_length
         self.max_iterations = max_iterations
         self.cli_cores = cli_cores
@@ -296,6 +286,11 @@ class SMAC2Scenario(ConfigurationScenario):
         # SMAC2 Specific
         self.outdir_train = self.directory / "outdir_train_configuration"
 
+    @property
+    def configurator(self: SMAC2Scenario) -> SMAC2:
+        """Return the type of configurator the scenario belongs to."""
+        return SMAC2
+
     def create_scenario(self: SMAC2Scenario) -> None:
         """Create scenario with solver and instances in the parent directory.
 
@@ -329,12 +324,13 @@ class SMAC2Scenario(ConfigurationScenario):
         Writes supplementary information to the target algorithm (algo =) as:
         algo = {configurator_target} {solver_directory} {sparkle_objective}
         """
+        super().create_scenario_file()
         with self.scenario_file_path.open("w") as file:
             file.write(f"algo = {configurator_target.absolute()} "
                        f"{self.solver.directory} {self.tmp} {self.sparkle_objective} \n"
                        f"deterministic = {1 if self.solver.deterministic else 0}\n"
                        f"run_obj = {self._get_performance_measure()}\n"
-                       f"cutoffTime = {self.cutoff_time}\n"
+                       f"cutoffTime = {self.solver_cutoff_time}\n"
                        f"paramfile = {self.solver.get_pcs_file(pcs_port)}\n"
                        f"outdir = {self.outdir_train}\n"
                        f"instance_file = {self.instance_file_path}\n"
@@ -382,18 +378,18 @@ class SMAC2Scenario(ConfigurationScenario):
             return "RUNTIME"
         return "QUALITY"
 
-    def serialize_scenario(self: SMAC2Scenario) -> dict:
+    def serialise(self: SMAC2Scenario) -> dict:
         """Transform ConfigurationScenario to dictionary format."""
         return {
             "number_of_runs": self.number_of_runs,
             "solver_calls": self.solver_calls,
             "cpu_time": self.cpu_time,
             "wallclock_time": self.wallclock_time,
-            "cutoff_time": self.cutoff_time,
+            "solver_cutoff_time": self.solver_cutoff_time,
             "cutoff_length": self.cutoff_length,
             "max_iterations": self.max_iterations,
             "sparkle_objective": self.sparkle_objective.name,
-            "feature_data": self.feature_data_path,
+            "feature_data": self.feature_file_path,
             "use_cpu_time_in_tunertime": self.use_cpu_time_in_tunertime
         }
 
@@ -433,8 +429,8 @@ class SMAC2Scenario(ConfigurationScenario):
         return SMAC2Scenario(solver,
                              instance_set,
                              [objective],
-                             instance_file_path.parent.parent,
                              number_of_runs,
+                             instance_file_path.parent.parent,
                              solver_calls,
                              max_iterations,
                              cpu_time,
