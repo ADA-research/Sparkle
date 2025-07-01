@@ -17,7 +17,6 @@ import runrunner as rrr
 from runrunner.base import Runner, Run
 from runrunner.slurm import Status, SlurmRun
 
-from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.initialise import check_for_initialise
@@ -522,12 +521,6 @@ def main(argv: list[str]) -> None:
                             cpu_time_key, wall_time_key, pdf
                             )
 
-    # Update latest scenario
-    gv.latest_scenario().set_parallel_portfolio_path(portfolio_path)
-    gv.latest_scenario().set_latest_scenario(Scenario.PARALLEL_PORTFOLIO)
-    gv.latest_scenario().set_parallel_portfolio_instance_path(instances.directory)
-    # Write used scenario to file
-    gv.latest_scenario().write_scenario_ini()
     # Write used settings to file
     gv.settings().write_used_settings()
     print("Running Sparkle parallel portfolio is done!")

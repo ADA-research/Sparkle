@@ -10,7 +10,6 @@ from runrunner import Runner
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help.reporting_scenario import Scenario
 from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
 from sparkle.CLI.help import argparse_custom as ac
 
@@ -211,14 +210,7 @@ def main(argv: list[str]) -> None:
             run_on=run_on)
         dependency_job_list.append(default_job)
 
-    # Update latest scenario
-    gv.latest_scenario().set_config_solver(solver)
-    gv.latest_scenario().set_config_instance_set_train(instance_set_train.directory)
-    gv.latest_scenario().set_configuration_scenario(config_scenario.scenario_file_path)
-    gv.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
-
     if instance_set_test is not None:
-        gv.latest_scenario().set_config_instance_set_test(instance_set_test.directory)
         # Schedule test set jobs
         if args.test_set_run_all_configurations:
             # TODO: Schedule test set runs for all configurations
@@ -244,9 +236,6 @@ def main(argv: list[str]) -> None:
                          f"{instance_set_test.name}",
                 run_on=run_on)
             dependency_job_list.append(test_set_job)
-    else:
-        # Set to default to overwrite possible old path
-        gv.latest_scenario().set_config_instance_set_test()
 
     if run_on == Runner.SLURM:
         job_id_str = ",".join([run.run_id for run in dependency_job_list])
@@ -258,7 +247,6 @@ def main(argv: list[str]) -> None:
     # Write used settings to file
     gv.settings().write_used_settings()
     # Write used scenario to file
-    gv.latest_scenario().write_scenario_ini()
     sys.exit(0)
 
 

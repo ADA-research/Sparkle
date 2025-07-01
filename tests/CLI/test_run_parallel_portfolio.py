@@ -254,13 +254,6 @@ def test_main(case: str) -> None:
                 "Expected exit code 0, "
                 f"got {excinfo.value.code}"
             )
-        current_port_path = gv.latest_scenario().get_parallel_portfolio_path().as_posix()
-        assert current_port_path.startswith("Output/Parallel_Portfolio/"), (
-            "Expected portfolio path should start with"
-            "Output/Parallel_Portfolio/Raw_Data/"
-            f"but got, {current_port_path}"
-        )
-        assert gv.latest_scenario().get_latest_scenario() == "PARALLEL_PORTFOLIO"
     elif case == "empty_args":
         with pytest.raises(TypeError) as excinfo:
             rpp.main([])
