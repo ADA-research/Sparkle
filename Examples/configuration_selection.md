@@ -77,7 +77,7 @@ sparkle jobs  # Wait for the constructor to complete its computations
 
 ### Generate a report
 
-Generate an experimental report detailing the experimental procedure and performance information; this will be located at `Output/Selection/Sparkle_Report.pdf`
+Generate an experimental report detailing the experimental procedure and performance information; this will be located at `Output/Analysis/`
 
 ```bash
 sparkle generate report
