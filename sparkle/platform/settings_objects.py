@@ -1912,13 +1912,13 @@ class Settings:
         prev_sections_set = set(prev_dict.keys())
         sections_removed = prev_sections_set - cur_sections_set
         if sections_removed:
-            print("Warning: the following sections have been removed:")
+            print("[INFO] The following sections have been removed:")
             for section in sections_removed:
                 print(f"  - Section '{section}'")
 
         sections_added = cur_sections_set - prev_sections_set
         if sections_added:
-            print("Warning: the following sections have been added:")
+            print("[INFO] The following sections have been added:")
             for section in sections_added:
                 print(f"  - Section '{section}'")
 
@@ -1936,7 +1936,7 @@ class Settings:
                 if cur_val is not None and cur_val != prev_val:
                     # Have we printed the initial warning?
                     if not option_changed:
-                        print("Warning: The following attributes/options have changed:")
+                        print("[INFO] The following attributes/options have changed:")
                         option_changed = True
 
                     # do we have yet to print the section?

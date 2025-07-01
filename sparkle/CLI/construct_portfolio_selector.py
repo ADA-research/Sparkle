@@ -64,8 +64,7 @@ def judge_exist_remaining_jobs(feature_data: FeatureDataFrame,
               "'sparkle run solvers --performance-data'")
     if missing_features or missing_performances:
         print("Please first execute all unperformed jobs before constructing Sparkle "
-              "portfolio selector")
-        print("Sparkle portfolio selector is not successfully constructed!")
+              "portfolio selector.")
         sys.exit(-1)
 
 
