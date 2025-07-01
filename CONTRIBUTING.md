@@ -1,11 +1,9 @@
 # Contributing
 
-For now, the development of Sparkle is done by a closed core team.
-
-We will gladly accept contributions in the form of bug reports, feature requests and pull requests in the near future, when the appropriate infrastructure is in place, and the code base is ready.
+We gladly accept contributions in the form of bug reports, feature requests and pull requests.
 
 ## Issue creation protocol
-When finding a bug or an issue in Sparkle, feel free to create an issue in [Jira](https://kvdblom.atlassian.net/jira/software/c/projects/SPRK/boards/1) if you are part of the closed core team.
+When finding a bug or an issue in Sparkle, feel free to create an issue on the GitHub.
 Check before you create a new issue if there already exists one that addresses the bug you found.
 In case an existing issue already partially covers the bug, you could add a comment to that issue, to ensure your bug is covered by it.
 Otherwise, you should create a new issue.
@@ -92,7 +90,7 @@ When releasing a new version (including bugfix versions) of Sparkle to the `main
 4. If there were updates to the CLI and/or the examples.md, make sure to re-compile their files for the Documentation. Run `md_to_sh.py` in the Documentation directory to compile the example .mds to executable .sh files, and run `command_descriptions.py` to automatically re-create the documentation for the CLI commands and their arguments. Run `mod_descriptions.py` to update the package descriptions. The documentation itself is after release automatically compiled and deployed to github pages.
 4. Create the compiled zip for PyPi by running `python setup.py sdist` and commit it.
 5. Merge the new version branch into both `development` and `main`, DO NOT delete the version branch!
-6. Upload the zip to PyPi with `twine upload $ZIPFILE_PATH`
+6. Hit the release button on GitHub.
 
 ## CHANGELOG
 
