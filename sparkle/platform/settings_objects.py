@@ -4,7 +4,7 @@ import configparser
 from enum import Enum
 import ast
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 from runrunner import Runner
 
@@ -22,6 +22,43 @@ class SettingState(Enum):
     DEFAULT = 1
     FILE = 2
     CMD_LINE = 3
+
+
+class Option(NamedTuple):
+    """Class to define an option in the Settings."""
+    name: str
+    section: str
+    type: Any
+    default_value: Any
+    alternatives: tuple[str]
+    help: str = ""
+    cli_kwargs: dict[str, Any] = {}
+
+    def __str__(self: Option) -> str:
+        """Return the option name."""
+        return self.name
+
+    def __eq__(self: Option, other: Any) -> bool:
+        """Check if two options are equal."""
+        if isinstance(other, Option):
+            return (self.name == other.name
+                    and self.section == other.section
+                    and self.type == other.type
+                    and self.default_value == other.default_value
+                    and self.alternatives == other.alternatives)
+        if isinstance(other, str):
+            return self.name == other or other in self.alternatives
+        return False
+
+    @property
+    def args(self: Option) -> list[str]:
+        """Return the option names as a command line arguments."""
+        return [f"--{name}" for name in [self.name] + list(self.alternatives)]
+
+    @property
+    def kwargs(self: Option) -> dict[str, Any]:
+        """Return the option attributes as kwargs."""
+        return {"type": self.type, "help": self.help, **self.cli_kwargs}
 
 
 class Settings:
@@ -168,34 +205,71 @@ class Settings:
     DEFAULT_selector_class = "MultiClassClassifier"
     DEFAULT_selector_model = "RandomForestClassifier"
 
+    # Define sections and options
+    SECTION_general: str = "general"
+    OPTION_objectives = Option("objectives", SECTION_general, list[str], None,
+                               ("sparkle_objectives", ),
+                               "A comma separated list of Sparkle objectives.")
+    OPTION_configurator = Option("configurator", SECTION_general, Configurator, None,
+                                 tuple(), "Name of the configurator to use.")
+    OPTION_solver_cutoff_time = Option("solver_cutoff_time", SECTION_general, int, None,
+                                       ("target_cutoff_time",
+                                        "cutoff_time_each_solver_call"),
+                                       "Solver cutoff time in seconds.")
+    OPTION_extractor_cutoff_time = Option(
+        "extractor_cutoff_time", SECTION_general, int, None,
+        tuple("cutoff_time_each_feature_computation"),
+        "Extractor cutoff time in seconds.")
+    OPTION_run_on = Option("run_on", SECTION_general, Runner, None, tuple(),
+                           "On which compute resource to execute.",
+                           cli_kwargs={"choices": [Runner.LOCAL, Runner.SLURM]})
+
+    OPTION_verbosity = Option("verbosity", SECTION_general, VerbosityLevel, None,
+                              tuple(), "Verbosity level.")
+    OPTION_check_interval = Option("check_interval", SECTION_general, int, None,
+                                   tuple(), "Check interval in seconds.")
+
+    SECTION_configuration = "configuration"
+    SECTION_ablation = "ablation"
+    SECTION_selection = "selection"
+    SECTION_smac2 = "smac2"
+    SECTION_smac3 = "smac3"
+    SECTION_irace = "irace"
+    SECTION_paramils = "paramils"
+    SECTION_slurm = "slurm"
+    SECTION_parallel_portfolio = "parallel_portfolio"
+
     # TODO: Check if this is good and we miss anything
-    sections_options: dict[str, dict[str, tuple[str]]] = {
-        "general": {
-            "sparkle_objective": (str, DEFAULT_general_sparkle_objective),
-            "sparkle_configurator": (str, DEFAULT_general_sparkle_configurator),
-            "solver_cutoff_time": (int, DEFAULT_general_solver_cutoff_time),
-            "extractor_cutoff_time": (int, DEFAULT_general_extractor_cutoff_time),
-            "verbosity": (str, DEFAULT_general_verbosity),
-            "check_interval": (int, DEFAULT_general_check_interval),
-            "run_on": (str, DEFAULT_general_run_on),
-        },
-        "config": {},
-        "smac2": {},
-        "smac3": {},
-        "irace": {},
-        "paramils": {},
-        "slurm": {},
-        "ablation": {},
-        "parallel_portfolio": {},
-        "selection": {},
+    sections_options: dict[str, list[Option]] = {
+        SECTION_general: [
+            OPTION_objectives, OPTION_configurator, OPTION_solver_cutoff_time,
+        ],
+        SECTION_configuration: [],
+        SECTION_smac2: [],
+        SECTION_smac3: [],
+        SECTION_irace: [],
+        SECTION_paramils: [],
+        SECTION_slurm: [],
+        SECTION_ablation: [],
+        SECTION_selection: [],
+        SECTION_parallel_portfolio: [],
     }
 
-    def __init__(self: Settings, file_path: Path = None) -> None:
-        """Initialise a settings object."""
+    def __init__(self: Settings, file_path: Path = None,
+                 argsv: list[str] = None) -> None:
+        """Initialise a settings object.
+
+        Args:
+            file_path (Path): Path to the settings file.
+            argsv (list[str]): List of command line arguments. Can contain a second
+                file_path argument, which will override settings read from the original
+                where possible but DOES NOT override the file_path.
+        """
         # Settings 'dictionary' in configparser format
         self.__settings = configparser.ConfigParser()
-        for section in self.sections:
+        for section in self.sections_options.keys():
             self.__settings.add_section(section)
+            self.__settings[section] = {}
 
         # Setting flags
         self.__general_sparkle_objective_set = SettingState.NOT_SET
@@ -260,12 +334,18 @@ class Settings:
 
         self.__slurm_extra_options_set = dict()
 
+        # TODO: Add every setting as a private attribute with self.__attribute = None
+        self.__sparkle_objectives: list[SparkleObjective] = None
+
         if file_path is None:
             # Initialise settings from default file path
             self.read_settings_ini()
         else:
             # Initialise settings from a given file path
             self.read_settings_ini(file_path)
+
+        # TODO: Deal with the argsv, must be flexible
+        # e.g. ignore arguments that do not match the settings options
 
     def read_settings_ini(self: Settings, file_path: Path = DEFAULT_settings_path,
                           state: SettingState = SettingState.FILE) -> None:
@@ -286,6 +366,18 @@ class Settings:
                 print(f"ERROR: Failed to read settings from {file_path} The file does "
                       "not exist. Default Setting values will be used.")
             return
+
+        for section in file_settings.sections():
+            if section not in self.__settings.sections():
+                continue
+            for option_name in file_settings.options(section):
+                if option_name not in self.sections_options[section]:
+                    continue
+                option_index = self.sections_options[section].index(option_name)
+                option = self.sections_options[section][option_index]
+                self.__settings.set(section, option.name,
+                                    file_settings.get(section, option_name))
+                file_settings.remove_option(section, option_name)
 
         section = "general"
         option_names = ("objectives", )
@@ -330,8 +422,8 @@ class Settings:
         option_names = ("verbosity", )
         for option in option_names:
             if file_settings.has_option(section, option):
-                value = VerbosityLevel.from_string(
-                    file_settings.get(section, option))
+                value = VerbosityLevel[
+                    file_settings.get(section, option)]
                 self.set_general_verbosity(value, state)
                 file_settings.remove_option(section, option)
 
@@ -606,13 +698,6 @@ class Settings:
                 self.set_slurm_max_parallel_runs_per_node(value, state)
                 file_settings.remove_option(section, option)
 
-        option_names = ("job_submission_limit", "max_jobs_submit")
-        for option in option_names:
-            if file_settings.has_option(section, option):
-                value = file_settings.getint(section, option)
-                self.set_slurm_job_submission_limit(value, state)
-                file_settings.remove_option(section, option)
-
         option_names = ("job_prepend", "prepend", "prepend_script")
         for option in option_names:
             if file_settings.has_option(section, option):
@@ -643,10 +728,8 @@ class Settings:
                 self.set_parallel_portfolio_number_of_seeds_per_solver(value, state)
                 file_settings.remove_option(section, option)
 
-        # TODO: Report on any unknown settings that were read
-        sections = file_settings.sections()
-
-        for section in sections:
+        # Report on any unknown settings that were read
+        for section in file_settings.sections():
             for option in file_settings[section]:
                 # TODO: Should check the options are valid Slurm options
                 if section == "slurm":
@@ -730,6 +813,23 @@ class Settings:
                   "file; keeping the value read from command line!")
 
         return change_setting_ok
+
+    @property
+    def objectives(self: Settings) -> list[SparkleObjective]:
+        """Get the objectives for Sparkle."""
+        if (self.__sparkle_objectives is None
+                and self.__settings.has_option(Settings.SECTION_general, "objectives")):
+            objectives = self.__settings[Settings.SECTION_general]["objectives"]
+            if "status" not in objectives:
+                objectives += ",status:metric"
+            if "cpu_time" not in objectives:
+                objectives += ",cpu_time:metric"
+            if "wall_time" not in objectives:
+                objectives += ",wall_time:metric"
+            if "memory" not in objectives:
+                objectives += ",memory:metric"
+            self.__sparkle_objectives = [resolve_objective(obj) for obj in objectives]
+        return self.__sparkle_objectives
 
     # General settings ###
     def set_general_sparkle_objectives(
@@ -885,8 +985,8 @@ class Settings:
         if self.__general_verbosity_set == SettingState.NOT_SET:
             self.set_general_verbosity()
 
-        return VerbosityLevel.from_string(
-            self.__settings["general"]["verbosity"])
+        return VerbosityLevel[
+            self.__settings["general"]["verbosity"]]
 
     def set_general_check_interval(
             self: Settings,
