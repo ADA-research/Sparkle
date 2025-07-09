@@ -9,7 +9,7 @@ from pathlib import PurePath
 
 from runrunner.logger import Log as RunRunnerLog
 
-from sparkle.CLI.help import global_variables as gv
+from sparkle.platform import Settings
 
 
 # Keep track of which command called Sparkle
@@ -51,7 +51,7 @@ def _update_caller_file_path(timestamp: str) -> None:
     """
     caller_file = caller + "_main_log.txt"
     caller_dir = Path(caller + "_" + timestamp)
-    log_dir = gv.settings().DEFAULT_log_output
+    log_dir = Settings.DEFAULT_log_output
     # Set caller directory for other Sparkle functions to use
     global caller_out_dir
     caller_out_dir = Path(caller_dir)
@@ -109,7 +109,7 @@ def log_command(argv: list[str]) -> None:
     log_str = timestamp + "   " + args + "   " + str(output_file) + "\n"
 
     # If the log file does not exist yet, write the header
-    log_path = gv.settings().DEFAULT_output / "sparkle.log"
+    log_path = Settings.DEFAULT_output / "sparkle.log"
     if not log_path.is_file():
         log_header = "\t Timestamp\t\t\t\t\t\t\t  Command\t\t\t\t\t\t\t Output details\n"
         log_str = log_header + log_str

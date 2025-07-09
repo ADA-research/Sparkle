@@ -43,7 +43,7 @@ def detect_sparkle_platform_exists(check: callable = all) -> Path:
     """
     cwd = Path.cwd()
     while str(cwd) != cwd.root:
-        if check([(cwd / wd).exists() for wd in gv.settings().DEFAULT_working_dirs]):
+        if check([(cwd / wd).exists() for wd in Settings.DEFAULT_working_dirs]):
             return cwd
         cwd = cwd.parent
     return None
@@ -89,10 +89,10 @@ def initialise_sparkle(save_existing_platform: bool = True,
         if save_existing_platform:
             print("Saving as snapshot...")
             snh.save_current_platform()
-        snh.remove_current_platform(filter=[gv.settings().DEFAULT_settings_dir])
+        snh.remove_current_platform(filter=[Settings.DEFAULT_settings_dir])
         print("Your settings directory was not removed.")
 
-    for working_dir in gv.settings().DEFAULT_working_dirs:
+    for working_dir in Settings.DEFAULT_working_dirs:
         working_dir.mkdir(exist_ok=True)
 
     # Check if Settings file exists, otherwise initialise a default one
@@ -102,35 +102,35 @@ def initialise_sparkle(save_existing_platform: bool = True,
         gv.settings().write_settings_ini(Path(Settings.DEFAULT_settings_path))
 
     # Initialise the FeatureDataFrame
-    FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
+    FeatureDataFrame(Settings.DEFAULT_feature_data_path)
 
     # Initialise the Performance DF with the static dimensions
     # TODO: We have many sparkle settings values regarding ``number of runs''
     # E.g. configurator, parallel portfolio, and here too. Should we unify this more, or
     # just make another setting that does this specifically for performance data?
-    PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path,
+    PerformanceDataFrame(Settings.DEFAULT_performance_data_path,
                          objectives=gv.settings().objectives, n_runs=1)
 
     if rebuild_runsolver:
         print("Cleaning Runsolver ...")
         runsolver_clean = subprocess.run(["make", "clean"],
-                                         cwd=gv.settings().DEFAULT_runsolver_dir,
+                                         cwd=Settings.DEFAULT_runsolver_dir,
                                          capture_output=True)
         if runsolver_clean.returncode != 0:
             warnings.warn(f"[{runsolver_clean.returncode}] Cleaning of Runsolver failed "
                           f"with the following msg: {runsolver_clean.stdout.decode()}")
 
     # Check that Runsolver is compiled, otherwise, compile
-    if not gv.settings().DEFAULT_runsolver_exec.exists():
+    if not Settings.DEFAULT_runsolver_exec.exists():
         print("Runsolver does not exist, trying to compile...")
-        if not (gv.settings().DEFAULT_runsolver_dir / "Makefile").exists():
+        if not (Settings.DEFAULT_runsolver_dir / "Makefile").exists():
             warnings.warn("Runsolver executable doesn't exist and cannot find makefile."
                           " Please verify the contents of the directory: "
-                          f"{gv.settings().DEFAULT_runsolver_dir}")
+                          f"{Settings.DEFAULT_runsolver_dir}")
         else:
             compile_runsolver =\
                 subprocess.run(["make"],
-                               cwd=gv.settings().DEFAULT_runsolver_dir,
+                               cwd=Settings.DEFAULT_runsolver_dir,
                                capture_output=True)
             if compile_runsolver.returncode != 0:
                 warnings.warn("Compilation of Runsolver failed with the following msg:"
@@ -140,8 +140,8 @@ def initialise_sparkle(save_existing_platform: bool = True,
                 print("Runsolver compiled successfully!")
 
     # If Runsolver is compiled, check that it can be executed
-    if gv.settings().DEFAULT_runsolver_exec.exists():
-        runsolver_check = subprocess.run([gv.settings().DEFAULT_runsolver_exec,
+    if Settings.DEFAULT_runsolver_exec.exists():
+        runsolver_check = subprocess.run([Settings.DEFAULT_runsolver_exec,
                                           "--version"],
                                          capture_output=True)
         if runsolver_check.returncode != 0:

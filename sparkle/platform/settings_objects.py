@@ -2,6 +2,7 @@
 from __future__ import annotations
 import configparser
 import argparse
+from enum import Enum
 from pathlib import Path
 from typing import Any, NamedTuple
 
@@ -452,21 +453,8 @@ class Settings:
         if file_path and file_path.exists():
             self.read_settings_ini(file_path)
 
-        # Read a possible second file, that overwrites the first, where applicable
-        # e.g. settings are not deleted, but overwritten where applicable
         if argsv:
-            if hasattr(argsv, "file_path") and argsv.file_path:
-                self.read_settings_ini(argsv.file_path)
-
-            # Match all possible arguments to the settings
-            for argument in argsv.__dict__.keys():
-                for section in self.sections_options.keys():
-                    if argument in self.sections_options[section]:
-                        index = self.sections_options[section].index(argument)
-                        option = self.sections_options[section][index]
-                        self.__settings.set(option.section, option.name,
-                                            str(argsv.__dict__[argument]))
-                        break
+            self.apply_arguments(argsv)
 
     def read_settings_ini(self: Settings, file_path: Path) -> None:
         """Read the settings from an INI file."""
@@ -522,10 +510,34 @@ class Settings:
         # Write to latest settings file
         self.write_settings_ini(self.DEFAULT_previous_settings_path)
 
+    def apply_arguments(self: Settings, argsv: argparse.Namespace) -> None:
+        """Apply the arguments to the settings."""
+        # Read a possible second file, that overwrites the first, where applicable
+        # e.g. settings are not deleted, but overwritten where applicable
+        if hasattr(argsv, "file_path") and argsv.file_path:
+            self.read_settings_ini(argsv.file_path)
+        # Match all possible arguments to the settings
+        for argument in argsv.__dict__.keys():
+            value = argsv.__dict__[argument]
+            if value is None:
+                continue  # Skip None
+            value = value.name if isinstance(value, Enum) else str(value)
+            for section in self.sections_options.keys():
+                if argument in self.sections_options[section]:
+                    index = self.sections_options[section].index(argument)
+                    option = self.sections_options[section][index]
+                    self.__settings.set(option.section, option.name, value)
+                    break
+
     def _abstract_getter(self: Settings, option: Option) -> Any:
         """Abstract getter method."""
         if self.__settings.has_option(option.section, option.name):
-            return option.type(self.__settings.get(option.section, option.name))
+            value = self.__settings.get(option.section, option.name)
+            if not isinstance(value, option.type):
+                if issubclass(option.type, Enum):
+                    return option.type[value]
+                return option.type(value)  # Attempt to resolve str to type
+            return value
         return option.default_value
 
     # General settings ###
