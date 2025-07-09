@@ -1059,8 +1059,7 @@ class Settings:
 
                 # If cur val is None, it is default
                 if cur_val is not None and cur_val != prev_val:
-                    # Have we printed the initial warning?
-                    if not option_changed and verbose:
+                    if not option_changed and verbose:  # Print the initial
                         print("[INFO] The following attributes/options have changed:")
                         option_changed = True
 

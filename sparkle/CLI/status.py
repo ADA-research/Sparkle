@@ -99,23 +99,23 @@ def main(argv: list[str]) -> None:
 
     print("========Sparkle System Status========\n")
     print_objects_list([s for s in gv.settings().DEFAULT_solver_dir.iterdir()],
-                       "Solver", args.verbose)
-    if args.verbose:
+                       "Solver", args.verbosity)
+    if args.verbosity:
         print()
     print_objects_list([e for e in gv.settings().DEFAULT_extractor_dir.iterdir()],
-                       "Extractor", args.verbose)
-    if args.verbose:
+                       "Extractor", args.verbosity)
+    if args.verbosity:
         print()
     print_objects_list([i for i in gv.settings().DEFAULT_instance_dir.iterdir()],
-                       "Instance Set", args.verbose)
+                       "Instance Set", args.verbosity)
 
     print()
     print_feature_computation_jobs(
-        gv.settings().DEFAULT_feature_data_path, args.verbose
+        gv.settings().DEFAULT_feature_data_path, args.verbosity
     )
-    print_performance_computation_jobs(performance_data, args.verbose)
+    print_performance_computation_jobs(performance_data, args.verbosity)
 
-    if args.verbose:
+    if args.verbosity:
         print("\nThe Performance Data overview:")
         print(performance_data)
 
