@@ -48,7 +48,7 @@ def test_read_from_file() -> None:
 
     # Ablation
     assert settings.ablation_racing_flag
-    assert settings.ablation_max_parallel_runs_per_node is None
+    assert settings.ablation_max_parallel_runs_per_node == 8
 
     # Selection
     assert settings.selection_model == "RandomForestClassifier"
@@ -242,7 +242,7 @@ def test_read_with_cli_file() -> None:
 
     # Ablation
     assert settings.ablation_racing_flag
-    assert settings.ablation_max_parallel_runs_per_node == 3
+    assert settings.ablation_max_parallel_runs_per_node == 8
 
     # Selection
     assert settings.selection_model == "RandomForestClassifier"
