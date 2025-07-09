@@ -26,9 +26,15 @@ class Selector:
         """Initialize the Selector object.
 
         Args:
-            selector_class: The Selector class to construct.
-            model_class: The model class the selector will use.
+            selector_class: The (name of) Selector class to construct.
+            model_class: The (name of) model class the selector will use.
         """
+        if isinstance(selector_class, str):  # Resolve class name
+            from asf import selectors
+            selector_class = getattr(selectors, selector_class)
+        if isinstance(model_class, str):  # Resolve class name
+            from sklearn import ensemble
+            model_class = getattr(ensemble, model_class)
         self.selector_class = selector_class
         self.model_class = model_class
 

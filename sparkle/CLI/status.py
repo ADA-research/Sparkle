@@ -120,7 +120,7 @@ def main(argv: list[str]) -> None:
         print(performance_data)
 
     # scan configurator log files for warnings
-    configurator = gv.settings().get_general_sparkle_configurator()
+    configurator = gv.settings().configurator
     configurator.get_status_from_logs(
         gv.settings().get_configurator_output_path(configurator))
 

@@ -70,7 +70,7 @@ def main(argv: list[str]) -> None:
             # Patchfix runsolver
             object.runsolver_exec = gv.settings().DEFAULT_runsolver_exec
 
-            objectives = gv.settings().get_general_sparkle_objectives()
+            objectives = gv.settings().objectives
             cutoff = args.cutoff_time if args.cutoff_time else 5  # Short call
             configuration = {}
             if object.pcs_file:

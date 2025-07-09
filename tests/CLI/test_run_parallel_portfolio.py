@@ -46,7 +46,7 @@ instance_path = Path("tests/test_files/Instances/Train-Instance-Set/")
 instance_file = FileInstanceSet(instance_path)
 single_instances_str = [str(instance) for instance in instance_file.instance_names]
 
-sparkle_objectives = [obj.name for obj in gv.settings().get_general_sparkle_objectives()]
+sparkle_objectives = [obj.name for obj in gv.settings().objectives]
 portfolio_path = Path("tests/test_files/Output/Parallel_Portfolio/"
                       "Raw_Data/runtime_experiment/")
 stdout = ('{"solver_dir": "/dummy/dir",'
@@ -216,9 +216,9 @@ def test_main(case: str) -> None:
             "Expected exit code -1, "
             f"got {excinfo.value.code}"
         )
-        assert str(gv.settings().get_run_on()).lower() == "runner.local", (
+        assert str(gv.settings().run_on).lower() == "runner.local", (
             "Expected run_on setting to be 'runner.local' "
-            f"but got runner.{gv.settings().get_run_on()}"
+            f"but got runner.{gv.settings().run_on}"
         )
     elif case == "first_objective_not_time":
         test_object = SparkleObjective(name="TEST")

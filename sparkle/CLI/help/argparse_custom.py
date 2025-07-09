@@ -55,6 +55,18 @@ class ArgumentContainer():
         self.names = names
         self.kwargs = kwargs
 
+# TODO: Organise these arguments
+
+# 1. Solver Arguments
+
+# 1. A: Solver Configuration Arguments
+
+# 2. InstanceSet Arguments
+
+# 3. FeatureExtractor Arguments
+
+# 4. Command Specific Flags
+
 
 ActualMarginalContributionArgument = \
     ArgumentContainer(names=["--actual"],
@@ -364,7 +376,7 @@ SettingsFileArgument = \
     ArgumentContainer(names=["--settings-file"],
                       kwargs={"type": Path,
                               "help": "Specify the settings file to use in case you want"
-                                      " to use one other than the default"})
+                                      " supplement or override the default file."})
 
 SkipChecksArgument = ArgumentContainer(
     names=["--skip-checks"],

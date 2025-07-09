@@ -109,8 +109,7 @@ def initialise_sparkle(save_existing_platform: bool = True,
     # E.g. configurator, parallel portfolio, and here too. Should we unify this more, or
     # just make another setting that does this specifically for performance data?
     PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path,
-                         objectives=gv.settings().get_general_sparkle_objectives(),
-                         n_runs=1)
+                         objectives=gv.settings().objectives, n_runs=1)
 
     if rebuild_runsolver:
         print("Cleaning Runsolver ...")

@@ -4,7 +4,7 @@ from __future__ import annotations
 import random
 import sys
 import argparse
-from pathlib import PurePath, Path
+from pathlib import Path
 
 from runrunner.base import Runner, Run
 
@@ -13,7 +13,7 @@ from sparkle.instance import Instance_Set
 from sparkle.structures import PerformanceDataFrame
 from sparkle.types import SparkleObjective, resolve_objective
 from sparkle.instance import InstanceSet
-from sparkle.platform.settings_objects import Settings, SettingState
+from sparkle.platform.settings_objects import Settings
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
@@ -38,7 +38,6 @@ def parser_function() -> argparse.ArgumentParser:
                                      **ac.BestConfigurationArgument.kwargs)
     configuration_group.add_argument(*ac.AllConfigurationArgument.names,
                                      **ac.AllConfigurationArgument.kwargs)
-
     parser.add_argument(*ac.ObjectiveArgument.names,
                         **ac.ObjectiveArgument.kwargs)
     parser.add_argument(*ac.PerformanceDataJobsArgument.names,
@@ -46,12 +45,13 @@ def parser_function() -> argparse.ArgumentParser:
     # This one is only relevant if the argument above is given
     parser.add_argument(*ac.RecomputeRunSolversArgument.names,
                         **ac.RecomputeRunSolversArgument.kwargs)
-    parser.add_argument(*ac.SolverCutOffTimeArgument.names,
-                        **ac.SolverCutOffTimeArgument.kwargs)
-    parser.add_argument(*ac.RunOnArgument.names,
-                        **ac.RunOnArgument.kwargs)
+    # Settings arguments
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*Settings.OPTION_solver_cutoff_time.args,
+                        **Settings.OPTION_solver_cutoff_time.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
     return parser
 
 
@@ -247,55 +247,47 @@ def main(argv: list[str]) -> None:
 
     # Process command line arguments
     args = parser.parse_args(argv)
-    if args.settings_file is not None:
-        # Do first, so other command line options can override settings from the file
-        gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
-    if args.solver_cutoff_time is not None:
-        gv.settings().set_general_solver_cutoff_time(
-            args.solver_cutoff_time, SettingState.CMD_LINE)
-    if args.run_on is not None:
-        gv.settings().set_run_on(
-            args.run_on.value, SettingState.CMD_LINE)
+    settings = gv.settings(args)
+
     if args.best_configuration:
         if not args.objective:
-            objective = gv.settings().get_general_sparkle_objectives()[0]
+            objective = settings.objectives[0]
             print("WARNING: Best configuration requested, but no objective specified. "
                   f"Defaulting to first objective: {objective}")
         else:
             objective = resolve_objective(args.objective)
 
     # Compare current settings to latest.ini
-    prev_settings = Settings(PurePath("Settings/latest.ini"))
-    Settings.check_settings_changes(gv.settings(), prev_settings)
+    prev_settings = Settings(Settings.DEFAULT_previous_settings_path)
+    Settings.check_settings_changes(settings, prev_settings)
 
     if args.solvers:
         solvers = [resolve_object_name(solver_path,
                    gv.file_storage_data_mapping[gv.solver_nickname_list_path],
-                   gv.settings().DEFAULT_solver_dir, Solver)
+                   settings.DEFAULT_solver_dir, Solver)
                    for solver_path in args.solvers]
     else:
         solvers = [Solver(p) for p in
-                   gv.settings().DEFAULT_solver_dir.iterdir() if p.is_dir()]
+                   settings.DEFAULT_solver_dir.iterdir() if p.is_dir()]
 
     if args.instance_path:
         instances = [resolve_object_name(instance_path,
                      gv.file_storage_data_mapping[gv.instances_nickname_path],
-                     gv.settings().DEFAULT_instance_dir, Instance_Set)
+                     settings.DEFAULT_instance_dir, Instance_Set)
                      for instance_path in args.instance_path]
         # Unpack the sets into instance strings
         instances = [str(path) for set in instances for path in set.instance_paths]
     else:
         instances = None  # TODO: Fix? Or its good like this
 
-    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
-    slurm_prepend = gv.settings().get_slurm_job_prepend()
+    sbatch_options = settings.sbatch_settings
+    slurm_prepend = settings.slurm_job_prepend
     # Write settings to file before starting, since they are used in callback scripts
-    gv.settings().write_used_settings()
-    run_on = gv.settings().get_run_on()
-    cutoff_time = gv.settings().get_general_solver_cutoff_time()
+    settings.write_used_settings()
+    run_on = settings.run_on
+    cutoff_time = settings.solver_cutoff_time
     # Open the performance data csv file
-    performance_dataframe = PerformanceDataFrame(
-        gv.settings().DEFAULT_performance_data_path)
+    performance_dataframe = PerformanceDataFrame(settings.DEFAULT_performance_data_path)
 
     print("Start running solvers ...")
     if args.performance_data_jobs:
@@ -315,7 +307,7 @@ def main(argv: list[str]) -> None:
                 train_instances = [resolve_object_name(
                     instance_path,
                     gv.file_storage_data_mapping[gv.instances_nickname_path],
-                    gv.settings().DEFAULT_instance_dir, Instance_Set)
+                    settings.DEFAULT_instance_dir, Instance_Set)
                     for instance_path in args.best_configuration]
                 # Unpack the sets into instance strings
                 instances = [str(path) for set in train_instances
@@ -350,7 +342,7 @@ def main(argv: list[str]) -> None:
                         str(solvers[solver_index].directory), config)
         if instances is None:
             instances = []
-            for instance_dir in gv.settings().DEFAULT_instance_dir.iterdir():
+            for instance_dir in settings.DEFAULT_instance_dir.iterdir():
                 if instance_dir.is_dir():
                     instances.append(Instance_Set(instance_dir))
 
@@ -359,13 +351,13 @@ def main(argv: list[str]) -> None:
             solvers=solvers,
             configurations=configurations,
             instances=instances,
-            objectives=gv.settings().get_general_sparkle_objectives(),
+            objectives=settings.objectives,
             seed=random.randint(0, sys.maxsize),
             cutoff_time=cutoff_time,
             sbatch_options=sbatch_options,
             slurm_prepend=slurm_prepend,
             log_dir=sl.caller_log_dir,
-            run_on=gv.settings().get_run_on(),
+            run_on=run_on,
         )
 
     # If there are no jobs return

@@ -417,9 +417,9 @@ def generate_parallel_portfolio_section(report: pl.Document,
     report.append(
         "In this scenario, Sparkle runs the portfolio of Solvers on each instance in "
         "parallel with "
-        f"{gv.settings().get_parallel_portfolio_number_of_seeds_per_solver()} different "
+        f"{gv.settings().parallel_portfolio_num_seeds_per_solver} different "
         "seeds. The cutoff time for each solver run is set to "
-        f"{gv.settings().get_general_solver_cutoff_time()} seconds.")
+        f"{gv.settings().solver_cutoff_time} seconds.")
     report.append(pl.Subsection("Solvers & Instance Sets"))
     report.append("The following Solvers were used in the portfolio:")
     # 1. Report on the Solvers and Instance Sets used for the portfolio

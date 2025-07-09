@@ -9,13 +9,15 @@ import runrunner as rrr
 from runrunner.base import Runner, Status, Run
 
 from sparkle.selector import Extractor
-from sparkle.CLI.help import global_variables as gv
-from sparkle.CLI.help import logging as sl
-from sparkle.platform.settings_objects import SettingState
-from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.initialise import check_for_initialise
+from sparkle.platform.settings_objects import Settings
 from sparkle.structures import FeatureDataFrame
 from sparkle.instance import Instance_Set, InstanceSet
+
+
+from sparkle.CLI.help import global_variables as gv
+from sparkle.CLI.help import logging as sl
+from sparkle.CLI.help import argparse_custom as ac
+from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help.nicknames import resolve_instance_name
 
 
@@ -26,10 +28,11 @@ def parser_function() -> argparse.ArgumentParser:
                                                  "and instances.")
     parser.add_argument(*ac.RecomputeFeaturesArgument.names,
                         **ac.RecomputeFeaturesArgument.kwargs)
+    # Settings arguments
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
-    parser.add_argument(*ac.RunOnArgument.names,
-                        **ac.RunOnArgument.kwargs)
+    parser.add_argument(*Settings.OPTION_run_on.args,
+                        **Settings.OPTION_run_on.kwargs)
     return parser
 
 
@@ -69,7 +72,7 @@ def compute_features(
         print("No feature computation jobs to run; stopping execution! To recompute "
               "feature values use the --recompute flag.")
         return None
-    cutoff = gv.settings().get_general_extractor_cutoff_time()
+    cutoff = gv.settings().extractor_cutoff_time
     cmd_list = []
     extractors = {}
     instance_paths = set()
@@ -101,8 +104,8 @@ def compute_features(
     print(f"The number of compute jobs: {len(cmd_list)}")
 
     parallel_jobs = min(
-        len(cmd_list), gv.settings().get_number_of_jobs_in_parallel())
-    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
+        len(cmd_list), gv.settings().slurm_jobs_in_parallel)
+    sbatch_options = gv.settings().sbatch_settings
     srun_options = ["-N1", "-n1"] + sbatch_options
     run = rrr.add_to_queue(
         runner=run_on,
@@ -113,7 +116,7 @@ def compute_features(
         base_dir=sl.caller_log_dir,
         sbatch_options=sbatch_options,
         srun_options=srun_options,
-        prepend=gv.settings().get_slurm_job_prepend())
+        prepend=gv.settings().slurm_job_prepend)
 
     if run_on == Runner.SLURM:
         print(f"Running the extractors through Slurm with Job IDs: {run.run_id}")
@@ -142,14 +145,8 @@ def main(argv: list[str]) -> None:
 
     # Process command line arguments
     args = parser.parse_args(argv)
-    if args.settings_file is not None:
-        gv.settings().read_settings_ini(
-            args.settings_file, SettingState.CMD_LINE
-        )  # Do first, so other command line options can override settings from the file
-    if args.run_on is not None:
-        gv.settings().set_run_on(
-            args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
+    settings = gv.settings(args)
+    run_on = settings.run_on
 
     # Check if there are any feature extractors registered
     if not any([p.is_dir() for p in gv.settings().DEFAULT_extractor_dir.iterdir()]):
@@ -159,7 +156,7 @@ def main(argv: list[str]) -> None:
 
     # Start compute features
     print("Start computing features ...")
-    compute_features(gv.settings().DEFAULT_feature_data_path, args.recompute, run_on)
+    compute_features(settings.DEFAULT_feature_data_path, args.recompute, run_on)
 
     # Write used settings to file
     gv.settings().write_used_settings()

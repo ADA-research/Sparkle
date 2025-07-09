@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Definitions of constants broadly used in Sparkle."""
 import ast
+from argparse import Namespace
 
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame
@@ -19,11 +20,12 @@ def get_seed() -> int:
 __settings: Settings = None
 
 
-def settings() -> Settings:
+def settings(argsv: Namespace = None) -> Settings:
     """Function to get the global settings object."""
     global __settings
     if __settings is None:
-        __settings = Settings()
+        __settings = Settings(Settings.DEFAULT_settings_path,
+                              argsv=argsv)
     return __settings
 
 
