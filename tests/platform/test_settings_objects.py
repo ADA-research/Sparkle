@@ -296,3 +296,11 @@ def test_read_with_cli_file() -> None:
     assert set(settings.sbatch_settings) == set(["--mem-per-cpu=3000", "--time=25:00",
                                                  "--partition=CPU", "--qos=fast",
                                                  "--max_parallel_runs_per_node=8"])
+
+    # Test smaller override for integration tests
+    override_path = Path("tests/CLI/test_files/Settings/sparkle_settings_kathleen.ini")
+    args = argparse.Namespace(**{"file_path": override_path})
+    settings = Settings(settings_arg, args)
+
+    assert set(settings.sbatch_settings) == set(["--mem-per-cpu=3000", "--time=30:00",
+                                                 "--qos=short"])
