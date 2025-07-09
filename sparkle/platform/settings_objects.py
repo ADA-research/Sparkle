@@ -535,7 +535,7 @@ class Settings:
             value = self.__settings.get(option.section, option.name)
             if not isinstance(value, option.type):
                 if issubclass(option.type, Enum):
-                    return option.type[value]
+                    return option.type[value.upper()]
                 return option.type(value)  # Attempt to resolve str to type
             return value
         return option.default_value
