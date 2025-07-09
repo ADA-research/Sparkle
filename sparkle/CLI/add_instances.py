@@ -77,7 +77,7 @@ def main(argv: list[str]) -> None:
     # When adding instances, an empty performance DF has no objectives yet
     performance_data = PerformanceDataFrame(
         gv.settings().DEFAULT_performance_data_path,
-        objectives=gv.settings().get_general_sparkle_objectives())
+        objectives=gv.settings().objectives)
     for instance_name in new_instance_set.instance_names:
         # Construct a name path due to multi-file instances
         feature_data.add_instances(str(instance_name))
