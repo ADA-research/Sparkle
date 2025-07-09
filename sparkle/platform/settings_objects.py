@@ -972,8 +972,8 @@ class Settings:
                 "wallclock_time": self.smac2_wallclock_time_budget,
                 "target_cutoff_length": self.smac2_target_cutoff_length,
                 "use_cpu_time_in_tunertime": self.smac2_use_tunertime_in_cpu_time_budget,
-                "cli_cores": self.smac2_cli_cores(),
-                "max_iterations": self.smac2_max_iterations()
+                "cli_cores": self.smac2_cli_cores,
+                "max_iterations": self.smac2_max_iterations
                 or configurator_settings["max_iterations"],
             })
         elif configurator_name == cim.SMAC3.__name__:
