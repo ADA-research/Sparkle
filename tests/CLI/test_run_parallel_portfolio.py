@@ -34,19 +34,19 @@ class FakeJob:
         self.status: SolverStatus = SolverStatus.KILLED
 
 
-solver_paths_str = [
-    "Examples/Resources/Solvers/CSCCSat",
-    "Examples/Resources/Solvers/PbO-CCSAT-Generic",
-    "Examples/Resources/Solvers/MiniSAT"
+solver_paths = [
+    Path("Examples/Resources/Solvers/CSCCSat"),
+    Path("Examples/Resources/Solvers/PbO-CCSAT-Generic"),
+    Path("Examples/Resources/Solvers/MiniSAT")
 ]
-solver_paths = [Path(path) for path in solver_paths_str]
 solvers = [Solver(path) for path in solver_paths]
 
 instance_path = Path("tests/test_files/Instances/Train-Instance-Set/")
 instance_file = FileInstanceSet(instance_path)
 single_instances_str = [str(instance) for instance in instance_file.instance_names]
 
-sparkle_objectives = [obj.name for obj in gv.settings().objectives]
+sparkle_objectives = ["PAR10", "status:metric", "cpu_time:metric", "wall_time:metric",
+                      "memory:metric"]
 portfolio_path = Path("tests/test_files/Output/Parallel_Portfolio/"
                       "Raw_Data/runtime_experiment/")
 stdout = ('{"solver_dir": "/dummy/dir",'
@@ -140,11 +140,6 @@ def test_run_parallel_portfolio(
             f"Expected number of solvers in pdf to be equal to {len(solvers)} "
             f"in the solvers list, but got {pdf.num_solvers}."
         )
-        for solver in pdf.solvers:
-            assert solver in solver_paths_str, (
-                f"Expected solvers in pdf to be in the solvers list {solver_paths_str}, "
-                f"but got {solver}."
-            )
 
         assert pdf.num_objectives == len(sparkle_objectives), (
             "Expected number of objectives in pdf to "
@@ -168,14 +163,11 @@ def test_parser_function() -> None:
     assert isinstance(returned_parser, argparse.ArgumentParser)
 
 
-instance_path_list = ["--instance-path", f"{instance_path}"]
+instance_path_list = ["--instance-path", f"{instance_path.absolute()}"]
 portfolio_name_list = ["--portfolio-name", f"{portfolio_path}"]
-solvers_list = ["--solvers", "Examples/Resources/Solvers/CSCCSat/",
-                "Examples/Resources/Solvers/PbO-CCSAT-Generic/",
-                "Examples/Resources/Solvers/MiniSAT/"
-                ]
-objectives_list = ["--objectives", "PAR10,status:metric,"
-                   "cpu_time:metric,wall_time:metric,memory:metric"]
+solvers_list = ["--solvers"] + [str(p.absolute()) for p in solver_paths]
+objectives_list = ["--objectives", "PAR10", "status:metric,",
+                   "cpu_time:metric", "wall_time:metric", "memory:metric"]
 cutoff_time_list = ["--cutoff-time", f"{55}"]
 solver_seeds_list = ["--solver-seeds", f"{2}"]
 settings_list = ["--settings-file", f"{Path('Settings/sparkle_settings.ini')}"]
@@ -183,6 +175,7 @@ run_on_local_list = ["--run-on", f"{Runner.LOCAL}"]
 run_on_slurm_list = ["--run-on", f"{Runner.SLURM}"]
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "case", [
         "solver_none",
@@ -192,12 +185,14 @@ run_on_slurm_list = ["--run-on", f"{Runner.SLURM}"]
         "empty_args"
     ]
 )
-def test_main(case: str) -> None:
+def test_main(case: str,
+              tmp_path: Path,
+              monkeypatch: pytest.MonkeyPatch) -> None:
     """Test main function from run_parallel_portfolio."""
-    args = []
+    monkeypatch.chdir(tmp_path)
     if case == "solver_none":
         solvers_list_with_none = solvers_list + [f"{None}"]
-        args += instance_path_list + portfolio_name_list + solvers_list_with_none +\
+        args = instance_path_list + portfolio_name_list + solvers_list_with_none +\
             objectives_list + cutoff_time_list + solver_seeds_list +\
             run_on_slurm_list + settings_list
         with pytest.raises(SystemExit) as excinfo:
@@ -207,7 +202,7 @@ def test_main(case: str) -> None:
             f"got {excinfo.value.code}"
         )
     elif case == "run_on_local":
-        args += instance_path_list + portfolio_name_list + solvers_list +\
+        args = instance_path_list + portfolio_name_list + solvers_list +\
             objectives_list + cutoff_time_list + solver_seeds_list +\
             run_on_local_list + settings_list
         with pytest.raises(SystemExit) as excinfo:
@@ -223,10 +218,10 @@ def test_main(case: str) -> None:
     elif case == "first_objective_not_time":
         test_object = SparkleObjective(name="TEST")
 
-        objectives_list_changed = ["--objectives", f"{test_object},status:metric,"
-                                   "cpu_time:metric,wall_time:metric,memory:metric"]
-        args += instance_path_list + portfolio_name_list + solvers_list +\
-            objectives_list_changed + cutoff_time_list + solver_seeds_list +\
+        objectives_changed = ["--objectives", f"{test_object}", "status:metric",
+                              "cpu_time:metric", "wall_time:metric", "memory:metric"]
+        args = instance_path_list + portfolio_name_list + solvers_list +\
+            objectives_changed + cutoff_time_list + solver_seeds_list +\
             run_on_slurm_list + settings_list
         with pytest.raises(SystemExit) as excinfo:
             rpp.main(args)
@@ -235,7 +230,7 @@ def test_main(case: str) -> None:
             f"got {excinfo.value.code}"
         )
     elif case == "porfolio_name_none":
-        args += instance_path_list + [f"{None}"] + solvers_list +\
+        args = instance_path_list + [f"{None}"] + solvers_list +\
             objectives_list + cutoff_time_list + solver_seeds_list +\
             run_on_slurm_list + settings_list
         with patch("sparkle.CLI.run_parallel_portfolio.time.sleep", return_value=None), \

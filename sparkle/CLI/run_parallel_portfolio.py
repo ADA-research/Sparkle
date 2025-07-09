@@ -51,8 +51,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(*Settings.OPTION_solver_cutoff_time.args,
                         **Settings.OPTION_solver_cutoff_time.kwargs)
     parser.add_argument(
-        Settings.OPTION_parallel_portfolio_number_of_seeds_per_solver.args,
-        Settings.OPTION_parallel_portfolio_number_of_seeds_per_solver.kwargs)
+        *Settings.OPTION_parallel_portfolio_number_of_seeds_per_solver.args,
+        **Settings.OPTION_parallel_portfolio_number_of_seeds_per_solver.kwargs)
     parser.add_argument(*Settings.OPTION_run_on.args,
                         **Settings.OPTION_run_on.kwargs)
     return parser
@@ -179,6 +179,7 @@ def submit_jobs(cmd_list: list[str],
           f"on {num_solvers} solvers for {num_instances} instances ...")
 
     sbatch_options = gv.settings().sbatch_settings
+    print(sbatch_options)
     solver_names = ", ".join([s.name for s in solvers])
     # Jobs are added in to the runrunner object in the same order they are provided
     return rrr.add_to_queue(
@@ -502,8 +503,7 @@ def main(argv: list[str]) -> None:
                                         status_key, cpu_time_key, wall_time_key)
     print_and_write_results(job_output_dict, solvers, instances,
                             portfolio_path, status_key,
-                            cpu_time_key, wall_time_key, pdf
-                            )
+                            cpu_time_key, wall_time_key, pdf)
 
     # Write used settings to file
     settings.write_used_settings()

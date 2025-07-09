@@ -132,9 +132,10 @@ class Settings:
     # Define sections and options
     # GENERAL Options
     SECTION_general: str = "general"
-    OPTION_objectives = Option("objectives", SECTION_general, list[str], None,
+    OPTION_objectives = Option("objectives", SECTION_general, str, None,
                                ("sparkle_objectives", ),
-                               "A comma separated list of Sparkle objectives.")
+                               "A list of Sparkle objectives.",
+                               cli_kwargs={"nargs": "+"})
     OPTION_configurator = Option("configurator", SECTION_general, Configurator, None,
                                  tuple(), "Name of the configurator to use.")
     OPTION_solver_cutoff_time = Option(
@@ -319,7 +320,8 @@ class Settings:
         "check_interval", SECTION_parallel_portfolio, int, None, tuple(),
         "The interval time in seconds when Solvers are checked for their status.")
     OPTION_parallel_portfolio_number_of_seeds_per_solver = Option(
-        "num_seeds_per_solver", SECTION_parallel_portfolio, int, None, tuple(),
+        "num_seeds_per_solver", SECTION_parallel_portfolio, int, None,
+        ("solver_seeds", ),
         "The number of seeds per solver.")
 
     SECTION_slurm = "slurm"
@@ -447,7 +449,8 @@ class Settings:
         self.__slurm_jobs_in_parallel: int = None
         self.__slurm_job_prepend: str = None
 
-        self.read_settings_ini(file_path)
+        if file_path and file_path.exists():
+            self.read_settings_ini(file_path)
 
         # Read a possible second file, that overwrites the first, where applicable
         # e.g. settings are not deleted, but overwritten where applicable
@@ -922,7 +925,9 @@ class Settings:
     @property
     def slurm_job_prepend(self: Settings) -> str:
         """Return the slurm job prepend."""
-        if self.__slurm_job_prepend is None:
+        if self.__slurm_job_prepend is None and self.__settings.has_option(
+                Settings.OPTION_slurm_prepend_script.section,
+                Settings.OPTION_slurm_prepend_script.name):
             value = self.__settings[Settings.OPTION_slurm_prepend_script.section][
                 Settings.OPTION_slurm_prepend_script.name]
             try:
