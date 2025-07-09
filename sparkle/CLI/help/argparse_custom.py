@@ -1,41 +1,7 @@
 """Custom helper class and functions to process CLI arguments with argparse."""
 from __future__ import annotations
-import argparse
-import enum
 from pathlib import Path
 from typing import Any
-
-from runrunner.base import Runner
-
-
-# Taken from https://stackoverflow.com/a/60750535
-class EnumAction(argparse.Action):
-    """Argparse action for handling Enums."""
-
-    def __init__(self: EnumAction, **kwargs: str) -> None:
-        """Initialise the EnumAction."""
-        # Pop off the type value
-        enum_type = kwargs.pop("type", None)
-
-        # Ensure an Enum subclass is provided
-        if enum_type is None:
-            raise ValueError("type must be assigned an Enum when using EnumAction")
-        if not issubclass(enum_type, enum.Enum):
-            raise TypeError("type must be an Enum when using EnumAction")
-
-        # Generate choices from the Enum
-        kwargs.setdefault("choices", tuple(e.value for e in enum_type))
-
-        super(EnumAction, self).__init__(**kwargs)
-
-        self._enum = enum_type
-
-    def __call__(self: EnumAction, parser: argparse.ArgumentParser,
-                 namespace: argparse.Namespace, values: str, option_string: str = None) \
-            -> None:
-        """Converts value back to Enum."""
-        value = self._enum(values)
-        setattr(namespace, self.dest, value)
 
 
 class ArgumentContainer():
@@ -151,16 +117,6 @@ ConfigurationArgument = \
                               "type": str,
                               "nargs": "+",
                               "help": "The indices of which configurations to use"})
-
-ConfiguratorArgument = ArgumentContainer(names=["--configurator"],
-                                         kwargs={"type": str,
-                                                 "help": "name of the configurator"})
-
-CutOffTimeArgument = \
-    ArgumentContainer(names=["--cutoff-time", "--cutoff", "--timeout"],
-                      kwargs={"type": int,
-                              "help": "The duration the portfolio will run before the "
-                                      "solvers within the portfolio will be stopped."})
 
 DefaultSolverConfigurationArgument = \
     ArgumentContainer(names=["--default-configuration"],
@@ -307,11 +263,6 @@ PerfectSelectorMarginalContributionArgument =\
                               "help": "compute the marginal contribution "
                                       "for the perfect selector"})
 
-RacingArgument = ArgumentContainer(names=["--racing"],
-                                   kwargs={"type": bool,
-                                           "help": "Performs abaltion analysis with "
-                                                   "racing"})
-
 RecomputeFeaturesArgument = \
     ArgumentContainer(names=["--recompute"],
                       kwargs={"action": "store_true",
@@ -346,14 +297,6 @@ RebuildRunsolverArgument = \
                               "default": False,
                               "help": "Clean the RunSolver executable and rebuild it."})
 
-RunOnArgument = ArgumentContainer(names=["--run-on"],
-                                  kwargs={"type": Runner,
-                                          "choices": [Runner.LOCAL,
-                                                      Runner.SLURM],
-                                          "action": EnumAction,
-                                          "help": "On which computer or cluster "
-                                                  "environment to execute the "
-                                                  "calculation."})
 
 SeedArgument = ArgumentContainer(names=["--seed"],
                                  kwargs={"type": int,
@@ -409,17 +352,6 @@ SolversArgument = ArgumentContainer(names=["--solvers", "--solver-paths",
                                             "help": "Specify the list of solvers to be "
                                                     "used. If not specifed, all solvers "
                                                     "known in Sparkle will be used."})
-
-SolverCallsArgument = \
-    ArgumentContainer(names=["--solver-calls"],
-                      kwargs={"type": int,
-                              "help": "number of solver calls to execute"})
-
-SolverSeedsArgument = \
-    ArgumentContainer(names=["--solver-seeds"],
-                      kwargs={"type": int,
-                              "help": "number of random seeds per solver to execute"})
-
 SolverRemoveArgument = \
     ArgumentContainer(names=["solver"],
                       kwargs={"metavar": "solver",
@@ -439,11 +371,6 @@ SolversReportArgument = ArgumentContainer(
             "help": "Solver(s) to use for the report. If not specified, all solvers are "
                     "included."})
 
-SolverCutOffTimeArgument = \
-    ArgumentContainer(names=["--solver-cutoff-time", "--target-cutoff-time"],
-                      kwargs={"type": int,
-                              "help": "cutoff time per Solver run in seconds"})
-
 TestSetRunAllConfigurationArgument = \
     ArgumentContainer(names=["--test-set-run-all-configurations"],
                       kwargs={"required": False,
@@ -455,10 +382,6 @@ UseFeaturesArgument = ArgumentContainer(names=["--use-features"],
                                                 "action": "store_true",
                                                 "help": "use the training set's features"
                                                         " for configuration"})
-
-VerboseArgument = ArgumentContainer(names=["--verbose", "-v"],
-                                    kwargs={"action": "store_true",
-                                            "help": "output status in verbose mode"})
 
 SolutionVerifierArgument = \
     ArgumentContainer(names=["--solution-verifier"],
@@ -473,8 +396,3 @@ ObjectiveArgument = \
     ArgumentContainer(names=["--objective"],
                       kwargs={"type": str,
                               "help": "the objective to use."})
-
-ObjectivesArgument = \
-    ArgumentContainer(names=["--objectives"],
-                      kwargs={"type": str,
-                              "help": "the comma seperated objective(s) to use."})

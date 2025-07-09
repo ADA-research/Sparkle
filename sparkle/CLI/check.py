@@ -8,6 +8,7 @@ from runrunner import Runner
 from sparkle.solver import Solver
 from sparkle.instance import Instance_Set, InstanceSet
 from sparkle.selector.extractor import Extractor
+from sparkle.platform import Settings
 from sparkle.types import SolverStatus
 
 from sparkle.CLI.help import logging as sl
@@ -25,10 +26,11 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(*ac.CheckPathArgument.names, **ac.CheckPathArgument.kwargs)
     parser.add_argument(*ac.InstancePathOptional.names,
                         **ac.InstancePathOptional.kwargs)
-    parser.add_argument(*ac.CutOffTimeArgument.names,
-                        **ac.CutOffTimeArgument.kwargs)
     parser.add_argument(*ac.SeedArgument.names,
                         **ac.SeedArgument.kwargs)
+    # Settings arguments
+    parser.add_argument(*Settings.OPTION_solver_cutoff_time.args,
+                        **Settings.OPTION_solver_cutoff_time.kwargs)
     return parser
 
 
@@ -38,6 +40,7 @@ def main(argv: list[str]) -> None:
     sl.log_command(sys.argv)
     parser = parser_function()
     args = parser.parse_args(argv)
+    settings = gv.settings(args)
     type_map = {
         "extractor": Extractor,
         "feature-extractor": Extractor,
@@ -68,9 +71,9 @@ def main(argv: list[str]) -> None:
             # Test the wrapper with a dummy call
             print(f"\nTesting Wrapper {object.wrapper} ...")
             # Patchfix runsolver
-            object.runsolver_exec = gv.settings().DEFAULT_runsolver_exec
+            object.runsolver_exec = settings.DEFAULT_runsolver_exec
 
-            objectives = gv.settings().objectives
+            objectives = settings.objectives
             cutoff = args.cutoff_time if args.cutoff_time else 5  # Short call
             configuration = {}
             if object.pcs_file:
@@ -101,7 +104,7 @@ def main(argv: list[str]) -> None:
     elif isinstance(object, Extractor):
         if args.instance_path:  # Test on an instance
             # Patchfix runsolver
-            object.runsolver_exec = gv.settings().DEFAULT_runsolver_exec
+            object.runsolver_exec = settings.DEFAULT_runsolver_exec
             print(f"\nTesting Wrapper {object.wrapper} ...")
             # cutoff = args.cutoff_time if args.cutoff_time else 20  # Short call
             result = object.run(instance=args.instance_path,

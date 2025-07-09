@@ -50,8 +50,7 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.SettingsFileArgument.kwargs)
     parser.add_argument(*Settings.OPTION_solver_cutoff_time.args,
                         **Settings.OPTION_solver_cutoff_time.kwargs)
-    parser.add_argument(*ac.RunOnArgument.names,
-                        **ac.RunOnArgument.kwargs)
+    parser.add_argument(*Settings.OPTION_run_on.args, **Settings.OPTION_run_on.kwargs)
     return parser
 
 

@@ -9,14 +9,14 @@ from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
-from sparkle.CLI.help import argparse_custom as ac
+from sparkle.platform import Settings
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(description="Display the status of the platform.")
-    parser.add_argument(*ac.VerboseArgument.names,
-                        **ac.VerboseArgument.kwargs)
+    parser.add_argument(*Settings.OPTION_verbosity.args,
+                        **Settings.OPTION_verbosity.kwargs)
     return parser
 
 

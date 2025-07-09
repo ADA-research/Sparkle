@@ -25,8 +25,6 @@ def parser_function() -> argparse.ArgumentParser:
         description="Configure a solver in the platform.",
         epilog=("Note that the test instance set is only used if the ``--ablation``"
                 " or ``--validation`` flags are given"))
-    parser.add_argument(*ac.ConfiguratorArgument.names,
-                        **ac.ConfiguratorArgument.kwargs)
     parser.add_argument(*ac.SolverArgument.names,
                         **ac.SolverArgument.kwargs)
     parser.add_argument(*ac.InstanceSetTrainArgument.names,
@@ -40,6 +38,8 @@ def parser_function() -> argparse.ArgumentParser:
     # Settings Arguments
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*Settings.OPTION_configurator.args,
+                        **Settings.OPTION_configurator.kwargs)
     parser.add_argument(*Settings.OPTION_objectives.args,
                         **Settings.OPTION_objectives.kwargs)
     parser.add_argument(*Settings.OPTION_solver_cutoff_time.args,
