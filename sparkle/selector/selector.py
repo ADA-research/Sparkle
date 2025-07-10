@@ -277,7 +277,7 @@ class SelectionScenario:
         return f"selector: {self.selector.name}\n"\
                f"solver_cutoff: {self.solver_cutoff}\n"\
                f"extractor_cutoff: {self.extractor_cutoff}\n"\
-               f"ablate: {self.ablation_scenarios is not None}\n"\
+               f"ablate: {len(self.ablation_scenarios) > 0}\n"\
                f"objective: {self.objective}\n"\
                f"selector_performance_data: {self.selector_performance_path}\n"\
                f"performance_data: {self.performance_target_path}\n"\
@@ -292,11 +292,7 @@ class SelectionScenario:
         values = {key: value.strip() for key, value in
                   [line.split(": ", maxsplit=1) for line in scenario_file.open()]}
         selector_class, selector_model = values["selector"].split("_", maxsplit=1)
-        # Evaluate string to class
-        from sklearn import ensemble
-        from asf import selectors
-        selector_class = getattr(selectors, selector_class)
-        selector_model = getattr(ensemble, selector_model)
+        import ast
         selector = Selector(selector_class, selector_model)
         return SelectionScenario(
             parent_directory=scenario_file.parent,
@@ -306,4 +302,4 @@ class SelectionScenario:
             feature_data=Path(values["feature_data"]),
             feature_extractors=values["feature_extractors"].split(","),
             solver_cutoff=float(values["solver_cutoff"]),
-            ablate=bool(values["ablate"]))
+            ablate=ast.literal_eval(values["ablate"]))
