@@ -209,8 +209,7 @@ def test_read_full_file(tmp_path: Path,
     assert settings.slurm_jobs_in_parallel == 16
     assert settings.slurm_job_prepend == "echo $JOB_ID"
     assert set(settings.sbatch_settings) == set(["--mem-per-cpu=3000", "--time=25:00",
-                                                 "--partition=CPU", "--qos=fast",
-                                                 "--max_parallel_runs_per_node=8"])
+                                                 "--partition=CPU", "--qos=fast"])
     # Test writing the file
     tmp = Path("tmp.ini")
     settings.write_settings_ini(tmp)
@@ -222,7 +221,7 @@ def test_read_with_cli_file() -> None:
     """Test reading settings with CLI file argument."""
     default_settings = Path("tests/test_files/Settings/settings-full.ini")
     settings_arg = Path("sparkle/Components/sparkle_settings.ini")
-    args = argparse.Namespace(**{"file_path": settings_arg,
+    args = argparse.Namespace(**{"settings_file": settings_arg,
                                  "solver_cutoff_time": 900})  # Random setting
     settings = Settings(default_settings, args)
     # Test overridden attributes
@@ -294,13 +293,12 @@ def test_read_with_cli_file() -> None:
     assert settings.slurm_jobs_in_parallel == 25  # Override
     assert settings.slurm_job_prepend == "echo $JOB_ID"
     assert set(settings.sbatch_settings) == set(["--mem-per-cpu=3000", "--time=25:00",
-                                                 "--partition=CPU", "--qos=fast",
-                                                 "--max_parallel_runs_per_node=8"])
+                                                 "--partition=CPU", "--qos=fast"])
 
     # Test smaller override for integration tests
     override_path = Path("tests/CLI/test_files/Settings/sparkle_settings_kathleen.ini")
-    args = argparse.Namespace(**{"file_path": override_path})
-    settings = Settings(settings_arg, args)
+    args = argparse.Namespace(**{"settings_file": override_path})
+    settings.apply_arguments(args)
 
     assert set(settings.sbatch_settings) == set(["--mem-per-cpu=3000", "--time=30:00",
-                                                 "--qos=short"])
+                                                 "--qos=short", "--partition=CPU"])

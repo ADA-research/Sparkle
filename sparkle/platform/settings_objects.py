@@ -957,6 +957,7 @@ class Settings:
     def sbatch_settings(self: Settings) -> list[str]:
         """Return the sbatch settings."""
         sbatch_options = self.__settings[Settings.SECTION_slurm]
+        print([f"--{key}={sbatch_options[key]}" for key in sbatch_options.keys()])
         # Return all non-predefined keys
         return [f"--{key}={sbatch_options[key]}" for key in sbatch_options.keys()
                 if key not in Settings.sections_options[Settings.SECTION_slurm]]
