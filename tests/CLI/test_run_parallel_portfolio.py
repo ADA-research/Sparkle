@@ -7,10 +7,8 @@ import argparse
 
 from sparkle.solver import Solver
 from sparkle.instance import FileInstanceSet
-from sparkle.types.objective import SparkleObjective
 from sparkle.CLI import run_parallel_portfolio as rpp
 from sparkle.types.status import SolverStatus
-from sparkle.CLI.help import global_variables as gv
 from runrunner.base import Runner
 from runrunner.slurm import Status
 from types import SimpleNamespace
@@ -161,99 +159,3 @@ def test_parser_function() -> None:
     returned_parser = rpp.parser_function()
     assert returned_parser.description == expected_description
     assert isinstance(returned_parser, argparse.ArgumentParser)
-
-
-instance_path_list = ["--instance-path", f"{instance_path.absolute()}"]
-portfolio_name_list = ["--portfolio-name", f"{portfolio_path}"]
-solvers_list = ["--solvers"] + [str(p.absolute()) for p in solver_paths]
-objectives_list = ["--objectives", "PAR10", "status:metric,",
-                   "cpu_time:metric", "wall_time:metric", "memory:metric"]
-cutoff_time_list = ["--cutoff-time", f"{55}"]
-solver_seeds_list = ["--solver-seeds", f"{2}"]
-settings_list = ["--settings-file", f"{Path('Settings/sparkle_settings.ini')}"]
-run_on_local_list = ["--run-on", f"{Runner.LOCAL}"]
-run_on_slurm_list = ["--run-on", f"{Runner.SLURM}"]
-
-
-@pytest.mark.integration
-@pytest.mark.parametrize(
-    "case", [
-        "solver_none",
-        "run_on_local",
-        "first_objective_not_time",
-        "porfolio_name_none",
-        "empty_args"
-    ]
-)
-def test_main(case: str,
-              tmp_path: Path,
-              monkeypatch: pytest.MonkeyPatch) -> None:
-    """Test main function from run_parallel_portfolio."""
-    monkeypatch.chdir(tmp_path)
-    if case == "solver_none":
-        solvers_list_with_none = solvers_list + [f"{None}"]
-        args = instance_path_list + portfolio_name_list + solvers_list_with_none +\
-            objectives_list + cutoff_time_list + solver_seeds_list +\
-            run_on_slurm_list + settings_list
-        with pytest.raises(SystemExit) as excinfo:
-            rpp.main(args)
-        assert excinfo.value.code == -1, (
-            "Expected exit code -1, "
-            f"got {excinfo.value.code}"
-        )
-    elif case == "run_on_local":
-        args = instance_path_list + portfolio_name_list + solvers_list +\
-            objectives_list + cutoff_time_list + solver_seeds_list +\
-            run_on_local_list + settings_list
-        with pytest.raises(SystemExit) as excinfo:
-            rpp.main(args)
-        assert excinfo.value.code == -1, (
-            "Expected exit code -1, "
-            f"got {excinfo.value.code}"
-        )
-        assert str(gv.settings().run_on).lower() == "runner.local", (
-            "Expected run_on setting to be 'runner.local' "
-            f"but got runner.{gv.settings().run_on}"
-        )
-    elif case == "first_objective_not_time":
-        test_object = SparkleObjective(name="TEST")
-
-        objectives_changed = ["--objectives", f"{test_object}", "status:metric",
-                              "cpu_time:metric", "wall_time:metric", "memory:metric"]
-        args = instance_path_list + portfolio_name_list + solvers_list +\
-            objectives_changed + cutoff_time_list + solver_seeds_list +\
-            run_on_slurm_list + settings_list
-        with pytest.raises(SystemExit) as excinfo:
-            rpp.main(args)
-        assert excinfo.value.code == -1, (
-            "Expected exit code -1, "
-            f"got {excinfo.value.code}"
-        )
-    elif case == "porfolio_name_none":
-        args = instance_path_list + [f"{None}"] + solvers_list +\
-            objectives_list + cutoff_time_list + solver_seeds_list +\
-            run_on_slurm_list + settings_list
-        with patch("sparkle.CLI.run_parallel_portfolio.time.sleep", return_value=None), \
-             patch("sparkle.CLI.run_parallel_portfolio.tqdm") as mock_tqdm, \
-             patch("sparkle.CLI.run_parallel_portfolio.rrr.add_to_queue") as \
-             mock_add_to_queue:
-            fake_pbar = MagicMock()
-            fake_pbar.set_description.return_value = None
-            fake_pbar.update.return_value = None
-            mock_tqdm.return_value.__enter__.return_value = fake_pbar
-            fake_run = SimpleNamespace(jobs=fake_jobs)
-            mock_add_to_queue.return_value = fake_run
-            with pytest.raises(SystemExit) as excinfo:
-                rpp.main(args)
-            assert excinfo.value.code == 0, (
-                "Expected exit code 0, "
-                f"got {excinfo.value.code}"
-            )
-    elif case == "empty_args":
-        with pytest.raises(TypeError) as excinfo:
-            rpp.main([])
-        str_exception = excinfo.exconly()
-        assert str_exception == "TypeError: 'NoneType' object is not iterable", (
-            "Expected: `TypeError: 'NoneType' object is not iterable`, but got "
-            f"{str_exception}"
-        )

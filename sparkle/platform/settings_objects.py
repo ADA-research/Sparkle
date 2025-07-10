@@ -514,8 +514,8 @@ class Settings:
         """Apply the arguments to the settings."""
         # Read a possible second file, that overwrites the first, where applicable
         # e.g. settings are not deleted, but overwritten where applicable
-        if hasattr(argsv, "file_path") and argsv.file_path:
-            self.read_settings_ini(argsv.file_path)
+        if hasattr(argsv, "settings_file") and argsv.settings_file:
+            self.read_settings_ini(argsv.settings_file)
         # Match all possible arguments to the settings
         for argument in argsv.__dict__.keys():
             value = argsv.__dict__[argument]
