@@ -102,7 +102,7 @@ def log_command(argv: list[str]) -> None:
     # Prepare logging information
     timestamp = time.strftime("%Y-%m-%d-%H.%M.%S", time.localtime(time.time()))
     _update_caller_file_path(timestamp)
-    args = " ".join(argv[0:])
+    args = " ".join(argv)
     log_str = timestamp + "   " + args + "   " + str(caller_log_path) + "\n"
 
     # If the log file does not exist yet, write the header
