@@ -16,7 +16,7 @@ from sparkle.types import resolve_objective
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.help.nicknames import resolve_object_name
+from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
 from sparkle.CLI.initialise import check_for_initialise
 
 
@@ -186,41 +186,69 @@ def main(argv: list[str]) -> None:
                                       sbatch_options=sbatch_options,
                                       slurm_prepend=slurm_prepend,
                                       base_dir=sl.caller_log_dir)
+    jobs = [selector_run]
     if run_on == Runner.LOCAL:
         print("Sparkle portfolio selector constructed!")
     else:
         print("Sparkle portfolio selector constructor running...")
 
-    dependencies = [selector_run]
+    # Validate the selector to run on the given instances
+    instances = [resolve_instance_name(instance, Settings.DEFAULT_instance_dir)
+                 for instance in performance_data.instances]
+    run_core = Path(__file__).parent.parent.resolve() /\
+        "CLI" / "core" / "run_portfolio_selector_core.py"
+    cmds = [
+        f"python3 {run_core} "
+        f"--selector-scenario {selection_scenario.scenario_file} "
+        f"--feature-data-csv {feature_data.csv_filepath} "
+        f"--instance {instance_path} "
+        f"--log-dir {sl.caller_log_dir} "
+        for instance_path in instances]
+    selector_validation = rrr.add_to_queue(
+        runner=run_on,
+        cmd=cmds,
+        name=f"Selector Validation: {len(instances)} instances",
+        base_dir=sl.caller_log_dir,
+        dependencies=[selector_run],
+        sbatch_options=sbatch_options,
+        prepend=gv.settings().slurm_job_prepend)
+    jobs.append(selector_validation)
+
     if solver_ablation:
         for ablated_scenario in selection_scenario.ablation_scenarios:
-            selector_run = selector.construct(
+            # Construct the ablated selector
+            ablation_run = selector.construct(
                 ablated_scenario,
                 run_on=run_on,
                 sbatch_options=sbatch_options,
                 slurm_prepend=slurm_prepend,
                 base_dir=sl.caller_log_dir)
+            # Validate the ablated selector
+            cmds = [
+                f"python3 {run_core} "
+                f"--selector-scenario {ablated_scenario.scenario_file} "
+                f"--feature-data-csv {feature_data.csv_filepath} "
+                f"--instance {instance_path} "
+                f"--log-dir {sl.caller_log_dir} "
+                for instance_path in instances]
+            ablation_validation = rrr.add_to_queue(
+                runner=run_on,
+                cmd=cmds,
+                name=f"{ablated_scenario.name} Validation: {len(instances)} instances",
+                base_dir=sl.caller_log_dir,
+                dependencies=[ablation_run],
+                sbatch_options=sbatch_options,
+                prepend=gv.settings().slurm_job_prepend)
+            jobs.extend([ablation_run, ablation_validation])
 
-    # Compute the marginal contribution
-    with_actual = "--actual" if solver_ablation else ""
-    cmd = (f"python3 sparkle/CLI/compute_marginal_contribution.py --selection-scenario "
-           f"{selection_scenario.scenario_file}  --perfect {with_actual}")
-    solver_names = ", ".join([Path(s).name for s in performance_data.solvers])
-    marginal_contribution = rrr.add_to_queue(
-        runner=run_on,
-        cmd=cmd,
-        name=f"Marginal Contribution computation: {solver_names}",
-        base_dir=sl.caller_log_dir,
-        dependencies=dependencies,
-        sbatch_options=sbatch_options,
-        prepend=gv.settings().slurm_job_prepend)
-    dependencies.append(marginal_contribution)
     if run_on == Runner.LOCAL:
-        marginal_contribution.wait()
-        print("Selector marginal contribution computing done!")
+        for job in jobs:
+            job.wait()
+        selector_validation.wait()
+        print("Selector validation done!")
     else:
         print(f"Running selector construction through Slurm with job id(s): "
-              f"{', '.join([d.run_id for d in dependencies])}")
+              f"{', '.join([d.run_id for d in jobs])}")
 
     # Write used settings to file
     gv.settings().write_used_settings()

@@ -32,13 +32,18 @@ if __name__ == "__main__":
     selector_scenario = SelectionScenario.from_file(args.selector_scenario)
     feature_data = FeatureDataFrame(Path(args.feature_data_csv))
     instance = Instance_Set(args.instance)
+    instance_name = str(instance.instances[0])
     # Note: Following code could be adjusted to run entire instance set
 
     # Run portfolio selector
     print("Sparkle portfolio selector predicting ...")
+    feature_instance_name = instance_name
+    if instance_name not in feature_data.instances and Path(
+            instance_name).name in feature_data.instances:
+        feature_instance_name = Path(instance_name).name
     predict_schedule = selector_scenario.selector.run(
         selector_scenario.selector_file_path,
-        str(instance.instances[0]),
+        feature_instance_name,
         feature_data)
 
     if predict_schedule is None:  # Selector Failed to produce prediction
