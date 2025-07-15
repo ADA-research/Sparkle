@@ -145,7 +145,7 @@ K. van der Blom, H. H. Hoos, C. Luo and J. G. Rook, **Sparkle: Toward Accessible
 Thijs Snelleman,
 Jeroen Rook,
 Hadar Shavit,
-Holger H. Hoos,
+Holger H. Hoos
 
 ### Contributors
 Chuan Luo,
@@ -159,7 +159,7 @@ Yingliu Lu,
 Malte Schwerin,
 Aaron Berger,
 Marie Anastacio,
-Aaron Berger
+Aaron Berger,
 Koen van der Blom,
 Noah Peil,
 Brian Schiller,
