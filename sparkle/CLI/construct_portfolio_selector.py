@@ -10,7 +10,7 @@ from runrunner.base import Runner
 from sparkle.selector import Selector, SelectionScenario
 from sparkle.instance import Instance_Set
 
-from sparkle.platform.settings_objects import SettingState
+from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.types import resolve_objective
 from sparkle.CLI.help import global_variables as gv
@@ -35,10 +35,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.SelectorAblationArgument.kwargs)
     parser.add_argument(*ac.InstanceSetTrainOptionalArgument.names,
                         **ac.InstanceSetTrainOptionalArgument.kwargs)
-    parser.add_argument(*ac.RunOnArgument.names,
-                        **ac.RunOnArgument.kwargs)
-    parser.add_argument(*ac.SettingsFileArgument.names,
-                        **ac.SettingsFileArgument.kwargs)
     # Solver Configurations arguments
     configuration_group = parser.add_mutually_exclusive_group(required=False)
     configuration_group.add_argument(*ac.AllSolverConfigurationArgument.names,
@@ -48,6 +44,11 @@ def parser_function() -> argparse.ArgumentParser:
     configuration_group.add_argument(*ac.DefaultSolverConfigurationArgument.names,
                                      **ac.DefaultSolverConfigurationArgument.kwargs)
     # TODO: Allow user to specify configuration ids to use
+    # Settings arguments
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*Settings.OPTION_run_on.args,
+                        **Settings.OPTION_run_on.kwargs)
     return parser
 
 
@@ -79,25 +80,20 @@ def main(argv: list[str]) -> None:
 
     # Process command line arguments
     args = parser.parse_args(argv)
+    settings = gv.settings(args)
     flag_recompute_portfolio = args.recompute_portfolio_selector
     solver_ablation = args.solver_ablation
 
-    if args.settings_file is not None:
-        # Do first, so other command line options can override settings from the file
-        gv.settings().read_settings_ini(args.settings_file, SettingState.CMD_LINE)
     if args.objective is not None:
         objective = resolve_objective(args.objective)
     else:
-        objective = gv.settings().get_general_sparkle_objectives()[0]
+        objective = settings.objectives[0]
         print("WARNING: No objective specified, defaulting to first objective from "
               f"settings ({objective}).")
-    if args.run_on is not None:
-        gv.settings().set_run_on(args.run_on.value, SettingState.CMD_LINE)
-    run_on = gv.settings().get_run_on()
+    run_on = settings.run_on
 
     print("Start constructing Sparkle portfolio selector ...")
-    selector = Selector(gv.settings().get_selection_class(),
-                        gv.settings().get_selection_model())
+    selector = Selector(settings.selection_class, settings.selection_model)
 
     instance_set = None
     if args.instance_set_train is not None:
@@ -106,8 +102,8 @@ def main(argv: list[str]) -> None:
             gv.file_storage_data_mapping[gv.instances_nickname_path],
             gv.settings().DEFAULT_instance_dir, Instance_Set)
 
-    solver_cutoff_time = gv.settings().get_general_solver_cutoff_time()
-    extractor_cutoff_time = gv.settings().get_general_extractor_cutoff_time()
+    solver_cutoff_time = gv.settings().solver_cutoff_time
+    extractor_cutoff_time = gv.settings().extractor_cutoff_time
 
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
@@ -183,8 +179,8 @@ def main(argv: list[str]) -> None:
             for scenario in selection_scenario.ablation_scenarios:
                 scenario.selector_file_path.unlink(missing_ok=True)
 
-    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
-    slurm_prepend = gv.settings().get_slurm_job_prepend()
+    sbatch_options = gv.settings().sbatch_settings
+    slurm_prepend = gv.settings().slurm_job_prepend
     selector_run = selector.construct(selection_scenario,
                                       run_on=run_on,
                                       sbatch_options=sbatch_options,
@@ -217,7 +213,7 @@ def main(argv: list[str]) -> None:
         base_dir=sl.caller_log_dir,
         dependencies=dependencies,
         sbatch_options=sbatch_options,
-        prepend=gv.settings().get_slurm_job_prepend())
+        prepend=gv.settings().slurm_job_prepend)
     dependencies.append(marginal_contribution)
     if run_on == Runner.LOCAL:
         marginal_contribution.wait()

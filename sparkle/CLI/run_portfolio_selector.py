@@ -2,14 +2,14 @@
 """Sparkle command to execute a portfolio selector."""
 import sys
 import argparse
-from pathlib import PurePath, Path
+from pathlib import Path
 
 import runrunner as rrr
 from runrunner import Runner
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
-from sparkle.platform.settings_objects import Settings, SettingState
+from sparkle.platform.settings_objects import Settings
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.structures import FeatureDataFrame
 from sparkle.CLI.initialise import check_for_initialise
@@ -28,10 +28,10 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.SelectionScenarioArgument.kwargs)
     parser.add_argument(*ac.InstanceSetRequiredArgument.names,
                         **ac.InstanceSetRequiredArgument.kwargs)
-    parser.add_argument(*ac.RunOnArgument.names,
-                        **ac.RunOnArgument.kwargs)
+    # Settings arguments
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*Settings.OPTION_run_on.args, **Settings.OPTION_run_on.kwargs)
     return parser
 
 
@@ -43,32 +43,25 @@ def main(argv: list[str]) -> None:
 
     # Define command line arguments
     parser = parser_function()
-
     # Process command line arguments
     args = parser.parse_args(argv)
-
-    if args.settings_file is not None:
-        gv.settings().read_settings_ini(
-            args.settings_file, SettingState.CMD_LINE
-        )  # Do first, so other command line options can override settings from the file
-    if args.run_on is not None:
-        gv.settings().set_run_on(args.run_on.value, SettingState.CMD_LINE)
+    settings = gv.settings(args)
 
     # Compare current settings to latest.ini
-    prev_settings = Settings(PurePath("Settings/latest.ini"))
-    Settings.check_settings_changes(gv.settings(), prev_settings)
+    prev_settings = Settings(Settings.DEFAULT_previous_settings_path)
+    Settings.check_settings_changes(settings, prev_settings)
 
     data_set: InstanceSet = resolve_object_name(
         args.instance,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.settings().DEFAULT_instance_dir, Instance_Set)
+        settings.DEFAULT_instance_dir, Instance_Set)
 
     if data_set is None:
         print("ERROR: The instance (set) could not be found. Please make sure the "
               "path is correct.")
         sys.exit(-1)
 
-    run_on = gv.settings().get_run_on()
+    run_on = settings.run_on
     selector_scenario = SelectionScenario.from_file(args.selection_scenario)
     # Create a new feature dataframe for this run, compute the features
     test_case_path = selector_scenario.directory / data_set.name
@@ -79,7 +72,7 @@ def main(argv: list[str]) -> None:
         extractor = resolve_object_name(
             extractor_name,
             gv.file_storage_data_mapping[gv.instances_nickname_path],
-            gv.settings().DEFAULT_extractor_dir, Extractor)
+            settings.DEFAULT_extractor_dir, Extractor)
         feature_dataframe.add_extractor(extractor_name, extractor.features)
 
     feature_dataframe.add_instances(data_set.instances)
@@ -113,8 +106,8 @@ def main(argv: list[str]) -> None:
         stderr=None if run_on == Runner.LOCAL else subprocess.PIPE,  # Print to screen
         base_dir=sl.caller_log_dir,
         dependencies=feature_run,
-        sbatch_options=gv.settings().get_slurm_extra_options(as_args=True),
-        prepend=gv.settings().get_slurm_job_prepend())
+        sbatch_options=settings.sbatch_settings,
+        prepend=settings.slurm_job_prepend)
 
     if run_on == Runner.LOCAL:
         selector_run.wait()
@@ -123,7 +116,7 @@ def main(argv: list[str]) -> None:
         print("Sparkle portfolio selector is running ...")
 
     # Write used settings to file
-    gv.settings().write_used_settings()
+    settings.write_used_settings()
     sys.exit(0)
 
 

@@ -329,7 +329,6 @@ class AblationScenario:
         self.config_scenario = configuration_scenario
         self.solver = configuration_scenario.solver
         self.train_set = configuration_scenario.instance_set
-        self.concurrent_clis = None
         self.test_set = test_set
         self.cutoff_time = configuration_scenario.solver_cutoff_time
         self.cutoff_length = cutoff_length

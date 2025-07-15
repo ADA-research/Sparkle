@@ -33,6 +33,7 @@ def test_compute_features_command(tmp_path: Path,
     assert pytest_wrapped_e.value.code == 0
 
     # Run the compute features command on slurm
+    print(settings_path)
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         compute_features.main(["--settings-file", str(settings_path),
                                "--run-on", "slurm"])

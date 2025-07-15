@@ -2,6 +2,18 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.9.5] - ??/??/2025
+
+### Added
+
+### Changed
+- Changed the CLI arguments and settings structures to be more streamlined and unified [SPRK-175]
+
+### Fixed
+
+### [Known issues]
+- IRACE configuration currently does not work as the IRACE .rdata output files cannot be read by R/IRACE.
+
 ## [0.9.4] - 01/06/2025
 
 ### Added

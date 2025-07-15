@@ -1,63 +1,7 @@
 """Custom helper class and functions to process CLI arguments with argparse."""
-
 from __future__ import annotations
-import argparse
-import enum
 from pathlib import Path
 from typing import Any
-
-from runrunner.base import Runner
-
-from sparkle.platform.settings_objects import SettingState, Settings
-
-
-class SetByUser(argparse.Action):
-    """Possible action to execute for CLI argument."""
-
-    def __call__(self: SetByUser, parser: argparse.ArgumentParser,
-                 namespace: argparse.Namespace, values: str, option_string: str = None)\
-            -> None:
-        """Set attributes when called."""
-        setattr(namespace, self.dest, values)
-        setattr(namespace, self.dest + "_nondefault", True)
-
-
-# Taken from https://stackoverflow.com/a/60750535
-class EnumAction(argparse.Action):
-    """Argparse action for handling Enums."""
-
-    def __init__(self: EnumAction, **kwargs: str) -> None:
-        """Initialise the EnumAction."""
-        # Pop off the type value
-        enum_type = kwargs.pop("type", None)
-
-        # Ensure an Enum subclass is provided
-        if enum_type is None:
-            raise ValueError("type must be assigned an Enum when using EnumAction")
-        if not issubclass(enum_type, enum.Enum):
-            raise TypeError("type must be an Enum when using EnumAction")
-
-        # Generate choices from the Enum
-        kwargs.setdefault("choices", tuple(e.value for e in enum_type))
-
-        super(EnumAction, self).__init__(**kwargs)
-
-        self._enum = enum_type
-
-    def __call__(self: EnumAction, parser: argparse.ArgumentParser,
-                 namespace: argparse.Namespace, values: str, option_string: str = None) \
-            -> None:
-        """Converts value back to Enum."""
-        value = self._enum(values)
-        setattr(namespace, self.dest, value)
-
-
-def user_set_state(args: argparse.Namespace, arg_name: str) -> SettingState:
-    """Return the SettingState of an argument."""
-    if hasattr(args, arg_name + "_nondefault"):
-        return SettingState.CMD_LINE
-    else:
-        return SettingState.DEFAULT
 
 
 class ArgumentContainer():
@@ -162,24 +106,6 @@ ConfigurationArgument = \
                               "nargs": "+",
                               "help": "The indices of which configurations to use"})
 
-ConfiguratorArgument = ArgumentContainer(names=["--configurator"],
-                                         kwargs={"type": str,
-                                                 "help": "name of the configurator"})
-
-CPUTimeArgument = \
-    ArgumentContainer(names=["--cpu-time"],
-                      kwargs={"type": int,
-                              "help": "configuration budget per configurator run in "
-                                      "seconds (cpu)"})
-
-CutOffTimeArgument = \
-    ArgumentContainer(names=["--cutoff-time", "--cutoff", "--timeout"],
-                      kwargs={"type": int,
-                              "help": "The duration the portfolio will run before the "
-                                      "solvers within the portfolio will be stopped "
-                                      "(default: "
-                                      f"{Settings.DEFAULT_general_solver_cutoff_time})"})
-
 DefaultSolverConfigurationArgument = \
     ArgumentContainer(names=["--default-configuration"],
                       kwargs={"action": "store_true",
@@ -233,7 +159,6 @@ InstanceSetRequiredArgument = \
                       kwargs={"required": True,
                               "type": Path,
                               "help": "path to instance (set)"})
-
 
 InstanceSetTestArgument = \
     ArgumentContainer(names=["--instance-set-test"],
@@ -320,46 +245,17 @@ NoSavePlatformArgument = ArgumentContainer(names=["--no-save"],
                                                    "help": "do not save the platform "
                                                            "upon re-initialisation."})
 
-NumberOfRunsConfigurationArgument = \
-    ArgumentContainer(names=["--number-of-runs"],
-                      kwargs={"type": int,
-                              "help": "number of configuration runs to execute"})
-
-NumberOfRunsAblationArgument = \
-    ArgumentContainer(names=["--number-of-runs"],
-                      kwargs={"type": int,
-                              "help": "Number of configuration runs to execute"})
-
 PerfectSelectorMarginalContributionArgument =\
     ArgumentContainer(names=["--perfect"],
                       kwargs={"action": "store_true",
                               "help": "compute the marginal contribution "
                                       "for the perfect selector"})
 
-RacingArgument = ArgumentContainer(names=["--racing"],
-                                   kwargs={"type": bool,
-                                           "help": "Performs abaltion analysis with "
-                                                   "racing"})
-
 RecomputeFeaturesArgument = \
     ArgumentContainer(names=["--recompute"],
                       kwargs={"action": "store_true",
                               "help": "Re-run feature extractor for instances with "
                                       "previously computed features"})
-
-RecomputeMarginalContributionArgument = \
-    ArgumentContainer(names=["--recompute"],
-                      kwargs={"action": "store_true",
-                              "help": "force marginal contribution to be recomputed even"
-                                      " when it already exists in file for the current "
-                                      "selector"})
-
-RecomputeMarginalContributionForSelectorArgument = \
-    ArgumentContainer(names=["--recompute-marginal-contribution"],
-                      kwargs={"action": "store_true",
-                              "help": "force marginal contribution to be recomputed even"
-                                      " when it already exists in file for the current "
-                                      "selector"})
 
 RecomputePortfolioSelectorArgument = \
     ArgumentContainer(names=["--recompute-portfolio-selector"],
@@ -389,14 +285,6 @@ RebuildRunsolverArgument = \
                               "default": False,
                               "help": "Clean the RunSolver executable and rebuild it."})
 
-RunOnArgument = ArgumentContainer(names=["--run-on"],
-                                  kwargs={"type": Runner,
-                                          "choices": [Runner.LOCAL,
-                                                      Runner.SLURM],
-                                          "action": EnumAction,
-                                          "help": "On which computer or cluster "
-                                                  "environment to execute the "
-                                                  "calculation."})
 
 SeedArgument = ArgumentContainer(names=["--seed"],
                                  kwargs={"type": int,
@@ -419,7 +307,7 @@ SettingsFileArgument = \
     ArgumentContainer(names=["--settings-file"],
                       kwargs={"type": Path,
                               "help": "Specify the settings file to use in case you want"
-                                      " to use one other than the default"})
+                                      " supplement or override the default file."})
 
 SkipChecksArgument = ArgumentContainer(
     names=["--skip-checks"],
@@ -452,17 +340,6 @@ SolversArgument = ArgumentContainer(names=["--solvers", "--solver-paths",
                                             "help": "Specify the list of solvers to be "
                                                     "used. If not specifed, all solvers "
                                                     "known in Sparkle will be used."})
-
-SolverCallsArgument = \
-    ArgumentContainer(names=["--solver-calls"],
-                      kwargs={"type": int,
-                              "help": "number of solver calls to execute"})
-
-SolverSeedsArgument = \
-    ArgumentContainer(names=["--solver-seeds"],
-                      kwargs={"type": int,
-                              "help": "number of random seeds per solver to execute"})
-
 SolverRemoveArgument = \
     ArgumentContainer(names=["solver"],
                       kwargs={"metavar": "solver",
@@ -482,11 +359,6 @@ SolversReportArgument = ArgumentContainer(
             "help": "Solver(s) to use for the report. If not specified, all solvers are "
                     "included."})
 
-SolverCutOffTimeArgument = \
-    ArgumentContainer(names=["--solver-cutoff-time", "--target-cutoff-time"],
-                      kwargs={"type": int,
-                              "help": "cutoff time per Solver run in seconds"})
-
 TestSetRunAllConfigurationArgument = \
     ArgumentContainer(names=["--test-set-run-all-configurations"],
                       kwargs={"required": False,
@@ -498,16 +370,6 @@ UseFeaturesArgument = ArgumentContainer(names=["--use-features"],
                                                 "action": "store_true",
                                                 "help": "use the training set's features"
                                                         " for configuration"})
-
-VerboseArgument = ArgumentContainer(names=["--verbose", "-v"],
-                                    kwargs={"action": "store_true",
-                                            "help": "output status in verbose mode"})
-
-WallClockTimeArgument = \
-    ArgumentContainer(names=["--wallclock-time"],
-                      kwargs={"type": int,
-                              "help": "configuration budget per configurator run in "
-                                      "seconds (wallclock)"})
 
 SolutionVerifierArgument = \
     ArgumentContainer(names=["--solution-verifier"],
@@ -522,8 +384,3 @@ ObjectiveArgument = \
     ArgumentContainer(names=["--objective"],
                       kwargs={"type": str,
                               "help": "the objective to use."})
-
-ObjectivesArgument = \
-    ArgumentContainer(names=["--objectives"],
-                      kwargs={"type": str,
-                              "help": "the comma seperated objective(s) to use."})

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Definitions of constants broadly used in Sparkle."""
 import ast
+from argparse import Namespace
 
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame
@@ -19,11 +20,14 @@ def get_seed() -> int:
 __settings: Settings = None
 
 
-def settings() -> Settings:
+def settings(argsv: Namespace = None) -> Settings:
     """Function to get the global settings object."""
     global __settings
     if __settings is None:
-        __settings = Settings()
+        __settings = Settings(Settings.DEFAULT_settings_path,
+                              argsv=argsv)
+    elif argsv is not None:
+        __settings.apply_arguments(argsv)
     return __settings
 
 
@@ -34,7 +38,7 @@ __selection_scenarios: list[SelectionScenario] = None
 def configuration_scenarios(refresh: bool = False) -> list[ConfigurationScenario]:
     """Fetch all known configuration scenarios."""
     global __configuration_scenarios
-    config_path = settings().DEFAULT_configuration_output
+    config_path = Settings.DEFAULT_configuration_output
     if __configuration_scenarios is None or refresh:
         __configuration_scenarios = []
         for f in config_path.glob("*/*/*.*"):  # We look for files at depth three
@@ -54,7 +58,7 @@ def configuration_scenarios(refresh: bool = False) -> list[ConfigurationScenario
 def selection_scenarios(refresh: bool = False) -> list[SelectionScenario]:
     """Fetch all known selection scenarios."""
     global __selection_scenarios
-    selection_path = settings().DEFAULT_selection_output
+    selection_path = Settings.DEFAULT_selection_output
     if __selection_scenarios is None or refresh:
         __selection_scenarios = []
         for f in selection_path.glob("*/*/*.txt"):  # We look for files at depth three
@@ -66,7 +70,7 @@ def selection_scenarios(refresh: bool = False) -> list[SelectionScenario]:
 
 def parallel_portfolio_scenarios() -> list[PerformanceDataFrame]:
     """Fetch all known parallel portfolio scenarios."""
-    parallel_portfolio_path = settings().DEFAULT_parallel_portfolio_output
+    parallel_portfolio_path = Settings.DEFAULT_parallel_portfolio_output
     return [PerformanceDataFrame(f) for f in parallel_portfolio_path.glob("*/*.csv")]
 
 
