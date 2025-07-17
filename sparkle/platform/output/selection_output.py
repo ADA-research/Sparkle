@@ -1,15 +1,69 @@
 """Sparkle class to organise configuration output."""
 from __future__ import annotations
+import operator
+import json
+from pathlib import Path
 
 from sparkle.selector import SelectionScenario
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-# TODO: This dependency should be removed or the functionality should be moved
-from sparkle.CLI.compute_marginal_contribution import \
-    compute_selector_marginal_contribution
 from sparkle.platform.output.structures import SelectionPerformance, SelectionSolverData
 
-import json
-from pathlib import Path
+
+def compute_selector_marginal_contribution(
+        selection_scenario: SelectionScenario) -> list[tuple[str, float]]:
+    """Compute the marginal contributions of solvers in the selector.
+
+    Args:
+      performance_data: Performance data object
+      feature_data_csv_path: Path to the CSV file with the feature data.
+      selection_scenario: The selector scenario for which to compute
+        marginal contribution.
+      objective: Objective to compute the marginal contribution for.
+
+    Returns:
+      A list of 4-tuples where every 4-tuple is of the form
+        (solver_name, config_id, marginal contribution, best_performance).
+    """
+    selector_performance = selection_scenario.objective.instance_aggregator(
+        selection_scenario.selector_performance_data.get_value(
+            SelectionScenario.__selector_solver_name__,
+            instance=selection_scenario.training_instances,
+            objective=selection_scenario.objective.name))
+    rank_list = []
+    compare = operator.lt if selection_scenario.objective.minimise else operator.gt
+    # Compute contribution per solver
+    for ablation_scenario in selection_scenario.ablation_scenarios:
+        # Hacky way of getting the needed data on the ablation
+        _, solver_name, config = ablation_scenario.directory.name.split("_", maxsplit=2)
+        # Hacky way of reconstructing the solver id in the PDF
+        solver = f"Solvers/{solver_name}"
+        ablated_selector_performance = ablation_scenario.objective.instance_aggregator(
+            ablation_scenario.selector_performance_data.get_value(
+                SelectionScenario.__selector_solver_name__,
+                instance=ablation_scenario.training_instances,
+                objective=ablation_scenario.objective.name))
+
+        # 1. If the performance remains equal, this solver did not contribute
+        # 2. If there is a performance decay without this solver, it does contribute
+        # 3. If there is a performance improvement, we have a bad portfolio selector
+        if ablated_selector_performance == selector_performance:
+            marginal_contribution = 0.0
+        elif not compare(ablated_selector_performance, selector_performance):
+            # The performance decreases, we have a contributing solver
+            marginal_contribution =\
+                ablated_selector_performance / selector_performance
+        else:
+            print("****** WARNING DUBIOUS SELECTOR/SOLVER: "
+                  f"The omission of solver {solver_name} ({config}) yields an "
+                  "improvement. The selector improves better without this solver. "
+                  "It may be usefull to construct a portfolio without this solver.")
+            marginal_contribution = 0.0
+
+        rank_list.append((solver, config,
+                          marginal_contribution, ablated_selector_performance))
+
+    rank_list.sort(key=lambda contribution: contribution[2], reverse=True)
+    return rank_list
 
 
 class SelectionOutput:
@@ -68,8 +122,7 @@ class SelectionOutput:
                 sort=True)
 
         self.marginal_contribution_actual = \
-            compute_selector_marginal_contribution(feature_data,
-                                                   selection_scenario)
+            compute_selector_marginal_contribution(selection_scenario)
         # Collect performance data
         self.vbs_performance_data = solver_performance_data.best_instance_performance(
             instances=self.training_instances,

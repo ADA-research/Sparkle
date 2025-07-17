@@ -8,6 +8,7 @@ Notable changes to Sparkle will be documented in this file.
 
 ### Changed
 - Changed the CLI arguments and settings structures to be more streamlined and unified [SPRK-175]
+- Refactored usage of run portfolio selector and marginal contribution computation [SPRK-177]
 
 ### Fixed
 

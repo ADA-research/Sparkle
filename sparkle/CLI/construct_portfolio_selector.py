@@ -2,9 +2,7 @@
 """Sparkle command to construct a portfolio selector."""
 import sys
 import argparse
-from pathlib import Path
 
-import runrunner as rrr
 from runrunner.base import Runner
 
 from sparkle.selector import Selector, SelectionScenario
@@ -16,7 +14,7 @@ from sparkle.types import resolve_objective
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.help.nicknames import resolve_object_name
+from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
 from sparkle.CLI.initialise import check_for_initialise
 
 
@@ -186,41 +184,55 @@ def main(argv: list[str]) -> None:
                                       sbatch_options=sbatch_options,
                                       slurm_prepend=slurm_prepend,
                                       base_dir=sl.caller_log_dir)
+    jobs = [selector_run]
     if run_on == Runner.LOCAL:
         print("Sparkle portfolio selector constructed!")
     else:
         print("Sparkle portfolio selector constructor running...")
 
-    dependencies = [selector_run]
+    # Validate the selector to run on the given instances
+    instances = [resolve_instance_name(instance, Settings.DEFAULT_instance_dir)
+                 for instance in performance_data.instances]
+    selector_validation = selector.run_cli(
+        selection_scenario.scenario_file,
+        instances,
+        feature_data.csv_filepath,
+        run_on=run_on,
+        sbatch_options=sbatch_options,
+        slurm_prepend=slurm_prepend,
+        dependencies=[selector_run],
+        log_dir=sl.caller_log_dir)
+    jobs.append(selector_validation)
+
     if solver_ablation:
         for ablated_scenario in selection_scenario.ablation_scenarios:
-            selector_run = selector.construct(
+            # Construct the ablated selector
+            ablation_run = selector.construct(
                 ablated_scenario,
                 run_on=run_on,
                 sbatch_options=sbatch_options,
                 slurm_prepend=slurm_prepend,
                 base_dir=sl.caller_log_dir)
+            # Validate the ablated selector
+            ablation_validation = selector.run_cli(
+                ablated_scenario.scenario_file,
+                instances,
+                feature_data.csv_filepath,
+                run_on=run_on,
+                sbatch_options=sbatch_options,
+                slurm_prepend=slurm_prepend,
+                dependencies=[ablation_run],
+                log_dir=sl.caller_log_dir)
+            jobs.extend([ablation_run, ablation_validation])
 
-    # Compute the marginal contribution
-    with_actual = "--actual" if solver_ablation else ""
-    cmd = (f"python3 sparkle/CLI/compute_marginal_contribution.py --selection-scenario "
-           f"{selection_scenario.scenario_file}  --perfect {with_actual}")
-    solver_names = ", ".join([Path(s).name for s in performance_data.solvers])
-    marginal_contribution = rrr.add_to_queue(
-        runner=run_on,
-        cmd=cmd,
-        name=f"Marginal Contribution computation: {solver_names}",
-        base_dir=sl.caller_log_dir,
-        dependencies=dependencies,
-        sbatch_options=sbatch_options,
-        prepend=gv.settings().slurm_job_prepend)
-    dependencies.append(marginal_contribution)
     if run_on == Runner.LOCAL:
-        marginal_contribution.wait()
-        print("Selector marginal contribution computing done!")
+        for job in jobs:
+            job.wait()
+        selector_validation.wait()
+        print("Selector validation done!")
     else:
         print(f"Running selector construction through Slurm with job id(s): "
-              f"{', '.join([d.run_id for d in dependencies])}")
+              f"{', '.join([d.run_id for d in jobs])}")
 
     # Write used settings to file
     gv.settings().write_used_settings()

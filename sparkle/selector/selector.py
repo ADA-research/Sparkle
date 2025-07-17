@@ -14,10 +14,12 @@ import pandas as pd
 
 from sparkle.types import SparkleObjective, resolve_objective
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
+from sparkle.instance import InstanceSet
 
 
 class Selector:
     """The Selector class for handling Algorithm Selection."""
+    selector_cli = Path(__file__).parent / "selector_cli.py"
 
     def __init__(
             self: Selector,
@@ -114,6 +116,59 @@ class Selector:
             solver_name, conf_index = solver.split("_", maxsplit=1)
             schedule[index] = (solver_name, conf_index, time)
         return schedule
+
+    def run_cli(self: Selector,
+                scenario_path: Path,
+                instance_set: InstanceSet | list[Path],
+                feature_data: Path,
+                run_on: Runner = Runner.LOCAL,
+                sbatch_options: list[str] = None,
+                slurm_prepend: str | list[str] | Path = None,
+                dependencies: list[Run] = None,
+                log_dir: Path = None) -> Run:
+        """Run the Selector CLI and write result to the Scenario PerformanceDataFrame.
+
+        Args:
+            scenario_path: The path to the scenario with the Selector to run.
+            instance_set: The instance set to run the Selector on.
+            feature_data: The instance feature data to use.
+            run_on: Which runner to use. Defaults to slurm.
+            sbatch_options: Additional options to pass to sbatch.
+            slurm_prepend: Slurm script to prepend to the sbatch
+            dependencies: List of dependencies to add to the job.
+            log_dir: The directory to write logs to.
+
+        Returns:
+            The Run object.
+        """
+        # NOTE: The selector object and the scenario selector could differ which could
+        # cause unintended behaviour (e.g. running a different selector than desired)
+        instances = instance_set if isinstance(instance_set, list) \
+            else instance_set.instance_paths
+        commands = [
+            f"python3 {Selector.selector_cli} "
+            f"--selector-scenario {scenario_path} "
+            f"--instance {instance_path} "
+            f"--feature-data {feature_data} "
+            f"--log-dir {log_dir}"
+            for instance_path in instances]
+        print(commands[0])
+        job_name = f"Run Selector: {self.name} on {len(instances)} instances"
+        import subprocess
+        r = rrr.add_to_queue(
+            runner=run_on,
+            cmd=commands,
+            name=job_name,
+            stdout=None if run_on == Runner.LOCAL else subprocess.PIPE,  # Print
+            stderr=None if run_on == Runner.LOCAL else subprocess.PIPE,  # Print
+            base_dir=log_dir,
+            sbatch_options=sbatch_options,
+            prepend=slurm_prepend,
+            dependencies=dependencies
+        )
+        if run_on == Runner.LOCAL:
+            r.wait()
+        return r
 
 
 class SelectionScenario:
