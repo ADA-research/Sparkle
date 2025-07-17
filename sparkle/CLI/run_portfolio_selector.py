@@ -2,9 +2,7 @@
 """Sparkle command to execute a portfolio selector."""
 import sys
 import argparse
-from pathlib import Path
 
-import runrunner as rrr
 from runrunner import Runner
 
 from sparkle.CLI.help import global_variables as gv
@@ -87,27 +85,16 @@ def main(argv: list[str]) -> None:
         selector_scenario.selector_performance_data.add_instance(str(instance))
     selector_scenario.selector_performance_data.save_csv()
 
-    run_core = Path(__file__).parent.parent.resolve() /\
-        "CLI" / "core" / "run_portfolio_selector_core.py"
-    cmd_list = [
-        f"python3 {run_core} "
-        f"--selector-scenario {args.selection_scenario} "
-        f"--feature-data-csv {feature_dataframe.csv_filepath} "
-        f"--instance {instance_name} "
-        f"--log-dir {sl.caller_log_dir} "
-        for instance_name in data_set.instances]
-
-    import subprocess
-    selector_run = rrr.add_to_queue(
-        runner=run_on,
-        cmd=cmd_list,
-        name=f"Portfolio Selector: {selector_scenario.selector.name} on {data_set.name}",
-        stdout=None if run_on == Runner.LOCAL else subprocess.PIPE,  # Print to screen
-        stderr=None if run_on == Runner.LOCAL else subprocess.PIPE,  # Print to screen
-        base_dir=sl.caller_log_dir,
-        dependencies=feature_run,
+    selector_run = selector_scenario.selector.run_cli(
+        scenario_path=selector_scenario.scenario_file,
+        instance_set=data_set,
+        feature_data=feature_dataframe.csv_filepath,
+        run_on=run_on,
+        slurm_prepend=settings.slurm_job_prepend,
         sbatch_options=settings.sbatch_settings,
-        prepend=settings.slurm_job_prepend)
+        dependencies=feature_run,
+        log_dir=sl.caller_log_dir,
+    )
 
     if run_on == Runner.LOCAL:
         selector_run.wait()

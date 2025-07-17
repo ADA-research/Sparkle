@@ -22,12 +22,6 @@ class ArgumentContainer():
         self.kwargs = kwargs
 
 
-ActualMarginalContributionArgument = \
-    ArgumentContainer(names=["--actual"],
-                      kwargs={"action": "store_true",
-                              "help": "compute the marginal contribution "
-                                      "for the actual selector"})
-
 AllJobsArgument = \
     ArgumentContainer(names=["--all"],
                       kwargs={"action": "store_true",
@@ -245,12 +239,6 @@ NoSavePlatformArgument = ArgumentContainer(names=["--no-save"],
                                                    "help": "do not save the platform "
                                                            "upon re-initialisation."})
 
-PerfectSelectorMarginalContributionArgument =\
-    ArgumentContainer(names=["--perfect"],
-                      kwargs={"action": "store_true",
-                              "help": "compute the marginal contribution "
-                                      "for the perfect selector"})
-
 RecomputeFeaturesArgument = \
     ArgumentContainer(names=["--recompute"],
                       kwargs={"action": "store_true",
@@ -262,9 +250,7 @@ RecomputePortfolioSelectorArgument = \
                       kwargs={"action": "store_true",
                               "help": "force the construction of a new portfolio "
                               "selector even when it already exists for the current "
-                              "feature and performance data. NOTE: This will also "
-                              "result in the computation of the marginal contributions "
-                              "of solvers to the new portfolio selector."})
+                              "feature and performance data."})
 
 RecomputeRunSolversArgument = \
     ArgumentContainer(names=["--recompute"],

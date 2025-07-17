@@ -2,9 +2,7 @@
 """Sparkle command to construct a portfolio selector."""
 import sys
 import argparse
-from pathlib import Path
 
-import runrunner as rrr
 from runrunner.base import Runner
 
 from sparkle.selector import Selector, SelectionScenario
@@ -195,23 +193,15 @@ def main(argv: list[str]) -> None:
     # Validate the selector to run on the given instances
     instances = [resolve_instance_name(instance, Settings.DEFAULT_instance_dir)
                  for instance in performance_data.instances]
-    run_core = Path(__file__).parent.parent.resolve() /\
-        "CLI" / "core" / "run_portfolio_selector_core.py"
-    cmds = [
-        f"python3 {run_core} "
-        f"--selector-scenario {selection_scenario.scenario_file} "
-        f"--feature-data-csv {feature_data.csv_filepath} "
-        f"--instance {instance_path} "
-        f"--log-dir {sl.caller_log_dir} "
-        for instance_path in instances]
-    selector_validation = rrr.add_to_queue(
-        runner=run_on,
-        cmd=cmds,
-        name=f"Selector Validation: {len(instances)} instances",
-        base_dir=sl.caller_log_dir,
-        dependencies=[selector_run],
+    selector_validation = selector.run_cli(
+        selection_scenario.scenario_file,
+        instances,
+        feature_data.csv_filepath,
+        run_on=run_on,
         sbatch_options=sbatch_options,
-        prepend=gv.settings().slurm_job_prepend)
+        slurm_prepend=slurm_prepend,
+        dependencies=[selector_run],
+        log_dir=sl.caller_log_dir)
     jobs.append(selector_validation)
 
     if solver_ablation:
@@ -224,21 +214,15 @@ def main(argv: list[str]) -> None:
                 slurm_prepend=slurm_prepend,
                 base_dir=sl.caller_log_dir)
             # Validate the ablated selector
-            cmds = [
-                f"python3 {run_core} "
-                f"--selector-scenario {ablated_scenario.scenario_file} "
-                f"--feature-data-csv {feature_data.csv_filepath} "
-                f"--instance {instance_path} "
-                f"--log-dir {sl.caller_log_dir} "
-                for instance_path in instances]
-            ablation_validation = rrr.add_to_queue(
-                runner=run_on,
-                cmd=cmds,
-                name=f"{ablated_scenario.name} Validation: {len(instances)} instances",
-                base_dir=sl.caller_log_dir,
-                dependencies=[ablation_run],
+            ablation_validation = selector.run_cli(
+                ablated_scenario.scenario_file,
+                instances,
+                feature_data.csv_filepath,
+                run_on=run_on,
                 sbatch_options=sbatch_options,
-                prepend=gv.settings().slurm_job_prepend)
+                slurm_prepend=slurm_prepend,
+                dependencies=[ablation_run],
+                log_dir=sl.caller_log_dir)
             jobs.extend([ablation_run, ablation_validation])
 
     if run_on == Runner.LOCAL:
