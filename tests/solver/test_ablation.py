@@ -53,8 +53,9 @@ def test_ablation_scenario_constructor() -> None:
     assert scenario.solver == solver
     assert scenario.train_set == dataset
     assert scenario.test_set == test_dataset
+    t = scenario.config_scenario.timestamp
     assert scenario.scenario_name ==\
-        f"ablation_{solver.name}_{dataset.name}_{test_dataset.name}"
+        f"ablation_{solver.name}_{dataset.name}_{t}_{test_dataset.name}"
     assert scenario.scenario_dir ==\
         configuration_scenario.directory / scenario.scenario_name
     assert scenario.validation_dir == scenario.scenario_dir / "validation"

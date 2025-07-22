@@ -67,7 +67,8 @@ class ParamILS(Configurator):
         if ParamILS.configurator_executable.exists():
             return  # Already installed
         from urllib.request import urlopen
-        import zipfile, io
+        import zipfile
+        import io
         r = urlopen(paramils_zip_url, timeout=60)
         z = zipfile.ZipFile(io.BytesIO(r.read()))
         z.extractall(ParamILS.configurator_path)
@@ -183,6 +184,7 @@ class ParamILSScenario(SMAC2Scenario):
                  min_runs: int = None,
                  max_runs: int = None,
                  random_restart: float = None,
+                 timestamp: str = None
                  )\
             -> None:
         """Initialize scenario paths and names.
@@ -212,6 +214,7 @@ class ParamILSScenario(SMAC2Scenario):
             min_runs: The minimum number of runs required for a single configuration.
             max_runs: The maximum number of runs allowed for a single configuration.
             random_restart: The probability to restart from a random configuration.
+            timestamp: An optional timestamp for the directory name.
         """
         super().__init__(solver, instance_set, sparkle_objectives, number_of_runs,
                          parent_directory, solver_calls, max_iterations, None,
@@ -301,10 +304,12 @@ class ParamILSScenario(SMAC2Scenario):
             config["solver_calls"] = config.pop("runcount_limit")
         results_folder = scenario_file.parent / "results"
         number_of_runs = len([p for p in results_folder.iterdir() if p.is_file()])
+        timestamp = scenario_file.parent.name.split("_")[-1]
         return ParamILSScenario(solver,
                                 instance_set,
                                 [objective],
                                 number_of_runs,
                                 scenario_file.parent.parent,
-                                **config
+                                **config,
+                                timestamp=timestamp
                                 )

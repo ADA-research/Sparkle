@@ -4,6 +4,7 @@ import re
 import shutil
 import decimal
 from pathlib import Path
+from datetime import datetime
 
 import runrunner as rrr
 from runrunner import Runner, Run
@@ -189,7 +190,8 @@ class ConfigurationScenario:
                  instance_set: InstanceSet,
                  sparkle_objectives: list[SparkleObjective],
                  number_of_runs: int,
-                 parent_directory: Path) -> None:
+                 parent_directory: Path,
+                 timestamp: str = None) -> None:
         """Initialize scenario paths and names.
 
         Args:
@@ -198,20 +200,21 @@ class ConfigurationScenario:
             sparkle_objectives: Sparkle Objectives to optimize.
             number_of_runs: The number of configurator runs to perform.
             parent_directory: Directory in which the scenario should be placed.
+            timestamp: An optional timestamp for the directory name.
         """
         self.solver = solver
         self.instance_set = instance_set
         self.sparkle_objectives = sparkle_objectives
         self.number_of_runs = number_of_runs
 
+        self.timestamp = datetime.now().strftime("%Y%m%d-%H%M") if timestamp is None\
+            else timestamp
         self.directory = parent_directory / self.name
         self.scenario_file_path = self.directory / "scenario.txt"
-        self.timestamp_path = self.directory / "timestamp"
         self.validation: Path = self.directory / "validation"
         self.tmp: Path = self.directory / "tmp"
         self.results_directory: Path = self.directory / "results"
         self._ablation_scenario: AblationScenario = None
-        self._timestamp: str = None
 
     @property
     def configurator(self: ConfigurationScenario) -> Configurator:
@@ -221,19 +224,7 @@ class ConfigurationScenario:
     @property
     def name(self: ConfigurationScenario) -> str:
         """Return the name of the scenario."""
-        return f"{self.solver.name}_{self.instance_set.name}"
-
-    @property
-    def timestamp(self: ConfigurationScenario) -> str:
-        """Return the timestamp of the scenario."""
-        if not self.timestamp_path.exists():
-            return None
-        if self._timestamp is None:
-            self._timestamp = self.timestamp_path.read_text().strip()
-        return self._timestamp
-        from datetime import datetime
-        stamp = datetime.fromtimestamp(self.scenario_file_path.stat().st_mtime)
-        return stamp.strftime("%Y%m%d-%H%M")
+        return f"{self.solver.name}_{self.instance_set.name}_{self.timestamp}"
 
     @property
     def configuration_ids(self: ConfigurationScenario) -> list[str]:
@@ -269,10 +260,7 @@ class ConfigurationScenario:
 
     def create_scenario_file(self: ConfigurationScenario) -> Path:
         """Create a file with the configuration scenario."""
-        with self.timestamp_path.open("w") as fout:
-            from datetime import datetime
-            stamp = datetime.fromtimestamp(datetime.now().timestamp())
-            fout.write(stamp.strftime("%Y%m%d-%H%M"))
+        pass
 
     def serialise(self: ConfigurationScenario) -> dict:
         """Serialize the configuration scenario."""
@@ -380,7 +368,8 @@ class AblationScenario:
         if AblationScenario.ablation_executable.exists():
             return  # Already installed
         from urllib.request import urlopen
-        import zipfile, io
+        import zipfile
+        import io
         AblationScenario.ablation_dir.mkdir(parents=True, exist_ok=True)
         r = urlopen(ablation_url, timeout=60)
         z = zipfile.ZipFile(io.BytesIO(r.read()))

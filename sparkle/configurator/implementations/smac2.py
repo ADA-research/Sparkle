@@ -67,7 +67,8 @@ class SMAC2(Configurator):
         if SMAC2.configurator_executable.exists():
             return  # Already installed
         from urllib.request import urlopen
-        import zipfile, io
+        import zipfile
+        import io
         r = urlopen(smac2_zip_url, timeout=60)
         z = zipfile.ZipFile(io.BytesIO(r.read()))
         z.extractall(SMAC2.configurator_path)
@@ -185,6 +186,7 @@ class SMAC2(Configurator):
 
 class SMAC2Scenario(ConfigurationScenario):
     """Class to handle SMAC2 configuration scenarios."""
+
     def __init__(self: SMAC2Scenario,
                  solver: Solver,
                  instance_set: InstanceSet,
@@ -199,7 +201,8 @@ class SMAC2Scenario(ConfigurationScenario):
                  target_cutoff_length: str = None,
                  cli_cores: int = None,
                  use_cpu_time_in_tunertime: bool = None,
-                 feature_data: FeatureDataFrame | Path = None)\
+                 feature_data: FeatureDataFrame | Path = None,
+                 timestamp: str = None)\
             -> None:
         """Initialize scenario paths and names.
 
@@ -230,9 +233,10 @@ class SMAC2Scenario(ConfigurationScenario):
                 If it is a FeatureDataFrame, will convert values to SMAC2 format.
                 If it is a Path, will pass the path to SMAC2.
                 Defaults to None.
+            timestamp: An optional timestamp for the directory name.
         """
         super().__init__(solver, instance_set, sparkle_objectives,
-                         number_of_runs, parent_directory)
+                         number_of_runs, parent_directory, timestamp)
         self.solver = solver
         self.instance_set = instance_set
 
@@ -426,17 +430,21 @@ class SMAC2Scenario(ConfigurationScenario):
         feature_data_path = None
         if "feature_file" in config:
             feature_data_path = Path(config["feature_file"])
-        return SMAC2Scenario(solver,
-                             instance_set,
-                             [objective],
-                             number_of_runs,
-                             instance_file_path.parent.parent,
-                             solver_calls,
-                             max_iterations,
-                             cpu_time,
-                             wallclock_limit,
-                             int(config["cutoffTime"]),
-                             config["cutoff_length"],
-                             cli_cores,
-                             use_cpu_time_in_tunertime,
-                             feature_data_path)
+        # Get the timestamp from the scenario dir name
+        timestamp = scenario_file.parent.name.split("_")[-1]
+        scenario = SMAC2Scenario(solver,
+                                 instance_set,
+                                 [objective],
+                                 number_of_runs,
+                                 instance_file_path.parent.parent,
+                                 solver_calls,
+                                 max_iterations,
+                                 cpu_time,
+                                 wallclock_limit,
+                                 int(config["cutoffTime"]),
+                                 config["cutoff_length"],
+                                 cli_cores,
+                                 use_cpu_time_in_tunertime,
+                                 feature_data_path,
+                                 timestamp)
+        return scenario

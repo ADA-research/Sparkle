@@ -100,6 +100,7 @@ class TestConfiguratorSMAC2(TestCase):
 
 class TestConfigurationScenarioSMAC2(TestCase):
     """Class bundling all tests regarding ConfigurationScenario."""
+
     def setUp(self: TestConfigurationScenarioSMAC2) -> None:
         """Setup executed before each test."""
         self.solver_path = Path("tests", "test_files", "Solvers", "Test-Solver")
@@ -140,8 +141,9 @@ class TestConfigurationScenarioSMAC2(TestCase):
         self.assertEqual(self.scenario.instance_set.directory,
                          self.instance_set.directory)
         self.assertIsNone(self.scenario.feature_data)
+        timestamp = self.scenario.timestamp
         self.assertEqual(self.scenario.name,
-                         f"{self.solver.name}_{self.instance_set.name}")
+                         f"{self.solver.name}_{self.instance_set.name}_{timestamp}")
 
     def test_smac2_scenario_check_scenario_directory(
         self: TestConfigurationScenarioSMAC2

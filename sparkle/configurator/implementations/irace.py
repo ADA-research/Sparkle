@@ -242,6 +242,7 @@ class IRACEScenario(ConfigurationScenario):
                  mu: int = None,
                  max_iterations: int = None,
                  feature_data: FeatureDataFrame = None,
+                 timestamp: str = None
                  )\
             -> None:
         """Initialize scenario paths and names.
@@ -276,6 +277,7 @@ class IRACEScenario(ConfigurationScenario):
                 using all the available budget. We recommend to use the default value.
             feature_data: FeatureDataFrame object with the feature data.
                 Currently not supported by IRACE.
+            timestamp: An optional timestamp for the directory name.
         """
         """
         Other possible arguments that are not added yet to Sparkle:
@@ -354,7 +356,7 @@ class IRACEScenario(ConfigurationScenario):
         --confidence          Confidence level for the elimination test. Default:
                                 0.95."""
         super().__init__(solver, instance_set, sparkle_objectives,
-                         number_of_runs, parent_directory)
+                         number_of_runs, parent_directory, timestamp)
         self.solver = solver
         self.instance_set = instance_set
         if sparkle_objectives is not None:
@@ -519,4 +521,5 @@ class IRACEScenario(ConfigurationScenario):
         if "maxTime" in scenario_dict:
             scenario_dict["max_time"] = int(scenario_dict.pop("maxTime"))
 
-        return IRACEScenario(solver, instance_set, **scenario_dict)
+        timestamp = scenario_file.parent.name.split("_")[-1]
+        return IRACEScenario(solver, instance_set, **scenario_dict, timestamp=timestamp)

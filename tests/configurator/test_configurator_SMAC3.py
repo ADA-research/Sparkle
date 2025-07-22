@@ -42,7 +42,7 @@ def test_smac3_scenario_from_file() -> None:
     """Test reading SMAC3 scenario file."""
     source = Path("tests/test_files/Configuration/test_smac3_scenario.txt")
     scenario = SMAC3Scenario.from_file(source)
-    assert scenario.name == "Test-Solver_Train-Instance-Set"
+    assert scenario.name == f"Test-Solver_Train-Instance-Set_{scenario.timestamp}"
     assert scenario.solver.directory == Path("tests/test_files/Solvers/Test-Solver")
     assert scenario.instance_set.directory ==\
         Path("tests/test_files/Instances/Train-Instance-Set")

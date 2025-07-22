@@ -175,6 +175,7 @@ class SMAC3Scenario(ConfigurationScenario):
                  n_workers: int = 1,
                  max_ratio: float = None,
                  smac3_output_directory: Path = Path(),
+                 timestamp: str = None
                  ) -> None:
         """Initialize scenario paths and names.
 
@@ -247,9 +248,10 @@ class SMAC3Scenario(ConfigurationScenario):
             smac3_output_directory: Path, defaults to Path()
                 The output subdirectory for the SMAC3 scenario. Defaults to the scenario
                 results directory.
+            timestamp: An optional timestamp for the directory name.
         """
         super().__init__(solver, instance_set, sparkle_objectives,
-                         number_of_runs, parent_directory)
+                         number_of_runs, parent_directory, timestamp)
         # The files are saved in `./output_directory/name/seed`.
         self.log_dir = self.directory / "logs"
         self.feature_data = feature_data
@@ -424,4 +426,5 @@ class SMAC3Scenario(ConfigurationScenario):
             variables["seed"] += run_index
             variables["smac3_output_directory"] = Path(f"run_{run_index}")
 
-        return SMAC3Scenario(**variables)
+        timestamp = scenario_file.parent.name.split("_")[-1]
+        return SMAC3Scenario(**variables, timestamp=timestamp)
