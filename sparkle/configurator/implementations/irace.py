@@ -375,10 +375,10 @@ class IRACEScenario(ConfigurationScenario):
         self.mu = mu
         self.max_iterations = max_iterations
 
-        # Pathing
-        self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
-        self.validation = self.directory / "validation"
-        self.results_directory = self.directory / "results"
+    @property
+    def instance_file_path(self: IRACEScenario) -> Path:
+        """Return the path of the instance file."""
+        return self.resolve_dir(self.directory, f"{self.instance_set.name}.txt")
 
     @property
     def configurator(self: IRACEScenario) -> IRACE:
@@ -394,13 +394,7 @@ class IRACEScenario(ConfigurationScenario):
         Args:
             parent_directory: Directory in which the scenario should be created.
         """
-        # Set up directories
-        shutil.rmtree(self.directory, ignore_errors=True)  # Clear directory
-        self.directory.mkdir(exist_ok=True, parents=True)
-        self.tmp.mkdir(exist_ok=True)
-        self.validation.mkdir(exist_ok=True)
-        self.results_directory.mkdir(exist_ok=True)
-
+        super().create_scenario()
         with self.instance_file_path.open("w+") as file:
             for instance_path in self.instance_set._instance_paths:
                 file.write(f"{instance_path.name}\n")
@@ -412,7 +406,6 @@ class IRACEScenario(ConfigurationScenario):
         Returns:
             Path to the created file.
         """
-        super().create_scenario_file()
         from sparkle.tools.parameters import PCSConvention
         solver_path = self.solver.directory.absolute()
         pcs_path = self.solver.get_pcs_file(port_type=PCSConvention.IRACE).absolute()

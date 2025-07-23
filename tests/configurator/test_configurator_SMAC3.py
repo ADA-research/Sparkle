@@ -68,7 +68,8 @@ def test_smac3_scenario_from_file() -> None:
 def test_smac3_configure(tmp_path: Path,
                          monkeypatch: pytest.MonkeyPatch) -> None:
     """Test SMAC3 scenario configuration."""
-    solver = Solver(Path("tests/test_files/Solvers/Test-Solver"))
+    solver = Solver(Path("tests/test_files/Solvers/Test-Solver").absolute())
+    solver_relative_path = Solver(Path("tests/test_files/Solvers/Test-Solver"))
     instance_set = Instance_Set(
         Path("tests/test_files/Instances/Train-Instance-Set"))
     objectives = [resolve_objective("PAR10"), resolve_objective("accuray:min")]
@@ -94,6 +95,7 @@ def test_smac3_configure(tmp_path: Path,
     data_target = data_target.clone(Path("tmp-pdf.csv"))
     scenario.create_scenario()
     smac_configurator = SMAC3()
+    scenario.solver = solver_relative_path
     with patch("runrunner.add_to_queue", new=lambda *args, **kwargs: None):
         runs = smac_configurator.configure(scenario, data_target)
     assert runs == [None, None]

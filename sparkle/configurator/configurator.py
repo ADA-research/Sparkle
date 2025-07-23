@@ -5,6 +5,7 @@ import shutil
 import decimal
 from pathlib import Path
 from datetime import datetime
+from typing import Optional
 
 import runrunner as rrr
 from runrunner import Runner, Run
@@ -206,14 +207,8 @@ class ConfigurationScenario:
         self.instance_set = instance_set
         self.sparkle_objectives = sparkle_objectives
         self.number_of_runs = number_of_runs
-
-        self.timestamp = datetime.now().strftime("%Y%m%d-%H%M") if timestamp is None\
-            else timestamp
-        self.directory = parent_directory / self.name
-        self.scenario_file_path = self.directory / "scenario.txt"
-        self.validation: Path = self.directory / "validation"
-        self.tmp: Path = self.directory / "tmp"
-        self.results_directory: Path = self.directory / "results"
+        self.parent_directory = parent_directory
+        self._timestamp = timestamp
         self._ablation_scenario: AblationScenario = None
 
     @property
@@ -225,6 +220,36 @@ class ConfigurationScenario:
     def name(self: ConfigurationScenario) -> str:
         """Return the name of the scenario."""
         return f"{self.solver.name}_{self.instance_set.name}_{self.timestamp}"
+
+    @property
+    def timestamp(self: ConfigurationScenario) -> str:
+        """Return the timestamp."""
+        return self._timestamp
+
+    @property
+    def directory(self: ConfigurationScenario) -> Path:
+        """Return the path of the scenario directory."""
+        return None if self.timestamp is None else self.parent_directory / self.name
+
+    @property
+    def scenario_file_path(self: ConfigurationScenario) -> Path:
+        """Return the path of the scenario file."""
+        return self.resolve_dir(self.directory, "scenario.txt")
+
+    @property
+    def validation(self: ConfigurationScenario) -> Path:
+        """Return the path of the validation directory."""
+        return self.resolve_dir(self.directory, "validation")
+
+    @property
+    def tmp(self: ConfigurationScenario) -> Path:
+        """Return the path of the tmp directory."""
+        return self.resolve_dir(self.directory, "tmp")
+
+    @property
+    def results_directory(self: ConfigurationScenario) -> Path:
+        """Return the path of the results directory."""
+        return self.resolve_dir(self.directory, "results")
 
     @property
     def configuration_ids(self: ConfigurationScenario) -> list[str]:
@@ -248,7 +273,14 @@ class ConfigurationScenario:
             return self._ablation_scenario
         return None
 
-    def create_scenario(self: ConfigurationScenario, parent_directory: Path) -> None:
+    @staticmethod
+    def resolve_dir(parent_dir: Path, name: str) -> Path:
+        """Checks whether parent dir exists."""
+        if parent_dir is None:
+            return None
+        return parent_dir / name
+
+    def create_scenario(self: ConfigurationScenario) -> None:
         """Create scenario with solver and instances in the parent directory.
 
         This prepares all the necessary subdirectories related to configuration.
@@ -256,11 +288,18 @@ class ConfigurationScenario:
         Args:
             parent_directory: Directory in which the scenario should be created.
         """
-        raise NotImplementedError
+        self._timestamp = datetime.now().strftime("%Y%m%d-%H%M")
+        # Prepare scenario directory
+        shutil.rmtree(self.directory, ignore_errors=True)
+        self.directory.mkdir(parents=True)
+        # Create empty directories as needed
+        self.tmp.mkdir(exist_ok=True)
+        self.validation.mkdir(exist_ok=True)
+        self.results_directory.mkdir(exist_ok=True)
 
     def create_scenario_file(self: ConfigurationScenario) -> Path:
         """Create a file with the configuration scenario."""
-        pass
+        raise NotImplementedError
 
     def serialise(self: ConfigurationScenario) -> dict:
         """Serialize the configuration scenario."""
@@ -270,9 +309,10 @@ class ConfigurationScenario:
     def find_scenario(cls: ConfigurationScenario,
                       directory: Path,
                       solver: Solver,
-                      instance_set: InstanceSet) -> ConfigurationScenario:
+                      instance_set: InstanceSet,
+                      timestamp: str) -> ConfigurationScenario:
         """Resolve a scenario from a directory and Solver / Training set."""
-        scenario_name = f"{solver.name}_{instance_set.name}"
+        scenario_name = f"{solver.name}_{instance_set.name}_{timestamp}"
         path = directory / f"{scenario_name}" / "scenario.txt"
         if not path.exists():
             return None
@@ -324,15 +364,46 @@ class AblationScenario:
         self.best_configuration = best_configuration
         self.ablation_racing = ablation_racing
         self.scenario_name = f"ablation_{configuration_scenario.name}"
+        self._table_file: Optional[Path] = None
         if self.test_set is not None:
             self.scenario_name += f"_{self.test_set.name}"
-        self.scenario_dir = configuration_scenario.directory / self.scenario_name
 
-        # Create required scenario Paths
-        self.tmp_dir = self.scenario_dir / "tmp"
-        self.validation_dir = self.scenario_dir / "validation"
-        self.validation_dir_tmp = self.validation_dir / "tmp"
-        self.table_file = self.validation_dir / "log" / "ablation-validation-run1234.txt"
+    @property
+    def scenario_dir(self: AblationScenario) -> Path:
+        """Return the path of the scenario directory."""
+        if self.config_scenario.directory is None:
+            return None
+        return self.config_scenario.directory / self.scenario_name
+
+    @property
+    def tmp_dir(self: AblationScenario) -> Path:
+        """Return the path of the tmp directory."""
+        if self.scenario_dir is None:
+            return None
+        return self.scenario_dir / "tmp"
+
+    @property
+    def validation_dir(self: AblationScenario) -> Path:
+        """Return the path of the validation directory."""
+        if self.scenario_dir is None:
+            return None
+        return self.scenario_dir / "validation"
+
+    @property
+    def validation_dir_tmp(self: AblationScenario) -> Path:
+        """Return the path of the validation tmp directory."""
+        if self.validation_dir is None:
+            return None
+        return self.validation_dir / "tmp"
+
+    @property
+    def table_file(self: AblationScenario) -> Path:
+        """Return the path of the table file."""
+        if self._table_file is not None:
+            return self._table_file
+        if self.validation_dir is None:
+            return None
+        return self.validation_dir / "log" / "ablation-validation-run1234.txt"
 
     @staticmethod
     def check_requirements(verbose: bool = False) -> bool:
