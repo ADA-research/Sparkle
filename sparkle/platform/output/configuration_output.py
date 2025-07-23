@@ -172,5 +172,6 @@ class ConfigurationOutput:
             "configurator": self.configurator.__name__,
             "best_configuration": self.best_configuration,
             "best_performance_train": self.best_performance_train,
-            "scenario": self.config_scenario.serialise(),
+            "scenario": {str(key): str(value)
+                         for key, value in self.config_scenario.serialise().items()},
         }

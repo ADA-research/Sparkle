@@ -19,7 +19,8 @@ def commands() -> list[str]:
     module_path = Path(__file__).parent.resolve()
     self_name = Path(__file__).name
     return [path.stem for path in module_path.iterdir()
-            if path.is_file() and path.suffix == ".py" and path.name != self_name]
+            if path.is_file() and path.suffix == ".py"
+            and path.name != self_name and path.name != "__init__.py"]
 
 
 def main() -> None:
@@ -43,6 +44,7 @@ def main() -> None:
 
     if command_file.is_file():
         os.system(f"python3 {command_file} {' '.join(args)}")
+        sys.exit(0)
     elif command == "install_autocomplete":
         script_path = module_path / "autocomplete.sh"
         bash_profile = Path.home() / ".bash_profile"
@@ -54,6 +56,7 @@ def main() -> None:
             "\n#----- Sparkle AutoComplete ----\n")
         print(f"Sparkle autocomplete installed! To enable, run `source {bash_profile}` "
               "or restart your terminal.")
+        sys.exit(0)
     else:
         print(f"Sparkle does not understand command <{command}>", end="")
         from difflib import SequenceMatcher
@@ -63,8 +66,9 @@ def main() -> None:
         if max(similarities) > 0.6:
             alternative = possible_commands[similarities.index(max(similarities))]
             print(f". Did you mean <{alternative}>?")
-        else:
-            print()
+            sys.exit(-2)
+
+        sys.exit(-1)
 
 
 if __name__ == "__main__":
