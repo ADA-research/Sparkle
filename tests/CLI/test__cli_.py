@@ -1,4 +1,5 @@
 """Test for CLI parsing entry point of Sparkle."""
+from pathlib import Path
 import sys
 import pytest
 from unittest.mock import patch
@@ -71,3 +72,22 @@ def test_suggestions(capfd: pytest.CaptureFixture) -> None:
             assert "Did you mean <about>?" in out
         assert pytest_wrapped_e.type is SystemExit
         assert pytest_wrapped_e.value.code == -2
+
+
+@patch("pathlib.Path.home")
+def test_auto_complete_install(
+        mock_home: Path,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test if Sparkle correctly installs autocompletion commands."""
+    monkeypatch.chdir(tmp_path)
+    profile_path = Path(".bash_profile")
+    mock_home.return_value = tmp_path
+
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        with patch.object(sys, "argv", ["sparkle", "install", "autocomplete"]):
+            _cli_.main()
+        assert profile_path.exists()
+        assert "#----- Sparkle AutoComplete ----" in profile_path.read_text()
+        assert pytest_wrapped_e.type is SystemExit
+        assert pytest_wrapped_e.value.code == 0
