@@ -72,9 +72,8 @@ def main(argv: list[str]) -> None:
             print(f"\nTesting Wrapper {object.wrapper} ...")
             # Patchfix runsolver
             object.runsolver_exec = settings.DEFAULT_runsolver_exec
-
-            objectives = settings.objectives
-            cutoff = args.cutoff_time if args.cutoff_time else 5  # Short call
+            objectives = settings.objectives if settings.objectives else []
+            cutoff = settings.solver_cutoff_time if settings.solver_cutoff_time else 5
             configuration = {}
             if object.pcs_file:
                 print("\nSample Configuration:")

@@ -18,14 +18,22 @@ def test_check_command() -> None:
     # Test solver
     solver_path = Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic"
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        check.main(["solver", str(solver_path)])  # Test without arguments
+        check.main(["solver", str(solver_path)])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+
+    # Test solver with example instance
+    example_instance = Path("Examples") / "Resources" / "Instances" / "PTN" /\
+        "Ptn-7824-b01.cnf"
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        check.main(["solver", str(solver_path), str(example_instance)])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
     # Test for instance set
     instance_set_path = Path("Examples") / "Resources" / "Instances" / "PTN"
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        check.main(["instance-set", str(instance_set_path)])  # Test without arguments
+        check.main(["instance-set", str(instance_set_path)])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
@@ -33,7 +41,7 @@ def test_check_command() -> None:
     extractor_path = Path("Examples") / "Resources" / "Extractors" /\
         "SAT-features-competition2012_revised_without_SatELite"
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        check.main(["feature-extractor", str(extractor_path)])  # Test without arguments
+        check.main(["feature-extractor", str(extractor_path)])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
