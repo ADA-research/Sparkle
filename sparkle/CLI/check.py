@@ -63,8 +63,8 @@ def main(argv: list[str]) -> None:
         if object.pcs_file:
             print()
             print(object.get_configuration_space())
-        if not os.access(object.wrapper_path, os.X_OK):
-            print(f"Wrapper {object.wrapper_path} is not executable!"
+        if not os.access(object.wrapper_file, os.X_OK):
+            print(f"Wrapper {object.wrapper_file} is not executable!"
                   f"Check that wrapper execution rights are set for all.")
             sys.exit(-1)
         if args.instance_path:  # Instance to test with
@@ -121,6 +121,8 @@ def main(argv: list[str]) -> None:
         print("\nList of instances:")
         for i_name, i_path in zip(object.instance_names, object.instance_paths):
             print(f"\t{i_name}: {i_path}")
+
+    sys.exit(0)
 
 
 if __name__ == "__main__":

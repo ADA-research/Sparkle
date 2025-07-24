@@ -38,40 +38,40 @@ def test_commands() -> None:
 def test_main() -> None:
     """Test if Sparkle correctly resolves the right CLI file to run."""
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        _cli_.main()  # Test without args, should yield usage error
-        assert pytest_wrapped_e.type is SystemExit
-        assert pytest_wrapped_e.value.code == 1
+        with patch.object(sys, "argv", ["sparkle"]):
+            _cli_.main()  # Test without args, should yield usage error
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 1
 
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         with patch.object(sys, "argv", ["sparkle", "about"]):
             _cli_.main()  # Test with about
-        assert pytest_wrapped_e.type is SystemExit
-        assert pytest_wrapped_e.value.code == 0
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
 
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         with patch.object(sys, "argv", ["sparkle", "load", "snapshot"]):
             with patch("os.system", new=lambda *args, **kwargs: None):
                 _cli_.main()  # Test with two word command
-        assert pytest_wrapped_e.type is SystemExit
-        assert pytest_wrapped_e.value.code == 0
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
 
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         with patch.object(sys, "argv", ["sparkle", "aabout"]):
             _cli_.main()  # Test with typo in about
-        assert pytest_wrapped_e.type is SystemExit
-        assert pytest_wrapped_e.value.code == -2
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == -2
 
 
 def test_suggestions(capfd: pytest.CaptureFixture) -> None:
     """Test if Sparkle correctly suggests commands."""
-    print(type(capfd))
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         with patch.object(sys, "argv", ["sparkle", "aabout"]):
             _cli_.main()  # Test with typo in about
-            out, err = capfd.readouterr()
-            assert "Did you mean <about>?" in out
-        assert pytest_wrapped_e.type is SystemExit
-        assert pytest_wrapped_e.value.code == -2
+    out, _ = capfd.readouterr()
+    assert "Did you mean <about>?" in out
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == -2
 
 
 @patch("pathlib.Path.home")
@@ -87,7 +87,7 @@ def test_auto_complete_install(
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         with patch.object(sys, "argv", ["sparkle", "install", "autocomplete"]):
             _cli_.main()
-        assert profile_path.exists()
-        assert "#----- Sparkle AutoComplete ----" in profile_path.read_text()
-        assert pytest_wrapped_e.type is SystemExit
-        assert pytest_wrapped_e.value.code == 0
+    assert profile_path.exists()
+    assert "#----- Sparkle AutoComplete ----" in profile_path.read_text()
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
