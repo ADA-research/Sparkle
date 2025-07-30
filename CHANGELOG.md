@@ -9,6 +9,7 @@ Notable changes to Sparkle will be documented in this file.
 ### Changed
 - Changed the CLI arguments and settings structures to be more streamlined and unified [SPRK-175]
 - Refactored usage of run portfolio selector and marginal contribution computation [SPRK-177]
+- Timestamps are now saved in the directory name of the configuration scenario. [Issue-#169]
 
 ### Fixed
 

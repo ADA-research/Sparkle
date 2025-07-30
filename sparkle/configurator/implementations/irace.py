@@ -378,7 +378,9 @@ class IRACEScenario(ConfigurationScenario):
     @property
     def instance_file_path(self: IRACEScenario) -> Path:
         """Return the path of the instance file."""
-        return self.resolve_dir(self.directory, f"{self.instance_set.name}.txt")
+        if self.directory:
+            return self.directory / f"{self.instance_set.name}.txt"
+        return None
 
     @property
     def configurator(self: IRACEScenario) -> IRACE:

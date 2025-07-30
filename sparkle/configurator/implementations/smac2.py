@@ -285,20 +285,27 @@ class SMAC2Scenario(ConfigurationScenario):
     @property
     def instance_file_path(self: SMAC2Scenario) -> Path:
         """Return the path of the instance file."""
-        return self.resolve_dir(self.directory, f"{self.instance_set.name}.txt")
+        if self.directory:
+            return self.directory / f"{self.instance_set.name}.txt"
+        return None
 
     @property
     def outdir_train(self: SMAC2Scenario) -> Path:
         """Return the path of the train out directory."""
         # SMAC2 Specific directory
-        return self.resolve_dir(self.directory, "outdir_train_configuration")
+        if self.directory:
+            return self.directory / "outdir_train_configuration"
+        return None
 
     @property
     def feature_file_path(self: SMAC2Scenario) -> Path:
         """Return the path of the feature file."""
-        return self.resolve_dir(
-            self.directory, f"{self.instance_set.name}_features.csv") if \
-            self._feature_file_path is None else self._feature_file_path
+        if self._feature_file_path:
+            return self._feature_file_path
+        elif self.directory:
+            return self.directory / f"{self.instance_set.name}_features.csv"
+        else:
+            return None
 
     @property
     def configurator(self: SMAC2Scenario) -> SMAC2:

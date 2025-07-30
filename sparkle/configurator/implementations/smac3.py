@@ -337,7 +337,9 @@ class SMAC3Scenario(ConfigurationScenario):
     @property
     def log_dir(self: SMAC3Scenario) -> Path:
         """Return the path of the log directory."""
-        return self.resolve_dir(self.directory, "logs")
+        if self.directory:
+            return self.directory / "logs"
+        return None
 
     @property
     def configurator(self: SMAC3Scenario) -> SMAC3:

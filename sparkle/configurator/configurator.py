@@ -201,7 +201,8 @@ class ConfigurationScenario:
             sparkle_objectives: Sparkle Objectives to optimize.
             number_of_runs: The number of configurator runs to perform.
             parent_directory: Directory in which the scenario should be placed.
-            timestamp: An optional timestamp for the directory name.
+            timestamp: The timestamp of the scenario directory/file creation.
+                Only set when read from file, otherwise generated at time of creation.
         """
         self.solver = solver
         self.instance_set = instance_set
@@ -234,22 +235,30 @@ class ConfigurationScenario:
     @property
     def scenario_file_path(self: ConfigurationScenario) -> Path:
         """Return the path of the scenario file."""
-        return self.resolve_dir(self.directory, "scenario.txt")
+        if self.directory:
+            return self.directory / "scenario.txt"
+        return None
 
     @property
     def validation(self: ConfigurationScenario) -> Path:
         """Return the path of the validation directory."""
-        return self.resolve_dir(self.directory, "validation")
+        if self.directory:
+            return self.directory / "validation"
+        return None
 
     @property
     def tmp(self: ConfigurationScenario) -> Path:
         """Return the path of the tmp directory."""
-        return self.resolve_dir(self.directory, "tmp")
+        if self.directory:
+            return self.directory / "tmp"
+        return None
 
     @property
     def results_directory(self: ConfigurationScenario) -> Path:
         """Return the path of the results directory."""
-        return self.resolve_dir(self.directory, "results")
+        if self.directory:
+            return self.directory / "results"
+        return None
 
     @property
     def configuration_ids(self: ConfigurationScenario) -> list[str]:
@@ -272,13 +281,6 @@ class ConfigurationScenario:
             self._ablation_scenario = AblationScenario.from_file(scenario, self)
             return self._ablation_scenario
         return None
-
-    @staticmethod
-    def resolve_dir(parent_dir: Path, name: str) -> Path:
-        """Checks whether parent dir exists."""
-        if parent_dir is None:
-            return None
-        return parent_dir / name
 
     def create_scenario(self: ConfigurationScenario) -> None:
         """Create scenario with solver and instances in the parent directory.
@@ -371,39 +373,40 @@ class AblationScenario:
     @property
     def scenario_dir(self: AblationScenario) -> Path:
         """Return the path of the scenario directory."""
-        if self.config_scenario.directory is None:
-            return None
-        return self.config_scenario.directory / self.scenario_name
+        if self.config_scenario.directory:
+            return self.config_scenario.directory / self.scenario_name
+        return None
 
     @property
     def tmp_dir(self: AblationScenario) -> Path:
         """Return the path of the tmp directory."""
-        if self.scenario_dir is None:
-            return None
-        return self.scenario_dir / "tmp"
+        if self.scenario_dir:
+            return self.scenario_dir / "tmp"
+        return None
 
     @property
     def validation_dir(self: AblationScenario) -> Path:
         """Return the path of the validation directory."""
-        if self.scenario_dir is None:
-            return None
-        return self.scenario_dir / "validation"
+        if self.scenario_dir:
+            return self.scenario_dir / "validation"
+        return None
 
     @property
     def validation_dir_tmp(self: AblationScenario) -> Path:
         """Return the path of the validation tmp directory."""
-        if self.validation_dir is None:
-            return None
-        return self.validation_dir / "tmp"
+        if self.validation_dir:
+            return self.validation_dir / "tmp"
+        return None
 
     @property
     def table_file(self: AblationScenario) -> Path:
         """Return the path of the table file."""
-        if self._table_file is not None:
+        if self._table_file:
             return self._table_file
-        if self.validation_dir is None:
+        elif self.validation_dir:
+            return self.validation_dir / "log" / "ablation-validation-run1234.txt"
+        else:
             return None
-        return self.validation_dir / "log" / "ablation-validation-run1234.txt"
 
     @staticmethod
     def check_requirements(verbose: bool = False) -> bool:
