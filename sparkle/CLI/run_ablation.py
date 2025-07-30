@@ -2,7 +2,6 @@
 """Sparkle command to execute ablation analysis."""
 import argparse
 import sys
-from datetime import datetime
 
 from runrunner.base import Runner
 
@@ -88,22 +87,11 @@ def main(argv: list[str]) -> None:
     configurator = settings.configurator
     output_path = settings.get_configurator_output_path(configurator)
 
-    # Get the newest timestamp
-    timestamp_list: list[datetime] = []
-    for subdir in output_path.iterdir():
-        if subdir.is_dir():
-            timestamp = subdir.name.split("_")[-1]
-            try:
-                timestamp = datetime.strptime(timestamp, "%Y%m%d-%H%M")
-                timestamp_list.append(timestamp)
-            except ValueError:
-                continue
-    newest_timestamp = max(timestamp_list)
     config_scenario = configurator.scenario_class().find_scenario(
         output_path,
         solver,
-        instance_set_train,
-        newest_timestamp.strftime("%Y%m%d-%H%M"))
+        instance_set_train)
+
     performance_data = PerformanceDataFrame(
         settings.DEFAULT_performance_data_path)
     if config_scenario is None:

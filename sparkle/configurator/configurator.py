@@ -312,8 +312,24 @@ class ConfigurationScenario:
                       directory: Path,
                       solver: Solver,
                       instance_set: InstanceSet,
-                      timestamp: str) -> ConfigurationScenario:
+                      timestamp: str = None) -> ConfigurationScenario:
         """Resolve a scenario from a directory and Solver / Training set."""
+        if timestamp is None:
+            # Get the newest timestamp
+            timestamp_list: list[datetime] = []
+            for subdir in directory.iterdir():
+                if subdir.is_dir():
+                    dir_timestamp = subdir.name.split("_")[-1]
+                    try:
+                        dir_timestamp = datetime.strptime(dir_timestamp, "%Y%m%d-%H%M")
+                        timestamp_list.append(dir_timestamp)
+                    except ValueError:
+                        continue
+
+            if timestamp_list == []:
+                return None
+            timestamp = max(timestamp_list).strftime("%Y%m%d-%H%M")
+
         scenario_name = f"{solver.name}_{instance_set.name}_{timestamp}"
         path = directory / f"{scenario_name}" / "scenario.txt"
         if not path.exists():
