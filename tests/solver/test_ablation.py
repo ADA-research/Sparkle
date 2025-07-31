@@ -29,6 +29,7 @@ configuration_scenario = SMAC2Scenario(
     Path(),
     solver_cutoff_time=cutoff_time
 )
+configuration_scenario._timestamp = "test_date"
 cutoff_length = "3"
 concurrent_clis = 4
 best_configuration = {
@@ -48,13 +49,15 @@ scenario = AblationScenario(
 )
 
 
-def test_ablation_scenario_constructor() -> None:
+def test_ablation_scenario_constructor(tmp_path: Path,
+                                       monkeypatch: pytest.MonkeyPatch) -> None:
     """Test for ablation scenario constructor."""
     assert scenario.solver == solver
     assert scenario.train_set == dataset
     assert scenario.test_set == test_dataset
+    t = scenario.config_scenario.timestamp
     assert scenario.scenario_name ==\
-        f"ablation_{solver.name}_{dataset.name}_{test_dataset.name}"
+        f"ablation_{solver.name}_{dataset.name}_{t}_{test_dataset.name}"
     assert scenario.scenario_dir ==\
         configuration_scenario.directory / scenario.scenario_name
     assert scenario.validation_dir == scenario.scenario_dir / "validation"
@@ -170,7 +173,7 @@ def test_check_for_ablation(output_dir_case: Path, case: str) -> None:
         ablation_racing
     )
     # Override table file to check test file
-    scenario_check.table_file =\
+    scenario_check._table_file =\
         output_dir_case / scenario_check.table_file.name
     return_val = scenario_check.check_for_ablation()
     if case == "correct":
@@ -197,7 +200,7 @@ def test_read_ablation_table(output_dir_case: Path, case: str) -> None:
         ablation_racing
     )
     # Override table file to check test file
-    scenario_read.table_file =\
+    scenario_read._table_file =\
         output_dir_case / scenario_read.table_file.name
     ablation_table = scenario_read.read_ablation_table()
     if case == "correct":

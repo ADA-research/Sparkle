@@ -1,13 +1,13 @@
 """Configurator classes to implement SMAC3 in Sparkle."""
 from __future__ import annotations
 from pathlib import Path
-import shutil
 
 from smac import version as smac_version
 from smac import Scenario as SmacScenario
 from smac import facade as smacfacades
 from smac.runhistory.enumerations import StatusType as SmacStatusType
 import numpy as np
+from typing import Optional
 
 from runrunner import Runner, Run
 
@@ -175,6 +175,7 @@ class SMAC3Scenario(ConfigurationScenario):
                  n_workers: int = 1,
                  max_ratio: float = None,
                  smac3_output_directory: Path = Path(),
+                 timestamp: str = None
                  ) -> None:
         """Initialize scenario paths and names.
 
@@ -247,11 +248,10 @@ class SMAC3Scenario(ConfigurationScenario):
             smac3_output_directory: Path, defaults to Path()
                 The output subdirectory for the SMAC3 scenario. Defaults to the scenario
                 results directory.
+            timestamp: An optional timestamp for the directory name.
         """
         super().__init__(solver, instance_set, sparkle_objectives,
-                         number_of_runs, parent_directory)
-        # The files are saved in `./output_directory/name/seed`.
-        self.log_dir = self.directory / "logs"
+                         number_of_runs, parent_directory, timestamp)
         self.feature_data = feature_data
         if isinstance(self.feature_data, Path):  # Load from file
             self.feature_data = FeatureDataFrame(self.feature_data)
@@ -290,41 +290,56 @@ class SMAC3Scenario(ConfigurationScenario):
                     solver_calls = int(walltime_limit / self.solver_cutoff_time)
             else:
                 solver_calls = 100  # SMAC3 Default value
+        self.smac3_output_directory = smac3_output_directory
+        self.crash_cost = crash_cost
+        self.termination_cost_threshold = termination_cost_threshold
+        self.walltime_limit = walltime_limit
+        self.cputime_limit = cputime_limit
+        self.solver_calls = solver_calls
+        self.use_default_config = use_default_config
+        self.instance_features = instance_features
+        self.min_budget = min_budget
+        self.max_budget = max_budget
+        self.seed = seed
+        self.n_workers = n_workers
+        self.smac3_scenario: Optional[SmacScenario] = None
+
+    def create_scenario(self: SMAC3Scenario) -> None:
+        """This prepares all the necessary subdirectories related to configuration."""
+        super().create_scenario()
+        self.log_dir.mkdir(parents=True)
+        if self.smac3_scenario is None:
+            self.set_smac3_scenario()
+        self.create_scenario_file()
+
+    def set_smac3_scenario(self: SMAC3Scenario) -> None:
+        """Set the smac scenario object."""
         self.smac3_scenario = SmacScenario(
-            configspace=solver.get_configuration_space(),
+            configspace=self.solver.get_configuration_space(),
             name=self.name,
-            output_directory=self.results_directory / smac3_output_directory,
-            deterministic=solver.deterministic,
+            output_directory=self.results_directory / self.smac3_output_directory,
+            deterministic=self.solver.deterministic,
             objectives=[self.sparkle_objective.name],
-            crash_cost=crash_cost,
-            termination_cost_threshold=termination_cost_threshold,
-            walltime_limit=walltime_limit,
-            cputime_limit=cputime_limit,
-            n_trials=solver_calls,
-            use_default_config=use_default_config,
-            instances=instance_set.instance_paths,
-            instance_features=instance_features,
-            min_budget=min_budget,
-            max_budget=max_budget,
-            seed=seed,
-            n_workers=n_workers
+            crash_cost=self.crash_cost,
+            termination_cost_threshold=self.termination_cost_threshold,
+            walltime_limit=self.walltime_limit,
+            cputime_limit=self.cputime_limit,
+            n_trials=self.solver_calls,
+            use_default_config=self.use_default_config,
+            instances=self.instance_set.instance_paths,
+            instance_features=self.instance_features,
+            min_budget=self.min_budget,
+            max_budget=self.max_budget,
+            seed=self.seed,
+            n_workers=self.n_workers
         )
 
-    def create_scenario(self: ConfigurationScenario) -> None:
-        """Create scenario with solver and instances in the parent directory.
-
-        This prepares all the necessary subdirectories related to configuration.
-
-        Args:
-            parent_directory: Directory in which the scenario should be created.
-        """
-        shutil.rmtree(self.directory, ignore_errors=True)
-        self.directory.mkdir(parents=True)
-        # Create empty directories as needed
-        self.results_directory.mkdir(parents=True)  # Prepare results directory
-        self.log_dir.mkdir(parents=True)
-        self.validation.mkdir(parents=True, exist_ok=True)
-        self.create_scenario_file()
+    @property
+    def log_dir(self: SMAC3Scenario) -> Path:
+        """Return the path of the log directory."""
+        if self.directory:
+            return self.directory / "logs"
+        return None
 
     @property
     def configurator(self: SMAC3Scenario) -> SMAC3:
@@ -333,7 +348,6 @@ class SMAC3Scenario(ConfigurationScenario):
 
     def create_scenario_file(self: SMAC3Scenario) -> Path:
         """Create a file with the configuration scenario."""
-        super().create_scenario_file()
         with self.scenario_file_path.open("w") as file:
             for key, value in self.serialise().items():
                 file.write(f"{key} = {value}\n")
@@ -341,7 +355,7 @@ class SMAC3Scenario(ConfigurationScenario):
     def serialise(self: SMAC3Scenario) -> dict:
         """Serialize the configuration scenario."""
         feature_data =\
-            self.feature_data.csv_filepath if self.feature_data else None
+            str(self.feature_data.csv_filepath) if self.feature_data else None
         return {
             "solver": self.solver.directory,
             "instance_set": self.instance_set.directory,
@@ -424,4 +438,7 @@ class SMAC3Scenario(ConfigurationScenario):
             variables["seed"] += run_index
             variables["smac3_output_directory"] = Path(f"run_{run_index}")
 
-        return SMAC3Scenario(**variables)
+        timestamp = scenario_file.parent.name.split("_")[-1]
+        scenario = SMAC3Scenario(**variables, timestamp=timestamp)
+        scenario.set_smac3_scenario()
+        return scenario

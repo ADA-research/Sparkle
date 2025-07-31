@@ -86,8 +86,12 @@ def main(argv: list[str]) -> None:
 
     configurator = settings.configurator
     output_path = settings.get_configurator_output_path(configurator)
+
     config_scenario = configurator.scenario_class().find_scenario(
-        output_path, solver, instance_set_train)
+        output_path,
+        solver,
+        instance_set_train)
+
     performance_data = PerformanceDataFrame(
         settings.DEFAULT_performance_data_path)
     if config_scenario is None:
