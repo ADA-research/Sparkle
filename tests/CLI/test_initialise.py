@@ -16,9 +16,7 @@ def test_initialise_command(tmp_path: Path,
 
     # Smoke test
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        # Call the command
         initialise.main([])
-        # Check the exit status
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
