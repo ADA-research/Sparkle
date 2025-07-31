@@ -161,7 +161,7 @@ class FeatureDataFrame:
 
     def sort(self: FeatureDataFrame) -> None:
         """Sorts the DataFrame by Multi-Index for readability."""
-        self.dataframe.sort_index(level=FeatureDataFrame.multi_dim_names)
+        self.dataframe.sort_index(level=FeatureDataFrame.multi_dim_names, inplace=True)
 
     @property
     def instances(self: FeatureDataFrame) -> list[str]:

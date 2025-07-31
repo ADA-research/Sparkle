@@ -5,6 +5,7 @@ Notable changes to Sparkle will be documented in this file.
 ## [0.9.5] - ??/??/2025
 
 ### Added
+- Feature data frame tests [Issue#181]
 
 ### Changed
 - Changed the CLI arguments and settings structures to be more streamlined and unified [SPRK-175]
