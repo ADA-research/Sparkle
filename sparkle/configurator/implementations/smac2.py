@@ -67,7 +67,8 @@ class SMAC2(Configurator):
         if SMAC2.configurator_executable.exists():
             return  # Already installed
         from urllib.request import urlopen
-        import zipfile, io
+        import zipfile
+        import io
         r = urlopen(smac2_zip_url, timeout=60)
         z = zipfile.ZipFile(io.BytesIO(r.read()))
         z.extractall(SMAC2.configurator_path)
@@ -185,6 +186,7 @@ class SMAC2(Configurator):
 
 class SMAC2Scenario(ConfigurationScenario):
     """Class to handle SMAC2 configuration scenarios."""
+
     def __init__(self: SMAC2Scenario,
                  solver: Solver,
                  instance_set: InstanceSet,
@@ -199,7 +201,8 @@ class SMAC2Scenario(ConfigurationScenario):
                  target_cutoff_length: str = None,
                  cli_cores: int = None,
                  use_cpu_time_in_tunertime: bool = None,
-                 feature_data: FeatureDataFrame | Path = None)\
+                 feature_data: FeatureDataFrame | Path = None,
+                 timestamp: str = None)\
             -> None:
         """Initialize scenario paths and names.
 
@@ -230,9 +233,10 @@ class SMAC2Scenario(ConfigurationScenario):
                 If it is a FeatureDataFrame, will convert values to SMAC2 format.
                 If it is a Path, will pass the path to SMAC2.
                 Defaults to None.
+            timestamp: An optional timestamp for the directory name.
         """
         super().__init__(solver, instance_set, sparkle_objectives,
-                         number_of_runs, parent_directory)
+                         number_of_runs, parent_directory, timestamp)
         self.solver = solver
         self.instance_set = instance_set
 
@@ -247,7 +251,7 @@ class SMAC2Scenario(ConfigurationScenario):
         self.use_cpu_time_in_tunertime = use_cpu_time_in_tunertime
 
         self.feature_data = feature_data
-        self.feature_file_path = None
+        self._feature_file_path = None
         if self.feature_data:
             if isinstance(self.feature_data, FeatureDataFrame):
                 # Convert feature data to SMAC2 format
@@ -270,21 +274,38 @@ class SMAC2Scenario(ConfigurationScenario):
                         return -512.0
 
                 self.feature_data = self.feature_data.map(map_nan)
-                self.feature_file_path =\
-                    self.directory / f"{self.instance_set.name}_features.csv"
             elif isinstance(self.feature_data, Path):  # Read from Path
-                self.feature_file_path = feature_data
+                self._feature_file_path = feature_data
                 self.feature_data = pd.read_csv(self.feature_file_path,
                                                 index_col=0)
             else:
                 print(f"WARNING: Feature data is of type {type(feature_data)}. "
                       "Expected FeatureDataFrame or Path.")
 
-        # Scenario Paths
-        self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
+    @property
+    def instance_file_path(self: SMAC2Scenario) -> Path:
+        """Return the path of the instance file."""
+        if self.directory:
+            return self.directory / f"{self.instance_set.name}.txt"
+        return None
 
-        # SMAC2 Specific
-        self.outdir_train = self.directory / "outdir_train_configuration"
+    @property
+    def outdir_train(self: SMAC2Scenario) -> Path:
+        """Return the path of the train out directory."""
+        # SMAC2 Specific directory
+        if self.directory:
+            return self.directory / "outdir_train_configuration"
+        return None
+
+    @property
+    def feature_file_path(self: SMAC2Scenario) -> Path:
+        """Return the path of the feature file."""
+        if self._feature_file_path:
+            return self._feature_file_path
+        elif self.directory:
+            return self.directory / f"{self.instance_set.name}_features.csv"
+        else:
+            return None
 
     @property
     def configurator(self: SMAC2Scenario) -> SMAC2:
@@ -299,15 +320,8 @@ class SMAC2Scenario(ConfigurationScenario):
         Args:
             parent_directory: Directory in which the scenario should be created.
         """
-        # Prepare scenario directory
-        shutil.rmtree(self.directory, ignore_errors=True)
-        self.directory.mkdir(parents=True)
-        # Create empty directories as needed
+        super().create_scenario()
         self.outdir_train.mkdir()
-        self.tmp.mkdir()
-        self.validation.mkdir()
-        self.results_directory.mkdir(parents=True)  # Prepare results directory
-
         self._prepare_instances()
 
         if self.feature_data is not None:
@@ -324,7 +338,6 @@ class SMAC2Scenario(ConfigurationScenario):
         Writes supplementary information to the target algorithm (algo =) as:
         algo = {configurator_target} {solver_directory} {sparkle_objective}
         """
-        super().create_scenario_file()
         with self.scenario_file_path.open("w") as file:
             file.write(f"algo = {configurator_target.absolute()} "
                        f"{self.solver.directory} {self.tmp} {self.sparkle_objective} \n"
@@ -389,7 +402,7 @@ class SMAC2Scenario(ConfigurationScenario):
             "cutoff_length": self.cutoff_length,
             "max_iterations": self.max_iterations,
             "sparkle_objective": self.sparkle_objective.name,
-            "feature_data": self.feature_file_path,
+            "feature_data": str(self.feature_file_path),
             "use_cpu_time_in_tunertime": self.use_cpu_time_in_tunertime
         }
 
@@ -426,6 +439,8 @@ class SMAC2Scenario(ConfigurationScenario):
         feature_data_path = None
         if "feature_file" in config:
             feature_data_path = Path(config["feature_file"])
+        # Get the timestamp from the scenario dir name
+        timestamp = scenario_file.parent.name.split("_")[-1]
         return SMAC2Scenario(solver,
                              instance_set,
                              [objective],
@@ -439,4 +454,5 @@ class SMAC2Scenario(ConfigurationScenario):
                              config["cutoff_length"],
                              cli_cores,
                              use_cpu_time_in_tunertime,
-                             feature_data_path)
+                             feature_data_path,
+                             timestamp)

@@ -242,6 +242,7 @@ class IRACEScenario(ConfigurationScenario):
                  mu: int = None,
                  max_iterations: int = None,
                  feature_data: FeatureDataFrame = None,
+                 timestamp: str = None
                  )\
             -> None:
         """Initialize scenario paths and names.
@@ -276,6 +277,7 @@ class IRACEScenario(ConfigurationScenario):
                 using all the available budget. We recommend to use the default value.
             feature_data: FeatureDataFrame object with the feature data.
                 Currently not supported by IRACE.
+            timestamp: An optional timestamp for the directory name.
         """
         """
         Other possible arguments that are not added yet to Sparkle:
@@ -354,7 +356,7 @@ class IRACEScenario(ConfigurationScenario):
         --confidence          Confidence level for the elimination test. Default:
                                 0.95."""
         super().__init__(solver, instance_set, sparkle_objectives,
-                         number_of_runs, parent_directory)
+                         number_of_runs, parent_directory, timestamp)
         self.solver = solver
         self.instance_set = instance_set
         if sparkle_objectives is not None:
@@ -373,10 +375,12 @@ class IRACEScenario(ConfigurationScenario):
         self.mu = mu
         self.max_iterations = max_iterations
 
-        # Pathing
-        self.instance_file_path = self.directory / f"{self.instance_set.name}.txt"
-        self.validation = self.directory / "validation"
-        self.results_directory = self.directory / "results"
+    @property
+    def instance_file_path(self: IRACEScenario) -> Path:
+        """Return the path of the instance file."""
+        if self.directory:
+            return self.directory / f"{self.instance_set.name}.txt"
+        return None
 
     @property
     def configurator(self: IRACEScenario) -> IRACE:
@@ -392,13 +396,7 @@ class IRACEScenario(ConfigurationScenario):
         Args:
             parent_directory: Directory in which the scenario should be created.
         """
-        # Set up directories
-        shutil.rmtree(self.directory, ignore_errors=True)  # Clear directory
-        self.directory.mkdir(exist_ok=True, parents=True)
-        self.tmp.mkdir(exist_ok=True)
-        self.validation.mkdir(exist_ok=True)
-        self.results_directory.mkdir(exist_ok=True)
-
+        super().create_scenario()
         with self.instance_file_path.open("w+") as file:
             for instance_path in self.instance_set._instance_paths:
                 file.write(f"{instance_path.name}\n")
@@ -410,7 +408,6 @@ class IRACEScenario(ConfigurationScenario):
         Returns:
             Path to the created file.
         """
-        super().create_scenario_file()
         from sparkle.tools.parameters import PCSConvention
         solver_path = self.solver.directory.absolute()
         pcs_path = self.solver.get_pcs_file(port_type=PCSConvention.IRACE).absolute()
@@ -519,4 +516,5 @@ class IRACEScenario(ConfigurationScenario):
         if "maxTime" in scenario_dict:
             scenario_dict["max_time"] = int(scenario_dict.pop("maxTime"))
 
-        return IRACEScenario(solver, instance_set, **scenario_dict)
+        timestamp = scenario_file.parent.name.split("_")[-1]
+        return IRACEScenario(solver, instance_set, **scenario_dict, timestamp=timestamp)

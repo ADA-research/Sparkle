@@ -9,7 +9,7 @@ from sparkle.configurator import AblationScenario
 from tests.CLI import tools as cli_tools
 
 
-@pytest.mark.integration
+# @pytest.mark.integration
 @patch("sparkle.configurator.configurator.AblationScenario.check_requirements")
 def test_run_ablation_command(
         mock_requirements: Mock,
@@ -22,7 +22,7 @@ def test_run_ablation_command(
     settings_path = cli_tools.get_settings_path()
     snapshot_path = (
         Path("tests") / "CLI" / "test_files"
-        / "snapshot_configured_solver_Pb0-CCSAT-Generic_PTN.zip").absolute()
+        / "snapshot_test_run_ablation.zip").absolute()
     solver_pbo_path = (
         Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic").absolute()
     train_set_path = (
