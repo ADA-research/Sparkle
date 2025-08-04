@@ -7,9 +7,9 @@ from pathlib import Path
 module_path = Path(__file__).parent.resolve()
 
 package_cli_entry_points = [
-    module_path / "core" / "compute_features.py",
-    module_path / "core" / "run_portfolio_selector_core.py",
     module_path.parent / "solver" / "solver_cli.py",
+    module_path.parent / "selector" / "selector_cli.py",
+    module_path.parent / "selector" / "extractor_cli.py",
     module_path.parent / "configurator" / "configurator_cli.py",
 ]
 

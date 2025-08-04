@@ -152,7 +152,7 @@ class Selector:
             f"--feature-data {feature_data} "
             f"--log-dir {log_dir}"
             for instance_path in instances]
-        print(commands[0])
+
         job_name = f"Run Selector: {self.name} on {len(instances)} instances"
         import subprocess
         r = rrr.add_to_queue(

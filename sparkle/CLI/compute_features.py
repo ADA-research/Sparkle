@@ -5,8 +5,7 @@ import sys
 import argparse
 from pathlib import Path
 
-import runrunner as rrr
-from runrunner.base import Runner, Status, Run
+from runrunner.base import Run, Runner
 
 from sparkle.selector import Extractor
 from sparkle.platform.settings_objects import Settings
@@ -39,7 +38,7 @@ def parser_function() -> argparse.ArgumentParser:
 def compute_features(
         feature_data: Path | FeatureDataFrame,
         recompute: bool,
-        run_on: Runner = Runner.SLURM) -> Run:
+        run_on: Runner = Runner.SLURM) -> list[Run]:
     """Compute features for all instance and feature extractor combinations.
 
     A RunRunner run is submitted for the computation of the features.
@@ -74,64 +73,36 @@ def compute_features(
         return None
     cutoff = gv.settings().extractor_cutoff_time
     cmd_list = []
-    extractors = {}
     instance_paths = set()
-    features_core = Path(__file__).parent.resolve() / "core" / "compute_features.py"
-    # We create a job for each instance/extractor combination
+    grouped_job_list: dict[str, dict[str, list[str]]] = {}
+
+    # Group the jobs by extractor/feature group
     for instance_name, extractor_name, feature_group in jobs:
-        extractor_path = gv.settings().DEFAULT_extractor_dir / extractor_name
-        # Pass instances to avoid looking it up for every iteration
+        if extractor_name not in grouped_job_list:
+            grouped_job_list[extractor_name] = {}
+        if feature_group not in grouped_job_list[extractor_name]:
+            grouped_job_list[extractor_name][feature_group] = []
         instance_path = resolve_instance_name(str(instance_name), instances)
-        instance_paths.add(instance_path)
-
-        cmd = (f"python3 {features_core} "
-               f"--instance {instance_path} "
-               f"--extractor {extractor_path} "
-               f"--feature-csv {feature_data.csv_filepath} "
-               f"--cutoff {cutoff} "
-               f"--log-dir {sl.caller_log_dir}")
-        if extractor_name in extractors:
-            extractor = extractors[extractor_name]
-        else:
-            extractor = Extractor(extractor_path)
-            extractors[extractor_name] = extractor
-        if extractor.groupwise_computation:
-            # Extractor job can be parallelised, thus creating i * e * g jobs
-            cmd_list.append(cmd + f" --feature-group {feature_group}")
-        else:
-            cmd_list.append(cmd)
-
-    print(f"The number of compute jobs: {len(cmd_list)}")
+        grouped_job_list[extractor_name][feature_group].append(instance_path)
 
     parallel_jobs = min(
         len(cmd_list), gv.settings().slurm_jobs_in_parallel)
     sbatch_options = gv.settings().sbatch_settings
+    slurm_prepend = gv.settings().slurm_job_prepend
     srun_options = ["-N1", "-n1"] + sbatch_options
-    run = rrr.add_to_queue(
-        runner=run_on,
-        cmd=cmd_list,
-        name=f"Compute Features: {len(extractors)} Extractors on "
-             f"{len(instance_paths)} instances",
-        parallel_jobs=parallel_jobs,
-        base_dir=sl.caller_log_dir,
-        sbatch_options=sbatch_options,
-        srun_options=srun_options,
-        prepend=gv.settings().slurm_job_prepend)
-
-    if run_on == Runner.SLURM:
-        print(f"Running the extractors through Slurm with Job IDs: {run.run_id}")
-    elif run_on == Runner.LOCAL:
-        print("Waiting for the local calculations to finish.")
-        run.wait()
-        for job in run.jobs:
-            jobs_done = sum(j.status == Status.COMPLETED for j in run.jobs)
-            print(f"Executing Progress: {jobs_done} out of {len(run.jobs)}")
-            if jobs_done == len(run.jobs):
-                break
-            job.wait()
-        print("Computing features done!")
-
-    return run
+    runs = []
+    for extractor_name, feature_groups in grouped_job_list.items():
+        extractor_path = gv.settings().DEFAULT_extractor_dir / extractor_name
+        extractor = Extractor(extractor_path)
+        for feature_group, instance_paths in feature_groups.items():
+            run = extractor.run_cli(
+                instance_paths, feature_data, cutoff,
+                feature_group if extractor.groupwise_computation else None,
+                run_on, sbatch_options, srun_options,
+                parallel_jobs, slurm_prepend,
+                log_dir=sl.caller_log_dir)
+            runs.append(run)
+    return runs
 
 
 def main(argv: list[str]) -> None:

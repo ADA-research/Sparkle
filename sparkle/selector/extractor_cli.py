@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Compute features for an instance, only for internal calls from Sparkle."""
+"""Execute Feature Extractor for an instance, write features to FeatureDataFrame."""
 import argparse
 from pathlib import Path
 from filelock import FileLock
 
-from sparkle.CLI.help import global_variables as gv
 from sparkle.structures import FeatureDataFrame
 from sparkle.selector import Extractor
 
@@ -13,11 +12,11 @@ from sparkle.selector import Extractor
 if __name__ == "__main__":
     # Define command line arguments
     parser = argparse.ArgumentParser()
+    parser.add_argument("--extractor", required=True, type=Path,
+                        help="path to feature extractor")
     parser.add_argument("--instance", required=True, type=Path, nargs="+",
                         help="path to instance file(s) to run on")
-    parser.add_argument("--extractor", required=True, type=str,
-                        help="path to feature extractor")
-    parser.add_argument("--feature-csv", required=True, type=str,
+    parser.add_argument("--feature-csv", required=True, type=Path,
                         help="path to feature data CSV file")
     parser.add_argument("--cutoff", required=True, type=str,
                         help="the maximum CPU time for the extractor.")
@@ -25,19 +24,18 @@ if __name__ == "__main__":
                         help="the group of features to compute, if available for the "
                              "extractor. If not available or provided, all groups will"
                              " be computed.")
-    parser.add_argument("--log-dir", type=Path, required=False,
+    parser.add_argument("--log-dir", type=Path, required=True,
                         help="path to the log directory")
     args = parser.parse_args()
 
     # Process command line arguments
-    log_dir =\
-        args.log_dir if args.log_dir is not None else gv.settings().DEFAULT_tmp_output
+    log_dir = args.log_dir
 
     # Instance agument is a list to allow for multifile instances
     instance_path: list[Path] = args.instance
     instance_name = instance_path[0].stem
-    extractor_path = Path(args.extractor)
-    feature_data_csv_path = Path(args.feature_csv)
+    extractor_path = args.extractor
+    feature_data_csv_path = args.feature_csv
     cutoff_extractor = args.cutoff
 
     # Ensure stringifcation of path objects
@@ -46,8 +44,7 @@ if __name__ == "__main__":
     else:
         instance_list = [str(instance_path)]
 
-    extractor = Extractor(extractor_path,
-                          gv.settings().DEFAULT_runsolver_exec)
+    extractor = Extractor(extractor_path)
     features = extractor.run(instance_list,
                              feature_group=args.feature_group,
                              cutoff_time=cutoff_extractor,

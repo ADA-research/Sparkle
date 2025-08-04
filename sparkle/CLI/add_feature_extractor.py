@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Sparkle command to add a feature extractor to the Sparkle platform."""
 import os
+import stat
 import sys
 import shutil
 import argparse
@@ -70,8 +71,19 @@ def main(argv: list[str]) -> None:
               not executable.")
         sys.exit(-1)
 
-    # Get the extractor features groups and names from the wrapper
     extractor = Extractor(extractor_target_path)
+
+    # Add RunSolver executable to the solver
+    runsolver_path = gv.settings().DEFAULT_runsolver_exec
+    if runsolver_path.name in [file.name for file in extractor_target_path.iterdir()]:
+        print("Warning! RunSolver executable detected in Extractor "
+              f"{extractor.name}. This will be replaced with "
+              f"Sparkle's version of RunSolver. ({runsolver_path})")
+    runsolver_target = extractor.directory / runsolver_path.name
+    shutil.copyfile(runsolver_path, runsolver_target)
+    runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
+
+    # Get the extractor features groups and names from the wrapper
     feature_dataframe = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
     feature_dataframe.add_extractor(extractor.name, extractor.features)
     feature_dataframe.save_csv()

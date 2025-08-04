@@ -99,7 +99,9 @@ def main(argv: list[str]) -> None:
                         print(f"\tSolver output is missing objective {obj.name}")
                     else:
                         print(f"\t{obj.name}: {result[obj.name]}")
-                if result["status"] == SolverStatus.UNKNOWN:
+                status_key = [key for key in result.keys()
+                              if key.startswith("status")][0]
+                if result[status_key] == SolverStatus.UNKNOWN:
                     print(f"Sparkle was unable to process {obj.name} output. "
                           "Check that your wrapper is able to handle KILL SIGNALS. "
                           "It is important to always communicate back to Sparkle "

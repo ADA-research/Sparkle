@@ -75,10 +75,8 @@ def main(argv: list[str]) -> None:
 
     feature_dataframe.add_instances(data_set.instances)
     feature_dataframe.save_csv()
-    feature_run = compute_features(feature_dataframe, recompute=False, run_on=run_on)
+    feature_runs = compute_features(feature_dataframe, recompute=False, run_on=run_on)
 
-    if run_on == Runner.LOCAL:
-        feature_run.wait()
     # Results need to be stored in the performance data object of the scenario:
     # Add the instance set to it
     for instance in data_set.instance_names:
@@ -92,7 +90,7 @@ def main(argv: list[str]) -> None:
         run_on=run_on,
         slurm_prepend=settings.slurm_job_prepend,
         sbatch_options=settings.sbatch_settings,
-        dependencies=feature_run,
+        dependencies=feature_runs,
         log_dir=sl.caller_log_dir,
     )
 
