@@ -78,11 +78,5 @@ lint.ignore = [
 "sparkle/instance/__init__.py" = ["N802"]
 "sparkle/configurator/implementations/__init__.py" = ["S307", "F401"]
 
-# Quotes preference
-[lint.flake8-quotes]
-inline-quotes = "double"
-multiline-quotes = "double"
-docstring-quotes = "double"
-
 [lint.mccabe]
 max-complexity = 15
