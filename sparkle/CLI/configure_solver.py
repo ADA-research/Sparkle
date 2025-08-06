@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to configure a solver."""
+
 from __future__ import annotations
 from pathlib import Path
 import argparse
@@ -23,33 +24,44 @@ def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
         description="Configure a solver in the platform.",
-        epilog=("Note that the test instance set is only used if the ``--ablation``"
-                " or ``--validation`` flags are given"))
-    parser.add_argument(*ac.SolverArgument.names,
-                        **ac.SolverArgument.kwargs)
-    parser.add_argument(*ac.InstanceSetTrainArgument.names,
-                        **ac.InstanceSetTrainArgument.kwargs)
-    parser.add_argument(*ac.InstanceSetTestArgument.names,
-                        **ac.InstanceSetTestArgument.kwargs)
-    parser.add_argument(*ac.TestSetRunAllConfigurationArgument.names,
-                        **ac.TestSetRunAllConfigurationArgument.kwargs)
-    parser.add_argument(*ac.UseFeaturesArgument.names,
-                        **ac.UseFeaturesArgument.kwargs)
+        epilog=(
+            "Note that the test instance set is only used if the ``--ablation``"
+            " or ``--validation`` flags are given"
+        ),
+    )
+    parser.add_argument(*ac.SolverArgument.names, **ac.SolverArgument.kwargs)
+    parser.add_argument(
+        *ac.InstanceSetTrainArgument.names, **ac.InstanceSetTrainArgument.kwargs
+    )
+    parser.add_argument(
+        *ac.InstanceSetTestArgument.names, **ac.InstanceSetTestArgument.kwargs
+    )
+    parser.add_argument(
+        *ac.TestSetRunAllConfigurationArgument.names,
+        **ac.TestSetRunAllConfigurationArgument.kwargs,
+    )
+    parser.add_argument(*ac.UseFeaturesArgument.names, **ac.UseFeaturesArgument.kwargs)
     # Settings Arguments
-    parser.add_argument(*ac.SettingsFileArgument.names,
-                        **ac.SettingsFileArgument.kwargs)
-    parser.add_argument(*Settings.OPTION_configurator.args,
-                        **Settings.OPTION_configurator.kwargs)
-    parser.add_argument(*Settings.OPTION_objectives.args,
-                        **Settings.OPTION_objectives.kwargs)
-    parser.add_argument(*Settings.OPTION_solver_cutoff_time.args,
-                        **Settings.OPTION_solver_cutoff_time.kwargs)
-    parser.add_argument(*Settings.OPTION_configurator_solver_call_budget.args,
-                        **Settings.OPTION_configurator_solver_call_budget.kwargs)
-    parser.add_argument(*Settings.OPTION_configurator_number_of_runs.args,
-                        **Settings.OPTION_configurator_number_of_runs.kwargs)
-    parser.add_argument(*Settings.OPTION_run_on.args,
-                        **Settings.OPTION_run_on.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names, **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(
+        *Settings.OPTION_configurator.args, **Settings.OPTION_configurator.kwargs
+    )
+    parser.add_argument(
+        *Settings.OPTION_objectives.args, **Settings.OPTION_objectives.kwargs
+    )
+    parser.add_argument(
+        *Settings.OPTION_solver_cutoff_time.args,
+        **Settings.OPTION_solver_cutoff_time.kwargs,
+    )
+    parser.add_argument(
+        *Settings.OPTION_configurator_solver_call_budget.args,
+        **Settings.OPTION_configurator_solver_call_budget.kwargs,
+    )
+    parser.add_argument(
+        *Settings.OPTION_configurator_number_of_runs.args,
+        **Settings.OPTION_configurator_number_of_runs.kwargs,
+    )
+    parser.add_argument(*Settings.OPTION_run_on.args, **Settings.OPTION_run_on.kwargs)
     return parser
 
 
@@ -69,8 +81,10 @@ def main(argv: list[str]) -> None:
 
     # Check configurator is available
     if not configurator.check_requirements(verbose=True):
-        print(f"{configurator.name} is not available. "
-              "Please inspect possible warnings above.")
+        print(
+            f"{configurator.name} is not available. "
+            "Please inspect possible warnings above."
+        )
         print(f"Would you like to install {configurator.name}? (Y/n)")
         if input().lower().strip() == "y":
             configurator.download_requirements()
@@ -87,13 +101,17 @@ def main(argv: list[str]) -> None:
     solver: Solver = resolve_object_name(
         args.solver,
         gv.file_storage_data_mapping[gv.solver_nickname_list_path],
-        settings.DEFAULT_solver_dir, class_name=Solver)
+        settings.DEFAULT_solver_dir,
+        class_name=Solver,
+    )
     if solver is None:
         raise ValueError(f"Solver {args.solver} not found.")
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        settings.DEFAULT_instance_dir, Instance_Set)
+        settings.DEFAULT_instance_dir,
+        Instance_Set,
+    )
     if instance_set_train is None:
         raise ValueError(f"Instance set {args.instance_set_train} not found.")
     instance_set_test = args.instance_set_test
@@ -101,7 +119,9 @@ def main(argv: list[str]) -> None:
         instance_set_test = resolve_object_name(
             args.instance_set_test,
             gv.file_storage_data_mapping[gv.instances_nickname_path],
-            settings.DEFAULT_instance_dir, Instance_Set)
+            settings.DEFAULT_instance_dir,
+            Instance_Set,
+        )
     use_features = args.use_features
     run_on = settings.run_on
 
@@ -109,24 +129,29 @@ def main(argv: list[str]) -> None:
 
     sparkle_objectives = settings.objectives
     if len(sparkle_objectives) > 1:
-        print(f"WARNING: {configurator.name} does not have multi objective support. "
-              f"Only the first objective ({sparkle_objectives[0]}) will be optimised.")
+        print(
+            f"WARNING: {configurator.name} does not have multi objective support. "
+            f"Only the first objective ({sparkle_objectives[0]}) will be optimised."
+        )
 
     performance_data = PerformanceDataFrame(settings.DEFAULT_performance_data_path)
 
     # Check if given objectives are in the data frame
     for objective in sparkle_objectives:
         if objective.name not in performance_data.objective_names:
-            print(f"WARNING: Objective {objective.name} not found in performance data. "
-                  "Adding to data frame.")
+            print(
+                f"WARNING: Objective {objective.name} not found in performance data. "
+                "Adding to data frame."
+            )
             performance_data.add_objective(objective.name)
 
     if use_features:
         feature_data = FeatureDataFrame(settings.DEFAULT_feature_data_path)
         # Check that the train instance set is in the feature data frame
         invalid = False
-        remaining_instance_jobs =\
-            set([instance for instance, _, _ in feature_data.remaining_jobs()])
+        remaining_instance_jobs = set(
+            [instance for instance, _, _ in feature_data.remaining_jobs()]
+        )
         for instance in instance_set_train.instance_paths:
             if str(instance) not in feature_data.instances:
                 print(f"ERROR: Train Instance {instance} not found in feature data.")
@@ -141,14 +166,20 @@ def main(argv: list[str]) -> None:
     number_of_runs = settings.configurator_number_of_runs
     output_path = settings.get_configurator_output_path(configurator)
     config_scenario = configurator.scenario_class()(
-        solver, instance_set_train, sparkle_objectives, number_of_runs,
-        output_path, **configurator_settings)
+        solver,
+        instance_set_train,
+        sparkle_objectives,
+        number_of_runs,
+        output_path,
+        **configurator_settings,
+    )
 
     # Run the default configuration
-    default_jobs = [(solver, config_id, instance, run_id)
-                    for solver, config_id, instance, run_id
-                    in performance_data.get_job_list()
-                    if config_id == PerformanceDataFrame.default_configuration]
+    default_jobs = [
+        (solver, config_id, instance, run_id)
+        for solver, config_id, instance, run_id in performance_data.get_job_list()
+        if config_id == PerformanceDataFrame.default_configuration
+    ]
 
     sbatch_options = settings.sbatch_settings
     slurm_prepend = settings.slurm_job_prepend
@@ -159,7 +190,8 @@ def main(argv: list[str]) -> None:
         slurm_prepend=slurm_prepend,
         num_parallel_jobs=settings.slurm_jobs_in_parallel,
         base_dir=sl.caller_log_dir,
-        run_on=run_on)
+        run_on=run_on,
+    )
 
     # If we have default configurations that need to be run, schedule them too
     if default_jobs:
@@ -167,10 +199,12 @@ def main(argv: list[str]) -> None:
         instances = []
         for _, _, instance, _ in default_jobs:
             instance_path = resolve_instance_name(
-                instance, settings.DEFAULT_instance_dir)
+                instance, settings.DEFAULT_instance_dir
+            )
             instances.append(instance_path)
         default_job = solver.run_performance_dataframe(
-            instances, PerformanceDataFrame.default_configuration,
+            instances,
+            PerformanceDataFrame.default_configuration,
             performance_data,
             sbatch_options=sbatch_options,
             slurm_prepend=slurm_prepend,
@@ -178,8 +212,9 @@ def main(argv: list[str]) -> None:
             log_dir=config_scenario.validation,
             base_dir=sl.caller_log_dir,
             job_name=f"Default Configuration: {solver.name} Validation on "
-                     f"{instance_set_train.name}",
-            run_on=run_on)
+            f"{instance_set_train.name}",
+            run_on=run_on,
+        )
         dependency_job_list.append(default_job)
 
     if instance_set_test is not None:
@@ -190,8 +225,14 @@ def main(argv: list[str]) -> None:
             pass
         else:
             # We place the results in the index we just added
-            run_index = list(set([performance_data.get_instance_num_runs(str(i))
-                                  for i in instance_set_test.instance_names]))
+            run_index = list(
+                set(
+                    [
+                        performance_data.get_instance_num_runs(str(i))
+                        for i in instance_set_test.instance_names
+                    ]
+                )
+            )
             test_set_job = solver.run_performance_dataframe(
                 instance_set_test,
                 run_index,
@@ -205,14 +246,17 @@ def main(argv: list[str]) -> None:
                 base_dir=sl.caller_log_dir,
                 dependencies=dependency_job_list,
                 job_name=f"Best Configuration: {solver.name} Validation on "
-                         f"{instance_set_test.name}",
-                run_on=run_on)
+                f"{instance_set_test.name}",
+                run_on=run_on,
+            )
             dependency_job_list.append(test_set_job)
 
     if run_on == Runner.SLURM:
         job_id_str = ",".join([run.run_id for run in dependency_job_list])
-        print(f"Running {configurator.name} configuration through Slurm with job "
-              f"id(s): {job_id_str}")
+        print(
+            f"Running {configurator.name} configuration through Slurm with job "
+            f"id(s): {job_id_str}"
+        )
     else:
         print("Running configuration finished!")
 

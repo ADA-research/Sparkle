@@ -1,4 +1,5 @@
 """This module helps to extract and structure information from Slurm I/O."""
+
 from __future__ import annotations
 import re
 from pathlib import Path
@@ -20,6 +21,7 @@ class SlurmBatch:
     file: Path
         The loaded file Path
     """
+
     # Precompiled regex
     re_sbatch = re.compile("#SBATCH (.*)")
     re_params_all = re.compile(r"params=\( \\\n(?:(.*))\)", re.DOTALL)

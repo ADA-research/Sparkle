@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to compute features for instances."""
+
 from __future__ import annotations
 import sys
 import argparse
@@ -22,23 +23,23 @@ from sparkle.CLI.help.nicknames import resolve_instance_name
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser(description="Sparkle command to Compute features "
-                                                 "for instances using added extractors "
-                                                 "and instances.")
-    parser.add_argument(*ac.RecomputeFeaturesArgument.names,
-                        **ac.RecomputeFeaturesArgument.kwargs)
+    parser = argparse.ArgumentParser(
+        description="Sparkle command to Compute features "
+        "for instances using added extractors "
+        "and instances."
+    )
+    parser.add_argument(
+        *ac.RecomputeFeaturesArgument.names, **ac.RecomputeFeaturesArgument.kwargs
+    )
     # Settings arguments
-    parser.add_argument(*ac.SettingsFileArgument.names,
-                        **ac.SettingsFileArgument.kwargs)
-    parser.add_argument(*Settings.OPTION_run_on.args,
-                        **Settings.OPTION_run_on.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names, **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*Settings.OPTION_run_on.args, **Settings.OPTION_run_on.kwargs)
     return parser
 
 
 def compute_features(
-        feature_data: Path | FeatureDataFrame,
-        recompute: bool,
-        run_on: Runner = Runner.SLURM) -> list[Run]:
+    feature_data: Path | FeatureDataFrame, recompute: bool, run_on: Runner = Runner.SLURM
+) -> list[Run]:
     """Compute features for all instance and feature extractor combinations.
 
     A RunRunner run is submitted for the computation of the features.
@@ -68,8 +69,10 @@ def compute_features(
 
     # If there are no jobs, stop
     if not jobs:
-        print("No feature computation jobs to run; stopping execution! To recompute "
-              "feature values use the --recompute flag.")
+        print(
+            "No feature computation jobs to run; stopping execution! To recompute "
+            "feature values use the --recompute flag."
+        )
         return None
     cutoff = gv.settings().extractor_cutoff_time
     cmd_list = []
@@ -85,8 +88,7 @@ def compute_features(
         instance_path = resolve_instance_name(str(instance_name), instances)
         grouped_job_list[extractor_name][feature_group].append(instance_path)
 
-    parallel_jobs = min(
-        len(cmd_list), gv.settings().slurm_jobs_in_parallel)
+    parallel_jobs = min(len(cmd_list), gv.settings().slurm_jobs_in_parallel)
     sbatch_options = gv.settings().sbatch_settings
     slurm_prepend = gv.settings().slurm_job_prepend
     srun_options = ["-N1", "-n1"] + sbatch_options
@@ -96,11 +98,17 @@ def compute_features(
         extractor = Extractor(extractor_path)
         for feature_group, instance_paths in feature_groups.items():
             run = extractor.run_cli(
-                instance_paths, feature_data, cutoff,
+                instance_paths,
+                feature_data,
+                cutoff,
                 feature_group if extractor.groupwise_computation else None,
-                run_on, sbatch_options, srun_options,
-                parallel_jobs, slurm_prepend,
-                log_dir=sl.caller_log_dir)
+                run_on,
+                sbatch_options,
+                srun_options,
+                parallel_jobs,
+                slurm_prepend,
+                log_dir=sl.caller_log_dir,
+            )
             runs.append(run)
     return runs
 
@@ -121,8 +129,10 @@ def main(argv: list[str]) -> None:
 
     # Check if there are any feature extractors registered
     if not any([p.is_dir() for p in gv.settings().DEFAULT_extractor_dir.iterdir()]):
-        print("No feature extractors present! Add feature extractors to Sparkle "
-              "by using the add_feature_extractor command.")
+        print(
+            "No feature extractors present! Add feature extractors to Sparkle "
+            "by using the add_feature_extractor command."
+        )
         sys.exit()
 
     # Start compute features

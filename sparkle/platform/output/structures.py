@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle output structures."""
+
 from __future__ import annotations
 from pathlib import Path
 
@@ -13,9 +14,14 @@ from sparkle.structures import PerformanceDataFrame
 
 class ValidationResults:
     """Class that stores validation information and results."""
-    def __init__(self: ValidationResults, solver: Solver,
-                 configuration: dict, instance_set: InstanceSet,
-                 results: list[list[str, Status, float, float]]) -> None:
+
+    def __init__(
+        self: ValidationResults,
+        solver: Solver,
+        configuration: dict,
+        instance_set: InstanceSet,
+        results: list[list[str, Status, float, float]],
+    ) -> None:
         """Initalize ValidationResults.
 
         Args:
@@ -34,9 +40,12 @@ class ValidationResults:
 
 class SelectionSolverData:
     """Class that stores solver information."""
-    def __init__(self: SelectionSolverData,
-                 solver_performance_ranking: list[tuple[str, float]],
-                 num_solvers: int) -> None:
+
+    def __init__(
+        self: SelectionSolverData,
+        solver_performance_ranking: list[tuple[str, float]],
+        num_solvers: int,
+    ) -> None:
         """Initalize SelectionSolverData.
 
         Args:
@@ -50,10 +59,13 @@ class SelectionSolverData:
 
 class SelectionPerformance:
     """Class that stores selection performance results."""
-    def __init__(self: SelectionSolverData,
-                 performance_path: Path,
-                 vbs_performance: float,
-                 objective: SparkleObjective) -> None:
+
+    def __init__(
+        self: SelectionSolverData,
+        performance_path: Path,
+        vbs_performance: float,
+        objective: SparkleObjective,
+    ) -> None:
         """Initalize SelectionPerformance.
 
         Args:
@@ -63,9 +75,10 @@ class SelectionPerformance:
         """
         performance_data = PerformanceDataFrame(performance_path)
         from sparkle.selector import SelectionScenario
+
         self.actual_performance_data = performance_data.get_value(
-            solver=SelectionScenario.__selector_solver_name__,
-            objective=objective.name)
+            solver=SelectionScenario.__selector_solver_name__, objective=objective.name
+        )
         self.vbs_performance = vbs_performance
         self.actual_performance = performance_data.mean(objective=objective.name)
         self.metric = objective.name
@@ -73,11 +86,14 @@ class SelectionPerformance:
 
 class ParallelPortfolioResults:
     """Class that stores parallel portfolio results."""
-    def __init__(self: ParallelPortfolioResults,
-                 unsolved_instances: int,
-                 sbs: str,
-                 runtime_solvers: dict[str, float],
-                 instance_results: dict[str, list]) -> None:
+
+    def __init__(
+        self: ParallelPortfolioResults,
+        unsolved_instances: int,
+        sbs: str,
+        runtime_solvers: dict[str, float],
+        instance_results: dict[str, list],
+    ) -> None:
         """Initalize SelectionSolverData.
 
         Args:

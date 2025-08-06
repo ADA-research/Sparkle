@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to load a Sparkle platform from a .zip file."""
+
 import sys
 import argparse
 from pathlib import Path
@@ -13,8 +14,7 @@ from sparkle.CLI.help import global_variables as gv
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(description="Load a platform from a zip file.")
-    parser.add_argument(*ac.SnapshotArgument.names,
-                        **ac.SnapshotArgument.kwargs)
+    parser.add_argument(*ac.SnapshotArgument.names, **ac.SnapshotArgument.kwargs)
     return parser
 
 

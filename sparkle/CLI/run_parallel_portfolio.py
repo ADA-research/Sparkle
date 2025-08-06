@@ -35,38 +35,42 @@ def parser_function() -> argparse.ArgumentParser:
     Returns:
         parser: The parser with the parsed command line arguments
     """
-    parser = argparse.ArgumentParser(description="Run a portfolio of solvers on an "
-                                                 "instance set in parallel.")
-    parser.add_argument(*ac.InstanceSetPathsArgument.names,
-                        **ac.InstanceSetPathsArgument.kwargs)
-    parser.add_argument(*ac.NicknamePortfolioArgument.names,
-                        **ac.NicknamePortfolioArgument.kwargs)
-    parser.add_argument(*ac.SolversArgument.names,
-                        **ac.SolversArgument.kwargs)
+    parser = argparse.ArgumentParser(
+        description="Run a portfolio of solvers on an instance set in parallel."
+    )
+    parser.add_argument(
+        *ac.InstanceSetPathsArgument.names, **ac.InstanceSetPathsArgument.kwargs
+    )
+    parser.add_argument(
+        *ac.NicknamePortfolioArgument.names, **ac.NicknamePortfolioArgument.kwargs
+    )
+    parser.add_argument(*ac.SolversArgument.names, **ac.SolversArgument.kwargs)
     # Settings arguments
-    parser.add_argument(*ac.SettingsFileArgument.names,
-                        **ac.SettingsFileArgument.kwargs)
-    parser.add_argument(*Settings.OPTION_objectives.args,
-                        **Settings.OPTION_objectives.kwargs)
-    parser.add_argument(*Settings.OPTION_solver_cutoff_time.args,
-                        **Settings.OPTION_solver_cutoff_time.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names, **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(
+        *Settings.OPTION_objectives.args, **Settings.OPTION_objectives.kwargs
+    )
+    parser.add_argument(
+        *Settings.OPTION_solver_cutoff_time.args,
+        **Settings.OPTION_solver_cutoff_time.kwargs,
+    )
     parser.add_argument(
         *Settings.OPTION_parallel_portfolio_number_of_seeds_per_solver.args,
-        **Settings.OPTION_parallel_portfolio_number_of_seeds_per_solver.kwargs)
-    parser.add_argument(*Settings.OPTION_run_on.args,
-                        **Settings.OPTION_run_on.kwargs)
+        **Settings.OPTION_parallel_portfolio_number_of_seeds_per_solver.kwargs,
+    )
+    parser.add_argument(*Settings.OPTION_run_on.args, **Settings.OPTION_run_on.kwargs)
     return parser
 
 
-def create_performance_dataframe(solvers: list[Solver],
-                                 instances_set: InstanceSet,
-                                 portfolio_path: Path) -> PerformanceDataFrame:
+def create_performance_dataframe(
+    solvers: list[Solver], instances_set: InstanceSet, portfolio_path: Path
+) -> PerformanceDataFrame:
     """Create a PerformanceDataFrame for the given solvers and instances.
 
     Args:
         solvers: List of solvers to include in the PerformanceDataFrame.
         instances_set: Set of instances to include in the PerformanceDataFrame.
-        csv_path: Path to save the CSV file.
+        portfolio_path: Path to save the CSV file.
 
     Returns:
         pdf: PerformanceDataFrame object initialized with solvers and instances.
@@ -75,22 +79,27 @@ def create_performance_dataframe(solvers: list[Solver],
     solvers = [str(s.directory) for s in solvers]
     objectives = gv.settings().objectives
     csv_path = portfolio_path / "results.csv"
-    return PerformanceDataFrame(csv_filepath=csv_path,
-                                solvers=solvers,
-                                objectives=objectives,
-                                instances=instances)
+    return PerformanceDataFrame(
+        csv_filepath=csv_path,
+        solvers=solvers,
+        objectives=objectives,
+        instances=instances,
+    )
 
 
-def build_command_list(instances_set: InstanceSet,
-                       solvers: list[Solver],
-                       portfolio_path: Path,
-                       pdf: PerformanceDataFrame) -> list[str]:
+def build_command_list(
+    instances_set: InstanceSet,
+    solvers: list[Solver],
+    portfolio_path: Path,
+    pdf: PerformanceDataFrame,
+) -> list[str]:
     """Build the list of command strings for all instance-solver-seed combinations.
 
     Args:
         instances_set: Set of instances to run on.
         solvers: List of solvers to run on the instances.
         portfolio_path: Path to the parallel portfolio.
+        pdf: Performance data frame object.
 
     Returns:
         cmd_list: List of command strings for all instance-solver-seed combinations.
@@ -109,7 +118,7 @@ def build_command_list(instances_set: InstanceSet,
                 objectives=objectives,
                 seed=seed,
                 cutoff_time=cutoff,
-                log_dir=portfolio_path
+                log_dir=portfolio_path,
             )
 
             cmd_list.append(" ".join(solver_call_list))
@@ -119,7 +128,7 @@ def build_command_list(instances_set: InstanceSet,
                     solver=str(solver.directory),
                     instance=instance.stem,
                     objective=objective.name,
-                    solver_fields=["Seed"]
+                    solver_fields=["Seed"],
                 )
     return cmd_list
 
@@ -152,10 +161,12 @@ def init_default_objectives() -> list:
     return default_objective_values, cpu_time_key, status_key, wall_time_key
 
 
-def submit_jobs(cmd_list: list[str],
-                solvers: list[Solver],
-                instances_set: InstanceSet,
-                run_on: Runner = Runner.SLURM) -> SlurmRun:
+def submit_jobs(
+    cmd_list: list[str],
+    solvers: list[Solver],
+    instances_set: InstanceSet,
+    run_on: Runner = Runner.SLURM,
+) -> SlurmRun:
     """Submit jobs to the runner and return the run object.
 
     Args:
@@ -172,11 +183,15 @@ def submit_jobs(cmd_list: list[str],
     num_jobs = num_solvers * num_instances * seeds_per_solver
     parallel_jobs = min(gv.settings().slurm_jobs_in_parallel, num_jobs)
     if parallel_jobs > num_jobs:
-        print("WARNING: Not all jobs will be started at the same time due to the "
-              "limitation of number of Slurm jobs that can be run in parallel. Check"
-              " your Sparkle Slurm Settings.")
-    print(f"Sparkle parallel portfolio is running {seeds_per_solver} seed(s) per solver "
-          f"on {num_solvers} solvers for {num_instances} instances ...")
+        print(
+            "WARNING: Not all jobs will be started at the same time due to the "
+            "limitation of number of Slurm jobs that can be run in parallel. Check"
+            " your Sparkle Slurm Settings."
+        )
+    print(
+        f"Sparkle parallel portfolio is running {seeds_per_solver} seed(s) per solver "
+        f"on {num_solvers} solvers for {num_instances} instances ..."
+    )
 
     sbatch_options = gv.settings().sbatch_settings
     print(sbatch_options)
@@ -194,11 +209,13 @@ def submit_jobs(cmd_list: list[str],
     )
 
 
-def monitor_jobs(run: Run,
-                 instances_set: InstanceSet,
-                 solvers: list[Solver],
-                 default_objective_values: dict,
-                 run_on: Runner = Runner.SLURM) -> dict:
+def monitor_jobs(
+    run: Run,
+    instances_set: InstanceSet,
+    solvers: list[Solver],
+    default_objective_values: dict,
+    run_on: Runner = Runner.SLURM,
+) -> dict:
     """Monitor job progress and update job output dictionary.
 
     Args:
@@ -206,6 +223,7 @@ def monitor_jobs(run: Run,
         instances_set: Set of instances to run on.
         solvers: List of solvers to run on the instances.
         default_objective_values: Default objective values for each solver-instance.
+        run_on: Unused
 
     Returns:
         job_output_dict: Dictionary containing the job output for each instance-solver
@@ -216,8 +234,9 @@ def monitor_jobs(run: Run,
     n_instance_jobs = num_solvers * seeds_per_solver
 
     job_output_dict = {
-        instance_name: {solver.name:
-                        default_objective_values.copy() for solver in solvers}
+        instance_name: {
+            solver.name: default_objective_values.copy() for solver in solvers
+        }
         for instance_name in instances_set._instance_names
     }
 
@@ -230,32 +249,36 @@ def monitor_jobs(run: Run,
             prev_done = sum(instances_done)
             time.sleep(check_interval)
             job_status_list = [r.status for r in run.jobs]
-            job_status_completed = [status == Status.COMPLETED
-                                    for status in job_status_list]
+            job_status_completed = [
+                status == Status.COMPLETED for status in job_status_list
+            ]
             # The jobs are sorted by instance
             for i, instance in enumerate(instances_set._instance_paths):
                 if instances_done[i]:
                     continue
-                instance_job_slice = slice(i * n_instance_jobs,
-                                           (i + 1) * n_instance_jobs)
+                instance_job_slice = slice(
+                    i * n_instance_jobs, (i + 1) * n_instance_jobs
+                )
                 if any(job_status_completed[instance_job_slice]):
                     instances_done[i] = True
                     # Kill remaining jobs for this instance.
                     solver_kills = [0] * num_solvers
-                    for job_index in range(i * n_instance_jobs,
-                                           (i + 1) * n_instance_jobs):
+                    for job_index in range(
+                        i * n_instance_jobs, (i + 1) * n_instance_jobs
+                    ):
                         if not job_status_completed[job_index]:
                             run.jobs[job_index].kill()
                             solver_index = int(
-                                (mod(job_index, n_instance_jobs))
-                                // seeds_per_solver)
+                                (mod(job_index, n_instance_jobs)) // seeds_per_solver
+                            )
                             solver_kills[solver_index] += 1
                     for solver_index in range(num_solvers):
                         # All seeds of a solver were killed on instance, set status kill
                         if solver_kills[solver_index] == seeds_per_solver:
                             solver_name = solvers[solver_index].name
-                            job_output_dict[instance.stem][solver_name]["status"] =\
+                            job_output_dict[instance.stem][solver_name]["status"] = (
                                 SolverStatus.KILLED
+                            )
             pbar.update(sum(instances_done) - prev_done)
     return job_output_dict
 
@@ -270,15 +293,22 @@ def wait_for_logs(cmd_list: list[str]) -> None:
     check_interval = gv.settings().parallel_portfolio_check_interval
     for cmd in cmd_list:
         runsolver_configuration = cmd.split(" ")[:11]
-        logs = [Path(p) for p in runsolver_configuration
-                if Path(p).suffix in [".log", ".val", ".rawres"]]
+        logs = [
+            Path(p)
+            for p in runsolver_configuration
+            if Path(p).suffix in [".log", ".val", ".rawres"]
+        ]
         if not all(p.exists() for p in logs):
             time.sleep(check_interval)
 
 
-def update_results_from_logs(cmd_list: list[str], run: Run, solvers: list[Solver],
-                             job_output_dict: dict,
-                             cpu_time_key: str) -> dict:
+def update_results_from_logs(
+    cmd_list: list[str],
+    run: Run,
+    solvers: list[Solver],
+    job_output_dict: dict,
+    cpu_time_key: str,
+) -> dict:
     """Parse logs to update job output dictionary with best objective values.
 
     Args:
@@ -304,7 +334,7 @@ def update_results_from_logs(cmd_list: list[str], run: Run, solvers: list[Solver
             run.jobs[index].stdout,
             cmd.split(" "),
             objectives=objectives,
-            verifier=solver_obj.verifier
+            verifier=solver_obj.verifier,
         )
         instance_name = list(job_output_dict.keys())[index // n_instance_jobs]
         cpu_time = solver_output[cpu_time_key]
@@ -318,10 +348,9 @@ def update_results_from_logs(cmd_list: list[str], run: Run, solvers: list[Solver
     return job_output_dict
 
 
-def fix_missing_times(job_output_dict: dict,
-                      status_key: str,
-                      cpu_time_key: str,
-                      wall_time_key: str) -> dict:
+def fix_missing_times(
+    job_output_dict: dict, status_key: str, cpu_time_key: str, wall_time_key: str
+) -> dict:
     """Fix CPU and wall clock times for solvers that did not produce logs.
 
     Args:
@@ -355,9 +384,11 @@ def fix_missing_times(job_output_dict: dict,
             for key, value in job_output_dict[instance][solver].items():
                 objective = resolve_objective(key)
                 if objective is not None and objective.time:
-                    value = (job_output_dict[instance][solver][cpu_time_key]
-                             if objective.use_time == UseTime.CPU_TIME
-                             else job_output_dict[instance][solver][wall_time_key])
+                    value = (
+                        job_output_dict[instance][solver][cpu_time_key]
+                        if objective.use_time == UseTime.CPU_TIME
+                        else job_output_dict[instance][solver][wall_time_key]
+                    )
                     if objective.post_process is not None:
                         status = job_output_dict[instance][solver][status_key]
                         value = objective.post_process(value, cutoff, status)
@@ -365,14 +396,16 @@ def fix_missing_times(job_output_dict: dict,
     return job_output_dict
 
 
-def print_and_write_results(job_output_dict: dict,
-                            solvers: list[Solver],
-                            instances_set: InstanceSet,
-                            portfolio_path: Path,
-                            status_key: str,
-                            cpu_time_key: str,
-                            wall_time_key: str,
-                            pdf: PerformanceDataFrame) -> None:
+def print_and_write_results(
+    job_output_dict: dict,
+    solvers: list[Solver],
+    instances_set: InstanceSet,
+    portfolio_path: Path,
+    status_key: str,
+    cpu_time_key: str,
+    wall_time_key: str,
+    pdf: PerformanceDataFrame,
+) -> None:
     """Print results to console and write the CSV file."""
     num_instances = len(job_output_dict)
     num_solvers = len(solvers)
@@ -380,17 +413,21 @@ def print_and_write_results(job_output_dict: dict,
     for index, instance_name in enumerate(job_output_dict.keys()):
         index_str = f"[{index + 1}/{num_instances}] "
         instance_output = job_output_dict[instance_name]
-        if all(instance_output[k][status_key] == SolverStatus.TIMEOUT
-               for k in instance_output):
+        if all(
+            instance_output[k][status_key] == SolverStatus.TIMEOUT
+            for k in instance_output
+        ):
             print(f"\n{index_str}{instance_name} was not solved within the cutoff-time.")
             continue
         print(f"\n{index_str}{instance_name} yielded the following Solver results:")
         for sindex in range(index * num_solvers, (index + 1) * num_solvers):
             solver_name = solvers[mod(sindex, num_solvers)].name
             job_info = job_output_dict[instance_name][solver_name]
-            print(f"\t- {solver_name} ended with status {job_info[status_key]} in "
-                  f"{job_info[cpu_time_key]}s CPU-Time ({job_info[wall_time_key]}s "
-                  "Wall clock time)")
+            print(
+                f"\t- {solver_name} ended with status {job_info[status_key]} in "
+                f"{job_info[cpu_time_key]}s CPU-Time ({job_info[wall_time_key]}s "
+                "Wall clock time)"
+            )
 
     instance_map = {Path(p).name: p for p in pdf.instances}
     solver_map = {Path(s).name: s for s in pdf.solvers}
@@ -403,14 +440,13 @@ def print_and_write_results(job_output_dict: dict,
             for objective in objectives:
                 obj_name = objective.name
                 obj_val = objective_dict.get(
-                    obj_name,
-                    PerformanceDataFrame.missing_value
+                    obj_name, PerformanceDataFrame.missing_value
                 )
                 pdf.set_value(
                     value=obj_val,
                     solver=solver_full_path,
                     instance=instance_full_path,
-                    objective=obj_name
+                    objective=obj_name,
                 )
     pdf.save_csv()
 
@@ -433,9 +469,10 @@ def main(argv: list[str]) -> None:
     Settings.check_settings_changes(settings, prev_settings)
 
     if args.solvers is not None:
-        solver_paths = [resolve_object_name("".join(s),
-                                            target_dir=settings.DEFAULT_solver_dir)
-                        for s in args.solvers]
+        solver_paths = [
+            resolve_object_name("".join(s), target_dir=settings.DEFAULT_solver_dir)
+            for s in args.solvers
+        ]
         if None in solver_paths:
             print("Some solvers not recognised! Check solver names:")
             for i, name in enumerate(solver_paths):
@@ -444,8 +481,9 @@ def main(argv: list[str]) -> None:
             sys.exit(-1)
         solvers = [Solver(p) for p in solver_paths]
     else:
-        solvers = [Solver(p) for p in
-                   settings.DEFAULT_solver_dir.iterdir() if p.is_dir()]
+        solvers = [
+            Solver(p) for p in settings.DEFAULT_solver_dir.iterdir() if p.is_dir()
+        ]
 
     portfolio_path = args.portfolio_name
 
@@ -455,34 +493,46 @@ def main(argv: list[str]) -> None:
         sys.exit(-1)
 
     # Retrieve instance sets
-    instances = [resolve_object_name(instance_path,
-                 gv.file_storage_data_mapping[gv.instances_nickname_path],
-                 gv.settings().DEFAULT_instance_dir, Instance_Set)
-                 for instance_path in args.instance_path]
+    instances = [
+        resolve_object_name(
+            instance_path,
+            gv.file_storage_data_mapping[gv.instances_nickname_path],
+            gv.settings().DEFAULT_instance_dir,
+            Instance_Set,
+        )
+        for instance_path in args.instance_path
+    ]
     # Join them into one
     if len(instances) > 1:
-        print("WARNING: More than one instance set specified. "
-              "Currently only supporting one.")
+        print(
+            "WARNING: More than one instance set specified. "
+            "Currently only supporting one."
+        )
     instances = instances[0]
 
     print(f"Running on {instances.size} instance(s)...")
 
     if not settings.objectives[0].time:
-        print("ERROR: Parallel Portfolio is currently only relevant for "
-              "RunTime objectives. In all other cases, use validation")
+        print(
+            "ERROR: Parallel Portfolio is currently only relevant for "
+            "RunTime objectives. In all other cases, use validation"
+        )
         sys.exit(-1)
 
     if args.portfolio_name is not None:  # Use a nickname
-        portfolio_path = settings.DEFAULT_parallel_portfolio_output /\
-            args.portfolio_name
+        portfolio_path = settings.DEFAULT_parallel_portfolio_output / args.portfolio_name
     else:  # Generate a timestamped nickname
         timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.gmtime(time.time()))
         randintstamp = int(random.getrandbits(32))
-        portfolio_path = settings.DEFAULT_parallel_portfolio_output /\
-            f"{timestamp}_{randintstamp}"
+        portfolio_path = (
+            settings.DEFAULT_parallel_portfolio_output / f"{timestamp}_{randintstamp}"
+        )
     if portfolio_path.exists():
-        print(f"[WARNING] Portfolio path {portfolio_path} already exists! "
-              "Overwrite? [y/n] ", end="")
+        print(
+            f"[WARNING] Portfolio path {portfolio_path} already exists! "
+            "Overwrite? [y/n] ",
+            end="",
+        )
         user_input = input()
         if user_input != "y":
             sys.exit()
@@ -491,19 +541,30 @@ def main(argv: list[str]) -> None:
     portfolio_path.mkdir(parents=True)
     pdf = create_performance_dataframe(solvers, instances, portfolio_path)
     returned_cmd = build_command_list(instances, solvers, portfolio_path, pdf)
-    default_objective_values, cpu_time_key, \
-        status_key, wall_time_key = init_default_objectives()
+    default_objective_values, cpu_time_key, status_key, wall_time_key = (
+        init_default_objectives()
+    )
     returned_run = submit_jobs(returned_cmd, solvers, instances, Runner.SLURM)
-    job_output_dict = monitor_jobs(returned_run, instances,
-                                   solvers, default_objective_values)
+    job_output_dict = monitor_jobs(
+        returned_run, instances, solvers, default_objective_values
+    )
     wait_for_logs(returned_cmd)
-    job_output_dict = update_results_from_logs(returned_cmd, returned_run,
-                                               solvers, job_output_dict, cpu_time_key)
-    job_output_dict = fix_missing_times(job_output_dict,
-                                        status_key, cpu_time_key, wall_time_key)
-    print_and_write_results(job_output_dict, solvers, instances,
-                            portfolio_path, status_key,
-                            cpu_time_key, wall_time_key, pdf)
+    job_output_dict = update_results_from_logs(
+        returned_cmd, returned_run, solvers, job_output_dict, cpu_time_key
+    )
+    job_output_dict = fix_missing_times(
+        job_output_dict, status_key, cpu_time_key, wall_time_key
+    )
+    print_and_write_results(
+        job_output_dict,
+        solvers,
+        instances,
+        portfolio_path,
+        status_key,
+        cpu_time_key,
+        wall_time_key,
+        pdf,
+    )
 
     # Write used settings to file
     settings.write_used_settings()

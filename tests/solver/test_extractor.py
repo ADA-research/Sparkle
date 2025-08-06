@@ -1,4 +1,5 @@
 """Test files for Extractor class."""
+
 from __future__ import annotations
 from pathlib import Path
 import pytest
@@ -6,12 +7,9 @@ from sparkle.selector import Extractor
 from unittest.mock import patch
 
 
-test_dir_2024 = Path(
-    "Examples/Resources/Extractors/SAT-features-competition2024/"
-)
+test_dir_2024 = Path("Examples/Resources/Extractors/SAT-features-competition2024/")
 test_dir_2012 = Path(
-    "Examples/Resources/Extractors/"
-    "SAT-features-competition2012_revised_without_SatELite"
+    "Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite"
 )
 
 extractor_2012 = Extractor(directory=test_dir_2012)
@@ -19,10 +17,8 @@ extractor_2024 = Extractor(directory=test_dir_2024)
 
 
 @pytest.mark.parametrize(
-    "extractor, test_dir", [
-        (extractor_2012, test_dir_2012),
-        (extractor_2024, test_dir_2024)
-    ]
+    "extractor, test_dir",
+    [(extractor_2012, test_dir_2012), (extractor_2024, test_dir_2024)],
 )
 def test_extractor_constructor(extractor: Extractor, test_dir: Path) -> None:
     """Test for constructor."""
@@ -34,19 +30,14 @@ def test_extractor_constructor(extractor: Extractor, test_dir: Path) -> None:
     assert extractor._groupwise_computation is None
 
 
-@pytest.mark.parametrize(
-    "extractor",
-    [extractor_2012, extractor_2024]
-)
+@pytest.mark.parametrize("extractor", [extractor_2012, extractor_2024])
 def test_features(extractor: Extractor) -> None:
     """Test for property features."""
     assert extractor._features is None
 
     first_call_features = extractor.features
 
-    assert isinstance(first_call_features, list), (
-        "Expected features to be a list."
-    )
+    assert isinstance(first_call_features, list), "Expected features to be a list."
 
     assert extractor._features == first_call_features, (
         "Internal _features attribute should match the accessed value."
@@ -73,20 +64,19 @@ def test_features(extractor: Extractor) -> None:
         second_call_features = extractor.features
 
         assert first_call_features == second_call_features, (
-            "Features property should cache the result and "
-            "return consistent values."
+            "Features property should cache the result and return consistent values."
         )
 
-        mock_subprocess_run.assert_not_called(), (
-            "subprocess.run should not be called again as the result should "
-            "be cached after the first access."
+        (
+            mock_subprocess_run.assert_not_called(),
+            (
+                "subprocess.run should not be called again as the result should "
+                "be cached after the first access."
+            ),
         )
 
 
-@pytest.mark.parametrize(
-    "extractor",
-    [extractor_2012, extractor_2024]
-)
+@pytest.mark.parametrize("extractor", [extractor_2012, extractor_2024])
 def test_feature_groups(extractor: Extractor) -> None:
     """Test for property feature_groups."""
     assert extractor._feature_groups is None
@@ -97,9 +87,7 @@ def test_feature_groups(extractor: Extractor) -> None:
         "Internal _feature_groups attribute should match the accessed value."
     )
 
-    assert isinstance(feature_groups, list), (
-        "Expected feature_groups to be a list."
-    )
+    assert isinstance(feature_groups, list), "Expected feature_groups to be a list."
 
     assert len(feature_groups) == len(set(feature_groups)), (
         f"Expected unique elements in feature_groups, "
@@ -131,15 +119,11 @@ def test_empty_feature_groups() -> None:
         )
 
         assert feature_groups == expected_groups, (
-            f"Expected groups: {expected_groups}, "
-            f"instead got : {feature_groups}"
+            f"Expected groups: {expected_groups}, instead got : {feature_groups}"
         )
 
 
-@pytest.mark.parametrize(
-    "extractor",
-    [extractor_2012, extractor_2024]
-)
+@pytest.mark.parametrize("extractor", [extractor_2012, extractor_2024])
 def test_output_dimension(extractor: Extractor) -> None:
     """Test for property output_dimension."""
     output_dim = extractor.output_dimension
@@ -147,17 +131,12 @@ def test_output_dimension(extractor: Extractor) -> None:
     features = extractor.features
 
     assert output_dim == len(features), (
-        f"Expected dimension: {len(features)}, "
-        f"but got: {output_dim}"
+        f"Expected dimension: {len(features)}, but got: {output_dim}"
     )
 
 
 @pytest.mark.parametrize(
-    "extractor, value",
-    [
-        (extractor_2012, False),
-        (extractor_2024, True)
-    ]
+    "extractor, value", [(extractor_2012, False), (extractor_2024, True)]
 )
 def test_groupwise_computation(extractor: Extractor, value: bool) -> None:
     """Test for property groupwise_computation."""
@@ -171,13 +150,11 @@ def test_groupwise_computation(extractor: Extractor, value: bool) -> None:
     )
 
     assert fc_groupwise_computation == value, (
-        f"Expected : {value}, "
-        f"but got: {fc_groupwise_computation}"
+        f"Expected : {value}, but got: {fc_groupwise_computation}"
     )
 
     assert fc_groupwise_computation == extractor._groupwise_computation, (
-        "Internal _groupwise_computation attribute"
-        "should match the accessed value."
+        "Internal _groupwise_computation attributeshould match the accessed value."
     )
 
     with patch("subprocess.run") as mock_subprocess_run:
@@ -188,9 +165,12 @@ def test_groupwise_computation(extractor: Extractor, value: bool) -> None:
             "return consistent values."
         )
 
-        mock_subprocess_run.assert_not_called(), (
-            "subprocess.run should not be called again as the result should "
-            "be cached after the first access."
+        (
+            mock_subprocess_run.assert_not_called(),
+            (
+                "subprocess.run should not be called again as the result should "
+                "be cached after the first access."
+            ),
         )
 
 

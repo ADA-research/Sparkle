@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to execute a portfolio selector."""
+
 import sys
 import argparse
 
@@ -21,14 +22,16 @@ def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
         description="Run a portfolio selector on instance (set): Determine which solver "
-                    "is most likely to perform well and run it on the instance (set).")
-    parser.add_argument(*ac.SelectionScenarioArgument.names,
-                        **ac.SelectionScenarioArgument.kwargs)
-    parser.add_argument(*ac.InstanceSetRequiredArgument.names,
-                        **ac.InstanceSetRequiredArgument.kwargs)
+        "is most likely to perform well and run it on the instance (set)."
+    )
+    parser.add_argument(
+        *ac.SelectionScenarioArgument.names, **ac.SelectionScenarioArgument.kwargs
+    )
+    parser.add_argument(
+        *ac.InstanceSetRequiredArgument.names, **ac.InstanceSetRequiredArgument.kwargs
+    )
     # Settings arguments
-    parser.add_argument(*ac.SettingsFileArgument.names,
-                        **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names, **ac.SettingsFileArgument.kwargs)
     parser.add_argument(*Settings.OPTION_run_on.args, **Settings.OPTION_run_on.kwargs)
     return parser
 
@@ -52,11 +55,15 @@ def main(argv: list[str]) -> None:
     data_set: InstanceSet = resolve_object_name(
         args.instance,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        settings.DEFAULT_instance_dir, Instance_Set)
+        settings.DEFAULT_instance_dir,
+        Instance_Set,
+    )
 
     if data_set is None:
-        print("ERROR: The instance (set) could not be found. Please make sure the "
-              "path is correct.")
+        print(
+            "ERROR: The instance (set) could not be found. Please make sure the "
+            "path is correct."
+        )
         sys.exit(-1)
 
     run_on = settings.run_on
@@ -70,7 +77,9 @@ def main(argv: list[str]) -> None:
         extractor = resolve_object_name(
             extractor_name,
             gv.file_storage_data_mapping[gv.instances_nickname_path],
-            settings.DEFAULT_extractor_dir, Extractor)
+            settings.DEFAULT_extractor_dir,
+            Extractor,
+        )
         feature_dataframe.add_extractor(extractor_name, extractor.features)
 
     feature_dataframe.add_instances(data_set.instances)

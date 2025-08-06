@@ -1,4 +1,5 @@
 """Helper types for command line interface."""
+
 from enum import Enum
 from typing import Type
 

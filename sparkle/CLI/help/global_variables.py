@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 """Definitions of constants broadly used in Sparkle."""
+
 import ast
 from argparse import Namespace
 
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame
 from sparkle.configurator.configurator import ConfigurationScenario
-from sparkle.configurator.implementations import (SMAC2Scenario, SMAC3Scenario,
-                                                  ParamILSScenario, IRACEScenario)
+from sparkle.configurator.implementations import (
+    SMAC2Scenario,
+    SMAC3Scenario,
+    ParamILSScenario,
+    IRACEScenario,
+)
 from sparkle.selector import SelectionScenario
 
 
@@ -24,8 +29,7 @@ def settings(argsv: Namespace = None) -> Settings:
     """Function to get the global settings object."""
     global __settings
     if __settings is None:
-        __settings = Settings(Settings.DEFAULT_settings_path,
-                              argsv=argsv)
+        __settings = Settings(Settings.DEFAULT_settings_path, argsv=argsv)
     elif argsv is not None:
         __settings.apply_arguments(argsv)
     return __settings
@@ -79,9 +83,11 @@ extractor_nickname_list_path = reference_list_dir / "sparkle_extractor_nickname_
 solver_nickname_list_path = reference_list_dir / "sparkle_solver_nickname_list.txt"
 instances_nickname_path = reference_list_dir / "sparkle_instance_nickname_list.txt"
 
-file_storage_data_mapping = {solver_nickname_list_path: {},
-                             instances_nickname_path: {},
-                             extractor_nickname_list_path: {}}
+file_storage_data_mapping = {
+    solver_nickname_list_path: {},
+    instances_nickname_path: {},
+    extractor_nickname_list_path: {},
+}
 
 for data_path in file_storage_data_mapping.keys():
     if data_path.exists():

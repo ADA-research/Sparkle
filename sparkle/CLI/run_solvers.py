@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to run solvers to get their performance data."""
+
 from __future__ import annotations
 import random
 import sys
@@ -24,47 +25,54 @@ from sparkle.CLI.initialise import check_for_initialise
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Run solvers on instances to get their performance data.")
-    parser.add_argument(*ac.SolversArgument.names,
-                        **ac.SolversArgument.kwargs)
-    parser.add_argument(*ac.InstanceSetPathsArgument.names,
-                        **ac.InstanceSetPathsArgument.kwargs)
+        description="Run solvers on instances to get their performance data."
+    )
+    parser.add_argument(*ac.SolversArgument.names, **ac.SolversArgument.kwargs)
+    parser.add_argument(
+        *ac.InstanceSetPathsArgument.names, **ac.InstanceSetPathsArgument.kwargs
+    )
 
     # Mutually exclusive: specific configuration or best configuration
     configuration_group = parser.add_mutually_exclusive_group()
-    configuration_group.add_argument(*ac.ConfigurationArgument.names,
-                                     **ac.ConfigurationArgument.kwargs)
-    configuration_group.add_argument(*ac.BestConfigurationArgument.names,
-                                     **ac.BestConfigurationArgument.kwargs)
-    configuration_group.add_argument(*ac.AllConfigurationArgument.names,
-                                     **ac.AllConfigurationArgument.kwargs)
-    parser.add_argument(*ac.ObjectiveArgument.names,
-                        **ac.ObjectiveArgument.kwargs)
-    parser.add_argument(*ac.PerformanceDataJobsArgument.names,
-                        **ac.PerformanceDataJobsArgument.kwargs)
+    configuration_group.add_argument(
+        *ac.ConfigurationArgument.names, **ac.ConfigurationArgument.kwargs
+    )
+    configuration_group.add_argument(
+        *ac.BestConfigurationArgument.names, **ac.BestConfigurationArgument.kwargs
+    )
+    configuration_group.add_argument(
+        *ac.AllConfigurationArgument.names, **ac.AllConfigurationArgument.kwargs
+    )
+    parser.add_argument(*ac.ObjectiveArgument.names, **ac.ObjectiveArgument.kwargs)
+    parser.add_argument(
+        *ac.PerformanceDataJobsArgument.names, **ac.PerformanceDataJobsArgument.kwargs
+    )
     # This one is only relevant if the argument above is given
-    parser.add_argument(*ac.RecomputeRunSolversArgument.names,
-                        **ac.RecomputeRunSolversArgument.kwargs)
+    parser.add_argument(
+        *ac.RecomputeRunSolversArgument.names, **ac.RecomputeRunSolversArgument.kwargs
+    )
     # Settings arguments
-    parser.add_argument(*ac.SettingsFileArgument.names,
-                        **ac.SettingsFileArgument.kwargs)
-    parser.add_argument(*Settings.OPTION_solver_cutoff_time.args,
-                        **Settings.OPTION_solver_cutoff_time.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names, **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(
+        *Settings.OPTION_solver_cutoff_time.args,
+        **Settings.OPTION_solver_cutoff_time.kwargs,
+    )
     parser.add_argument(*Settings.OPTION_run_on.args, **Settings.OPTION_run_on.kwargs)
     return parser
 
 
 def run_solvers(
-        solvers: list[Solver],
-        instances: list[str] | list[InstanceSet],
-        objectives: list[SparkleObjective],
-        seed: int,
-        cutoff_time: int,
-        configurations: list[list[dict[str, str]]],
-        sbatch_options: list[str] = None,
-        slurm_prepend: str | list[str] | Path = None,
-        log_dir: Path = None,
-        run_on: Runner = Runner.SLURM,) -> list[Run]:
+    solvers: list[Solver],
+    instances: list[str] | list[InstanceSet],
+    objectives: list[SparkleObjective],
+    seed: int,
+    cutoff_time: int,
+    configurations: list[list[dict[str, str]]],
+    sbatch_options: list[str] = None,
+    slurm_prepend: str | list[str] | Path = None,
+    log_dir: Path = None,
+    run_on: Runner = Runner.SLURM,
+) -> list[Run]:
     """Run the solvers.
 
     Parameters
@@ -102,28 +110,34 @@ def run_solvers(
                 conf_name = conf["configuration_id"]
             else:
                 conf_name = conf_index
-            run = solver.run(instances=instances,
-                             objectives=objectives,
-                             seed=seed,
-                             configuration=conf,
-                             cutoff_time=cutoff_time,
-                             run_on=run_on,
-                             sbatch_options=sbatch_options,
-                             slurm_prepend=slurm_prepend,
-                             log_dir=log_dir)
+            run = solver.run(
+                instances=instances,
+                objectives=objectives,
+                seed=seed,
+                configuration=conf,
+                cutoff_time=cutoff_time,
+                run_on=run_on,
+                sbatch_options=sbatch_options,
+                slurm_prepend=slurm_prepend,
+                log_dir=log_dir,
+            )
             if run_on == Runner.LOCAL:
                 if isinstance(run, dict):
                     run = [run]
                 # TODO: Refactor resolving objective keys
-                status_key = [key for key in run[0]
-                              if key.lower().startswith("status")][0]
-                time_key = [key for key in run[0]
-                            if key.lower().startswith("cpu_time")][0]
+                status_key = [key for key in run[0] if key.lower().startswith("status")][
+                    0
+                ]
+                time_key = [key for key in run[0] if key.lower().startswith("cpu_time")][
+                    0
+                ]
                 for i, solver_output in enumerate(run):
-                    print(f"Execution of {solver.name} ({conf_name}) on instance "
-                          f"{instances[i]} completed with status "
-                          f"{solver_output[status_key]} in {solver_output[time_key]} "
-                          f"seconds.")
+                    print(
+                        f"Execution of {solver.name} ({conf_name}) on instance "
+                        f"{instances[i]} completed with status "
+                        f"{solver_output[status_key]} in {solver_output[time_key]} "
+                        f"seconds."
+                    )
                 print("Running configured solver done!")
             else:
                 runs.append(run)
@@ -131,14 +145,15 @@ def run_solvers(
 
 
 def run_solvers_performance_data(
-        performance_data: PerformanceDataFrame,
-        cutoff_time: int,
-        rerun: bool = False,
-        solvers: list[Solver] = None,
-        instances: list[str] = None,
-        sbatch_options: list[str] = None,
-        slurm_prepend: str | list[str] | Path = None,
-        run_on: Runner = Runner.SLURM) -> list[Run]:
+    performance_data: PerformanceDataFrame,
+    cutoff_time: int,
+    rerun: bool = False,
+    solvers: list[Solver] = None,
+    instances: list[str] = None,
+    sbatch_options: list[str] = None,
+    slurm_prepend: str | list[str] | Path = None,
+    run_on: Runner = Runner.SLURM,
+) -> list[Run]:
     """Run the solvers for the performance data.
 
     Parameters
@@ -175,7 +190,8 @@ def run_solvers_performance_data(
     jobs_with_paths = []
     for solver, config, instance, run in jobs:
         instance_path = resolve_instance_name(
-            instance, gv.settings().DEFAULT_instance_dir)
+            instance, gv.settings().DEFAULT_instance_dir
+        )
         jobs_with_paths.append((solver, config, instance_path, run))
     jobs = jobs_with_paths
 
@@ -214,16 +230,25 @@ def run_solvers_performance_data(
     for solver, solver_key in zip(solvers, solver_keys):
         for solver_config in solver_jobs[solver_key].keys():
             solver_instances = solver_jobs[solver_key][solver_config].keys()
-            run_ids = [solver_jobs[solver_key][solver_config][instance]
-                       for instance in solver_instances]
+            run_ids = [
+                solver_jobs[solver_key][solver_config][instance]
+                for instance in solver_instances
+            ]
             if solver_instances == []:
                 print(f"Warning: No jobs for instances found for solver {solver_key}")
                 continue
             run = solver.run_performance_dataframe(
-                solver_instances, solver_config, performance_data,
-                run_ids=run_ids, cutoff_time=cutoff_time,
-                sbatch_options=sbatch_options, slurm_prepend=slurm_prepend,
-                log_dir=sl.caller_log_dir, base_dir=sl.caller_log_dir, run_on=run_on)
+                solver_instances,
+                solver_config,
+                performance_data,
+                run_ids=run_ids,
+                cutoff_time=cutoff_time,
+                sbatch_options=sbatch_options,
+                slurm_prepend=slurm_prepend,
+                log_dir=sl.caller_log_dir,
+                base_dir=sl.caller_log_dir,
+                run_on=run_on,
+            )
             runrunner_runs.append(run)
             if run_on == Runner.LOCAL:
                 # Do some printing?
@@ -251,8 +276,10 @@ def main(argv: list[str]) -> None:
     if args.best_configuration:
         if not args.objective:
             objective = settings.objectives[0]
-            print("WARNING: Best configuration requested, but no objective specified. "
-                  f"Defaulting to first objective: {objective}")
+            print(
+                "WARNING: Best configuration requested, but no objective specified. "
+                f"Defaulting to first objective: {objective}"
+            )
         else:
             objective = resolve_objective(args.objective)
 
@@ -261,19 +288,30 @@ def main(argv: list[str]) -> None:
     Settings.check_settings_changes(settings, prev_settings)
 
     if args.solvers:
-        solvers = [resolve_object_name(solver_path,
-                   gv.file_storage_data_mapping[gv.solver_nickname_list_path],
-                   settings.DEFAULT_solver_dir, Solver)
-                   for solver_path in args.solvers]
+        solvers = [
+            resolve_object_name(
+                solver_path,
+                gv.file_storage_data_mapping[gv.solver_nickname_list_path],
+                settings.DEFAULT_solver_dir,
+                Solver,
+            )
+            for solver_path in args.solvers
+        ]
     else:
-        solvers = [Solver(p) for p in
-                   settings.DEFAULT_solver_dir.iterdir() if p.is_dir()]
+        solvers = [
+            Solver(p) for p in settings.DEFAULT_solver_dir.iterdir() if p.is_dir()
+        ]
 
     if args.instance_path:
-        instances = [resolve_object_name(instance_path,
-                     gv.file_storage_data_mapping[gv.instances_nickname_path],
-                     settings.DEFAULT_instance_dir, Instance_Set)
-                     for instance_path in args.instance_path]
+        instances = [
+            resolve_object_name(
+                instance_path,
+                gv.file_storage_data_mapping[gv.instances_nickname_path],
+                settings.DEFAULT_instance_dir,
+                Instance_Set,
+            )
+            for instance_path in args.instance_path
+        ]
         # Unpack the sets into instance strings
         instances = [str(path) for set in instances for path in set.instance_paths]
     else:
@@ -298,23 +336,34 @@ def main(argv: list[str]) -> None:
             rerun=args.recompute,
             sbatch_options=sbatch_options,
             slurm_prepend=slurm_prepend,
-            run_on=run_on)
+            run_on=run_on,
+        )
     else:
         if args.best_configuration:
             train_instances = None
             if isinstance(args.best_configuration, list):
-                train_instances = [resolve_object_name(
-                    instance_path,
-                    gv.file_storage_data_mapping[gv.instances_nickname_path],
-                    settings.DEFAULT_instance_dir, Instance_Set)
-                    for instance_path in args.best_configuration]
+                train_instances = [
+                    resolve_object_name(
+                        instance_path,
+                        gv.file_storage_data_mapping[gv.instances_nickname_path],
+                        settings.DEFAULT_instance_dir,
+                        Instance_Set,
+                    )
+                    for instance_path in args.best_configuration
+                ]
                 # Unpack the sets into instance strings
-                instances = [str(path) for set in train_instances
-                             for path in set.instance_paths]
+                instances = [
+                    str(path) for set in train_instances for path in set.instance_paths
+                ]
             # Determine best configuration
-            configurations = [[performance_dataframe.best_configuration(
-                str(solver.directory), objective, train_instances)[0]]
-                for solver in solvers]
+            configurations = [
+                [
+                    performance_dataframe.best_configuration(
+                        str(solver.directory), objective, train_instances
+                    )[0]
+                ]
+                for solver in solvers
+            ]
         elif args.configuration:
             # Sort the configurations to the solvers
             # TODO: Add a better check that the id could only match this solver
@@ -325,20 +374,26 @@ def main(argv: list[str]) -> None:
                     if c not in performance_dataframe.configuration_ids:
                         raise ValueError(f"Configuration id {c} not found.")
                     if c in performance_dataframe.get_configurations(
-                            str(solver.directory)):
+                        str(solver.directory)
+                    ):
                         configurations[-1].append(c)
         elif args.all_configurations:  # All known configurations
-            configurations = [performance_dataframe.get_configurations(
-                str(solver.directory)) for solver in solvers]
+            configurations = [
+                performance_dataframe.get_configurations(str(solver.directory))
+                for solver in solvers
+            ]
         else:  # Only default configurations
-            configurations =\
-                [[PerformanceDataFrame.default_configuration] for _ in solvers]
+            configurations = [
+                [PerformanceDataFrame.default_configuration] for _ in solvers
+            ]
         # Look up and replace with the actual configurations
         for solver_index, configs in enumerate(configurations):
             for config_index, config in enumerate(configs):
-                configurations[solver_index][config_index] = \
+                configurations[solver_index][config_index] = (
                     performance_dataframe.get_full_configuration(
-                        str(solvers[solver_index].directory), config)
+                        str(solvers[solver_index].directory), config
+                    )
+                )
         if instances is None:
             instances = []
             for instance_dir in settings.DEFAULT_instance_dir.iterdir():
@@ -363,8 +418,10 @@ def main(argv: list[str]) -> None:
     if runs is None or all(run is None for run in runs):
         print("Running solvers done!")
     elif run_on == Runner.SLURM:
-        print("Running solvers through Slurm with job id(s): "
-              f'{",".join(r.run_id for r in runs if r is not None)}')
+        print(
+            "Running solvers through Slurm with job id(s): "
+            f"{','.join(r.run_id for r in runs if r is not None)}"
+        )
     sys.exit(0)
 
 

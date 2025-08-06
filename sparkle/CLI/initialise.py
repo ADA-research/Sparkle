@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Command to initialise a Sparkle platform."""
+
 import subprocess
 import argparse
 import shutil
@@ -19,13 +20,17 @@ from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 def parser_function() -> argparse.ArgumentParser:
     """Parse CLI arguments for the initialise command."""
     parser = argparse.ArgumentParser(
-        description="Initialise the Sparkle platform in the current directory.")
-    parser.add_argument(*ac.DownloadExamplesArgument.names,
-                        **ac.DownloadExamplesArgument.kwargs)
-    parser.add_argument(*ac.NoSavePlatformArgument.names,
-                        **ac.NoSavePlatformArgument.kwargs)
-    parser.add_argument(*ac.RebuildRunsolverArgument.names,
-                        **ac.RebuildRunsolverArgument.kwargs)
+        description="Initialise the Sparkle platform in the current directory."
+    )
+    parser.add_argument(
+        *ac.DownloadExamplesArgument.names, **ac.DownloadExamplesArgument.kwargs
+    )
+    parser.add_argument(
+        *ac.NoSavePlatformArgument.names, **ac.NoSavePlatformArgument.kwargs
+    )
+    parser.add_argument(
+        *ac.RebuildRunsolverArgument.names, **ac.RebuildRunsolverArgument.kwargs
+    )
     return parser
 
 
@@ -60,20 +65,26 @@ def check_for_initialise() -> None:
     platform_path = detect_sparkle_platform_exists()
     if platform_path is None:
         print("-----------------------------------------------")
-        print("No Sparkle platform found; "
-              "The platform will now be initialized automatically.")
+        print(
+            "No Sparkle platform found; "
+            "The platform will now be initialized automatically."
+        )
         print("-----------------------------------------------")
         initialise_sparkle()
     elif platform_path != Path.cwd():
-        print(f"[WARNING] Sparkle platform found in {platform_path} instead of "
-              f"{Path.cwd()}. Switching to CWD to {platform_path}")
+        print(
+            f"[WARNING] Sparkle platform found in {platform_path} instead of "
+            f"{Path.cwd()}. Switching to CWD to {platform_path}"
+        )
         os.chdir(platform_path)
 
 
-def initialise_sparkle(save_existing_platform: bool = True,
-                       interactive: bool = False,
-                       download_examples: bool = False,
-                       rebuild_runsolver: bool = False) -> None:
+def initialise_sparkle(
+    save_existing_platform: bool = True,
+    interactive: bool = False,
+    download_examples: bool = False,
+    rebuild_runsolver: bool = False,
+) -> None:
     """Initialize a new Sparkle platform.
 
     Args:
@@ -108,53 +119,65 @@ def initialise_sparkle(save_existing_platform: bool = True,
     # TODO: We have many sparkle settings values regarding ``number of runs''
     # E.g. configurator, parallel portfolio, and here too. Should we unify this more, or
     # just make another setting that does this specifically for performance data?
-    PerformanceDataFrame(Settings.DEFAULT_performance_data_path,
-                         objectives=gv.settings().objectives, n_runs=1)
+    PerformanceDataFrame(
+        Settings.DEFAULT_performance_data_path,
+        objectives=gv.settings().objectives,
+        n_runs=1,
+    )
 
     if rebuild_runsolver:
         print("Cleaning Runsolver ...")
-        runsolver_clean = subprocess.run(["make", "clean"],
-                                         cwd=Settings.DEFAULT_runsolver_dir,
-                                         capture_output=True)
+        runsolver_clean = subprocess.run(
+            ["make", "clean"], cwd=Settings.DEFAULT_runsolver_dir, capture_output=True
+        )
         if runsolver_clean.returncode != 0:
-            warnings.warn(f"[{runsolver_clean.returncode}] Cleaning of Runsolver failed "
-                          f"with the following msg: {runsolver_clean.stdout.decode()}")
+            warnings.warn(
+                f"[{runsolver_clean.returncode}] Cleaning of Runsolver failed "
+                f"with the following msg: {runsolver_clean.stdout.decode()}"
+            )
 
     # Check that Runsolver is compiled, otherwise, compile
     if not Settings.DEFAULT_runsolver_exec.exists():
         print("Runsolver does not exist, trying to compile...")
         if not (Settings.DEFAULT_runsolver_dir / "Makefile").exists():
-            warnings.warn("Runsolver executable doesn't exist and cannot find makefile."
-                          " Please verify the contents of the directory: "
-                          f"{Settings.DEFAULT_runsolver_dir}")
+            warnings.warn(
+                "Runsolver executable doesn't exist and cannot find makefile."
+                " Please verify the contents of the directory: "
+                f"{Settings.DEFAULT_runsolver_dir}"
+            )
         else:
-            compile_runsolver =\
-                subprocess.run(["make"],
-                               cwd=Settings.DEFAULT_runsolver_dir,
-                               capture_output=True)
+            compile_runsolver = subprocess.run(
+                ["make"], cwd=Settings.DEFAULT_runsolver_dir, capture_output=True
+            )
             if compile_runsolver.returncode != 0:
-                warnings.warn("Compilation of Runsolver failed with the following msg:"
-                              f"[{compile_runsolver.returncode}] "
-                              f"{compile_runsolver.stderr.decode()}")
+                warnings.warn(
+                    "Compilation of Runsolver failed with the following msg:"
+                    f"[{compile_runsolver.returncode}] "
+                    f"{compile_runsolver.stderr.decode()}"
+                )
             else:
                 print("Runsolver compiled successfully!")
 
     # If Runsolver is compiled, check that it can be executed
     if Settings.DEFAULT_runsolver_exec.exists():
-        runsolver_check = subprocess.run([Settings.DEFAULT_runsolver_exec,
-                                          "--version"],
-                                         capture_output=True)
+        runsolver_check = subprocess.run(
+            [Settings.DEFAULT_runsolver_exec, "--version"], capture_output=True
+        )
         if runsolver_check.returncode != 0:
-            print("WARNING: Runsolver executable cannot be run successfully. "
-                  "Please verify the following error messages:\n"
-                  f"{runsolver_check.stderr.decode()}")
+            print(
+                "WARNING: Runsolver executable cannot be run successfully. "
+                "Please verify the following error messages:\n"
+                f"{runsolver_check.stderr.decode()}"
+            )
 
     # Check that java is available for SMAC2
     if shutil.which("java") is None:
         # NOTE: An automatic resolution of Java at this point would be good
         # However, loading modules from Python has thusfar not been successfull.
-        print("WARNING: Could not find Java as an executable! Java 1.8.0_402 is required"
-              " to use SMAC2 or ParamILS as a configurator. Consider installing Java.")
+        print(
+            "WARNING: Could not find Java as an executable! Java 1.8.0_402 is required"
+            " to use SMAC2 or ParamILS as a configurator. Consider installing Java."
+        )
 
     # Check for each configurator that it is available
     if interactive and not SMAC2.configurator_executable.exists():
@@ -169,8 +192,10 @@ def initialise_sparkle(save_existing_platform: bool = True,
             ParamILS.download_requirements()
     if interactive and not IRACE.check_requirements():
         if shutil.which("R") is None:
-            print("R is not installed, which is required for the IRACE "
-                  "configurator (installation). Consider installing R.")
+            print(
+                "R is not installed, which is required for the IRACE "
+                "configurator (installation). Consider installing R."
+            )
         else:
             print("IRACE is not installed, would you like to install? (Y/n) ...")
             if input().lower() == "y":
@@ -184,11 +209,15 @@ def initialise_sparkle(save_existing_platform: bool = True,
         print("Downloading examples ...")
         curl = subprocess.Popen(
             ["curl", "https://codeload.github.com/ADA-research/Sparkle/tar.gz/main"],
-            stdout=subprocess.PIPE)
+            stdout=subprocess.PIPE,
+        )
         outpath = Path("outfile.tar.gz")
         with curl.stdout, outpath.open("wb") as outfile:
-            tar = subprocess.Popen(["tar", "-xz", "--strip=1", "Sparkle-main/Examples"],
-                                   stdin=curl.stdout, stdout=outfile)
+            tar = subprocess.Popen(
+                ["tar", "-xz", "--strip=1", "Sparkle-main/Examples"],
+                stdin=curl.stdout,
+                stdout=outfile,
+            )
         curl.wait()  # Wait for the download to complete
         tar.wait()  # Wait for the extraction to complete
         outpath.unlink(missing_ok=True)
@@ -202,10 +231,12 @@ def main(argv: list[str]) -> None:
     parser = parser_function()
     # Process command line arguments
     args = parser.parse_args(argv)
-    initialise_sparkle(save_existing_platform=args.no_save,
-                       interactive=True,
-                       download_examples=args.download_examples,
-                       rebuild_runsolver=args.rebuild_runsolver)
+    initialise_sparkle(
+        save_existing_platform=args.no_save,
+        interactive=True,
+        download_examples=args.download_examples,
+        rebuild_runsolver=args.rebuild_runsolver,
+    )
     sys.exit(0)
 
 

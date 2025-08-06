@@ -1,4 +1,5 @@
 """Tests for the check command."""
+
 from pathlib import Path
 import pytest
 
@@ -23,8 +24,9 @@ def test_check_command() -> None:
     assert pytest_wrapped_e.value.code == 0
 
     # Test solver with example instance
-    example_instance = Path("Examples") / "Resources" / "Instances" / "PTN" /\
-        "Ptn-7824-b01.cnf"
+    example_instance = (
+        Path("Examples") / "Resources" / "Instances" / "PTN" / "Ptn-7824-b01.cnf"
+    )
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         check.main(["solver", str(solver_path), str(example_instance)])
     assert pytest_wrapped_e.type is SystemExit
@@ -38,8 +40,12 @@ def test_check_command() -> None:
     assert pytest_wrapped_e.value.code == 0
 
     # Test for feature extractor
-    extractor_path = Path("Examples") / "Resources" / "Extractors" /\
-        "SAT-features-competition2012_revised_without_SatELite"
+    extractor_path = (
+        Path("Examples")
+        / "Resources"
+        / "Extractors"
+        / "SAT-features-competition2012_revised_without_SatELite"
+    )
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         check.main(["feature-extractor", str(extractor_path)])
     assert pytest_wrapped_e.type is SystemExit

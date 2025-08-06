@@ -1,14 +1,18 @@
 """Test public methods of ParamILS configurator."""
+
 import pytest
 from pathlib import Path
 from sparkle.configurator.implementations import ParamILS, ParamILSScenario
 
 
-def test_paramils_organise_output(tmp_path: Path,
-                                  monkeypatch: pytest.MonkeyPatch) -> None:
+def test_paramils_organise_output(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test IRACE organise output method."""
-    output_file = Path("tests/test_files/Configuration/results/"
-                       "PbO-CCSAT-Generic_PTN_seed_2_paramils.txt")
+    output_file = Path(
+        "tests/test_files/Configuration/results/"
+        "PbO-CCSAT-Generic_PTN_seed_2_paramils.txt"
+    )
     scenario_file = Path("tests/test_files/Configuration/test_paramils_scenario.txt")
     scenario = ParamILSScenario.from_file(scenario_file)
     configuration = ParamILS.organise_output(output_file, None, scenario, 2)
@@ -33,8 +37,7 @@ def test_paramils_organise_output(tmp_path: Path,
     }
 
 
-def test_paramils_scenario_file(tmp_path: Path,
-                                monkeypatch: pytest.MonkeyPatch) -> None:
+def test_paramils_scenario_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test IRACE scenario file creation."""
     pass
 

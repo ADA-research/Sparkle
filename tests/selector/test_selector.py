@@ -1,4 +1,5 @@
 """Test files for Selector class."""
+
 import pytest
 from unittest.mock import patch, Mock
 
@@ -16,14 +17,16 @@ import pandas as pd
 
 
 @pytest.mark.parametrize(
-    "selector_class, model_class", [
+    "selector_class, model_class",
+    [
         (MultiClassClassifier, RandomForestClassifier),
         (PairwiseClassifier, GradientBoostingClassifier),
-    ]
+    ],
 )
 def test_selector_constructor(
-        selector_class: AbstractModelBasedSelector,
-        model_class: AbstractPredictor | ClassifierMixin | RegressorMixin) -> None:
+    selector_class: AbstractModelBasedSelector,
+    model_class: AbstractPredictor | ClassifierMixin | RegressorMixin,
+) -> None:
     """Test for method constructor."""
     selector = Selector(selector_class, model_class)
     assert selector.selector_class == selector_class
@@ -32,16 +35,16 @@ def test_selector_constructor(
 
 @patch("runrunner.add_to_queue")
 def test_construct(
-        mock_add_to_queue: Mock,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch) -> None:
+    mock_add_to_queue: Mock, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test for method construct."""
     selector = Selector(MultiClassClassifier, RandomForestClassifier)
 
     # Construct Parameters
     objective = PAR(10)
     performance_data_path = Path(
-        "tests/test_files/Output/Performance_Data/performance_data.csv")
+        "tests/test_files/Output/Performance_Data/performance_data.csv"
+    )
     performance_data = PerformanceDataFrame(performance_data_path)
     performance_data.filter_objective(objective.name)
     feature_data_path = Path("tests/test_files/Output/Feature_Data/feature_data.csv")
@@ -62,11 +65,13 @@ def test_construct(
         solver_cutoff=solver_cutoff,
     )
 
-    selector.construct(scenario,
-                       run_on=run_on,
-                       job_name="test_job",
-                       sbatch_options=sbatch_options,
-                       base_dir=base_dir)
+    selector.construct(
+        scenario,
+        run_on=run_on,
+        job_name="test_job",
+        sbatch_options=sbatch_options,
+        base_dir=base_dir,
+    )
 
     assert scenario.performance_target_path.is_file()
     selector_performance = pd.read_csv(scenario.performance_target_path)
@@ -94,22 +99,23 @@ def test_construct(
 
 
 @patch("runrunner.add_to_queue")
-def test_construct_all_configurations(mock_add_queue: Mock,
-                                      tmp_path: Path,
-                                      monkeypatch: pytest.MonkeyPatch) -> None:
+def test_construct_all_configurations(
+    mock_add_queue: Mock, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test with configuration selection."""
     selector = Selector(MultiClassClassifier, RandomForestClassifier)
 
     # Construct Parameters
-    performance_data_path =\
-        Path("tests/test_files/performance/actual-data.csv").absolute()
+    performance_data_path = Path(
+        "tests/test_files/performance/actual-data.csv"
+    ).absolute()
     objective = PAR(10)
-    performance_data =\
-        PerformanceDataFrame(performance_data_path)
+    performance_data = PerformanceDataFrame(performance_data_path)
     # Filter performance data
     performance_data.filter_objective(objective.name)
-    feature_data_path =\
-        Path("tests/test_files/Output/Feature_Data/feature_data.csv").absolute()
+    feature_data_path = Path(
+        "tests/test_files/Output/Feature_Data/feature_data.csv"
+    ).absolute()
     feature_data = FeatureDataFrame(feature_data_path)
     solver_cutoff = 60
     run_on = Runner.SLURM
@@ -137,9 +143,11 @@ def test_construct_all_configurations(mock_add_queue: Mock,
 
 @pytest.mark.parametrize(
     "instance",
-    ["Instances/PTN/Ptn-7824-b03.cnf",
-     "Instances/PTN/Ptn-7824-b15.cnf",
-     "Instances/PTN/Ptn-7824-b21.cnf"]
+    [
+        "Instances/PTN/Ptn-7824-b03.cnf",
+        "Instances/PTN/Ptn-7824-b15.cnf",
+        "Instances/PTN/Ptn-7824-b21.cnf",
+    ],
 )
 def test_run(instance: str) -> None:
     """Test for method run."""

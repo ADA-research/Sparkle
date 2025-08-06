@@ -1,4 +1,5 @@
 """Test class for the Settings class."""
+
 import pytest
 from pathlib import Path
 import argparse
@@ -33,8 +34,14 @@ def test_read_from_file() -> None:
     default_settings = Path("sparkle/Components/sparkle_settings.ini")
     settings = Settings(default_settings)
     assert set([o.name for o in settings.objectives]) == set(
-        ["PAR10", "status:metric", "cpu_time:metric",
-         "wall_time:metric", "memory:metric"])
+        [
+            "PAR10",
+            "status:metric",
+            "cpu_time:metric",
+            "wall_time:metric",
+            "memory:metric",
+        ]
+    )
     assert settings.solver_cutoff_time == 60
     assert settings.extractor_cutoff_time == 60
     assert settings.run_on == "slurm"
@@ -102,23 +109,35 @@ def test_file_with_cli_args() -> None:
     assert settings.configurator_solver_call_budget is None
     # Create parser to mimic CLI args
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument(*Settings.OPTION_solver_cutoff_time.args,
-                        **Settings.OPTION_solver_cutoff_time.kwargs)
-    parser.add_argument(*Settings.OPTION_extractor_cutoff_time.args,
-                        **Settings.OPTION_extractor_cutoff_time.kwargs)
-    parser.add_argument(*Settings.OPTION_configurator_solver_call_budget.args,
-                        **Settings.OPTION_configurator_solver_call_budget.kwargs)
-    args = parser.parse_args(["--solver-cutoff-time", "10",
-                              "--extractor-cutoff-time", "20",
-                              "--solver-calls", "100"])
+    parser.add_argument(
+        *Settings.OPTION_solver_cutoff_time.args,
+        **Settings.OPTION_solver_cutoff_time.kwargs,
+    )
+    parser.add_argument(
+        *Settings.OPTION_extractor_cutoff_time.args,
+        **Settings.OPTION_extractor_cutoff_time.kwargs,
+    )
+    parser.add_argument(
+        *Settings.OPTION_configurator_solver_call_budget.args,
+        **Settings.OPTION_configurator_solver_call_budget.kwargs,
+    )
+    args = parser.parse_args(
+        [
+            "--solver-cutoff-time",
+            "10",
+            "--extractor-cutoff-time",
+            "20",
+            "--solver-calls",
+            "100",
+        ]
+    )
     settings = Settings(default_settings, args)
     assert settings.solver_cutoff_time == 10
     assert settings.extractor_cutoff_time == 20
     assert settings.configurator_solver_call_budget == 100
 
 
-def test_read_empty_file(tmp_path: Path,
-                         monkeypatch: pytest.MonkeyPatch) -> None:
+def test_read_empty_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test reading an empty file for standard properties."""
     empty = Path("tests/test_files/Settings/settings-empty.ini").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
@@ -135,15 +154,20 @@ def test_read_empty_file(tmp_path: Path,
     assert tmp.read_text() == ""
 
 
-def test_read_full_file(tmp_path: Path,
-                        monkeypatch: pytest.MonkeyPatch) -> None:
+def test_read_full_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test reading settings from file where each setting gets a value."""
     default_settings = Path("tests/test_files/Settings/settings-full.ini").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     settings = Settings(default_settings)
     assert set([o.name for o in settings.objectives]) == set(
-        ["PAR10", "status:metric", "cpu_time:metric",
-         "wall_time:metric", "memory:metric"])
+        [
+            "PAR10",
+            "status:metric",
+            "cpu_time:metric",
+            "wall_time:metric",
+            "memory:metric",
+        ]
+    )
     assert settings.solver_cutoff_time == 60
     assert settings.extractor_cutoff_time == 60
     assert settings.run_on == "slurm"
@@ -208,8 +232,9 @@ def test_read_full_file(tmp_path: Path,
     # Slurm
     assert settings.slurm_jobs_in_parallel == 16
     assert settings.slurm_job_prepend == "echo $JOB_ID"
-    assert set(settings.sbatch_settings) == set(["--mem-per-cpu=3000", "--time=25:00",
-                                                 "--partition=CPU", "--qos=fast"])
+    assert set(settings.sbatch_settings) == set(
+        ["--mem-per-cpu=3000", "--time=25:00", "--partition=CPU", "--qos=fast"]
+    )
     # Test writing the file
     tmp = Path("tmp.ini")
     settings.write_settings_ini(tmp)
@@ -221,13 +246,20 @@ def test_read_with_cli_file() -> None:
     """Test reading settings with CLI file argument."""
     default_settings = Path("tests/test_files/Settings/settings-full.ini")
     settings_arg = Path("sparkle/Components/sparkle_settings.ini")
-    args = argparse.Namespace(**{"settings_file": settings_arg,
-                                 "solver_cutoff_time": 900})  # Random setting
+    args = argparse.Namespace(
+        **{"settings_file": settings_arg, "solver_cutoff_time": 900}
+    )  # Random setting
     settings = Settings(default_settings, args)
     # Test overridden attributes
     assert set([o.name for o in settings.objectives]) == set(
-        ["PAR10", "status:metric", "cpu_time:metric",
-         "wall_time:metric", "memory:metric"])
+        [
+            "PAR10",
+            "status:metric",
+            "cpu_time:metric",
+            "wall_time:metric",
+            "memory:metric",
+        ]
+    )
     assert settings.solver_cutoff_time == 900  # Override
     assert settings.extractor_cutoff_time == 60
     assert settings.run_on == "slurm"
@@ -292,13 +324,15 @@ def test_read_with_cli_file() -> None:
     # Slurm
     assert settings.slurm_jobs_in_parallel == 25  # Override
     assert settings.slurm_job_prepend == "echo $JOB_ID"
-    assert set(settings.sbatch_settings) == set(["--mem-per-cpu=3000", "--time=25:00",
-                                                 "--partition=CPU", "--qos=fast"])
+    assert set(settings.sbatch_settings) == set(
+        ["--mem-per-cpu=3000", "--time=25:00", "--partition=CPU", "--qos=fast"]
+    )
 
     # Test smaller override for integration tests
     override_path = Path("tests/CLI/test_files/Settings/sparkle_settings_kathleen.ini")
     args = argparse.Namespace(**{"settings_file": override_path})
     settings.apply_arguments(args)
 
-    assert set(settings.sbatch_settings) == set(["--mem-per-cpu=3000", "--time=30:00",
-                                                 "--qos=short", "--partition=CPU"])
+    assert set(settings.sbatch_settings) == set(
+        ["--mem-per-cpu=3000", "--time=30:00", "--qos=short", "--partition=CPU"]
+    )

@@ -1,4 +1,5 @@
 """Test for the Sparkle CLI status entry point."""
+
 import pytest
 from pathlib import Path
 
@@ -6,8 +7,7 @@ from sparkle.CLI import status
 
 
 @pytest.mark.integration
-def test_status_command(tmp_path: Path,
-                        monkeypatch: pytest.MonkeyPatch) -> None:
+def test_status_command(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test status command."""
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     # Smoke test

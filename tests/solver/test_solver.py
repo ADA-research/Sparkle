@@ -11,6 +11,7 @@ from sparkle.solver import Solver, verifiers
 
 class TestSolver(TestCase):
     """Class bundling all tests regarding Solver."""
+
     def setUp(self: TestSolver) -> None:
         """Setup executed before each test."""
         self.solver_path = Path("tests", "test_files", "test_solver")
@@ -68,15 +69,13 @@ class TestSolver(TestCase):
 
         # None in meta file
         meta_file = self.solver_path / Solver.meta_data
-        meta_data = {"deterministic": False,
-                     "verifier": None}
+        meta_data = {"deterministic": False, "verifier": None}
         meta_file.open("w").write(str(meta_data))
         solver = Solver(self.solver_path)
         self.assertEqual(solver.verifier, None)
 
         # Verifier SAT in meta file
-        meta_data = {"deterministic": False,
-                     "verifier": "SATVerifier"}
+        meta_data = {"deterministic": False, "verifier": "SATVerifier"}
         meta_file.open("w").write(str(meta_data))
         solver = Solver(self.solver_path)
         self.assertEqual(solver.verifier, verifiers.SATVerifier)

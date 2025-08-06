@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Handles SMAC2 calls passing to sparkle solver wrappers."""
+
 import sys
 from pathlib import Path
 
@@ -27,16 +28,17 @@ if __name__ == "__main__":
     seed = int(sys.argv[8])
 
     runsolver_binary = solver_dir / "runsolver"
-    solver = Solver(solver_dir,
-                    runsolver_exec=runsolver_binary)
+    solver = Solver(solver_dir, runsolver_exec=runsolver_binary)
     # Call Runsolver with the solver configurator wrapper and its arguments
-    output = solver.run(instances=instance,
-                        objectives=[objective],
-                        seed=seed,
-                        cutoff_time=cutoff_time,
-                        configuration=configuration,
-                        log_dir=solver_log_dir,
-                        run_on=Runner.LOCAL)
+    output = solver.run(
+        instances=instance,
+        objectives=[objective],
+        seed=seed,
+        cutoff_time=cutoff_time,
+        configuration=configuration,
+        log_dir=solver_log_dir,
+        run_on=Runner.LOCAL,
+    )
 
     # Return values to SMAC
     # SMAC2 does not accept nan values etc for quality
@@ -45,5 +47,7 @@ if __name__ == "__main__":
         quality = float(output[objective.name])
         if not objective.minimise:
             quality = -1 * quality
-    print("Result for SMAC: "
-          f"{output['status']}, {output['cpu_time']}, 0, {quality}, {seed}")
+    print(
+        "Result for SMAC: "
+        f"{output['status']}, {output['cpu_time']}, 0, {quality}, {seed}"
+    )

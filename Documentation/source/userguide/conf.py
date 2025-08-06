@@ -124,11 +124,9 @@ latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
-
     # The font size ('10pt', '11pt' or '12pt').
     #
     # 'pointsize': '10pt',
-
     # Additional stuff for the LaTeX preamble.
     #
     # 'preamble': r"""
@@ -150,27 +148,35 @@ latex_show_urls = "footnote"
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "sparkle-userguide.tex", "Sparkle User Guide",
-     "ADA Research Group, AIM @ RWTH Aachen", "howto"),
+    (
+        master_doc,
+        "sparkle-userguide.tex",
+        "Sparkle User Guide",
+        "ADA Research Group, AIM @ RWTH Aachen",
+        "howto",
+    ),
 ]
 
 # Manually installed sty files not easily available from conda
 # Note that although texlive-core is available from conda (containing at least some
 # packages), it can cause conflicts with exiting texlive installations.
-latex_additional_files = ["../tex_sty/fncychap.sty", "../tex_sty/wrapfig.sty",
-                          "../tex_sty/capt-of.sty", "../tex_sty/framed.sty",
-                          "../tex_sty/upquote.sty", "../tex_sty/needspace.sty",
-                          "../tex_sty/tabulary.sty", "../tex_sty/titlesec.sty"]
+latex_additional_files = [
+    "../tex_sty/fncychap.sty",
+    "../tex_sty/wrapfig.sty",
+    "../tex_sty/capt-of.sty",
+    "../tex_sty/framed.sty",
+    "../tex_sty/upquote.sty",
+    "../tex_sty/needspace.sty",
+    "../tex_sty/tabulary.sty",
+    "../tex_sty/titlesec.sty",
+]
 
 
 # -- Options for manual page output ------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, "sparkle", "Sparkle Documentation",
-     [author], 1)
-]
+man_pages = [(master_doc, "sparkle", "Sparkle Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -179,9 +185,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, "sparkle", "Sparkle User Guide",
-     author, "sparkle", " A PbO-based Multi-agent Problem-solving Platform.",
-     "Miscellaneous"),
+    (
+        master_doc,
+        "sparkle",
+        "Sparkle User Guide",
+        author,
+        "sparkle",
+        " A PbO-based Multi-agent Problem-solving Platform.",
+        "Miscellaneous",
+    ),
 ]
 
 

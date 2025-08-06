@@ -1,4 +1,5 @@
 """Parameter Configuration Space tools."""
+
 from __future__ import annotations
 import re
 import ast
@@ -14,6 +15,7 @@ from sparkle.tools.configspace import expression_to_configspace
 
 class PCSConvention(Enum):
     """Internal pcs convention enum."""
+
     UNKNOWN = "UNKNOWN"
     SMAC = "smac"
     ParamILS = "paramils"
@@ -23,24 +25,32 @@ class PCSConvention(Enum):
 
 class PCSConverter:
     """Parser class independent file of notation."""
+
     section_regex = re.compile(r"\[(?P<name>[a-zA-Z]+?)\]\s*(?P<comment>#.*)?$")
     illegal_param_name = re.compile(r"[!:\-+@!#$%^&*()=<>?/\|~` ]")
 
-    smac2_params_regex = re.compile(r"^(?P<name>[a-zA-Z0-9_]+)\s+(?P<type>[a-zA-Z]+)\s+"
-                                    r"(?P<values>[a-zA-Z0-9\-\[\]{}_,. ]+)\s*"
-                                    r"\[(?P<default>[a-zA-Z0-9._-]+)\]?\s*"
-                                    r"(?P<scale>log)?\s*(?P<comment>#.*)?$")
-    smac2_conditions_regex = re.compile(r"^(?P<parameter>[a-zA-Z0-9_]+)\s*\|\s*"
-                                        r"(?P<expression>.+)$")
+    smac2_params_regex = re.compile(
+        r"^(?P<name>[a-zA-Z0-9_]+)\s+(?P<type>[a-zA-Z]+)\s+"
+        r"(?P<values>[a-zA-Z0-9\-\[\]{}_,. ]+)\s*"
+        r"\[(?P<default>[a-zA-Z0-9._-]+)\]?\s*"
+        r"(?P<scale>log)?\s*(?P<comment>#.*)?$"
+    )
+    smac2_conditions_regex = re.compile(
+        r"^(?P<parameter>[a-zA-Z0-9_]+)\s*\|\s*"
+        r"(?P<expression>.+)$"
+    )
     smac2_forbidden_regex = re.compile(r"\{(?P<forbidden>.+)\}$")
 
     paramils_params_regex = re.compile(
         r"^(?P<name>[a-zA-Z0-9@!#:_-]+)\s*"
         r"(?P<values>{[a-zA-Z0-9._+\-\, ]+})\s*"
         r"\[(?P<default>[a-zA-Z0-9._\-+ ]+)\]?\s*"
-        r"(?P<comment>#.*)?$")
-    paramils_conditions_regex = re.compile(r"^(?P<parameter>[a-zA-Z0-9@!#:_-]+)\s*\|\s*"
-                                           r"(?P<expression>.+)$")
+        r"(?P<comment>#.*)?$"
+    )
+    paramils_conditions_regex = re.compile(
+        r"^(?P<parameter>[a-zA-Z0-9@!#:_-]+)\s*\|\s*"
+        r"(?P<expression>.+)$"
+    )
 
     irace_params_regex = re.compile(
         r"^(?P<name>[a-zA-Z0-9_]+)\s+"
@@ -48,7 +58,8 @@ class PCSConverter:
         r"(?P<type>[cior])(?:,)?(?P<scale>log)?\s+"
         r"(?P<values>[a-zA-Z0-9\-()_,. ]+)\s*"
         r"(?:\|)?(?P<conditions>[a-zA-Z-0-9_!=<>\%()\&\|\. ]*)?\s*"
-        r"(?P<comment>#.*)?$")
+        r"(?P<comment>#.*)?$"
+    )
 
     @staticmethod
     def get_convention(file: Path) -> PCSConvention:
@@ -96,7 +107,8 @@ class PCSConverter:
         if convention == PCSConvention.IRACE:
             return PCSConverter.parse_irace(file)
         raise Exception(
-            f"PCS convention not recognised based on any lines in file:\n{file}")
+            f"PCS convention not recognised based on any lines in file:\n{file}"
+        )
 
     @staticmethod
     def parse_smac(content: list[str] | Path) -> ConfigurationSpace:
@@ -158,14 +170,17 @@ class PCSConverter:
             elif re.match(PCSConverter.smac2_conditions_regex, line):
                 # Break up the expression into the smallest possible pieces
                 match = re.fullmatch(PCSConverter.smac2_conditions_regex, line)
-                parameter, condition =\
-                    match.group("parameter"), match.group("expression")
+                parameter, condition = (
+                    match.group("parameter"),
+                    match.group("expression"),
+                )
                 parameter = cs[parameter.strip()]
                 condition = condition.replace(" || ", " or ").replace(" && ", " and ")
                 condition = re.sub(r"(?<![<>!=])=(?<![=])", "==", condition)
                 condition = re.sub(r"!==", "!=", condition)
-                condition = expression_to_configspace(condition, cs,
-                                                      target_parameter=parameter)
+                condition = expression_to_configspace(
+                    condition, cs, target_parameter=parameter
+                )
                 cs.add(condition)
             elif re.match(PCSConverter.smac2_forbidden_regex, line):
                 match = re.fullmatch(PCSConverter.smac2_forbidden_regex, line)
@@ -179,23 +194,49 @@ class PCSConverter:
                 # Functions: abs, acos, asin, atan, cbrt, ceil, cos, cosh, exp, floor,
                 # log, log10, log2, sin, sinh, sqrt, tan, tanh
                 # NOTE: According to MA & JR, these were never actually supported
-                rejected_operators = ("+", "-", "*", "^", "%",
-                                      "abs", "acos", "asin", "atan", "cbrt", "ceil",
-                                      "cos", "cosh", "exp", "floor", "log", "log10",
-                                      "log2", "sin", "sinh", "sqrt", "tan", "tanh")
+                rejected_operators = (
+                    "+",
+                    "-",
+                    "*",
+                    "^",
+                    "%",
+                    "abs",
+                    "acos",
+                    "asin",
+                    "atan",
+                    "cbrt",
+                    "ceil",
+                    "cos",
+                    "cosh",
+                    "exp",
+                    "floor",
+                    "log",
+                    "log10",
+                    "log2",
+                    "sin",
+                    "sinh",
+                    "sqrt",
+                    "tan",
+                    "tanh",
+                )
                 if any([r in forbidden.split(" ") for r in rejected_operators]):
-                    print("WARNING: Arithmetic operators are not supported by "
-                          "ConfigurationSpace. Skipping forbidden expression:\n"
-                          f"{forbidden}")
+                    print(
+                        "WARNING: Arithmetic operators are not supported by "
+                        "ConfigurationSpace. Skipping forbidden expression:\n"
+                        f"{forbidden}"
+                    )
                     continue
-                forbidden = forbidden.replace(" && ", " and ").replace(
-                    ", ", " and ").replace(" || ", " or ").strip()  # To AST notation
+                forbidden = (
+                    forbidden.replace(" && ", " and ")
+                    .replace(", ", " and ")
+                    .replace(" || ", " or ")
+                    .strip()
+                )  # To AST notation
                 forbidden = re.sub(r"(?<![<>!=])=(?![=])", "==", forbidden)
                 forbidden = expression_to_configspace(forbidden, cs)
                 cs.add(forbidden)
             else:
-                raise Exception(
-                    f"SMAC2 PCS expression not recognised on line:\n{line}")
+                raise Exception(f"SMAC2 PCS expression not recognised on line:\n{line}")
         return cs
 
     @staticmethod
@@ -219,7 +260,8 @@ class PCSConverter:
                     # expressions
                     raise ValueError(
                         f"ParamILS parameter name not allowed: {name}. "
-                        "This is supported by ParamILS, but not by PCSConverter.")
+                        "This is supported by ParamILS, but not by PCSConverter."
+                    )
                 values = parameter.group("values")
                 values = values.replace("..", ",")  # Replace automatic expansion
                 try:
@@ -237,7 +279,7 @@ class PCSConverter:
                     parameter_type = str
                 default = parameter.group("default")
                 comment = parameter.group("comment")
-                if parameter_type == int:
+                if parameter_type is int:
                     csparam = ConfigSpace.UniformIntegerHyperparameter(
                         name=name,
                         lower=int(values[0]),
@@ -245,7 +287,7 @@ class PCSConverter:
                         default_value=int(default),
                         meta=comment,
                     )
-                elif parameter_type == float:
+                elif parameter_type is float:
                     csparam = ConfigSpace.UniformFloatHyperparameter(
                         name=name,
                         lower=float(values[0]),
@@ -253,7 +295,7 @@ class PCSConverter:
                         default_value=float(default),
                         meta=comment,
                     )
-                elif parameter_type == str:
+                elif parameter_type is str:
                     csparam = ConfigSpace.CategoricalHyperparameter(
                         name=name,
                         choices=values,
@@ -264,8 +306,10 @@ class PCSConverter:
             elif re.match(PCSConverter.paramils_conditions_regex, line):
                 # Break up the expression into the smallest possible pieces
                 match = re.fullmatch(PCSConverter.paramils_conditions_regex, line)
-                parameter, condition =\
-                    match.group("parameter").strip(), match.group("expression")
+                parameter, condition = (
+                    match.group("parameter").strip(),
+                    match.group("expression"),
+                )
                 condition = condition.replace(" || ", " or ").replace(" && ", " and ")
                 condition = re.sub(r"(?<![<>!=])=(?<![=])", "==", condition)
                 condition = re.sub(r"!==", "!=", condition)
@@ -287,27 +331,54 @@ class PCSConverter:
                 # Functions: abs, acos, asin, atan, cbrt, ceil, cos, cosh, exp, floor,
                 # log, log10, log2, sin, sinh, sqrt, tan, tanh
                 # NOTE: According to MA & JR, these were never actually supported
-                rejected_operators = ("+", "-", "*", "^", "%",
-                                      "abs", "acos", "asin", "atan", "cbrt", "ceil",
-                                      "cos", "cosh", "exp", "floor", "log", "log10",
-                                      "log2", "sin", "sinh", "sqrt", "tan", "tanh")
+                rejected_operators = (
+                    "+",
+                    "-",
+                    "*",
+                    "^",
+                    "%",
+                    "abs",
+                    "acos",
+                    "asin",
+                    "atan",
+                    "cbrt",
+                    "ceil",
+                    "cos",
+                    "cosh",
+                    "exp",
+                    "floor",
+                    "log",
+                    "log10",
+                    "log2",
+                    "sin",
+                    "sinh",
+                    "sqrt",
+                    "tan",
+                    "tanh",
+                )
                 if any([r in forbidden.split(" ") for r in rejected_operators]):
-                    print("WARNING: Arithmetic operators are not supported by "
-                          "ConfigurationSpace. Skipping forbidden expression:\n"
-                          f"{forbidden}")
+                    print(
+                        "WARNING: Arithmetic operators are not supported by "
+                        "ConfigurationSpace. Skipping forbidden expression:\n"
+                        f"{forbidden}"
+                    )
                     continue
-                forbidden = forbidden.replace(" && ", " and ").replace(
-                    ", ", " and ").replace(" || ", " or ").strip()  # To AST notation
+                forbidden = (
+                    forbidden.replace(" && ", " and ")
+                    .replace(", ", " and ")
+                    .replace(" || ", " or ")
+                    .strip()
+                )  # To AST notation
                 forbidden = re.sub(r"(?<![<>!=])=(?![=])", "==", forbidden)
                 forbidden = expression_to_configspace(forbidden, cs)
                 cs.add(forbidden)
             else:
                 raise Exception(
-                    f"ParamILS PCS expression not recognised on line: {line}")
+                    f"ParamILS PCS expression not recognised on line: {line}"
+                )
         # Add the condition
         for pname, cond in conditions_lines.items():  # Add conditions
-            condition = expression_to_configspace(cond, cs,
-                                                  target_parameter=cs[pname])
+            condition = expression_to_configspace(cond, cs, target_parameter=cs[pname])
             cs.add(condition)
         return cs
 
@@ -332,8 +403,7 @@ class PCSConverter:
                     global_flag, forbidden_flag = True, False
                     continue
                 else:
-                    raise Exception(
-                        f"IRACE PCS section not recognised on line:\n{line}")
+                    raise Exception(f"IRACE PCS section not recognised on line:\n{line}")
             elif global_flag:  # Parse global statements
                 continue  # We do not parse global group
             elif forbidden_flag:  # Parse forbidden statements
@@ -359,10 +429,14 @@ class PCSConverter:
                 if parameter_type == "c" or parameter_type == "o":
                     values = [str(i) for i in values]
                 else:
-                    if any(operator in values
-                           for operator in ["+", "-", "*", "/", "%", "min", "max"]):
-                        raise ValueError("Dependent parameter domains not supported by "
-                                         "ConfigurationSpace.")
+                    if any(
+                        operator in values
+                        for operator in ["+", "-", "*", "/", "%", "min", "max"]
+                    ):
+                        raise ValueError(
+                            "Dependent parameter domains not supported by "
+                            "ConfigurationSpace."
+                        )
                     lower_bound, upper_bound = values[0], values[1]
                 if parameter_type == "c":
                     csparam = ConfigSpace.CategoricalHyperparameter(
@@ -402,19 +476,20 @@ class PCSConverter:
                     conditions = conditions.strip()
                     standardised_conditions.append((csparam, conditions))
             else:
-                raise Exception(
-                    f"IRACE PCS expression not recognised on line:\n{line}")
+                raise Exception(f"IRACE PCS expression not recognised on line:\n{line}")
 
         # We can only add the conditions after all parameters have been parsed:
         for csparam, conditions in standardised_conditions:
-            conditions = expression_to_configspace(conditions, cs,
-                                                   target_parameter=csparam)
+            conditions = expression_to_configspace(
+                conditions, cs, target_parameter=csparam
+            )
             cs.add(conditions)
         return cs
 
     @staticmethod
-    def export(configspace: ConfigurationSpace,
-               pcs_format: PCSConvention, file: Path) -> str | None:
+    def export(
+        configspace: ConfigurationSpace, pcs_format: PCSConvention, file: Path
+    ) -> str | None:
         """Exports a config space object to a specific PCS convention.
 
         Args:
@@ -426,15 +501,24 @@ class PCSConverter:
             String in case of no file path given, otherwise None.
         """
         # Create pcs table
-        declaration = f"### {pcs_format.name} Parameter Configuration Space file "\
-                      "generated by Sparkle\n"
+        declaration = (
+            f"### {pcs_format.name} Parameter Configuration Space file "
+            "generated by Sparkle\n"
+        )
         rows = []
         extra_rows = []
         if pcs_format == PCSConvention.SMAC or pcs_format == PCSConvention.ParamILS:
             import numpy as np
+
             granularity = 20  # For ParamILS. TODO: Make it parametrisable
-            header = ["# Parameter Name", "type", "values",
-                      "default value", "scale", "comments"]
+            header = [
+                "# Parameter Name",
+                "type",
+                "values",
+                "default value",
+                "scale",
+                "comments",
+            ]
             parameter_map = {
                 ConfigSpace.UniformFloatHyperparameter: "real",
                 ConfigSpace.UniformIntegerHyperparameter: "integer",
@@ -443,20 +527,36 @@ class PCSConverter:
             }
             for parameter in list(configspace.values()):
                 log = False
-                if isinstance(parameter,
-                              ConfigSpace.hyperparameters.NumericalHyperparameter):
+                if isinstance(
+                    parameter, ConfigSpace.hyperparameters.NumericalHyperparameter
+                ):
                     log = parameter.log
                     if pcs_format == PCSConvention.ParamILS:  # Discretise
-                        dtype = float if isinstance(
-                            parameter, ConfigSpace.UniformFloatHyperparameter) else int
+                        dtype = (
+                            float
+                            if isinstance(
+                                parameter, ConfigSpace.UniformFloatHyperparameter
+                            )
+                            else int
+                        )
                         if log:
                             lower = 1e-5 if parameter.lower == 0 else parameter.lower
-                            domain = list(np.unique(np.geomspace(
-                                lower, parameter.upper, granularity,
-                                dtype=dtype)))
+                            domain = list(
+                                np.unique(
+                                    np.geomspace(
+                                        lower, parameter.upper, granularity, dtype=dtype
+                                    )
+                                )
+                            )
                         else:
-                            domain = list(np.linspace(parameter.lower, parameter.upper,
-                                                      granularity, dtype=dtype))
+                            domain = list(
+                                np.linspace(
+                                    parameter.lower,
+                                    parameter.upper,
+                                    granularity,
+                                    dtype=dtype,
+                                )
+                            )
                         if dtype(parameter.default_value) not in domain:  # Add default
                             domain += [dtype(parameter.default_value)]
                         domain = list(set(domain))  # Ensure unique values only
@@ -466,26 +566,35 @@ class PCSConverter:
                         domain = f"[{parameter.lower}, {parameter.upper}]"
                 else:
                     domain = "{" + ",".join(parameter.choices) + "}"
-                rows.append([parameter.name,
-                             parameter_map[type(parameter)]
-                             if not pcs_format == PCSConvention.ParamILS else "",
-                             domain,
-                             f"[{parameter.default_value}]",
-                             "log"
-                             if log and not pcs_format == PCSConvention.ParamILS else "",
-                             f"# {parameter.meta}"])
+                rows.append(
+                    [
+                        parameter.name,
+                        parameter_map[type(parameter)]
+                        if not pcs_format == PCSConvention.ParamILS
+                        else "",
+                        domain,
+                        f"[{parameter.default_value}]",
+                        "log"
+                        if log and not pcs_format == PCSConvention.ParamILS
+                        else "",
+                        f"# {parameter.meta}",
+                    ]
+                )
             if configspace.conditions:
                 extra_rows.extend(["", "# Parameter Conditions"])
                 for condition in configspace.conditions:
                     condition_str = str(condition)
-                    condition_str = condition_str.replace(
-                        "(", "").replace(")", "")  # Brackets not allowed
+                    condition_str = condition_str.replace("(", "").replace(
+                        ")", ""
+                    )  # Brackets not allowed
                     condition_str = condition_str.replace("'", "")  # No quotes needed
                     condition_str = condition_str.replace(
-                        f"{condition.child.name} | ", "").strip()
+                        f"{condition.child.name} | ", ""
+                    ).strip()
                     condition_str = f"{condition.child.name} | " + condition_str
-                    if (pcs_format == PCSConvention.ParamILS
-                            and re.search(r"[<>!=]+|[<>]=|[!=]=", condition_str)):
+                    if pcs_format == PCSConvention.ParamILS and re.search(
+                        r"[<>!=]+|[<>]=|[!=]=", condition_str
+                    ):
                         # TODO: Translate condition ParamILS expression (in)
                         continue
                     extra_rows.append(condition_str)
@@ -495,8 +604,9 @@ class PCSConverter:
                     forbidden_str = str(forbidden).replace("Forbidden: ", "")
                     forbidden_str = forbidden_str.replace("(", "{").replace(")", "}")
                     forbidden_str = forbidden_str.replace("'", "")
-                    if (pcs_format == PCSConvention.ParamILS
-                            and re.search(r"[<>!=]+|[<>]=|[!=]=", forbidden_str)):
+                    if pcs_format == PCSConvention.ParamILS and re.search(
+                        r"[<>!=]+|[<>]=|[!=]=", forbidden_str
+                    ):
                         # TODO: Translate condition ParamILS expression (in)
                         continue
                     extra_rows.append(forbidden_str)
@@ -508,64 +618,87 @@ class PCSConverter:
                 ConfigSpace.CategoricalHyperparameter: "c",
                 ConfigSpace.OrdinalHyperparameter: "o",
             }
-            header = ["# Parameter Name", "switch", "type", "values",
-                      "[conditions (using R syntax)]", "comments"]
+            header = [
+                "# Parameter Name",
+                "switch",
+                "type",
+                "values",
+                "[conditions (using R syntax)]",
+                "comments",
+            ]
             for parameter in list(configspace.values()):
                 parameter_conditions = []
                 for c in configspace.conditions:
                     if c.child == parameter:
                         parameter_conditions.append(c)
                 parameter_type = parameter_map[type(parameter)]
-                condition_type = parameter_type if type(
-                    parameter) == ConfigSpace.CategoricalHyperparameter else ""
+                condition_type = (
+                    parameter_type
+                    if type(parameter) is ConfigSpace.CategoricalHyperparameter
+                    else ""
+                )
                 condition_str = " || ".join([str(c) for c in parameter_conditions])
                 condition_str = condition_str.replace(f"{parameter.name} | ", "")
                 condition_str = condition_str.replace(" in ", f" %in% {condition_type}")
                 condition_str = condition_str.replace("{", "(").replace("}", ")")
                 condition_str = condition_str.replace("'", "")  # No quotes around string
-                condition_str = condition_str.replace(
-                    " && ", " & ").replace(" || ", " | ")
-                if isinstance(parameter,
-                              ConfigSpace.hyperparameters.NumericalHyperparameter):
+                condition_str = condition_str.replace(" && ", " & ").replace(
+                    " || ", " | "
+                )
+                if isinstance(
+                    parameter, ConfigSpace.hyperparameters.NumericalHyperparameter
+                ):
                     if parameter.log:
                         parameter_type += ",log"
                     domain = f"({parameter.lower}, {parameter.upper})"
-                    if isinstance(parameter,
-                                  ConfigSpace.hyperparameters.FloatHyperparameter):
+                    if isinstance(
+                        parameter, ConfigSpace.hyperparameters.FloatHyperparameter
+                    ):
                         # Format the floats to interpret the number of digits
                         # (Includes scientific notation)
-                        lower, upper = (format(parameter.lower, ".16f").strip("0"),
-                                        format(parameter.upper, ".16f").strip("0"))
-                        param_digits = max(len(str(lower).split(".")[1]),
-                                           len(str(upper).split(".")[1]))
+                        lower, upper = (
+                            format(parameter.lower, ".16f").strip("0"),
+                            format(parameter.upper, ".16f").strip("0"),
+                        )
+                        param_digits = max(
+                            len(str(lower).split(".")[1]), len(str(upper).split(".")[1])
+                        )
                         # Check if we need to update the global digits
                         if param_digits > digits:
                             digits = param_digits
                 else:
                     domain = "(" + ",".join(parameter.choices) + ")"
-                rows.append([parameter.name,
-                             f'"--{parameter.name} "',
-                             parameter_type,
-                             domain,  # Parameter range/domain
-                             f"| {condition_str}" if condition_str else "",
-                             f"# {parameter.meta}" if parameter.meta else ""])
+                rows.append(
+                    [
+                        parameter.name,
+                        f'"--{parameter.name} "',
+                        parameter_type,
+                        domain,  # Parameter range/domain
+                        f"| {condition_str}" if condition_str else "",
+                        f"# {parameter.meta}" if parameter.meta else "",
+                    ]
+                )
             if configspace.forbidden_clauses:
                 extra_rows.extend(["", "[forbidden]"])
                 for forbidden_expression in configspace.forbidden_clauses:
                     forbidden_str = str(forbidden_expression).replace("Forbidden: ", "")
                     if " in " in forbidden_str:
                         type_char = parameter_map[
-                            type(forbidden_expression.hyperparameter)]
+                            type(forbidden_expression.hyperparameter)
+                        ]
                         forbidden_str.replace(" in ", f" %in% {type_char}")
-                    forbidden_str = forbidden_str.replace(
-                        " && ", " & ").replace(" || ", " | ")
+                    forbidden_str = forbidden_str.replace(" && ", " & ").replace(
+                        " || ", " | "
+                    )
                     extra_rows.append(forbidden_str)
             if digits > 4:  # Default digits is 4
                 extra_rows.extend(["", "[global]", f"digits={digits}"])
 
-        output = declaration + tabulate.tabulate(
-            rows, headers=header,
-            tablefmt="plain", numalign="left") + "\n"
+        output = (
+            declaration
+            + tabulate.tabulate(rows, headers=header, tablefmt="plain", numalign="left")
+            + "\n"
+        )
         if extra_rows:
             output += "\n".join(extra_rows) + "\n"
         if file is None:

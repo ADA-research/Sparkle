@@ -1,4 +1,5 @@
 """This package provides specific Configurator class implementations for Sparkle."""
+
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.implementations.irace import IRACE, IRACEScenario
 from sparkle.configurator.implementations.paramils import ParamILS, ParamILSScenario

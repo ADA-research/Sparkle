@@ -1,4 +1,5 @@
 """Configurator classes to implement IRACE in Sparkle."""
+
 from __future__ import annotations
 import shutil
 import subprocess
@@ -15,6 +16,7 @@ from runrunner import Runner, Run
 
 class IRACE(Configurator):
     """Class for IRACE configurator."""
+
     configurator_path = Path(__file__).parent.resolve() / "IRACE"
     configurator_target = configurator_path / "irace_target_algorithm.py"
 
@@ -37,11 +39,14 @@ class IRACE(Configurator):
         """Returns the version of the configurator."""
         if self._version is None:
             import re
-            version_call = subprocess.run(["Rscript", "-e", "packageVersion('irace')"],
-                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+            version_call = subprocess.run(
+                ["Rscript", "-e", "packageVersion('irace')"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
             if version_call.returncode == 0:
-                r_data = re.search(IRACE.r_regex,
-                                   version_call.stdout.decode().strip())
+                r_data = re.search(IRACE.r_regex, version_call.stdout.decode().strip())
                 if r_data is not None and r_data.group("data") is not None:
                     self._version = r_data.group("data")
         return self._version
@@ -62,12 +67,13 @@ class IRACE(Configurator):
         r_call = subprocess.run(
             ["Rscript", "-e", "find.package('irace')"],
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
+            stderr=subprocess.PIPE,
+        )
         if r_call.returncode != 0:
             return None  # Not installed
         import re
-        r_path = re.search(IRACE.r_regex,
-                           r_call.stdout.decode().strip())
+
+        r_path = re.search(IRACE.r_regex, r_call.stdout.decode().strip())
         if r_path is None or r_path.group("data") is None:
             return  # Could not find IRACE?
         path = Path(r_path.group("data"))
@@ -82,17 +88,20 @@ class IRACE(Configurator):
     def check_requirements(verbose: bool = False) -> bool:
         """Check that IRACE is installed."""
         import warnings
+
         if shutil.which("R") is None:
             if verbose:
                 warnings.warn(
                     "IRACE requires R, but R is not installed. "
-                    "Please ensure R is installed.")
+                    "Please ensure R is installed."
+                )
             return False
         if not IRACE.configurator_executable():
             if verbose:
                 warnings.warn(
                     "IRACE executable not found. Please ensure IRACE is installed "
-                    f"in the expected Path ({IRACE.configurator_path}).")
+                    f"in the expected Path ({IRACE.configurator_path})."
+                )
             return False
         return True
 
@@ -102,36 +111,50 @@ class IRACE(Configurator):
         if shutil.which("R") is None:
             raise RuntimeError("IRACE requires R, but R is not installed.")
         # Ensure personal library exists, do not raise warnings
-        subprocess.run([
-            "Rscript", "-e",
-            "dir.create(path = Sys.getenv('R_LIBS_USER'), "
-            "showWarnings = FALSE, recursive = TRUE)"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(
+            [
+                "Rscript",
+                "-e",
+                "dir.create(path = Sys.getenv('R_LIBS_USER'), "
+                "showWarnings = FALSE, recursive = TRUE)",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
         install_irace = subprocess.run(
-            ["Rscript", "-e",
-             # Install R
-             "install.packages('irace', "
-             "lib=Sys.getenv('R_LIBS_USER'), "  # Install in user library
-             "dependencies = TRUE, "  # Ensure dependencies are installed
-             "repos='https://cloud.r-project.org')"],  # Set source
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print(f"{install_irace.stdout.decode()}\n\n"
-              f"{install_irace.stderr.decode()}")
+            [
+                "Rscript",
+                "-e",
+                # Install R
+                "install.packages('irace', "
+                "lib=Sys.getenv('R_LIBS_USER'), "  # Install in user library
+                "dependencies = TRUE, "  # Ensure dependencies are installed
+                "repos='https://cloud.r-project.org')",
+            ],  # Set source
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        print(f"{install_irace.stdout.decode()}\n\n{install_irace.stderr.decode()}")
         if install_irace.returncode != 0:
             import warnings
-            warnings.warn("IRACE had a non-zero return code during installation!\n\n"
-                          f"{install_irace.stdout.decode()}\n\n"
-                          f"{install_irace.stderr.decode()}")
 
-    def configure(self: IRACE,
-                  scenario: ConfigurationScenario,
-                  data_target: PerformanceDataFrame,
-                  validate_after: bool = True,
-                  sbatch_options: list[str] = [],
-                  slurm_prepend: str | list[str] | Path = None,
-                  num_parallel_jobs: int = None,
-                  base_dir: Path = None,
-                  run_on: Runner = Runner.SLURM) -> Run:
+            warnings.warn(
+                "IRACE had a non-zero return code during installation!\n\n"
+                f"{install_irace.stdout.decode()}\n\n"
+                f"{install_irace.stderr.decode()}"
+            )
+
+    def configure(
+        self: IRACE,
+        scenario: ConfigurationScenario,
+        data_target: PerformanceDataFrame,
+        validate_after: bool = True,
+        sbatch_options: list[str] = [],
+        slurm_prepend: str | list[str] | Path = None,
+        num_parallel_jobs: int = None,
+        base_dir: Path = None,
+        run_on: Runner = Runner.SLURM,
+    ) -> Run:
         """Start configuration job.
 
         Args:
@@ -155,15 +178,20 @@ class IRACE(Configurator):
         seeds = [i for i in range(scenario.number_of_runs)]
         output_files = [
             scenario.results_directory.absolute() / f"output_{job_idx}.Rdata"
-            for job_idx in configuration_ids]
-        cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
-                f"{IRACE.__name__} {output_path} {data_target.csv_filepath} "
-                f"{scenario.scenario_file_path} {configuration_id} "
-                f"{IRACE.configurator_executable().absolute()} "
-                f"--scenario {scenario.scenario_file_path} "
-                f"--log-file {output_path} "
-                f"--seed {seed}" for seed, configuration_id, output_path
-                in zip(seeds, configuration_ids, output_files)]
+            for job_idx in configuration_ids
+        ]
+        cmds = [
+            f"python3 {Configurator.configurator_cli_path.absolute()} "
+            f"{IRACE.__name__} {output_path} {data_target.csv_filepath} "
+            f"{scenario.scenario_file_path} {configuration_id} "
+            f"{IRACE.configurator_executable().absolute()} "
+            f"--scenario {scenario.scenario_file_path} "
+            f"--log-file {output_path} "
+            f"--seed {seed}"
+            for seed, configuration_id, output_path in zip(
+                seeds, configuration_ids, output_files
+            )
+        ]
         return super().configure(
             configuration_commands=cmds,
             data_target=data_target,
@@ -175,29 +203,37 @@ class IRACE(Configurator):
             validate_after=validate_after,
             num_parallel_jobs=num_parallel_jobs,
             base_dir=base_dir,
-            run_on=run_on
+            run_on=run_on,
         )
 
     @staticmethod
-    def organise_output(output_source: Path,
-                        output_target: Path,
-                        scenario: IRACEScenario,
-                        configuration_id: str) -> None | dict:
+    def organise_output(
+        output_source: Path,
+        output_target: Path,
+        scenario: IRACEScenario,
+        configuration_id: str,
+    ) -> None | dict:
         """Method to restructure and clean up after a single configurator call."""
         get_config = subprocess.run(
-            ["Rscript", "-e",
-             'library("irace"); '
-             f'load("{output_source}"); '
-             "last <- length(iraceResults$iterationElites); "
-             "id <- iraceResults$iterationElites[last]; "
-             "print(getConfigurationById(iraceResults, ids = id))"],
-            capture_output=True)
+            [
+                "Rscript",
+                "-e",
+                'library("irace"); '
+                f'load("{output_source}"); '
+                "last <- length(iraceResults$iterationElites); "
+                "id <- iraceResults$iterationElites[last]; "
+                "print(getConfigurationById(iraceResults, ids = id))",
+            ],
+            capture_output=True,
+        )
         r_table = get_config.stdout.decode()
         if get_config.returncode != 0 or r_table.strip() == "":
-            raise RuntimeError("Failed to get configuration from IRACE file "
-                               f"{output_source}:\n"
-                               f"{get_config.stdout.decode()}\n"
-                               f"{get_config.stderr.decode()}")
+            raise RuntimeError(
+                "Failed to get configuration from IRACE file "
+                f"{output_source}:\n"
+                f"{get_config.stdout.decode()}\n"
+                f"{get_config.stderr.decode()}"
+            )
 
         # Join the table header and content together
         header = ""
@@ -217,8 +253,9 @@ class IRACE(Configurator):
             if not parameter == ".PARENT." and value != "NA" and value != "<NA>":
                 configuration += f"--{parameter} {value} "
         configuration = Solver.config_str_to_dict(configuration)
-        return Configurator.save_configuration(scenario, configuration_id,
-                                               configuration, output_target)
+        return Configurator.save_configuration(
+            scenario, configuration_id, configuration, output_target
+        )
 
     def get_status_from_logs(self: Configurator) -> None:
         """Method to scan the log files of the configurator for warnings."""
@@ -228,23 +265,23 @@ class IRACE(Configurator):
 class IRACEScenario(ConfigurationScenario):
     """Class for IRACE scenario."""
 
-    def __init__(self: IRACEScenario,
-                 solver: Solver,
-                 instance_set: InstanceSet,
-                 sparkle_objectives: list[SparkleObjective],
-                 number_of_runs: int,
-                 parent_directory: Path,
-                 solver_calls: int = None,
-                 solver_cutoff_time: int = None,
-                 max_time: int = None,
-                 budget_estimation: float = None,
-                 first_test: int = None,
-                 mu: int = None,
-                 max_iterations: int = None,
-                 feature_data: FeatureDataFrame = None,
-                 timestamp: str = None
-                 )\
-            -> None:
+    def __init__(
+        self: IRACEScenario,
+        solver: Solver,
+        instance_set: InstanceSet,
+        sparkle_objectives: list[SparkleObjective],
+        number_of_runs: int,
+        parent_directory: Path,
+        solver_calls: int = None,
+        solver_cutoff_time: int = None,
+        max_time: int = None,
+        budget_estimation: float = None,
+        first_test: int = None,
+        mu: int = None,
+        max_iterations: int = None,
+        feature_data: FeatureDataFrame = None,
+        timestamp: str = None,
+    ) -> None:
         """Initialize scenario paths and names.
 
         Args:
@@ -355,8 +392,14 @@ class IRACEScenario(ConfigurationScenario):
                                 at each iteration. Default: 0.
         --confidence          Confidence level for the elimination test. Default:
                                 0.95."""
-        super().__init__(solver, instance_set, sparkle_objectives,
-                         number_of_runs, parent_directory, timestamp)
+        super().__init__(
+            solver,
+            instance_set,
+            sparkle_objectives,
+            number_of_runs,
+            parent_directory,
+            timestamp,
+        )
         self.solver = solver
         self.instance_set = instance_set
         if sparkle_objectives is not None:
@@ -409,6 +452,7 @@ class IRACEScenario(ConfigurationScenario):
             Path to the created file.
         """
         from sparkle.tools.parameters import PCSConvention
+
         solver_path = self.solver.directory.absolute()
         pcs_path = self.solver.get_pcs_file(port_type=PCSConvention.IRACE).absolute()
         with self.scenario_file_path.open("w") as file:
@@ -430,11 +474,15 @@ class IRACEScenario(ConfigurationScenario):
             elif self.max_time is not None:
                 file.write(f"maxTime = {self.max_time}\n")
             if self.solver_calls is not None and self.max_time is not None:
-                print("WARNING: Both solver calls and max time specified for scenario. "
-                      "This is not supported by IRACE, defaulting to solver calls.")
+                print(
+                    "WARNING: Both solver calls and max time specified for scenario. "
+                    "This is not supported by IRACE, defaulting to solver calls."
+                )
             elif self.solver_calls is None and self.max_time is None:
-                print("WARNING: Neither solver calls nor max time specified. "
-                      "Either budget is required for the IRACE scenario.")
+                print(
+                    "WARNING: Neither solver calls nor max time specified. "
+                    "Either budget is required for the IRACE scenario."
+                )
             if self.max_time is not None and self.budget_estimation is None:
                 # Auto Estimate
                 if self.solver_cutoff_time < self.max_time:
@@ -448,17 +496,29 @@ class IRACEScenario(ConfigurationScenario):
                 file.write(f"nbIterations = {self.max_iterations}\n")
         print("Verifying contents of IRACE scenario file and testing solver call...")
         check_file = subprocess.run(
-            [f"{IRACE.configurator_executable().absolute()}",
-             "-s", f"{self.scenario_file_path.absolute()}", "--check"],
-            capture_output=True)
+            [
+                f"{IRACE.configurator_executable().absolute()}",
+                "-s",
+                f"{self.scenario_file_path.absolute()}",
+                "--check",
+            ],
+            capture_output=True,
+        )
         if check_file.returncode != 0:
-            stdout_msg = "\n".join([
-                line for line in check_file.stdout.decode().splitlines()
-                if not line.startswith("#")])
-            print("An error occured in the IRACE scenario file:\n",
-                  self.scenario_file_path.open("r").read(),
-                  stdout_msg, "\n",
-                  check_file.stderr.decode())
+            stdout_msg = "\n".join(
+                [
+                    line
+                    for line in check_file.stdout.decode().splitlines()
+                    if not line.startswith("#")
+                ]
+            )
+            print(
+                "An error occured in the IRACE scenario file:\n",
+                self.scenario_file_path.open("r").read(),
+                stdout_msg,
+                "\n",
+                check_file.stderr.decode(),
+            )
             return None
         print("IRACE scenario file is valid.")
         return self.scenario_file_path
@@ -479,32 +539,40 @@ class IRACEScenario(ConfigurationScenario):
     @staticmethod
     def from_file(scenario_file: Path) -> IRACEScenario:
         """Reads scenario file and initalises IRACEScenario."""
-        scenario_dict = {keyvalue[0]: keyvalue[1]
-                         for keyvalue in (line.split(" = ", maxsplit=1)
-                                          for line in scenario_file.open().readlines()
-                                          if line.strip() != "")}
-        _, solver_path, objective, cutoff, _, _, _, _, _ =\
-            scenario_dict.pop("targetCmdline").split(" ")
+        scenario_dict = {
+            keyvalue[0]: keyvalue[1]
+            for keyvalue in (
+                line.split(" = ", maxsplit=1)
+                for line in scenario_file.open().readlines()
+                if line.strip() != ""
+            )
+        }
+        _, solver_path, objective, cutoff, _, _, _, _, _ = scenario_dict.pop(
+            "targetCmdline"
+        ).split(" ")
         scenario_dict["sparkle_objectives"] = [resolve_objective(objective)]
         scenario_dict["solver_cutoff_time"] = int(cutoff)
         scenario_dict["parent_directory"] = scenario_file.parent.parent
-        scenario_dict["number_of_runs"] =\
-            len([p for p in (scenario_file.parent / "results").iterdir()])
+        scenario_dict["number_of_runs"] = len(
+            [p for p in (scenario_file.parent / "results").iterdir()]
+        )
         scenario_dict.pop("targetRunner")
         scenario_dict.pop("execDir")
         scenario_dict.pop("targetRunnerLauncher")
         scenario_dict.pop("deterministic")
         scenario_dict.pop("parameterFile")
         scenario_dict.pop("debugLevel")
-        instance_set_path =\
-            Path(scenario_dict.pop("trainInstancesDir").strip().strip('"'))
+        instance_set_path = Path(
+            scenario_dict.pop("trainInstancesDir").strip().strip('"')
+        )
         instance_set = Instance_Set(instance_set_path)
         solver = Solver(Path(solver_path.strip()))
         scenario_dict.pop("trainInstancesFile")
         # Replace keys with scenario variable names
         if "budgetEstimation" in scenario_dict:
-            scenario_dict["budget_estimation"] =\
-                float(scenario_dict.pop(("budgetEstimation")))
+            scenario_dict["budget_estimation"] = float(
+                scenario_dict.pop(("budgetEstimation"))
+            )
         if "firstTest" in scenario_dict:
             scenario_dict["first_test"] = int(scenario_dict.pop("firstTest"))
         if "mu" in scenario_dict:

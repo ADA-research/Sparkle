@@ -1,10 +1,12 @@
 """Class for solver status."""
+
 from __future__ import annotations
 from enum import Enum
 
 
 class SolverStatus(str, Enum):
     """Possible return states for solver runs."""
+
     SUCCESS = "SUCCESS"  # Positive status
     SAT = "SAT"  # SAT specific positive status
     UNSAT = "UNSAT"  # SAT specific positive status

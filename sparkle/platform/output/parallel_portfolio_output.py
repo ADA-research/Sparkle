@@ -16,10 +16,13 @@ import csv
 class ParallelPortfolioOutput:
     """Class that collects parallel portfolio data and outputs it a JSON format."""
 
-    def __init__(self: ParallelPortfolioOutput, parallel_portfolio_path: Path,
-                 instance_set: InstanceSet,
-                 objective: SparkleObjective,
-                 output: Path) -> None:
+    def __init__(
+        self: ParallelPortfolioOutput,
+        parallel_portfolio_path: Path,
+        instance_set: InstanceSet,
+        objective: SparkleObjective,
+        output: Path,
+    ) -> None:
         """Initialize ParallelPortfolioOutput class.
 
         Args:
@@ -34,14 +37,15 @@ class ParallelPortfolioOutput:
             self.output = output
 
         self.instance_set = instance_set
-        csv_data = [line for line in
-                    csv.reader((parallel_portfolio_path / "results.csv").open("r"))]
+        csv_data = [
+            line
+            for line in csv.reader((parallel_portfolio_path / "results.csv").open("r"))
+        ]
         header = csv_data[0]
         csv_data = csv_data[1:]
         solver_column = header.index("Solver")
         instance_column = header.index("Instance")
-        status_column = [i for i, v in enumerate(header)
-                         if v.startswith("status")][0]
+        status_column = [i for i, v in enumerate(header) if v.startswith("status")][0]
         objective_column = header.index(objective.name)
         self.solver_list = list(set([line[solver_column] for line in csv_data]))
 
@@ -50,25 +54,25 @@ class ParallelPortfolioOutput:
         for row in csv_data:
             if row[instance_column] in instance_results.keys():
                 instance_results[row[instance_column]].append(
-                    [row[solver_column], row[status_column], row[objective_column]])
+                    [row[solver_column], row[status_column], row[objective_column]]
+                )
 
         solvers_solutions = self.get_solver_solutions(self.solver_list, csv_data)
-        unsolved_instances = self.instance_set.size - sum([solvers_solutions[key]
-                                                           for key in solvers_solutions])
+        unsolved_instances = self.instance_set.size - sum(
+            [solvers_solutions[key] for key in solvers_solutions]
+        )
         # sbs_runtime is redundant, the same information is available in instance_results
-        _, sbs, runtime_all_solvers, _ =\
-            sgrfpp.get_portfolio_metrics(self.solver_list,
-                                         instance_set,
-                                         instance_results,
-                                         objective)
+        _, sbs, runtime_all_solvers, _ = sgrfpp.get_portfolio_metrics(
+            self.solver_list, instance_set, instance_results, objective
+        )
 
-        self.results = ParallelPortfolioResults(unsolved_instances,
-                                                sbs, runtime_all_solvers,
-                                                instance_results)
+        self.results = ParallelPortfolioResults(
+            unsolved_instances, sbs, runtime_all_solvers, instance_results
+        )
 
-    def get_solver_solutions(self: ParallelPortfolioOutput,
-                             solver_list: list[str],
-                             csv_data: list[list[str]]) -> dict:
+    def get_solver_solutions(
+        self: ParallelPortfolioOutput, solver_list: list[str], csv_data: list[list[str]]
+    ) -> dict:
         """Return dictionary with solution count for each solver."""
         # Default initalisation, increase solution counter for each successful evaluation
         solvers_solutions = {solver: 0 for solver in solver_list}
@@ -81,24 +85,23 @@ class ParallelPortfolioOutput:
 
         return solvers_solutions
 
-    def serialise_instances(self: ParallelPortfolioOutput,
-                            instances: list[InstanceSet]) -> dict:
+    def serialise_instances(
+        self: ParallelPortfolioOutput, instances: list[InstanceSet]
+    ) -> dict:
         """Transform Instances to dictionary format."""
         # Even though parallel portfolio currently doesn't support multi sets,
         # this function can
         return {
             "number_of_instance_sets": len(instances),
             "instance_sets": [
-                {
-                    "name": instance.name,
-                    "number_of_instances": instance.size
-                }
+                {"name": instance.name, "number_of_instances": instance.size}
                 for instance in instances
-            ]
+            ],
         }
 
-    def serialise_results(self: ParallelPortfolioOutput,
-                          pr: ParallelPortfolioResults) -> dict:
+    def serialise_results(
+        self: ParallelPortfolioOutput, pr: ParallelPortfolioResults
+    ) -> dict:
         """Transform results to dictionary format."""
         return {
             "sbs": pr.sbs,

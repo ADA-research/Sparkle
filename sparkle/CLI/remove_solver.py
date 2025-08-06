@@ -17,8 +17,7 @@ from sparkle.CLI.help.nicknames import resolve_object_name
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(description="Remove a solver from the platform.")
-    parser.add_argument(*ac.SolverRemoveArgument.names,
-                        **ac.SolverRemoveArgument.kwargs)
+    parser.add_argument(*ac.SolverRemoveArgument.names, **ac.SolverRemoveArgument.kwargs)
     return parser
 
 
@@ -36,7 +35,8 @@ def main(argv: list[str]) -> None:
     solver_path = resolve_object_name(
         args.solver,
         gv.file_storage_data_mapping[gv.solver_nickname_list_path],
-        gv.settings().DEFAULT_solver_dir)
+        gv.settings().DEFAULT_solver_dir,
+    )
 
     if solver_path is None:
         print(f'Could not resolve Solver path/name "{solver_path}"!')
@@ -61,11 +61,13 @@ def main(argv: list[str]) -> None:
             gv.solver_nickname_list_path,
             gv.file_storage_data_mapping[gv.solver_nickname_list_path],
             key=nickname,
-            remove=True)
+            remove=True,
+        )
 
     if gv.settings().DEFAULT_performance_data_path.exists():
         performance_data = PerformanceDataFrame(
-            gv.settings().DEFAULT_performance_data_path)
+            gv.settings().DEFAULT_performance_data_path
+        )
         if str(solver_path) in performance_data.solvers:
             performance_data.remove_solver(str(solver_path))
         performance_data.save_csv()

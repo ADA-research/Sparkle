@@ -19,12 +19,13 @@ from sparkle.CLI.help import argparse_custom as ac
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(description="Add instances to the platform.")
-    parser.add_argument(*ac.InstancesPathArgument.names,
-                        **ac.InstancesPathArgument.kwargs)
-    parser.add_argument(*ac.NicknameInstanceSetArgument.names,
-                        **ac.NicknameInstanceSetArgument.kwargs)
-    parser.add_argument(*ac.NoCopyArgument.names,
-                        **ac.NoCopyArgument.kwargs)
+    parser.add_argument(
+        *ac.InstancesPathArgument.names, **ac.InstancesPathArgument.kwargs
+    )
+    parser.add_argument(
+        *ac.NicknameInstanceSetArgument.names, **ac.NicknameInstanceSetArgument.kwargs
+    )
+    parser.add_argument(*ac.NoCopyArgument.names, **ac.NoCopyArgument.kwargs)
     return parser
 
 
@@ -46,15 +47,18 @@ def main(argv: list[str]) -> None:
         print(f'Instance set path "{instances_source}" does not exist!')
         sys.exit(-1)
     if instances_target.exists():
-        print(f'Instance set "{instances_source.name}" already exists in Sparkle! '
-              "Exiting...")
+        print(
+            f'Instance set "{instances_source.name}" already exists in Sparkle! '
+            "Exiting..."
+        )
         sys.exit(-1)
     if args.nickname is not None:
         sfh.add_remove_platform_item(
             instances_target,
             gv.instances_nickname_path,
             gv.file_storage_data_mapping[gv.instances_nickname_path],
-            key=args.nickname)
+            key=args.nickname,
+        )
 
     print(f"Start adding all instances in directory {instances_source} ...")
     new_instance_set = Instance_Set(instances_source)
@@ -76,8 +80,8 @@ def main(argv: list[str]) -> None:
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
     # When adding instances, an empty performance DF has no objectives yet
     performance_data = PerformanceDataFrame(
-        gv.settings().DEFAULT_performance_data_path,
-        objectives=gv.settings().objectives)
+        gv.settings().DEFAULT_performance_data_path, objectives=gv.settings().objectives
+    )
     for instance_name in new_instance_set.instance_names:
         # Construct a name path due to multi-file instances
         feature_data.add_instances(str(instance_name))

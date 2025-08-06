@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Template for users to create Python solver wrappers."""
+
 import sys
 import subprocess
 from pathlib import Path
 from sparkle.types import SolverStatus
-from sparkle.tools.solver_wrapper_parsing import (parse_solver_wrapper_args,
-                                                  get_solver_call_params)
+from sparkle.tools.solver_wrapper_parsing import (
+    parse_solver_wrapper_args,
+    get_solver_call_params,
+)
 
 # Convert the arguments to a dictionary
 args = parse_solver_wrapper_args(sys.argv[1:])
@@ -25,9 +28,7 @@ if solver_dir != Path("."):
     solver_exec = f"{solver_dir / solver_name}"
 else:
     solver_exec = f"./{solver_name}"
-solver_cmd = [solver_exec,
-              "-inst", str(instance),
-              "-seed", str(seed)]
+solver_cmd = [solver_exec, "-inst", str(instance), "-seed", str(seed)]
 
 # Construct call from args dictionary
 params = []
@@ -36,8 +37,7 @@ for key in solver_params:
         params.extend(["-" + str(key), str(args[key])])
 
 try:
-    solver_call = subprocess.run(solver_cmd + params,
-                                 capture_output=True)
+    solver_call = subprocess.run(solver_cmd + params, capture_output=True)
 except Exception as ex:
     print(f"Solver call failed with exception:\n{ex}")
 
@@ -56,8 +56,6 @@ for line in output_str.splitlines():
         status = SolverStatus.TIMEOUT
         break
 
-outdir = {"status": status.value,
-          "quality": 0,
-          "solver_call": solver_cmd + params}
+outdir = {"status": status.value, "quality": 0, "solver_call": solver_cmd + params}
 
 print(outdir)

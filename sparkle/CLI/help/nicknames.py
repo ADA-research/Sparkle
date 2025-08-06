@@ -1,4 +1,5 @@
 """Helper functions for CLI nicknames."""
+
 from __future__ import annotations
 from pathlib import Path
 from typing import Callable
@@ -6,15 +7,18 @@ import glob
 from sparkle.instance import Instance_Set, InstanceSet
 
 
-def resolve_object_name(name: str | Path,
-                        nickname_dict: dict = {},
-                        target_dir: Path = Path(),
-                        class_name: Callable = None) -> Path | any:
+def resolve_object_name(
+    name: str | Path,
+    nickname_dict: dict = {},
+    target_dir: Path = Path(),
+    class_name: Callable = None,
+) -> Path | any:
     """Attempts to resolve a (nick) name.
 
     Args:
         name: The (nick)name to resolve
         target_dir: The location where the file object should exist
+        nickname_dict: Nicknames
         class_name: If passed, will attempt to return an object
             that is constructed from this Path.
 
@@ -33,7 +37,7 @@ def resolve_object_name(name: str | Path,
         path = Path(nickname_dict[str(name)])
     # Third check if we can create a valid path with the name
     elif isinstance(name, (str, Path)) and (target_dir / name).exists():
-        path = (target_dir / name)
+        path = target_dir / name
     # Finally, attempt to construct the object from the Path
     try:
         if class_name is not None:
@@ -46,9 +50,9 @@ def resolve_object_name(name: str | Path,
     return path
 
 
-def resolve_instance_name(name: str,
-                          target: Path | list[InstanceSet],
-                          return_path: bool = True) -> str | InstanceSet:
+def resolve_instance_name(
+    name: str, target: Path | list[InstanceSet], return_path: bool = True
+) -> str | InstanceSet:
     """Attempts to resolve an instance name.
 
     Args:
@@ -84,8 +88,9 @@ def resolve_instance_name(name: str,
             continue
         out_set = instance_set
         # Handle multi file instance
-        instance_path = [instance_path] if not isinstance(
-            instance_path, list) else instance_path
+        instance_path = (
+            [instance_path] if not isinstance(instance_path, list) else instance_path
+        )
         instance_path = " ".join(str(p) for p in instance_path)
         break
 

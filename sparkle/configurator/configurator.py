@@ -1,4 +1,5 @@
 """Configurator class to use different algorithm configurators."""
+
 from __future__ import annotations
 import re
 import shutil
@@ -18,13 +19,13 @@ from sparkle.types import SparkleObjective
 
 class Configurator:
     """Abstact class to use different configurators like SMAC."""
+
     configurator_cli_path = Path(__file__).parent.resolve() / "configurator_cli.py"
 
     full_name = "Configurator Abstract Class"
     version = "NaN"
 
-    def __init__(self: Configurator,
-                 multi_objective_support: bool = False) -> None:
+    def __init__(self: Configurator, multi_objective_support: bool = False) -> None:
         """Initialize Configurator.
 
         Args:
@@ -53,18 +54,20 @@ class Configurator:
         """Download the configurator."""
         raise NotImplementedError
 
-    def configure(self: Configurator,
-                  configuration_commands: list[str],
-                  data_target: PerformanceDataFrame,
-                  output: Path,
-                  scenario: ConfigurationScenario,
-                  configuration_ids: list[str] = None,
-                  validate_after: bool = True,
-                  sbatch_options: list[str] = None,
-                  slurm_prepend: str | list[str] | Path = None,
-                  num_parallel_jobs: int = None,
-                  base_dir: Path = None,
-                  run_on: Runner = Runner.SLURM) -> Run:
+    def configure(
+        self: Configurator,
+        configuration_commands: list[str],
+        data_target: PerformanceDataFrame,
+        output: Path,
+        scenario: ConfigurationScenario,
+        configuration_ids: list[str] = None,
+        validate_after: bool = True,
+        sbatch_options: list[str] = None,
+        slurm_prepend: str | list[str] | Path = None,
+        num_parallel_jobs: int = None,
+        base_dir: Path = None,
+        run_on: Runner = Runner.SLURM,
+    ) -> Run:
         """Start configuration job.
 
         This method is shared by the configurators and should be called by the
@@ -89,22 +92,28 @@ class Configurator:
         if not self.check_requirements(verbose=True):
             raise RuntimeError(
                 f"{self.name} is not installed. Please install {self.name} "
-                "and try again.")
+                "and try again."
+            )
         # Add the configuration IDs to the dataframe with empty configurations
-        data_target.add_configuration(str(scenario.solver.directory),
-                                      configuration_ids,
-                                      [{}] * len(configuration_ids))
+        data_target.add_configuration(
+            str(scenario.solver.directory),
+            configuration_ids,
+            [{}] * len(configuration_ids),
+        )
         data_target.save_csv()
         # Submit the configuration job
-        runs = [rrr.add_to_queue(
-            runner=run_on,
-            cmd=configuration_commands,
-            name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
-            base_dir=base_dir,
-            output_path=output,
-            parallel_jobs=num_parallel_jobs,
-            sbatch_options=sbatch_options,
-            prepend=slurm_prepend)]
+        runs = [
+            rrr.add_to_queue(
+                runner=run_on,
+                cmd=configuration_commands,
+                name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
+                base_dir=base_dir,
+                output_path=output,
+                parallel_jobs=num_parallel_jobs,
+                sbatch_options=sbatch_options,
+                prepend=slurm_prepend,
+            )
+        ]
 
         if validate_after:
             validate = scenario.solver.run_performance_dataframe(
@@ -118,8 +127,8 @@ class Configurator:
                 base_dir=base_dir,
                 dependencies=runs,
                 job_name=f"{self.name}: Validating {len(configuration_ids)} "
-                         f"{scenario.solver.name} Configurations on "
-                         f"{scenario.instance_set.name}",
+                f"{scenario.solver.name} Configurations on "
+                f"{scenario.instance_set.name}",
                 run_on=run_on,
             )
             runs.append(validate)
@@ -132,10 +141,12 @@ class Configurator:
         return runs
 
     @staticmethod
-    def organise_output(output_source: Path,
-                        output_target: Path,
-                        scenario: ConfigurationScenario,
-                        configuration_id: str) -> None | str:
+    def organise_output(
+        output_source: Path,
+        output_target: Path,
+        scenario: ConfigurationScenario,
+        configuration_id: str,
+    ) -> None | str:
         """Method to restructure and clean up after a single configurator call.
 
         Args:
@@ -147,10 +158,12 @@ class Configurator:
         raise NotImplementedError
 
     @staticmethod
-    def save_configuration(scenario: ConfigurationScenario,
-                           configuration_id: str,
-                           configuration: dict,
-                           output_target: Path) -> dict | None:
+    def save_configuration(
+        scenario: ConfigurationScenario,
+        configuration_id: str,
+        configuration: dict,
+        output_target: Path,
+    ) -> dict | None:
         """Method to save a configuration to a file.
 
         If the output_target is None, return the configuration.
@@ -165,17 +178,22 @@ class Configurator:
             return configuration
         # Save result to Performance DataFrame
         from filelock import FileLock
+
         lock = FileLock(f"{output_target}.lock")
         with lock.acquire(timeout=600):
             performance_data = PerformanceDataFrame(output_target)
             # Resolve absolute path to Solver column
-            solver = [s for s in performance_data.solvers
-                      if Path(s).name == scenario.solver.name][0]
+            solver = [
+                s
+                for s in performance_data.solvers
+                if Path(s).name == scenario.solver.name
+            ][0]
             # Update the configuration ID by adding the configuration
             performance_data.add_configuration(
                 solver=solver,
                 configuration_id=configuration_id,
-                configuration=configuration)
+                configuration=configuration,
+            )
             performance_data.save_csv()
 
     def get_status_from_logs(self: Configurator) -> None:
@@ -186,13 +204,15 @@ class Configurator:
 class ConfigurationScenario:
     """Template class to handle a configuration scenarios."""
 
-    def __init__(self: ConfigurationScenario,
-                 solver: Solver,
-                 instance_set: InstanceSet,
-                 sparkle_objectives: list[SparkleObjective],
-                 number_of_runs: int,
-                 parent_directory: Path,
-                 timestamp: str = None) -> None:
+    def __init__(
+        self: ConfigurationScenario,
+        solver: Solver,
+        instance_set: InstanceSet,
+        sparkle_objectives: list[SparkleObjective],
+        number_of_runs: int,
+        parent_directory: Path,
+        timestamp: str = None,
+    ) -> None:
         """Initialize scenario paths and names.
 
         Args:
@@ -269,8 +289,10 @@ class ConfigurationScenario:
         Returns:
             List of configuration IDs, one for each run.
         """
-        return [f"{self.configurator.__name__}_{self.timestamp}_{i}"
-                for i in range(self.number_of_runs)]
+        return [
+            f"{self.configurator.__name__}_{self.timestamp}_{i}"
+            for i in range(self.number_of_runs)
+        ]
 
     @property
     def ablation_scenario(self: ConfigurationScenario) -> AblationScenario:
@@ -308,11 +330,13 @@ class ConfigurationScenario:
         raise NotImplementedError
 
     @classmethod
-    def find_scenario(cls: ConfigurationScenario,
-                      directory: Path,
-                      solver: Solver,
-                      instance_set: InstanceSet,
-                      timestamp: str = None) -> ConfigurationScenario:
+    def find_scenario(
+        cls: ConfigurationScenario,
+        directory: Path,
+        solver: Solver,
+        instance_set: InstanceSet,
+        timestamp: str = None,
+    ) -> ConfigurationScenario:
         """Resolve a scenario from a directory and Solver / Training set."""
         if timestamp is None:
             # Get the newest timestamp
@@ -346,20 +370,26 @@ class AblationScenario:
     """Class for ablation analysis."""
 
     # We use the SMAC2 target algorithm for solver output handling
-    configurator_target = Path(__file__).parent.resolve() /\
-        "implementations" / "SMAC2" / "smac2_target_algorithm.py"
+    configurator_target = (
+        Path(__file__).parent.resolve()
+        / "implementations"
+        / "SMAC2"
+        / "smac2_target_algorithm.py"
+    )
 
     ablation_dir = Path(__file__).parent / "implementations" / "ablationAnalysis-0.9.4"
     ablation_executable = ablation_dir / "ablationAnalysis"
     ablation_validation_executable = ablation_dir / "ablationValidation"
 
-    def __init__(self: AblationScenario,
-                 configuration_scenario: ConfigurationScenario,
-                 test_set: InstanceSet,
-                 cutoff_length: str,
-                 concurrent_clis: int,
-                 best_configuration: dict,
-                 ablation_racing: bool = False) -> None:
+    def __init__(
+        self: AblationScenario,
+        configuration_scenario: ConfigurationScenario,
+        test_set: InstanceSet,
+        cutoff_length: str,
+        concurrent_clis: int,
+        best_configuration: dict,
+        ablation_racing: bool = False,
+    ) -> None:
         """Initialize ablation scenario.
 
         Args:
@@ -428,6 +458,7 @@ class AblationScenario:
     def check_requirements(verbose: bool = False) -> bool:
         """Check if Ablation Analysis is installed."""
         import warnings
+
         if no_java := shutil.which("java") is None:
             if verbose:
                 warnings.warn(
@@ -439,20 +470,21 @@ class AblationScenario:
                 warnings.warn(
                     "AblationAnalysis executable not found. Please ensure Ablation"
                     " Analysis is installed in the expected Path "
-                    f"({AblationScenario.ablation_executable}).")
+                    f"({AblationScenario.ablation_executable})."
+                )
         if no_validation := not AblationScenario.ablation_validation_executable.exists():
             if verbose:
                 warnings.warn(
                     "AblationAnalysis Validation executable not found. Please ensure "
                     "Ablation Analysis is installed in the expected Path "
-                    f"({AblationScenario.ablation_validation_executable}).")
+                    f"({AblationScenario.ablation_validation_executable})."
+                )
         return not (no_java or no_exec or no_validation)
 
     @staticmethod
     def download_requirements(
-        ablation_url: str =
-            "https://github.com/ADA-research/Sparkle/raw/refs/heads/development"
-            "/Resources/Other/ablationAnalysis-0.9.4.zip"
+        ablation_url: str = "https://github.com/ADA-research/Sparkle/raw/refs/heads/development"
+        "/Resources/Other/ablationAnalysis-0.9.4.zip",
     ) -> None:
         """Download Ablation Analysis executable."""
         if AblationScenario.ablation_executable.exists():
@@ -460,6 +492,7 @@ class AblationScenario:
         from urllib.request import urlopen
         import zipfile
         import io
+
         AblationScenario.ablation_dir.mkdir(parents=True, exist_ok=True)
         r = urlopen(ablation_url, timeout=60)
         z = zipfile.ZipFile(io.BytesIO(r.read()))
@@ -479,8 +512,9 @@ class AblationScenario:
         parameter_names = [p.name for p in pcs.values()]
         # We need to remove any redundant keys that are not in PCS
         best_configuration = self.best_configuration.copy()
-        removable_keys = [key for key in best_configuration
-                          if key not in parameter_names]
+        removable_keys = [
+            key for key in best_configuration if key not in parameter_names
+        ]
         for key in removable_keys:
             del best_configuration[key]
         opt_config_str = " ".join([f"-{k} {v}" for k, v in best_configuration.items()])
@@ -505,28 +539,32 @@ class AblationScenario:
 
         # Create config file
         config_file = self.scenario_dir / "ablation_config.txt"
-        config = (f'algo = "{AblationScenario.configurator_target.absolute()} '
-                  f"{self.config_scenario.solver.directory.absolute()} "
-                  f'{self.tmp_dir.absolute()} {objective}"\n'
-                  f"execdir = {self.tmp_dir.absolute()}\n"
-                  "experimentDir = ./\n"
-                  f"deterministic = {1 if self.solver.deterministic else 0}\n"
-                  f"run_obj = {smac_run_obj}\n"
-                  f"overall_obj = {objective_str}\n"
-                  f"cutoffTime = {self.cutoff_time}\n"
-                  f"cutoff_length = {self.cutoff_length}\n"
-                  f"cli-cores = {self.concurrent_clis}\n"
-                  f"useRacing = {self.ablation_racing}\n"
-                  "seed = 1234\n"  # NOTE: This does not seem right
-                  f"paramfile = {pcs_file_path}\n"
-                  "instance_file = instances_train.txt\n"
-                  "test_instance_file = instances_test.txt\n"
-                  "sourceConfiguration = DEFAULT\n"
-                  f'targetConfiguration = "{opt_config_str}"')
+        config = (
+            f'algo = "{AblationScenario.configurator_target.absolute()} '
+            f"{self.config_scenario.solver.directory.absolute()} "
+            f'{self.tmp_dir.absolute()} {objective}"\n'
+            f"execdir = {self.tmp_dir.absolute()}\n"
+            "experimentDir = ./\n"
+            f"deterministic = {1 if self.solver.deterministic else 0}\n"
+            f"run_obj = {smac_run_obj}\n"
+            f"overall_obj = {objective_str}\n"
+            f"cutoffTime = {self.cutoff_time}\n"
+            f"cutoff_length = {self.cutoff_length}\n"
+            f"cli-cores = {self.concurrent_clis}\n"
+            f"useRacing = {self.ablation_racing}\n"
+            "seed = 1234\n"  # NOTE: This does not seem right
+            f"paramfile = {pcs_file_path}\n"
+            "instance_file = instances_train.txt\n"
+            "test_instance_file = instances_test.txt\n"
+            "sourceConfiguration = DEFAULT\n"
+            f'targetConfiguration = "{opt_config_str}"'
+        )
         config_file.open("w").write(config)
         # Write config to validation directory
-        conf_valid = config.replace(f"execdir = {self.tmp_dir.absolute()}\n",
-                                    f"execdir = {self.validation_dir_tmp.absolute()}\n")
+        conf_valid = config.replace(
+            f"execdir = {self.tmp_dir.absolute()}\n",
+            f"execdir = {self.validation_dir_tmp.absolute()}\n",
+        )
         (self.validation_dir / config_file.name).open("w").write(conf_valid)
         return self.validation_dir / config_file.name
 
@@ -544,7 +582,8 @@ class AblationScenario:
                 # We need to unpack the multi instance file paths in quotes
                 if isinstance(instance, list):
                     joined_instances = " ".join(
-                        [str(file.absolute()) for file in instance])
+                        [str(file.absolute()) for file in instance]
+                    )
                     fh.write(f"{joined_instances}\n")
                 else:
                     fh.write(f"{instance.absolute()}\n")
@@ -580,8 +619,15 @@ class AblationScenario:
         if not self.check_for_ablation():
             # No ablation table exists for this solver-instance pair
             return []
-        results = [["Round", "Flipped parameter", "Source value", "Target value",
-                    "Validation result"]]
+        results = [
+            [
+                "Round",
+                "Flipped parameter",
+                "Source value",
+                "Target value",
+                "Validation result",
+            ]
+        ]
 
         for line in self.table_file.open().readlines():
             # Pre-process lines from the ablation file and add to the results dictionary.
@@ -597,11 +643,13 @@ class AblationScenario:
                 results.append(values)
         return results
 
-    def submit_ablation(self: AblationScenario,
-                        log_dir: Path,
-                        sbatch_options: list[str] = [],
-                        slurm_prepend: str | list[str] | Path = None,
-                        run_on: Runner = Runner.SLURM) -> list[Run]:
+    def submit_ablation(
+        self: AblationScenario,
+        log_dir: Path,
+        sbatch_options: list[str] = [],
+        slurm_prepend: str | list[str] | Path = None,
+        run_on: Runner = Runner.SLURM,
+    ) -> list[Run]:
         """Submit an ablation job.
 
         Args:
@@ -619,8 +667,10 @@ class AblationScenario:
                 "Analysis is installed and try again."
             )
         # 1. submit the ablation to the runrunner queue
-        cmd = (f"{AblationScenario.ablation_executable.absolute()} "
-               "--optionFile ablation_config.txt")
+        cmd = (
+            f"{AblationScenario.ablation_executable.absolute()} "
+            "--optionFile ablation_config.txt"
+        )
         srun_options = ["-N1", "-n1", f"-c{self.concurrent_clis}"]
         sbatch_options += [f"--cpus-per-task={self.concurrent_clis}"]
         run_ablation = rrr.add_to_queue(
@@ -631,7 +681,8 @@ class AblationScenario:
             path=self.scenario_dir,
             sbatch_options=sbatch_options,
             srun_options=srun_options,
-            prepend=slurm_prepend)
+            prepend=slurm_prepend,
+        )
 
         runs = []
         if run_on == Runner.LOCAL:
@@ -642,9 +693,11 @@ class AblationScenario:
         if self.test_set is not None:
             # Validation dir should have a copy of all needed files, except for the
             # output of the ablation run, which is stored in ablation-run[seed].txt
-            cmd = f"{AblationScenario.ablation_validation_executable.absolute()} "\
-                  "--optionFile ablation_config.txt "\
-                  "--ablationLogFile ../log/ablation-run1234.txt"
+            cmd = (
+                f"{AblationScenario.ablation_validation_executable.absolute()} "
+                "--optionFile ablation_config.txt "
+                "--ablationLogFile ../log/ablation-run1234.txt"
+            )
 
             run_ablation_validation = rrr.add_to_queue(
                 runner=run_on,
@@ -654,7 +707,8 @@ class AblationScenario:
                 base_dir=log_dir,
                 dependencies=run_ablation,
                 sbatch_options=sbatch_options,
-                prepend=slurm_prepend)
+                prepend=slurm_prepend,
+            )
 
             if run_on == Runner.LOCAL:
                 run_ablation_validation.wait()
@@ -662,8 +716,9 @@ class AblationScenario:
         return runs
 
     @staticmethod
-    def from_file(path: Path,
-                  config_scenario: ConfigurationScenario) -> AblationScenario:
+    def from_file(
+        path: Path, config_scenario: ConfigurationScenario
+    ) -> AblationScenario:
         """Reads scenario file and initalises AblationScenario."""
         variables = {}
         for line in path.open().readlines():
@@ -683,9 +738,11 @@ class AblationScenario:
             test_path = Path(test_path).parent
             if test_path != config_scenario.instance_set.directory:
                 test_set = Instance_Set(test_path)
-        return AblationScenario(config_scenario,
-                                test_set,
-                                variables["cutoff_length"],
-                                int(variables["cli-cores"]),
-                                best_conf,
-                                ablation_racing=bool(variables["useRacing"]))
+        return AblationScenario(
+            config_scenario,
+            test_set,
+            variables["cutoff_length"],
+            int(variables["cli-cores"]),
+            best_conf,
+            ablation_racing=bool(variables["useRacing"]),
+        )

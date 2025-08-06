@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Sparkle solver wrapper for testing purposes."""
+
 import sys
 import subprocess
 from pathlib import Path
 from sparkle.types import SolverStatus
-from sparkle.tools.solver_wrapper_parsing import parse_solver_wrapper_args, \
-    get_solver_call_params
+from sparkle.tools.solver_wrapper_parsing import (
+    parse_solver_wrapper_args,
+    get_solver_call_params,
+)
 
 
 # Parse the arguments of the solver wrapper
@@ -19,19 +22,17 @@ seed = args_dict["seed"]
 
 # Construct the base solver call
 solver_name = "PbO-CCSAT"
-solver_exec = f"{solver_dir / solver_name}" if solver_dir != Path(".") else "./" + \
-    solver_name
-solver_cmd = [solver_exec,
-              "-inst", str(instance),
-              "-seed", str(seed)]
+solver_exec = (
+    f"{solver_dir / solver_name}" if solver_dir != Path(".") else "./" + solver_name
+)
+solver_cmd = [solver_exec, "-inst", str(instance), "-seed", str(seed)]
 
 # Get further params for the solver call
 params = get_solver_call_params(args_dict)
 
 # Execute the solver call
 try:
-    solver_call = subprocess.run(solver_cmd + params,
-                                 capture_output=True)
+    solver_call = subprocess.run(solver_cmd + params, capture_output=True)
 except Exception as ex:
     print(f"Solver call failed with exception:\n{ex}")
 
@@ -48,8 +49,6 @@ for line in output_str.splitlines():
         status = SolverStatus.TIMEOUT
         break
 
-outdir = {"status": status.value,
-          "quality": 0,
-          "solver_call": solver_cmd + params}
+outdir = {"status": status.value, "quality": 0, "solver_call": solver_cmd + params}
 
 print(outdir)

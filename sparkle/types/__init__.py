@@ -1,4 +1,5 @@
 """This package provides types for Sparkle applications."""
+
 import importlib
 import inspect
 import re
@@ -12,7 +13,8 @@ from sparkle.types.objective import SparkleObjective, UseTime
 
 
 objective_string_regex = re.compile(
-    r"(?P<name>[\w\-_]+)(:(?P<direction>min|max))?(:(?P<type>metric|objective))?$")
+    r"(?P<name>[\w\-_]+)(:(?P<direction>min|max))?(:(?P<type>metric|objective))?$"
+)
 objective_variable_regex = re.compile(r"(-?\d+)$")
 
 
@@ -35,7 +37,7 @@ def resolve_objective(objective_name: str) -> SparkleObjective:
         default SparkleObjective with minimization unless specified as max
 
     Args:
-        name: The name of the objective class. Can include parameter value k.
+        objective_name: The name of the objective class. Can include parameter value k.
 
     Returns:
         Instance of the Objective class or None if not found.
@@ -49,17 +51,22 @@ def resolve_objective(objective_name: str) -> SparkleObjective:
     metric = match.group("type") == "metric"
 
     # Search for optional variable and record split point between name and variable
-    name_options = [(name, None), ]  # Options of names to check for
+    name_options = [
+        (name, None),
+    ]  # Options of names to check for
     if m := objective_variable_regex.search(name):
         argument = int(m.group())
-        name_options = [(name[:m.start()], argument), ] + name_options  # Prepend
+        name_options = [
+            (name[: m.start()], argument),
+        ] + name_options  # Prepend
 
     # First try to resolve the user input classes
     for rname, rarg in name_options:
         try:
             user_module = importlib.import_module("Settings.objective")
-            for o_name, o_class in inspect.getmembers(user_module,
-                                                      predicate=_check_class):
+            for o_name, o_class in inspect.getmembers(
+                user_module, predicate=_check_class
+            ):
                 if o_name == rname:
                     if rarg is not None:
                         return o_class(rarg, minimise=minimise, metric=metric)
@@ -69,8 +76,7 @@ def resolve_objective(objective_name: str) -> SparkleObjective:
 
     for rname, rarg in name_options:
         # Try to match with specially defined classes
-        for o_name, o_class in inspect.getmembers(objective,
-                                                  predicate=_check_class):
+        for o_name, o_class in inspect.getmembers(objective, predicate=_check_class):
             if o_name == rname:
                 if rarg is not None:
                     return o_class(rarg, minimise=minimise, metric=metric)

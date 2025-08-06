@@ -1,4 +1,5 @@
 """Test the snapshot CLI entry points."""
+
 import pytest
 from pathlib import Path
 
@@ -6,8 +7,7 @@ from sparkle.CLI import load_snapshot, save_snapshot, initialise
 
 
 @pytest.mark.integration
-def test_load_command(tmp_path: Path,
-                      monkeypatch: pytest.MonkeyPatch) -> None:
+def test_load_command(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test load command."""
     test_snapshot_file = Path("tests/CLI/test_files/test_snapshot.zip").absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
@@ -20,8 +20,7 @@ def test_load_command(tmp_path: Path,
 
 
 @pytest.mark.integration
-def test_save_command(tmp_path: Path,
-                      monkeypatch: pytest.MonkeyPatch) -> None:
+def test_save_command(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test load command."""
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     # Fix input calls to test with NO (e.g. no download)

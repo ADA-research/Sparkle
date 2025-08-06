@@ -1,4 +1,5 @@
 """This module provides tools for the argument parsing for solver wrappers."""
+
 from pathlib import Path
 import ast
 from typing import Any
@@ -9,7 +10,9 @@ from sparkle.types import resolve_objective
 def parse_commandline_dict(args: list[str]) -> dict:
     """Parses a commandline dictionary to the object."""
     dict_str = " ".join(args)
-    dict_str = dict_str[dict_str.index("{"):dict_str.index("}") + 1]  # Slurm script fix
+    dict_str = dict_str[
+        dict_str.index("{") : dict_str.index("}") + 1
+    ]  # Slurm script fix
     return ast.literal_eval(dict_str)
 
 
@@ -39,15 +42,16 @@ def parse_solver_wrapper_args(args: list[str]) -> dict[Any]:
     instance = args_dict["instance"]
     args_dict["instance"] = parse_instance(instance)
     args_dict["seed"] = int(args_dict["seed"])
-    args_dict["objectives"] = [resolve_objective(name)
-                               for name in args_dict["objectives"].split(",")]
+    args_dict["objectives"] = [
+        resolve_objective(name) for name in args_dict["objectives"].split(",")
+    ]
     args_dict["cutoff_time"] = float(args_dict["cutoff_time"])
     return args_dict
 
 
-def get_solver_call_params(args_dict: dict,
-                           prefix: str = "-",
-                           postfix: str = " ") -> list[str]:
+def get_solver_call_params(
+    args_dict: dict, prefix: str = "-", postfix: str = " "
+) -> list[str]:
     """Gather the additional parameters for the solver call.
 
     Args:

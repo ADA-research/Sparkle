@@ -18,8 +18,9 @@ from sparkle.CLI.help.nicknames import resolve_object_name
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(description="Remove instances from the platform.")
-    parser.add_argument(*ac.InstancesPathRemoveArgument.names,
-                        **ac.InstancesPathRemoveArgument.kwargs)
+    parser.add_argument(
+        *ac.InstancesPathRemoveArgument.names, **ac.InstancesPathRemoveArgument.kwargs
+    )
     return parser
 
 
@@ -37,10 +38,14 @@ def main(argv: list[str]) -> None:
     instances_path = resolve_object_name(
         args.instances_path,
         nickname_dict=gv.file_storage_data_mapping[gv.instances_nickname_path],
-        target_dir=gv.settings().DEFAULT_instance_dir)
+        target_dir=gv.settings().DEFAULT_instance_dir,
+    )
 
-    if instances_path is None or not instances_path.exists() or not\
-            instances_path.is_dir():
+    if (
+        instances_path is None
+        or not instances_path.exists()
+        or not instances_path.is_dir()
+    ):
         print(f'Could not resolve instances path arg "{args.instances_path}"!')
         print("Check that the path or nickname is spelled correctly.")
         sys.exit(-1)
@@ -61,9 +66,9 @@ def main(argv: list[str]) -> None:
     instances_nicknames = gv.file_storage_data_mapping[gv.instances_nickname_path]
     for key in instances_nicknames:
         if instances_nicknames[key] == instances_path:
-            sfh.add_remove_platform_item(instances_path,
-                                         gv.instances_nickname_path,
-                                         key=key, remove=True)
+            sfh.add_remove_platform_item(
+                instances_path, gv.instances_nickname_path, key=key, remove=True
+            )
             break
 
     # We unlink symbolics links, erase copies

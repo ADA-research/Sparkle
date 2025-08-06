@@ -1,4 +1,5 @@
 """Objects and methods relating to instances for Sparkle."""
+
 from __future__ import annotations
 from pathlib import Path
 
@@ -55,10 +56,12 @@ class InstanceSet:
 
     def __repr__(self: InstanceSet) -> str:
         """Get detailed representation of an Instance Set."""
-        return f"{self.name}:\n"\
-               f"\t- Type: {type(self).__name__}\n"\
-               f"\t- Directory: {self.directory}\n"\
-               f"\t- # Instances: {self.size}"
+        return (
+            f"{self.name}:\n"
+            f"\t- Type: {type(self).__name__}\n"
+            f"\t- Directory: {self.directory}\n"
+            f"\t- # Instances: {self.size}"
+        )
 
     def get_path_by_name(self: InstanceSet, name: str) -> Path | list[Path]:
         """Retrieves an instance paths by its name. Returns None upon failure."""
@@ -98,6 +101,7 @@ class FileInstanceSet(InstanceSet):
 
 class MultiFileInstanceSet(InstanceSet):
     """Object representation of a set of multi-file instances."""
+
     instance_csv = "instances.csv"
 
     def __init__(self: MultiFileInstanceSet, target: Path) -> None:
@@ -113,22 +117,27 @@ class MultiFileInstanceSet(InstanceSet):
         # Read from instance_file
         if not target.is_dir():
             # Single file
-            instance_list = [line for line in csv.reader(
-                self.instance_file.open()) if target.stem in line]
+            instance_list = [
+                line
+                for line in csv.reader(self.instance_file.open())
+                if target.stem in line
+            ]
         else:
             # Multi file
             instance_list = [line for line in csv.reader(self.instance_file.open())]
 
         for instance in instance_list:
             self._instance_names.append(instance[0])
-            self._instance_paths.append([
-                (self.directory / f) if isinstance(f, str) else f for f in instance[1:]])
+            self._instance_paths.append(
+                [(self.directory / f) if isinstance(f, str) else f for f in instance[1:]]
+            )
 
     @property
     def all_paths(self: MultiFileInstanceSet) -> list[Path]:
         """Returns all file paths in the instance set as a flat list."""
-        return [p for instance in self._instance_paths for p in instance] + \
-            [self.instance_file]
+        return [p for instance in self._instance_paths for p in instance] + [
+            self.instance_file
+        ]
 
     @property
     def instances(self: InstanceSet) -> list[str]:
@@ -138,6 +147,7 @@ class MultiFileInstanceSet(InstanceSet):
 
 class IterableFileInstanceSet(InstanceSet):
     """Object representation of files containing multiple instances."""
+
     supported_filetypes = set([".csv", ".npy"])
 
     def __init__(self: IterableFileInstanceSet, target: Path) -> None:
@@ -148,9 +158,11 @@ class IterableFileInstanceSet(InstanceSet):
                 they are assumed to have the same number of instances.
         """
         super().__init__(target)
-        self._instance_paths =\
-            [p for p in self.directory.iterdir()
-             if p.suffix in IterableFileInstanceSet.supported_filetypes]
+        self._instance_paths = [
+            p
+            for p in self.directory.iterdir()
+            if p.suffix in IterableFileInstanceSet.supported_filetypes
+        ]
         self._size = IterableFileInstanceSet.__determine_size__(self._instance_paths[0])
         self._instance_names = [p.name for p in self._instance_paths]
 

@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for file manipulation."""
+
 from __future__ import annotations
 from filelock import FileLock
 from pathlib import Path
 
 
-def add_remove_platform_item(item: any,
-                             file_target: Path,
-                             target: list | dict,
-                             key: str = None,
-                             remove: bool = False) -> None:
+def add_remove_platform_item(
+    item: any,
+    file_target: Path,
+    target: list | dict,
+    key: str = None,
+    remove: bool = False,
+) -> None:
     """Add/remove item from a list or dictionary of the platform that must saved to disk.
 
     Args:

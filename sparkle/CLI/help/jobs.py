@@ -1,13 +1,14 @@
 """File to help with RunRunner jobs."""
+
 from pathlib import Path
 
 from runrunner.base import Status
 from runrunner.slurm import SlurmRun
 
 
-def get_runs_from_file(path: Path,
-                       print_error: bool = False,
-                       filter: list[Status] = None) -> list[SlurmRun]:
+def get_runs_from_file(
+    path: Path, print_error: bool = False, filter: list[Status] = None
+) -> list[SlurmRun]:
     """Retrieve all run objects from file storage.
 
     Args:
