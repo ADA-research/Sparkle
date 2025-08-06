@@ -1,10 +1,12 @@
 """Types definition for features to unify extractors across the Sparkle platform."""
+
 from __future__ import annotations
 from enum import Enum
 
 
 class FeatureGroup(str, Enum):
     """Various feature groups."""
+
     BASE = "base"
     PRE = "pre"
     DIAMETER = "dia"
@@ -18,6 +20,7 @@ class FeatureGroup(str, Enum):
 
 class FeatureSubgroup(str, Enum):
     """Various feature subgroups. Only used for embedding in with feature names."""
+
     VCG = "Variable-Clause-Graph"
     POSNEG = "Postive-Negative-Literals"
     HORNY = "Horn-Formula"
@@ -32,6 +35,7 @@ class FeatureSubgroup(str, Enum):
 
 class FeatureType(str, Enum):
     """Various feature types."""
+
     MIN = "min"
     MAX = "max"
     MEAN = "mean"

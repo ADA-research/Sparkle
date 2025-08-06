@@ -13,6 +13,7 @@ Notable changes to Sparkle will be documented in this file.
 - Timestamps are now saved in the directory name of the configuration scenario. [Issue#169]
 - Refactored compute_features to be part of the extractor as CLI script
 - RunSolver executable is now copied to feature extractors dirs instead, paths now directly linked similar to Solvers
+- Changed flake8 to ruff [Issue#184]
 - Refactored FeatureDataFrame to subclass pandas DF instead of property [Issue#185]
 
 ### Fixed

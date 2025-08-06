@@ -1,4 +1,5 @@
 """Test ablation scenario class."""
+
 from __future__ import annotations
 from pathlib import Path
 import pytest
@@ -12,22 +13,17 @@ from sparkle.instance import Instance_Set
 
 
 solver = Solver(Path("tests/test_files/Solvers/Test-Solver").absolute())
-dataset = Instance_Set(Path(
-    "tests/test_files/Instances/Test-Instance-Set").absolute())
+dataset = Instance_Set(Path("tests/test_files/Instances/Test-Instance-Set").absolute())
 objective = PAR(10)
-test_dataset = Instance_Set(Path(
-    "tests/test_files/Instances/Test-Instance-Set").absolute())
+test_dataset = Instance_Set(
+    Path("tests/test_files/Instances/Test-Instance-Set").absolute()
+)
 ablation_executable: Path = None
 validation_executable: Path = None
 override_dirs: bool = False
 cutoff_time = 2
 configuration_scenario = SMAC2Scenario(
-    solver,
-    dataset,
-    [objective],
-    1,
-    Path(),
-    solver_cutoff_time=cutoff_time
+    solver, dataset, [objective], 1, Path(), solver_cutoff_time=cutoff_time
 )
 configuration_scenario._timestamp = "test_date"
 cutoff_length = "3"
@@ -36,7 +32,7 @@ best_configuration = {
     "init_solution": "2",
     "perform_first_div": "1",
     "asd": 5,
-    "test_bool": True
+    "test_bool": True,
 }
 ablation_racing = False
 scenario = AblationScenario(
@@ -45,26 +41,32 @@ scenario = AblationScenario(
     cutoff_length,
     concurrent_clis,
     best_configuration,
-    ablation_racing
+    ablation_racing,
 )
 
 
-def test_ablation_scenario_constructor(tmp_path: Path,
-                                       monkeypatch: pytest.MonkeyPatch) -> None:
+def test_ablation_scenario_constructor(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test for ablation scenario constructor."""
     assert scenario.solver == solver
     assert scenario.train_set == dataset
     assert scenario.test_set == test_dataset
     t = scenario.config_scenario.timestamp
-    assert scenario.scenario_name ==\
-        f"ablation_{solver.name}_{dataset.name}_{t}_{test_dataset.name}"
-    assert scenario.scenario_dir ==\
-        configuration_scenario.directory / scenario.scenario_name
+    assert (
+        scenario.scenario_name
+        == f"ablation_{solver.name}_{dataset.name}_{t}_{test_dataset.name}"
+    )
+    assert (
+        scenario.scenario_dir
+        == configuration_scenario.directory / scenario.scenario_name
+    )
     assert scenario.validation_dir == scenario.scenario_dir / "validation"
 
 
-def test_create_configuration_file(tmp_path: Path,
-                                   monkeypatch: pytest.MonkeyPatch) -> None:
+def test_create_configuration_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test for method create_configuration_file."""
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     scenario.scenario_dir.mkdir(parents=True, exist_ok=True)
@@ -83,9 +85,7 @@ def test_create_configuration_file(tmp_path: Path,
         for line in validation_config_file.open().readlines()
         for key, value in [line.split("=", 1)]
     }
-    assert config_dict.get("cutoffTime") == f"{cutoff_time}", (
-        "cutoffTime does not match"
-    )
+    assert config_dict.get("cutoffTime") == f"{cutoff_time}", "cutoffTime does not match"
 
     assert config_dict.get("cutoff_length") == f"{cutoff_length}", (
         "cutoff_length does not match"
@@ -118,29 +118,21 @@ def test_create_configuration_file(tmp_path: Path,
 
 
 @pytest.mark.parametrize(
-    "test, file_name", [
-        (False, "instances_train.txt"),
-        (True, "instances_test.txt")
-    ]
+    "test, file_name", [(False, "instances_train.txt"), (True, "instances_test.txt")]
 )
 def test_create_instance_file(
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-        test: bool, file_name: str) -> None:
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, test: bool, file_name: str
+) -> None:
     """Test for method create_instance_file."""
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     scenario.scenario_dir.mkdir(parents=True, exist_ok=True)
     scenario.validation_dir.mkdir(parents=True, exist_ok=True)
-    main_instance_file = \
-        scenario.scenario_dir / file_name
-    validation_instance_file = \
-        scenario.validation_dir / file_name
+    main_instance_file = scenario.scenario_dir / file_name
+    validation_instance_file = scenario.validation_dir / file_name
 
     assert scenario.create_instance_file(test) == main_instance_file
 
-    assert main_instance_file.exists() is True, (
-        f"{main_instance_file} does not exist."
-    )
+    assert main_instance_file.exists() is True, f"{main_instance_file} does not exist."
 
     assert validation_instance_file.exists() is True, (
         f"{validation_instance_file} does not exist."
@@ -150,17 +142,17 @@ def test_create_instance_file(
     validation_content = validation_instance_file.open().readlines()
 
     assert main_train_content == validation_content, (
-        "The instance file and its validation copy "
-        "do not have the same content."
+        "The instance file and its validation copy do not have the same content."
     )
 
 
 @pytest.mark.parametrize(
-    "output_dir_case, case", [
+    "output_dir_case, case",
+    [
         (Path("tests/test_files/Ablation/Ablation_Correct"), "correct"),
         (Path("tests/test_files/Ablation/No_Ablation"), "no"),
-        (Path("tests/test_files/Ablation/Ablation_Corrupted"), "corrupted")
-    ]
+        (Path("tests/test_files/Ablation/Ablation_Corrupted"), "corrupted"),
+    ],
 )
 def test_check_for_ablation(output_dir_case: Path, case: str) -> None:
     """Test for method check_for_ablation."""
@@ -170,11 +162,10 @@ def test_check_for_ablation(output_dir_case: Path, case: str) -> None:
         cutoff_length,
         concurrent_clis,
         best_configuration,
-        ablation_racing
+        ablation_racing,
     )
     # Override table file to check test file
-    scenario_check._table_file =\
-        output_dir_case / scenario_check.table_file.name
+    scenario_check._table_file = output_dir_case / scenario_check.table_file.name
     return_val = scenario_check.check_for_ablation()
     if case == "correct":
         assert return_val is True
@@ -183,11 +174,12 @@ def test_check_for_ablation(output_dir_case: Path, case: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "output_dir_case, case", [
+    "output_dir_case, case",
+    [
         (Path("tests/test_files/Ablation/Ablation_Correct"), "correct"),
         (Path("tests/test_files/Ablation/No_Ablation"), "no"),
-        (Path("tests/test_files/Ablation/Ablation_Corrupted"), "corrupted")
-    ]
+        (Path("tests/test_files/Ablation/Ablation_Corrupted"), "corrupted"),
+    ],
 )
 def test_read_ablation_table(output_dir_case: Path, case: str) -> None:
     """Test for reading an ablation table."""
@@ -197,15 +189,14 @@ def test_read_ablation_table(output_dir_case: Path, case: str) -> None:
         cutoff_length,
         concurrent_clis,
         best_configuration,
-        ablation_racing
+        ablation_racing,
     )
     # Override table file to check test file
-    scenario_read._table_file =\
-        output_dir_case / scenario_read.table_file.name
+    scenario_read._table_file = output_dir_case / scenario_read.table_file.name
     ablation_table = scenario_read.read_ablation_table()
     if case == "correct":
         for line in ablation_table:
-            assert type(line) == list
+            assert type(line) is list
             assert len(line) == 5  # Always same length
             for value in line:
                 assert type(value) is str
@@ -214,15 +205,14 @@ def test_read_ablation_table(output_dir_case: Path, case: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "test_set", [
+    "test_set",
+    [
         Instance_Set(Path("tests/test_files/Instances/Test-Instance-Set")),
         None,
-    ]
+    ],
 )
 @patch("sparkle.configurator.configurator.AblationScenario.check_requirements")
-def test_submit_ablation(
-        mock_requirements: Mock,
-        test_set: Instance_Set) -> None:
+def test_submit_ablation(mock_requirements: Mock, test_set: Instance_Set) -> None:
     """Test for method submit ablation."""
     mock_requirements.return_value = True  # Mock requirements to avoid exception
     log_dir = Path("Output/Log")
@@ -232,10 +222,9 @@ def test_submit_ablation(
         cutoff_length,
         concurrent_clis,
         best_configuration,
-        ablation_racing
+        ablation_racing,
     )
-    with patch("runrunner.add_to_queue")\
-            as mock_add_to_queue:
+    with patch("runrunner.add_to_queue") as mock_add_to_queue:
         result = scenario_submit.submit_ablation(log_dir)
 
         if test_set:

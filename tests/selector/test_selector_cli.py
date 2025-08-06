@@ -1,4 +1,5 @@
 """Tests for Selector CLI entry point."""
+
 from pathlib import Path
 import shutil
 import pytest
@@ -10,9 +11,9 @@ from sparkle.selector.selector_cli import main as selector_cli
 
 
 @patch("runrunner.add_to_queue")
-def test_selector_cli(mock_add_queue: Mock,
-                      tmp_path: Path,
-                      monkeypatch: pytest.MonkeyPatch) -> None:
+def test_selector_cli(
+    mock_add_queue: Mock, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test the Selector CLI entry point."""
     scenario_path = Path("tests/test_files/Selector/scenario").absolute()
     feature_data = Path("tests/test_files/Selector/example_feature_data.csv").absolute()
@@ -30,13 +31,23 @@ def test_selector_cli(mock_add_queue: Mock,
     # Selector should predict CSCCSAT, copy that too
     shutil.copytree(csccsat, csccsat_target)
     arguments = [
-        "--selector-scenario", "Selector/scenario.txt",
-        "--feature-data", "example_feature_data.csv",
-        "--instance", f"{instance_path}",
-        "--seed", "0"]
-    mock_add_queue.return_value = {"status": SolverStatus.SAT, "quality": 0,
-                                   "cpu_time": 0.48925, "wall_time": 0.52824,
-                                   "memory": 1537.2734375, "PAR10": 0.48925}
+        "--selector-scenario",
+        "Selector/scenario.txt",
+        "--feature-data",
+        "example_feature_data.csv",
+        "--instance",
+        f"{instance_path}",
+        "--seed",
+        "0",
+    ]
+    mock_add_queue.return_value = {
+        "status": SolverStatus.SAT,
+        "quality": 0,
+        "cpu_time": 0.48925,
+        "wall_time": 0.52824,
+        "memory": 1537.2734375,
+        "PAR10": 0.48925,
+    }
     selector_cli(arguments)
     # TODO: Add checks based on the patch call
     mock_add_queue.assert_called_once()

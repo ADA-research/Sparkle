@@ -1,4 +1,5 @@
 """Test methods for the PCS parser classes."""
+
 from pathlib import Path
 
 import ConfigSpace
@@ -43,9 +44,9 @@ def test_configspace_to_smac2() -> None:
     configspace_file = Path("tests/test_files/pcs/Test-Solver_configspace.yaml")
     smac2_file = Path("tests/test_files/pcs/Test-Solver_SMAC2.pcs")
     configspace = PCSConverter.parse(configspace_file)
-    smac2_export = PCSConverter.export(configspace,
-                                       pcs_format=PCSConvention.SMAC,
-                                       file=None).splitlines()
+    smac2_export = PCSConverter.export(
+        configspace, pcs_format=PCSConvention.SMAC, file=None
+    ).splitlines()
     expected_lines = smac2_file.open().read().splitlines()
     for index in range(len(smac2_export)):
         assert smac2_export[index] == expected_lines[index]
@@ -56,9 +57,9 @@ def test_configspace_to_irace() -> None:
     configspace_file = Path("tests/test_files/pcs/Test-Solver_configspace.yaml")
     irace_file = Path("tests/test_files/pcs/Test-Solver_IRACE.pcs")
     configspace = PCSConverter.parse(configspace_file)
-    irace_export = PCSConverter.export(configspace,
-                                       pcs_format=PCSConvention.IRACE,
-                                       file=None).splitlines()
+    irace_export = PCSConverter.export(
+        configspace, pcs_format=PCSConvention.IRACE, file=None
+    ).splitlines()
     expected_lines = irace_file.open().read().splitlines()
     for index in range(len(irace_export)):
         assert irace_export[index] == expected_lines[index]

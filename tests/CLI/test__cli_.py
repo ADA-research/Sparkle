@@ -1,4 +1,5 @@
 """Test for CLI parsing entry point of Sparkle."""
+
 from pathlib import Path
 import sys
 import pytest
@@ -10,29 +11,32 @@ from sparkle.CLI import _cli_
 def test_commands() -> None:
     """Test if Sparkle correctly resolves the possible command files."""
     commands = _cli_.commands()
-    assert set(commands) == set([
-        "run_ablation",
-        "save_snapshot",
-        "check",
-        "add_solver",
-        "cleanup",
-        "remove_instances",
-        "generate_report",
-        "remove_feature_extractor",
-        "jobs",
-        "run_solvers",
-        "add_feature_extractor",
-        "configure_solver",
-        "status",
-        "initialise",
-        "about",
-        "run_parallel_portfolio",
-        "remove_solver",
-        "add_instances",
-        "run_portfolio_selector",
-        "construct_portfolio_selector",
-        "compute_features",
-        "load_snapshot", ])
+    assert set(commands) == set(
+        [
+            "run_ablation",
+            "save_snapshot",
+            "check",
+            "add_solver",
+            "cleanup",
+            "remove_instances",
+            "generate_report",
+            "remove_feature_extractor",
+            "jobs",
+            "run_solvers",
+            "add_feature_extractor",
+            "configure_solver",
+            "status",
+            "initialise",
+            "about",
+            "run_parallel_portfolio",
+            "remove_solver",
+            "add_instances",
+            "run_portfolio_selector",
+            "construct_portfolio_selector",
+            "compute_features",
+            "load_snapshot",
+        ]
+    )
 
 
 def test_main() -> None:
@@ -76,9 +80,8 @@ def test_suggestions(capfd: pytest.CaptureFixture) -> None:
 
 @patch("pathlib.Path.home")
 def test_auto_complete_install(
-        mock_home: Path,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch) -> None:
+    mock_home: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test if Sparkle correctly installs autocompletion commands."""
     monkeypatch.chdir(tmp_path)
     profile_path = Path(".bash_profile")

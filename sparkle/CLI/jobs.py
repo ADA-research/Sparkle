@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Command to interact with async jobs."""
+
 import sys
 import time
 import argparse
@@ -19,60 +20,82 @@ from sparkle.CLI.help import global_variables as gv
 
 def parser_function() -> argparse.ArgumentParser:
     """Create parser for the jobs command."""
-    parser = argparse.ArgumentParser(description="Command to interact with async jobs. "
-                                                 "The command starts an interactive "
-                                                 "table when no flags are given. Jobs "
-                                                 "can be selected for cancelling in the "
-                                                 "table and non activate jobs can be "
-                                                 "flushed by pressing the spacebar.")
+    parser = argparse.ArgumentParser(
+        description="Command to interact with async jobs. "
+        "The command starts an interactive "
+        "table when no flags are given. Jobs "
+        "can be selected for cancelling in the "
+        "table and non activate jobs can be "
+        "flushed by pressing the spacebar."
+    )
     parser.add_argument(*ac.CancelJobsArgument.names, **ac.CancelJobsArgument.kwargs)
     parser.add_argument(*ac.JobIDsArgument.names, **ac.JobIDsArgument.kwargs)
     parser.add_argument(*ac.AllJobsArgument.names, **ac.AllJobsArgument.kwargs)
     return parser
 
 
-def create_jobs_table(jobs: list[SlurmRun],
-                      markup: bool = True,
-                      format: str = "grid") -> str:
+def create_jobs_table(
+    jobs: list[SlurmRun], markup: bool = True, format: str = "grid"
+) -> str:
     """Create a table of jobs.
 
     Args:
-        runs: List of SlurmRun objects.
+        jobs: List of SlurmRun objects.
         markup: By default some mark up will be applied to the table.
             If false, a more plain version will be created.
         format: The tabulate format to use.
-        per_job: If true, returns a dict with the job ids as keys and
-            The lines per job as values.
 
     Returns:
         A table of jobs as a string.
     """
-    job_table = [["RunId", "Name", "Quality of Service", "Partition", "Status",
-                  "Dependencies", "Finished Jobs", "Run Time"]]
+    job_table = [
+        [
+            "RunId",
+            "Name",
+            "Quality of Service",
+            "Partition",
+            "Status",
+            "Dependencies",
+            "Finished Jobs",
+            "Run Time",
+        ]
+    ]
     for job in jobs:
         # Count number of jobs that have finished
-        finished_jobs_count = sum(1 for status in job.all_status
-                                  if status == Status.COMPLETED)
+        finished_jobs_count = sum(
+            1 for status in job.all_status if status == Status.COMPLETED
+        )
         if markup:  # Format job.status
-            status_text = \
-                TEXT.format_text([TEXT.BOLD], job.status) \
-                if job.status == Status.RUNNING else \
-                (TEXT.format_text([TEXT.ITALIC], job.status)
-                    if job.status == Status.COMPLETED else job.status.value)
+            status_text = (
+                TEXT.format_text([TEXT.BOLD], job.status)
+                if job.status == Status.RUNNING
+                else (
+                    TEXT.format_text([TEXT.ITALIC], job.status)
+                    if job.status == Status.COMPLETED
+                    else job.status.value
+                )
+            )
         else:
             status_text = job.status.value
         job_table.append(
-            [job.run_id,
-             job.name,
-             job.qos,
-             job.partition,
-             status_text,
-             "None" if len(job.dependencies) == 0 else ", ".join(job.dependencies),
-             f"{finished_jobs_count}/{len(job.all_status)}",
-             job.runtime])
+            [
+                job.run_id,
+                job.name,
+                job.qos,
+                job.partition,
+                status_text,
+                "None" if len(job.dependencies) == 0 else ", ".join(job.dependencies),
+                f"{finished_jobs_count}/{len(job.all_status)}",
+                job.runtime,
+            ]
+        )
     if markup:
-        job_table = tabulate(job_table, headers="firstrow", tablefmt=format,
-                             maxcolwidths=[12, 32, 14, 12, 16, 16, 16, 10])
+        job_table = tabulate(
+            job_table,
+            headers="firstrow",
+            tablefmt=format,
+            maxcolwidths=[12, 32, 14, 12, 16, 16, 16, 10],
+        )
     return job_table
 
 
@@ -94,8 +117,7 @@ def table_gui(jobs: list[Run]) -> None:
         button_yes = ptg.Button("Yes", kill_exit)
         button_no = ptg.Button("No", lambda *_: manager.remove(popup))
 
-        popup = manager.alert(ptg.Label(f"Cancel job {job_id}?"),
-                              button_no, button_yes)
+        popup = manager.alert(ptg.Label(f"Cancel job {job_id}?"), button_no, button_yes)
 
         refresh_data(self.parent)
 
@@ -107,8 +129,7 @@ def table_gui(jobs: list[Run]) -> None:
         for job in jobs:
             if job.status in [Status.WAITING, Status.RUNNING]:
                 job.get_latest_job_details()
-        job_table = create_jobs_table(jobs,
-                                      markup=True).splitlines()
+        job_table = create_jobs_table(jobs, markup=True).splitlines()
 
         if window.width != len(job_table[0]):  # Resize window
             window.width = len(job_table[0])
@@ -116,9 +137,10 @@ def table_gui(jobs: list[Run]) -> None:
         for index, row in enumerate(job_table):
             if row.startswith("|"):
                 row_id = row.split("|")[1].strip()
-                if (row_id in job_id_map.keys()
-                        and job_id_map[row_id].status in [Status.WAITING,
-                                                          Status.RUNNING]):
+                if row_id in job_id_map.keys() and job_id_map[row_id].status in [
+                    Status.WAITING,
+                    Status.RUNNING,
+                ]:
                     window._widgets[index + 1] = ptg.Button(row, cancel_jobs)
                 else:
                     window._widgets[index + 1] = ptg.Label(row)
@@ -128,6 +150,7 @@ def table_gui(jobs: list[Run]) -> None:
 
     table = create_jobs_table(jobs, markup=True).splitlines()
     with ptg.WindowManager() as manager:
+
         def macro_reload(fmt: str) -> str:
             """Updates jobs in the table with an interval."""
             if "last_reload" not in globals():
@@ -171,8 +194,10 @@ def table_gui(jobs: list[Run]) -> None:
                 table_window = manager._windows[-1]
                 for iw, widget in enumerate(table_window._widgets):
                     if isinstance(widget, ptg.Label):
-                        if ("|" in widget.value
-                                and widget.value.split("|")[1].strip().isnumeric()):
+                        if (
+                            "|" in widget.value
+                            and widget.value.split("|")[1].strip().isnumeric()
+                        ):
                             job_id = widget.value.split("|")[1].strip()
                             if job_id in flushable_job_ids:
                                 flushable_widgets.append(widget)
@@ -191,17 +216,17 @@ def table_gui(jobs: list[Run]) -> None:
                     table_window.remove(widget)
                 manager.remove(popup)
 
-            popup = manager.alert(ptg.Label("Flush non-active jobs?"),
-                                  ptg.Button("Yes", flush),
-                                  ptg.Button("No", lambda *_: manager.remove(popup)))
+            popup = manager.alert(
+                ptg.Label("Flush non-active jobs?"),
+                ptg.Button("Yes", flush),
+                ptg.Button("No", lambda *_: manager.remove(popup)),
+            )
 
         ptg.tim.define("!reload", macro_reload)
-        window = (
-            ptg.Window(
-                "[bold]Sparkle Jobs [!reload]%c",
-                width=len(table[0]),
-                box="EMPTY",
-            )
+        window = ptg.Window(
+            "[bold]Sparkle Jobs [!reload]%c",
+            width=len(table[0]),
+            box="EMPTY",
         )
         job_id_map = {job.run_id: job for job in jobs}
         for row in table:
@@ -232,8 +257,11 @@ def main(argv: list[str]) -> None:
 
     # Filter jobs on relevant status
     path = gv.settings().DEFAULT_log_output
-    jobs = [run for run in jobs_help.get_runs_from_file(path)
-            if run.status == Status.WAITING or run.status == Status.RUNNING]
+    jobs = [
+        run
+        for run in jobs_help.get_runs_from_file(path)
+        if run.status == Status.WAITING or run.status == Status.RUNNING
+    ]
     if args.job_ids:  # Filter
         jobs = [job for job in jobs if job.run_id in args.job_ids]
         job_ids = [job.run_id for job in jobs]
@@ -264,8 +292,10 @@ def main(argv: list[str]) -> None:
                 else:
                     print(f"ERROR: No jobs with ids {args.job_ids} to cancel.")
                     sys.exit(-1)
-            print(f"Canceled {len(killed_jobs)} jobs with IDs: "
-                  f"{', '.join([j.run_id for j in killed_jobs])}.")
+            print(
+                f"Canceled {len(killed_jobs)} jobs with IDs: "
+                f"{', '.join([j.run_id for j in killed_jobs])}."
+            )
         sys.exit(0)
     else:
         table_gui(jobs)

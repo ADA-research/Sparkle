@@ -96,24 +96,27 @@ pygments_style = "colorful"
 
 class SparkleBashLexer(BashLexer):
     """Extended BashLexer to add sparkle keywords."""
+
     def __init__(self: SparkleBashLexer, **options: any) -> None:
         """Initialize the BashLexer and extend."""
         super().__init__(**options)
-        self.tokens["basic"][0] =\
-            (r"\b(if|fi|else|while|in|do|done|for|then|return|function|case|"
-             r"select|break|continue|until|esac|elif|sparkle)(\s*)\b",
-             bygroups(Keyword, Whitespace))
+        self.tokens["basic"][0] = (
+            r"\b(if|fi|else|while|in|do|done|for|then|return|function|case|"
+            r"select|break|continue|until|esac|elif|sparkle)(\s*)\b",
+            bygroups(Keyword, Whitespace),
+        )
         command_str = "|".join(commands())
-        self.tokens["basic"][1] =\
-            (r"\b(alias|bg|bind|builtin|caller|cd|command|compgen|"
-             r"complete|declare|dirs|disown|echo|enable|eval|exec|exit|"
-             r"export|false|fc|fg|getopts|hash|help|history|jobs|kill|let|"
-             r"local|logout|popd|printf|pushd|pwd|read|readonly|set|shift|"
-             r"shopt|source|suspend|test|time|times|trap|true|type|typeset|"
-             r"ulimit|umask|unalias|unset|wait|"
-             f"{command_str}"
-             r")(?=[\s)`])",
-             Name.Builtin)
+        self.tokens["basic"][1] = (
+            r"\b(alias|bg|bind|builtin|caller|cd|command|compgen|"
+            r"complete|declare|dirs|disown|echo|enable|eval|exec|exit|"
+            r"export|false|fc|fg|getopts|hash|help|history|jobs|kill|let|"
+            r"local|logout|popd|printf|pushd|pwd|read|readonly|set|shift|"
+            r"shopt|source|suspend|test|time|times|trap|true|type|typeset|"
+            r"ulimit|umask|unalias|unset|wait|"
+            f"{command_str}"
+            r")(?=[\s)`])",
+            Name.Builtin,
+        )
 
 
 pygments.highlight(code="bash", lexer=SparkleBashLexer(), formatter=TerminalFormatter())
@@ -174,15 +177,12 @@ latex_elements = {
     # The paper size ("letterpaper" or "a4paper").
     #
     # "papersize": "letterpaper",
-
     # The font size ("10pt", "11pt" or "12pt").
     #
     # "pointsize": "10pt",
-
     # Additional stuff for the LaTeX preamble.
     #
     # "preamble": "",
-
     # Latex figure (float) alignment
     #
     # "figure_align": "htbp",
@@ -192,26 +192,34 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "sparkle.tex", "Sparkle Documentation",
-     "ADA Research Group, AIM @ RWTH Aachen", "manual"),
+    (
+        master_doc,
+        "sparkle.tex",
+        "Sparkle Documentation",
+        "ADA Research Group, AIM @ RWTH Aachen",
+        "manual",
+    ),
 ]
 
 # Manually installed sty files not easily available from conda
 # Note that although texlive-core is available from conda (containing at least some
 # packages), it can cause conflicts with exiting texlive installations.
-latex_additional_files = ["tex_sty/fncychap.sty", "tex_sty/wrapfig.sty",
-                          "tex_sty/capt-of.sty", "tex_sty/framed.sty",
-                          "tex_sty/upquote.sty", "tex_sty/needspace.sty",
-                          "tex_sty/tabulary.sty", "tex_sty/titlesec.sty"]
+latex_additional_files = [
+    "tex_sty/fncychap.sty",
+    "tex_sty/wrapfig.sty",
+    "tex_sty/capt-of.sty",
+    "tex_sty/framed.sty",
+    "tex_sty/upquote.sty",
+    "tex_sty/needspace.sty",
+    "tex_sty/tabulary.sty",
+    "tex_sty/titlesec.sty",
+]
 
 # -- Options for manual page output ------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, "sparkle", "Sparkle Documentation",
-     [author], 1)
-]
+man_pages = [(master_doc, "sparkle", "Sparkle Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -220,9 +228,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, "sparkle", "sparkle Documentation",
-     author, "sparkle", " A PbO-based Multi-agent Problem-solving Platform.",
-     "Miscellaneous"),
+    (
+        master_doc,
+        "sparkle",
+        "sparkle Documentation",
+        author,
+        "sparkle",
+        " A PbO-based Multi-agent Problem-solving Platform.",
+        "Miscellaneous",
+    ),
 ]
 
 

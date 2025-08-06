@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to execute ablation analysis."""
+
 import argparse
 import sys
 
@@ -21,19 +22,25 @@ def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
         description="Runs parameter importance between the default and configured "
-                    "parameters with ablation. This command requires a finished "
-                    "configuration for the solver instance pair.",
+        "parameters with ablation. This command requires a finished "
+        "configuration for the solver instance pair.",
         epilog="Note that if no test instance set is given, the validation is performed"
-               " on the training set.")
+        " on the training set.",
+    )
     parser.add_argument("--solver", required=False, type=str, help="path to solver")
-    parser.add_argument(*ac.InstanceSetTrainOptionalArgument.names,
-                        **ac.InstanceSetTrainOptionalArgument.kwargs)
-    parser.add_argument(*ac.InstanceSetTestAblationArgument.names,
-                        **ac.InstanceSetTestAblationArgument.kwargs)
+    parser.add_argument(
+        *ac.InstanceSetTrainOptionalArgument.names,
+        **ac.InstanceSetTrainOptionalArgument.kwargs,
+    )
+    parser.add_argument(
+        *ac.InstanceSetTestAblationArgument.names,
+        **ac.InstanceSetTestAblationArgument.kwargs,
+    )
     # Settings arguments
     parser.add_argument(*ac.SettingsFileArgument.names, **ac.SettingsFileArgument.kwargs)
-    parser.add_argument(*Settings.OPTION_ablation_racing.args,
-                        **Settings.OPTION_ablation_racing.kwargs)
+    parser.add_argument(
+        *Settings.OPTION_ablation_racing.args, **Settings.OPTION_ablation_racing.kwargs
+    )
     parser.add_argument(*Settings.OPTION_run_on.args, **Settings.OPTION_run_on.kwargs)
     parser.set_defaults(ablation_settings_help=False)
     return parser
@@ -67,9 +74,9 @@ def main(argv: list[str]) -> None:
     prev_settings = Settings(Settings.DEFAULT_previous_settings_path)
     Settings.check_settings_changes(settings, prev_settings)
 
-    solver = resolve_object_name(args.solver,
-                                 gv.solver_nickname_mapping,
-                                 settings.DEFAULT_solver_dir, Solver)
+    solver = resolve_object_name(
+        args.solver, gv.solver_nickname_mapping, settings.DEFAULT_solver_dir, Solver
+    )
     if solver is None:
         print(f"Could not resolve Solver path/name {args.solver}!")
         print([p for p in settings.DEFAULT_solver_dir.iterdir()])
@@ -78,40 +85,47 @@ def main(argv: list[str]) -> None:
     instance_set_train: InstanceSet = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        settings.DEFAULT_instance_dir, Instance_Set)
+        settings.DEFAULT_instance_dir,
+        Instance_Set,
+    )
     instance_set_test = resolve_object_name(
         args.instance_set_test,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        settings.DEFAULT_instance_dir, Instance_Set)
+        settings.DEFAULT_instance_dir,
+        Instance_Set,
+    )
 
     configurator = settings.configurator
     output_path = settings.get_configurator_output_path(configurator)
 
     config_scenario = configurator.scenario_class().find_scenario(
-        output_path,
-        solver,
-        instance_set_train)
+        output_path, solver, instance_set_train
+    )
 
-    performance_data = PerformanceDataFrame(
-        settings.DEFAULT_performance_data_path)
+    performance_data = PerformanceDataFrame(settings.DEFAULT_performance_data_path)
     if config_scenario is None:
-        print("No configuration scenario found for combination:\n"
-              f"{configurator.name} {solver.name} {instance_set_train.name}")
+        print(
+            "No configuration scenario found for combination:\n"
+            f"{configurator.name} {solver.name} {instance_set_train.name}"
+        )
         sys.exit(-1)
     best_configuration_key, _ = performance_data.best_configuration(
         str(solver.directory),
         config_scenario.sparkle_objective,
-        instances=instance_set_train.instance_names)
+        instances=instance_set_train.instance_names,
+    )
     best_configuration = performance_data.get_full_configuration(
-        str(solver.directory),
-        best_configuration_key)
+        str(solver.directory), best_configuration_key
+    )
     if instance_set_test is None:
         instance_set_test = instance_set_train
 
     if not config_scenario.results_directory.is_dir():
-        print("Error: No configuration results found for the given solver and training"
-              " instance set. Ablation needs to have a target configuration. "
-              "Please finish configuration first.")
+        print(
+            "Error: No configuration results found for the given solver and training"
+            " instance set. Ablation needs to have a target configuration. "
+            "Please finish configuration first."
+        )
         sys.exit(-1)
     else:
         print("Configuration exists!")
@@ -133,14 +147,14 @@ def main(argv: list[str]) -> None:
     runs = ablation_scenario.submit_ablation(
         log_dir=sl.caller_log_dir,
         sbatch_options=settings.sbatch_settings,
-        run_on=run_on)
+        run_on=run_on,
+    )
 
     if run_on == Runner.LOCAL:
         print("Ablation analysis finished!")
     else:
         job_id_str = ",".join([run.run_id for run in runs])
-        print(f"Ablation analysis running through Slurm with job id(s): "
-              f"{job_id_str}")
+        print(f"Ablation analysis running through Slurm with job id(s): {job_id_str}")
     sys.exit(0)
 
 

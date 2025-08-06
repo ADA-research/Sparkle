@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Run a solver, read/write to performance dataframe."""
+
 from filelock import FileLock
 import argparse
 from pathlib import Path
@@ -17,36 +18,74 @@ from sparkle.structures import PerformanceDataFrame
 if __name__ == "__main__":
     # Define command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--performance-dataframe", required=True, type=Path,
-                        help="path to the performance dataframe")
+    parser.add_argument(
+        "--performance-dataframe",
+        required=True,
+        type=Path,
+        help="path to the performance dataframe",
+    )
     parser.add_argument("--solver", required=True, type=Path, help="path to solver")
-    parser.add_argument("--instance", required=True, type=Path, nargs="+",
-                        help="path to instance to run on")
-    parser.add_argument("--run-index", required=True, type=int,
-                        help="run index in the dataframe to set.")
-    parser.add_argument("--log-dir", type=Path, required=True,
-                        help="path to the log directory")
+    parser.add_argument(
+        "--instance",
+        required=True,
+        type=Path,
+        nargs="+",
+        help="path to instance to run on",
+    )
+    parser.add_argument(
+        "--run-index",
+        required=True,
+        type=int,
+        help="run index in the dataframe to set.",
+    )
+    parser.add_argument(
+        "--log-dir", type=Path, required=True, help="path to the log directory"
+    )
 
     # These two arguments should be mutually exclusive
-    parser.add_argument("--configuration-id", type=str, required=False,
-                        help="configuration id to read from the PerformanceDataFrame.")
-    parser.add_argument("--configuration", type=dict, required=False,
-                        help="configuration for the solver")
+    parser.add_argument(
+        "--configuration-id",
+        type=str,
+        required=False,
+        help="configuration id to read from the PerformanceDataFrame.",
+    )
+    parser.add_argument(
+        "--configuration",
+        type=dict,
+        required=False,
+        help="configuration for the solver",
+    )
 
-    parser.add_argument("--seed", type=str, required=False,
-                        help="seed to use for the solver. If not provided, read from "
-                             "the PerformanceDataFrame or generate one.")
-    parser.add_argument("--cutoff-time", type=int, required=False,
-                        help="the cutoff time for the solver.")
-    parser.add_argument("--target-objective", required=False, type=str,
-                        help="The objective to use to determine the best configuration.")
-    parser.add_argument("--best-configuration-instances",
-                        required=False, type=str, nargs="+",
-                        help="If given, will ignore any given configurations, and try to"
-                             " determine the best found configurations over the given "
-                             "instances. Defaults to the first objective given in the "
-                             " objectives argument or the one given by the dataframe "
-                             " to use to determine the best configuration.")
+    parser.add_argument(
+        "--seed",
+        type=str,
+        required=False,
+        help="seed to use for the solver. If not provided, read from "
+        "the PerformanceDataFrame or generate one.",
+    )
+    parser.add_argument(
+        "--cutoff-time",
+        type=int,
+        required=False,
+        help="the cutoff time for the solver.",
+    )
+    parser.add_argument(
+        "--target-objective",
+        required=False,
+        type=str,
+        help="The objective to use to determine the best configuration.",
+    )
+    parser.add_argument(
+        "--best-configuration-instances",
+        required=False,
+        type=str,
+        nargs="+",
+        help="If given, will ignore any given configurations, and try to"
+        " determine the best found configurations over the given "
+        "instances. Defaults to the first objective given in the "
+        " objectives argument or the one given by the dataframe "
+        " to use to determine the best configuration.",
+    )
     args = parser.parse_args()
     # Process command line arguments
     log_dir = args.log_dir
@@ -55,8 +94,9 @@ if __name__ == "__main__":
     instance_path: list[Path] = args.instance
     # If instance is only one file then we don't need a list
     instance_path = instance_path[0] if len(instance_path) == 1 else instance_path
-    instance_name = instance_path.stem if isinstance(
-        instance_path, Path) else instance_path[0].stem
+    instance_name = (
+        instance_path.stem if isinstance(instance_path, Path) else instance_path[0].stem
+    )
     run_index = args.run_index
     # Ensure stringifcation of path objects
     if isinstance(instance_path, list):
@@ -80,9 +120,9 @@ if __name__ == "__main__":
         if args.best_configuration_instances:  # Determine best configuration
             best_configuration_instances: list[str] = args.best_configuration_instances
             # Get the unique instance names
-            best_configuration_instances = list(set([
-                Path(instance).stem
-                for instance in best_configuration_instances]))
+            best_configuration_instances = list(
+                set([Path(instance).stem for instance in best_configuration_instances])
+            )
             target_objective = resolve_objective(args.target_objective)
             config_id, value = performance_dataframe.best_configuration(
                 solver=str(args.solver),
@@ -90,24 +130,28 @@ if __name__ == "__main__":
                 instances=best_configuration_instances,
             )
             configuration = performance_dataframe.get_full_configuration(
-                str(args.solver), config_id)
+                str(args.solver), config_id
+            )
             # Read the seed from the dataframe
             seed = performance_dataframe.get_value(
                 str(args.solver),
                 instance_name,
                 objective=target_objective.name,
                 run=run_index,
-                solver_fields=[PerformanceDataFrame.column_seed])
+                solver_fields=[PerformanceDataFrame.column_seed],
+            )
         elif args.configuration_id:  # Read from DF the ID
             config_id = args.configuration_id
             configuration = performance_dataframe.get_full_configuration(
-                str(args.solver), config_id)
+                str(args.solver), config_id
+            )
             seed = performance_dataframe.get_value(
                 str(args.solver),
                 instance_name,
                 objective=None,
                 run=run_index,
-                solver_fields=[PerformanceDataFrame.column_seed])
+                solver_fields=[PerformanceDataFrame.column_seed],
+            )
         else:  # Direct config given
             configuration = args.configuration
             config_id = configuration["config_id"]
@@ -125,14 +169,21 @@ if __name__ == "__main__":
         configuration=configuration.copy() if configuration else None,
         cutoff_time=args.cutoff_time,
         log_dir=log_dir,
-        run_on=Runner.LOCAL)
+        run_on=Runner.LOCAL,
+    )
 
     # Prepare the results for the DataFrame for each objective
-    result = [[solver_output[objective.name] for objective in objectives],
-              [seed] * len(objectives)]
-    solver_fields = [PerformanceDataFrame.column_value, PerformanceDataFrame.column_seed]
-    objective_values = [f"{objective.name}: {solver_output[objective.name]}"
-                        for objective in objectives]
+    result = [
+        [solver_output[objective.name] for objective in objectives],
+        [seed] * len(objectives),
+    ]
+    solver_fields = [
+        PerformanceDataFrame.column_value,
+        PerformanceDataFrame.column_seed,
+    ]
+    objective_values = [
+        f"{objective.name}: {solver_output[objective.name]}" for objective in objectives
+    ]
     print(f"Appending value objective values: {', '.join(objective_values)}")
     print(f"For Solver/config: {solver}/{config_id}")
     print(f"For index: Instance {instance_name}, Run {args.run_index}")
@@ -152,4 +203,5 @@ if __name__ == "__main__":
             objective=[o.name for o in objectives],
             run=run_index,
             solver_fields=solver_fields,
-            append_write_csv=True)
+            append_write_csv=True,
+        )

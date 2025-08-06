@@ -1,4 +1,5 @@
 """Test the solver CLI entry points."""
+
 import pytest
 from pathlib import Path
 import shutil
@@ -7,11 +8,13 @@ from sparkle.CLI import add_solver, remove_solver
 
 
 @pytest.mark.integration
-def test_add_remove_solver_command(tmp_path: Path,
-                                   monkeypatch: pytest.MonkeyPatch) -> None:
+def test_add_remove_solver_command(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test initialise command."""
-    source_path = (Path("Examples") / "Resources" / "Solvers"
-                   / "PbO-CCSAT-Generic").absolute()
+    source_path = (
+        Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic"
+    ).absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     # Copy solver to tmp dir for no-copy test
     solver_path = Path("test") / "PbO-CCSAT-Generic"
@@ -34,8 +37,7 @@ def test_add_remove_solver_command(tmp_path: Path,
 
     # Symlink test
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        add_solver.main([str(solver_path.absolute()),
-                         "--no-copy"])
+        add_solver.main([str(solver_path.absolute()), "--no-copy"])
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
     assert expected_target.is_symlink()

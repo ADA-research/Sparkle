@@ -1,4 +1,5 @@
 """Class for handling the Runsolver Wrapper."""
+
 from __future__ import annotations
 import sys
 import ast
@@ -22,12 +23,13 @@ class RunSolver:
 
     @staticmethod
     def wrap_command(
-            runsolver_executable: Path,
-            command: list[str],
-            cutoff_time: int,
-            log_directory: Path,
-            log_name_base: str = None,
-            raw_results_file: bool = True) -> list[str]:
+        runsolver_executable: Path,
+        command: list[str],
+        cutoff_time: int,
+        log_directory: Path,
+        log_name_base: str = None,
+        raw_results_file: bool = True,
+    ) -> list[str]:
         """Wrap a command with the RunSolver call and arguments.
 
         Args:
@@ -73,22 +75,35 @@ class RunSolver:
         watcher_data_path = raw_result_path.with_suffix(".log")
         var_values_path = raw_result_path.with_suffix(".val")
 
-        return [str(runsolver_executable.absolute()),
-                "--timestamp", "--use-pty",
-                "--cpu-limit", str(cutoff_time),
-                "-w", str(watcher_data_path),
-                "-v", str(var_values_path)] + (
-                    ["-o", str(raw_result_path)] if raw_results_file else []) + command
+        return (
+            [
+                str(runsolver_executable.absolute()),
+                "--timestamp",
+                "--use-pty",
+                "--cpu-limit",
+                str(cutoff_time),
+                "-w",
+                str(watcher_data_path),
+                "-v",
+                str(var_values_path),
+            ]
+            + (["-o", str(raw_result_path)] if raw_results_file else [])
+            + command
+        )
 
     @staticmethod
-    def get_measurements(runsolver_values_path: Path,
-                         not_found: float = -1.0) -> tuple[float, float, float]:
+    def get_measurements(
+        runsolver_values_path: Path, not_found: float = -1.0
+    ) -> tuple[float, float, float]:
         """Return the CPU and wallclock time reported by runsolver in values log."""
         cpu_time, wall_time, memory = not_found, not_found, not_found
         if runsolver_values_path.exists():
             with runsolver_values_path.open("r") as infile:
-                lines = [line.strip().split("=") for line in infile.readlines()
-                         if line.count("=") == 1]
+                lines = [
+                    line.strip().split("=")
+                    for line in infile.readlines()
+                    if line.count("=") == 1
+                ]
                 for keyword, value in lines:
                     if keyword == "WCTIME":
                         wall_time = float(value)
@@ -101,11 +116,13 @@ class RunSolver:
         return cpu_time, wall_time, memory
 
     @staticmethod
-    def get_status(runsolver_values_path: Path,
-                   runsolver_raw_path: Path) -> SolverStatus:
+    def get_status(
+        runsolver_values_path: Path, runsolver_raw_path: Path
+    ) -> SolverStatus:
         """Get run status from runsolver logs."""
-        if not runsolver_values_path.exists() and (runsolver_raw_path is not None
-                                                   and not runsolver_raw_path.exists()):
+        if not runsolver_values_path.exists() and (
+            runsolver_raw_path is not None and not runsolver_raw_path.exists()
+        ):
             # Runsolver logs were not created, job was stopped ''incorrectly''
             return SolverStatus.CRASHED
         # First check if runsolver reported time out
@@ -142,8 +159,9 @@ class RunSolver:
         return ""
 
     @staticmethod
-    def get_solver_output(runsolver_configuration: list[str | Path],
-                          process_output: str) -> dict[str, str | object]:
+    def get_solver_output(
+        runsolver_configuration: list[str | Path], process_output: str
+    ) -> dict[str, str | object]:
         """Decode solver output dictionary when called with runsolver."""
         solver_input = None
         solver_output = None
@@ -160,8 +178,10 @@ class RunSolver:
                 if solver_data_file.exists():
                     solver_output = solver_data_file.open("r").read()
                 elif process_output is None:
-                    warnings.warn("[RunSolver] Could not find Solver output file: "
-                                  f"{solver_data_file}")
+                    warnings.warn(
+                        "[RunSolver] Could not find Solver output file: "
+                        f"{solver_data_file}"
+                    )
             if "-v" in conf or "--var" in conf:
                 value_data_file = Path(runsolver_configuration[idx + 1])
             if "--cpu-limit" in conf:
@@ -186,12 +206,14 @@ class RunSolver:
             output_dict = ast.literal_eval(solver_regex_filter)
         except Exception as ex:
             config_str = " ".join([str(c) for c in runsolver_configuration])
-            warnings.warn("Solver output decoding failed from RunSolver configuration:\n"
-                          f"'{config_str}'\n"
-                          f"Output: {solver_output}\n"
-                          f"Exception: {ex}\n"
-                          "Setting status to 'UNKNOWN'.",
-                          category=RuntimeWarning)
+            warnings.warn(
+                "Solver output decoding failed from RunSolver configuration:\n"
+                f"'{config_str}'\n"
+                f"Output: {solver_output}\n"
+                f"Exception: {ex}\n"
+                "Setting status to 'UNKNOWN'.",
+                category=RuntimeWarning,
+            )
             output_dict = {"status": SolverStatus.UNKNOWN}
 
         output_dict["cutoff_time"] = cutoff_time

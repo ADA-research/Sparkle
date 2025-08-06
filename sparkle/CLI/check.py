@@ -1,4 +1,5 @@
 """Command to help users check if their input solvers, datasets etc. are correct."""
+
 import sys
 import os
 import argparse
@@ -20,17 +21,18 @@ def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
         description="Command to help users check if their input solvers, instance sets "
-                    "or feature extractors are readable by Sparkle. Specify a path to "
-                    "an instance to test calling the wrapper.")
+        "or feature extractors are readable by Sparkle. Specify a path to "
+        "an instance to test calling the wrapper."
+    )
     parser.add_argument(*ac.CheckTypeArgument.names, **ac.CheckTypeArgument.kwargs)
     parser.add_argument(*ac.CheckPathArgument.names, **ac.CheckPathArgument.kwargs)
-    parser.add_argument(*ac.InstancePathOptional.names,
-                        **ac.InstancePathOptional.kwargs)
-    parser.add_argument(*ac.SeedArgument.names,
-                        **ac.SeedArgument.kwargs)
+    parser.add_argument(*ac.InstancePathOptional.names, **ac.InstancePathOptional.kwargs)
+    parser.add_argument(*ac.SeedArgument.names, **ac.SeedArgument.kwargs)
     # Settings arguments
-    parser.add_argument(*Settings.OPTION_solver_cutoff_time.args,
-                        **Settings.OPTION_solver_cutoff_time.kwargs)
+    parser.add_argument(
+        *Settings.OPTION_solver_cutoff_time.args,
+        **Settings.OPTION_solver_cutoff_time.kwargs,
+    )
     return parser
 
 
@@ -51,7 +53,8 @@ def main(argv: list[str]) -> None:
         "Instance-Set": Instance_Set,
         "Solver": Solver,
         "FeatureExtractor": Extractor,
-        "InstanceSet": Instance_Set}
+        "InstanceSet": Instance_Set,
+    }
     type = type_map[args.type]
     print(f"Checking {type.__name__} in directory {args.path} ...")
     object = type(args.path)
@@ -64,21 +67,26 @@ def main(argv: list[str]) -> None:
             print()
             print(object.get_configuration_space())
         if not os.access(object.wrapper_file, os.X_OK):
-            print(f"Wrapper {object.wrapper_file} is not executable!"
-                  f"Check that wrapper execution rights are set for all.")
+            print(
+                f"Wrapper {object.wrapper_file} is not executable!"
+                f"Check that wrapper execution rights are set for all."
+            )
             sys.exit(-1)
         if args.instance_path:  # Instance to test with
             object.runsolver_exec = settings.DEFAULT_runsolver_exec
             if not object.runsolver_exec.exists():
-                print(f"Runsolver {object.runsolver_exec} not found. "
-                      "Checking without Runsolver currently not supported.")
+                print(
+                    f"Runsolver {object.runsolver_exec} not found. "
+                    "Checking without Runsolver currently not supported."
+                )
             else:
                 # Test the wrapper with a dummy call
                 print(f"\nTesting Wrapper {object.wrapper} ...")
                 # Patchfix runsolver
                 objectives = settings.objectives if settings.objectives else []
-                cutoff =\
+                cutoff = (
                     settings.solver_cutoff_time if settings.solver_cutoff_time else 5
+                )
                 configuration = {}
                 if object.pcs_file:
                     print("\nSample Configuration:")
@@ -92,33 +100,40 @@ def main(argv: list[str]) -> None:
                     cutoff_time=cutoff,
                     configuration=configuration,
                     log_dir=sl.caller_log_dir,
-                    run_on=Runner.LOCAL)
+                    run_on=Runner.LOCAL,
+                )
                 print("Result:")
                 for obj in objectives:  # Check objectives
                     if obj.name not in result:
                         print(f"\tSolver output is missing objective {obj.name}")
                     else:
                         print(f"\t{obj.name}: {result[obj.name]}")
-                status_key = [key for key in result.keys()
-                              if key.startswith("status")][0]
+                status_key = [key for key in result.keys() if key.startswith("status")][
+                    0
+                ]
                 if result[status_key] == SolverStatus.UNKNOWN:
-                    print(f"Sparkle was unable to process {obj.name} output. "
-                          "Check that your wrapper is able to handle KILL SIGNALS. "
-                          "It is important to always communicate back to Sparkle "
-                          "on regular exit and termination signals for stability.")
+                    print(
+                        f"Sparkle was unable to process {obj.name} output. "
+                        "Check that your wrapper is able to handle KILL SIGNALS. "
+                        "It is important to always communicate back to Sparkle "
+                        "on regular exit and termination signals for stability."
+                    )
                     sys.exit(-1)
     elif isinstance(object, Extractor):
         if args.instance_path:  # Test on an instance
             # Patchfix runsolver
             object.runsolver_exec = settings.DEFAULT_runsolver_exec
             if not object.runsolver_exec.exists():
-                print(f"Runsolver {object.runsolver_exec} not found. "
-                      "Checking without Runsolver currently not supported.")
+                print(
+                    f"Runsolver {object.runsolver_exec} not found. "
+                    "Checking without Runsolver currently not supported."
+                )
             else:
                 print(f"\nTesting Wrapper {object.wrapper} ...")
                 # cutoff = args.cutoff_time if args.cutoff_time else 20  # Short call
-                result = object.run(instance=args.instance_path,
-                                    log_dir=sl.caller_log_dir)
+                result = object.run(
+                    instance=args.instance_path, log_dir=sl.caller_log_dir
+                )
                 # Print feature results
                 print("Feature values:")
                 for f_group, f_name, f_value in result:

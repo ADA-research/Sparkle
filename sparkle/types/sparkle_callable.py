@@ -1,4 +1,5 @@
 """Abstract class Sparkle Callable."""
+
 from __future__ import annotations
 from pathlib import Path
 
@@ -6,9 +7,9 @@ from pathlib import Path
 class SparkleCallable:
     """Sparkle Callable class."""
 
-    def __init__(self: SparkleCallable,
-                 directory: Path,
-                 runsolver_exec: Path = None) -> None:
+    def __init__(
+        self: SparkleCallable, directory: Path, runsolver_exec: Path = None
+    ) -> None:
         """Initialize callable.
 
         Args:

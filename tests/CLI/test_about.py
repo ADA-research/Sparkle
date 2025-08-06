@@ -1,4 +1,5 @@
 """Test the about CLI entry point."""
+
 import pytest
 from pathlib import Path
 
@@ -6,8 +7,7 @@ from sparkle.CLI import about
 
 
 @pytest.mark.integration
-def test_about_command(tmp_path: Path,
-                       monkeypatch: pytest.MonkeyPatch) -> None:
+def test_about_command(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test about command."""
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     # Smoke test

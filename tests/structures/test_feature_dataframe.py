@@ -1,4 +1,5 @@
 """Tests for feature dataframe class."""
+
 import math
 import pandas as pd
 import pytest
@@ -8,7 +9,7 @@ from sparkle.structures import FeatureDataFrame
 
 SAMPLE_EXTRACTOR_DATA = {
     "ExtractorA": [("Group1", "Feature1"), ("Group1", "Feature2")],
-    "ExtractorB": [("Group2", "Feature3")]
+    "ExtractorB": [("Group2", "Feature3")],
 }
 SAMPLE_INSTANCES = ["Instance_X", "Instance_Y"]
 
@@ -20,7 +21,7 @@ def feature_df(tmp_path: Path) -> FeatureDataFrame:
     feature_df = FeatureDataFrame(
         csv_filepath=csv_path,
         instances=SAMPLE_INSTANCES,
-        extractor_data=SAMPLE_EXTRACTOR_DATA
+        extractor_data=SAMPLE_EXTRACTOR_DATA,
     )
     return feature_df
 
@@ -32,7 +33,7 @@ def test_feature_dataframe_constructor(tmp_path: Path) -> None:
     feature_df_new = FeatureDataFrame(
         csv_filepath=csv_path,
         instances=SAMPLE_INSTANCES,
-        extractor_data=SAMPLE_EXTRACTOR_DATA
+        extractor_data=SAMPLE_EXTRACTOR_DATA,
     )
     assert feature_df_new.csv_filepath == csv_path
     assert feature_df_new.index.names == FeatureDataFrame.multi_dim_names
@@ -47,8 +48,10 @@ def test_feature_dataframe_constructor(tmp_path: Path) -> None:
     feature_df_new.save_csv()
 
     feature_df_loaded = FeatureDataFrame(csv_filepath=csv_path)
-    assert feature_df_loaded.get_value("Instance_X", "ExtractorA",
-                                       "Group1", "Feature1") == 123.45
+    assert (
+        feature_df_loaded.get_value("Instance_X", "ExtractorA", "Group1", "Feature1")
+        == 123.45
+    )
 
 
 def test_add_extractor(feature_df: FeatureDataFrame) -> None:
@@ -73,8 +76,7 @@ def test_add_instances(feature_df: FeatureDataFrame) -> None:
     assert "Instance_Z" in feature_df.instances
     assert feature_df["Instance_Z"].isnull().all()
 
-    feature_df.add_instances("Instance_W", values=[
-                             1.0] * feature_df.num_features)
+    feature_df.add_instances("Instance_W", values=[1.0] * feature_df.num_features)
     assert "Instance_W" in feature_df.instances
     assert (feature_df["Instance_W"] == 1.0).all()
 
@@ -126,7 +128,8 @@ def test_get_value(feature_df: FeatureDataFrame) -> None:
 def test_set_value(feature_df: FeatureDataFrame) -> None:
     """Test for method set_value."""
     initial_value = feature_df.get_value(
-        "Instance_Y", "ExtractorB", "Group2", "Feature3")
+        "Instance_Y", "ExtractorB", "Group2", "Feature3"
+    )
     assert math.isnan(initial_value)
 
     feature_df.set_value("Instance_Y", "ExtractorB", "Group2", "Feature3", -1.5)
@@ -142,14 +145,18 @@ def test_has_missing_vectors(feature_df: FeatureDataFrame) -> None:
 
     # SCENARIO 1: Atleast one missing value per instance for all extractors
     feature_df.loc[:, :] = 1.0
-    feature_df.set_value("Instance_X", "ExtractorA", "Group1",
-                         "Feature1", FeatureDataFrame.missing_value)
-    feature_df.set_value("Instance_X", "ExtractorB", "Group2",
-                         "Feature3", FeatureDataFrame.missing_value)
-    feature_df.set_value("Instance_Y", "ExtractorA", "Group1",
-                         "Feature1", FeatureDataFrame.missing_value)
-    feature_df.set_value("Instance_Y", "ExtractorB", "Group2",
-                         "Feature3", FeatureDataFrame.missing_value)
+    feature_df.set_value(
+        "Instance_X", "ExtractorA", "Group1", "Feature1", FeatureDataFrame.missing_value
+    )
+    feature_df.set_value(
+        "Instance_X", "ExtractorB", "Group2", "Feature3", FeatureDataFrame.missing_value
+    )
+    feature_df.set_value(
+        "Instance_Y", "ExtractorA", "Group1", "Feature1", FeatureDataFrame.missing_value
+    )
+    feature_df.set_value(
+        "Instance_Y", "ExtractorB", "Group2", "Feature3", FeatureDataFrame.missing_value
+    )
     assert feature_df.has_missing_vectors()
 
     # SCENARIO 2: One feature group is completely missing
@@ -253,7 +260,8 @@ def test_extractors(feature_df: FeatureDataFrame) -> None:
     assert sorted(feature_df.extractors) == sorted(["ExtractorA", "ExtractorB"])
     feature_df.add_extractor("New_Extractor", [("Group_New", "Feature_New")])
     assert sorted(feature_df.extractors) == sorted(
-        ["ExtractorA", "ExtractorB", "New_Extractor"])
+        ["ExtractorA", "ExtractorB", "New_Extractor"]
+    )
 
 
 def test_num_features(feature_df: FeatureDataFrame) -> None:
@@ -262,7 +270,8 @@ def test_num_features(feature_df: FeatureDataFrame) -> None:
     # Add an extractor with 3 new features
     feature_df.add_extractor(
         "ExtractorC",
-        [("Group3", "Feature4"), ("Group3", "Feature5"), ("Group3", "Feature6")])
+        [("Group3", "Feature4"), ("Group3", "Feature5"), ("Group3", "Feature6")],
+    )
     assert feature_df.num_features == 6
     # Remove an extractor that has 2 features ("ExtractorA")
     feature_df.remove_extractor("ExtractorA")
@@ -275,7 +284,8 @@ def features(feature_df: FeatureDataFrame) -> None:
     assert sorted(feature_df.features) == sorted(initial_features)
     # Add a new extractor with one new feature and one duplicate feature
     feature_df.add_extractor(
-        "ExtractorC", [("Group3", "Feature4"), ("Group1", "Feature1")])
+        "ExtractorC", [("Group3", "Feature4"), ("Group1", "Feature1")]
+    )
     expected_features = ["Feature1", "Feature2", "Feature3", "Feature4"]
     assert sorted(feature_df.features) == sorted(expected_features)
 

@@ -1,4 +1,5 @@
 """Tools for testing Sparkle CLI."""
+
 import os
 import json
 import subprocess
@@ -18,8 +19,10 @@ def kill_slurm_jobs(command_log_dir: Path = None) -> None:
             If not given, will detect the latest command and kill all its jobs.
     """
     if command_log_dir is None:
-        command_log_dir = sorted([p for p in (Path("Output") / "Log").iterdir()],
-                                 key=lambda p: os.stat(p).st_mtime)[-1]
+        command_log_dir = sorted(
+            [p for p in (Path("Output") / "Log").iterdir()],
+            key=lambda p: os.stat(p).st_mtime,
+        )[-1]
     jobs = jobs_help.get_runs_from_file(command_log_dir)
     for j in jobs:
         j.kill()
@@ -29,8 +32,9 @@ def get_cluster_name() -> str:
     """Get the cluster name."""
     global __cluster_name
     if __cluster_name is None:
-        output = subprocess.run(["sacctmgr", "show", "Cluster", "--json"],
-                                capture_output=True).stdout.decode()
+        output = subprocess.run(
+            ["sacctmgr", "show", "Cluster", "--json"], capture_output=True
+        ).stdout.decode()
         try:
             cluster_info = json.loads(output)
             __cluster_name = cluster_info["clusters"][0]["name"].lower()

@@ -1,4 +1,5 @@
 """Module to manage feature data files and common operations on them."""
+
 from __future__ import annotations
 import pandas as pd
 import math
@@ -7,14 +8,16 @@ from pathlib import Path
 
 class FeatureDataFrame(pd.DataFrame):
     """Class to manage feature data CSV files and common operations on them."""
+
     missing_value = math.nan
     multi_dim_names = ["FeatureGroup", "FeatureName", "Extractor"]
 
-    def __init__(self: FeatureDataFrame,
-                 csv_filepath: Path,
-                 instances: list[str] = [],
-                 extractor_data: dict[str, list[tuple[str, str]]] = {}
-                 ) -> None:
+    def __init__(
+        self: FeatureDataFrame,
+        csv_filepath: Path,
+        instances: list[str] = [],
+        extractor_data: dict[str, list[tuple[str, str]]] = {},
+    ) -> None:
         """Initialise a FeatureDataFrame object.
 
         Arguments:
@@ -27,8 +30,9 @@ class FeatureDataFrame(pd.DataFrame):
         # Initialize a dataframe from an existing file
         if csv_filepath.exists():
             # Read from file
-            temp_df = pd.read_csv(csv_filepath,
-                                  index_col=FeatureDataFrame.multi_dim_names)
+            temp_df = pd.read_csv(
+                csv_filepath, index_col=FeatureDataFrame.multi_dim_names
+            )
             super().__init__(temp_df)
             self.csv_filepath = csv_filepath
         # Create a new dataframe
@@ -42,19 +46,20 @@ class FeatureDataFrame(pd.DataFrame):
                     multi_index_lists[2].append(extractor)
             # Initialise new dataframe
             multi_index = pd.MultiIndex.from_arrays(
-                multi_index_lists,
-                names=self.multi_dim_names
+                multi_index_lists, names=self.multi_dim_names
             )
-            super().__init__(data=self.missing_value,
-                             index=multi_index,
-                             columns=instances)
+            super().__init__(
+                data=self.missing_value, index=multi_index, columns=instances
+            )
             self.csv_filepath = csv_filepath
             self.save_csv()
 
-    def add_extractor(self: FeatureDataFrame,
-                      extractor: str,
-                      extractor_features: list[tuple[str, str]],
-                      values: list[list[float]] = None) -> None:
+    def add_extractor(
+        self: FeatureDataFrame,
+        extractor: str,
+        extractor_features: list[tuple[str, str]],
+        values: list[list[float]] = None,
+    ) -> None:
         """Add an extractor and its feature names to the dataframe.
 
         Arguments:
@@ -70,26 +75,25 @@ class FeatureDataFrame(pd.DataFrame):
             feature_group, feature = pair
             self.loc[(feature_group, feature, extractor), :] = values[index]
 
-    def add_instances(self: FeatureDataFrame,
-                      instance: str | list[str],
-                      values: list[float] = None) -> None:
+    def add_instances(
+        self: FeatureDataFrame, instance: str | list[str], values: list[float] = None
+    ) -> None:
         """Add one or more instances to the dataframe."""
         if values is None:
             values = FeatureDataFrame.missing_value
         self[instance] = values
 
-    def remove_extractor(self: FeatureDataFrame,
-                         extractor: str) -> None:
+    def remove_extractor(self: FeatureDataFrame, extractor: str) -> None:
         """Remove an extractor from the dataframe."""
         self.drop(extractor, axis=0, level="Extractor", inplace=True)
 
-    def remove_instances(self: FeatureDataFrame,
-                         instances: str | list[str]) -> None:
+    def remove_instances(self: FeatureDataFrame, instances: str | list[str]) -> None:
         """Remove an instance from the dataframe."""
         self.drop(instances, axis=1, inplace=True)
 
-    def get_feature_groups(self: FeatureDataFrame,
-                           extractor: str | list[str] = None) -> list[str]:
+    def get_feature_groups(
+        self: FeatureDataFrame, extractor: str | list[str] = None
+    ) -> list[str]:
         """Retrieve the feature groups in the dataframe.
 
         Args:
@@ -106,20 +110,24 @@ class FeatureDataFrame(pd.DataFrame):
             indices = indices[indices.isin(extractor, level=2)]
         return indices.get_level_values(level=0).unique().to_list()
 
-    def get_value(self: FeatureDataFrame,
-                  instance: str,
-                  extractor: str,
-                  feature_group: str,
-                  feature_name: str) -> None:
+    def get_value(
+        self: FeatureDataFrame,
+        instance: str,
+        extractor: str,
+        feature_group: str,
+        feature_name: str,
+    ) -> None:
         """Return a value in the dataframe."""
         return self.loc[(feature_group, feature_name, extractor), instance]
 
-    def set_value(self: FeatureDataFrame,
-                  instance: str,
-                  extractor: str,
-                  feature_group: str,
-                  feature_name: str,
-                  value: float) -> None:
+    def set_value(
+        self: FeatureDataFrame,
+        instance: str,
+        extractor: str,
+        feature_group: str,
+        feature_name: str,
+        value: float,
+    ) -> None:
         """Set a value in the dataframe."""
         self.loc[(feature_group, feature_name, extractor), instance] = value
 
@@ -127,8 +135,7 @@ class FeatureDataFrame(pd.DataFrame):
         """Returns True if there are any Extractors still to be run on any instance."""
         for instance in self.columns:
             for extractor in self.extractors:
-                extractor_features = self.xs(extractor, level=2,
-                                             drop_level=False)
+                extractor_features = self.xs(extractor, level=2, drop_level=False)
                 if extractor_features.loc[:, instance].isnull().all():
                     return True
         return False
