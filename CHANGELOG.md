@@ -10,9 +10,10 @@ Notable changes to Sparkle will be documented in this file.
 ### Changed
 - Changed the CLI arguments and settings structures to be more streamlined and unified [SPRK-175]
 - Refactored usage of run portfolio selector and marginal contribution computation [SPRK-177]
-- Timestamps are now saved in the directory name of the configuration scenario. [Issue-#169]
+- Timestamps are now saved in the directory name of the configuration scenario [Issue-#169]
 - Refactored compute_features to be part of the extractor as CLI script
 - RunSolver executable is now copied to feature extractors dirs instead, paths now directly linked similar to Solvers
+- Changed flake8 to ruff [Issue#184]
 
 ### Fixed
 
