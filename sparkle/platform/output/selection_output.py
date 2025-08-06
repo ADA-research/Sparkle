@@ -7,7 +7,10 @@ from pathlib import Path
 
 from sparkle.selector import SelectionScenario
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from sparkle.platform.output.structures import SelectionPerformance, SelectionSolverData
+from sparkle.platform.output.structures import (
+    SelectionPerformance,
+    SelectionSolverData,
+)
 
 
 def compute_selector_marginal_contribution(

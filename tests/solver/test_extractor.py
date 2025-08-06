@@ -145,8 +145,7 @@ def test_groupwise_computation(extractor: Extractor, value: bool) -> None:
     fc_groupwise_computation = extractor.groupwise_computation
 
     assert isinstance(fc_groupwise_computation, bool), (
-        f"Groupwise computation should be bool, "
-        f"but got: {type(fc_groupwise_computation)}"
+        f"Groupwise computation should be bool, but got: {type(fc_groupwise_computation)}"
     )
 
     assert fc_groupwise_computation == value, (

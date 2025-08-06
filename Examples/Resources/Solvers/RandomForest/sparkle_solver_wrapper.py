@@ -208,7 +208,11 @@ class RandomForest:
         instance = int(instance)
         dataset = self.dataset
         x_train, x_test, y_train, y_test = train_test_split(
-            dataset.data, dataset.target, test_size=0.2, shuffle=True, random_state=seed
+            dataset.data,
+            dataset.target,
+            test_size=0.2,
+            shuffle=True,
+            random_state=seed,
         )
 
         if instance == -1:

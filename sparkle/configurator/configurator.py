@@ -91,8 +91,7 @@ class Configurator:
         """
         if not self.check_requirements(verbose=True):
             raise RuntimeError(
-                f"{self.name} is not installed. Please install {self.name} "
-                "and try again."
+                f"{self.name} is not installed. Please install {self.name} and try again."
             )
         # Add the configuration IDs to the dataframe with empty configurations
         data_target.add_configuration(

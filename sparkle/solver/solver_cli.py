@@ -33,7 +33,10 @@ if __name__ == "__main__":
         help="path to instance to run on",
     )
     parser.add_argument(
-        "--run-index", required=True, type=int, help="run index in the dataframe to set."
+        "--run-index",
+        required=True,
+        type=int,
+        help="run index in the dataframe to set.",
     )
     parser.add_argument(
         "--log-dir", type=Path, required=True, help="path to the log directory"
@@ -47,7 +50,10 @@ if __name__ == "__main__":
         help="configuration id to read from the PerformanceDataFrame.",
     )
     parser.add_argument(
-        "--configuration", type=dict, required=False, help="configuration for the solver"
+        "--configuration",
+        type=dict,
+        required=False,
+        help="configuration for the solver",
     )
 
     parser.add_argument(
@@ -58,7 +64,10 @@ if __name__ == "__main__":
         "the PerformanceDataFrame or generate one.",
     )
     parser.add_argument(
-        "--cutoff-time", type=int, required=False, help="the cutoff time for the solver."
+        "--cutoff-time",
+        type=int,
+        required=False,
+        help="the cutoff time for the solver.",
     )
     parser.add_argument(
         "--target-objective",
@@ -168,7 +177,10 @@ if __name__ == "__main__":
         [solver_output[objective.name] for objective in objectives],
         [seed] * len(objectives),
     ]
-    solver_fields = [PerformanceDataFrame.column_value, PerformanceDataFrame.column_seed]
+    solver_fields = [
+        PerformanceDataFrame.column_value,
+        PerformanceDataFrame.column_seed,
+    ]
     objective_values = [
         f"{objective.name}: {solver_output[objective.name]}" for objective in objectives
     ]

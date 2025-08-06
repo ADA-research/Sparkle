@@ -9,7 +9,12 @@ from sparkle.configurator.implementations.smac3 import SMAC3, SMAC3Scenario
 
 def resolve_configurator(configurator_name: str) -> Configurator:
     """Returns the Configurator subclass by name."""
-    subclass_names = [IRACE.__name__, ParamILS.__name__, SMAC2.__name__, SMAC3.__name__]
+    subclass_names = [
+        IRACE.__name__,
+        ParamILS.__name__,
+        SMAC2.__name__,
+        SMAC3.__name__,
+    ]
     if configurator_name in subclass_names:
         return eval(configurator_name)
     return None

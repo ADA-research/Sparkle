@@ -38,7 +38,9 @@ def parser_function() -> argparse.ArgumentParser:
 
 
 def compute_features(
-    feature_data: Path | FeatureDataFrame, recompute: bool, run_on: Runner = Runner.SLURM
+    feature_data: Path | FeatureDataFrame,
+    recompute: bool,
+    run_on: Runner = Runner.SLURM,
 ) -> list[Run]:
     """Compute features for all instance and feature extractor combinations.
 

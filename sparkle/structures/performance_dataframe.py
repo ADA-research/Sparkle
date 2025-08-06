@@ -532,7 +532,10 @@ class PerformanceDataFrame(pd.DataFrame):
         if len(self.objectives) < 2:
             raise Exception("Cannot remove last objective from PerformanceDataFrame")
         self.drop(
-            objectives, axis=0, level=PerformanceDataFrame.index_objective, inplace=True
+            objectives,
+            axis=0,
+            level=PerformanceDataFrame.index_objective,
+            inplace=True,
         )
 
     def remove_instances(self: PerformanceDataFrame, instances: str | list[str]) -> None:

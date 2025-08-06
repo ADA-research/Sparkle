@@ -71,7 +71,9 @@ class ParallelPortfolioOutput:
         )
 
     def get_solver_solutions(
-        self: ParallelPortfolioOutput, solver_list: list[str], csv_data: list[list[str]]
+        self: ParallelPortfolioOutput,
+        solver_list: list[str],
+        csv_data: list[list[str]],
     ) -> dict:
         """Return dictionary with solution count for each solver."""
         # Default initalisation, increase solution counter for each successful evaluation

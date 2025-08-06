@@ -146,16 +146,32 @@ def test_has_missing_vectors(feature_df: FeatureDataFrame) -> None:
     # SCENARIO 1: Atleast one missing value per instance for all extractors
     feature_df.dataframe.loc[:, :] = 1.0
     feature_df.set_value(
-        "Instance_X", "ExtractorA", "Group1", "Feature1", FeatureDataFrame.missing_value
+        "Instance_X",
+        "ExtractorA",
+        "Group1",
+        "Feature1",
+        FeatureDataFrame.missing_value,
     )
     feature_df.set_value(
-        "Instance_X", "ExtractorB", "Group2", "Feature3", FeatureDataFrame.missing_value
+        "Instance_X",
+        "ExtractorB",
+        "Group2",
+        "Feature3",
+        FeatureDataFrame.missing_value,
     )
     feature_df.set_value(
-        "Instance_Y", "ExtractorA", "Group1", "Feature1", FeatureDataFrame.missing_value
+        "Instance_Y",
+        "ExtractorA",
+        "Group1",
+        "Feature1",
+        FeatureDataFrame.missing_value,
     )
     feature_df.set_value(
-        "Instance_Y", "ExtractorB", "Group2", "Feature3", FeatureDataFrame.missing_value
+        "Instance_Y",
+        "ExtractorB",
+        "Group2",
+        "Feature3",
+        FeatureDataFrame.missing_value,
     )
     assert feature_df.has_missing_vectors()
 

@@ -134,7 +134,8 @@ def main(argv: list[str]) -> None:
     runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
 
     performance_data = PerformanceDataFrame(
-        gv.settings().DEFAULT_performance_data_path, objectives=gv.settings().objectives
+        gv.settings().DEFAULT_performance_data_path,
+        objectives=gv.settings().objectives,
     )
     performance_data.add_solver(str(solver_directory))
     performance_data.save_csv()

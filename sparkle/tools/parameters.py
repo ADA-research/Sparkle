@@ -544,7 +544,10 @@ class PCSConverter:
                             domain = list(
                                 np.unique(
                                     np.geomspace(
-                                        lower, parameter.upper, granularity, dtype=dtype
+                                        lower,
+                                        parameter.upper,
+                                        granularity,
+                                        dtype=dtype,
                                     )
                                 )
                             )
@@ -661,7 +664,8 @@ class PCSConverter:
                             format(parameter.upper, ".16f").strip("0"),
                         )
                         param_digits = max(
-                            len(str(lower).split(".")[1]), len(str(upper).split(".")[1])
+                            len(str(lower).split(".")[1]),
+                            len(str(upper).split(".")[1]),
                         )
                         # Check if we need to update the global digits
                         if param_digits > digits:

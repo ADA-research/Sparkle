@@ -531,7 +531,12 @@ class Settings:
         SECTION_paramils,
         int,
         None,
-        ("iteration_limit", "numIterations", "numberOfIterations", "maximum_iterations"),
+        (
+            "iteration_limit",
+            "numIterations",
+            "numberOfIterations",
+            "maximum_iterations",
+        ),
         "The maximum number of ParamILS iterations per run/job.",
     )
     OPTION_paramils_number_initial_configurations = Option(
@@ -756,7 +761,9 @@ class Settings:
                 if option_name not in self.sections_options[section]:
                     if section == Settings.SECTION_slurm:  # Flexible section
                         self.__settings.set(
-                            section, option_name, file_settings.get(section, option_name)
+                            section,
+                            option_name,
+                            file_settings.get(section, option_name),
                         )
                     else:
                         print(
@@ -889,7 +896,8 @@ class Settings:
             ):
                 self.__verbosity_level = VerbosityLevel[
                     self.__settings.get(
-                        Settings.OPTION_verbosity.section, Settings.OPTION_verbosity.name
+                        Settings.OPTION_verbosity.section,
+                        Settings.OPTION_verbosity.name,
                     )
                 ]
             else:

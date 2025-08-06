@@ -48,6 +48,5 @@ if __name__ == "__main__":
         if not objective.minimise:
             quality = -1 * quality
     print(
-        "Result for SMAC: "
-        f"{output['status']}, {output['cpu_time']}, 0, {quality}, {seed}"
+        f"Result for SMAC: {output['status']}, {output['cpu_time']}, 0, {quality}, {seed}"
     )

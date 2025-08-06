@@ -400,7 +400,8 @@ SnapshotNameArgument = ArgumentContainer(
 )
 
 SolverArgument = ArgumentContainer(
-    names=["--solver"], kwargs={"required": True, "type": Path, "help": "path to solver"}
+    names=["--solver"],
+    kwargs={"required": True, "type": Path, "help": "path to solver"},
 )
 
 SolversArgument = ArgumentContainer(

@@ -62,6 +62,7 @@ lint.ignore = [
     "PTH207", # Replace `glob` with `Path.glob` or `Path.rglob`
     "PTH208", # Use `pathlib.Path.iterdir()` instead.
     "ANN401", # Dynamically typed expressions (typing.Any) are disallowed in `initial_values`
+    "E501",   # Line too long ({width} > {limit})
 ]
 
 

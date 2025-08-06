@@ -145,7 +145,9 @@ def main(argv: list[str]) -> None:
     print("Submiting ablation run...")
     run_on = settings.run_on
     runs = ablation_scenario.submit_ablation(
-        log_dir=sl.caller_log_dir, sbatch_options=settings.sbatch_settings, run_on=run_on
+        log_dir=sl.caller_log_dir,
+        sbatch_options=settings.sbatch_settings,
+        run_on=run_on,
     )
 
     if run_on == Runner.LOCAL:

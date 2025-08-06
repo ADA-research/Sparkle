@@ -113,7 +113,9 @@ def main(argv: list[str]) -> None:
 
     print("========Sparkle System Status========\n")
     print_objects_list(
-        [s for s in gv.settings().DEFAULT_solver_dir.iterdir()], "Solver", args.verbosity
+        [s for s in gv.settings().DEFAULT_solver_dir.iterdir()],
+        "Solver",
+        args.verbosity,
     )
     if args.verbosity:
         print()

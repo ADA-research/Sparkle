@@ -10,8 +10,7 @@ def test_paramils_organise_output(
 ) -> None:
     """Test IRACE organise output method."""
     output_file = Path(
-        "tests/test_files/Configuration/results/"
-        "PbO-CCSAT-Generic_PTN_seed_2_paramils.txt"
+        "tests/test_files/Configuration/results/PbO-CCSAT-Generic_PTN_seed_2_paramils.txt"
     )
     scenario_file = Path("tests/test_files/Configuration/test_paramils_scenario.txt")
     scenario = ParamILSScenario.from_file(scenario_file)

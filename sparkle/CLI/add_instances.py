@@ -80,7 +80,8 @@ def main(argv: list[str]) -> None:
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
     # When adding instances, an empty performance DF has no objectives yet
     performance_data = PerformanceDataFrame(
-        gv.settings().DEFAULT_performance_data_path, objectives=gv.settings().objectives
+        gv.settings().DEFAULT_performance_data_path,
+        objectives=gv.settings().objectives,
     )
     for instance_name in new_instance_set.instance_names:
         # Construct a name path due to multi-file instances
