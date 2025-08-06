@@ -76,8 +76,8 @@ def test_construct(
     assert scenario.feature_target_path.is_file()
     selector_feature_data = pd.read_csv(scenario.feature_target_path, index_col=0)
     # Feature data got transposed
-    assert selector_feature_data.shape[0] == feature_data.dataframe.shape[1]
-    assert selector_feature_data.shape[1] == feature_data.dataframe.shape[0]
+    assert selector_feature_data.shape[0] == feature_data.shape[1]
+    assert selector_feature_data.shape[1] == feature_data.shape[0]
 
     _, kwargs = mock_add_to_queue.call_args
     assert kwargs["runner"] == run_on
