@@ -78,13 +78,13 @@ class SMAC3(Configurator):
         Returns:
             A RunRunner Run object.
         """
+        scenario.create_scenario()
         if (
             scenario.smac3_scenario.walltime_limit
             == scenario.smac3_scenario.cputime_limit
             == np.inf
         ):
             print("WARNING: Starting SMAC3 scenario without any time limit.")
-        scenario.create_scenario()
         configuration_ids = scenario.configuration_ids
         # TODO: Setting seeds like this is weird and should be inspected.
         # It could be good to take perhaps a seed from the scenario and use that

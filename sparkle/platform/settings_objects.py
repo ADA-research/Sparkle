@@ -157,7 +157,7 @@ class Settings:
     OPTION_configurator = Option(
         "configurator",
         SECTION_general,
-        Configurator,
+        str,
         None,
         tuple(),
         "Name of the configurator to use.",
@@ -854,6 +854,12 @@ class Settings:
         if self.__general_sparkle_configurator is None and self.__settings.has_option(
             Settings.OPTION_configurator.section, Settings.OPTION_configurator.name
         ):
+            print(
+                self.__settings.get(
+                    Settings.OPTION_configurator.section,
+                    Settings.OPTION_configurator.name,
+                )
+            )
             self.__general_sparkle_configurator = cim.resolve_configurator(
                 self.__settings.get(
                     Settings.OPTION_configurator.section,
