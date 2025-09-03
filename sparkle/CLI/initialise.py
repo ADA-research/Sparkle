@@ -222,6 +222,8 @@ def initialise_sparkle(
         tar.wait()  # Wait for the extraction to complete
         outpath.unlink(missing_ok=True)
 
+    # Remove latest.ini to reset seed
+    Settings.DEFAULT_previous_settings_path.unlink(missing_ok=True)
     print("New Sparkle platform initialised!")
 
 
@@ -238,6 +240,7 @@ def main(argv: list[str]) -> None:
         rebuild_runsolver=args.rebuild_runsolver,
     )
     sys.exit(0)
+    # TODO remove latest.ini
 
 
 if __name__ == "__main__":

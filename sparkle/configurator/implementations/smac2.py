@@ -5,6 +5,7 @@ from pathlib import Path
 import glob
 import shutil
 import math
+import random
 
 import pandas as pd
 
@@ -108,10 +109,8 @@ class SMAC2(Configurator):
         """
         scenario.create_scenario()
         configuration_ids = scenario.configuration_ids
-        # TODO: Setting seeds like this is weird and should be inspected.
-        # It could be good to take perhaps a seed from the scenario and use that
-        # to generate a seed per run
-        seeds = [i for i in range(scenario.number_of_runs)]
+
+        seeds = [random.randint(0, 2**32 - 1) for _ in range(scenario.number_of_runs)]
         output = [
             f"{(scenario.results_directory).absolute()}/"
             f"{scenario.name}_{config_id}_smac.txt"

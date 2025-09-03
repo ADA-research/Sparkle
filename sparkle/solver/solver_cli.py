@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--seed",
-        type=str,
+        type=int,
         required=False,
         help="seed to use for the solver. If not provided, read from "
         "the PerformanceDataFrame or generate one.",
@@ -107,7 +107,10 @@ if __name__ == "__main__":
 
     solver = Solver(args.solver)
 
-    if args.configuration_id or args.best_configuration_instances:  # Read
+    if args.configuration:
+        configuration = args.configuration
+        config_id = configuration["config_id"]
+    elif args.configuration_id or args.best_configuration_instances:  # Read
         # Desyncronize from other possible jobs writing to the same file
         time.sleep(random.random() * 10)
         lock = FileLock(f"{args.performance_dataframe}.lock")  # Lock the file
@@ -132,31 +135,14 @@ if __name__ == "__main__":
             configuration = performance_dataframe.get_full_configuration(
                 str(args.solver), config_id
             )
-            # Read the seed from the dataframe
-            seed = performance_dataframe.get_value(
-                str(args.solver),
-                instance_name,
-                objective=target_objective.name,
-                run=run_index,
-                solver_fields=[PerformanceDataFrame.column_seed],
-            )
+
         elif args.configuration_id:  # Read from DF the ID
             config_id = args.configuration_id
             configuration = performance_dataframe.get_full_configuration(
                 str(args.solver), config_id
             )
-            seed = performance_dataframe.get_value(
-                str(args.solver),
-                instance_name,
-                objective=None,
-                run=run_index,
-                solver_fields=[PerformanceDataFrame.column_seed],
-            )
-        else:  # Direct config given
-            configuration = args.configuration
-            config_id = configuration["config_id"]
 
-        seed = args.seed or seed
+        seed = args.seed
         # If no seed is provided and no seed can be read, generate one
         if not isinstance(seed, int):
             seed = random.randint(0, 2**32 - 1)

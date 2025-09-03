@@ -3,6 +3,8 @@
 import pytest
 from pathlib import Path
 import argparse
+import random
+from sparkle.CLI.help import global_variables as gv
 
 from sparkle.platform.settings_objects import Settings, Option
 
@@ -46,6 +48,7 @@ def test_read_from_file() -> None:
     assert settings.extractor_cutoff_time == 60
     assert settings.run_on == "slurm"
     assert settings.verbosity_level.name == "STANDARD"
+    assert settings.seed == 0
 
     # Configurator
     assert settings.configurator.name == "SMAC2"
@@ -147,6 +150,7 @@ def test_read_empty_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
     assert settings.irace_max_experiments == 0
     assert settings.smac3_facade == "AlgorithmConfigurationFacade"
     assert settings.verbosity_level.name == "STANDARD"
+    assert settings.seed == 0
 
     # Check that writing settings read from an empty file produces an empty file
     tmp = Path("tmp.ini")
@@ -172,6 +176,7 @@ def test_read_full_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None
     assert settings.extractor_cutoff_time == 60
     assert settings.run_on == "slurm"
     assert settings.verbosity_level.name == "QUIET"
+    assert settings.seed == 1
 
     # Configurator
     assert settings.configurator.name == "SMAC3"
@@ -264,6 +269,7 @@ def test_read_with_cli_file() -> None:
     assert settings.extractor_cutoff_time == 60
     assert settings.run_on == "slurm"
     assert settings.verbosity_level.name == "QUIET"
+    assert settings.seed == 0
 
     # Configurator
     assert settings.configurator.name == "SMAC2"  # Override
@@ -336,3 +342,30 @@ def test_read_with_cli_file() -> None:
     assert set(settings.sbatch_settings) == set(
         ["--mem-per-cpu=3000", "--time=30:00", "--qos=short", "--partition=CPU"]
     )
+
+
+def test_set_random_state() -> None:
+    """Test the global random state."""
+    Settings.DEFAULT_settings_path = Path("tests/test_files/Settings/settings-full.ini")
+    Settings.DEFAULT_previous_settings_path = Path(
+        "tests/test_files/Settings/latest.ini"
+    )
+    Settings.DEFAULT_previous_settings_path.unlink(missing_ok=True)
+    assert Settings(Settings.DEFAULT_settings_path).seed == 1
+
+    rng = random.Random(1)
+    next_seed = rng.randint(1, 2**32 - 1)
+    assert gv.settings().seed == next_seed
+    gv.settings().write_used_settings()
+    latest_ini = Settings(Settings.DEFAULT_previous_settings_path)
+    assert latest_ini.seed == next_seed
+    assert rng.randint(1, 2**32 - 1) == random.randint(1, 2**32 - 1)
+
+    gv.is_seed_set = False
+    rng = random.Random(next_seed)
+    next_seed = rng.randint(1, 2**32 - 1)
+    assert gv.settings().seed == next_seed
+    gv.settings().write_used_settings()
+    latest_ini = Settings(Settings.DEFAULT_previous_settings_path)
+    assert latest_ini.seed == next_seed
+    assert rng.randint(1, 2**32 - 1) == random.randint(1, 2**32 - 1)

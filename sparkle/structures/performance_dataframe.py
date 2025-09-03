@@ -758,8 +758,8 @@ class PerformanceDataFrame(pd.DataFrame):
                     isinstance(value, (int, float)) and math.isnan(value)
                 ):
                     result.append(tuple([solver, config, instance, run]))
-        # Filter duplicates
-        result = list(set(result))
+        # Filter duplicates while keeping the order conistent
+        result = list(dict.fromkeys(result))
         return result
 
     def configuration_performance(

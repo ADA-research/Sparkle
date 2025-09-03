@@ -3,6 +3,8 @@
 
 import ast
 from argparse import Namespace
+import random
+import numpy as np
 
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame
@@ -16,13 +18,8 @@ from sparkle.configurator.implementations import (
 from sparkle.selector import SelectionScenario
 
 
-# TODO: Handle different seed requirements; for the moment this is a dummy function
-def get_seed() -> int:
-    """Return a seed."""
-    return 1
-
-
 __settings: Settings = None
+is_seed_set = False
 
 
 def settings(argsv: Namespace = None) -> Settings:
@@ -32,6 +29,19 @@ def settings(argsv: Namespace = None) -> Settings:
         __settings = Settings(Settings.DEFAULT_settings_path, argsv=argsv)
     elif argsv is not None:
         __settings.apply_arguments(argsv)
+
+    global is_seed_set
+    if not is_seed_set:
+        # Set global random state
+        latest_ini = Settings(Settings.DEFAULT_previous_settings_path)
+        seed = __settings.seed if latest_ini.seed == 0 else latest_ini.seed
+        np.random.seed(seed)
+        random.seed(seed)
+        # Next seed will be saved in latest.ini when the cli script calls 'write_used_settings()'
+        next_seed = random.randint(1, 2**32 - 1)
+        __settings.seed = next_seed
+        is_seed_set = True
+
     return __settings
 
 

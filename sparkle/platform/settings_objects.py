@@ -195,6 +195,9 @@ class Settings:
         ("verbosity_level",),
         "Verbosity level.",
     )
+    OPTION_seed = Option(
+        "seed", SECTION_general, int, 0, tuple(), "Random seed for reproducibility."
+    )
 
     # CONFIGURATION Options
     SECTION_configuration = "configuration"
@@ -591,6 +594,7 @@ class Settings:
             OPTION_extractor_cutoff_time,
             OPTION_run_on,
             OPTION_verbosity,
+            OPTION_seed,
         ],
         SECTION_configuration: [
             OPTION_configurator_number_of_runs,
@@ -669,6 +673,7 @@ class Settings:
         self.__extractor_cutoff_time: int = None
         self.__run_on: Runner = None
         self.__verbosity_level: VerbosityLevel = None
+        self.__seed: int = None
 
         # Configuration attributes
         self.__configurator_solver_call_budget: int = None
@@ -903,6 +908,29 @@ class Settings:
             else:
                 self.__verbosity_level = Settings.OPTION_verbosity.default_value
         return self.__verbosity_level
+
+    @property
+    def seed(self: Settings) -> int:
+        """Seed to use in CLI commands."""
+        if self.__seed is None:
+            if self.__settings.has_option(
+                Settings.OPTION_seed.section, Settings.OPTION_seed.name
+            ):
+                self.__seed = self.__settings.get(
+                    Settings.OPTION_seed.section, Settings.OPTION_seed.name
+                )
+
+            else:
+                self.__seed = Settings.OPTION_seed.default_value
+        return int(self.__seed)
+
+    @seed.setter
+    def seed(self: Settings, value: int) -> None:
+        """Set the seed value (overwrites settings)."""
+        self.__seed = value
+        self.__settings.set(
+            Settings.OPTION_seed.section, Settings.OPTION_seed.name, str(self.__seed)
+        )
 
     # Configuration settings ###
     @property
