@@ -34,12 +34,11 @@ from sparkle.platform.output.selection_output import SelectionOutput
 
 
 MAX_DEC = 4  # Maximum decimals used for each reported value
-MAX_COLS_PER_TABLE_PDF = 3  # when a DF is wider, split it
-MAX_COLS_PER_TABLE_FDF = 6
-WIDE_TABLE_THRESHOLD_PDF = 5  # columns above which we switch to landscape
-WIDE_TABLE_THRESHOLD_FDF = 5
+MAX_COLS_PER_TABLE = 2  # number of value columns extra to number of key columns
+WIDE_TABLE_THRESHOLD = 4  # columns above which we switch to landscape
 NUM_KEYS_PDF = 3
 NUM_KEYS_FDF = 3
+MAX_CELL_LEN = 15
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -693,49 +692,56 @@ def generate_parallel_portfolio_section(
         figure.append(pl.UnsafeCommand(r"label{fig:portfoliovssbs}"))
 
 
-def round_floats(df: pd.DataFrame, digits: int = MAX_DEC) -> pd.DataFrame:
-    """Round only the float columns of df in-place and return it."""
-    num_cols = df.select_dtypes(include=["float64"]).columns
-
-    for col in num_cols:
-
-        def round_cell(x: float) -> Union[int, float]:
-            if x.is_integer():
-                return int(x)
-            s = str(x).rstrip("0").rstrip(".")
-            if "." in s and len(s.split(".")[1]) > digits:
-                return round(x, digits)
-            return x
-
-        df[col] = df[col].apply(round_cell)
-    return df
-
-
-def melt_feature_df(feat_df: pd.DataFrame) -> pd.DataFrame:
-    """Convert the wide feature matrix into a tall 5-column dataframe."""
-    id_cols = ["FeatureGroup", "FeatureName", "Extractor"]
-    df = feat_df.copy()
-
-    # make sure the id‑columns exist as real columns
-    if not set(id_cols).issubset(df.columns):
-        df = df.reset_index()
-
-    # sanity check – helpful error if something is still off
-    missing = [c for c in id_cols if c not in df.columns]
-    if missing:  # corrupted CSV / unexpected schema
-        raise ValueError(f"Missing expected column(s): {missing}")
-
-    long = (
-        df.melt(
-            id_vars=id_cols,  # keep the three meta keys fixed
-            var_name="Instance",  # former wide header
-            value_name="Value",
-        )  # the numeric feature value
-        .sort_values(id_cols + ["Instance"])  # nice, deterministic order
-        .reset_index(drop=True)
+def latex_escape_text(s: str) -> str:
+    """Escape special LaTeX characters in a string."""
+    # escape text, but we'll insert our own LaTeX macro around it
+    return (
+        s.replace("\\", r"\textbackslash{}")
+        .replace("&", r"\&")
+        .replace("%", r"\%")
+        .replace("$", r"\$")
+        .replace("#", r"\#")
+        .replace("_", r"\_")
+        .replace("{", r"\{")
+        .replace("}", r"\}")
+        .replace("~", r"\textasciitilde{}")
+        .replace("^", r"\textasciicircum{}")
     )
 
-    return long[id_cols + ["Instance", "Value"]]
+
+def wrap_fixed_shortstack(s: str, width: int = MAX_CELL_LEN) -> str:
+    """Wrap long text to a fixed width for LaTeX tables."""
+    t = str(s)
+    if len(t) <= width:
+        return latex_escape_text(t)
+    chunks = [latex_escape_text(t[i : i + width]) for i in range(0, len(t), width)]
+    # left-aligned shortstack; forces line breaks and grows row height
+    return r"\shortstack[l]{" + r"\\ ".join(chunks) + "}"
+
+
+def wrap_header_labels(df: pd.DataFrame, width: int = MAX_CELL_LEN) -> pd.DataFrame:
+    """Wrap long header labels to a fixed width for LaTeX tables."""
+    df2 = df.copy()
+    if isinstance(df2.columns, pd.MultiIndex):
+        new = []
+        for tup in df2.columns:
+            new.append(
+                tuple(
+                    wrap_fixed_shortstack(x, width) if isinstance(x, str) else x
+                    for x in tup
+                )
+            )
+        names = [
+            (wrap_fixed_shortstack(n, width) if isinstance(n, str) else n)
+            for n in (df2.columns.names or [])
+        ]
+        df2.columns = pd.MultiIndex.from_tuples(new, names=names)
+    else:
+        df2.columns = [
+            wrap_fixed_shortstack(c, width) if isinstance(c, str) else c
+            for c in df2.columns
+        ]
+    return df2
 
 
 def format_cell(x: Union[int, float, str]) -> str:
@@ -743,7 +749,7 @@ def format_cell(x: Union[int, float, str]) -> str:
     try:
         f = float(x)
     except (TypeError, ValueError):
-        return str(x)
+        return wrap_fixed_shortstack(str(x), MAX_CELL_LEN)
 
     if not math.isfinite(f):
         return "NaN"
@@ -767,8 +773,8 @@ def append_dataframe_longtable(
     df: pd.DataFrame,
     caption: str,
     label: str,
-    max_cols: int = MAX_COLS_PER_TABLE_PDF,
-    wide_threshold: int = MAX_COLS_PER_TABLE_PDF,
+    max_cols: int = MAX_COLS_PER_TABLE,
+    wide_threshold: int = MAX_COLS_PER_TABLE,
     num_keys: int = NUM_KEYS_PDF,
 ) -> None:
     """Appends a pandas DataFrame to a PyLaTeX document as one or more LaTeX longtables.
@@ -811,19 +817,21 @@ def append_dataframe_longtable(
         if (full_part.shape[1]) <= max_cols:
             break
 
-        # tell pandas how to print numbers
-        formatters = {col: format_cell for col in full_part.columns}
+        full_part_wrapped = wrap_header_labels(full_part, MAX_CELL_LEN)
 
-        tex = full_part.to_latex(
+        # tell pandas how to print numbers
+        formatters = {col: format_cell for col in full_part_wrapped.columns}
+
+        tex = full_part_wrapped.to_latex(
             longtable=True,
             index=False,
-            escape=True,
+            escape=False,
             caption=caption + (f" (part {i + 1})" if n_chunks > 1 else ""),
             label=label + f"-p{i + 1}" if n_chunks > 1 else label,
             float_format=None,
             multicolumn=True,
             multirow=True,
-            column_format="c" * full_part.shape[1],
+            column_format="c" * full_part_wrapped.shape[1],
             formatters=formatters,
         )
 
@@ -831,7 +839,7 @@ def append_dataframe_longtable(
         centred_tex = "\\begin{center}\n" + tex + "\\end{center}\n"
 
         # rotate if still too wide
-        if full_part.shape[1] > wide_threshold:
+        if full_part_wrapped.shape[1] > wide_threshold:
             report.append(NoEscape(r"\begin{landscape}"))
             report.append(NoEscape(centred_tex))
             report.append(NoEscape(r"\end{landscape}"))
@@ -871,18 +879,18 @@ def generate_appendix(
         performance_data,
         caption="Performance Data Frame",
         label="tab:perf_data",
-        max_cols=MAX_COLS_PER_TABLE_PDF,
-        wide_threshold=WIDE_TABLE_THRESHOLD_PDF,
+        max_cols=MAX_COLS_PER_TABLE,
+        wide_threshold=WIDE_TABLE_THRESHOLD,
         num_keys=NUM_KEYS_PDF,
     )
 
     append_dataframe_longtable(
         report,
-        feature_data.dataframe,
+        feature_data,
         caption="Feature Data Frame",
         label="tab:feature_data",
-        max_cols=MAX_COLS_PER_TABLE_FDF,
-        wide_threshold=WIDE_TABLE_THRESHOLD_FDF,
+        max_cols=MAX_COLS_PER_TABLE,
+        wide_threshold=WIDE_TABLE_THRESHOLD,
         num_keys=NUM_KEYS_FDF,
     )
 
