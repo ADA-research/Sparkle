@@ -7,7 +7,11 @@ import argparse
 from pathlib import Path
 import time
 import json
+import math
+import pandas as pd
+from typing import Union
 
+from pylatex import NoEscape, NewPage
 import pylatex as pl
 from sparkle import __version__ as __sparkle_version__
 
@@ -30,6 +34,12 @@ from sparkle.platform.output.selection_output import SelectionOutput
 
 
 MAX_DEC = 4  # Maximum decimals used for each reported value
+MAX_COLS_PER_TABLE_PDF = 3  # when a DF is wider, split it
+MAX_COLS_PER_TABLE_FDF = 6
+WIDE_TABLE_THRESHOLD_PDF = 5  # columns above which we switch to landscape
+WIDE_TABLE_THRESHOLD_FDF = 5
+NUM_KEYS_PDF = 3
+NUM_KEYS_FDF = 3
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -683,17 +693,198 @@ def generate_parallel_portfolio_section(
         figure.append(pl.UnsafeCommand(r"label{fig:portfoliovssbs}"))
 
 
+def round_floats(df: pd.DataFrame, digits: int = MAX_DEC) -> pd.DataFrame:
+    """Round only the float columns of df in-place and return it."""
+    num_cols = df.select_dtypes(include=["float64"]).columns
+
+    for col in num_cols:
+
+        def round_cell(x: float) -> Union[int, float]:
+            if x.is_integer():
+                return int(x)
+            s = str(x).rstrip("0").rstrip(".")
+            if "." in s and len(s.split(".")[1]) > digits:
+                return round(x, digits)
+            return x
+
+        df[col] = df[col].apply(round_cell)
+    return df
+
+
+def melt_feature_df(feat_df: pd.DataFrame) -> pd.DataFrame:
+    """Convert the wide feature matrix into a tall 5-column dataframe."""
+    id_cols = ["FeatureGroup", "FeatureName", "Extractor"]
+    df = feat_df.copy()
+
+    # make sure the id‑columns exist as real columns
+    if not set(id_cols).issubset(df.columns):
+        df = df.reset_index()
+
+    # sanity check – helpful error if something is still off
+    missing = [c for c in id_cols if c not in df.columns]
+    if missing:  # corrupted CSV / unexpected schema
+        raise ValueError(f"Missing expected column(s): {missing}")
+
+    long = (
+        df.melt(
+            id_vars=id_cols,  # keep the three meta keys fixed
+            var_name="Instance",  # former wide header
+            value_name="Value",
+        )  # the numeric feature value
+        .sort_values(id_cols + ["Instance"])  # nice, deterministic order
+        .reset_index(drop=True)
+    )
+
+    return long[id_cols + ["Instance", "Value"]]
+
+
+def format_cell(x: Union[int, float, str]) -> str:
+    """Format a number for printing in a LaTeX table."""
+    try:
+        f = float(x)
+    except (TypeError, ValueError):
+        return str(x)
+
+    if not math.isfinite(f):
+        return "NaN"
+
+    if f.is_integer():
+        return str(int(f))
+    # round to MAX_DEC, then strip trailing zeros
+    s = f"{round(f, MAX_DEC):.{MAX_DEC}f}".rstrip("0").rstrip(".")
+    return s
+
+
+def needs_index(df: pd.DataFrame) -> bool:
+    """Return *True* if the index conveys information that should be printed."""
+    return not (
+        isinstance(df.index, pd.RangeIndex) and df.index.name in (None, "", "index")
+    )
+
+
+def append_dataframe_longtable(
+    report: pl.Document,
+    df: pd.DataFrame,
+    caption: str,
+    label: str,
+    max_cols: int = MAX_COLS_PER_TABLE_PDF,
+    wide_threshold: int = MAX_COLS_PER_TABLE_PDF,
+    num_keys: int = NUM_KEYS_PDF,
+) -> None:
+    """Appends a pandas DataFrame to a PyLaTeX document as one or more LaTeX longtables.
+
+    Args:
+        report: The PyLaTeX document to which the table(s) will be appended.
+        df: The DataFrame to be rendered as LaTeX longtable(s).
+        caption: The caption for the table(s).
+        label: The LaTeX label for referencing the table(s).
+        max_cols: Maximum number of columns per table chunk.
+                  Defaults to MAX_COLS_PER_TABLE.
+        wide_threshold: Number of columns above which the table is rotated
+                        to landscape. Defaults to WIDE_TABLE_THRESHOLD.
+        num_keys: Number of key columns to include in each table chunk.
+                  Defaults to NUM_KEYS_PDF.
+
+    Returns:
+        None
+    """
+    # decide whether to keep the index
+    if needs_index(df):
+        df = df.reset_index()
+
+    # break the DF into manageable pieces
+    if caption == "Performance Data Frame":
+        mask = df.columns.get_level_values("Meta") == "Seed"  # Remove the seeds
+        df = df.loc[:, ~mask]
+    keys = df.iloc[:, :num_keys]  # Objective, Instnace, Run for performance data frame
+
+    n_chunks = max((df.shape[1] - 1) // max_cols + 1, 1)
+    for i in range(n_chunks):
+        full_part = None
+        start_col = i * max_cols
+        end_col = (i + 1) * max_cols
+        values = df.iloc[
+            :,
+            start_col + num_keys : end_col + num_keys,
+        ]
+        full_part = pd.concat([keys, values], axis=1)
+        if (full_part.shape[1]) <= max_cols:
+            break
+
+        # tell pandas how to print numbers
+        formatters = {col: format_cell for col in full_part.columns}
+
+        tex = full_part.to_latex(
+            longtable=True,
+            index=False,
+            escape=True,
+            caption=caption + (f" (part {i + 1})" if n_chunks > 1 else ""),
+            label=label + f"-p{i + 1}" if n_chunks > 1 else label,
+            float_format=None,
+            multicolumn=True,
+            multirow=True,
+            column_format="c" * full_part.shape[1],
+            formatters=formatters,
+        )
+
+        # centre the whole table horizontally
+        centred_tex = "\\begin{center}\n" + tex + "\\end{center}\n"
+
+        # rotate if still too wide
+        if full_part.shape[1] > wide_threshold:
+            report.append(NoEscape(r"\begin{landscape}"))
+            report.append(NoEscape(centred_tex))
+            report.append(NoEscape(r"\end{landscape}"))
+        else:
+            report.append(NoEscape(centred_tex))
+
+        report.append(NewPage())  # keep each part on its own page
+
+
 def generate_appendix(
     report: pl.Document,
     performance_data: PerformanceDataFrame,
     feature_data: FeatureDataFrame,
 ) -> None:
-    """Generate an appendix for the report."""
-    # report.append(pl.UnsafeCommand("appendix"))
-    # report.append("Below are the full performance and feature data frames.")
-    # TODO: Add long table for the entire performance data frame
-    # performance_data.to_latex() # maybe?
-    # TODO: Add long table for the entire feature data frame
+    """Appends an appendix section to the given report document.
+
+    Args:
+        report: The LaTeX document object to which the appendix will be added.
+        performance_data: The performance data to be included in the appendix.
+        feature_data: The feature data to be included in the appendix.
+
+    Returns:
+        None
+    """
+    # preamble
+    for pkg in ("longtable", "pdflscape", "caption", "booktabs"):
+        p = pl.Package(pkg)
+        if p not in report.packages:
+            report.packages.append(p)
+
+    report.append(pl.NewPage())
+    report.append(pl.UnsafeCommand("appendix"))
+    report.append(pl.Section("Below are the full performance and feature data frames."))
+
+    append_dataframe_longtable(
+        report,
+        performance_data,
+        caption="Performance Data Frame",
+        label="tab:perf_data",
+        max_cols=MAX_COLS_PER_TABLE_PDF,
+        wide_threshold=WIDE_TABLE_THRESHOLD_PDF,
+        num_keys=NUM_KEYS_PDF,
+    )
+
+    append_dataframe_longtable(
+        report,
+        feature_data.dataframe,
+        caption="Feature Data Frame",
+        label="tab:feature_data",
+        max_cols=MAX_COLS_PER_TABLE_FDF,
+        wide_threshold=WIDE_TABLE_THRESHOLD_FDF,
+        num_keys=NUM_KEYS_FDF,
+    )
 
 
 def main(argv: list[str]) -> None:
