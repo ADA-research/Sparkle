@@ -38,7 +38,7 @@ MAX_COLS_PER_TABLE = 2  # number of value columns extra to number of key columns
 WIDE_TABLE_THRESHOLD = 4  # columns above which we switch to landscape
 NUM_KEYS_PDF = 3
 NUM_KEYS_FDF = 3
-MAX_CELL_LEN = 15
+MAX_CELL_LEN = 17
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -709,16 +709,23 @@ def latex_escape_text(s: str) -> str:
     )
 
 
+def last_path_segment(text: str) -> str:
+    """Keep only the last non-empty path-like segment. Handles both back and forwardslashes. Removes any leading/trailing slashes."""
+    t = str(text).strip().replace("\\", "/")
+    parts = [p for p in t.split("/") if p]  # ignore empty segments
+    return parts[-1] if parts else ""
+
+
 def wrap_fixed_shortstack(cell: str, width: int = MAX_CELL_LEN) -> str:
     """Wrap long text to a fixed width for LaTeX tables."""
-    string_cell = str(cell)
+    string_cell = last_path_segment(cell)
     if len(string_cell) <= width:
         return latex_escape_text(string_cell)
     chunks = [
         latex_escape_text(string_cell[index : index + width])
         for index in range(0, len(string_cell), width)
     ]
-    # left-aligned shortstack; forces line breaks and grows row height
+    # left-aligned shortstack: forces line breaks and grows row height
     return r"\shortstack[l]{" + r"\\ ".join(chunks) + "}"
 
 
@@ -728,11 +735,11 @@ def wrap_header_labels(
     """Wrap long header labels to a fixed width for LaTeX tables."""
     df_copy = df.copy()
     if isinstance(df_copy.columns, pd.MultiIndex):
-        splitted_column_names = []
+        new_cols = []
         for tup in df_copy.columns:
-            splitted_column_names.append(
+            new_cols.append(
                 tuple(
-                    wrap_fixed_shortstack(index, width_per_cell)
+                    wrap_fixed_shortstack(last_path_segment(index), width_per_cell)
                     if isinstance(index, str)
                     else index
                     for index in tup
@@ -740,16 +747,16 @@ def wrap_header_labels(
             )
         names = [
             (
-                wrap_fixed_shortstack(name, width_per_cell)
+                wrap_fixed_shortstack(last_path_segment(name), width_per_cell)
                 if isinstance(name, str)
                 else name
             )
             for name in (df_copy.columns.names or [])
         ]
-        df_copy.columns = pd.MultiIndex.from_tuples(splitted_column_names, names=names)
+        df_copy.columns = pd.MultiIndex.from_tuples(new_cols, names=names)
     else:
         df_copy.columns = [
-            wrap_fixed_shortstack(column, width_per_cell)
+            wrap_fixed_shortstack(last_path_segment(column), width_per_cell)
             if isinstance(column, str)
             else column
             for column in df_copy.columns
@@ -762,7 +769,7 @@ def format_cell(cell: Union[int, float, str]) -> str:
     try:
         float_cell = float(cell)
     except (TypeError, ValueError):
-        return wrap_fixed_shortstack(str(cell), MAX_CELL_LEN)
+        return wrap_fixed_shortstack(last_path_segment(str(cell)), MAX_CELL_LEN)
 
     if not math.isfinite(float_cell):
         return "NaN"
@@ -846,7 +853,8 @@ def append_dataframe_longtable(
             label=label + f"-p{i + 1}" if n_chunks > 1 else label,
             float_format=None,
             multicolumn=True,
-            multirow=True,
+            multicolumn_format="c",
+            multirow=False,
             column_format="c" * full_part_wrapped.shape[1],
             formatters=formatters,
         )
