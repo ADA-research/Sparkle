@@ -830,7 +830,7 @@ def append_dataframe_longtable(
             start_col + num_keys : end_col + num_keys,
         ]
         full_part = pd.concat([keys, values], axis=1)
-        if (full_part.shape[1]) <= max_cols:
+        if (full_part.shape[1]) <= num_keys:
             break
 
         full_part_wrapped = wrap_header_labels(full_part, MAX_CELL_LEN)
