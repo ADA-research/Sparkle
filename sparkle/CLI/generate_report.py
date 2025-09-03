@@ -694,7 +694,7 @@ def generate_parallel_portfolio_section(
 
 def latex_escape_text(s: str) -> str:
     """Escape special LaTeX characters in a string."""
-    # escape text, but we'll insert our own LaTeX macro around it
+    # escape text, but insert our own LaTeX macro around it
     return (
         s.replace("\\", r"\textbackslash{}")
         .replace("&", r"\&")
@@ -709,55 +709,68 @@ def latex_escape_text(s: str) -> str:
     )
 
 
-def wrap_fixed_shortstack(s: str, width: int = MAX_CELL_LEN) -> str:
+def wrap_fixed_shortstack(cell: str, width: int = MAX_CELL_LEN) -> str:
     """Wrap long text to a fixed width for LaTeX tables."""
-    t = str(s)
-    if len(t) <= width:
-        return latex_escape_text(t)
-    chunks = [latex_escape_text(t[i : i + width]) for i in range(0, len(t), width)]
+    string_cell = str(cell)
+    if len(string_cell) <= width:
+        return latex_escape_text(string_cell)
+    chunks = [
+        latex_escape_text(string_cell[index : index + width])
+        for index in range(0, len(string_cell), width)
+    ]
     # left-aligned shortstack; forces line breaks and grows row height
     return r"\shortstack[l]{" + r"\\ ".join(chunks) + "}"
 
 
-def wrap_header_labels(df: pd.DataFrame, width: int = MAX_CELL_LEN) -> pd.DataFrame:
+def wrap_header_labels(
+    df: pd.DataFrame, width_per_cell: int = MAX_CELL_LEN
+) -> pd.DataFrame:
     """Wrap long header labels to a fixed width for LaTeX tables."""
-    df2 = df.copy()
-    if isinstance(df2.columns, pd.MultiIndex):
-        new = []
-        for tup in df2.columns:
-            new.append(
+    df_copy = df.copy()
+    if isinstance(df_copy.columns, pd.MultiIndex):
+        splitted_column_names = []
+        for tup in df_copy.columns:
+            splitted_column_names.append(
                 tuple(
-                    wrap_fixed_shortstack(x, width) if isinstance(x, str) else x
-                    for x in tup
+                    wrap_fixed_shortstack(index, width_per_cell)
+                    if isinstance(index, str)
+                    else index
+                    for index in tup
                 )
             )
         names = [
-            (wrap_fixed_shortstack(n, width) if isinstance(n, str) else n)
-            for n in (df2.columns.names or [])
+            (
+                wrap_fixed_shortstack(name, width_per_cell)
+                if isinstance(name, str)
+                else name
+            )
+            for name in (df_copy.columns.names or [])
         ]
-        df2.columns = pd.MultiIndex.from_tuples(new, names=names)
+        df_copy.columns = pd.MultiIndex.from_tuples(splitted_column_names, names=names)
     else:
-        df2.columns = [
-            wrap_fixed_shortstack(c, width) if isinstance(c, str) else c
-            for c in df2.columns
+        df_copy.columns = [
+            wrap_fixed_shortstack(column, width_per_cell)
+            if isinstance(column, str)
+            else column
+            for column in df_copy.columns
         ]
-    return df2
+    return df_copy
 
 
-def format_cell(x: Union[int, float, str]) -> str:
-    """Format a number for printing in a LaTeX table."""
+def format_cell(cell: Union[int, float, str]) -> str:
+    """Format a cell for printing in a LaTeX table."""
     try:
-        f = float(x)
+        float_cell = float(cell)
     except (TypeError, ValueError):
-        return wrap_fixed_shortstack(str(x), MAX_CELL_LEN)
+        return wrap_fixed_shortstack(str(cell), MAX_CELL_LEN)
 
-    if not math.isfinite(f):
+    if not math.isfinite(float_cell):
         return "NaN"
 
-    if f.is_integer():
-        return str(int(f))
+    if float_cell.is_integer():
+        return str(int(float_cell))
     # round to MAX_DEC, then strip trailing zeros
-    s = f"{round(f, MAX_DEC):.{MAX_DEC}f}".rstrip("0").rstrip(".")
+    s = f"{round(float_cell, MAX_DEC):.{MAX_DEC}f}".rstrip("0").rstrip(".")
     return s
 
 
@@ -798,11 +811,14 @@ def append_dataframe_longtable(
     if needs_index(df):
         df = df.reset_index()
 
-    # break the DF into manageable pieces
-    if caption == "Performance Data Frame":
-        mask = df.columns.get_level_values("Meta") == "Seed"  # Remove the seeds
+    # Remove the seed column if present
+    try:
+        mask = df.columns.get_level_values("Meta") == "Seed"
         df = df.loc[:, ~mask]
-    keys = df.iloc[:, :num_keys]  # Objective, Instnace, Run for performance data frame
+    except KeyError:
+        pass
+
+    keys = df.iloc[:, :num_keys]  # Key columns
 
     n_chunks = max((df.shape[1] - 1) // max_cols + 1, 1)
     for i in range(n_chunks):
@@ -825,7 +841,7 @@ def append_dataframe_longtable(
         tex = full_part_wrapped.to_latex(
             longtable=True,
             index=False,
-            escape=False,
+            escape=False,  # We want to split the long words, not escape them
             caption=caption + (f" (part {i + 1})" if n_chunks > 1 else ""),
             label=label + f"-p{i + 1}" if n_chunks > 1 else label,
             float_format=None,
