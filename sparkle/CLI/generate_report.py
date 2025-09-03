@@ -878,7 +878,7 @@ def generate_appendix(
     performance_data: PerformanceDataFrame,
     feature_data: FeatureDataFrame,
 ) -> None:
-    """Appends an appendix section to the given report document.
+    """Appendix.
 
     Args:
         report: The LaTeX document object to which the appendix will be added.
@@ -889,12 +889,14 @@ def generate_appendix(
         None
     """
     # preamble
-    for pkg in ("longtable", "pdflscape", "caption", "booktabs"):
+    for pkg in ("longtable", "pdflscape", "caption", "booktabs", "placeins"):
         p = pl.Package(pkg)
         if p not in report.packages:
             report.packages.append(p)
 
     report.append(pl.NewPage())
+    report.append(pl.NoEscape(r"\clearpage"))
+    report.append(pl.NoEscape(r"\FloatBarrier"))
     report.append(pl.UnsafeCommand("appendix"))
     report.append(pl.Section("Below are the full performance and feature data frames."))
 
@@ -917,6 +919,8 @@ def generate_appendix(
         wide_threshold=WIDE_TABLE_THRESHOLD,
         num_keys=NUM_KEYS_FDF,
     )
+
+    report.append(pl.NoEscape(r"\FloatBarrier"))
 
 
 def main(argv: list[str]) -> None:
