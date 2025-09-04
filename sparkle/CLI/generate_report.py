@@ -7,9 +7,7 @@ import argparse
 from pathlib import Path
 import time
 import json
-import math
 import pandas as pd
-from typing import Union
 
 from pylatex import NoEscape, NewPage
 import pylatex as pl
@@ -114,7 +112,14 @@ def generate_configuration_section(
     tabular.add_row("Setting", "Value")
     tabular.add_hline()
     for setting, value in scenario.serialise().items():
-        tabular.add_row([setting, str(value)])
+        # Keep only the last path segment for paths
+        # Otherwise tables get too wide and we can't see other values
+        t = str(value).strip().replace("\\", "/")
+        parts = [p for p in t.split("/") if p]
+        if parts[-1]:
+            tabular.add_row([setting, parts[-1]])
+        else:
+            tabular.add_row([setting, "None"])
     table_conf_settings = pl.Table(position="h")
     table_conf_settings.append(pl.UnsafeCommand("centering"))
     table_conf_settings.append(tabular)
@@ -168,7 +173,6 @@ def generate_configuration_section(
         report.append(pl.utils.bold(" "))  # Force white space
         report.append("the results are plotted per instance.")
         # Create graph to compare best configuration vs default on the instance set
-        import pandas as pd
 
         df = pd.DataFrame(
             [
@@ -474,7 +478,6 @@ def generate_selection_section(
     selector_performance = scenario_output.actual_performance_data
 
     # Join the data together
-    import pandas as pd
 
     df = pd.DataFrame(
         [sbs_performance, selector_performance],
@@ -673,7 +676,6 @@ def generate_parallel_portfolio_section(
     portfolio_instance_performance = scenario.best_instance_performance(
         objective=objective.name
     ).tolist()
-    import pandas as pd
 
     df = pd.DataFrame(
         [sbs_instance_performance, portfolio_instance_performance],
@@ -692,109 +694,13 @@ def generate_parallel_portfolio_section(
         figure.append(pl.UnsafeCommand(r"label{fig:portfoliovssbs}"))
 
 
-def latex_escape_text(s: str) -> str:
-    """Escape special LaTeX characters in a string."""
-    # escape text, but insert our own LaTeX macro around it
-    return (
-        s.replace("\\", r"\textbackslash{}")
-        .replace("&", r"\&")
-        .replace("%", r"\%")
-        .replace("$", r"\$")
-        .replace("#", r"\#")
-        .replace("_", r"\_")
-        .replace("{", r"\{")
-        .replace("}", r"\}")
-        .replace("~", r"\textasciitilde{}")
-        .replace("^", r"\textasciicircum{}")
-    )
-
-
-def last_path_segment(text: str) -> str:
-    """Keep only the last non-empty path-like segment. Handles both back and forwardslashes. Removes any leading/trailing slashes."""
-    t = str(text).strip().replace("\\", "/")
-    parts = [p for p in t.split("/") if p]  # ignore empty segments
-    return parts[-1] if parts else ""
-
-
-def wrap_fixed_shortstack(cell: str, width: int = MAX_CELL_LEN) -> str:
-    """Wrap long text to a fixed width for LaTeX tables."""
-    string_cell = last_path_segment(cell)
-    if len(string_cell) <= width:
-        return latex_escape_text(string_cell)
-    chunks = [
-        latex_escape_text(string_cell[index : index + width])
-        for index in range(0, len(string_cell), width)
-    ]
-    # left-aligned shortstack: forces line breaks and grows row height
-    return r"\shortstack[l]{" + r"\\ ".join(chunks) + "}"
-
-
-def wrap_header_labels(
-    df: pd.DataFrame, width_per_cell: int = MAX_CELL_LEN
-) -> pd.DataFrame:
-    """Wrap long header labels to a fixed width for LaTeX tables."""
-    df_copy = df.copy()
-    if isinstance(df_copy.columns, pd.MultiIndex):
-        new_cols = []
-        for tup in df_copy.columns:
-            new_cols.append(
-                tuple(
-                    wrap_fixed_shortstack(last_path_segment(index), width_per_cell)
-                    if isinstance(index, str)
-                    else index
-                    for index in tup
-                )
-            )
-        names = [
-            (
-                wrap_fixed_shortstack(last_path_segment(name), width_per_cell)
-                if isinstance(name, str)
-                else name
-            )
-            for name in (df_copy.columns.names or [])
-        ]
-        df_copy.columns = pd.MultiIndex.from_tuples(new_cols, names=names)
-    else:
-        df_copy.columns = [
-            wrap_fixed_shortstack(last_path_segment(column), width_per_cell)
-            if isinstance(column, str)
-            else column
-            for column in df_copy.columns
-        ]
-    return df_copy
-
-
-def format_cell(cell: Union[int, float, str]) -> str:
-    """Format a cell for printing in a LaTeX table."""
-    try:
-        float_cell = float(cell)
-    except (TypeError, ValueError):
-        return wrap_fixed_shortstack(last_path_segment(str(cell)), MAX_CELL_LEN)
-
-    if not math.isfinite(float_cell):
-        return "NaN"
-
-    if float_cell.is_integer():
-        return str(int(float_cell))
-    # round to MAX_DEC, then strip trailing zeros
-    s = f"{round(float_cell, MAX_DEC):.{MAX_DEC}f}".rstrip("0").rstrip(".")
-    return s
-
-
-def needs_index(df: pd.DataFrame) -> bool:
-    """Return *True* if the index conveys information that should be printed."""
-    return not (
-        isinstance(df.index, pd.RangeIndex) and df.index.name in (None, "", "index")
-    )
-
-
 def append_dataframe_longtable(
     report: pl.Document,
     df: pd.DataFrame,
     caption: str,
     label: str,
     max_cols: int = MAX_COLS_PER_TABLE,
-    wide_threshold: int = MAX_COLS_PER_TABLE,
+    wide_threshold: int = WIDE_TABLE_THRESHOLD,
     num_keys: int = NUM_KEYS_PDF,
 ) -> None:
     """Appends a pandas DataFrame to a PyLaTeX document as one or more LaTeX longtables.
@@ -814,29 +720,136 @@ def append_dataframe_longtable(
     Returns:
         None
     """
-    # decide whether to keep the index
-    if needs_index(df):
-        df = df.reset_index()
+    import math
+    from typing import Union
 
-    # Remove the seed column if present
-    try:
-        mask = df.columns.get_level_values("Meta") == "Seed"
-        df = df.loc[:, ~mask]
-    except KeyError:
-        pass
+    def latex_escape_text(s: str) -> str:
+        """Escape special LaTeX characters in a string."""
+        # escape text, but insert our own LaTeX macro around it
+        return (
+            s.replace("\\", r"\textbackslash{}")
+            .replace("&", r"\&")
+            .replace("%", r"\%")
+            .replace("$", r"\$")
+            .replace("#", r"\#")
+            .replace("_", r"\_")
+            .replace("{", r"\{")
+            .replace("}", r"\}")
+            .replace("~", r"\textasciitilde{}")
+            .replace("^", r"\textasciicircum{}")
+        )
 
-    keys = df.iloc[:, :num_keys]  # Key columns
+    def last_path_segment(text: str) -> str:
+        """Keep only the last non-empty path-like segment. Handles both back and forwardslashes. Removes any leading/trailing slashes."""
+        t = str(text).strip().replace("\\", "/")
+        parts = [p for p in t.split("/") if p]  # ignore empty segments
+        return parts[-1] if parts else ""
 
-    n_chunks = max((df.shape[1] - 1) // max_cols + 1, 1)
-    for i in range(n_chunks):
+    def wrap_fixed_shortstack(cell: str, width: int = MAX_CELL_LEN) -> str:
+        """Wrap long text to a fixed width for LaTeX tables."""
+        string_cell = last_path_segment(cell)
+        if len(string_cell) <= width:
+            return latex_escape_text(string_cell)
+        chunks = [
+            latex_escape_text(string_cell[index : index + width])
+            for index in range(0, len(string_cell), width)
+        ]
+        # left-aligned shortstack: forces line breaks and grows row height
+        return r"\shortstack[l]{" + r"\\ ".join(chunks) + "}"
+
+    def wrap_header_labels(
+        df: pd.DataFrame, width_per_cell: int = MAX_CELL_LEN
+    ) -> pd.DataFrame:
+        """Wrap long header labels to a fixed width for LaTeX tables."""
+        df_copy = df.copy()
+        if isinstance(df_copy.columns, pd.MultiIndex):
+            new_cols = []
+            for tup in df_copy.columns:
+                new_cols.append(
+                    tuple(
+                        wrap_fixed_shortstack(last_path_segment(index), width_per_cell)
+                        if isinstance(index, str)
+                        else index
+                        for index in tup
+                    )
+                )
+            names = [
+                (
+                    wrap_fixed_shortstack(last_path_segment(name), width_per_cell)
+                    if isinstance(name, str)
+                    else name
+                )
+                for name in (df_copy.columns.names or [])
+            ]
+            df_copy.columns = pd.MultiIndex.from_tuples(new_cols, names=names)
+        else:
+            df_copy.columns = [
+                wrap_fixed_shortstack(last_path_segment(column), width_per_cell)
+                if isinstance(column, str)
+                else column
+                for column in df_copy.columns
+            ]
+        return df_copy
+
+    def format_cell(cell: Union[int, float, str]) -> str:
+        """Format a cell for printing in a LaTeX table."""
+        try:
+            float_cell = float(cell)
+        except (TypeError, ValueError):
+            return wrap_fixed_shortstack(last_path_segment(str(cell)), MAX_CELL_LEN)
+
+        if not math.isfinite(float_cell):
+            return "NaN"
+
+        if float_cell.is_integer():
+            return str(int(float_cell))
+        # round to MAX_DEC, then strip trailing zeros
+        s = f"{round(float_cell, MAX_DEC):.{MAX_DEC}f}".rstrip("0").rstrip(".")
+        return s
+
+    df_copy = df.copy()
+
+    # Inorder to be able to show the key columns, we need to reset the index
+    if not isinstance(df_copy.index, pd.RangeIndex) and df_copy.index.name in (
+        None,
+        "index",
+        "",
+    ):
+        df_copy = df_copy.reset_index()
+
+    # Remove the Seed column from the performance dataframe since it is not
+    # very informative and clutters the table
+    if isinstance(df_copy, PerformanceDataFrame):
+        mask = df_copy.columns.get_level_values("Meta") == "Seed"
+        df_copy = df_copy.loc[:, ~mask]
+
+    # For performance dataframe, we want to show values of objectives with their corresponding instance and run.
+    # Since objective, instance and run are indexes in the performance dataframe,
+    # they will be part of the index and we need to reset the index to get them
+    # as columns.
+    # We'll name them as key columns, since they are the key to identify the value of the objective
+    # for a given instance and run.
+    # (Respectively FeatureGroup, FeatureName, Extractor in feature dataframe)
+    keys = df_copy.iloc[:, :num_keys]  # Key columns
+
+    # Split the dataframe into chunks of max_cols per page
+    number_column_chunks = max((df_copy.shape[1] - 1) // max_cols + 1, 1)
+    for i in range(number_column_chunks):
+        report.append(NewPage())
         full_part = None
         start_col = i * max_cols
         end_col = (i + 1) * max_cols
-        values = df.iloc[
+
+        # Select the value columns for this chunk
+        values = df_copy.iloc[
             :,
             start_col + num_keys : end_col + num_keys,
         ]
+
+        # Concatenate the key and value columns
         full_part = pd.concat([keys, values], axis=1)
+
+        # If there are no value columns left, we are done
         if (full_part.shape[1]) <= num_keys:
             break
 
@@ -849,8 +862,8 @@ def append_dataframe_longtable(
             longtable=True,
             index=False,
             escape=False,  # We want to split the long words, not escape them
-            caption=caption + (f" (part {i + 1})" if n_chunks > 1 else ""),
-            label=label + f"-p{i + 1}" if n_chunks > 1 else label,
+            caption=caption + (f" (part {i + 1})" if number_column_chunks > 1 else ""),
+            label=label + f"-p{i + 1}" if number_column_chunks > 1 else label,
             float_format=None,
             multicolumn=True,
             multicolumn_format="c",
@@ -869,8 +882,6 @@ def append_dataframe_longtable(
             report.append(NoEscape(r"\end{landscape}"))
         else:
             report.append(NoEscape(centred_tex))
-
-        report.append(NewPage())  # keep each part on its own page
 
 
 def generate_appendix(
@@ -898,22 +909,23 @@ def generate_appendix(
     report.append(pl.NoEscape(r"\clearpage"))
     report.append(pl.NoEscape(r"\FloatBarrier"))
     report.append(pl.UnsafeCommand("appendix"))
-    report.append(pl.Section("Below are the full performance and feature data frames."))
+    report.append(pl.Section("Performance DataFrame"))
 
     append_dataframe_longtable(
         report,
         performance_data,
-        caption="Performance Data Frame",
+        caption="Performance DataFrame",
         label="tab:perf_data",
         max_cols=MAX_COLS_PER_TABLE,
         wide_threshold=WIDE_TABLE_THRESHOLD,
         num_keys=NUM_KEYS_PDF,
     )
 
+    report.append(pl.Section("Feature DataFrame"))
     append_dataframe_longtable(
         report,
         feature_data,
-        caption="Feature Data Frame",
+        caption="Feature DataFrame",
         label="tab:feature_data",
         max_cols=MAX_COLS_PER_TABLE,
         wide_threshold=WIDE_TABLE_THRESHOLD,
