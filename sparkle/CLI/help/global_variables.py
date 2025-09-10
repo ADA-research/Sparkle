@@ -34,6 +34,7 @@ def settings(argsv: Namespace = None) -> Settings:
         # Set global RNG states
         np.random.seed(seed)
         random.seed(seed)
+        __settings.random_state = seed
         # Next seed will be saved in latest.ini when the cli script calls 'write_used_settings()'
         next_seed = random.randint(0, max_seed)
         __settings.seed = next_seed

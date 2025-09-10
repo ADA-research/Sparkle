@@ -6,6 +6,7 @@ import sys
 from sparkle.CLI.help import snapshot_help
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
+from sparkle.CLI.help import global_variables as gv
 import argparse
 
 
@@ -22,7 +23,7 @@ def parser_function() -> argparse.ArgumentParser:
 def main(argv: list[str]) -> None:
     """Main function of the command."""
     # Log command call
-    sl.log_command(sys.argv)
+    sl.log_command(sys.argv, gv.settings().random_state)
     parser = parser_function()
     args = parser.parse_args(argv)
     snapshot_help.save_current_platform(args.name)

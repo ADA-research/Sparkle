@@ -739,6 +739,9 @@ class Settings:
         self.__slurm_jobs_in_parallel: int = None
         self.__slurm_job_prepend: str = None
 
+        # The seed that has been used to set the random state
+        self.random_state: Optional[int] = None
+
         if file_path and file_path.exists():
             self.read_settings_ini(file_path)
 

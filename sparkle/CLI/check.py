@@ -38,11 +38,13 @@ def parser_function() -> argparse.ArgumentParser:
 
 def main(argv: list[str]) -> None:
     """Main entry point of the Check command."""
-    # Log command call
-    sl.log_command(sys.argv)
     parser = parser_function()
     args = parser.parse_args(argv)
     settings = gv.settings(args)
+
+    # Log command call
+    sl.log_command(sys.argv, settings.random_state)
+
     type_map = {
         "extractor": Extractor,
         "feature-extractor": Extractor,
