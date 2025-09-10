@@ -5,7 +5,7 @@ import configparser
 import argparse
 from enum import Enum
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Optional
 
 from runrunner import Runner
 
@@ -196,7 +196,12 @@ class Settings:
         "Verbosity level.",
     )
     OPTION_seed = Option(
-        "seed", SECTION_general, int, 0, tuple(), "Random seed for reproducibility."
+        "seed",
+        SECTION_general,
+        int,
+        None,
+        tuple(),
+        "Seed to use for pseudo-random number generators.",
     )
 
     # CONFIGURATION Options
@@ -673,7 +678,7 @@ class Settings:
         self.__extractor_cutoff_time: int = None
         self.__run_on: Runner = None
         self.__verbosity_level: VerbosityLevel = None
-        self.__seed: int = None
+        self.__seed: Optional[int] = None
 
         # Configuration attributes
         self.__configurator_solver_call_budget: int = None
@@ -912,17 +917,17 @@ class Settings:
     @property
     def seed(self: Settings) -> int:
         """Seed to use in CLI commands."""
-        if self.__seed is None:
-            if self.__settings.has_option(
-                Settings.OPTION_seed.section, Settings.OPTION_seed.name
-            ):
-                self.__seed = self.__settings.get(
-                    Settings.OPTION_seed.section, Settings.OPTION_seed.name
-                )
+        if self.__seed is not None:
+            return self.__seed
 
-            else:
-                self.__seed = Settings.OPTION_seed.default_value
-        return int(self.__seed)
+        section, name = Settings.OPTION_seed.section, Settings.OPTION_seed.name
+        if self.__settings.has_option(section, name):
+            value = self.__settings.get(section, name)
+            self.__seed = int(value)
+        else:
+            self.__seed = Settings.OPTION_seed.default_value
+
+        return self.__seed
 
     @seed.setter
     def seed(self: Settings, value: int) -> None:

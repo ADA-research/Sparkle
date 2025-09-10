@@ -406,7 +406,7 @@ def main(argv: list[str]) -> None:
             configurations=configurations,
             instances=instances,
             objectives=settings.objectives,
-            seed=random.randint(0, sys.maxsize),
+            seed=random.randint(0, 2**32 - 1),
             cutoff_time=cutoff_time,
             sbatch_options=sbatch_options,
             slurm_prepend=slurm_prepend,

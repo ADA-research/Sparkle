@@ -19,7 +19,6 @@ from sparkle.selector import SelectionScenario
 
 
 __settings: Settings = None
-is_seed_set = False
 
 
 def settings(argsv: Namespace = None) -> Settings:
@@ -27,20 +26,20 @@ def settings(argsv: Namespace = None) -> Settings:
     global __settings
     if __settings is None:
         __settings = Settings(Settings.DEFAULT_settings_path, argsv=argsv)
-    elif argsv is not None:
-        __settings.apply_arguments(argsv)
-
-    global is_seed_set
-    if not is_seed_set:
         # Set global random state
+        max_seed = 2**32 - 1
         latest_ini = Settings(Settings.DEFAULT_previous_settings_path)
-        seed = __settings.seed if latest_ini.seed == 0 else latest_ini.seed
+        # Determine seed priority: latest.ini > __settings > random
+        seed = latest_ini.seed or __settings.seed or random.randint(0, max_seed)
+        # Set global RNG states
         np.random.seed(seed)
         random.seed(seed)
         # Next seed will be saved in latest.ini when the cli script calls 'write_used_settings()'
-        next_seed = random.randint(1, 2**32 - 1)
+        next_seed = random.randint(0, max_seed)
         __settings.seed = next_seed
-        is_seed_set = True
+
+    elif argsv is not None:
+        __settings.apply_arguments(argsv)
 
     return __settings
 
