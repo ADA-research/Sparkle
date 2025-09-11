@@ -55,6 +55,12 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         *ac.InstanceSetsReportArgument.names, **ac.InstanceSetsReportArgument.kwargs
     )
+
+    # Add argument for filtering appendix
+    parser.add_argument(
+        *ac.AppendixReportArgument.names, **ac.AppendixReportArgument.kwargs
+    )
+
     # Add argument for filtering configurators?
     # Add argument for filtering selectors?
     # Add argument for filtering ??? scenario ids? configuration ids?
@@ -819,7 +825,7 @@ def append_dataframe_longtable(
 
     # Remove the Seed column from the performance dataframe since it is not
     # very informative and clutters the table
-    if isinstance(df_copy, PerformanceDataFrame):
+    if isinstance(df, PerformanceDataFrame):
         mask = df_copy.columns.get_level_values("Meta") == "Seed"
         df_copy = df_copy.loc[:, ~mask]
 
@@ -1109,7 +1115,13 @@ def main(argv: list[str]) -> None:
     for parallel_dataframe in parallel_portfolio_scenarios:
         generate_parallel_portfolio_section(report, parallel_dataframe)
 
-    generate_appendix(report, performance_data, feature_data)
+    # Check if user wants to add appendix and
+    # choose argument from user over current setting.
+    appendicies_enabled = (
+        args.appendicies if args.appendicies is not None else gv.settings().appendicies
+    )
+    if appendicies_enabled:
+        generate_appendix(report, performance_data, feature_data)
 
     # Adding bibliography
     report.append(pl.NewPage())  # Ensure it starts on new page
