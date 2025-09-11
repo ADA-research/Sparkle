@@ -13,6 +13,7 @@ from sparkle.types import SparkleObjective, resolve_objective
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator import implementations as cim
 from sparkle.platform.cli_types import VerbosityLevel
+from sparkle.CLI.help.argparse_custom import str2bool
 
 
 class Option(NamedTuple):
@@ -186,6 +187,14 @@ class Settings:
         tuple(),
         "On which compute resource to execute.",
         cli_kwargs={"choices": [Runner.LOCAL, Runner.SLURM]},
+    )
+    OPTION_appendicies = Option(
+        "appendicies",
+        SECTION_general,
+        bool,
+        False,
+        tuple(),
+        "If True, include the appendix section in the generated report.",
     )
     OPTION_verbosity = Option(
         "verbosity",
@@ -590,6 +599,7 @@ class Settings:
             OPTION_solver_cutoff_time,
             OPTION_extractor_cutoff_time,
             OPTION_run_on,
+            OPTION_appendicies,
             OPTION_verbosity,
         ],
         SECTION_configuration: [
@@ -668,6 +678,7 @@ class Settings:
         self.__solver_cutoff_time: int = None
         self.__extractor_cutoff_time: int = None
         self.__run_on: Runner = None
+        self.__appendicies: bool = False
         self.__verbosity_level: VerbosityLevel = None
 
         # Configuration attributes
@@ -823,6 +834,8 @@ class Settings:
             if not isinstance(value, option.type):
                 if issubclass(option.type, Enum):
                     return option.type[value.upper()]
+                if option.type is bool:
+                    return str2bool(value)
                 return option.type(value)  # Attempt to resolve str to type
             return value
         return option.default_value
@@ -886,6 +899,11 @@ class Settings:
         if self.__run_on is None:
             self.__run_on = self._abstract_getter(Settings.OPTION_run_on)
         return self.__run_on
+
+    @property
+    def appendicies(self: Settings) -> bool:
+        """Whether to include appendicies in the report."""
+        return self._abstract_getter(Settings.OPTION_appendicies)
 
     @property
     def verbosity_level(self: Settings) -> VerbosityLevel:
