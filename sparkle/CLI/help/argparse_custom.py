@@ -3,7 +3,6 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import Any
-import argparse
 
 
 class ArgumentContainer:
@@ -475,29 +474,12 @@ ObjectiveArgument = ArgumentContainer(
     names=["--objective"], kwargs={"type": str, "help": "the objective to use."}
 )
 
-
-def str2bool(value: str | None | bool) -> bool | None:
-    """Convert the given input string to a boolean value, if the input is string."""
-    # If input is already bool or None just return
-    if isinstance(value, bool):
-        return value
-    if value is None:
-        return None
-
-    str_value = str(value).strip().lower()
-    if str_value == "true":
-        return True
-    if str_value == "false":
-        return False
-    raise argparse.ArgumentTypeError(f"Expected a boolean value, got '{value}'.")
-
-
 AppendixReportArgument = ArgumentContainer(
     names=["--appendicies"],
     kwargs={
-        "type": str2bool,
+        "required": False,
         "default": None,
-        "metavar": "BOOL",
-        "help": "Include appendix section (True/False). Default: False unless enabled in settings.",
+        "action": "store_true",
+        "help": "Include appendix section. Default: False unless enabled in settings.",
     },
 )
