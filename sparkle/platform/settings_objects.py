@@ -13,7 +13,6 @@ from sparkle.types import SparkleObjective, resolve_objective
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator import implementations as cim
 from sparkle.platform.cli_types import VerbosityLevel
-from sparkle.CLI.help.argparse_custom import str2bool
 
 
 class Option(NamedTuple):
@@ -194,7 +193,7 @@ class Settings:
         bool,
         False,
         tuple(),
-        "If True, include the appendix section in the generated report.",
+        "Include the appendix section in the generated report.",
     )
     OPTION_verbosity = Option(
         "verbosity",
@@ -830,12 +829,12 @@ class Settings:
     def _abstract_getter(self: Settings, option: Option) -> Any:
         """Abstract getter method."""
         if self.__settings.has_option(option.section, option.name):
+            if option.type is bool:
+                return self.__settings.getboolean(option.section, option.name)
             value = self.__settings.get(option.section, option.name)
             if not isinstance(value, option.type):
                 if issubclass(option.type, Enum):
                     return option.type[value.upper()]
-                if option.type is bool:
-                    return str2bool(value)
                 return option.type(value)  # Attempt to resolve str to type
             return value
         return option.default_value
