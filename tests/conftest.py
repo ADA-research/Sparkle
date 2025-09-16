@@ -6,6 +6,15 @@ import pytest
 def pytest_addoption(parser: pytest.Parser) -> None:
     """Adding options to the Pytest args."""
     parser.addoption(
+        "--unit",
+        "--unit-tests",
+        "--UNIT",
+        action="store_true",
+        dest="unit",
+        default=False,
+        help="run unit tests",
+    )
+    parser.addoption(
         "--integration",
         "--cli",
         "--CLI",
@@ -36,14 +45,16 @@ def pytest_configure(config: pytest.Parser) -> None:
     if config.option.performance:
         # config.option
         markers.append("performance")
-        setattr(config.option, "markexpr", "performance")
     else:
         markers.append("not performance")
-        setattr(config.option, "markexpr", "not performance")
     if config.option.all or config.option.CLI:
         markers.append("integration")
-        setattr(config.option, "markexpr", "integration")
     else:
         markers.append("not integration")
-        setattr(config.option, "markexpr", "not integration")
-    setattr(config.option, "markexpr", markers)  # config.option
+    # Run unittests by default, currently an
+    if config.option.unit or config.option.all or len(markers) == 0:
+        markers.append("unit")
+    else:
+        markers.append("not unit")
+
+    setattr(config.option, "markexpr", " and ".join(markers))
