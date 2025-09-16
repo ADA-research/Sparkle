@@ -109,6 +109,7 @@ def main(argv: list[str]) -> None:
     solver = Solver(args.solver)
     # If no seed is provided and no seed can be read, generate one
     seed = random.randint(0, 2**32 - 1)
+    config_id = PerformanceDataFrame.default_configuration
     configuration = None  # Run with no configuration by default
 
     # Desyncronize from other possible jobs writing to the same file
@@ -214,8 +215,9 @@ def main(argv: list[str]) -> None:
                 solver_fields=solver_fields,
                 append_write_csv=True,
             )
+            performance_dataframe.save_csv()
     except Exception as e:
-        print(f"[TIMEOUT] Failed to write to performance dataframe: {e}")
+        print(f"Failed to write to performance dataframe:\n{e}")
 
 
 if __name__ == "__main__":

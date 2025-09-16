@@ -3,11 +3,13 @@
 import pytest
 from pathlib import Path
 import shutil
+from unittest.mock import patch, PropertyMock
 
 from tests.CLI import tools as cli_tools
 
 from sparkle.solver import Solver, solver_cli
 from sparkle.structures import PerformanceDataFrame
+from sparkle.platform.settings_objects import Settings
 
 from runrunner.base import Runner, Status
 from runrunner.slurm import SlurmRun
@@ -15,37 +17,55 @@ from runrunner.slurm import SlurmRun
 
 def test_solver_cli(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test the Solver CLI entry point."""
+    if not Settings.DEFAULT_runsolver_exec.exists():
+        return  # Currently only works with runsolver
+    runsolver_path = Settings.DEFAULT_runsolver_exec.absolute()
     solver_path = Path("Examples/Resources/Solvers/PbO-CCSAT-Generic").absolute()
     instance_path = Path("Examples/Resources/Instances/PTN/Ptn-7824-b01.cnf").absolute()
     monkeypatch.chdir(tmp_path)
 
     pdf = PerformanceDataFrame(
         Path("performance_data.csv"),
-        solvers=[solver_path.name],
-        instances=[instance_path.name],
+        solvers=[str(solver_path)],
+        instances=[instance_path.stem],
         objectives=["PAR10"],
     )
 
-    solver_cli.main(
-        [
-            "--performance-dataframe",
-            str(pdf.csv_filepath),
-            "--solver",
-            str(solver_path),
-            "--instance",
-            str(instance_path),
-            "--seed",
-            "0",
-            # "--objective",
-            # "PAR10",
-            "--cutoff-time",
-            "60",
-            "--run-index",
-            "0",
-            "--log-dir",
-            str(tmp_path),
-        ]
-    )
+    # Patch RunSolver Path
+    with patch(
+        "sparkle.types.SparkleCallable.runsolver_exec",
+        new_callable=PropertyMock,
+        return_value=runsolver_path,
+    ):
+        solver_cli.main(
+            [
+                "--performance-dataframe",
+                str(pdf.csv_filepath),
+                "--solver",
+                str(solver_path),
+                "--instance",
+                str(instance_path),
+                "--seed",
+                "0",
+                "--cutoff-time",
+                "5",  # Short time for testing
+                "--run-index",
+                "1",
+                "--log-dir",
+                str(tmp_path),
+            ]
+        )
+        pdf = PerformanceDataFrame(pdf.csv_filepath)
+        assert (
+            pdf.get_value(
+                solver=str(solver_path),
+                instance=instance_path.stem,
+                configuration=PerformanceDataFrame.default_configuration,
+                run=1,
+                objective="PAR10",
+            )
+            == 50.0
+        )
 
 
 @pytest.mark.performance
