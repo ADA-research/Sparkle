@@ -51,7 +51,7 @@ def pytest_configure(config: pytest.Parser) -> None:
         markers.append("integration")
     else:
         markers.append("not integration")
-    # Run unittests by default, currently an
+    # Run unittests by default, currently all non-marked tests (e.g. marker 'unused')
     if config.option.unit or config.option.all or len(markers) == 0:
         markers.append("unit")
     else:
