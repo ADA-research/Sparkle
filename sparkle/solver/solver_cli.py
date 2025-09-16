@@ -107,17 +107,20 @@ def main(argv: list[str]) -> None:
         run_instances = str(instance_path)
 
     solver = Solver(args.solver)
+    # If no seed is provided and no seed can be read, generate one
+    seed = random.randint(0, 2**32 - 1)
+    configuration = None  # Run with no configuration by default
 
+    # Desyncronize from other possible jobs writing to the same file
+    time.sleep(random.random() * 10)
+    lock = FileLock(f"{args.performance_dataframe}.lock")  # Lock the file
+    with lock.acquire(timeout=600):
+        performance_dataframe = PerformanceDataFrame(args.performance_dataframe)
+
+    objectives = performance_dataframe.objectives
+    # Filter out possible errors, shouldn't occur
+    objectives = [o for o in objectives if o is not None]
     if args.configuration_id or args.best_configuration_instances:  # Read
-        # Desyncronize from other possible jobs writing to the same file
-        time.sleep(random.random() * 10)
-        lock = FileLock(f"{args.performance_dataframe}.lock")  # Lock the file
-        with lock.acquire(timeout=600):
-            performance_dataframe = PerformanceDataFrame(args.performance_dataframe)
-
-        objectives = performance_dataframe.objectives
-        # Filter out possible errors, shouldn't occur
-        objectives = [o for o in objectives if o is not None]
         if args.best_configuration_instances:  # Determine best configuration
             best_configuration_instances: list[str] = args.best_configuration_instances
             # Get the unique instance names
@@ -158,9 +161,6 @@ def main(argv: list[str]) -> None:
             config_id = configuration["config_id"]
 
         seed = args.seed or seed
-        # If no seed is provided and no seed can be read, generate one
-        if not isinstance(seed, int):
-            seed = random.randint(0, 2**32 - 1)
 
     print(f"Running Solver {solver} on instance {instance_name} with seed {seed}..")
     solver_output = solver.run(

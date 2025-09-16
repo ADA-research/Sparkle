@@ -36,10 +36,14 @@ def test_solver_cli(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
             str(instance_path),
             "--seed",
             "0",
-            "--objective",
-            "PAR10",
+            # "--objective",
+            # "PAR10",
             "--cutoff-time",
             "60",
+            "--run-index",
+            "0",
+            "--log-dir",
+            str(tmp_path),
         ]
     )
 
