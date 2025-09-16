@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 """Run a solver, read/write to performance dataframe."""
 
+import sys
 from filelock import FileLock
 import argparse
 from pathlib import Path
@@ -15,7 +16,8 @@ from sparkle.types import resolve_objective
 from sparkle.structures import PerformanceDataFrame
 
 
-if __name__ == "__main__":
+def main(argv: list[str]) -> None:
+    """Main entry point for the solver command."""
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -41,7 +43,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--log-dir", type=Path, required=True, help="path to the log directory"
     )
-
     # These two arguments should be mutually exclusive
     parser.add_argument(
         "--configuration-id",
@@ -86,7 +87,7 @@ if __name__ == "__main__":
         " objectives argument or the one given by the dataframe "
         " to use to determine the best configuration.",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     # Process command line arguments
     log_dir = args.log_dir
     print(f"Running Solver and read/writing results with {args.performance_dataframe}")
@@ -188,20 +189,34 @@ if __name__ == "__main__":
     print(f"For Solver/config: {solver}/{config_id}")
     print(f"For index: Instance {instance_name}, Run {args.run_index}")
 
+    obj_t = [
+        f"{solver_output[objective.name]} [{objective.name}]" for objective in objectives
+    ]
+    with Path("TEST_OUT").open("a") as fout:
+        fout.write(f"{solver} | {instance_name}: " + ", ".join(obj_t) + "\n")
+
     # Desyncronize from other possible jobs writing to the same file
     time.sleep(random.random() * 10)
 
     # Now that we have all the results, we can add them to the performance dataframe
     lock = FileLock(f"{args.performance_dataframe}.lock")  # Lock the file
-    with lock.acquire(timeout=600):
-        performance_dataframe = PerformanceDataFrame(args.performance_dataframe)
-        performance_dataframe.set_value(
-            result,
-            solver=str(args.solver),
-            instance=instance_name,
-            configuration=config_id,
-            objective=[o.name for o in objectives],
-            run=run_index,
-            solver_fields=solver_fields,
-            append_write_csv=True,
-        )
+
+    try:
+        with lock.acquire(timeout=600):
+            performance_dataframe = PerformanceDataFrame(args.performance_dataframe)
+            performance_dataframe.set_value(
+                result,
+                solver=str(args.solver),
+                instance=instance_name,
+                configuration=config_id,
+                objective=[o.name for o in objectives],
+                run=run_index,
+                solver_fields=solver_fields,
+                append_write_csv=True,
+            )
+    except Exception as e:
+        print(f"[TIMEOUT] Failed to write to performance dataframe: {e}")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
