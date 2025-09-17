@@ -339,8 +339,8 @@ class Solver(SparkleCallable):
             run_ids: List of run ids to use. If list of list, a list of runs is given
                 per instance. Otherwise, all runs are used for each instance.
             cutoff_time: The cutoff time for the solver, measured through RunSolver.
-            objective: The objective to use, only relevant for train set best config
-                determining
+            objective: The objective to use, only relevant when determining the best
+                configuration.
             train_set: The training set to use. If present, will determine the best
                 configuration of the solver using these instances and run with it on
                 all instances in the instance argument.
@@ -363,6 +363,10 @@ class Solver(SparkleCallable):
             instances = [str(i) for i in instances.instance_paths]
         if not isinstance(config_ids, list):
             config_ids = [config_ids]
+        configurations = [
+            performance_dataframe.get_full_configuration(str(self.directory), config_id)
+            for config_id in config_ids
+        ]
         if run_ids is None:
             run_ids = performance_dataframe.run_ids
         if isinstance(run_ids[0], list):  # Runs per instance
@@ -370,36 +374,55 @@ class Solver(SparkleCallable):
             for index, instance in enumerate(instances):
                 for run_id in run_ids[index]:
                     combinations.extend(
-                        [(instance, config_id, run_id) for config_id in config_ids]
+                        [
+                            (instance, config_id, config, run_id)
+                            for config_id, config in zip(config_ids, configurations)
+                        ]
                     )
         else:  # Runs for all instances
             import itertools
 
             combinations = [
-                (instance, config_id, run_id)
-                for instance, config_id, run_id in itertools.product(
-                    instances, config_ids, performance_dataframe.run_ids
+                (instance, config_data[0], config_data[1], run_id)
+                for instance, config_data, run_id in itertools.product(
+                    instances,
+                    zip(config_ids, configurations),
+                    performance_dataframe.run_ids,
                 )
             ]
         objective_arg = f"--target-objective {objective.name}" if objective else ""
         train_arg = (
-            " ".join([str(i) for i in train_set.instance_paths]) if train_set else ""
+            "--best-configuration-instances "
+            + " ".join([str(i) for i in train_set.instance_paths])
+            if train_set
+            else ""
         )
+        configuration_args = [
+            f"--configuration-id {config_id}"
+            if not config
+            else f"--configuration '{json.dumps(config)}'"
+            for _, config_id, config, _ in combinations
+        ]
 
         # We run all instances/configs/runs combinations
+        # For each value we try to resolve from the PDF, to avoid high read loads during executions
         cmds = [
             f"python3 {Solver.solver_cli} "
             f"--solver {self.directory} "
             f"--instance {instance} "
-            f"--configuration-id {config_id} "
+            f"{config_arg} "
+            # f"{'--configuration-id ' + config_id if not config else '--configuration"' + str(config) + '\"'} "
             f"--run-index {run_id} "
+            f"--objectives {' '.join([obj.name for obj in performance_dataframe.objectives])} "
             f"--performance-dataframe {performance_dataframe.csv_filepath} "
             f"--cutoff-time {cutoff_time} "
             f"--log-dir {log_dir} "
             f"--seed {random.randint(0, 2**32 - 1)} "
             f"{objective_arg} "
-            f"{'--best-configuration-instances' if train_set else ''} {train_arg}"
-            for instance, config_id, run_id in combinations
+            f"{train_arg}"
+            for (instance, _, _, run_id), config_arg in zip(
+                combinations, configuration_args
+            )
         ]
         job_name = f"Run: {self.name} on {set_name}" if job_name is None else job_name
         r = rrr.add_to_queue(

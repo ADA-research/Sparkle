@@ -69,8 +69,8 @@ class PerformanceDataFrame(pd.DataFrame):
                 csv_filepath,
                 header=[0, 1, 2],
                 index_col=[0, 1, 2],
-                dtype={"Value": str, "Seed": int},
                 on_bad_lines="skip",
+                dtype={"Value": str, "Seed": int},
                 comment="$",
             )  # $ For extra data lines
             super().__init__(df)

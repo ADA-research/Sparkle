@@ -14,6 +14,7 @@ from runrunner import Runner
 from sparkle.solver import Solver
 from sparkle.types import resolve_objective
 from sparkle.structures import PerformanceDataFrame
+from sparkle.tools.solver_wrapper_parsing import parse_commandline_dict
 
 
 def main(argv: list[str]) -> None:
@@ -53,7 +54,8 @@ def main(argv: list[str]) -> None:
     )
     parser.add_argument(
         "--configuration",
-        type=dict,
+        type=str,
+        nargs="+",
         required=False,
         help="configuration for the solver",
     )
@@ -125,12 +127,17 @@ def main(argv: list[str]) -> None:
     )
 
     if args.configuration:  # Configuration provided, override
-        configuration = args.configuration
-        config_id = configuration["config_id"]
+        configuration = parse_commandline_dict(args.configuration)
+        config_id = configuration["configuration_id"]
     elif (
         args.configuration_id or args.best_configuration_instances or not objectives
-    ):  # Read
+    ):  # Read from PerformanceDataFrame, can be slow
         # Desyncronize from other possible jobs writing to the same file
+        print(
+            "Reading from Performance DataFrame.. "
+            f"[{'configuration' if (args.configuration_id or args.best_configuration_instances) else ''} "
+            f"{'objectives' if not objectives else ''}]"
+        )
         time.sleep(random.random() * 10)
         lock = FileLock(f"{args.performance_dataframe}.lock")  # Lock the file
         with lock.acquire(timeout=600):
@@ -138,8 +145,7 @@ def main(argv: list[str]) -> None:
 
         if not objectives:
             objectives = performance_dataframe.objectives
-        # Filter out possible errors, shouldn't occur
-        # objectives = [o for o in objectives if o is not None]
+
         if args.best_configuration_instances:  # Determine best configuration
             best_configuration_instances: list[str] = args.best_configuration_instances
             # Get the unique instance names
@@ -160,7 +166,9 @@ def main(argv: list[str]) -> None:
                 str(args.solver), config_id
             )
 
-        elif args.configuration_id:  # Read from DF the ID
+        elif (
+            args.configuration_id
+        ):  # Read from PerformanceDataFrame the configuration using the ID
             config_id = args.configuration_id
             configuration = performance_dataframe.get_full_configuration(
                 str(args.solver), config_id
@@ -186,15 +194,23 @@ def main(argv: list[str]) -> None:
         PerformanceDataFrame.column_value,
         PerformanceDataFrame.column_seed,
     ]
-    objective_values = [
-        f"{objective.name}: {solver_output[objective.name]}" for objective in objectives
-    ]
-    print(f"Appending value objective values: {', '.join(objective_values)}")
+
     print(f"For Solver/config: {solver}/{config_id}")
-    print(f"For index: Instance {instance_name}, Run {args.run_index}")
+    print(f"For index: Instance {instance_name}, Run {args.run_index}, Seed {seed}")
+    print("Appending the following objective values:")  # {', '.join(objective_values)}")
+    for objective in objectives:
+        print(
+            f"{objective.name}, {instance_name}, {args.run_index} | {args.solver}, {config_id}: {solver_output[objective.name]}"
+        )
 
     # Desyncronize from other possible jobs writing to the same file
-    time.sleep(random.random() * 10)
+    time.sleep(random.random() * 100)
+    # TESTLOG
+    # lock = FileLock("test.log.lock")
+    # with lock.acquire(timeout=600):
+    #     with Path("test.log").open("a") as f:
+    #         for objective in objectives:
+    #             f.write(f"{objective.name}, {instance_name}, {args.run_index} | {solver} {config_id}: {solver_output[objective.name]}, {seed}\n")
 
     # Now that we have all the results, we can add them to the performance dataframe
     lock = FileLock(f"{args.performance_dataframe}.lock")  # Lock the file
