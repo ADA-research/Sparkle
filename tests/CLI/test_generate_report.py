@@ -8,6 +8,14 @@ from sparkle.CLI import load_snapshot, generate_report
 from tests.CLI import tools
 
 
+def test_parser() -> None:
+    """Test argument parser."""
+    parser = generate_report.parser_function()
+    import argparse
+
+    assert isinstance(parser, argparse.ArgumentParser)
+
+
 @pytest.mark.integration
 def test_generate_report_configuration(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
