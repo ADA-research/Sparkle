@@ -11,6 +11,7 @@ import zipfile
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.tools.general import get_time_pid_random_string
+from sparkle.platform import Settings
 
 
 def save_current_platform(name: str = None) -> None:
@@ -42,6 +43,7 @@ def remove_current_platform(filter: list[Path] = None) -> None:
     for working_dir in gv.settings().DEFAULT_working_dirs:
         if working_dir not in filter:
             shutil.rmtree(working_dir, ignore_errors=True)
+    Settings.DEFAULT_previous_settings_path.unlink(missing_ok=True)
 
 
 def create_working_dirs() -> None:

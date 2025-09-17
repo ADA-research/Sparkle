@@ -3,8 +3,13 @@
 import pytest
 from pathlib import Path
 import argparse
+import random
+from unittest.mock import patch
+import re
 
+from sparkle.CLI.help import global_variables as gv
 from sparkle.platform.settings_objects import Settings, Option
+from sparkle.CLI import add_solver, run_solvers, add_instances
 
 
 def test_option() -> None:
@@ -46,6 +51,7 @@ def test_read_from_file() -> None:
     assert settings.extractor_cutoff_time == 60
     assert settings.run_on == "slurm"
     assert settings.verbosity_level.name == "STANDARD"
+    assert settings.seed is None
 
     # Configurator
     assert settings.configurator.name == "SMAC2"
@@ -147,6 +153,7 @@ def test_read_empty_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
     assert settings.irace_max_experiments == 0
     assert settings.smac3_facade == "AlgorithmConfigurationFacade"
     assert settings.verbosity_level.name == "STANDARD"
+    assert settings.seed is None
 
     # Check that writing settings read from an empty file produces an empty file
     tmp = Path("tmp.ini")
@@ -172,6 +179,7 @@ def test_read_full_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None
     assert settings.extractor_cutoff_time == 60
     assert settings.run_on == "slurm"
     assert settings.verbosity_level.name == "QUIET"
+    assert settings.seed == 1
 
     # Configurator
     assert settings.configurator.name == "SMAC3"
@@ -264,6 +272,7 @@ def test_read_with_cli_file() -> None:
     assert settings.extractor_cutoff_time == 60
     assert settings.run_on == "slurm"
     assert settings.verbosity_level.name == "QUIET"
+    assert settings.seed == 1
 
     # Configurator
     assert settings.configurator.name == "SMAC2"  # Override
@@ -336,3 +345,114 @@ def test_read_with_cli_file() -> None:
     assert set(settings.sbatch_settings) == set(
         ["--mem-per-cpu=3000", "--time=30:00", "--qos=short", "--partition=CPU"]
     )
+
+
+def test_set_random_state() -> None:
+    """Test the global random state."""
+    Settings.DEFAULT_settings_path = Path("tests/test_files/Settings/settings-full.ini")
+    Settings.DEFAULT_previous_settings_path = Path(
+        "tests/test_files/Settings/latest.ini"
+    )
+    Settings.DEFAULT_previous_settings_path.unlink(missing_ok=True)
+    assert Settings(Settings.DEFAULT_settings_path).seed == 1
+
+    # Case 1: Seed is set by user and latest.ini has no seed
+    gv.__settings = None  # Needed because other tests use the settings
+    rng = random.Random(1)
+    next_seed = rng.randint(0, 2**32 - 1)
+    assert gv.settings().seed == next_seed
+    gv.settings().write_used_settings()
+    latest_ini = Settings(Settings.DEFAULT_previous_settings_path)
+    assert latest_ini.seed == next_seed
+    assert rng.randint(0, 2**32 - 1) == random.randint(0, 2**32 - 1)
+
+    # Case 2: latest.ini has a seed
+    gv.__settings = None
+    rng = random.Random(next_seed)
+    next_seed = rng.randint(0, 2**32 - 1)
+    assert gv.settings().seed == next_seed
+    gv.settings().write_used_settings()
+    latest_ini = Settings(Settings.DEFAULT_previous_settings_path)
+    assert latest_ini.seed == next_seed
+    assert rng.randint(0, 2**32 - 1) == random.randint(0, 2**32 - 1)
+
+    # Case 3: User did not set a seed and latest.ini has no seed
+    Settings.DEFAULT_settings_path = Path("tests/test_files/Settings/settings-empty.ini")
+    Settings.DEFAULT_previous_settings_path.unlink(missing_ok=True)
+    assert Settings(Settings.DEFAULT_settings_path).seed is None
+
+    gv.__settings = None
+    # Simulate seed behavior of the global random state
+    rng = random.Random(0)
+    init_seed = rng.randint(0, 2**32 - 1)
+    rng = random.Random(init_seed)
+    next_seed = rng.randint(0, 2**32 - 1)
+    # Set the seed for reproducible test
+    rng = random.seed(0)
+    assert gv.settings().seed == next_seed
+
+    # Remove latest.ini test file
+    Settings.DEFAULT_previous_settings_path.unlink(missing_ok=True)
+
+
+@pytest.mark.integration
+def test_submitted_seeds(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Run solvers example to test submitted seeds."""
+    solver_path = (
+        Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic"
+    ).absolute()
+    instances_path = (Path("Examples") / "Resources" / "Instances" / "PTN").absolute()
+    settings_path = Path("tests/test_files/Settings/settings-full.ini").absolute()
+    Settings.DEFAULT_settings_path = Path(
+        "tests/test_files/Settings/settings-full.ini"
+    ).absolute()
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+
+    # Smoke test
+    # First we add solvers and instances to the platform
+    rng = random.Random(1)
+    next_seed = rng.randint(0, 2**32 - 1)
+    gv.__settings = None
+
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        add_solver.main([str(solver_path)])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+    assert gv.settings().seed == next_seed
+
+    rng = random.Random(next_seed)
+    next_seed = rng.randint(0, 2**32 - 1)
+    gv.__settings = None
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        add_instances.main([str(instances_path)])
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+    assert gv.settings().seed == next_seed
+
+    rng = random.Random(next_seed)
+    next_seed = rng.randint(0, 2**32 - 1)
+    gv.__settings = None
+    with patch("runrunner.add_to_queue") as mock_add_to_queue:
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            run_solvers.main(
+                [
+                    "--performance-data-jobs",
+                    "--recompute",
+                    "--run-on",
+                    "local",
+                    "--settings-file",
+                    str(settings_path),
+                ]
+            )
+        assert pytest_wrapped_e.type is SystemExit
+        assert pytest_wrapped_e.value.code == 0
+        assert gv.settings().seed == next_seed
+
+        mock_add_to_queue.assert_called_once()
+        _, kwargs = mock_add_to_queue.call_args
+
+        for cmd in kwargs["cmd"]:
+            match = re.search(r"--seed (\d+)", cmd)
+            seed_str = match.group(1)
+            cur_seed = int(seed_str)
+            assert cur_seed == rng.randint(0, 2**32 - 1)

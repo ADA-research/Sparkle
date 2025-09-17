@@ -1,6 +1,7 @@
 """File to handle a Selector for selecting Solvers."""
 
 from __future__ import annotations
+import random
 from pathlib import Path
 
 from sklearn.base import ClassifierMixin, RegressorMixin
@@ -172,7 +173,8 @@ class Selector:
             f"--selector-scenario {scenario_path} "
             f"--instance {instance_path} "
             f"--feature-data {feature_data} "
-            f"--log-dir {log_dir}"
+            f"--log-dir {log_dir} "
+            f"--seed {random.randint(0, 2**32 - 1)}"
             for instance_path in instances
         ]
 

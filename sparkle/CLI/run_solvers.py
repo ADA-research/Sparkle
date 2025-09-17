@@ -262,16 +262,16 @@ def run_solvers_performance_data(
 
 def main(argv: list[str]) -> None:
     """Main function of the run solvers command."""
-    # Log command call
-    sl.log_command(sys.argv)
-    check_for_initialise()
-
     # Define command line arguments
     parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args(argv)
     settings = gv.settings(args)
+
+    # Log command call
+    sl.log_command(sys.argv, seed=settings.random_state)
+    check_for_initialise()
 
     if args.best_configuration:
         if not args.objective:
@@ -406,7 +406,7 @@ def main(argv: list[str]) -> None:
             configurations=configurations,
             instances=instances,
             objectives=settings.objectives,
-            seed=random.randint(0, sys.maxsize),
+            seed=random.randint(0, 2**32 - 1),
             cutoff_time=cutoff_time,
             sbatch_options=sbatch_options,
             slurm_prepend=slurm_prepend,

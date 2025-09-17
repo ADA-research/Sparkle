@@ -37,7 +37,7 @@ def remove_temporary_files() -> None:
 def main(argv: list[str]) -> None:
     """Main function of the cleanup command."""
     # Log command call
-    sl.log_command(sys.argv)
+    sl.log_command(sys.argv, gv.settings().random_state)
 
     # Define command line arguments
     parser = parser_function()

@@ -8,6 +8,7 @@ from smac import Scenario as SmacScenario
 from smac import facade as smacfacades
 from smac.runhistory.enumerations import StatusType as SmacStatusType
 import numpy as np
+import random
 from typing import Optional
 
 from runrunner import Runner, Run
@@ -86,10 +87,9 @@ class SMAC3(Configurator):
         ):
             print("WARNING: Starting SMAC3 scenario without any time limit.")
         configuration_ids = scenario.configuration_ids
-        # TODO: Setting seeds like this is weird and should be inspected.
-        # It could be good to take perhaps a seed from the scenario and use that
-        # to generate a seed per run
-        seeds = [i for i in range(scenario.number_of_runs)]
+
+        # Scenario file also has a seed, but not for all type of configurators
+        seeds = [random.randint(0, 2**32 - 1) for _ in range(scenario.number_of_runs)]
         num_parallel_jobs = num_parallel_jobs or scenario.number_of_runs
         # We do not require the configurator CLI as its already our own python wrapper
         cmds = [

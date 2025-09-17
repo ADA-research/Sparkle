@@ -699,7 +699,7 @@ def generate_appendix(
 def main(argv: list[str]) -> None:
     """Generate a report for executed experiments in the platform."""
     # Log command call
-    sl.log_command(sys.argv)
+    sl.log_command(sys.argv, gv.settings().random_state)
 
     # Define command line arguments
     parser = parser_function()

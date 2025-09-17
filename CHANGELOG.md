@@ -15,6 +15,7 @@ Notable changes to Sparkle will be documented in this file.
 - RunSolver executable is now copied to feature extractors dirs instead, paths now directly linked similar to Solvers
 - Changed flake8 to ruff [Issue#184]
 - Refactored FeatureDataFrame to subclass pandas DF instead of property [Issue#185]
+- Added seed functionality [Issue#182]
 
 ### Fixed
 

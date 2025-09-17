@@ -117,10 +117,6 @@ def compute_features(
 
 def main(argv: list[str]) -> None:
     """Main function of the compute features command."""
-    # Log command call
-    sl.log_command(sys.argv)
-    check_for_initialise()
-
     # Define command line arguments
     parser = parser_function()
 
@@ -128,6 +124,10 @@ def main(argv: list[str]) -> None:
     args = parser.parse_args(argv)
     settings = gv.settings(args)
     run_on = settings.run_on
+
+    # Log command call
+    sl.log_command(sys.argv, settings.random_state)
+    check_for_initialise()
 
     # Check if there are any feature extractors registered
     if not any([p.is_dir() for p in gv.settings().DEFAULT_extractor_dir.iterdir()]):

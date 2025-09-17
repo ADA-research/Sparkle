@@ -3,6 +3,7 @@
 from __future__ import annotations
 from pathlib import Path
 import shutil
+import random
 
 from runrunner import Runner, Run
 
@@ -110,9 +111,8 @@ class ParamILS(Configurator):
             )
         scenario.create_scenario()
         configuration_ids = scenario.configuration_ids
-        # We set the seed over the last n run ids in the dataframe
-        # TODO: Setting seeds like this is weird and should be inspected.
-        seeds = [i for i in range(scenario.number_of_runs)]
+
+        seeds = [random.randint(0, 2**32 - 1) for _ in range(scenario.number_of_runs)]
         output = [
             f"{(scenario.results_directory).absolute()}/"
             f"{scenario.name}_seed_{config_id}_paramils.txt"

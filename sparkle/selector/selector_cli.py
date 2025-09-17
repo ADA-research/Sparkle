@@ -58,7 +58,7 @@ def main(argv: list[str]) -> None:
         if seed is None:  # Still no value
             import random
 
-            seed = random.randint(0, sys.maxsize)
+            seed = random.randint(0, 2**32 - 1)
 
     # Note: Following code could be adjusted to run entire instance set
     # Run portfolio selector
