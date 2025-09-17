@@ -16,6 +16,22 @@ def test_parser() -> None:
     assert isinstance(parser, argparse.ArgumentParser)
 
 
+@pytest.mark.parametrize(
+    "args",
+    [
+        [],
+        ["--only-json", "True"],
+        ["--solver", "PbO-CCSAT-Generic", "--instance-set", "PTN", "--appendices"],
+    ],
+)
+def test_main(args: list[str]) -> None:
+    """Test main of generate report."""
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        generate_report.main(args) is None
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+
+
 @pytest.mark.integration
 def test_generate_report_configuration(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
