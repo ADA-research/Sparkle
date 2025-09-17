@@ -6,6 +6,7 @@ from typing import Any
 import shlex
 import ast
 import json
+import random
 from pathlib import Path
 
 from ConfigSpace import ConfigurationSpace
@@ -384,6 +385,7 @@ class Solver(SparkleCallable):
         train_arg = (
             " ".join([str(i) for i in train_set.instance_paths]) if train_set else ""
         )
+
         # We run all instances/configs/runs combinations
         cmds = [
             f"python3 {Solver.solver_cli} "
@@ -394,6 +396,7 @@ class Solver(SparkleCallable):
             f"--performance-dataframe {performance_dataframe.csv_filepath} "
             f"--cutoff-time {cutoff_time} "
             f"--log-dir {log_dir} "
+            f"--seed {random.randint(0, 2**32 - 1)} "
             f"{objective_arg} "
             f"{'--best-configuration-instances' if train_set else ''} {train_arg}"
             for instance, config_id, run_id in combinations

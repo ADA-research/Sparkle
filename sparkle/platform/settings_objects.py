@@ -5,7 +5,7 @@ import configparser
 import argparse
 from enum import Enum
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Optional
 
 from runrunner import Runner
 
@@ -194,6 +194,14 @@ class Settings:
         VerbosityLevel.STANDARD,
         ("verbosity_level",),
         "Verbosity level.",
+    )
+    OPTION_seed = Option(
+        "seed",
+        SECTION_general,
+        int,
+        None,
+        tuple(),
+        "Seed to use for pseudo-random number generators.",
     )
 
     # CONFIGURATION Options
@@ -591,6 +599,7 @@ class Settings:
             OPTION_extractor_cutoff_time,
             OPTION_run_on,
             OPTION_verbosity,
+            OPTION_seed,
         ],
         SECTION_configuration: [
             OPTION_configurator_number_of_runs,
@@ -669,6 +678,7 @@ class Settings:
         self.__extractor_cutoff_time: int = None
         self.__run_on: Runner = None
         self.__verbosity_level: VerbosityLevel = None
+        self.__seed: Optional[int] = None
 
         # Configuration attributes
         self.__configurator_solver_call_budget: int = None
@@ -728,6 +738,9 @@ class Settings:
         # Slurm attributes
         self.__slurm_jobs_in_parallel: int = None
         self.__slurm_job_prepend: str = None
+
+        # The seed that has been used to set the random state
+        self.random_state: Optional[int] = None
 
         if file_path and file_path.exists():
             self.read_settings_ini(file_path)
@@ -903,6 +916,29 @@ class Settings:
             else:
                 self.__verbosity_level = Settings.OPTION_verbosity.default_value
         return self.__verbosity_level
+
+    @property
+    def seed(self: Settings) -> int:
+        """Seed to use in CLI commands."""
+        if self.__seed is not None:
+            return self.__seed
+
+        section, name = Settings.OPTION_seed.section, Settings.OPTION_seed.name
+        if self.__settings.has_option(section, name):
+            value = self.__settings.get(section, name)
+            self.__seed = int(value)
+        else:
+            self.__seed = Settings.OPTION_seed.default_value
+
+        return self.__seed
+
+    @seed.setter
+    def seed(self: Settings, value: int) -> None:
+        """Set the seed value (overwrites settings)."""
+        self.__seed = value
+        self.__settings.set(
+            Settings.OPTION_seed.section, Settings.OPTION_seed.name, str(self.__seed)
+        )
 
     # Configuration settings ###
     @property

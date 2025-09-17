@@ -24,7 +24,7 @@ def parser_function() -> argparse.ArgumentParser:
 def main(argv: list[str]) -> None:
     """Main function of the remove solver command."""
     # Log command call
-    sl.log_command(sys.argv)
+    sl.log_command(sys.argv, gv.settings().random_state)
     check_for_initialise()
 
     # Define command line arguments

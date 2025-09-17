@@ -100,7 +100,7 @@ def print_performance_computation_jobs(
 def main(argv: list[str]) -> None:
     """Main function of the status command."""
     # Log command call
-    sl.log_command(sys.argv)
+    sl.log_command(sys.argv, gv.settings().random_state)
     check_for_initialise()
 
     # Define command line arguments

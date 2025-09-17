@@ -7,6 +7,7 @@ import decimal
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
+import random
 
 import runrunner as rrr
 from runrunner import Runner, Run
@@ -551,7 +552,7 @@ class AblationScenario:
             f"cutoff_length = {self.cutoff_length}\n"
             f"cli-cores = {self.concurrent_clis}\n"
             f"useRacing = {self.ablation_racing}\n"
-            "seed = 1234\n"  # NOTE: This does not seem right
+            f"seed = {random.randint(0, 2**32 - 1)}\n"
             f"paramfile = {pcs_file_path}\n"
             "instance_file = instances_train.txt\n"
             "test_instance_file = instances_test.txt\n"

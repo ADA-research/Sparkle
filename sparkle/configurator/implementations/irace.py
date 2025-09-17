@@ -3,6 +3,7 @@
 from __future__ import annotations
 import shutil
 import subprocess
+import random
 from pathlib import Path
 
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
@@ -174,8 +175,7 @@ class IRACE(Configurator):
         scenario.create_scenario()
         configuration_ids = scenario.configuration_ids
         # Create command to call IRACE. Create plural based on number of runs
-        # TODO: Setting seeds like this is weird and should be inspected.
-        seeds = [i for i in range(scenario.number_of_runs)]
+        seeds = [random.randint(0, 2**32 - 1) for _ in range(scenario.number_of_runs)]
         output_files = [
             scenario.results_directory.absolute() / f"output_{job_idx}.Rdata"
             for job_idx in configuration_ids

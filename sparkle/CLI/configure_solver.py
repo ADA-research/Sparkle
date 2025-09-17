@@ -67,18 +67,17 @@ def parser_function() -> argparse.ArgumentParser:
 
 def main(argv: list[str]) -> None:
     """Main function of the configure solver command."""
-    # Log command call
-    sl.log_command(sys.argv)
-    check_for_initialise()
-
     parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args(argv)
     settings = gv.settings(argsv=args)
 
-    configurator = settings.configurator
+    # Log command call
+    sl.log_command(sys.argv, settings.random_state)
+    check_for_initialise()
 
+    configurator = settings.configurator
     # Check configurator is available
     if not configurator.check_requirements(verbose=True):
         print(

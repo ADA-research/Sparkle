@@ -2,7 +2,6 @@
 # -*- coding: UTF-8 -*-
 """Run a solver, read/write to performance dataframe."""
 
-import sys
 from filelock import FileLock
 import argparse
 from pathlib import Path
@@ -16,8 +15,7 @@ from sparkle.types import resolve_objective
 from sparkle.structures import PerformanceDataFrame
 
 
-def main(argv: list[str]) -> None:
-    """Main entry point for the solver command."""
+if __name__ == "__main__":
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -43,6 +41,7 @@ def main(argv: list[str]) -> None:
     parser.add_argument(
         "--log-dir", type=Path, required=True, help="path to the log directory"
     )
+
     # These two arguments should be mutually exclusive
     parser.add_argument(
         "--configuration-id",
@@ -59,7 +58,7 @@ def main(argv: list[str]) -> None:
 
     parser.add_argument(
         "--seed",
-        type=str,
+        type=int,
         required=False,
         help="seed to use for the solver. If not provided, read from "
         "the PerformanceDataFrame or generate one.",
@@ -87,7 +86,7 @@ def main(argv: list[str]) -> None:
         " objectives argument or the one given by the dataframe "
         " to use to determine the best configuration.",
     )
-    args = parser.parse_args(argv)
+    args = parser.parse_args()
     # Process command line arguments
     log_dir = args.log_dir
     print(f"Running Solver and read/writing results with {args.performance_dataframe}")
@@ -107,21 +106,20 @@ def main(argv: list[str]) -> None:
         run_instances = str(instance_path)
 
     solver = Solver(args.solver)
-    # If no seed is provided and no seed can be read, generate one
-    seed = random.randint(0, 2**32 - 1)
-    config_id = PerformanceDataFrame.default_configuration
-    configuration = None  # Run with no configuration by default
 
-    # Desyncronize from other possible jobs writing to the same file
-    time.sleep(random.random() * 10)
-    lock = FileLock(f"{args.performance_dataframe}.lock")  # Lock the file
-    with lock.acquire(timeout=600):
-        performance_dataframe = PerformanceDataFrame(args.performance_dataframe)
+    if args.configuration:
+        configuration = args.configuration
+        config_id = configuration["config_id"]
+    elif args.configuration_id or args.best_configuration_instances:  # Read
+        # Desyncronize from other possible jobs writing to the same file
+        time.sleep(random.random() * 10)
+        lock = FileLock(f"{args.performance_dataframe}.lock")  # Lock the file
+        with lock.acquire(timeout=600):
+            performance_dataframe = PerformanceDataFrame(args.performance_dataframe)
 
-    objectives = performance_dataframe.objectives
-    # Filter out possible errors, shouldn't occur
-    objectives = [o for o in objectives if o is not None]
-    if args.configuration_id or args.best_configuration_instances:  # Read
+        objectives = performance_dataframe.objectives
+        # Filter out possible errors, shouldn't occur
+        objectives = [o for o in objectives if o is not None]
         if args.best_configuration_instances:  # Determine best configuration
             best_configuration_instances: list[str] = args.best_configuration_instances
             # Get the unique instance names
@@ -137,31 +135,17 @@ def main(argv: list[str]) -> None:
             configuration = performance_dataframe.get_full_configuration(
                 str(args.solver), config_id
             )
-            # Read the seed from the dataframe
-            seed = performance_dataframe.get_value(
-                str(args.solver),
-                instance_name,
-                objective=target_objective.name,
-                run=run_index,
-                solver_fields=[PerformanceDataFrame.column_seed],
-            )
+
         elif args.configuration_id:  # Read from DF the ID
             config_id = args.configuration_id
             configuration = performance_dataframe.get_full_configuration(
                 str(args.solver), config_id
             )
-            seed = performance_dataframe.get_value(
-                str(args.solver),
-                instance_name,
-                objective=None,
-                run=run_index,
-                solver_fields=[PerformanceDataFrame.column_seed],
-            )
-        else:  # Direct config given
-            configuration = args.configuration
-            config_id = configuration["config_id"]
 
-        seed = args.seed or seed
+        seed = args.seed
+        # If no seed is provided and no seed can be read, generate one
+        if not isinstance(seed, int):
+            seed = random.randint(0, 2**32 - 1)
 
     print(f"Running Solver {solver} on instance {instance_name} with seed {seed}..")
     solver_output = solver.run(
@@ -190,35 +174,20 @@ def main(argv: list[str]) -> None:
     print(f"For Solver/config: {solver}/{config_id}")
     print(f"For index: Instance {instance_name}, Run {args.run_index}")
 
-    obj_t = [
-        f"{solver_output[objective.name]} [{objective.name}]" for objective in objectives
-    ]
-    with Path("TEST_OUT").open("a") as fout:
-        fout.write(f"{solver} | {instance_name}: " + ", ".join(obj_t) + "\n")
-
     # Desyncronize from other possible jobs writing to the same file
     time.sleep(random.random() * 10)
 
     # Now that we have all the results, we can add them to the performance dataframe
     lock = FileLock(f"{args.performance_dataframe}.lock")  # Lock the file
-
-    try:
-        with lock.acquire(timeout=600):
-            performance_dataframe = PerformanceDataFrame(args.performance_dataframe)
-            performance_dataframe.set_value(
-                result,
-                solver=str(args.solver),
-                instance=instance_name,
-                configuration=config_id,
-                objective=[o.name for o in objectives],
-                run=run_index,
-                solver_fields=solver_fields,
-                append_write_csv=True,
-            )
-            performance_dataframe.save_csv()
-    except Exception as e:
-        print(f"Failed to write to performance dataframe:\n{e}")
-
-
-if __name__ == "__main__":
-    main(sys.argv[1:])
+    with lock.acquire(timeout=600):
+        performance_dataframe = PerformanceDataFrame(args.performance_dataframe)
+        performance_dataframe.set_value(
+            result,
+            solver=str(args.solver),
+            instance=instance_name,
+            configuration=config_id,
+            objective=[o.name for o in objectives],
+            run=run_index,
+            solver_fields=solver_fields,
+            append_write_csv=True,
+        )

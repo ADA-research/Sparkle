@@ -48,7 +48,7 @@ def parser_function() -> argparse.ArgumentParser:
 
 def main(argv: list[str]) -> None:
     """Main function to run ablation analysis."""
-    sl.log_command(sys.argv)
+    sl.log_command(sys.argv, gv.settings().random_state)
     check_for_initialise()
 
     if not AblationScenario.check_requirements(verbose=True):

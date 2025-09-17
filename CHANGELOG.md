@@ -6,6 +6,7 @@ Notable changes to Sparkle will be documented in this file.
 
 ### Added
 - Feature data frame tests [Issue#181]
+- Added seed functionality to Sparkle Settings, which parametrises np.random / random.random throughout the platform [Issue#182]
 
 ### Changed
 - Changed the CLI arguments and settings structures to be more streamlined and unified [SPRK-175]

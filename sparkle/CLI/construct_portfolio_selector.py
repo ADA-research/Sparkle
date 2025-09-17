@@ -85,16 +85,17 @@ def judge_exist_remaining_jobs(
 
 def main(argv: list[str]) -> None:
     """Main method of construct portfolio selector."""
-    # Log command call
-    sl.log_command(sys.argv)
-    check_for_initialise()
-
     # Define command line arguments
     parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args(argv)
     settings = gv.settings(args)
+
+    # Log command call
+    sl.log_command(sys.argv, settings.random_state)
+    check_for_initialise()
+
     flag_recompute_portfolio = args.recompute_portfolio_selector
     solver_ablation = args.solver_ablation
 

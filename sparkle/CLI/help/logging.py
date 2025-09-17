@@ -87,7 +87,7 @@ def add_output(output_path: str, description: str) -> None:
         output_file.write(output_str)
 
 
-def log_command(argv: list[str]) -> None:
+def log_command(argv: list[str], seed: int = None) -> None:
     """Write to file which command was executed.
 
     Includes information on when it was executed, with which arguments, and
@@ -95,7 +95,7 @@ def log_command(argv: list[str]) -> None:
 
     Args:
         argv: List containing the command line arguments derived from sys.argv.
-
+        seed: Optionally, the seed that corresponds to the set random state.
     """
     # Determine caller
     _update_caller(argv)
@@ -104,12 +104,13 @@ def log_command(argv: list[str]) -> None:
     timestamp = time.strftime("%Y-%m-%d-%H.%M.%S", time.localtime(time.time()))
     _update_caller_file_path(timestamp)
     args = " ".join(argv)
-    log_str = timestamp + "   " + args + "   " + str(caller_log_path) + "\n"
+    log_str = f"{timestamp}   {args}   {str(caller_log_path)}"
+    log_str += "\n" if seed is None else f"   {seed}\n"
 
     # If the log file does not exist yet, write the header
     log_path = Settings.DEFAULT_output / "sparkle.log"
     if not log_path.is_file():
-        log_header = "\t Timestamp\t\t\t\t\t\t\t  Command\t\t\t\t\t\t\t Output details\n"
+        log_header = "\t Timestamp\t\t\t\t\t\t\t  Command\t\t\t\t\t\t\t Output details\t\t\t\t\t\t\t  Seed\n"
         log_str = log_header + log_str
 
     # Write to log file
