@@ -55,7 +55,15 @@ class Option(NamedTuple):
     @property
     def kwargs(self: Option) -> dict[str, Any]:
         """Return the option attributes as kwargs."""
-        return {"type": self.type, "help": self.help, **self.cli_kwargs}
+        kw = {"help": self.help, **self.cli_kwargs}
+
+        # If this option uses a boolean flag action, argparse must NOT receive 'type'
+        action = kw.get("action")
+        if action in ("store_true", "store_false"):
+            return kw
+
+        # Otherwise include the base 'type'
+        return {"type": self.type, **kw}
 
 
 class Settings:
@@ -186,6 +194,18 @@ class Settings:
         tuple(),
         "On which compute resource to execute.",
         cli_kwargs={"choices": [Runner.LOCAL, Runner.SLURM]},
+    )
+    OPTION_appendices = Option(
+        "appendices",
+        SECTION_general,
+        bool,
+        False,
+        tuple(),
+        "Include the appendix section in the generated report.",
+        cli_kwargs={
+            "action": "store_true",
+            "default": None,
+        },
     )
     OPTION_verbosity = Option(
         "verbosity",
@@ -598,6 +618,7 @@ class Settings:
             OPTION_solver_cutoff_time,
             OPTION_extractor_cutoff_time,
             OPTION_run_on,
+            OPTION_appendices,
             OPTION_verbosity,
             OPTION_seed,
         ],
@@ -677,6 +698,7 @@ class Settings:
         self.__solver_cutoff_time: int = None
         self.__extractor_cutoff_time: int = None
         self.__run_on: Runner = None
+        self.__appendices: bool = False
         self.__verbosity_level: VerbosityLevel = None
         self.__seed: Optional[int] = None
 
@@ -832,6 +854,8 @@ class Settings:
     def _abstract_getter(self: Settings, option: Option) -> Any:
         """Abstract getter method."""
         if self.__settings.has_option(option.section, option.name):
+            if option.type is bool:
+                return self.__settings.getboolean(option.section, option.name)
             value = self.__settings.get(option.section, option.name)
             if not isinstance(value, option.type):
                 if issubclass(option.type, Enum):
@@ -899,6 +923,11 @@ class Settings:
         if self.__run_on is None:
             self.__run_on = self._abstract_getter(Settings.OPTION_run_on)
         return self.__run_on
+
+    @property
+    def appendices(self: Settings) -> bool:
+        """Whether to include appendices in the report."""
+        return self._abstract_getter(Settings.OPTION_appendices)
 
     @property
     def verbosity_level(self: Settings) -> VerbosityLevel:
