@@ -139,14 +139,21 @@ class PerformanceDataFrame(pd.DataFrame):
         # Store configuration in global attributes dictionary, see Pandas Docs
         self.attrs = configurations
 
-        if self.index.duplicated().any():  # Combine duplicate indices
-            combined = self.groupby(level=[0, 1, 2]).first()
-            # We keep the last to allow overwriting existing values
-            duplicates = self.index[self.index.duplicated(keep="last")]
-            # Remove all duplicate entries from self
-            self.drop(duplicates, inplace=True)
-            for d in duplicates:  # Place combined duplicates in self
-                self.loc[d, :] = combined.loc[d, :]
+        if self.index.duplicated().any():  # Drop all duplicates except for last
+            # NOTE: This is rather convoluted (but fast!) due to the fact we need to do it inplace to maintain our type (PerformanceDataFrame)
+            # Make the index levels into columns (in-place)
+            self.reset_index(inplace=True)
+            # The first nlevels columns are the index columns created by reset_index, drop duplicates in those columns
+            idx_cols = self.columns[
+                : len(PerformanceDataFrame.multi_index_names)
+            ].tolist()
+            self.drop_duplicates(
+                subset=idx_cols, keep="last", inplace=True
+            )  # Drop duplicates
+            self.set_index(idx_cols, inplace=True)  # Restore the MultiIndex (in-place)
+            self.index.rename(
+                self.multi_index_names, inplace=True
+            )  # Restore level names
 
         # Sort the index to optimize lookup speed
         self.sort_index(axis=0, inplace=True)
