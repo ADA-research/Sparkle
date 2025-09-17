@@ -55,7 +55,15 @@ class Option(NamedTuple):
     @property
     def kwargs(self: Option) -> dict[str, Any]:
         """Return the option attributes as kwargs."""
-        return {"type": self.type, "help": self.help, **self.cli_kwargs}
+        kw = {"help": self.help, **self.cli_kwargs}
+
+        # If this option uses a boolean flag action, argparse must NOT receive 'type'
+        action = kw.get("action")
+        if action in ("store_true", "store_false"):
+            return kw
+
+        # Otherwise include the base 'type'
+        return {"type": self.type, **kw}
 
 
 class Settings:
@@ -187,13 +195,17 @@ class Settings:
         "On which compute resource to execute.",
         cli_kwargs={"choices": [Runner.LOCAL, Runner.SLURM]},
     )
-    OPTION_appendicies = Option(
-        "appendicies",
+    OPTION_appendices = Option(
+        "appendices",
         SECTION_general,
         bool,
         False,
         tuple(),
         "Include the appendix section in the generated report.",
+        cli_kwargs={
+            "action": "store_true",
+            "default": None,
+        },
     )
     OPTION_verbosity = Option(
         "verbosity",
@@ -598,7 +610,7 @@ class Settings:
             OPTION_solver_cutoff_time,
             OPTION_extractor_cutoff_time,
             OPTION_run_on,
-            OPTION_appendicies,
+            OPTION_appendices,
             OPTION_verbosity,
         ],
         SECTION_configuration: [
@@ -677,7 +689,7 @@ class Settings:
         self.__solver_cutoff_time: int = None
         self.__extractor_cutoff_time: int = None
         self.__run_on: Runner = None
-        self.__appendicies: bool = False
+        self.__appendices: bool = False
         self.__verbosity_level: VerbosityLevel = None
 
         # Configuration attributes
@@ -900,9 +912,9 @@ class Settings:
         return self.__run_on
 
     @property
-    def appendicies(self: Settings) -> bool:
-        """Whether to include appendicies in the report."""
-        return self._abstract_getter(Settings.OPTION_appendicies)
+    def appendices(self: Settings) -> bool:
+        """Whether to include appendices in the report."""
+        return self._abstract_getter(Settings.OPTION_appendices)
 
     @property
     def verbosity_level(self: Settings) -> VerbosityLevel:
