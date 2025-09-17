@@ -42,19 +42,15 @@ def pytest_addoption(parser: pytest.Parser) -> None:
 def pytest_configure(config: pytest.Parser) -> None:
     """Handling custom Pytest args."""
     markers = []
+    if config.option.all:
+        return
     if config.option.performance:
         # config.option
         markers.append("performance")
     else:
         markers.append("not performance")
-    if config.option.all or config.option.CLI:
+    if config.option.CLI:
         markers.append("integration")
     else:
         markers.append("not integration")
-    # Run unittests by default, currently all non-marked tests (e.g. marker 'unused')
-    if config.option.unit or config.option.all or len(markers) == 0:
-        markers.append("unit")
-    else:
-        markers.append("not unit")
-
     setattr(config.option, "markexpr", " and ".join(markers))

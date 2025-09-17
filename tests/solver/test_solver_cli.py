@@ -83,9 +83,10 @@ def test_solver_cli_performance(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     """
     if not Settings.DEFAULT_runsolver_exec.exists():
         return  # Currently only works with runsolver
-    cluster_name = cli_tools.get_cluster_name()
-    if cluster_name != "kathleen":
-        raise Exception("Performance test only available on Kathleen")
+
+    if cli_tools.get_cluster_name() != "kathleen":
+        return  # Test currently does not work on Github Actions
+
     cluster_settings = cli_tools.get_cluster_settings()
 
     pdf_source = Path(
