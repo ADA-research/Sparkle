@@ -25,6 +25,7 @@ from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.configurator.configurator import ConfigurationScenario
 from sparkle.selector.selector import SelectionScenario
 from sparkle.types import SolverStatus
+from sparkle.platform import Settings
 
 from sparkle.platform import latex
 from sparkle.platform.output.configuration_output import ConfigurationOutput
@@ -58,7 +59,7 @@ def parser_function() -> argparse.ArgumentParser:
 
     # Add argument for filtering appendix
     parser.add_argument(
-        *ac.AppendixReportArgument.names, **ac.AppendixReportArgument.kwargs
+        *Settings.OPTION_appendices.args, **Settings.OPTION_appendices.kwargs
     )
 
     # Add argument for filtering configurators?
@@ -1116,11 +1117,8 @@ def main(argv: list[str]) -> None:
         generate_parallel_portfolio_section(report, parallel_dataframe)
 
     # Check if user wants to add appendix and
-    # choose argument from user over current setting.
-    appendicies_enabled = (
-        args.appendicies if args.appendicies is not None else gv.settings().appendicies
-    )
-    if appendicies_enabled:
+    settings = gv.settings(args)
+    if settings.appendices:
         generate_appendix(report, performance_data, feature_data)
 
     # Adding bibliography
