@@ -6,6 +6,7 @@ Notable changes to Sparkle will be documented in this file.
 
 ### Added
 - Feature data frame tests [Issue#181]
+- Added seed functionality to Sparkle Settings, which parametrises np.random / random.random throughout the platform [Issue#182]
 
 ### Changed
 - Changed the CLI arguments and settings structures to be more streamlined and unified [SPRK-175]
@@ -15,7 +16,6 @@ Notable changes to Sparkle will be documented in this file.
 - RunSolver executable is now copied to feature extractors dirs instead, paths now directly linked similar to Solvers
 - Changed flake8 to ruff [Issue#184]
 - Refactored FeatureDataFrame to subclass pandas DF instead of property [Issue#185]
-- Added seed functionality [Issue#182]
 
 ### Fixed
 
