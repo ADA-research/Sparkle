@@ -473,13 +473,3 @@ SolutionVerifierArgument = ArgumentContainer(
 ObjectiveArgument = ArgumentContainer(
     names=["--objective"], kwargs={"type": str, "help": "the objective to use."}
 )
-
-AppendixReportArgument = ArgumentContainer(
-    names=["--appendicies"],
-    kwargs={
-        "required": False,
-        "default": None,
-        "action": "store_true",
-        "help": "Include appendix section. Default: False unless enabled in settings.",
-    },
-)
