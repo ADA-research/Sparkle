@@ -110,7 +110,7 @@ def log_command(argv: list[str], seed: int = None) -> None:
     # If the log file does not exist yet, write the header
     log_path = Settings.DEFAULT_output / "sparkle.log"
     if not log_path.is_file():
-        log_header = "\t Timestamp\t\t\t\t\t\t\t  Command\t\t\t\t\t\t\t Output details\n"
+        log_header = "\t Timestamp\t\t\t\t\t\t\t  Command\t\t\t\t\t\t\t Output details\t\t\t\t\t\t\t  Seed\n"
         log_str = log_header + log_str
 
     # Write to log file
