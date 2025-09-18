@@ -312,8 +312,8 @@ class Solver(SparkleCallable):
     def run_performance_dataframe(
         self: Solver,
         instances: str | list[str] | InstanceSet,
-        config_ids: str | list[str],
         performance_dataframe: PerformanceDataFrame,
+        config_ids: str | list[str] = None,
         run_ids: list[int] | list[list[int]] = None,
         cutoff_time: int = None,
         objective: SparkleObjective = None,
@@ -365,6 +365,8 @@ class Solver(SparkleCallable):
             config_ids = [config_ids]
         configurations = [
             performance_dataframe.get_full_configuration(str(self.directory), config_id)
+            if config_id
+            else None
             for config_id in config_ids
         ]
         if run_ids is None:
@@ -398,7 +400,9 @@ class Solver(SparkleCallable):
             else ""
         )
         configuration_args = [
-            f"--configuration-id {config_id}"
+            ""
+            if not config_id and not config
+            else f"--configuration-id {config_id}"
             if not config
             else f"--configuration '{json.dumps(config)}'"
             for _, config_id, config, _ in combinations

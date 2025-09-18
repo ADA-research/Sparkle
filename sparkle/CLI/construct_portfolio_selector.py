@@ -72,8 +72,11 @@ def judge_exist_remaining_jobs(
         )
     if missing_performances:
         print(
-            "There remain unperformed performance computation jobs! Please run: "
-            "'sparkle run solvers --performance-data'"
+            "There remain unperformed performance computation jobs! Please run:\n"
+            "'sparkle cleanup --performance-data'\n"
+            "to check for missing values in the logs, otherwise run:\n"
+            "'sparkle run solvers --performance-data'\n"
+            "to compute missing values."
         )
     if missing_features or missing_performances:
         print(

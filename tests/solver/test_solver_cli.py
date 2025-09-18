@@ -1,5 +1,6 @@
 """Tests for Solver CLI entry point."""
 
+import logging
 import os
 import time
 import math
@@ -88,6 +89,8 @@ def test_solver_cli_performance(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
         return  # Test currently does not work on Github Actions
 
     cluster_settings = cli_tools.get_cluster_settings()
+    logging.basicConfig(level=logging.INFO)
+    mylogger = logging.getLogger()
 
     pdf_source = Path(
         "tests/test_files/performance/example-high-concurrency.csv"
@@ -95,12 +98,20 @@ def test_solver_cli_performance(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     solver = Path("Examples/Resources/Solvers/PbO-CCSAT-Generic").absolute()
     instances = Path("Examples/Resources/Instances/PTN").absolute()
     runsolver_exec = Settings.DEFAULT_runsolver_exec.absolute()
-    monkeypatch.chdir(tmp_path)
+
+    # NOTE: Slurm logs dont show up in the actual tmp dir, thus we make our own for now
+    current_dir = Path.cwd()
+    tmp_dir = Path("tests/test_files/tmp")
+    tmp_dir.mkdir(exist_ok=True)
+    monkeypatch.chdir(tmp_dir)
+
     pdf_target = Path("performance_data.csv")
     solver_target = Path("Solvers/PbO-CCSAT-Generic")  # Match the structure in PDF
     runsolver_target = solver_target / "runsolver"
     instances_target = Path("Instances/PTN")
-    log_dir = Path("Tmp")
+    log_dir = Path("Log").absolute()
+
+    log_dir.mkdir(exist_ok=True)
     shutil.copyfile(pdf_source, pdf_target)
     shutil.copytree(solver, solver_target)
     shutil.copytree(instances, instances_target)
@@ -131,13 +142,17 @@ def test_solver_cli_performance(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
         job_name="Performance Load Test PerformanceDataFrame",
         run_on=Runner.SLURM,
     )
-
-    # TODO: RunRunner issue, status cannot be resolved directly after submission?
-    # TODO: RunRunner issue, run.wait will never finish on Slurm?
-    run.get_latest_job_details()
-
+    expected_values = (
+        len(run.jobs) * len(original_pdf.objectives) * len(original_pdf.run_ids)
+    )
+    mylogger.info(
+        f"Running {len(run.jobs)} jobs, expecting {expected_values} new values..."
+    )
+    mylogger.info(Path().absolute())
     # Wait for jobs to finish
     while run.status != Status.COMPLETED:
+        # TODO: RunRunner issue, status cannot be resolved directly after submission?
+        # TODO: RunRunner issue, run.wait will never finish on Slurm? As it does not execute get_latest_job_details
         time.sleep(15)  # Wait for status to be available
         run.get_latest_job_details()
         if run.status in [
@@ -160,7 +175,6 @@ def test_solver_cli_performance(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
             original_value = original_pdf.loc[index, column]
             changed_value = pdf_changed.loc[index, column]
             assert str(original_value) == str(changed_value)
-            # assert original_pdf.loc[index, column] == pdf_changed.loc[index, column]
 
     # 2. Check that all written values are either nan (emtpy) or match with the logs
     pattern = re.compile(
@@ -172,6 +186,8 @@ def test_solver_cli_performance(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
         r"(?P<target_value>\S+)$"
     )
 
+    values_checked = 0
+    nan_count = 0
     for log in log_dir.iterdir():
         if log.suffix != ".out":
             continue
@@ -179,6 +195,7 @@ def test_solver_cli_performance(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
             for line in f:
                 match = pattern.match(line)
                 if match:
+                    values_checked += 1
                     value = pdf_changed.loc[
                         (
                             match.group("objective"),
@@ -190,7 +207,18 @@ def test_solver_cli_performance(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
                     if (isinstance(value, float) and math.isnan(value)) or (
                         isinstance(value, str) and value.lower() == "nan"
                     ):
+                        nan_count += 1
                         continue
                     assert str(value) == str(match.group("target_value"))
 
+    mylogger.info(
+        f"Verified {values_checked} values in logs out of {expected_values} ({values_checked / expected_values * 100:.2f}%)"
+    )
+    mylogger.info(
+        f"Found {nan_count} empty values in logs out of {expected_values} ({nan_count / expected_values * 100:.2f}%)"
+    )
     # 3. TODO: Check that the values make sense (?)
+
+    # Clean up
+    monkeypatch.chdir(current_dir)
+    shutil.rmtree(tmp_dir)
