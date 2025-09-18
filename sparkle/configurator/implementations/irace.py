@@ -566,7 +566,7 @@ class IRACEScenario(ConfigurationScenario):
             scenario_dict.pop("trainInstancesDir").strip().strip('"')
         )
         instance_set = Instance_Set(instance_set_path)
-        solver = Solver(Path(solver_path.strip()))
+        solver = Solver(Path(solver_path.strip()).relative_to(Path.cwd()))
         scenario_dict.pop("trainInstancesFile")
         # Replace keys with scenario variable names
         if "budgetEstimation" in scenario_dict:

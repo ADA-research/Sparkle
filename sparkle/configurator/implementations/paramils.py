@@ -244,9 +244,8 @@ class ParamILSScenario(SMAC2Scenario):
             cli_cores,
             use_cpu_time_in_tunertime,
             feature_data,
+            timestamp,
         )
-        self.solver = solver
-        self.instance_set = instance_set
         self.tuner_timeout = tuner_timeout
         self.multi_objective = len(sparkle_objectives) > 1  # Not using MO yet in Sparkle
         self.focused = focused_ils
