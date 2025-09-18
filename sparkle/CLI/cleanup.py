@@ -127,6 +127,22 @@ def main(argv: list[str]) -> None:
             f"Extracted {count} values from the logs and placed them in the PerformanceDataFrame."
         )
 
+        # Remove empty configurations
+        removed_configurations = 0
+        for solver, configurations in performance_data.configurations.items():
+            for config_id, config in configurations.items():
+                if config_id == PerformanceDataFrame.default_configuration:
+                    continue
+                if not config:  # Empty configuration, remove
+                    performance_data.remove_configuration(solver, config_id)
+                    removed_configurations += 1
+        if removed_configurations:
+            performance_data.save_csv()
+        print(
+            f"Removed {removed_configurations} empty configurations from the "
+            "Performance DataFrame."
+        )
+
         index_num = len(performance_data.index)
         # We only clean lines that are completely empty
         performance_data.remove_empty_runs()
