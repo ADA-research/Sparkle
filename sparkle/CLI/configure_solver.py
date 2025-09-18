@@ -203,8 +203,8 @@ def main(argv: list[str]) -> None:
             instances.append(instance_path)
         default_job = solver.run_performance_dataframe(
             instances,
-            PerformanceDataFrame.default_configuration,
             performance_data,
+            PerformanceDataFrame.default_configuration,
             sbatch_options=sbatch_options,
             slurm_prepend=slurm_prepend,
             cutoff_time=config_scenario.solver_cutoff_time,
@@ -234,8 +234,8 @@ def main(argv: list[str]) -> None:
             )
             test_set_job = solver.run_performance_dataframe(
                 instance_set_test,
-                run_index,
                 performance_data,
+                run_ids=run_index,
                 cutoff_time=config_scenario.solver_cutoff_time,
                 objective=config_scenario.sparkle_objective,
                 train_set=instance_set_train,

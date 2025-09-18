@@ -75,7 +75,7 @@ def main(argv: list[str]) -> None:
             )
             sys.exit(-1)
         if args.instance_path:  # Instance to test with
-            object.runsolver_exec = settings.DEFAULT_runsolver_exec
+            object._runsolver_exec = settings.DEFAULT_runsolver_exec
             if not object.runsolver_exec.exists():
                 print(
                     f"Runsolver {object.runsolver_exec} not found. "

@@ -19,9 +19,14 @@ class SparkleCallable:
         """
         self.directory = directory
         self.name = directory.name
-        self.runsolver_exec = runsolver_exec
-        if self.runsolver_exec is None:
-            self.runsolver_exec = self.directory / "runsolver"
+        self._runsolver_exec = runsolver_exec
+
+    @property
+    def runsolver_exec(self: SparkleCallable) -> Path:
+        """Return the path of the runsolver executable."""
+        if self._runsolver_exec is None:
+            return self.directory / "runsolver"
+        return self._runsolver_exec
 
     def build_cmd(self: SparkleCallable) -> list[str | Path]:
         """A method that builds the commandline call string."""

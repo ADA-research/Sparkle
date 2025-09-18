@@ -23,8 +23,8 @@ setup(
     packages=find_packages(exclude=["tests"]),
     install_requires=[
         "numpy>=1.26.4",
-        "pandas==2.2.2",
-        "filelock==3.15.1",
+        "pandas==2.3.2",
+        "filelock==3.19.1",
         "tabulate==0.9.0",
         "pytermgui==7.7.2",
         "tqdm==4.66.5",

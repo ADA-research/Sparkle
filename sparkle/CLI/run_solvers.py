@@ -239,8 +239,8 @@ def run_solvers_performance_data(
                 continue
             run = solver.run_performance_dataframe(
                 solver_instances,
-                solver_config,
                 performance_data,
+                solver_config,
                 run_ids=run_ids,
                 cutoff_time=cutoff_time,
                 sbatch_options=sbatch_options,

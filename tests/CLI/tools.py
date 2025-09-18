@@ -5,6 +5,7 @@ import json
 import subprocess
 from pathlib import Path
 
+from sparkle.platform import Settings
 from sparkle.CLI.help import jobs as jobs_help
 
 
@@ -51,3 +52,8 @@ def get_settings_path() -> Path:
         return (settings_dir / "sparkle_settings_kathleen.ini").absolute()
     # TODO: Add Grace (LIACS)
     return (settings_dir / "sparkle_settings_default.ini").absolute()
+
+
+def get_cluster_settings() -> Settings:
+    """Get the settings corresponding to the compute cluster."""
+    return Settings(get_settings_path())
