@@ -43,6 +43,7 @@ def pytest_configure(config: pytest.Parser) -> None:
     """Handling custom Pytest args."""
     markers = []
     if config.option.all:
+        setattr(config.option, "markexpr", "not performance")
         return
     if config.option.performance:
         # config.option
