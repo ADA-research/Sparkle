@@ -980,7 +980,8 @@ class PerformanceDataFrame(pd.DataFrame):
             instances: The instances which should be selected for the evaluation
             sort: Whether to sort the results afterwards
         Returns:
-            The marginal contribution of each solver.
+            The marginal contribution of each solver (configuration) as:
+            [(solver, config_id, marginal_contribution, portfolio_best_performance_without_solver)]
         """
         output = []
         objective = self.verify_objective(objective)

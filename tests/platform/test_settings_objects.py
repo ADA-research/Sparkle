@@ -66,6 +66,7 @@ def test_read_from_file() -> None:
     # Selection
     assert settings.selection_model == "RandomForestClassifier"
     assert settings.selection_class == "MultiClassClassifier"
+    assert settings.minimum_marginal_contribution == 0.01
 
     # SMAC2
     assert settings.smac2_wallclock_time_budget == 600
@@ -194,6 +195,7 @@ def test_read_full_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None
     # Selection
     assert settings.selection_model == "RandomForestClassifier"
     assert settings.selection_class == "MultiClassClassifier"
+    assert settings.minimum_marginal_contribution == 0.01
 
     # SMAC2
     assert settings.smac2_wallclock_time_budget == 600
@@ -287,6 +289,7 @@ def test_read_with_cli_file() -> None:
     # Selection
     assert settings.selection_model == "RandomForestClassifier"
     assert settings.selection_class == "MultiClassClassifier"
+    assert settings.minimum_marginal_contribution == 0.01
 
     # SMAC2
     assert settings.smac2_wallclock_time_budget == 600

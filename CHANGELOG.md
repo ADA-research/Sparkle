@@ -8,6 +8,7 @@ Notable changes to Sparkle will be documented in this file.
 - Feature data frame tests [Issue#181]
 - Added seed functionality to Sparkle Settings, which parametrises np.random / random.random throughout the platform [Issue#182]
 - sparkle cleanup --performance-data: Added functionality to automatically extract missing values in the PerformanceDataFrame from the logs [Issue#188]
+- Minimum marginal contribution option for constructing a selector, filtering all Solvers/Configurations that do no meet the minimum marginal contribution on the training set. Defaults to 0.01.
 
 ### Changed
 - Changed the CLI arguments and settings structures to be more streamlined and unified [SPRK-175]
