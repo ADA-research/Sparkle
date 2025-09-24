@@ -17,19 +17,66 @@ def test_parser() -> None:
 
 
 @pytest.mark.parametrize(
-    "args",
+    "args, case",
     [
-        [],
-        ["--only-json", "True"],
-        ["--solver", "PbO-CCSAT-Generic", "--instance-set", "PTN", "--appendices"],
+        ([], 0),
+        (["--only-json", "True"], 1),
+        (["--solver", "PbO-CCSAT-Generic", "--instance-set", "PTN", "--appendices"], 2),
     ],
 )
-def test_main(args: list[str]) -> None:
+def test_main(args: list[str], case: int) -> None:
     """Test main of generate report."""
     with pytest.raises(SystemExit) as pytest_wrapped_e:
+        # If report.pdf and/or output.json is generated, delete it first
+        if Path("Output/Analysis/report/report.pdf").exists():
+            Path("Output/Analysis/report/report.pdf").unlink()
+        if Path("Output/Analysis/JSON/output.json").exists():
+            Path("Output/Analysis/JSON/output.json").unlink()
+
         generate_report.main(args) is None
+        # Check if the report.pdf file and output.json is generated
+        assert Path("Output/Analysis/report/report.pdf").exists()
+        assert Path("Output/Analysis/JSON/output.json").exists()
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
+
+    if case == 1:
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            # Since report.pdf is generated already in case = 0
+            # see if it'll be deleted with --only-json True
+            # and not created again
+            if Path("Output/Analysis/JSON/output.json").exists():
+                Path("Output/Analysis/JSON/output.json").unlink()
+            assert generate_report.main(args) is None
+            # Check if the report.pdf file is deleted
+            assert not Path("Output/Analysis/report/report.pdf").exists()
+
+            # Check if the output.json is generated
+            assert Path("Output/Analysis/JSON/output.json").exists()
+            assert pytest_wrapped_e.type is SystemExit
+            assert pytest_wrapped_e.value.code == 0
+
+    elif case == 2:
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            performance_section_name = "Performance DataFrame"
+            feature_section_name = "Feature DataFrame"
+            generate_report.main(args) is None
+            # Check if the appendices part is in report.pdf
+            # by checking the file size and section presence
+            report_path = Path("Output/Analysis/report/report.pdf")
+            assert report_path.exists()
+            assert report_path.stat().st_size > 10  # Arbitrary size check
+
+            # To check the section presence, get the .tex file
+            tex_path = Path("Output/Analysis/report/report.tex")
+            assert tex_path.exists()
+            with Path.open(tex_path, "r") as f:
+                tex_content = f.read()
+                assert f"\\section{{{performance_section_name}}}" in tex_content
+                assert f"\\section{{{feature_section_name}}}" in tex_content
+
+            assert pytest_wrapped_e.type is SystemExit
+            assert pytest_wrapped_e.value.code == 0
 
 
 @pytest.mark.integration
