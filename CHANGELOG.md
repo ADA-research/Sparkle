@@ -7,6 +7,8 @@ Notable changes to Sparkle will be documented in this file.
 ### Added
 - Feature data frame tests [Issue#181]
 - Added seed functionality to Sparkle Settings, which parametrises np.random / random.random throughout the platform [Issue#182]
+- sparkle cleanup --performance-data: Added functionality to automatically extract missing values in the PerformanceDataFrame from the logs [Issue#188]
+- Minimum marginal contribution option for constructing a selector, filtering all Solvers/Configurations that do no meet the minimum marginal contribution on the training set. Defaults to 0.01.
 
 ### Changed
 - Changed the CLI arguments and settings structures to be more streamlined and unified [SPRK-175]
@@ -18,6 +20,7 @@ Notable changes to Sparkle will be documented in this file.
 - Refactored FeatureDataFrame to subclass pandas DF instead of property [Issue#185]
 
 ### Fixed
+- Fixed various reading/writing issues to PerformanceDataFrame [Issue#188]
 
 ### [Known issues]
 - IRACE configuration currently does not work as the IRACE .rdata output files cannot be read by R/IRACE.

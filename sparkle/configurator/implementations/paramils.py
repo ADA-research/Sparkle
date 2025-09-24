@@ -111,8 +111,8 @@ class ParamILS(Configurator):
             )
         scenario.create_scenario()
         configuration_ids = scenario.configuration_ids
-
-        seeds = [random.randint(0, 2**32 - 1) for _ in range(scenario.number_of_runs)]
+        # The maximum seed size for ParamILS is 999 999 999
+        seeds = [random.randint(0, 10**9 - 1) for _ in range(scenario.number_of_runs)]
         output = [
             f"{(scenario.results_directory).absolute()}/"
             f"{scenario.name}_seed_{config_id}_paramils.txt"
@@ -244,9 +244,8 @@ class ParamILSScenario(SMAC2Scenario):
             cli_cores,
             use_cpu_time_in_tunertime,
             feature_data,
+            timestamp,
         )
-        self.solver = solver
-        self.instance_set = instance_set
         self.tuner_timeout = tuner_timeout
         self.multi_objective = len(sparkle_objectives) > 1  # Not using MO yet in Sparkle
         self.focused = focused_ils

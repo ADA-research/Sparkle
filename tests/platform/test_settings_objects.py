@@ -60,12 +60,13 @@ def test_read_from_file() -> None:
     assert settings.configurator_max_iterations is None
 
     # Ablation
-    assert settings.ablation_racing_flag
+    assert settings.ablation_racing_flag is False
     assert settings.ablation_max_parallel_runs_per_node == 8
 
     # Selection
     assert settings.selection_model == "RandomForestClassifier"
     assert settings.selection_class == "MultiClassClassifier"
+    assert settings.minimum_marginal_contribution == 0.01
 
     # SMAC2
     assert settings.smac2_wallclock_time_budget == 600
@@ -188,12 +189,13 @@ def test_read_full_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None
     assert settings.configurator_max_iterations == 42
 
     # Ablation
-    assert settings.ablation_racing_flag
+    assert settings.ablation_racing_flag is False
     assert settings.ablation_max_parallel_runs_per_node == 3
 
     # Selection
     assert settings.selection_model == "RandomForestClassifier"
     assert settings.selection_class == "MultiClassClassifier"
+    assert settings.minimum_marginal_contribution == 0.01
 
     # SMAC2
     assert settings.smac2_wallclock_time_budget == 600
@@ -281,12 +283,13 @@ def test_read_with_cli_file() -> None:
     assert settings.configurator_max_iterations == 42
 
     # Ablation
-    assert settings.ablation_racing_flag
+    assert settings.ablation_racing_flag is False
     assert settings.ablation_max_parallel_runs_per_node == 8
 
     # Selection
     assert settings.selection_model == "RandomForestClassifier"
     assert settings.selection_class == "MultiClassClassifier"
+    assert settings.minimum_marginal_contribution == 0.01
 
     # SMAC2
     assert settings.smac2_wallclock_time_budget == 600

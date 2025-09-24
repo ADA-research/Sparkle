@@ -195,18 +195,6 @@ class Settings:
         "On which compute resource to execute.",
         cli_kwargs={"choices": [Runner.LOCAL, Runner.SLURM]},
     )
-    OPTION_appendices = Option(
-        "appendices",
-        SECTION_general,
-        bool,
-        False,
-        tuple(),
-        "Include the appendix section in the generated report.",
-        cli_kwargs={
-            "action": "store_true",
-            "default": None,
-        },
-    )
     OPTION_verbosity = Option(
         "verbosity",
         SECTION_general,
@@ -222,6 +210,18 @@ class Settings:
         None,
         tuple(),
         "Seed to use for pseudo-random number generators.",
+    )
+    OPTION_appendices = Option(
+        "appendices",
+        SECTION_general,
+        bool,
+        False,
+        tuple(),
+        "Include the appendix section in the generated report.",
+        cli_kwargs={
+            "action": "store_true",
+            "default": None,
+        },
     )
 
     # CONFIGURATION Options
@@ -292,6 +292,18 @@ class Settings:
         None,
         ("model",),
         "Can be any of the sklearn.ensemble models.",
+    )
+    OPTION_minimum_marginal_contribution = Option(
+        "minimum_marginal_contribution",
+        SECTION_selection,
+        float,
+        0.01,
+        (
+            "minimum_marginal_contribution",
+            "minimum_contribution",
+            "contribution_threshold",
+        ),
+        "The minimum marginal contribution a solver (configuration) must have to be used for the selector.",
     )
 
     # SMAC2 Options
@@ -631,7 +643,11 @@ class Settings:
             OPTION_ablation_racing,
             OPTION_ablation_clis_per_node,
         ],
-        SECTION_selection: [OPTION_selection_class, OPTION_selection_model],
+        SECTION_selection: [
+            OPTION_selection_class,
+            OPTION_selection_model,
+            OPTION_minimum_marginal_contribution,
+        ],
         SECTION_smac2: [
             OPTION_smac2_wallclock_time_budget,
             OPTION_smac2_cpu_time_budget,
@@ -714,6 +730,7 @@ class Settings:
         # Selection attributes
         self.__selection_model: str = None
         self.__selection_class: str = None
+        self.__minimum_marginal_contribution: float = None
 
         # SMAC2 attributes
         self.__smac2_wallclock_time_budget: int = None
@@ -1034,6 +1051,15 @@ class Settings:
                 Settings.OPTION_selection_class
             )
         return self.__selection_class
+
+    @property
+    def minimum_marginal_contribution(self: Settings) -> float:
+        """Get the minimum marginal contribution."""
+        if self.__minimum_marginal_contribution is None:
+            self.__minimum_marginal_contribution = self._abstract_getter(
+                Settings.OPTION_minimum_marginal_contribution
+            )
+        return self.__minimum_marginal_contribution
 
     # Configuration: SMAC2 specific settings ###
     @property
@@ -1481,6 +1507,10 @@ class Settings:
         for section in sections_remained:
             printed_section = False
             names = set(cur_dict[section].keys()) | set(prev_dict[section].keys())
+            if (
+                section == "general" and "seed" in names
+            ):  # Do not report on the seed, is supposed to change
+                names.remove("seed")
             for name in names:
                 # if name is not present in one of the two dicts, get None as placeholder
                 cur_val = cur_dict[section].get(name, None)

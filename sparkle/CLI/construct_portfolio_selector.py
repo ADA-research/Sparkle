@@ -55,6 +55,10 @@ def parser_function() -> argparse.ArgumentParser:
     # TODO: Allow user to specify configuration ids to use
     # Settings arguments
     parser.add_argument(*ac.SettingsFileArgument.names, **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(
+        *Settings.OPTION_minimum_marginal_contribution.args,
+        **Settings.OPTION_minimum_marginal_contribution.kwargs,
+    )
     parser.add_argument(*Settings.OPTION_run_on.args, **Settings.OPTION_run_on.kwargs)
     return parser
 
@@ -72,8 +76,11 @@ def judge_exist_remaining_jobs(
         )
     if missing_performances:
         print(
-            "There remain unperformed performance computation jobs! Please run: "
-            "'sparkle run solvers --performance-data'"
+            "There remain unperformed performance computation jobs! Please run:\n"
+            "'sparkle cleanup --performance-data'\n"
+            "to check for missing values in the logs, otherwise run:\n"
+            "'sparkle run solvers --performance-data'\n"
+            "to compute missing values."
         )
     if missing_features or missing_performances:
         print(
@@ -190,6 +197,21 @@ def main(argv: list[str]) -> None:
             "value of all other non-missing values! Imputing all missing values..."
         )
         feature_data.impute_missing_values()
+
+    # Filter the scenario from Solver (Configurations) that do not meet the minimum marginal contribution on the training set
+    if gv.settings().minimum_marginal_contribution > 0.0:
+        print(
+            f"Filtering the scenario from Solver (Configurations) with contribution < {gv.settings().minimum_marginal_contribution} ..."
+        )
+        for (
+            solver,
+            config_id,
+            marginal_contribution,
+            _,
+        ) in performance_data.marginal_contribution(objective=objective):
+            if marginal_contribution < gv.settings().minimum_marginal_contribution:
+                print(f"\tRemoving {solver}, {config_id} [{marginal_contribution}]")
+                performance_data.remove_configuration(solver, config_id)
 
     selection_scenario = SelectionScenario(
         gv.settings().DEFAULT_selection_output,
