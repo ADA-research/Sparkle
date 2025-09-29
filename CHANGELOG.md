@@ -2,7 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.9.5] - ??/??/2025
+## [0.9.5] - 30/09/2025
 
 ### Added
 - Feature data frame tests [Issue#181]

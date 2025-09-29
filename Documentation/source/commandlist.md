@@ -5,7 +5,6 @@
 - {ref}`cmd-check`
 - {ref}`cmd-cleanup`
 - {ref}`cmd-compute-features`
-- {ref}`cmd-compute-marginal-contribution`
 - {ref}`cmd-configure-solver`
 - {ref}`cmd-construct-portfolio-selector`
 - {ref}`cmd-generate-report`
