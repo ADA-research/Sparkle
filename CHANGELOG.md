@@ -23,7 +23,7 @@ Notable changes to Sparkle will be documented in this file.
 - Fixed various reading/writing issues to PerformanceDataFrame [Issue#188]
 
 ### [Known issues]
-- IRACE configuration currently does not work as the IRACE .rdata output files cannot be read by R/IRACE.
+- IRACE configurator currently does not work as the IRACE .rdata output files cannot be read by R/IRACE.
 
 ## [0.9.4] - 01/06/2025
 
