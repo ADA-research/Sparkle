@@ -54,14 +54,6 @@
 
 ```
 
-(cmd-compute-marginal-contribution)=
-
-```{eval-rst}
-.. autoprogram:: sparkle.CLI.compute_marginal_contribution:parser_function()
-   :prog: compute_marginal_contribution
-
-```
-
 (cmd-configure-solver)=
 
 ```{eval-rst}
