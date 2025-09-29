@@ -97,7 +97,7 @@ def main(argv: list[str]) -> None:
     prev_settings = Settings(Path(Settings.DEFAULT_previous_settings_path))
     Settings.check_settings_changes(settings, prev_settings)
 
-    configurator = gv.settings().get_general_sparkle_configurator()
+    configurator = gv.settings().configurator
 
     # Check configurator is available
     if not configurator.check_requirements(verbose=True):
