@@ -21,7 +21,8 @@ if __name__ == "__main__":
     sphinx_file = Path("source/commandlist.md").open("w")
     for command in commands:
         sphinx_file.write(
-            f"- {{ref}}`cmd-{command.replace('.py', '').replace('_', '-')}`\n")
+            f"- {{ref}}`cmd-{command.replace('.py', '').replace('_', '-')}`\n"
+        )
     sphinx_file.close()
 
     sphinx_file = Path("source/commandsautoprogram.md").open("w")
@@ -32,7 +33,8 @@ if __name__ == "__main__":
             f"""\n```{{eval-rst}}\n"""
             f""".. autoprogram:: sparkle.CLI.{c_name}:parser_function()\n"""
             f"""   :prog: {c_name}\n\n"""
-            f"""```\n""")
+            f"""```\n"""
+        )
         if not i == len(commands) - 1:
             sphinx_file.write("\n")
     sphinx_file.close()

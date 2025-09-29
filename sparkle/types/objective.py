@@ -1,4 +1,5 @@
 """Class for Sparkle Objective and Performance."""
+
 from __future__ import annotations
 from enum import Enum
 import typing
@@ -8,6 +9,7 @@ from sparkle.types.status import SolverStatus
 
 class UseTime(str, Enum):
     """Enum describing what type of time to use."""
+
     WALL_TIME = "WALL_TIME"
     CPU_TIME = "CPU_TIME"
     NO = "NO"
@@ -30,15 +32,17 @@ class SparkleObjective:
     use_time: UseTime
     metric: bool
 
-    def __init__(self: SparkleObjective,
-                 name: str,
-                 run_aggregator: typing.Callable = np.mean,
-                 instance_aggregator: typing.Callable = np.mean,
-                 solver_aggregator: typing.Callable = None,
-                 minimise: bool = True,
-                 post_process: typing.Callable = None,
-                 use_time: UseTime = UseTime.NO,
-                 metric: bool = False) -> None:
+    def __init__(
+        self: SparkleObjective,
+        name: str,
+        run_aggregator: typing.Callable = np.mean,
+        instance_aggregator: typing.Callable = np.mean,
+        solver_aggregator: typing.Callable = None,
+        minimise: bool = True,
+        post_process: typing.Callable = None,
+        use_time: UseTime = UseTime.NO,
+        metric: bool = False,
+    ) -> None:
         """Create sparkle objective from string."""
         self.name = name
         self.run_aggregator: typing.Callable = run_aggregator
@@ -68,16 +72,19 @@ class SparkleObjective:
 
 class PAR(SparkleObjective):
     """Penalised Averaged Runtime Objective for Sparkle."""
-    negative_status = {SolverStatus.CRASHED,
-                       SolverStatus.KILLED,
-                       SolverStatus.ERROR,
-                       SolverStatus.TIMEOUT,
-                       SolverStatus.WRONG,
-                       SolverStatus.UNKNOWN}
 
-    def __init__(self: PAR, k: int = 10,
-                 minimise: bool = True,
-                 metric: bool = False) -> None:
+    negative_status = {
+        SolverStatus.CRASHED,
+        SolverStatus.KILLED,
+        SolverStatus.ERROR,
+        SolverStatus.TIMEOUT,
+        SolverStatus.WRONG,
+        SolverStatus.UNKNOWN,
+    }
+
+    def __init__(
+        self: PAR, k: int = 10, minimise: bool = True, metric: bool = False
+    ) -> None:
         """Initialize PAR."""
         self.k = k
         if k <= 0:
@@ -89,8 +96,10 @@ class PAR(SparkleObjective):
                 return cutoff * self.k
             return value
 
-        super().__init__(f"PAR{k}",
-                         minimise=minimise,
-                         use_time=UseTime.CPU_TIME,
-                         post_process=penalise,
-                         metric=metric)
+        super().__init__(
+            f"PAR{k}",
+            minimise=minimise,
+            use_time=UseTime.CPU_TIME,
+            post_process=penalise,
+            metric=metric,
+        )

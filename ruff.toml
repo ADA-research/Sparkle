@@ -1,0 +1,82 @@
+# Line and docstring length
+line-length = 89
+indent-width = 4
+
+# File excludes
+exclude = [
+    "sparkle/Components/ablationAnalysis-0.9.4/",
+    "sparkle/Components/runsolver/",
+    "sparkle/Components/smac2-v2.10.03-master-778/",
+    "sparkle/Components/irace-v4.2.0/",
+    "Examples/Resources/CVRP/",
+    "Examples/Resources/CCAG/",
+    "Examples/Resources/Solvers/CSCCSat/",
+    "Examples/Resources/Solvers/PbO-CCSAT-Generic/",
+    "Examples/Resources/Solvers/MiniSAT/",
+    "Examples/Resources/MinVC/",
+    "Examples/Resources/Extractors/",
+    "Extractors/",
+    "Settings/",
+    ".git",
+    "Instances/",
+    "Log/",
+    "Output/",
+    "__pycache__",
+    ".pytest_cache",
+    "Snapshots/",
+    "Reference_Lists/",
+    "scratch/",
+    "Solvers/",
+    "Tmp/",
+    "build/",
+    "dist/",
+]
+
+# See https://docs.astral.sh/ruff/rules/
+lint.select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "W",   # pycodestyle warnings
+    "D",   # pydocstyle (flake8-docstrings)
+    "Q",   # flake8-quotes
+    "S",   # flake8-bandit
+    "N",   # pep8-naming
+    "PTH", # flake8-use-pathlib
+    "ANN", # flake8-annotations
+]
+
+# Ignored rules
+lint.ignore = [
+    "D401", # First line of docstring should be in imperative mood: "{first_line}"
+    "D404", # First word of the docstring should not be "This"
+    "D413", # Missing blank line after last section ("{name}")
+    "D203", # 1 blank line required before class docstring
+    "D204", # 1 blank line required after class docstring
+    "D213", # Multi-line docstring summary should start at the second line
+    "D300", # Use triple double quotes """
+    "S605", "S607", "S404", "S603", "S311", "S310", # Certain Bandit rules
+    "E401", # Multiple imports on one line
+    "PTH201", # Do not pass the current directory explicitly to Path
+    "PTH116", # os.stat() should be replaced by Path.stat(), Path.owner(), or Path.group()
+    "PTH100", # `os.path.abspath()` should be replaced by `Path.resolve()`
+    "PTH207", # Replace `glob` with `Path.glob` or `Path.rglob`
+    "PTH208", # Use `pathlib.Path.iterdir()` instead.
+    "ANN401", # Dynamically typed expressions (typing.Any) are disallowed in `initial_values`
+    "E501",   # Line too long ({width} > {limit})
+]
+
+
+# Per-file ignores
+[lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"setup.py" = ["E501"]
+"tests/*" = ["S101"]
+"test/*" = ["S101"]
+"sparkle/platform/settings_objects.py" = ["S110", "ANN401"]
+"sparkle/tools/parameters.py" = ["S110"]
+"sparkle/types/__init__.py" = ["S110", "S307", "F401"]
+"sparkle/instance/__init__.py" = ["N802"]
+"sparkle/configurator/implementations/__init__.py" = ["S307", "F401"]
+
+[lint.mccabe]
+max-complexity = 15

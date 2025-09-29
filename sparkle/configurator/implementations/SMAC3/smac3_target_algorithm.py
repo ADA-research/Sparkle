@@ -1,4 +1,5 @@
 """Target algorithm for SMAC3 to allow for Slurm scheduling."""
+
 from __future__ import annotations
 import sys
 from pathlib import Path
@@ -26,7 +27,7 @@ def smac3_solver_call(config: Configuration, instance: str, seed: int) -> list[f
         seed,
         cutoff_time=cutoff,
         configuration=dict(config),
-        log_dir=log_dir
+        log_dir=log_dir,
     )
 
 
@@ -45,10 +46,11 @@ class SparkleTargetFunctionRunner(AbstractSerialRunner):
     """
 
     def __init__(
-            self: SparkleTargetFunctionRunner,
-            scenario: Scenario,
-            target_function: Callable = smac3_solver_call,
-            required_arguments: list[str] = None) -> None:
+        self: SparkleTargetFunctionRunner,
+        scenario: Scenario,
+        target_function: Callable = smac3_solver_call,
+        required_arguments: list[str] = None,
+    ) -> None:
         """Initialize SparkleTargetFunctionRunner."""
         if required_arguments is None:
             required_arguments = []
@@ -68,8 +70,10 @@ class SparkleTargetFunctionRunner(AbstractSerialRunner):
         # However, we only want to warn the user and not
         for key in list(signature.keys())[1:]:
             if key not in required_arguments:
-                print(f"The argument {key} is not set by SMAC: Consider removing it "
-                      "from the target function.")
+                print(
+                    f"The argument {key} is not set by SMAC: Consider removing it "
+                    "from the target function."
+                )
 
         # Pynisher limitations
         if (memory := self._scenario.trial_memory_limit) is not None:
@@ -181,8 +185,9 @@ class SparkleTargetFunctionRunner(AbstractSerialRunner):
             cpu_time = result["cpu_time"]
             del result["cpu_time"]
             del result["memory"]
-            result = {key: value
-                      for key, value in result.items() if key in self._objectives}
+            result = {
+                key: value for key, value in result.items() if key in self._objectives
+            }
         except Exception as e:
             cost = np.asarray(cost).squeeze().tolist()
             additional_info = {
@@ -195,8 +200,10 @@ class SparkleTargetFunctionRunner(AbstractSerialRunner):
             return status, cost, runtime, cpu_time, additional_info
 
         # Do some sanity checking (for multi objective)
-        error = f"Returned costs {result} does not match "\
-                f"the number of objectives {self._objectives}."
+        error = (
+            f"Returned costs {result} does not match "
+            f"the number of objectives {self._objectives}."
+        )
 
         # If dict convert to array and make sure the order is correct
         if isinstance(result, dict):
@@ -207,7 +214,8 @@ class SparkleTargetFunctionRunner(AbstractSerialRunner):
             for name in self._objectives:
                 if name not in result:
                     raise RuntimeError(
-                        f"Objective {name} was not found in the returned costs.")
+                        f"Objective {name} was not found in the returned costs."
+                    )
 
                 ordered_cost.append(result[name])
 
@@ -265,22 +273,26 @@ if __name__ == "__main__":
     kwargs = {}
     if scenario.max_ratio is not None:  # Override the default initial design
         kwargs["initial_design"] = scenario.smac_facade.get_initial_design(
-            scenario=scenario.smac3_scenario, max_ratio=scenario.max_ratio)
+            scenario=scenario.smac3_scenario, max_ratio=scenario.max_ratio
+        )
     # Facade Configurable
-    smac_facade = scenario.smac_facade(scenario.smac3_scenario,
-                                       smac3_solver_call,
-                                       **kwargs)
+    smac_facade = scenario.smac_facade(
+        scenario.smac3_scenario, smac3_solver_call, **kwargs
+    )
     # Override the target function runner to control resource management
     smac_facade._runner = SparkleTargetFunctionRunner(
         scenario.smac3_scenario,
-        required_arguments=smac_facade._get_signature_arguments())
+        required_arguments=smac_facade._get_signature_arguments(),
+    )
     # Refresh the optimiser with new target class
     smac_facade._optimizer = smac_facade._get_optimizer()
 
     incumbent = smac_facade.optimize()
     # TODO: Fix taking first objective, how do we determine 'best configuration' from
     # a multi objective run?
-    SMAC3.organise_output(scenario.smac3_scenario.output_directory / "runhistory.json",
-                          output_target=output_path,
-                          scenario=scenario,
-                          configuration_id=config_id)
+    SMAC3.organise_output(
+        scenario.smac3_scenario.output_directory / "runhistory.json",
+        output_target=output_path,
+        scenario=scenario,
+        configuration_id=config_id,
+    )

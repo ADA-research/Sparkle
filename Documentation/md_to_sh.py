@@ -4,8 +4,9 @@ from pathlib import Path
 from sparkle import about
 
 if __name__ == "__main__":
-    files = [p for p in Path("../Examples").iterdir()
-             if p.is_file() and p.suffix == ".md"]
+    files = [
+        p for p in Path("../Examples").iterdir() if p.is_file() and p.suffix == ".md"
+    ]
 
     for file in files:
         with file.open() as f:
@@ -23,6 +24,8 @@ if __name__ == "__main__":
 
         with file.with_suffix(".sh").open("w") as f:
             f.write("#!/usr/bin/env bash\n")
-            f.write("# Auto-Generated .sh files from the original .md by "
-                    f"Sparkle {about.version}\n\n")
+            f.write(
+                "# Auto-Generated .sh files from the original .md by "
+                f"Sparkle {about.version}\n\n"
+            )
             f.writelines(output_lines)

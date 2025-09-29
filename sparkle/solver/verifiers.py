@@ -1,4 +1,5 @@
 """Classes for verifying solutions."""
+
 from __future__ import annotations
 from pathlib import Path
 import subprocess
@@ -9,18 +10,19 @@ from sparkle.types import SolverStatus
 class SolutionVerifier:
     """Solution verifier base class."""
 
-    def verify(self: SolutionVerifier,
-               instance: Path,
-               output: dict,
-               solver_call: list[str]) -> SolverStatus:
+    def verify(
+        self: SolutionVerifier, instance: Path, output: dict, solver_call: list[str]
+    ) -> SolverStatus:
         """Verify the solution."""
         raise NotImplementedError
 
 
 class SATVerifier(SolutionVerifier):
     """Class to handle the SAT verifier."""
-    sat_verifier_path =\
+
+    sat_verifier_path = (
         Path(__file__).parent.parent / "Components/Sparkle-SAT-verifier/SAT"
+    )
 
     def __str__(self: SATVerifier) -> str:
         """Return the name of the SAT verifier."""
@@ -52,8 +54,7 @@ class SATVerifier(SolutionVerifier):
         return SolverStatus.UNKNOWN
 
     @staticmethod
-    def call_sat_raw_result(instance: Path,
-                            raw_result: Path) -> SolverStatus:
+    def call_sat_raw_result(instance: Path, raw_result: Path) -> SolverStatus:
         """Run a SAT verifier to determine correctness of a result.
 
         Args:
@@ -63,10 +64,9 @@ class SATVerifier(SolutionVerifier):
         Returns:
             The status of the solver on the instance
         """
-        sat_verify = subprocess.run([SATVerifier.sat_verifier_path,
-                                     instance,
-                                     raw_result],
-                                    capture_output=True)
+        sat_verify = subprocess.run(
+            [SATVerifier.sat_verifier_path, instance, raw_result], capture_output=True
+        )
         return SATVerifier.sat_verify_output(sat_verify.stdout.decode())
 
 
@@ -81,24 +81,30 @@ class SolutionFileVerifier(SolutionVerifier):
                 instance,objective,solution
         """
         self.csv_file = csv_file
-        lines = [line.split(",", maxsplit=2)
-                 for line in self.csv_file.read_text().splitlines()]
-        self.solutions = {instance: (objective, solution)
-                          for instance, objective, solution in lines}
+        lines = [
+            line.split(",", maxsplit=2)
+            for line in self.csv_file.read_text().splitlines()
+        ]
+        self.solutions = {
+            instance: (objective, solution) for instance, objective, solution in lines
+        }
 
     def __str__(self: SATVerifier) -> str:
         """Return the name of the SAT verifier."""
         return SolutionFileVerifier.__name__
 
-    def verify(self: SolutionFileVerifier,
-               instance: Path,
-               solver_output: dict[str, object],
-               solver_call: list[str]) -> SolverStatus:
+    def verify(
+        self: SolutionFileVerifier,
+        instance: Path,
+        solver_output: dict[str, object],
+        solver_call: list[str],
+    ) -> SolverStatus:
         """Verify the solution.
 
         Args:
             instance: instance to verify, solution found by instance name as key
             solver_output: outcome of the solver to verify
+            solver_call: list of solver calls
 
         Returns:
             The status of the solver on the instance
@@ -129,5 +135,7 @@ class SolutionFileVerifier(SolutionVerifier):
 
 
 # Define a mapping so we can translate between names and classes
-mapping = {SATVerifier.__name__: SATVerifier,
-           SolutionFileVerifier.__name__: SolutionFileVerifier}
+mapping = {
+    SATVerifier.__name__: SATVerifier,
+    SolutionFileVerifier.__name__: SolutionFileVerifier,
+}

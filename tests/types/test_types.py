@@ -13,10 +13,24 @@ class TestResolveObjective(unittest.TestCase):
 
     def setUp(self: TestResolveObjective) -> None:
         """List for good and bad objective names."""
-        self.test_names_good = ["quality", "quality10", "f1", "F1", "PAR10special",
-                                "very_special-indicator"]
-        self.test_names_bad = ["", "10", ".test", ":min", "quality:minimum",
-                               "quality:min:max", "_test", "-accuracy"]
+        self.test_names_good = [
+            "quality",
+            "quality10",
+            "f1",
+            "F1",
+            "PAR10special",
+            "very_special-indicator",
+        ]
+        self.test_names_bad = [
+            "",
+            "10",
+            ".test",
+            ":min",
+            "quality:minimum",
+            "quality:min:max",
+            "_test",
+            "-accuracy",
+        ]
 
     def test_resolving_basic(self: TestResolveObjective) -> None:
         """Test successful strings that should result in a normal SparkleObjective."""
@@ -55,13 +69,14 @@ class TestResolveObjective(unittest.TestCase):
     def test_par(self: TestResolveObjective) -> None:
         """Test PAR objects that should successfully initialize."""
         for name, k, oname, minimise, metric in [
-                ("PAR", 10, "PAR10", True, False),
-                ("PAR10", 10, "PAR10", True, False),
-                ("PAR2", 2, "PAR2", True, False),
-                ("PAR100", 100, "PAR100", True, False),
-                ("PAR10:max", 10, "PAR10", False, False),
-                ("PAR10:min", 10, "PAR10", True, False),
-                ("PAR10:min:metric", 10, "PAR10", True, True)]:
+            ("PAR", 10, "PAR10", True, False),
+            ("PAR10", 10, "PAR10", True, False),
+            ("PAR2", 2, "PAR2", True, False),
+            ("PAR100", 100, "PAR100", True, False),
+            ("PAR10:max", 10, "PAR10", False, False),
+            ("PAR10:min", 10, "PAR10", True, False),
+            ("PAR10:min:metric", 10, "PAR10", True, True),
+        ]:
             objective = resolve_objective(name)
             self.assertIsInstance(objective, SparkleObjective)
             self.assertIsInstance(objective, PAR)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions to record and restore a Sparkle platform."""
+
 import shutil
 import sys
 import os
@@ -10,6 +11,7 @@ import zipfile
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.tools.general import get_time_pid_random_string
+from sparkle.platform import Settings
 
 
 def save_current_platform(name: str = None) -> None:
@@ -24,8 +26,9 @@ def save_current_platform(name: str = None) -> None:
     snapshot_tmp_path = gv.settings().DEFAULT_snapshot_dir / name
     snapshot_tmp_path.mkdir(parents=True)  # Create temporary directory for zip
     available_dirs = [p.name for p in Path.cwd().iterdir()]
-    root_working_dirs = [p for p in gv.settings().DEFAULT_working_dirs
-                         if p.name in available_dirs]
+    root_working_dirs = [
+        p for p in gv.settings().DEFAULT_working_dirs if p.name in available_dirs
+    ]
     for working_dir in root_working_dirs:
         if working_dir.exists():
             shutil.copytree(working_dir, snapshot_tmp_path / working_dir.name)
@@ -40,6 +43,7 @@ def remove_current_platform(filter: list[Path] = None) -> None:
     for working_dir in gv.settings().DEFAULT_working_dirs:
         if working_dir not in filter:
             shutil.rmtree(working_dir, ignore_errors=True)
+    Settings.DEFAULT_previous_settings_path.unlink(missing_ok=True)
 
 
 def create_working_dirs() -> None:
@@ -81,10 +85,13 @@ def load_snapshot(snapshot_file: Path) -> None:
     print(f"Loading snapshot file {snapshot_file} ...")
     extract_snapshot(snapshot_file)
     if any([not wd.exists() for wd in gv.settings().DEFAULT_working_dirs]):
-        missing_dirs = [wd.name for wd in gv.settings().DEFAULT_working_dirs
-                        if not wd.exists()]
-        print("ERROR: Failed to load Sparkle platform! The snapshot file may be outdated"
-              " or corrupted. Missing the following directories: "
-              f"{', '.join(missing_dirs)}")
+        missing_dirs = [
+            wd.name for wd in gv.settings().DEFAULT_working_dirs if not wd.exists()
+        ]
+        print(
+            "ERROR: Failed to load Sparkle platform! The snapshot file may be outdated"
+            " or corrupted. Missing the following directories: "
+            f"{', '.join(missing_dirs)}"
+        )
         sys.exit(-1)
     print(f"Snapshot file {snapshot_file} loaded successfully!")

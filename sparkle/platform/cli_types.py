@@ -1,4 +1,5 @@
 """Helper types for command line interface."""
+
 from enum import Enum
 from typing import Type
 
@@ -8,11 +9,6 @@ class VerbosityLevel(Enum):
 
     QUIET = 0
     STANDARD = 1
-
-    @staticmethod
-    def from_string(name: str) -> "VerbosityLevel":
-        """Converts string to VerbosityLevel."""
-        return VerbosityLevel[name]
 
 
 class TEXT(Enum):

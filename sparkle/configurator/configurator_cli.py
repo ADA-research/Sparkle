@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Configurator CLI wrapper class to standardise I/O of Configurators."""
+
 import sys
 import subprocess
 from pathlib import Path
@@ -19,8 +20,10 @@ if __name__ == "__main__":
     # 2. Execute the call, output is automatically piped to the caller's set output
     subprocess.run(configurator_call)
     # 3. Have the configurator implementation organise the output, standardised
-    configurator.organise_output(output_source=output_source,
-                                 output_target=output_target,
-                                 scenario=scenario,
-                                 configuration_id=configuration_id)
+    configurator.organise_output(
+        output_source=output_source,
+        output_target=output_target,
+        scenario=scenario,
+        configuration_id=configuration_id,
+    )
     print(f"Organising done! See {output_target} for results.")

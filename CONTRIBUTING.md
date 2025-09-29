@@ -36,13 +36,13 @@ When ready, create a pull request towards the `main` branch, clearly indicating 
 Make sure to also update the `CHANGELOG.md` and the version number with a minor version (after the dot) when ready to merge to main. E.g., 0.4.1 changes to 0.4.2.
 
 ### All other development
-The development is done on the `development` branch. Before starting your own work, make sure you have the pre-commit pipeline installed to avoid any flake8 issues on the GitHub, by running `pre-commit install` in the sparkle environment.
+The development is done on the `development` branch. Before starting your own work, make sure you have the pre-commit pipeline installed to avoid any ruff issues on the GitHub, by running `pre-commit install` in the sparkle environment.
 To make changes to Sparkle, please create a branch from `development` and add your code there.
 If, during testing, you need to clean up local files, please do so using the custom git command `git sparkle-clean` as this preserves certain untracked files that are necessary to run Sparkle (and which would be removed when simply running `git clean -dxf`). To make this command locally available, run `git config alias.sparkle-clean "clean -dxf -e Sparkle.egg-info"` once.
 When ready, create a pull request towards the `development` branch.
 
 ## Pull requests, review, and merge protocol
-1. Prior to creating a pull request, **the author(s) of the changes are expected to ensure the general, code style and testing conditions below are satisfied**. To avoid burning through our build minutes on Github, this is easily tested locally by running "flake8" or "pytest" in the main sparkle directory in your branch.
+1. Prior to creating a pull request, **the author(s) of the changes are expected to ensure the general, code style and testing conditions below are satisfied**. To avoid burning through our build minutes on Github, this is easily tested locally by running "ruff" or "pytest" in the main sparkle directory in your branch.
 2. Pull requests should be reviewed by at least one member of the Sparkle development team.
 3. Once all reviewers have approved the pull request it can be merged. Make sure issue branches are deleted upon merger to avoid excessively many dormant branches. In principle the last reviewer to approve should do the merge immediately. However, if this does not work because, e.g., a final (minor) change is requested, or they forget, someone else can take over the responsibility.
 
@@ -59,8 +59,8 @@ The coding style consistency is a work in progress, and existing code may not ad
 
 1. Ensure the code is easily readable and understandable.
 2. Ensure comments explain code that cannot be written in an easily readable and understandable way.
-3. Adhere to the [PEP8](https://pep8.org/) style guide. Deviations are documented in `.flake8` (only larger line length).
-3. Make sure the code style rules pass by running `flake8`.
+3. Adhere to the [PEP8](https://pep8.org/) style guide.
+3. Make sure the code style rules pass by running `ruff`.
 4. Ensure useful and accurate docstrings are included, and follow the [Google style](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for them. End parameter description sentences always with a dot.
 5. Ensure useful and accurate type hints are included.
 6. Use fstrings over other string formatting.
@@ -76,8 +76,8 @@ The coding style consistency is a work in progress, and existing code may not ad
 When releasing a new version (including bugfix versions) of Sparkle to the `main` branch, the protocol below should be followed. First the checks should be performed. If at any step anything fails, it should first be fixed and then ALL checks should be performed again from scratch, starting from point 1.
 
 ### Checks
-1. Freshly install the conda environment. Remove the old one with `conda env remove -n sparkle` and create it again with `conda env create -f environment.yml` or with `conda env create -f dev-env.yml`. In principle, these environments are equal except that the dev-env has a few extra libs to run pytests and flake8.
-2. Make sure the code style rules pass by running `flake8` (make sure the `sparkle` conda environment is installed and active).
+1. Freshly install the conda environment. Remove the old one with `conda env remove -n sparkle` and create it again with `conda env create -f environment.yml` or with `conda env create -f dev-env.yml`. In principle, these environments are equal except that the dev-env has a few extra libs to run pytests and ruff.
+2. Make sure the code style rules pass by running `ruff` (make sure the `sparkle` conda environment is installed and active).
 3. Make sure the unit tests pass by running `pytest` (make sure the `sparkle` conda environment is installed and active). You can combine this step and the next step by running `pytest --all`.
 4. Make sure the integration tests pass by running `pytest --integration` (make sure the `sparkle` conda environment is installed and active).
 5. Make sure the examples in `Examples/` execute correctly (all `.sh` files).

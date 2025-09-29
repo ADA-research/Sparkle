@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions to log which output was created by Sparkle where."""
-from __future__ import annotations
 
+from __future__ import annotations
 import time
 from pathlib import Path
-from pathlib import PurePath
 
 from runrunner.logger import Log as RunRunnerLog
 
-from sparkle.CLI.help import global_variables as gv
+from sparkle.platform import Settings
 
 
 # Keep track of which command called Sparkle
@@ -18,7 +17,7 @@ caller: str = "unknown"
 
 # Current caller file path
 global caller_log_path
-caller_log_path: str | PurePath = "not set"
+caller_log_path: Path = "not set"
 
 # Root output directory for the calling command in the form of
 # Output/<timestamp>_<command_name>/
@@ -51,24 +50,24 @@ def _update_caller_file_path(timestamp: str) -> None:
     """
     caller_file = caller + "_main_log.txt"
     caller_dir = Path(caller + "_" + timestamp)
-    log_dir = gv.settings().DEFAULT_log_output
+    log_dir = Settings.DEFAULT_log_output
     # Set caller directory for other Sparkle functions to use
     global caller_out_dir
     caller_out_dir = Path(caller_dir)
     global caller_log_path
-    caller_log_path = PurePath(log_dir / caller_out_dir / caller_file)
+    caller_log_path = Path(log_dir / caller_out_dir / caller_file)
     global caller_log_dir
     caller_log_dir = log_dir / caller_out_dir
 
     # Create needed directories if they don't exist
-    caller_dir = Path(caller_log_path).parents[0]
+    caller_dir = caller_log_path.parents[0]
     caller_dir.mkdir(parents=True, exist_ok=True)
     caller_log_dir.mkdir(parents=True, exist_ok=True)
 
     # If the caller output file does not exist yet, write the header
-    if not Path(caller_log_path).is_file():
+    if not caller_log_path.is_file():
         output_header = "\t Timestamp\t\t\t\t\t\t\t  Path\t\t\t\t\t\t\t Description\n"
-        with Path(caller_log_path).open("a") as output_file:
+        with caller_log_path.open("a") as output_file:
             output_file.write(output_header)
 
 
@@ -84,11 +83,11 @@ def add_output(output_path: str, description: str) -> None:
     timestamp = time.strftime("%Y-%m-%d-%H.%M.%S", time.localtime(time.time()))
     output_str = f"{timestamp}\t{output_path}\t{description}\n"
     # Write output path and description to caller file
-    with Path(caller_log_path).open("a") as output_file:
+    with caller_log_path.open("a") as output_file:
         output_file.write(output_str)
 
 
-def log_command(argv: list[str]) -> None:
+def log_command(argv: list[str], seed: int = None) -> None:
     """Write to file which command was executed.
 
     Includes information on when it was executed, with which arguments, and
@@ -96,7 +95,7 @@ def log_command(argv: list[str]) -> None:
 
     Args:
         argv: List containing the command line arguments derived from sys.argv.
-
+        seed: Optionally, the seed that corresponds to the set random state.
     """
     # Determine caller
     _update_caller(argv)
@@ -104,14 +103,14 @@ def log_command(argv: list[str]) -> None:
     # Prepare logging information
     timestamp = time.strftime("%Y-%m-%d-%H.%M.%S", time.localtime(time.time()))
     _update_caller_file_path(timestamp)
-    output_file = caller_log_path
-    args = " ".join(argv[0:])
-    log_str = timestamp + "   " + args + "   " + str(output_file) + "\n"
+    args = " ".join(argv)
+    log_str = f"{timestamp}   {args}   {str(caller_log_path)}"
+    log_str += "\n" if seed is None else f"   {seed}\n"
 
     # If the log file does not exist yet, write the header
-    log_path = gv.settings().DEFAULT_output / "sparkle.log"
+    log_path = Settings.DEFAULT_output / "sparkle.log"
     if not log_path.is_file():
-        log_header = "\t Timestamp\t\t\t\t\t\t\t  Command\t\t\t\t\t\t\t Output details\n"
+        log_header = "\t Timestamp\t\t\t\t\t\t\t  Command\t\t\t\t\t\t\t Output details\t\t\t\t\t\t\t  Seed\n"
         log_str = log_header + log_str
 
     # Write to log file

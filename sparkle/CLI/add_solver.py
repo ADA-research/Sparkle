@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to add a solver to the Sparkle platform."""
+
 import os
 import stat
 import sys
@@ -20,14 +21,16 @@ from sparkle.CLI.help import argparse_custom as ac
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Add a solver to the Sparkle platform.")
-    parser.add_argument(*ac.DeterministicArgument.names,
-                        **ac.DeterministicArgument.kwargs)
-    parser.add_argument(*ac.SolutionVerifierArgument.names,
-                        **ac.SolutionVerifierArgument.kwargs)
-    parser.add_argument(*ac.NicknameSolverArgument.names,
-                        **ac.NicknameSolverArgument.kwargs)
+    parser = argparse.ArgumentParser(description="Add a solver to the Sparkle platform.")
+    parser.add_argument(
+        *ac.DeterministicArgument.names, **ac.DeterministicArgument.kwargs
+    )
+    parser.add_argument(
+        *ac.SolutionVerifierArgument.names, **ac.SolutionVerifierArgument.kwargs
+    )
+    parser.add_argument(
+        *ac.NicknameSolverArgument.names, **ac.NicknameSolverArgument.kwargs
+    )
     parser.add_argument(*ac.SolverPathArgument.names, **ac.SolverPathArgument.kwargs)
     parser.add_argument(*ac.SkipChecksArgument.names, **ac.SkipChecksArgument.kwargs)
     parser.add_argument(*ac.NoCopyArgument.names, **ac.NoCopyArgument.kwargs)
@@ -37,7 +40,7 @@ def parser_function() -> argparse.ArgumentParser:
 def main(argv: list[str]) -> None:
     """Main function of the command."""
     # Log command call
-    sl.log_command(sys.argv)
+    sl.log_command(sys.argv, gv.settings().random_state)
     check_for_initialise()
 
     # Define command line arguments
@@ -56,8 +59,10 @@ def main(argv: list[str]) -> None:
     # Make sure it is pointing to the verifiers module
     if solution_verifier:
         if Path(solution_verifier).is_file():  # File verifier
-            solution_verifier = (verifiers.SolutionFileVerifier.__name__,
-                                 solution_verifier)
+            solution_verifier = (
+                verifiers.SolutionFileVerifier.__name__,
+                solution_verifier,
+            )
         elif solution_verifier not in verifiers.mapping:
             print(f"ERROR: Unknown solution verifier {solution_verifier}!")
             sys.exit(-1)
@@ -68,8 +73,10 @@ def main(argv: list[str]) -> None:
         print("Running checks...")
         solver = Solver(Path(solver_source))
         if solver.pcs_file is None:
-            print("None or multiple .pcs files found. Solver "
-                  "is not valid for configuration.")
+            print(
+                "None or multiple .pcs files found. Solver "
+                "is not valid for configuration."
+            )
         else:
             print(f"PCS file detected: {solver.pcs_file.name}. ", end="")
             if solver.read_pcs_file():
@@ -79,26 +86,31 @@ def main(argv: list[str]) -> None:
 
         wrapper_path = solver.directory / solver.wrapper
         if not wrapper_path.is_file():
-            print(f"ERROR: Solver {solver_source.name} does not have a solver wrapper "
-                  f"(Missing file {solver.wrapper}).")
+            print(
+                f"ERROR: Solver {solver_source.name} does not have a solver wrapper "
+                f"(Missing file {solver.wrapper})."
+            )
             sys.exit(-1)
         elif not os.access(wrapper_path, os.X_OK):
-            print(f"ERROR: Solver {solver_source.name} wrapper file {solver.wrapper} "
-                  f" does not have execution rights set!")
+            print(
+                f"ERROR: Solver {solver_source.name} wrapper file {solver.wrapper} "
+                f" does not have execution rights set!"
+            )
             sys.exit(-1)
 
     # Start add solver
     solver_directory = gv.settings().DEFAULT_solver_dir / solver_source.name
     if solver_directory.exists():
-        print(f"ERROR: Solver {solver_source.name} already exists! "
-              "Can not add new solver.")
+        print(
+            f"ERROR: Solver {solver_source.name} already exists! Can not add new solver."
+        )
         sys.exit(-1)
     if args.no_copy:
-        print(f"Creating symbolic link from {solver_source} "
-              f"to {solver_directory}...")
+        print(f"Creating symbolic link from {solver_source} to {solver_directory}...")
         if not os.access(solver_source, os.W_OK):
-            raise PermissionError("Sparkle does not have the right to write to the "
-                                  "destination folder.")
+            raise PermissionError(
+                "Sparkle does not have the right to write to the destination folder."
+            )
         solver_directory.symlink_to(solver_source.absolute())
     else:
         print(f"Copying {solver_source.name} to platform...")
@@ -107,22 +119,24 @@ def main(argv: list[str]) -> None:
 
     # Save the deterministic bool in the solver
     with (solver_directory / Solver.meta_data).open("w+") as fout:
-        fout.write(str({"deterministic": deterministic,
-                        "verifier": solution_verifier}))
+        fout.write(str({"deterministic": deterministic, "verifier": solution_verifier}))
 
     # Add RunSolver executable to the solver
     runsolver_path = gv.settings().DEFAULT_runsolver_exec
     if runsolver_path.name in [file.name for file in solver_directory.iterdir()]:
-        print("Warning! RunSolver executable detected in Solver "
-              f"{solver_source.name}. This will be replaced with "
-              f"Sparkle's version of RunSolver. ({runsolver_path})")
+        print(
+            "Warning! RunSolver executable detected in Solver "
+            f"{solver_source.name}. This will be replaced with "
+            f"Sparkle's version of RunSolver. ({runsolver_path})"
+        )
     runsolver_target = solver_directory / runsolver_path.name
     shutil.copyfile(runsolver_path, runsolver_target)
     runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
 
     performance_data = PerformanceDataFrame(
         gv.settings().DEFAULT_performance_data_path,
-        objectives=gv.settings().get_general_sparkle_objectives())
+        objectives=gv.settings().objectives,
+    )
     performance_data.add_solver(str(solver_directory))
     performance_data.save_csv()
 
@@ -133,7 +147,8 @@ def main(argv: list[str]) -> None:
             solver_directory,
             gv.solver_nickname_list_path,
             gv.file_storage_data_mapping[gv.solver_nickname_list_path],
-            key=nickname)
+            key=nickname,
+        )
 
     solver = Solver(solver_directory)  # Recreate solver from its new directory
     if solver.pcs_file is not None:

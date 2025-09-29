@@ -68,7 +68,7 @@ pip install sparkle
 
 Note that a direct installation through Pip does not handle certain dependencies of the Sparkle CLI, such as the required libraries for compiling [RunSolver](https://www.cril.univ-artois.fr/~roussel/runsolver/).
 
-You will need to supply, asside from the other dependencies in the next section, the following in your virtual environment:
+You will need to supply, aside from the other dependencies in the next section, the following in your virtual environment:
 - `Python 3.10` is required to use Sparkle
 - `libnuma` and `numactl` in order to compile RunSolver. We suggest to use `GCC 12.2.0`.
 
@@ -145,7 +145,7 @@ K. van der Blom, H. H. Hoos, C. Luo and J. G. Rook, **Sparkle: Toward Accessible
 Thijs Snelleman,
 Jeroen Rook,
 Hadar Shavit,
-Holger H. Hoos,
+Holger H. Hoos
 
 ### Contributors
 Chuan Luo,
@@ -159,7 +159,7 @@ Yingliu Lu,
 Malte Schwerin,
 Aaron Berger,
 Marie Anastacio,
-Aaron Berger
+Aaron Berger,
 Koen van der Blom,
 Noah Peil,
 Brian Schiller,

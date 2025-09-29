@@ -1,4 +1,5 @@
 """Test the cancel CLI entry point."""
+
 import shutil
 import pytest
 from pathlib import Path
@@ -16,8 +17,7 @@ from runrunner.base import Status
 
 
 @pytest.mark.integration
-def test_cancel_command_no_jobs(tmp_path: Path,
-                                monkeypatch: pytest.MonkeyPatch) -> None:
+def test_cancel_command_no_jobs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test cancel command with no jobs."""
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     # Fix input calls to test with NO (e.g. no download)
@@ -44,8 +44,9 @@ def test_cancel_command_no_jobs(tmp_path: Path,
 
 
 @pytest.mark.integration
-def test_cancel_command_configuration(tmp_path: Path,
-                                      monkeypatch: pytest.MonkeyPatch) -> None:
+def test_cancel_command_configuration(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test cancel command on configuration jobs."""
     if tools.get_cluster_name() != "kathleen":
         # Test currently does not work on Github Actions due to truncating
@@ -56,10 +57,10 @@ def test_cancel_command_configuration(tmp_path: Path,
     if not SMAC2.check_requirements():
         SMAC2.download_requirements()
     # Submit configuration jobs and cancel it by ID
-    solver_path =\
-        (Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic").absolute()
-    instance_set_path =\
-        (Path("Examples") / "Resources" / "Instances" / "PTN").absolute()
+    solver_path = (
+        Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic"
+    ).absolute()
+    instance_set_path = (Path("Examples") / "Resources" / "Instances" / "PTN").absolute()
     settings_file = tools.get_settings_path()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
 
@@ -77,15 +78,23 @@ def test_cancel_command_configuration(tmp_path: Path,
 
     # Submit configure solver job and validation job
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        configure_solver.main(["--solver", solver_path.name,
-                               "--instance-set-train", instance_set_path.name,
-                               "--settings-file", str(settings_file)])
+        configure_solver.main(
+            [
+                "--solver",
+                solver_path.name,
+                "--instance-set-train",
+                instance_set_path.name,
+                "--settings-file",
+                str(settings_file),
+            ]
+        )
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
 
     # Extract job IDs from Sparkle
-    jobs = jobs_help.get_runs_from_file(gv.settings().DEFAULT_log_output,
-                                        print_error=True)
+    jobs = jobs_help.get_runs_from_file(
+        gv.settings().DEFAULT_log_output, print_error=True
+    )
 
     # Cancel configuration jobs
     with pytest.raises(SystemExit) as pytest_wrapped_e:

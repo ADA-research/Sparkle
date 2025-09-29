@@ -17,17 +17,19 @@ from sparkle.selector import Extractor
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    parser = argparse.ArgumentParser(description="Remove a feature extractor "
-                                                 "from the platform.")
-    parser.add_argument(*ac.ExtractorPathArgument.names,
-                        **ac.ExtractorPathArgument.kwargs)
+    parser = argparse.ArgumentParser(
+        description="Remove a feature extractor from the platform."
+    )
+    parser.add_argument(
+        *ac.ExtractorPathArgument.names, **ac.ExtractorPathArgument.kwargs
+    )
     return parser
 
 
 def main(argv: list[str]) -> None:
     """Main function of the remove feature extractor command."""
     # Log command call
-    sl.log_command(sys.argv)
+    sl.log_command(sys.argv, gv.settings().random_state)
     check_for_initialise()
 
     # Define command line arguments
@@ -40,7 +42,8 @@ def main(argv: list[str]) -> None:
         args.extractor_path,
         extractor_nicknames,
         gv.settings().DEFAULT_extractor_dir,
-        class_name=Extractor)
+        class_name=Extractor,
+    )
 
     if extractor is None:
         print(f'Feature extractor path "{args.extractor_path}" does not exist!')
@@ -55,7 +58,8 @@ def main(argv: list[str]) -> None:
                 gv.extractor_nickname_list_path,
                 extractor_nicknames,
                 key=key,
-                remove=True)
+                remove=True,
+            )
             break
 
     if gv.settings().DEFAULT_feature_data_path.exists():

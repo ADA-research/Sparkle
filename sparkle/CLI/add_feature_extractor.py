@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Sparkle command to add a feature extractor to the Sparkle platform."""
+
 import os
+import stat
 import sys
 import shutil
 import argparse
@@ -19,11 +21,15 @@ def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     # Define command line arguments
     parser = argparse.ArgumentParser(
-        description="Add a feature extractor to the platform.")
-    parser.add_argument(*ac.ExtractorPathArgument.names,
-                        **ac.ExtractorPathArgument.kwargs)
-    parser.add_argument(*ac.NicknameFeatureExtractorArgument.names,
-                        **ac.NicknameFeatureExtractorArgument.kwargs)
+        description="Add a feature extractor to the platform."
+    )
+    parser.add_argument(
+        *ac.ExtractorPathArgument.names, **ac.ExtractorPathArgument.kwargs
+    )
+    parser.add_argument(
+        *ac.NicknameFeatureExtractorArgument.names,
+        **ac.NicknameFeatureExtractorArgument.kwargs,
+    )
     parser.add_argument(*ac.NoCopyArgument.names, **ac.NoCopyArgument.kwargs)
     return parser
 
@@ -31,7 +37,7 @@ def parser_function() -> argparse.ArgumentParser:
 def main(argv: list[str]) -> None:
     """Main function of the add feature extractor command."""
     # Log command call
-    sl.log_command(sys.argv)
+    sl.log_command(sys.argv, gv.settings().random_state)
     check_for_initialise()
 
     parser = parser_function()
@@ -50,13 +56,17 @@ def main(argv: list[str]) -> None:
     extractor_target_path = gv.settings().DEFAULT_extractor_dir / extractor_source.name
 
     if extractor_target_path.exists():
-        print(f"Feature extractor {extractor_source.name} already exists! "
-              "Can not add feature extractor.")
+        print(
+            f"Feature extractor {extractor_source.name} already exists! "
+            "Can not add feature extractor."
+        )
         sys.exit(-1)
 
     if args.no_copy:
-        print(f"Creating symbolic link from {extractor_source} "
-              f"to {extractor_target_path}...")
+        print(
+            f"Creating symbolic link from {extractor_source} "
+            f"to {extractor_target_path}..."
+        )
         extractor_target_path.symlink_to(extractor_source.absolute())
     else:
         print(f"Copying feature extractor {extractor_source.name} ...")
@@ -66,12 +76,27 @@ def main(argv: list[str]) -> None:
     # Check execution permissions for wrapper
     extractor_wrapper = extractor_target_path / Extractor.wrapper
     if not extractor_wrapper.is_file() or not os.access(extractor_wrapper, os.X_OK):
-        print(f"The file {extractor_wrapper} does not exist or is \
-              not executable.")
+        print(
+            f"The file {extractor_wrapper} does not exist or is \
+              not executable."
+        )
         sys.exit(-1)
 
-    # Get the extractor features groups and names from the wrapper
     extractor = Extractor(extractor_target_path)
+
+    # Add RunSolver executable to the solver
+    runsolver_path = gv.settings().DEFAULT_runsolver_exec
+    if runsolver_path.name in [file.name for file in extractor_target_path.iterdir()]:
+        print(
+            "Warning! RunSolver executable detected in Extractor "
+            f"{extractor.name}. This will be replaced with "
+            f"Sparkle's version of RunSolver. ({runsolver_path})"
+        )
+    runsolver_target = extractor.directory / runsolver_path.name
+    shutil.copyfile(runsolver_path, runsolver_target)
+    runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
+
+    # Get the extractor features groups and names from the wrapper
     feature_dataframe = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
     feature_dataframe.add_extractor(extractor.name, extractor.features)
     feature_dataframe.save_csv()
@@ -83,7 +108,8 @@ def main(argv: list[str]) -> None:
             extractor_target_path,
             gv.extractor_nickname_list_path,
             gv.file_storage_data_mapping[gv.extractor_nickname_list_path],
-            key=nickname_str)
+            key=nickname_str,
+        )
 
     # Write used settings to file
     gv.settings().write_used_settings()

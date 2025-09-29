@@ -1,4 +1,5 @@
 """Test the construct portfolio selector CLI entry point."""
+
 import pytest
 from pathlib import Path
 
@@ -9,12 +10,15 @@ from tests.CLI import tools as cli_tools
 
 @pytest.mark.integration
 def test_construct_portfolio_selector_command(
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch) -> None:
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test construct portfolio command."""
     snapshot_path = (
-        Path("tests") / "CLI" / "test_files"
-        / "snapshot_computed_features_run_solvers_csccsat_minisat_ptn.zip").absolute()
+        Path("tests")
+        / "CLI"
+        / "test_files"
+        / "snapshot_computed_features_run_solvers_csccsat_minisat_ptn.zip"
+    ).absolute()
     test_settings_path = cli_tools.get_settings_path()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
 

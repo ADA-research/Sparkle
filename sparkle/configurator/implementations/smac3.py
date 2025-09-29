@@ -1,13 +1,15 @@
 """Configurator classes to implement SMAC3 in Sparkle."""
+
 from __future__ import annotations
 from pathlib import Path
-import shutil
 
 from smac import version as smac_version
 from smac import Scenario as SmacScenario
 from smac import facade as smacfacades
 from smac.runhistory.enumerations import StatusType as SmacStatusType
 import numpy as np
+import random
+from typing import Optional
 
 from runrunner import Runner, Run
 
@@ -20,6 +22,7 @@ from sparkle.types import SparkleObjective, resolve_objective, SolverStatus
 
 class SMAC3(Configurator):
     """Class for SMAC3 (Python) configurator."""
+
     configurator_path = Path(__file__).parent.resolve() / "SMAC3"
     configurator_target = configurator_path / "smac3_target_algorithm.py"
 
@@ -50,15 +53,17 @@ class SMAC3(Configurator):
         """Download SMAC3."""
         return  # Nothing to do
 
-    def configure(self: SMAC3,
-                  scenario: SMAC3Scenario,
-                  data_target: PerformanceDataFrame,
-                  validate_after: bool = True,
-                  sbatch_options: list[str] = [],
-                  slurm_prepend: str | list[str] | Path = None,
-                  num_parallel_jobs: int = None,
-                  base_dir: Path = None,
-                  run_on: Runner = Runner.SLURM) -> list[Run]:
+    def configure(
+        self: SMAC3,
+        scenario: SMAC3Scenario,
+        data_target: PerformanceDataFrame,
+        validate_after: bool = True,
+        sbatch_options: list[str] = [],
+        slurm_prepend: str | list[str] | Path = None,
+        num_parallel_jobs: int = None,
+        base_dir: Path = None,
+        run_on: Runner = Runner.SLURM,
+    ) -> list[Run]:
         """Start configuration job.
 
         Args:
@@ -74,21 +79,25 @@ class SMAC3(Configurator):
         Returns:
             A RunRunner Run object.
         """
-        if (scenario.smac3_scenario.walltime_limit
-                == scenario.smac3_scenario.cputime_limit == np.inf):
-            print("WARNING: Starting SMAC3 scenario without any time limit.")
         scenario.create_scenario()
+        if (
+            scenario.smac3_scenario.walltime_limit
+            == scenario.smac3_scenario.cputime_limit
+            == np.inf
+        ):
+            print("WARNING: Starting SMAC3 scenario without any time limit.")
         configuration_ids = scenario.configuration_ids
-        # TODO: Setting seeds like this is weird and should be inspected.
-        # It could be good to take perhaps a seed from the scenario and use that
-        # to generate a seed per run
-        seeds = [i for i in range(scenario.number_of_runs)]
+
+        # Scenario file also has a seed, but not for all type of configurators
+        seeds = [random.randint(0, 2**32 - 1) for _ in range(scenario.number_of_runs)]
         num_parallel_jobs = num_parallel_jobs or scenario.number_of_runs
         # We do not require the configurator CLI as its already our own python wrapper
-        cmds = [f"python3 {self.configurator_target.absolute()} "
-                f"{scenario.scenario_file_path.absolute()} {configuration_id} {seed} "
-                f"{data_target.csv_filepath}"
-                for configuration_id, seed in zip(configuration_ids, seeds)]
+        cmds = [
+            f"python3 {self.configurator_target.absolute()} "
+            f"{scenario.scenario_file_path.absolute()} {configuration_id} {seed} "
+            f"{data_target.csv_filepath}"
+            for configuration_id, seed in zip(configuration_ids, seeds)
+        ]
         return super().configure(
             configuration_commands=cmds,
             data_target=data_target,
@@ -100,16 +109,19 @@ class SMAC3(Configurator):
             slurm_prepend=slurm_prepend,
             num_parallel_jobs=num_parallel_jobs,
             base_dir=base_dir,
-            run_on=run_on
+            run_on=run_on,
         )
 
     @staticmethod
-    def organise_output(output_source: Path,
-                        output_target: Path,
-                        scenario: SMAC3Scenario,
-                        configuration_id: str) -> None | str:
+    def organise_output(
+        output_source: Path,
+        output_target: Path,
+        scenario: SMAC3Scenario,
+        configuration_id: str,
+    ) -> None | str:
         """Method to restructure and clean up after a single configurator call."""
         import json
+
         if not output_source.exists():
             print(f"SMAC3 ERROR: Output source file does not exist! [{output_source}]")
             return
@@ -122,12 +134,15 @@ class SMAC3(Configurator):
             score = entry["cost"]
             # SMAC3 configuration ids start at 1
             config_evals[smac_conf_id - 1].append(score)
-        config_evals = [objective.instance_aggregator(evaluations)
-                        for evaluations in config_evals]
+        config_evals = [
+            objective.instance_aggregator(evaluations) for evaluations in config_evals
+        ]
         best_config = configurations[
-            config_evals.index(objective.solver_aggregator(config_evals))]
-        return Configurator.save_configuration(scenario, configuration_id,
-                                               best_config, output_target)
+            config_evals.index(objective.solver_aggregator(config_evals))
+        ]
+        return Configurator.save_configuration(
+            scenario, configuration_id, best_config, output_target
+        )
 
     def get_status_from_logs(self: SMAC3) -> None:
         """Method to scan the log files of the configurator for warnings."""
@@ -145,7 +160,7 @@ class SMAC3(Configurator):
             SolverStatus.ERROR: SmacStatusType.CRASHED,
             SolverStatus.KILLED: SmacStatusType.TIMEOUT,
             SolverStatus.SAT: SmacStatusType.SUCCESS,
-            SolverStatus.UNSAT: SmacStatusType.SUCCESS
+            SolverStatus.UNSAT: SmacStatusType.SUCCESS,
         }
         return mapping[status]
 
@@ -153,29 +168,31 @@ class SMAC3(Configurator):
 class SMAC3Scenario(ConfigurationScenario):
     """Class to handle SMAC3 configuration scenarios."""
 
-    def __init__(self: SMAC3Scenario,
-                 solver: Solver,
-                 instance_set: InstanceSet,
-                 sparkle_objectives: list[SparkleObjective],
-                 number_of_runs: int,
-                 parent_directory: Path,
-                 solver_cutoff_time: int = None,
-                 smac_facade: smacfacades.AbstractFacade | str =
-                 smacfacades.AlgorithmConfigurationFacade,
-                 crash_cost: float | list[float] = np.inf,
-                 termination_cost_threshold: float | list[float] = np.inf,
-                 walltime_limit: float = np.inf,
-                 cputime_limit: float = np.inf,
-                 solver_calls: int = None,
-                 use_default_config: bool = False,
-                 feature_data: FeatureDataFrame | Path = None,
-                 min_budget: float | int | None = None,
-                 max_budget: float | int | None = None,
-                 seed: int = -1,
-                 n_workers: int = 1,
-                 max_ratio: float = None,
-                 smac3_output_directory: Path = Path(),
-                 ) -> None:
+    def __init__(
+        self: SMAC3Scenario,
+        solver: Solver,
+        instance_set: InstanceSet,
+        sparkle_objectives: list[SparkleObjective],
+        number_of_runs: int,
+        parent_directory: Path,
+        solver_cutoff_time: int = None,
+        smac_facade: smacfacades.AbstractFacade
+        | str = smacfacades.AlgorithmConfigurationFacade,
+        crash_cost: float | list[float] = np.inf,
+        termination_cost_threshold: float | list[float] = np.inf,
+        walltime_limit: float = np.inf,
+        cputime_limit: float = np.inf,
+        solver_calls: int = None,
+        use_default_config: bool = False,
+        feature_data: FeatureDataFrame | Path = None,
+        min_budget: float | int | None = None,
+        max_budget: float | int | None = None,
+        seed: int = -1,
+        n_workers: int = 1,
+        max_ratio: float = None,
+        smac3_output_directory: Path = Path(),
+        timestamp: str = None,
+    ) -> None:
         """Initialize scenario paths and names.
 
         Args:
@@ -247,11 +264,16 @@ class SMAC3Scenario(ConfigurationScenario):
             smac3_output_directory: Path, defaults to Path()
                 The output subdirectory for the SMAC3 scenario. Defaults to the scenario
                 results directory.
+            timestamp: An optional timestamp for the directory name.
         """
-        super().__init__(solver, instance_set, sparkle_objectives,
-                         number_of_runs, parent_directory)
-        # The files are saved in `./output_directory/name/seed`.
-        self.log_dir = self.directory / "logs"
+        super().__init__(
+            solver,
+            instance_set,
+            sparkle_objectives,
+            number_of_runs,
+            parent_directory,
+            timestamp,
+        )
         self.feature_data = feature_data
         if isinstance(self.feature_data, Path):  # Load from file
             self.feature_data = FeatureDataFrame(self.feature_data)
@@ -263,16 +285,18 @@ class SMAC3Scenario(ConfigurationScenario):
         self.max_ratio = max_ratio
 
         if self.feature_data is not None:
-            instance_features =\
-                {instance: self.feature_data.get_instance(str(instance))
-                    for instance in self.instance_set.instance_paths}
+            instance_features = {
+                instance: self.feature_data.get_instance(str(instance))
+                for instance in self.instance_set.instance_paths
+            }
         else:
             # 'If no instance features are passed, the runhistory encoder can not
             # distinguish between different instances and therefore returns the same data
             # points with different values, all of which are used to train the surrogate
             # model. Consider using instance indices as features.'
-            instance_features = {name: [index] for index, name
-                                 in enumerate(instance_set.instance_paths)}
+            instance_features = {
+                name: [index] for index, name in enumerate(instance_set.instance_paths)
+            }
 
         # NOTE: Patchfix; SMAC3 can handle MO but Sparkle also gives non-user specified
         # objectives but not all class methods can handle it here yet
@@ -290,41 +314,56 @@ class SMAC3Scenario(ConfigurationScenario):
                     solver_calls = int(walltime_limit / self.solver_cutoff_time)
             else:
                 solver_calls = 100  # SMAC3 Default value
+        self.smac3_output_directory = smac3_output_directory
+        self.crash_cost = crash_cost
+        self.termination_cost_threshold = termination_cost_threshold
+        self.walltime_limit = walltime_limit
+        self.cputime_limit = cputime_limit
+        self.solver_calls = solver_calls
+        self.use_default_config = use_default_config
+        self.instance_features = instance_features
+        self.min_budget = min_budget
+        self.max_budget = max_budget
+        self.seed = seed
+        self.n_workers = n_workers
+        self.smac3_scenario: Optional[SmacScenario] = None
+
+    def create_scenario(self: SMAC3Scenario) -> None:
+        """This prepares all the necessary subdirectories related to configuration."""
+        super().create_scenario()
+        self.log_dir.mkdir(parents=True)
+        if self.smac3_scenario is None:
+            self.set_smac3_scenario()
+        self.create_scenario_file()
+
+    def set_smac3_scenario(self: SMAC3Scenario) -> None:
+        """Set the smac scenario object."""
         self.smac3_scenario = SmacScenario(
-            configspace=solver.get_configuration_space(),
+            configspace=self.solver.get_configuration_space(),
             name=self.name,
-            output_directory=self.results_directory / smac3_output_directory,
-            deterministic=solver.deterministic,
+            output_directory=self.results_directory / self.smac3_output_directory,
+            deterministic=self.solver.deterministic,
             objectives=[self.sparkle_objective.name],
-            crash_cost=crash_cost,
-            termination_cost_threshold=termination_cost_threshold,
-            walltime_limit=walltime_limit,
-            cputime_limit=cputime_limit,
-            n_trials=solver_calls,
-            use_default_config=use_default_config,
-            instances=instance_set.instance_paths,
-            instance_features=instance_features,
-            min_budget=min_budget,
-            max_budget=max_budget,
-            seed=seed,
-            n_workers=n_workers
+            crash_cost=self.crash_cost,
+            termination_cost_threshold=self.termination_cost_threshold,
+            walltime_limit=self.walltime_limit,
+            cputime_limit=self.cputime_limit,
+            n_trials=self.solver_calls,
+            use_default_config=self.use_default_config,
+            instances=self.instance_set.instance_paths,
+            instance_features=self.instance_features,
+            min_budget=self.min_budget,
+            max_budget=self.max_budget,
+            seed=self.seed,
+            n_workers=self.n_workers,
         )
 
-    def create_scenario(self: ConfigurationScenario) -> None:
-        """Create scenario with solver and instances in the parent directory.
-
-        This prepares all the necessary subdirectories related to configuration.
-
-        Args:
-            parent_directory: Directory in which the scenario should be created.
-        """
-        shutil.rmtree(self.directory, ignore_errors=True)
-        self.directory.mkdir(parents=True)
-        # Create empty directories as needed
-        self.results_directory.mkdir(parents=True)  # Prepare results directory
-        self.log_dir.mkdir(parents=True)
-        self.validation.mkdir(parents=True, exist_ok=True)
-        self.create_scenario_file()
+    @property
+    def log_dir(self: SMAC3Scenario) -> Path:
+        """Return the path of the log directory."""
+        if self.directory:
+            return self.directory / "logs"
+        return None
 
     @property
     def configurator(self: SMAC3Scenario) -> SMAC3:
@@ -333,15 +372,13 @@ class SMAC3Scenario(ConfigurationScenario):
 
     def create_scenario_file(self: SMAC3Scenario) -> Path:
         """Create a file with the configuration scenario."""
-        super().create_scenario_file()
         with self.scenario_file_path.open("w") as file:
             for key, value in self.serialise().items():
                 file.write(f"{key} = {value}\n")
 
     def serialise(self: SMAC3Scenario) -> dict:
         """Serialize the configuration scenario."""
-        feature_data =\
-            self.feature_data.csv_filepath if self.feature_data else None
+        feature_data = str(self.feature_data.csv_filepath) if self.feature_data else None
         return {
             "solver": self.solver.directory,
             "instance_set": self.instance_set.directory,
@@ -363,8 +400,7 @@ class SMAC3Scenario(ConfigurationScenario):
         }
 
     @staticmethod
-    def from_file(scenario_file: Path,
-                  run_index: int = None) -> SMAC3Scenario:
+    def from_file(scenario_file: Path, run_index: int = None) -> SMAC3Scenario:
         """Reads scenario file and initalises ConfigurationScenario.
 
         Args:
@@ -376,15 +412,20 @@ class SMAC3Scenario(ConfigurationScenario):
             ConfigurationScenario.
         """
         import ast
-        variables = {keyvalue[0]: keyvalue[1].strip()
-                     for keyvalue in (line.split(" = ", maxsplit=1)
-                                      for line in scenario_file.open().readlines()
-                                      if line.strip() != "")}
+
+        variables = {
+            keyvalue[0]: keyvalue[1].strip()
+            for keyvalue in (
+                line.split(" = ", maxsplit=1)
+                for line in scenario_file.open().readlines()
+                if line.strip() != ""
+            )
+        }
         variables["solver"] = Solver(Path(variables["solver"]))
         variables["instance_set"] = Instance_Set(Path(variables["instance_set"]))
         variables["sparkle_objectives"] = [
-            resolve_objective(o)
-            for o in variables["sparkle_objectives"].split(",")]
+            resolve_objective(o) for o in variables["sparkle_objectives"].split(",")
+        ]
         variables["parent_directory"] = scenario_file.parent.parent
         variables["solver_cutoff_time"] = int(variables["solver_cutoff_time"])
         variables["number_of_runs"] = int(variables["number_of_runs"])
@@ -392,23 +433,27 @@ class SMAC3Scenario(ConfigurationScenario):
 
         # We need to support both lists of floats and single float (np.inf is fine)
         if variables["crash_cost"].startswith("["):
-            variables["crash_cost"] =\
-                [float(v) for v in ast.literal_eval(variables["crash_cost"])]
+            variables["crash_cost"] = [
+                float(v) for v in ast.literal_eval(variables["crash_cost"])
+            ]
         else:
             variables["crash_cost"] = float(variables["crash_cost"])
         if variables["termination_cost_threshold"].startswith("["):
-            variables["termination_cost_threshold"] =\
-                [float(v) for v in ast.literal_eval(
-                    variables["termination_cost_threshold"])]
+            variables["termination_cost_threshold"] = [
+                float(v)
+                for v in ast.literal_eval(variables["termination_cost_threshold"])
+            ]
         else:
-            variables["termination_cost_threshold"] =\
-                float(variables["termination_cost_threshold"])
+            variables["termination_cost_threshold"] = float(
+                variables["termination_cost_threshold"]
+            )
 
         variables["walltime_limit"] = float(variables["walltime_limit"])
         variables["cputime_limit"] = float(variables["cputime_limit"])
         variables["solver_calls"] = ast.literal_eval(variables["solver_calls"])
-        variables["use_default_config"] =\
-            ast.literal_eval(variables["use_default_config"])
+        variables["use_default_config"] = ast.literal_eval(
+            variables["use_default_config"]
+        )
 
         if variables["feature_data"] != "None":
             variables["feature_data"] = Path(variables["feature_data"])
@@ -424,4 +469,7 @@ class SMAC3Scenario(ConfigurationScenario):
             variables["seed"] += run_index
             variables["smac3_output_directory"] = Path(f"run_{run_index}")
 
-        return SMAC3Scenario(**variables)
+        timestamp = scenario_file.parent.name.split("_")[-1]
+        scenario = SMAC3Scenario(**variables, timestamp=timestamp)
+        scenario.set_smac3_scenario()
+        return scenario
