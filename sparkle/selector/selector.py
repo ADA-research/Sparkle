@@ -143,6 +143,7 @@ class Selector:
         run_on: Runner = Runner.LOCAL,
         sbatch_options: list[str] = None,
         slurm_prepend: str | list[str] | Path = None,
+        job_name: str = None,
         dependencies: list[Run] = None,
         log_dir: Path = None,
     ) -> Run:
@@ -155,6 +156,7 @@ class Selector:
             run_on: Which runner to use. Defaults to slurm.
             sbatch_options: Additional options to pass to sbatch.
             slurm_prepend: Slurm script to prepend to the sbatch
+            job_name: Name to give the Slurm job when submitting.
             dependencies: List of dependencies to add to the job.
             log_dir: The directory to write logs to.
 
@@ -178,7 +180,11 @@ class Selector:
             for instance_path in instances
         ]
 
-        job_name = f"Run Selector: {self.name} on {len(instances)} instances"
+        job_name = (
+            f"Run Selector: {self.name} on {len(instances)} instances"
+            if not job_name
+            else job_name
+        )
         import subprocess
 
         r = rrr.add_to_queue(
@@ -331,16 +337,6 @@ class SelectionScenario:
         """Get the test instances."""
         instances = self.selector_performance_data.instances
         return [i for i in instances if i not in self.training_instances]
-
-    @property
-    def training_instance_sets(self: SelectionScenario) -> list[str]:
-        """Get the training instance sets."""
-        return list(set(Path(i).parent.name for i in self.training_instances))
-
-    @property
-    def test_instance_sets(self: SelectionScenario) -> list[str]:
-        """Get the test instance sets."""
-        return list(set(Path(i).parent.name for i in self.test_instances))
 
     @property
     def instance_sets(self: SelectionScenario) -> list[str]:

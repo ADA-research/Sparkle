@@ -287,6 +287,7 @@ def main(argv: list[str]) -> None:
                 run_on=run_on,
                 sbatch_options=sbatch_options,
                 slurm_prepend=slurm_prepend,
+                job_name=f"Selector Ablation: {ablated_scenario.directory.name} on {len(instances)} instances",
                 dependencies=[ablation_run],
                 log_dir=sl.caller_log_dir,
             )
