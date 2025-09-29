@@ -23,7 +23,7 @@ Furthermore, Sparkle handles various tasks for the user such as:
 
 ## Installation
 
-Sparkle is a Python based package, but required several non-Python dependencies to run fully. The easiest installation is through Conda. A setup with Python virtual Environment is also possible, but requires more user input for the installation process.
+Sparkle is a Python based package, but requires several non-Python dependencies to run fully. The easiest installation is through Conda. A setup with Python virtual Environment is also possible, but requires more user input for the installation process.
 
 ### Conda
 
