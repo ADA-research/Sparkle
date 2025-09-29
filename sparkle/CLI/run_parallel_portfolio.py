@@ -194,7 +194,6 @@ def submit_jobs(
     )
 
     sbatch_options = gv.settings().sbatch_settings
-    print(sbatch_options)
     solver_names = ", ".join([s.name for s in solvers])
     # Jobs are added in to the runrunner object in the same order they are provided
     return rrr.add_to_queue(
