@@ -372,7 +372,6 @@ class SMAC2Scenario(ConfigurationScenario):
         Writes supplementary information to the target algorithm (algo =) as:
         algo = {configurator_target} {solver_directory} {sparkle_objective}
         """
-        super().create_scenario_file()
         with self.scenario_file_path.open("w") as file:
             file.write(
                 f"algo = {configurator_target.absolute()} "

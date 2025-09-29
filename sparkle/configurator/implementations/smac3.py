@@ -372,7 +372,6 @@ class SMAC3Scenario(ConfigurationScenario):
 
     def create_scenario_file(self: SMAC3Scenario) -> Path:
         """Create a file with the configuration scenario."""
-        super().create_scenario_file()
         with self.scenario_file_path.open("w") as file:
             for key, value in self.serialise().items():
                 file.write(f"{key} = {value}\n")

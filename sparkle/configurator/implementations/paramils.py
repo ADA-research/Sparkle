@@ -261,7 +261,6 @@ class ParamILSScenario(SMAC2Scenario):
 
     def create_scenario_file(self: ParamILSScenario) -> Path:
         """Create a file with the configuration scenario."""
-        super().create_scenario_file()
         from sparkle.tools.parameters import PCSConvention
 
         scenario_file = super().create_scenario_file(
