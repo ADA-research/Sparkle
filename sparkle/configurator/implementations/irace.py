@@ -451,6 +451,7 @@ class IRACEScenario(ConfigurationScenario):
         Returns:
             Path to the created file.
         """
+        super().create_scenario_file()
         from sparkle.tools.parameters import PCSConvention
 
         solver_path = self.solver.directory.absolute()

@@ -454,6 +454,14 @@ slurm_parsing
     :members: SlurmBatch
 ```
 
+(mod-selector)=
+```{eval-rst}
+selector
+===============
+.. automodule:: sparkle.selector
+    :members: Extractor,SelectionScenario,Selector
+```
+
 (mod-solver)=
 ```{eval-rst}
 solver
