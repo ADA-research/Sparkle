@@ -374,9 +374,9 @@ def build_command_list(
     Returns:
         cmd_list: List of command strings for all instance-solver-seed combinations.
     """
-    cutoff = gv.settings().get_general_solver_cutoff_time()
-    objectives = gv.settings().get_general_sparkle_objectives()
-    seeds_per_solver = gv.settings().get_parallel_portfolio_number_of_seeds_per_solver()
+    cutoff = gv.settings().solver_cutoff_time
+    objectives = gv.settings().objectives
+    seeds_per_solver = gv.settings().parallel_portfolio_num_seeds_per_solver
     cmd_list = []
 
     # Create a command for each instance-solver-seed combination
@@ -420,10 +420,10 @@ def submit_jobs(
     Returns:
         run: The run object containing the submitted jobs.
     """
-    seeds_per_solver = gv.settings().get_parallel_portfolio_number_of_seeds_per_solver()
+    seeds_per_solver = gv.settings().parallel_portfolio_num_seeds_per_solver
     num_solvers, num_instances = len(solvers), len(instances_set._instance_paths)
     num_jobs = num_solvers * num_instances * seeds_per_solver
-    parallel_jobs = min(gv.settings().get_number_of_jobs_in_parallel(), num_jobs)
+    parallel_jobs = min(gv.settings().slurm_jobs_in_parallel, num_jobs)
     if parallel_jobs > num_jobs:
         print(
             "WARNING: Not all jobs will be started at the same time due to the "
@@ -435,7 +435,7 @@ def submit_jobs(
         f"on {num_solvers} solvers for {num_instances} instances ..."
     )
 
-    sbatch_options = gv.settings().get_slurm_extra_options(as_args=True)
+    sbatch_options = gv.settings().sbatch_settings
     solver_names = ", ".join([s.name for s in solvers])
     # Jobs are added in to the runrunner object in the same order they are provided
     return rrr.add_to_queue(
@@ -446,7 +446,7 @@ def submit_jobs(
         base_dir=sl.caller_log_dir,
         srun_options=["-N1", "-n1"] + sbatch_options,
         sbatch_options=sbatch_options,
-        prepend=gv.settings().get_slurm_job_prepend(),
+        prepend=gv.settings().slurm_job_prepend,
     )
 
 
