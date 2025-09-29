@@ -339,6 +339,18 @@ class SelectionScenario:
         return [i for i in instances if i not in self.training_instances]
 
     @property
+    def training_instance_sets(self: SelectionScenario) -> list[str]:
+        """Get the training instance sets."""
+        # NOTE: This no longer works as instances no longer have their set in the name
+        return list(set(Path(i).parent.name for i in self.training_instances))
+
+    @property
+    def test_instance_sets(self: SelectionScenario) -> list[str]:
+        """Get the test instance sets."""
+        # NOTE: This no longer works as instances no longer have their set in the name
+        return list(set(Path(i).parent.name for i in self.test_instances))
+
+    @property
     def instance_sets(self: SelectionScenario) -> list[str]:
         """Get all the instance sets used in this scenario."""
         return list(
