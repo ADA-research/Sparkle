@@ -1026,7 +1026,7 @@ def main(argv: list[str]) -> None:
         )
     for selection_scenario in selection_scenarios:
         processed_selection_scenarios.append(
-            (SelectionOutput(selection_scenario, feature_data), selection_scenario)
+            (SelectionOutput(selection_scenario), selection_scenario)
         )
 
     raw_output = gv.settings().DEFAULT_output_analysis / "JSON"
