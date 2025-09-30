@@ -25,9 +25,6 @@ setup(
         "numpy>=1.26.4",
         "pandas==2.3.2",
         "filelock==3.19.1",
-        "tabulate==0.9.0",
-        "pytermgui==7.7.2",
-        "tqdm==4.66.5",
         "smac==2.3.1",
         "RunRunner==0.2.0.3",
         "asf-lib==0.0.1.15",
@@ -38,6 +35,10 @@ setup(
         "plotly==6.1.2",
         "kaleido==1.0.0",
         "pylatex==1.4.2",
+        # Terminal GUI packages
+        "tabulate==0.9.0",
+        "pytermgui==7.7.2",
+        "tqdm==4.66.5",
     ],
     include_package_data=True,
     # Setup 'sparkle' as a CLI command

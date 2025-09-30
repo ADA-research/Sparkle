@@ -37,6 +37,41 @@ def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: sparkle <command>")
         sys.exit(1)
+    if " ".join(sys.argv[1:]) == "install autocomplete":
+        import urllib.request
+
+        print(sys.prefix)
+        if sys.prefix == sys.base_prefix:
+            print(
+                "Sparkle is not installed in a virtual environment! "
+                "Autocomplete must be installed manually, see the documentation."
+            )
+            sys.exit(-1)
+        # TODO: Update this URL to link to the file on main
+        code_inject = (
+            urllib.request.urlopen(
+                "https://raw.githubusercontent.com/ADA-research/Sparkle/refs/heads/replace-conda-with-venv/Resources/Other/venv_autocomplete.sh"
+            )
+            .read()
+            .decode()
+        )
+        venv_profile_path = Path(sys.prefix) / "bin" / "activate"
+        if venv_profile_path.is_file():
+            if code_inject in venv_profile_path.read_text():
+                print(
+                    f"[{Path(sys.prefix).name}] Sparkle autocomplete is already installed in the virtual environment! Exit."
+                )
+                sys.exit(-1)
+            with venv_profile_path.open("a") as f:
+                f.write(code_inject)
+            print(
+                f"[{Path(sys.prefix).name}] Sparkle autocomplete has been installed in the virtual environment!"
+            )
+            sys.exit(0)
+        print(
+            "Virtual environment not found! Manual installation in activation script required, see the documentation."
+        )
+        sys.exit(-1)
     # Support spaces instead of _
     possible_commands = commands()
     command, command_file = "", Path()

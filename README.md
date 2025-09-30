@@ -42,18 +42,24 @@ pip install sparkle
 Note that a direct installation through Pip does not handle certain dependencies of the Sparkle CLI, such as the required libraries for compiling [RunSolver](https://www.cril.univ-artois.fr/~roussel/runsolver/). This can possibly be resolved in your system (if it does not work 'out-of-the-box') by running `sudo yum install numactl-devel`.
 
 You will need to supply, aside from the other dependencies in the next section, the following in your virtual environment:
-- `Python 3.9`, `Python 3.10` or `Python 3.11` is required to use Sparkle
+- `Python 3.10` or greater is required to use Sparkle
 - `libnuma` and `numactl` in order to compile RunSolver (Which can be installed through `sudo yum install numactl-devel`). We suggest to use `GCC 12.2.0`.
 
 #### Sparkle Autocomplete
 
-If you wish for the Bash autocomplete to also work for Sparkle's CLI commands, you can add the autocomplete script to your environments activation file. The source script of this can be found in `Resources/Other/venv_autocomplete.sh` and must be appended to your activation script, which can be done with the following one-liner:
+If you wish for the Bash autocomplete to also work for Sparkle's CLI commands, you can add the autocomplete script to your environments activation file. The source script of this can be found in `Resources/Other/venv_autocomplete.sh` and must be appended to your activation script, which can be done with the Sparkle CLI:
+
+```bash
+sparkle install autocomplete
+```
+
+Alternatively, if the installation fails for some reason or you are not using Venv,you can do it yourself with bash commands such as:
 
 ```bash
 curl https://raw.githubusercontent.com/ADA-research/Sparkle/refs/heads/main/sparkle/Resources/Other/venv_autocomplete.sh >> venv/bin/activate
 ```
 
-where `venv/bin/activate` leads to the script to activate your newly created environment. Note that afterwards you need to deactivate and reactivate the environment for changes to take effect.
+where `venv/bin/activate` leads to the script to activate your newly created environment. Note that afterwards you need to deactivate and reactivate the environment for changes to take effect. If you are using conda, you will probably need to append this script to your .bash_profile instead.
 
 ### Alternative: Conda
 
