@@ -32,7 +32,7 @@ jobs:
         echo $CONDA/bin >> $GITHUB_PATH
     - name: Install dependencies
       run: |
-        python3 -p ${{ matrix.python-version }} -m venv venv/
+        python3 -m venv venv/ -p ${{ matrix.python-version }}
         source venv/bin/activate  # Activate the new environment
         pip install -e .  # Install Sparkle from the repo
         pip install -r dev-requirements.txt  # Devtools
