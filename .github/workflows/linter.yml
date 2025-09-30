@@ -24,8 +24,10 @@ jobs:
 
     - name: Install dependencies
       run: |
-        conda install -y python=3.10.14
-        conda env update --file dev-env.yml --name base
+        python3 -m venv venv/
+        source venv/bin/activate  # Activate the new environment
+        pip install -e .  # Install Sparkle from the repo
+        pip install -r dev-requirements.txt  # Devtools
 
     - name: Lint with Ruff
       run: |

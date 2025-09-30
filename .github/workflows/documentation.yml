@@ -47,8 +47,10 @@ jobs:
           echo $CONDA/bin >> $GITHUB_PATH
       - name: Install dependencies
         run: |
-          conda install -y python=3.9 # https://github.com/conda/conda/issues/13560#issuecomment-1992720842
-          conda env update --file dev-env.yml --name base
+          python3 -m venv venv/
+          source venv/bin/activate  # Activate the new environment
+          pip install -e .  # Install Sparkle from the repo
+          pip install -r dev-requirements.txt  # Devtools
           pip install -r Documentation/requirements.txt
           pip install genbadge[tests,coverage]
       - name: Install RunSolver dependencies
