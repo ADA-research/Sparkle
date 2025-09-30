@@ -1,5 +1,5 @@
 """Solution verifiers tests."""
-
+import sys
 from sparkle.solver import verifiers
 from sparkle.types import SolverStatus
 from pathlib import Path
@@ -7,6 +7,8 @@ from pathlib import Path
 
 def test_sat_verifier() -> None:
     """Test if SATVerifier correctly returns value."""
+    if sys.platform != "linux":
+        return  # SAT Verifier is Linux only
     instance_sat = Path("Examples/Resources/Instances/PTN2/Ptn-7824-b08.cnf")
     solver_call_sat = ["tests/test_files/verifier/sat_solver_runsolver.rawres"]
     solver_call_unsat = ["tests/test_files/verifier/unsat_solver_runsolver.rawres"]
