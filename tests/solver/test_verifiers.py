@@ -38,6 +38,8 @@ def test_sat_verifier() -> None:
 
 def test_solution_file_verifier() -> None:
     """Test if SolutionFileVerifier correctly returns value."""
+    if sys.platform != "linux":
+        return  # SAT Verifier is Linux only
     file = Path("tests/test_files/verifier/verifier_file.csv")
     solver_call_sat = ["tests/test_files/verifier/sat_solver_runsolver.rawres"]
     solver_call_unsat = ["tests/test_files/verifier/unsat_solver_runsolver.rawres"]
