@@ -26,7 +26,7 @@ jobs:
 
     - name: Lint with Ruff
       run: |
-        source venv/bin/activate
+        source venv/bin/activate  # Activate venv
         ruff check .
 
     - name: Archive outputs
