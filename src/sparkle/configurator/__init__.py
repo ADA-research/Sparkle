@@ -7,8 +7,12 @@ from sparkle.configurator.configurator import (
 )
 
 from sparkle.configurator.implementations import (
-    SMAC2, SMAC2Scenario,
-    SMAC3, SMAC3Scenario,
-    ParamILS, ParamILSScenario,
-    IRACE, IRACEScenario,
+    SMAC2,
+    SMAC2Scenario,
+    SMAC3,
+    SMAC3Scenario,
+    ParamILS,
+    ParamILSScenario,
+    IRACE,
+    IRACEScenario,
 )

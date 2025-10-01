@@ -1,4 +1,5 @@
 """Tools for testing Sparkle CLI."""
+
 import os
 import shutil
 import json

@@ -1,7 +1,7 @@
 """Generate shell scripts from markdown files."""
 
 from pathlib import Path
-from sparkle import __version__ as sparkle_version
+from src.sparkle import __version__ as sparkle_version
 
 if __name__ == "__main__":
     files = [

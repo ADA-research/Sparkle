@@ -4,10 +4,10 @@ indent-width = 4
 
 # File excludes
 exclude = [
-    "sparkle/Components/ablationAnalysis-0.9.4/",
-    "sparkle/Components/runsolver/",
-    "sparkle/Components/smac2-v2.10.03-master-778/",
-    "sparkle/Components/irace-v4.2.0/",
+    "src/sparkle/Components/ablationAnalysis-0.9.4/",
+    "src/sparkle/Components/runsolver/",
+    "src/sparkle/Components/smac2-v2.10.03-master-778/",
+    "src/sparkle/Components/irace-v4.2.0/",
     "Examples/Resources/CVRP/",
     "Examples/Resources/CCAG/",
     "Examples/Resources/Solvers/CSCCSat/",
@@ -72,11 +72,11 @@ lint.ignore = [
 "setup.py" = ["E501"]
 "tests/*" = ["S101"]
 "test/*" = ["S101"]
-"sparkle/platform/settings_objects.py" = ["S110", "ANN401"]
-"sparkle/tools/parameters.py" = ["S110"]
-"sparkle/types/__init__.py" = ["S110", "S307", "F401"]
-"sparkle/instance/__init__.py" = ["N802"]
-"sparkle/configurator/implementations/__init__.py" = ["S307", "F401"]
+"src/sparkle/platform/settings_objects.py" = ["S110", "ANN401"]
+"src/sparkle/tools/parameters.py" = ["S110"]
+"src/sparkle/types/__init__.py" = ["S110", "S307", "F401"]
+"src/sparkle/instance/__init__.py" = ["N802"]
+"src/sparkle/configurator/implementations/__init__.py" = ["S307", "F401"]
 
 [lint.mccabe]
 max-complexity = 15

@@ -15,7 +15,7 @@ help:
 .PHONY: help makefile
 
 apidoc: 
-	sphinx-apidoc -f -o source/_generated ../sparkle/CLI
+	sphinx-apidoc -f -o source/_generated ../src/sparkle/CLI
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).

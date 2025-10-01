@@ -3,7 +3,7 @@ name: Unittest
 on:
   pull_request:
     paths:
-      - sparkle/**
+      - src/sparkle/**
 
 jobs:
   pytest:

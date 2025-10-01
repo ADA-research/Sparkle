@@ -1,4 +1,5 @@
 """Solution verifiers tests."""
+
 import sys
 from sparkle.solver import verifiers
 from sparkle.types import SolverStatus
