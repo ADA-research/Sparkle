@@ -1,7 +1,7 @@
 """Generate shell scripts from markdown files."""
 
 from pathlib import Path
-from sparkle import about
+from sparkle import __version__ as sparkle_version
 
 if __name__ == "__main__":
     files = [
@@ -26,6 +26,6 @@ if __name__ == "__main__":
             f.write("#!/usr/bin/env bash\n")
             f.write(
                 "# Auto-Generated .sh files from the original .md by "
-                f"Sparkle {about.version}\n\n"
+                f"Sparkle {sparkle_version}\n\n"
             )
             f.writelines(output_lines)

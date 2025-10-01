@@ -21,12 +21,12 @@ def main(argv: list[str]) -> None:
     print(
         "\n".join(
             [
-                f"Sparkle ({sparkle.about.description})",
-                f"Version: {sparkle.about.version}",
-                f"Licence: {sparkle.about.licence}",
-                f"Written by {', '.join(sparkle.about.authors[:-1])},\
-           and {sparkle.about.authors[-1]}",
-                f"Contact: {sparkle.about.contact}",
+                f"Sparkle ({sparkle.description})",
+                f"Version: {sparkle.__version__}",
+                f"Licence: {sparkle.licence}",
+                f"Written by {', '.join(sparkle.authors[:-1])},\
+           and {sparkle.authors[-1]}",
+                f"Contact: {sparkle.contact}",
                 "For more details see README.md",
             ]
         )

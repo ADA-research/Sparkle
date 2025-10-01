@@ -2,14 +2,13 @@
 
 from pathlib import Path
 from setuptools import setup, find_packages
-from sparkle.about import version
 
 # read the contents of README file
 long_description = (Path(__file__).parent / "README.md").read_text()
 
 setup(
     name="Sparkle",
-    version=version,
+    version="0.9.5",
     url="https://github.com/ADA-research/Sparkle",
     author="Thijs Snelleman",
     author_email="fkt_sparkle@aim.rwth-aachen.de",
