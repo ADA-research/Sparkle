@@ -18,19 +18,15 @@ jobs:
       with:
         python-version: '3.10.14'
 
-    - name: Add conda to system path
-      run: |
-        echo $CONDA/bin >> $GITHUB_PATH
-
     - name: Install dependencies
       run: |
         python3 -m venv venv/
         source venv/bin/activate  # Activate the new environment
-        pip install -e .  # Install Sparkle from the repo
         pip install -r dev-requirements.txt  # Devtools
 
     - name: Lint with Ruff
       run: |
+        source venv/bin/activate
         ruff check .
 
     - name: Archive outputs
