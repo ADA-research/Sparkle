@@ -1,4 +1,5 @@
-# -------------------------------- Sparkle autocomplete ---------------------------------
+
+# -------------------------------- Sparkle Venv Autocomplete ---------------------------------
 _sparkle_target() {
     local cur opts
     # Retrieving the current typed argument
@@ -15,8 +16,12 @@ _sparkle_target() {
         return 0
     fi
 
-    # Package path is the path of this file's dir
-    PACKAGE_PATH=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+    # Venv: Package path is in the parent of this file's dir
+    SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+    PARENT_DIR="$(dirname "$SCRIPT_DIR")"
+    SEARCH_TERM="${PARENT_DIR}/lib/python*/site-packages/sparkle"
+    # Find the Path to Sparkle
+    PACKAGE_PATH=$( find $SEARCH_TERM )
 
     # Otherwise, first we retrieve all paths of folder and .py files inside the <your_package> package,
     # we keep only the package related section, remove the .py extension and convert their separators into dots
@@ -34,4 +39,4 @@ _sparkle_target() {
 # -o default makes sure that default behaviour of bash is used when our script returns 0
 complete -F _sparkle_target -o default sparkle
 
-# -------------------------------- Sparkle autocomplete ---------------------------------
+# -------------------------------- Sparkle Venv Autocomplete ---------------------------------

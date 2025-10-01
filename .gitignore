@@ -2,6 +2,8 @@
 *.egg-info
 .coverage
 .xml
+
+# Platform folders
 Solvers/*
 Extractors/*
 Instances/*
@@ -9,6 +11,8 @@ Output/*
 Snapshots/*
 Settings/*
 Tmp/*
+
+# PyTest dump
 tests/test_files/tmp
 
 # RunSolver compilation
@@ -33,6 +37,9 @@ sparkle/configurator/implementations/ablationAnalysis-0.9.4/*
 # Generated documentation 
 Documentation/source/_generated/
 Documentation/build
+
+# Virtual Environments
+venv/
 
 # Common IDE
 .idea

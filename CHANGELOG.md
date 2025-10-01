@@ -2,6 +2,18 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.9.6] - ??/??/2025
+
+### Added
+
+### Changed
+- Sparkle's autocomplete installation is now based on the `Venv` activation script instead of the user's bash profile. [Issue#194] 
+
+### Fixed
+
+### [Known issues]
+- IRACE configurator currently does not work as the IRACE .rdata output files cannot be read by R/IRACE.
+
 ## [0.9.5] - 30/09/2025
 
 ### Added
