@@ -2,12 +2,26 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.9.5] - ??/??/2025
+## [0.9.6] - ??/??/2025
+
+### Added
+
+### Changed
+- Sparkle's autocomplete installation is now based on the `Venv` activation script instead of the user's bash profile. [Issue#194] 
+
+### Fixed
+
+### [Known issues]
+- IRACE configurator currently does not work as the IRACE .rdata output files cannot be read by R/IRACE.
+
+## [0.9.5] - 30/09/2025
 
 ### Added
 - Feature data frame tests [Issue#181]
 - Added seed functionality to Sparkle Settings, which parametrises np.random / random.random throughout the platform [Issue#182]
 - A native python RunSolver implementation
+- sparkle cleanup --performance-data: Added functionality to automatically extract missing values in the PerformanceDataFrame from the logs [Issue#188]
+- Minimum marginal contribution option for constructing a selector, filtering all Solvers/Configurations that do no meet the minimum marginal contribution on the training set. Defaults to 0.01.
 
 ### Changed
 - Changed the CLI arguments and settings structures to be more streamlined and unified [SPRK-175]
@@ -19,9 +33,10 @@ Notable changes to Sparkle will be documented in this file.
 - Refactored FeatureDataFrame to subclass pandas DF instead of property [Issue#185]
 
 ### Fixed
+- Fixed various reading/writing issues to PerformanceDataFrame [Issue#188]
 
 ### [Known issues]
-- IRACE configuration currently does not work as the IRACE .rdata output files cannot be read by R/IRACE.
+- IRACE configurator currently does not work as the IRACE .rdata output files cannot be read by R/IRACE.
 
 ## [0.9.4] - 01/06/2025
 

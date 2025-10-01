@@ -51,7 +51,7 @@ When ready, create a pull request towards the `development` branch.
 2. Ensure the pipelines run successfully within the `sparkle` conda environment.
 3. Ensure a useful and accurate entry to the `CHANGELOG.md` is included.
 4. Ensure tests are adapted or new ones are created to cover possible new functionalities.
-5. In case of changes to the `environment.yml` or `dev-env.yml` make sure it installs correctly. Since the environment can affect all code, make sure ALL tests, examples, etc. run correctly.
+5. In case of changes to the dependencies, make sure it installs correctly in a new virtual environment. Since the environment can affect all code, make sure ALL tests, examples, etc. run correctly.
 6. Carefully check any changes to files in the `Settings/` directory. Are they truly needed?
 
 ### Code style
@@ -76,7 +76,7 @@ The coding style consistency is a work in progress, and existing code may not ad
 When releasing a new version (including bugfix versions) of Sparkle to the `main` branch, the protocol below should be followed. First the checks should be performed. If at any step anything fails, it should first be fixed and then ALL checks should be performed again from scratch, starting from point 1.
 
 ### Checks
-1. Freshly install the conda environment. Remove the old one with `conda env remove -n sparkle` and create it again with `conda env create -f environment.yml` or with `conda env create -f dev-env.yml`. In principle, these environments are equal except that the dev-env has a few extra libs to run pytests and ruff.
+1. Freshly install the conda environment. Remove the old one with `deactivate` followed by deleting the directory and create it again with `env` followed by `pip install -e .`. Optionally, you can run `pip install dev-requirements.txt`. In principle, these environments are equal except that the dev-requirements has a few extra libs to run pytests and ruff.
 2. Make sure the code style rules pass by running `ruff` (make sure the `sparkle` conda environment is installed and active).
 3. Make sure the unit tests pass by running `pytest` (make sure the `sparkle` conda environment is installed and active). You can combine this step and the next step by running `pytest --all`.
 4. Make sure the integration tests pass by running `pytest --integration` (make sure the `sparkle` conda environment is installed and active).

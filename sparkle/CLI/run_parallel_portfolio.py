@@ -87,52 +87,6 @@ def create_performance_dataframe(
     )
 
 
-def build_command_list(
-    instances_set: InstanceSet,
-    solvers: list[Solver],
-    portfolio_path: Path,
-    pdf: PerformanceDataFrame,
-) -> list[str]:
-    """Build the list of command strings for all instance-solver-seed combinations.
-
-    Args:
-        instances_set: Set of instances to run on.
-        solvers: List of solvers to run on the instances.
-        portfolio_path: Path to the parallel portfolio.
-        pdf: Performance data frame object.
-
-    Returns:
-        cmd_list: List of command strings for all instance-solver-seed combinations.
-    """
-    cutoff = gv.settings().solver_cutoff_time
-    objectives = gv.settings().objectives
-    seeds_per_solver = gv.settings().parallel_portfolio_num_seeds_per_solver
-    cmd_list = []
-
-    # Create a command for each instance-solver-seed combination
-    for instance, solver in itertools.product(instances_set._instance_paths, solvers):
-        for _ in range(seeds_per_solver):
-            seed = int(random.getrandbits(32))
-            solver_call_list = solver.build_cmd(
-                instance.absolute(),
-                objectives=objectives,
-                seed=seed,
-                cutoff_time=cutoff,
-                log_dir=portfolio_path,
-            )
-
-            cmd_list.append(" ".join(solver_call_list))
-            for objective in objectives:
-                pdf.set_value(
-                    value=seed,
-                    solver=str(solver.directory),
-                    instance=instance.stem,
-                    objective=objective.name,
-                    solver_fields=["Seed"],
-                )
-    return cmd_list
-
-
 def init_default_objectives() -> list:
     """Initialize default objective values and key names.
 
@@ -159,54 +113,6 @@ def init_default_objectives() -> list:
         default_objective_values[o.name] = default_value
     default_objective_values[status_key] = SolverStatus.UNKNOWN  # Overwrite status
     return default_objective_values, cpu_time_key, status_key, wall_time_key
-
-
-def submit_jobs(
-    cmd_list: list[str],
-    solvers: list[Solver],
-    instances_set: InstanceSet,
-    run_on: Runner = Runner.SLURM,
-) -> SlurmRun:
-    """Submit jobs to the runner and return the run object.
-
-    Args:
-        cmd_list: List of command strings for all instance-solver-seed combinations.
-        solvers: List of solvers to run on the instances.
-        instances_set: Set of instances to run on.
-        run_on: Runner to use for submitting the jobs.
-
-    Returns:
-        run: The run object containing the submitted jobs.
-    """
-    seeds_per_solver = gv.settings().parallel_portfolio_num_seeds_per_solver
-    num_solvers, num_instances = len(solvers), len(instances_set._instance_paths)
-    num_jobs = num_solvers * num_instances * seeds_per_solver
-    parallel_jobs = min(gv.settings().slurm_jobs_in_parallel, num_jobs)
-    if parallel_jobs > num_jobs:
-        print(
-            "WARNING: Not all jobs will be started at the same time due to the "
-            "limitation of number of Slurm jobs that can be run in parallel. Check"
-            " your Sparkle Slurm Settings."
-        )
-    print(
-        f"Sparkle parallel portfolio is running {seeds_per_solver} seed(s) per solver "
-        f"on {num_solvers} solvers for {num_instances} instances ..."
-    )
-
-    sbatch_options = gv.settings().sbatch_settings
-    print(sbatch_options)
-    solver_names = ", ".join([s.name for s in solvers])
-    # Jobs are added in to the runrunner object in the same order they are provided
-    return rrr.add_to_queue(
-        runner=run_on,
-        cmd=cmd_list,
-        name=f"Parallel Portfolio: {solver_names}",
-        parallel_jobs=parallel_jobs,
-        base_dir=sl.caller_log_dir,
-        srun_options=["-N1", "-n1"] + sbatch_options,
-        sbatch_options=sbatch_options,
-        prepend=gv.settings().slurm_job_prepend,
-    )
 
 
 def monitor_jobs(
@@ -449,6 +355,99 @@ def print_and_write_results(
                     objective=obj_name,
                 )
     pdf.save_csv()
+
+
+def build_command_list(
+    instances_set: InstanceSet,
+    solvers: list[Solver],
+    portfolio_path: Path,
+    performance_data: PerformanceDataFrame,
+) -> list[str]:
+    """Build the list of command strings for all instance-solver-seed combinations.
+
+    Args:
+        instances_set: Set of instances to run on.
+        solvers: List of solvers to run on the instances.
+        portfolio_path: Path to the parallel portfolio.
+        performance_data: PerformanceDataFrame object.
+
+    Returns:
+        cmd_list: List of command strings for all instance-solver-seed combinations.
+    """
+    cutoff = gv.settings().solver_cutoff_time
+    objectives = gv.settings().objectives
+    seeds_per_solver = gv.settings().parallel_portfolio_num_seeds_per_solver
+    cmd_list = []
+
+    # Create a command for each instance-solver-seed combination
+    for instance, solver in itertools.product(instances_set._instance_paths, solvers):
+        for _ in range(seeds_per_solver):
+            seed = int(random.getrandbits(32))
+            solver_call_list = solver.build_cmd(
+                instance.absolute(),
+                objectives=objectives,
+                seed=seed,
+                cutoff_time=cutoff,
+                log_dir=portfolio_path,
+            )
+
+            cmd_list.append(" ".join(solver_call_list))
+            for objective in objectives:
+                performance_data.set_value(
+                    value=seed,
+                    solver=str(solver.directory),
+                    instance=instance.stem,
+                    objective=objective.name,
+                    solver_fields=["Seed"],
+                )
+    return cmd_list
+
+
+def submit_jobs(
+    cmd_list: list[str],
+    solvers: list[Solver],
+    instances_set: InstanceSet,
+    run_on: Runner = Runner.SLURM,
+) -> SlurmRun:
+    """Submit jobs to the runner and return the run object.
+
+    Args:
+        cmd_list: List of command strings for all instance-solver-seed combinations.
+        solvers: List of solvers to run on the instances.
+        instances_set: Set of instances to run on.
+        run_on: Runner to use for submitting the jobs.
+
+    Returns:
+        run: The run object containing the submitted jobs.
+    """
+    seeds_per_solver = gv.settings().parallel_portfolio_num_seeds_per_solver
+    num_solvers, num_instances = len(solvers), len(instances_set._instance_paths)
+    num_jobs = num_solvers * num_instances * seeds_per_solver
+    parallel_jobs = min(gv.settings().slurm_jobs_in_parallel, num_jobs)
+    if parallel_jobs > num_jobs:
+        print(
+            "WARNING: Not all jobs will be started at the same time due to the "
+            "limitation of number of Slurm jobs that can be run in parallel. Check"
+            " your Sparkle Slurm Settings."
+        )
+    print(
+        f"Sparkle parallel portfolio is running {seeds_per_solver} seed(s) per solver "
+        f"on {num_solvers} solvers for {num_instances} instances ..."
+    )
+
+    sbatch_options = gv.settings().sbatch_settings
+    solver_names = ", ".join([s.name for s in solvers])
+    # Jobs are added in to the runrunner object in the same order they are provided
+    return rrr.add_to_queue(
+        runner=run_on,
+        cmd=cmd_list,
+        name=f"Parallel Portfolio: {solver_names}",
+        parallel_jobs=parallel_jobs,
+        base_dir=sl.caller_log_dir,
+        srun_options=["-N1", "-n1"] + sbatch_options,
+        sbatch_options=sbatch_options,
+        prepend=gv.settings().slurm_job_prepend,
+    )
 
 
 def main(argv: list[str]) -> None:

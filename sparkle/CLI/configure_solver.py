@@ -97,6 +97,27 @@ def main(argv: list[str]) -> None:
     prev_settings = Settings(Path(Settings.DEFAULT_previous_settings_path))
     Settings.check_settings_changes(settings, prev_settings)
 
+    configurator = gv.settings().configurator
+
+    # Check configurator is available
+    if not configurator.check_requirements(verbose=True):
+        print(
+            f"{configurator.name} is not available. "
+            "Please inspect possible warnings above."
+        )
+        print(f"Would you like to install {configurator.name}? (Y/n)")
+        if input().lower().strip() == "y":
+            configurator.download_requirements()
+        else:
+            sys.exit()
+        if not configurator.check_requirements(verbose=True):
+            raise RuntimeError(f"Failed to install {configurator.name}.")
+        sys.exit(-1)
+
+    # Compare current settings to latest.ini
+    prev_settings = Settings(Path(Settings.DEFAULT_previous_settings_path))
+    Settings.check_settings_changes(gv.settings(), prev_settings)
+
     solver: Solver = resolve_object_name(
         args.solver,
         gv.file_storage_data_mapping[gv.solver_nickname_list_path],
@@ -203,8 +224,8 @@ def main(argv: list[str]) -> None:
             instances.append(instance_path)
         default_job = solver.run_performance_dataframe(
             instances,
-            PerformanceDataFrame.default_configuration,
             performance_data,
+            PerformanceDataFrame.default_configuration,
             sbatch_options=sbatch_options,
             slurm_prepend=slurm_prepend,
             cutoff_time=config_scenario.solver_cutoff_time,
@@ -234,8 +255,8 @@ def main(argv: list[str]) -> None:
             )
             test_set_job = solver.run_performance_dataframe(
                 instance_set_test,
-                run_index,
                 performance_data,
+                run_ids=run_index,
                 cutoff_time=config_scenario.solver_cutoff_time,
                 objective=config_scenario.sparkle_objective,
                 train_set=instance_set_train,

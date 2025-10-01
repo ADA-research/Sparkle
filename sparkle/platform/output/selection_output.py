@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 from sparkle.selector import SelectionScenario
-from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
+from sparkle.structures import PerformanceDataFrame
 from sparkle.platform.output.structures import (
     SelectionPerformance,
     SelectionSolverData,
@@ -83,14 +83,12 @@ class SelectionOutput:
     def __init__(
         self: SelectionOutput,
         selection_scenario: SelectionScenario,
-        feature_data: FeatureDataFrame,
     ) -> None:
         """Initialize SelectionOutput class.
 
         Args:
             selection_scenario: Path to selection output directory
             performance_data: The performance data used for the selector
-            feature_data: The feature data used for the selector
         """
         self.training_instances = selection_scenario.training_instances
         training_instance_sets = selection_scenario.training_instance_sets

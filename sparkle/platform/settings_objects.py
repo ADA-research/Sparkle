@@ -55,7 +55,15 @@ class Option(NamedTuple):
     @property
     def kwargs(self: Option) -> dict[str, Any]:
         """Return the option attributes as kwargs."""
-        return {"type": self.type, "help": self.help, **self.cli_kwargs}
+        kw = {"help": self.help, **self.cli_kwargs}
+
+        # If this option uses a boolean flag action, argparse must NOT receive 'type'
+        action = kw.get("action")
+        if action in ("store_true", "store_false"):
+            return kw
+
+        # Otherwise include the base 'type'
+        return {"type": self.type, **kw}
 
 
 class Settings:
@@ -203,6 +211,18 @@ class Settings:
         tuple(),
         "Seed to use for pseudo-random number generators.",
     )
+    OPTION_appendices = Option(
+        "appendices",
+        SECTION_general,
+        bool,
+        False,
+        tuple(),
+        "Include the appendix section in the generated report.",
+        cli_kwargs={
+            "action": "store_true",
+            "default": None,
+        },
+    )
 
     # CONFIGURATION Options
     SECTION_configuration = "configuration"
@@ -272,6 +292,18 @@ class Settings:
         None,
         ("model",),
         "Can be any of the sklearn.ensemble models.",
+    )
+    OPTION_minimum_marginal_contribution = Option(
+        "minimum_marginal_contribution",
+        SECTION_selection,
+        float,
+        0.01,
+        (
+            "minimum_marginal_contribution",
+            "minimum_contribution",
+            "contribution_threshold",
+        ),
+        "The minimum marginal contribution a solver (configuration) must have to be used for the selector.",
     )
 
     # SMAC2 Options
@@ -598,6 +630,7 @@ class Settings:
             OPTION_solver_cutoff_time,
             OPTION_extractor_cutoff_time,
             OPTION_run_on,
+            OPTION_appendices,
             OPTION_verbosity,
             OPTION_seed,
         ],
@@ -610,7 +643,11 @@ class Settings:
             OPTION_ablation_racing,
             OPTION_ablation_clis_per_node,
         ],
-        SECTION_selection: [OPTION_selection_class, OPTION_selection_model],
+        SECTION_selection: [
+            OPTION_selection_class,
+            OPTION_selection_model,
+            OPTION_minimum_marginal_contribution,
+        ],
         SECTION_smac2: [
             OPTION_smac2_wallclock_time_budget,
             OPTION_smac2_cpu_time_budget,
@@ -677,6 +714,7 @@ class Settings:
         self.__solver_cutoff_time: int = None
         self.__extractor_cutoff_time: int = None
         self.__run_on: Runner = None
+        self.__appendices: bool = False
         self.__verbosity_level: VerbosityLevel = None
         self.__seed: Optional[int] = None
 
@@ -692,6 +730,7 @@ class Settings:
         # Selection attributes
         self.__selection_model: str = None
         self.__selection_class: str = None
+        self.__minimum_marginal_contribution: float = None
 
         # SMAC2 attributes
         self.__smac2_wallclock_time_budget: int = None
@@ -832,6 +871,8 @@ class Settings:
     def _abstract_getter(self: Settings, option: Option) -> Any:
         """Abstract getter method."""
         if self.__settings.has_option(option.section, option.name):
+            if option.type is bool:
+                return self.__settings.getboolean(option.section, option.name)
             value = self.__settings.get(option.section, option.name)
             if not isinstance(value, option.type):
                 if issubclass(option.type, Enum):
@@ -899,6 +940,11 @@ class Settings:
         if self.__run_on is None:
             self.__run_on = self._abstract_getter(Settings.OPTION_run_on)
         return self.__run_on
+
+    @property
+    def appendices(self: Settings) -> bool:
+        """Whether to include appendices in the report."""
+        return self._abstract_getter(Settings.OPTION_appendices)
 
     @property
     def verbosity_level(self: Settings) -> VerbosityLevel:
@@ -1005,6 +1051,15 @@ class Settings:
                 Settings.OPTION_selection_class
             )
         return self.__selection_class
+
+    @property
+    def minimum_marginal_contribution(self: Settings) -> float:
+        """Get the minimum marginal contribution."""
+        if self.__minimum_marginal_contribution is None:
+            self.__minimum_marginal_contribution = self._abstract_getter(
+                Settings.OPTION_minimum_marginal_contribution
+            )
+        return self.__minimum_marginal_contribution
 
     # Configuration: SMAC2 specific settings ###
     @property
@@ -1452,6 +1507,10 @@ class Settings:
         for section in sections_remained:
             printed_section = False
             names = set(cur_dict[section].keys()) | set(prev_dict[section].keys())
+            if (
+                section == "general" and "seed" in names
+            ):  # Do not report on the seed, is supposed to change
+                names.remove("seed")
             for name in names:
                 # if name is not present in one of the two dicts, get None as placeholder
                 cur_val = cur_dict[section].get(name, None)
