@@ -42,7 +42,7 @@ class TestConfiguratorSMAC2(TestCase):
         )
         assert self.smac2_conf.multiobjective is False
 
-    @patch("sparkle.configurator.implementations.SMAC2.check_requirements")
+    @patch("sparkle.configurator.implementations.smac2.SMAC2.check_requirements")
     @patch("runrunner.add_to_queue")
     def test_smac2_configure(
         self: TestConfiguratorSMAC2, mock_add_to_queue: Mock, mock_requirements: Mock
