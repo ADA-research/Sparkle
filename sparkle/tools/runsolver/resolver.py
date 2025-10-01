@@ -34,7 +34,7 @@ class RunSolverResolver(RunSolver):
             List of commands and arguments to execute the solver.
         """
         if runsolver_executable.exists():
-            RunSolver.wrap_command(
+            return RunSolver.wrap_command(
                 runsolver_executable,
                 command,
                 cutoff_time,
@@ -43,4 +43,6 @@ class RunSolverResolver(RunSolver):
                 raw_results_file,
             )
         else:
-            PyRunSolver.wrap_command(command, cutoff_time, log_directory, log_name_base)
+            return PyRunSolver.wrap_command(
+                command, cutoff_time, log_directory, log_name_base
+            )
