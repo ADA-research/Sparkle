@@ -8,6 +8,7 @@ Notable changes to Sparkle will be documented in this file.
 
 ### Changed
 - Sparkle's autocomplete installation is now based on the `Venv` activation script instead of the user's bash profile. [Issue#194] 
+- A native python RunSolver implementation [Issue#192]
 
 ### Fixed
 
@@ -19,7 +20,6 @@ Notable changes to Sparkle will be documented in this file.
 ### Added
 - Feature data frame tests [Issue#181]
 - Added seed functionality to Sparkle Settings, which parametrises np.random / random.random throughout the platform [Issue#182]
-- A native python RunSolver implementation
 - sparkle cleanup --performance-data: Added functionality to automatically extract missing values in the PerformanceDataFrame from the logs [Issue#188]
 - Minimum marginal contribution option for constructing a selector, filtering all Solvers/Configurations that do no meet the minimum marginal contribution on the training set. Defaults to 0.01.
 
