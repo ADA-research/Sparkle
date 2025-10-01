@@ -92,7 +92,7 @@ Asside from several package dependencies, Sparkle's package / CLI relies on a fe
 Other dependencies are handled by the Conda environment, but if that is not an option for you please ensure you have the following:
 
 - [libnuma](https://anaconda.org/esrf-bcu/libnuma) and [numactl](https://anaconda.org/brown-data-science/numactl) for [Runsolver](http://www.cril.univ-artois.fr/~roussel/runsolver/) compilation which sparkle uses to measure solvers meta data. This is restricted to Linux based systems.
-- [Swig](https://anaconda.org/conda-forge/swig/) 4.0.2 for [SMAC3](https://github.com/automl/SMAC3).
+- [Swig](https://anaconda.org/conda-forge/swig/) 4.0.2 for [SMAC3](https://github.com/automl/SMAC3). Although Sparkle can be used without SMAC3, there seem to be some complications installation wise currently if swig is not present.
 
 For detailed installation instructions see the documentation: https://ada-research.github.io/Sparkle/
 
