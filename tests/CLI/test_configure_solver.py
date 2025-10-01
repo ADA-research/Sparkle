@@ -11,7 +11,7 @@ from tests.CLI import tools
 
 
 @pytest.mark.integration
-@patch("sparkle.configurator.implementations.SMAC2.check_requirements")
+@patch("sparkle.configurator.implementations.smac2.SMAC2.check_requirements")
 def test_configure_solver(
     mock_requirements: Mock, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

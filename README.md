@@ -1,7 +1,6 @@
 # _Sparkle_
 
 [![Tests](https://ada-research.github.io/Sparkle/_static/junit/junit-badge.svg)](https://ada-research.github.io/Sparkle/_static/junit/index.html)
-![tests status](https://github.com/ada-research/sparkle/actions/workflows/unittest.yml/badge.svg?event=push)
 [![Coverage Status](https://ada-research.github.io/Sparkle/_static/coverage/coverage-badge.svg)](https://ada-research.github.io/Sparkle/_static/coverage/index.html)
 ![linter](https://github.com/ada-research/sparkle/actions/workflows/linter.yml/badge.svg?event=push)
 ![docs](https://github.com/ada-research/sparkle/actions/workflows/documentation.yml/badge.svg?event=push)
@@ -25,11 +24,45 @@ Furthermore, Sparkle handles various tasks for the user such as:
 
 Sparkle is a Python based package, but requires several non-Python dependencies to run fully. The easiest installation is through Conda. A setup with Python virtual Environment is also possible, but requires more user input for the installation process.
 
-### Conda
+### venv
 
-The quick and full installation of Sparkle can be done using Conda (For Conda installation see [here]( https://docs.conda.io/en/latest/miniconda.html)). 
+Sparkle can also be installed as a standalone package using Pip. We recommend creating a new virtual environment with [venv](https://docs.python.org/3/library/venv.html) before to ensure no clashes between dependencies occur. Note that when creating a new venv, Sparkle needs Python 3.10 to run, so create your virtual environment with this Python version active
 
-Simply download the `environment.yml` file from the [Github](https://github.com/ADA-research/Sparkle/blob/main/environment.yml) with wget:
+To install Sparkle in your virtual environment (in this example called 'venv' here) simply type:
+
+```bash
+python3 -m venv venv/
+
+source venv/bin/activate  # Activate the new environment
+
+pip install sparkle
+```
+
+Note that a direct installation through Pip does not handle certain dependencies of the Sparkle CLI, such as the required libraries for compiling [RunSolver](https://www.cril.univ-artois.fr/~roussel/runsolver/). This can possibly be resolved in your system (if it does not work 'out-of-the-box') by running `sudo yum install numactl-devel`.
+
+You will need to supply, aside from the other dependencies in the next section, the following in your virtual environment:
+- `Python 3.10` or greater is required to use Sparkle
+- `libnuma` and `numactl` in order to compile RunSolver (Which can be installed through `sudo yum install numactl-devel`). We suggest to use `GCC 12.2.0`.
+
+#### Sparkle Autocomplete
+
+If you wish for the Bash autocomplete to also work for Sparkle's CLI commands, you can add the autocomplete script to your environments activation file. The source script of this can be found in `Resources/Other/venv_autocomplete.sh` and must be appended to your activation script, which can be done with the Sparkle CLI:
+
+```bash
+sparkle install autocomplete
+```
+
+Alternatively, if the installation fails for some reason or you are not using Venv,you can do it yourself with bash commands such as:
+
+```bash
+curl https://raw.githubusercontent.com/ADA-research/Sparkle/refs/heads/main/sparkle/Resources/Other/venv_autocomplete.sh >> venv/bin/activate
+```
+
+where `venv/bin/activate` leads to the script to activate your newly created environment. Note that afterwards you need to deactivate and reactivate the environment for changes to take effect. If you are using conda, you will probably need to append this script to your .bash_profile instead.
+
+### Alternative: Conda
+
+Sparkle can as alternatively be installed in a [Conda](https://docs.conda.io/en/latest/miniconda.html) environment. For this we provide an `environment.yml` file on [Github](https://github.com/ADA-research/Sparkle/blob/main/environment.yml), which you can download and run as follows:
 
 ```bash
 wget https://raw.githubusercontent.com/ADA-research/Sparkle/main/environment.yml
@@ -44,37 +77,11 @@ conda env create -f environment.yml
 The installation of the environment may take up to five minutes depending on your internet connection.
 Once the environment has been created it can be activated by:
 
-```
+```bash
 conda activate sparkle
 ```
 
-```{note}
-The creation of the Conda environment also takes care of the installation of the Sparkle package itself. 
-```
-
-```{note}
-You will need to reactivate the environment every time you start the terminal, before using Sparkle.
-```
-
-### venv
-
-Sparkle can also be installed as a standalone package using Pip. We recommend creating a new virtual environment with [venv](https://docs.python.org/3/library/venv.html) before to ensure no clashes between dependencies occur. Note that when creating a new venv, Sparkle needs Python 3.10 to run, so create your virtual environment with this Python version active
-
-To install Sparkle in the virtual environment simply type:
-
-```bash
-pip install sparkle
-```
-
-Note that a direct installation through Pip does not handle certain dependencies of the Sparkle CLI, such as the required libraries for compiling [RunSolver](https://www.cril.univ-artois.fr/~roussel/runsolver/).
-
-You will need to supply, aside from the other dependencies in the next section, the following in your virtual environment:
-- `Python 3.9`, `Python 3.10` or `Python 3.11` is required to use Sparkle
-- `libnuma` and `numactl` in order to compile RunSolver. We suggest to use `GCC 12.2.0`.
-
-### Bash autocomplete
-
-If you wish for the Bash autocomplete to also work for Sparkle's CLI commands, you can type `sparkle install autocomplete`, which will append a single line of code to your `.bash_profile` allowing you to auto complete any sparkle command with the tab.
+You will need to reactivate the environment every time you start the terminal, before using Sparkle. Note that we generally recommend `venv` over `conda` as it is much lighter to run.
 
 ### Dependencies
 Asside from several package dependencies, Sparkle's package / CLI relies on a few user supplied executables:
@@ -91,18 +98,7 @@ For detailed installation instructions see the documentation: https://ada-resear
 
 ### Developer installation
 
-The file `dev-env.yml` is used for developer mode of the Sparkle package and contains several extra packages for testing.
-
-The two environments can be created in parallel since one is named `sparkle` and the other `sparkle-dev`. If you want to update an environment it is better to do a clean installation by removing and recreating it. For example:
-
-```
-conda deactivate
-conda env remove -n sparkle
-conda env create -f environment.yml
-conda activate sparkle
-```
-
-This should be fast as both `conda` and `pip` use local cache for the packages.
+The file `dev-requirements.txt` is used for developer mode of the Sparkle package and contains several extra packages for testing. You can install the requirements from this file into your `venv` to be able to use the devtools for Sparkle.
 
 #### Examples
 
@@ -168,7 +164,6 @@ Emir Pisiciri
 ### Contact
 sparkle@aim.rwth-aachen.de
 
-
 ### Sponsors
 
-The development of Sparkle is partially sponsored by the [Alexander von Humboldt foundation](https://www.humboldt-foundation.de/en/).
+The development of Sparkle is partially sponsored by the [Alexander von Humboldt Foundation](https://www.humboldt-foundation.de/en/).

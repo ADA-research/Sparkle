@@ -41,14 +41,12 @@ jobs:
       - uses: ./.github/actions/setup_slurm_action  # Set up medium slurm cluster
       - uses: actions/setup-python@v5
       - uses: r-lib/actions/setup-r@v2
-      - name: Add conda to system path
+      - name: Setup Virtual Environment
         run: |
-          # $CONDA is an environment variable pointing to the root of the miniconda directory
-          echo $CONDA/bin >> $GITHUB_PATH
-      - name: Install dependencies
-        run: |
-          conda install -y python=3.9 # https://github.com/conda/conda/issues/13560#issuecomment-1992720842
-          conda env update --file dev-env.yml --name base
+          python3 -m venv venv/
+          source venv/bin/activate  # Activate the new environment
+          pip install -e .  # Install Sparkle from the repo
+          pip install -r dev-requirements.txt  # Devtools
           pip install -r Documentation/requirements.txt
           pip install genbadge[tests,coverage]
       - name: Install RunSolver dependencies
@@ -58,15 +56,24 @@ jobs:
       - name: Install pdflatex for report generation dependency
         run: sudo apt-get install texlive-latex-base
       - name: Run Code Coverage report
-        run:  pytest --all --cov sparkle/ --cov-report=xml:Documentation/source/_static/coverage/coverage.xml --cov-report=html:Documentation/source/_static/coverage
+        run:  |
+          source venv/bin/activate  # Activate venv
+          pytest --all --cov sparkle/ --cov-report=xml:Documentation/source/_static/coverage/coverage.xml --cov-report=html:Documentation/source/_static/coverage
       - name: Run tests report
-        run: pytest --all --junitxml=Documentation/source/_static/junit/junit.xml --html=Documentation/source/_static/junit/index.html
+        run:  |
+          source venv/bin/activate  # Activate venv
+          pytest --all --junitxml=Documentation/source/_static/junit/junit.xml --html=Documentation/source/_static/junit/index.html
       - name: Generate coverage badge
-        run: genbadge coverage -i Documentation/source/_static/coverage/coverage.xml -o Documentation/source/_static/coverage/coverage-badge.svg
+        run:  |
+          source venv/bin/activate  # Activate venv
+          genbadge coverage -i Documentation/source/_static/coverage/coverage.xml -o Documentation/source/_static/coverage/coverage-badge.svg
       - name: Generate tests badge
-        run: genbadge tests -i Documentation/source/_static/junit/junit.xml -o Documentation/source/_static/junit/junit-badge.svg
+        run:  |
+          source venv/bin/activate  # Activate venv
+          genbadge tests -i Documentation/source/_static/junit/junit.xml -o Documentation/source/_static/junit/junit-badge.svg
       - name: Build Documentation
         run: |
+          source venv/bin/activate  # Activate venv
           cd Documentation
           make html
       - name: Setup Pages
