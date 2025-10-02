@@ -44,5 +44,5 @@ class RunSolverResolver(RunSolver):
             )
         else:
             return PyRunSolver.wrap_command(
-                command, cutoff_time, log_directory, log_name_base
+                command, cutoff_time, log_directory, log_name_base, raw_results_file
             )

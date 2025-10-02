@@ -174,11 +174,17 @@ class Extractor(SparkleCallable):
                         f"\t-stderr: '{job.stderr}'\n"
                     )
                 return None
-            # RunRunner adds a stamp before the statement
-            output = [
-                ast.literal_eval(job.stdout.split("\t", maxsplit=1)[-1])
-                for job in extractor_run.jobs
-            ]
+            # RunRunner adds a timestamp before the statement
+            import re
+
+            pattern = re.compile(
+                r"^(?P<timestamp1>\d+\.\d+)\/(?P<timestamp2>\d+\.\d+)\s+(?P<output>.*)$"
+            )
+            output = []
+            for job in extractor_run.jobs:
+                match = pattern.match(job.stdout)
+                if match:
+                    output.append(ast.literal_eval(match.group("output")))
             if len(output) == 1:
                 return output[0]
             return output
