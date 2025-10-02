@@ -47,13 +47,13 @@ sparkle_output()
 # This should now always execute at the end of the program, making sure we communicate back to Sparkle
 trap sparkle_output 0 SIGTERM SIGINT SIGQUIT SIGABRT SIGHUP
 
-# Execute the solver
-output="$($cmd)"
+# Execute the solver, with duplicated output:
+# - One to the terminal so it can be verified by SATVerifier and we record the 'latest' log
+# - One to our variable so we can return the correct status to Sparkle
+exec 5>&1
+output="$($cmd |tee >(cat - >&5))"
 
-# Optional: Print original output so the solution can be verified by SolutionVerifier
-echo "$output"
-
-# Parse the solver output
+# Parse the solver output, for example:
 while IFS= read -r line; do
     if [[ $line == *"s SATISFIABLE"* ]]; then
         status="SUCCESS"
