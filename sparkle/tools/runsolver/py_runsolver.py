@@ -270,7 +270,6 @@ if __name__ == "__main__":
         type=Path,
         help="File to redirect command stdout and stderr to.",
     )
-    # TODO: Add Memory Limit as well
     parser.add_argument("command", nargs=argparse.REMAINDER, help="The command to run.")
 
     args = parser.parse_args()
