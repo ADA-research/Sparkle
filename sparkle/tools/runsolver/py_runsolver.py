@@ -93,8 +93,6 @@ def run_with_monitoring(
     user_time = 0.0
     system_time = 0.0
     max_memory_kib = 0
-    timeout = False
-    memout = False
 
     with watcher_file.open("w") as f:
         f.write(
@@ -102,9 +100,44 @@ def run_with_monitoring(
         )
         f.write(f"command line: {shlex.join(sys.argv)}")
 
+    def process_raw_output(fd: int, target_file: Path = None) -> int | None:
+        """Reads and writes 'raw' command output to a file."""
+        if fd is None:  # Closed file stream, nothing to do
+            return None
+        while select.select([fd], [], [], 0)[
+            0
+        ]:  # Check if FD is available for read without blocking/waiting
+            try:
+                data = os.read(
+                    fd,
+                    8192,  # Preferably this would be larger, but the stream never gives more than 4095 chars per read. Don't know why.
+                ).decode()
+                if data:
+                    if timestamp:
+                        ends_with_newline = data.endswith("\n")
+                        stamp = f"{user_time:.2f}/{time.time() - start_time:.2f}"
+                        data = "\n".join(
+                            [f"{stamp}\t{line}" for line in data.splitlines()]
+                        )  # Add stamp at the beginning of each line
+                        data += (
+                            "\n" if ends_with_newline else ""
+                        )  # Splitlines removes last \n
+                    if target_file:
+                        with target_file.open(
+                            "a"
+                        ) as f:  # Reopen and close per line to stream output
+                            f.write(data)
+                    else:  # No output log, print to 'terminal' (Or slurm log etc.)
+                        print(data)
+                else:
+                    os.close(fd)  # No data on stream
+                    return None  # Remove FD
+            except OSError:  # Streamno longer readable
+                return None  # Remove FD
+        return fd
+
     if output_file:  # Create raw output log
         output_file.open("w+").close()
-    wall_time = None
 
     try:
         master_fd, slave_fd = (
@@ -121,42 +154,22 @@ def run_with_monitoring(
             # Check if process has exceed wall clock limit
             if wall_clock_limit and (time.time() - start_time) > wall_clock_limit:
                 process.kill()
-                timeout = True
                 break
 
             # Read process output and write to out_log
-            is_ready, _, _ = select.select([master_fd], [], [], 0)
-            if is_ready:
-                try:
-                    data = os.read(
-                        master_fd, 8192
-                    ).decode()  # The data is also available in process.poll() ?
-                    if data:
-                        if timestamp:
-                            stamp = "00.00/00.00"  # TODO: Fix/add measurements
-                            data = "\n".join(
-                                [f"{stamp}\t{line}" for line in data.splitlines()]
-                            )  # Add stamp at the beginning of each line
-                        if output_file:
-                            with output_file.open(
-                                "a"
-                            ) as f:  # Reopen and close per line to stream output
-                                f.write(data)
-                        else:  # No output log, print to 'terminal' (Or slurm log etc.)
-                            print(data)
-                    else:
-                        os.close(master_fd)
-                        master_fd = None
-                except OSError:
-                    os.close(master_fd)
-                    master_fd = None
+            master_fd = process_raw_output(master_fd, output_file)
 
             try:  # Try to update statistics
                 children = ps_process.children(recursive=True)
 
                 # Sum CPU times and memory for the entire process tree
-                current_user_time = ps_process.cpu_times().user
-                current_system_time = ps_process.cpu_times().system
+                current_user_time = (
+                    ps_process.cpu_times().user + ps_process.cpu_times().children_user
+                )
+                current_system_time = (
+                    ps_process.cpu_times().system
+                    + ps_process.cpu_times().children_system
+                )
                 current_vms = ps_process.memory_info().vms
 
                 for child in children:
@@ -173,18 +186,14 @@ def run_with_monitoring(
                 max_memory_kib = max(max_memory_kib, current_vms / 1024)
                 if cpu_limit and cpu_time > cpu_limit:
                     process.kill()
-                    timeout = True
                     break
                 if vm_limit and max_memory_kib > vm_limit:
                     process.kill()
-                    memout = True
                     break
 
             except psutil.NoSuchProcess:
                 break
-
-            # Polling interval -> Do we need this?
-            # time.sleep(0.1)
+        process_raw_output(master_fd, output_file)  # Final read from stream
     except (
         KeyboardInterrupt
     ):  # Ensure that we can catch CTRL-C and still wrap up properly
@@ -195,9 +204,13 @@ def run_with_monitoring(
         if process:
             process.wait()
         if master_fd:
-            os.close(master_fd)
+            os.close(master_fd)  # Close child's output stream
 
-    wall_time = time.time() - start_time if wall_time is None else wall_time
+    wall_time = time.time() - start_time
+    timeout = (cpu_limit is not None and cpu_time > cpu_limit) or (
+        wall_clock_limit is not None and wall_time > wall_clock_limit
+    )
+    memout = vm_limit is not None and max_memory_kib > vm_limit
 
     stats = {
         "WCTIME": (f"{wall_time}", "wall clock time in seconds"),
