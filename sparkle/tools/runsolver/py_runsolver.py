@@ -102,15 +102,18 @@ def run_with_monitoring(
         )
         f.write(f"command line: {shlex.join(sys.argv)}")
 
-    out_log = output_file.open("wb") if output_file is not None else None
+    if output_file:  # Create raw output log
+        output_file.open("w+").close()
     wall_time = None
 
     try:
-        master_fd, slave_fd = pty.openpty()
+        master_fd, slave_fd = (
+            pty.openpty()
+        )  # Open new pseudo-terminal pair for Master (us) and Slave (subprocess)
         process = subprocess.Popen(
             command, stdout=slave_fd, stderr=slave_fd, close_fds=True
         )
-        os.close(slave_fd)
+        os.close(slave_fd)  # Is this necessary? Are the fds not already closed above?
         ps_process = psutil.Process(process.pid)
 
         # Main monitoring loop
@@ -124,7 +127,6 @@ def run_with_monitoring(
             # Read process output and write to out_log
             is_ready, _, _ = select.select([master_fd], [], [], 0)
             if is_ready:
-                wall_time = time.time() - start_time
                 try:
                     data = os.read(
                         master_fd, 8192
@@ -135,8 +137,11 @@ def run_with_monitoring(
                             data = "\n".join(
                                 [f"{stamp}\t{line}" for line in data.splitlines()]
                             )  # Add stamp at the beginning of each line
-                        if out_log is not None:
-                            out_log.write(data)
+                        if output_file:
+                            with output_file.open(
+                                "a"
+                            ) as f:  # Reopen and close per line to stream output
+                                f.write(data)
                         else:  # No output log, print to 'terminal' (Or slurm log etc.)
                             print(data)
                     else:
