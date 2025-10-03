@@ -8,6 +8,7 @@ Notable changes to Sparkle will be documented in this file.
 
 ### Changed
 - Sparkle's autocomplete installation is now based on the `Venv` activation script instead of the user's bash profile. [Issue#194] 
+- A native python RunSolver implementation [Issue#192]
 
 ### Fixed
 

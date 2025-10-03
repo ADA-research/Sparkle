@@ -249,6 +249,7 @@ class Solver(SparkleCallable):
         set_label = instances.name if isinstance(instances, InstanceSet) else "instances"
         instances = [instances] if not isinstance(instances, list) else instances
         log_dir = Path() if log_dir is None else log_dir
+
         for instance in instances:
             paths = (
                 instance.instance_paths
