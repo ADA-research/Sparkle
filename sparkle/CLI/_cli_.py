@@ -50,7 +50,7 @@ def main() -> None:
         # TODO: Update this URL to link to the file on main
         code_inject = (
             urllib.request.urlopen(
-                "https://raw.githubusercontent.com/ADA-research/Sparkle/refs/heads/replace-conda-with-venv/Resources/Other/venv_autocomplete.sh"
+                "https://raw.githubusercontent.com/ADA-research/Sparkle/refs/heads/development/Resources/Other/venv_autocomplete.sh"
             )
             .read()
             .decode()

@@ -70,7 +70,7 @@ def run_with_monitoring(
     watcher_file: Path,
     value_file: Path,
     output_file: Path,
-    timestamp: bool,
+    timestamp: bool = True,
     cpu_limit: Optional[int] = None,
     wall_clock_limit: Optional[int] = None,
     vm_limit: Optional[int] = None,
@@ -82,8 +82,7 @@ def run_with_monitoring(
         watcher_file: File to log the command line.
         value_file: File to write final resource usage metrics.
         output_file: Optional file to redirect command's output.
-        timestamp: Whether to add a timestamp to the value file.
-            Currently only has a place holder value, as we do not have timestamps per output statement.
+        timestamp: Whether to add timestamps to each raw output line as CPU TIME / WC Time.
         cpu_limit: CPU time limit in seconds.
         wall_clock_limit: Wall-clock time limit in seconds.
         vm_limit: Virtual memory limit in KiB.
