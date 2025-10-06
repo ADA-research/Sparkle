@@ -14,7 +14,7 @@ import psutil
 
 from sparkle.tools.general import get_time_pid_random_string
 from sparkle.tools.runsolver.runsolver import RunSolver
-from sparkle.about import version as sparkle_version
+from sparkle.__about__ import __version__ as sparkle_version
 
 
 class PyRunSolver(RunSolver):

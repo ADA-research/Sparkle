@@ -81,7 +81,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project.scripts]
-sparkle-cli = "sparkle.CLI._cli_:main"  # Enable 'sparkle [command]' from the command line
+sparkle = "sparkle.CLI._cli_:main"  # Enable 'sparkle [command]' from the command line
 
 [project.urls]
 Homepage = "https://github.com/ADA-research/Sparkle"
