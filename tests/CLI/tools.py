@@ -1,6 +1,5 @@
 """Tools for testing Sparkle CLI."""
 
-import os
 import shutil
 import json
 import subprocess
@@ -23,7 +22,7 @@ def kill_slurm_jobs(command_log_dir: Path = None) -> None:
     if command_log_dir is None:
         command_log_dir = sorted(
             [p for p in (Path("Output") / "Log").iterdir()],
-            key=lambda p: os.stat(p).st_mtime,
+            key=lambda p: p.stat().st_mtime,
         )[-1]
     jobs = jobs_help.get_runs_from_file(command_log_dir)
     for j in jobs:

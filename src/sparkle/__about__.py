@@ -1,16 +1,11 @@
 """Package meta file."""
 
-__name__ = "sparkle"
-__version__ = "0.9.5"
+import importlib.metadata
 
-description = "Platform for evaluating empirical algorithms"
-licence = "MIT"
-authors = [
-    "Koen van der Blom",
-    "Jeremie Gobeil",
-    "Holger H. Hoos",
-    "Chuan Luo",
-    "Jeroen Rook",
-    "Thijs Snelleman",
-]
-contact = "sparkle@aim.rwth-aachen.de"
+__name__ = "sparkle"
+__version__ = importlib.metadata.version(__name__)
+
+description = importlib.metadata.metadata(__name__)["Summary"]
+licence = importlib.metadata.metadata(__name__)["License-Expression"]
+authors = importlib.metadata.metadata(__name__)["Author"]
+contact = importlib.metadata.metadata(__name__)["Maintainer-email"].split(", ")[-1]
