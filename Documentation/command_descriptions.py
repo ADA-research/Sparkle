@@ -1,22 +1,18 @@
 #!/usr/bin/env python3
 """Automatic extraction of command list from their implementations."""
 
-import os
 from pathlib import Path
 
 if __name__ == "__main__":
-    command_dir = "../src/sparkle/CLI"
+    command_dir = Path("../src/sparkle/CLI")
 
-    commands = []
-
-    for file in os.listdir(command_dir):
-        if file == "cli.py":
-            continue
-        filepath = Path(command_dir) / file
-        if Path(filepath).is_file() and file[-3:] == ".py" and file[0] != "_":
-            commands.append(file)
-
-    commands = sorted(commands)
+    commands = sorted(
+        [
+            file
+            for file in command_dir.iterdir()
+            if file.is_file() and file.suffix == ".py" and file.name[0] != "_"
+        ]
+    )
 
     sphinx_file = Path("source/commandlist.md").open("w")
     for command in commands:
