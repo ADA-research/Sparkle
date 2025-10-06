@@ -92,9 +92,13 @@ def main(argv: list[str]) -> None:
             f"{extractor.name}. This will be replaced with "
             f"Sparkle's version of RunSolver. ({runsolver_path})"
         )
-    runsolver_target = extractor.directory / runsolver_path.name
-    shutil.copyfile(runsolver_path, runsolver_target)
-    runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
+
+    if runsolver_path.exists():
+        runsolver_target = extractor.directory / runsolver_path.name
+        shutil.copyfile(runsolver_path, runsolver_target)
+        runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
+    else:
+        print("Warning! RunSolver does not exists. Falling back to PyRunSolver.")
 
     # Get the extractor features groups and names from the wrapper
     feature_dataframe = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
