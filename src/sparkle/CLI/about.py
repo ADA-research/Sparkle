@@ -3,7 +3,7 @@
 
 import sys
 import argparse
-import sparkle
+import sparkle.__about__
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -21,12 +21,12 @@ def main(argv: list[str]) -> None:
     print(
         "\n".join(
             [
-                f"Sparkle ({sparkle.description})",
-                f"Version: {sparkle.__version__}",
-                f"Licence: {sparkle.licence}",
-                f"Written by {', '.join(sparkle.authors[:-1])},\
-           and {sparkle.authors[-1]}",
-                f"Contact: {sparkle.contact}",
+                f"Sparkle ({sparkle.__about__.description})",
+                f"Version: {sparkle.__about__.__version__}",
+                f"Licence: {sparkle.__about__.licence}",
+                f"Written by {', '.join(sparkle.__about__.authors[:-1])},\
+           and {sparkle.__about__.authors[-1]}",
+                f"Contact: {sparkle.__about__.contact}",
                 "For more details see README.md",
             ]
         )

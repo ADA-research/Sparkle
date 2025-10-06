@@ -36,7 +36,7 @@ def test_option() -> None:
 
 def test_read_from_file() -> None:
     """Test reading settings from file."""
-    default_settings = Path("src/Sparkle/Components/sparkle_settings.ini")
+    default_settings = Path("src/sparkle/Components/sparkle_settings.ini")
     settings = Settings(default_settings)
     assert set([o.name for o in settings.objectives]) == set(
         [
@@ -109,7 +109,7 @@ def test_read_from_file() -> None:
 
 def test_file_with_cli_args() -> None:
     """Test reading settings from file with CLI override args."""
-    default_settings = Path("src/Sparkle/Components/sparkle_settings.ini")
+    default_settings = Path("src/sparkle/Components/sparkle_settings.ini")
     settings = Settings(default_settings)
     assert settings.solver_cutoff_time == 60
     assert settings.extractor_cutoff_time == 60
@@ -255,7 +255,7 @@ def test_read_full_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None
 def test_read_with_cli_file() -> None:
     """Test reading settings with CLI file argument."""
     default_settings = Path("tests/test_files/Settings/settings-full.ini")
-    settings_arg = Path("src/Sparkle/Components/sparkle_settings.ini")
+    settings_arg = Path("src/sparkle/Components/sparkle_settings.ini")
     args = argparse.Namespace(
         **{"settings_file": settings_arg, "solver_cutoff_time": 900}
     )  # Random setting
