@@ -141,7 +141,6 @@ K. van der Blom, H. H. Hoos, C. Luo and J. G. Rook, **Sparkle: Toward Accessible
 Thijs Snelleman,
 Jeroen Rook,
 Hadar Shavit,
-Holger H. Hoos
 
 ### Contributors
 Chuan Luo,

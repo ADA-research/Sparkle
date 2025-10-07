@@ -5,10 +5,11 @@ Notable changes to Sparkle will be documented in this file.
 ## [0.9.6] - ??/??/2025
 
 ### Added
+- A native python RunSolver implementation, an alternative for users when Roussel's RunSolver is not an option. [Issue#192]
 
 ### Changed
-- Sparkle's autocomplete installation is now based on the `Venv` activation script instead of the user's bash profile. [Issue#194] 
-- A native python RunSolver implementation [Issue#192]
+- Sparkle's autocomplete installation is now based on the `Venv` activation script instead of the user's bash profile. [Issue#194]
+- Moved from `setup.py` to `pyproject.toml` structure.
 
 ### Fixed
 
@@ -29,7 +30,7 @@ Notable changes to Sparkle will be documented in this file.
 - Timestamps are now saved in the directory name of the configuration scenario. [Issue#169]
 - Refactored compute_features to be part of the extractor as CLI script
 - RunSolver executable is now copied to feature extractors dirs instead, paths now directly linked similar to Solvers
-- Changed flake8 to ruff [Issue#184]
+- Changed linter from flake8 to ruff [Issue#184]
 - Refactored FeatureDataFrame to subclass pandas DF instead of property [Issue#185]
 
 ### Fixed
@@ -380,7 +381,7 @@ Patchfix
 - Published the documentation on https://sparkle-ai.readthedocs.io/
 - Created a `CHANGELOG.md` file documenting the changes to Sparkle
 - Created a `CONTRIBUTING.md` file explaining how to contribute
-- Set the licence to an MIT licence
+- Set the license to an MIT license
 - Added `epstopdf.pl` to the distribution to ease install
 - Added the test instance name to the output and validation dirs
 - Extended check for ablation

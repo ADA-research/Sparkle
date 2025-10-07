@@ -133,7 +133,7 @@ def main(argv: list[str]) -> None:
     if runsolver_path.exists():
         runsolver_target = solver_directory / runsolver_path.name
         shutil.copyfile(runsolver_path, runsolver_target)
-        runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
+        runsolver_target.chmod(runsolver_target.stat().st_mode | stat.S_IEXEC)
     else:
         print("Warning! RunSolver does not exists. Falling back to PyRunSolver.")
 

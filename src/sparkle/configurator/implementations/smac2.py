@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 from pathlib import Path
-import glob
 import shutil
 import math
 import random
@@ -190,16 +189,14 @@ class SMAC2(Configurator):
             log_dir = (
                 scenario / "outdir_train_configuration" / (scenario.name + "_scenario")
             )
-            warn_files = glob.glob(str(log_dir) + "/log-warn*")
-            non_empty = [
-                log_file for log_file in warn_files if Path(log_file).stat().st_size > 0
-            ]
-            if len(non_empty) > 0:
+            # Collect all non empty log files paths
+            warn_files = [f for f in log_dir.glob("log-warn*") if f.stat().st_size > 0]
+            if len(warn_files) > 0:
                 print(
-                    f"Scenario {scenario.name} has {len(non_empty)} warning(s), see "
+                    f"Scenario {scenario.name} has {len(warn_files)} warning(s), see "
                     "the following log file(s) for more information:"
                 )
-                for log_file in non_empty:
+                for log_file in warn_files:
                     print(f"\t-{log_file}")
             else:
                 print(f"Scenario {scenario.name} has no warnings.")

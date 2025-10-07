@@ -58,7 +58,7 @@ jobs:
       - name: Run Code Coverage report
         run:  |
           source venv/bin/activate  # Activate venv
-          pytest --all --cov sparkle/ --cov-report=xml:Documentation/source/_static/coverage/coverage.xml --cov-report=html:Documentation/source/_static/coverage
+          pytest --all --cov src/sparkle/ --cov-report=xml:Documentation/source/_static/coverage/coverage.xml --cov-report=html:Documentation/source/_static/coverage
       - name: Run tests report
         run:  |
           source venv/bin/activate  # Activate venv
