@@ -1,7 +1,6 @@
 """Tests for Solver CLI entry point."""
 
 import logging
-import os
 import time
 import math
 import stat
@@ -116,7 +115,7 @@ def test_solver_cli_performance(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     shutil.copytree(solver, solver_target)
     shutil.copytree(instances, instances_target)
     shutil.copyfile(runsolver_exec, runsolver_target)
-    runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
+    runsolver_target.chmod(runsolver_target.stat().st_mode | stat.S_IEXEC)
 
     # This DataFrame only has the Default configuration evaluated
     # And 50 new configurations that are not evaluated at all

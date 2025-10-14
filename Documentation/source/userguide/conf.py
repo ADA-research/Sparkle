@@ -19,18 +19,18 @@ import sys
 sys.path.append(os.path.abspath("../../../sparkle"))
 sys.path.append(os.path.abspath("../../../sparkle/CLI"))
 
-from sparkle import about  # noqa: E402
+from sparkle import __name__, __version__
 
 # -- Project information -----------------------------------------------------
 
-project = "Sparkle"
-copyright = "2024, ADA Research Group, AIM @ RWTH Aachen"
+project = __name__
+copyright = "2025, ADA Research Group, AIM @ RWTH Aachen"
 author = "ADA Research Group, AIM @ RWTH Aachen"
 
 # The short X.Y version
-version = about.version
+version = __version__
 # The full version, including alpha/beta/rc tags
-release = about.version
+release = __version__
 
 
 # -- General configuration ---------------------------------------------------

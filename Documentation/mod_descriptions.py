@@ -3,14 +3,14 @@
 
 from pathlib import Path
 import re
-import sparkle
+import Sparkle
 import inspect
 
 if __name__ == "__main__":
     special_module = re.compile("^__.*__$")
     submodules = [
         (name, obj)
-        for name, obj in inspect.getmembers(sparkle)
+        for name, obj in inspect.getmembers(Sparkle)
         if re.match(special_module, name) is None
     ]
     sphinx_list = []
@@ -22,7 +22,7 @@ if __name__ == "__main__":
         module_classes = [
             class_name
             for class_name, class_obj in inspect.getmembers(obj, inspect.isclass)
-            if class_obj.__module__.startswith(sparkle.__name__)
+            if class_obj.__module__.startswith(Sparkle.__name__)
         ]
         listed_members = ",".join(module_methods + module_classes)
         sphinx_list.append("- {ref}`mod-" + f"{module_name}`\n")
