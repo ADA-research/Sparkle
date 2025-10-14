@@ -6,7 +6,6 @@ from pathlib import Path
 
 from sklearn.base import ClassifierMixin, RegressorMixin
 from asf.cli import cli_train as asf_cli
-from asf.scenario.scenario_metadata import ScenarioMetadata
 from asf.predictors import AbstractPredictor
 from asf.selectors.abstract_model_based_selector import AbstractModelBasedSelector
 
@@ -75,14 +74,16 @@ class Selector:
         """
         selection_scenario.create_scenario()
         selector = self.selector_class(
-            self.model_class,
-            ScenarioMetadata(
-                algorithms=selection_scenario.performance_data.columns.to_list(),
-                features=selection_scenario.feature_data.columns.to_list(),
-                performance_metric=selection_scenario.objective.name,
-                maximize=not selection_scenario.objective.minimise,
-                budget=selection_scenario.solver_cutoff,
-            ),
+            model_class=self.model_class,
+            maximize=not selection_scenario.objective.minimise,
+            budget=selection_scenario.solver_cutoff,
+            # ScenarioMetadata(
+            #     algorithms=selection_scenario.performance_data.columns.to_list(),
+            #     features=selection_scenario.feature_data.columns.to_list(),
+            #     performance_metric=selection_scenario.objective.name,
+            #     maximize=not selection_scenario.objective.minimise,
+            #     budget=selection_scenario.solver_cutoff,
+            # ),
         )
         cmd = asf_cli.build_cli_command(
             selector,
@@ -188,12 +189,12 @@ class Selector:
         import subprocess
 
         r = rrr.add_to_queue(
-            runner=run_on,
             cmd=commands,
             name=job_name,
             stdout=None if run_on == Runner.LOCAL else subprocess.PIPE,  # Print
             stderr=None if run_on == Runner.LOCAL else subprocess.PIPE,  # Print
             base_dir=log_dir,
+            runner=run_on,
             sbatch_options=sbatch_options,
             prepend=slurm_prepend,
             dependencies=dependencies,

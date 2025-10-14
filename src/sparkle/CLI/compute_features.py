@@ -77,7 +77,6 @@ def compute_features(
         )
         return None
     cutoff = gv.settings().extractor_cutoff_time
-    cmd_list = []
     instance_paths = set()
     grouped_job_list: dict[str, dict[str, list[str]]] = {}
 
@@ -90,7 +89,6 @@ def compute_features(
         instance_path = resolve_instance_name(str(instance_name), instances)
         grouped_job_list[extractor_name][feature_group].append(instance_path)
 
-    parallel_jobs = min(len(cmd_list), gv.settings().slurm_jobs_in_parallel)
     sbatch_options = gv.settings().sbatch_settings
     slurm_prepend = gv.settings().slurm_job_prepend
     srun_options = ["-N1", "-n1"] + sbatch_options
@@ -107,7 +105,7 @@ def compute_features(
                 run_on,
                 sbatch_options,
                 srun_options,
-                parallel_jobs,
+                gv.settings().slurm_jobs_in_parallel,
                 slurm_prepend,
                 log_dir=sl.caller_log_dir,
             )
