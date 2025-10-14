@@ -130,7 +130,12 @@ def main(argv: list[str]) -> None:
         configuration = parse_commandline_dict(args.configuration)
         config_id = configuration["configuration_id"]
     elif (
-        args.configuration_id or args.best_configuration_instances or not objectives
+        (
+            args.configuration_id
+            and args.configuration_id != PerformanceDataFrame.default_configuration
+        )
+        or args.best_configuration_instances
+        or not objectives
     ):  # Read from PerformanceDataFrame, can be slow
         # Desyncronize from other possible jobs writing to the same file
         print(
