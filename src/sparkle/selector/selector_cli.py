@@ -100,7 +100,6 @@ def main(argv: list[str]) -> None:
             configuration=config,
             log_dir=args.log_dir,
         )
-        print(solver_output)
         for key in solver_output:
             if key in selector_output and isinstance(solver_output[key], (int, float)):
                 selector_output[key] += solver_output[key]
