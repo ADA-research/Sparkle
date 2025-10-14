@@ -114,6 +114,47 @@ def test_generate_configuration(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     assert "Ablation table" in latex_output
 
 
+class DummyObjective:
+    """A dummy objective for testing."""
+
+    def __init__(self, name: str, time: bool = False) -> None:
+        """Initialize dummy objective."""
+        self.name = name
+        self.time = time
+        self.minimise = True
+
+    def __str__(self) -> str:
+        """String representation of the objective."""
+        return self.name
+
+
+class StubSettings:
+    """Stub settings for testing."""
+
+    def __init__(self, base_dir: Path) -> None:
+        """Initialize stub settings."""
+        self.DEFAULT_extractor_dir = base_dir / "extractors"
+        self.DEFAULT_extractor_dir.mkdir(parents=True, exist_ok=True)
+        self.parallel_portfolio_num_seeds_per_solver = 2
+        self.solver_cutoff_time = 120
+
+
+class SolverMapping(dict):
+    """A mapping that replaces spaces with underscores in keys."""
+
+    def __getitem__(self, key: str) -> list[str]:
+        """Get item from mapping, replacing spaces with underscores."""
+        return super().__getitem__(key.replace(" ", "_"))
+
+    def get(self, key: str, default: list[str] | None = None) -> list[str] | None:
+        """Get item from mapping, replacing spaces with underscores."""
+        return super().get(key.replace(" ", "_"), default)
+
+    def __contains__(self, key: str) -> bool:
+        """Check if key is in mapping, replacing spaces with underscores."""
+        return super().__contains__(key.replace(" ", "_"))
+
+
 def test_generate_selection_section(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -313,47 +354,6 @@ def test_generate_parallel_portfolio_section_reports_counts(
     latex_output = report.dumps()
     assert "Parallel Portfolio" in latex_output
     assert "Parallel Portfolio Performance" in latex_output
-
-
-class DummyObjective:
-    """A dummy objective for testing."""
-
-    def __init__(self, name: str, time: bool = False) -> None:
-        """Initialize dummy objective."""
-        self.name = name
-        self.time = time
-        self.minimise = True
-
-    def __str__(self) -> str:
-        """String representation of the objective."""
-        return self.name
-
-
-class StubSettings:
-    """Stub settings for testing."""
-
-    def __init__(self, base_dir: Path) -> None:
-        """Initialize stub settings."""
-        self.DEFAULT_extractor_dir = base_dir / "extractors"
-        self.DEFAULT_extractor_dir.mkdir(parents=True, exist_ok=True)
-        self.parallel_portfolio_num_seeds_per_solver = 2
-        self.solver_cutoff_time = 120
-
-
-class SolverMapping(dict):
-    """A mapping that replaces spaces with underscores in keys."""
-
-    def __getitem__(self, key: str) -> list[str]:
-        """Get item from mapping, replacing spaces with underscores."""
-        return super().__getitem__(key.replace(" ", "_"))
-
-    def get(self, key: str, default: list[str] | None = None) -> list[str] | None:
-        """Get item from mapping, replacing spaces with underscores."""
-        return super().get(key.replace(" ", "_"), default)
-
-    def __contains__(self, key: str) -> bool:
-        """Check if key is in mapping, replacing spaces with underscores."""
-        return super().__contains__(key.replace(" ", "_"))
 
 
 @pytest.mark.parametrize(
