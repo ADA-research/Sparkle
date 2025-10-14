@@ -75,15 +75,8 @@ class Selector:
         selection_scenario.create_scenario()
         selector = self.selector_class(
             model_class=self.model_class,
-            maximize=not selection_scenario.objective.minimise,
             budget=selection_scenario.solver_cutoff,
-            # ScenarioMetadata(
-            #     algorithms=selection_scenario.performance_data.columns.to_list(),
-            #     features=selection_scenario.feature_data.columns.to_list(),
-            #     performance_metric=selection_scenario.objective.name,
-            #     maximize=not selection_scenario.objective.minimise,
-            #     budget=selection_scenario.solver_cutoff,
-            # ),
+            maximize=not selection_scenario.objective.minimise,
         )
         cmd = asf_cli.build_cli_command(
             selector,
