@@ -77,7 +77,7 @@ sparkle generate report
 Run the portfolio selector on a *single* testing instance; the result will be printed to the command line if you add `--run-on local` to the command.
 
 ```bash
-sparkle run portfolio selector --selection-scenario Output/Selection/MultiClassClassifier_RandomForestClassifier/CSCCSat_MiniSAT_PbO-CCSAT-Generic/ --instance-set Examples/Resources/Instances/PTN2/
+sparkle run portfolio selector --selection-scenario Output/Selection/MultiClassClassifier_RandomForestClassifier/CSCCSat_MiniSAT_PbO-CCSAT-Generic/ --instance-set Examples/Resources/Instances/PTN2/Ptn-7824-b02.cnf
 ```
 
 ### Run on an instance set
@@ -85,7 +85,7 @@ sparkle run portfolio selector --selection-scenario Output/Selection/MultiClassC
 Run the portfolio selector on a testing instance *set*
 
 ```bash
-sparkle run portfolio selector Examples/Resources/Instances/PTN2/
+sparkle run portfolio selector --selection-scenario Output/Selection/MultiClassClassifier_RandomForestClassifier/ --instance-set Examples/Resources/Instances/PTN2/
 sparkle jobs  # Wait for the portfolio selector to be done running on the testing instance set
 ```
 

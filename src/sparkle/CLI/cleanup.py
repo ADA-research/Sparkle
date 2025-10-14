@@ -21,6 +21,7 @@ def parser_function() -> argparse.ArgumentParser:
         description="Command to clean files from the platform."
     )
     parser.add_argument(*ac.CleanupArgumentAll.names, **ac.CleanupArgumentAll.kwargs)
+    parser.add_argument(*ac.CleanupArgumentLogs.names, **ac.CleanupArgumentLogs.kwargs)
     parser.add_argument(
         *ac.CleanupArgumentRemove.names, **ac.CleanupArgumentRemove.kwargs
     )
@@ -160,9 +161,9 @@ def main(argv: list[str]) -> None:
         snh.remove_current_platform()
         snh.create_working_dirs()
         print("Cleaned platform of all files!")
-    else:
+    elif args.logs:
         remove_temporary_files()
-        print("Cleaned platform of temporary files!")
+        print("Cleaned platform of log files!")
     sys.exit(0)
 
 
