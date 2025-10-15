@@ -1,6 +1,6 @@
 [project]
 name = "Sparkle"
-version = "0.9.1"
+version = "0.9.5.1"
 description = """\
     Sparkle is a Programming by Optimisation (PbO)-based problem-solving \
     platform designed to enable the widespread and effective use of PbO \
