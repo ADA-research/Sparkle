@@ -38,9 +38,9 @@ copyright = "2024, ADA Research Group, AIM @ RWTH Aachen"
 author = "ADA Research Group, AIM @ RWTH Aachen"
 
 # The short X.Y version
-version = sparkle.about.version
+version = sparkle.__version__
 # The full version, including alpha/beta/rc tags
-release = sparkle.about.version
+release = sparkle.__version__
 
 
 # -- General configuration ---------------------------------------------------
