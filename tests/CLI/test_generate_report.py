@@ -5,41 +5,70 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from src.sparkle.CLI import generate_report, load_snapshot
-from src.sparkle.CLI.generate_report import (
+from sparkle.CLI import generate_report, load_snapshot
+from sparkle.CLI.generate_report import (
     MAX_COLS_PER_TABLE,
     NUM_KEYS_FDF,
     NUM_KEYS_PDF,
     WIDE_TABLE_THRESHOLD,
 )
-from src.sparkle.configurator.configurator import AblationScenario, ConfigurationScenario
-from src.sparkle.configurator.implementations import (
+from sparkle.configurator.configurator import AblationScenario, ConfigurationScenario
+from sparkle.configurator.implementations import (
     IRACEScenario,
     ParamILSScenario,
     SMAC2Scenario,
     SMAC3Scenario,
 )
-from src.sparkle.instance import Instance_Set
-from src.sparkle.platform.output.configuration_output import ConfigurationOutput
-from src.sparkle.structures import FeatureDataFrame, PerformanceDataFrame
-from src.sparkle.types import SolverStatus
+from sparkle.instance import Instance_Set
+from sparkle.platform.output.configuration_output import ConfigurationOutput
+from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
+from sparkle.types import SolverStatus
 from tests.CLI import tools
 
 pl = pytest.importorskip("pylatex")
 
 
-def test_parser() -> None:
+@pytest.mark.parametrize(
+    "argv, case",
+    [
+        (["TEST_TEST TESTTEST"], 0),
+        (["--help"], 1),
+        (["--only-json", "True"], 2),
+        (["--solver", "PbO-CCSAT-Generic", "--instance-set", "PTN", "--appendices"], 3),
+    ],
+)
+def test_parser(argv: list[str], case: int) -> None:
     """Test argument parser."""
     parser = generate_report.parser_function()
     import argparse
 
     assert isinstance(parser, argparse.ArgumentParser)
 
+    if case == 0:
+        # Invalid argument should raise SystemExit with code 2
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            parser.parse_args(argv)
+        assert pytest_wrapped_e.type is SystemExit
+        assert pytest_wrapped_e.value.code == 2
+    elif case == 1:
+        # --help should exit with code 0
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            parser.parse_args(argv)
+        assert pytest_wrapped_e.type is SystemExit
+        assert pytest_wrapped_e.value.code == 0
+    elif case == 2:
+        args = parser.parse_args(argv)
+        assert args.only_json is True
+    elif case == 3:
+        args = parser.parse_args(argv)
+        assert args.solvers == ["PbO-CCSAT-Generic"]
+        assert args.instance_sets == ["PTN"]
+        assert args.appendices is True
+
 
 def test_generate_configuration(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test generate report for configuration."""
     # Not done
-    return
     doc_path = tmp_path / "config_report" / "report.tex"
     doc_path.parent.mkdir(parents=True, exist_ok=True)
     report = pl.Document(default_filepath=str(doc_path))
@@ -51,11 +80,6 @@ def test_generate_configuration(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     test_sets = Instance_Set(
         Path("tests/test_files/Instances/Test-Instance-Set").absolute()
     )
-    # train_sets = [
-    #     Instance_Set(
-    #         Path("tests/test_files/Instances/Train-Instance-Set/train_instance_1.cnf")
-    #     )
-    # ]
 
     cutoff_length = "3"
     concurrent_clis = 4
@@ -68,19 +92,17 @@ def test_generate_configuration(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     ablation_racing = False
 
     config_pairs = []
-    for scenario_path in path_to_test_config.iterdir():
+    for scenario in path_to_test_config.glob("*scenario.txt"):
         configuration_scenario = None
-        if not scenario_path.name.endswith("scenario.txt"):
+        if "smac2" in str(scenario):
+            configuration_scenario = SMAC2Scenario.from_file(scenario)
+        elif "smac3" in str(scenario):
             continue
-        if "smac2" in str(scenario_path):
-            configuration_scenario = SMAC2Scenario.from_file(scenario_path)
-        elif "smac3" in str(scenario_path):
-            continue
-            configuration_scenario = SMAC3Scenario.from_file(scenario_path)
-        elif "paramils" in str(scenario_path):
-            configuration_scenario = ParamILSScenario.from_file(scenario_path)
-        elif "irace" in str(scenario_path):
-            configuration_scenario = IRACEScenario.from_file(scenario_path)
+            configuration_scenario = SMAC3Scenario.from_file(scenario)
+        elif "paramils" in str(scenario):
+            configuration_scenario = ParamILSScenario.from_file(scenario)
+        elif "irace" in str(scenario):
+            configuration_scenario = IRACEScenario.from_file(scenario)
         if not configuration_scenario:
             continue
         assert isinstance(configuration_scenario, ConfigurationScenario)
@@ -424,6 +446,7 @@ def test_generate_appendix(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> N
     assert generate_report.generate_appendix(report, performance_df, feature_df) is None
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "args, case",
     [
