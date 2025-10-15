@@ -76,7 +76,7 @@ The coding style consistency is a work in progress, and existing code may not ad
 When releasing a new version (including bugfix versions) of Sparkle to the `main` branch, the protocol below should be followed. First the checks should be performed. If at any step anything fails, it should first be fixed and then ALL checks should be performed again from scratch, starting from point 1.
 
 ### Checks
-1. Freshly install the conda environment. Remove the old one with `deactivate` followed by deleting the directory and create it again with `env` followed by `pip install -e .`. Optionally, you can run `pip install dev-requirements.txt`. In principle, these environments are equal except that the dev-requirements has a few extra libs to run pytests and ruff.
+1. Freshly install the conda environment. Remove the old one with `deactivate` followed by deleting the directory and create it again with `env` followed by `pip install -e .`. Optionally, you can run `pip install -r dev-requirements.txt`. In principle, these environments are equal except that the dev-requirements has a few extra libs to run pytests and ruff.
 2. Make sure the code style rules pass by running `ruff` (make sure the `sparkle` conda environment is installed and active).
 3. Make sure the unit tests pass by running `pytest` (make sure the `sparkle` conda environment is installed and active). You can combine this step and the next step by running `pytest --all`.
 4. Make sure the integration tests pass by running `pytest --integration` (make sure the `sparkle` conda environment is installed and active).
