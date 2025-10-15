@@ -2,7 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.9.6] - ??/??/2025
+## [0.9.5.1] - 15/10/2025
 
 ### Added
 - A native python RunSolver implementation, an alternative for users when Roussel's RunSolver is not an option. [Issue#192]
