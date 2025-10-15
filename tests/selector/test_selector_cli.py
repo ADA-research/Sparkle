@@ -26,13 +26,13 @@ def test_selector_cli(
     shutil.copyfile(feature_data, Path("example_feature_data.csv"))
     instance_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(instance_path_absolute, instance_path)
-    shutil.copytree(scenario_path_absolute, Path("Selector"))
+    shutil.copytree(scenario_path_absolute, Path("scenario"))
     csccsat_target = Path("Solvers/CSCCSat")
     # Selector should predict CSCCSAT, copy that too
     shutil.copytree(csccsat, csccsat_target)
     arguments = [
         "--selector-scenario",
-        "Selector/scenario.txt",
+        "scenario/scenario.txt",
         "--feature-data",
         "example_feature_data.csv",
         "--instance",

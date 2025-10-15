@@ -26,8 +26,8 @@ import sparkle.CLI
 from sparkle.CLI._cli_ import commands
 
 # Add path to sparkle root
-sys.path.append(os.path.abspath("../../sparkle"))
-sys.path.append(os.path.abspath("../../sparkle/CLI"))
+sys.path.append(os.path.abspath("../../src/sparkle"))
+sys.path.append(os.path.abspath("../../src/sparkle/CLI"))
 
 import sparkle  # noqa: E402
 

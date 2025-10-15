@@ -46,11 +46,11 @@ sparkleoutput()
 # We set the script to trigger on regular exit and some termination signals
 trap sparkleoutput 0 SIGTERM SIGINT SIGQUIT SIGABRT SIGHUP
 
-# Execute the solver
-output="$($cmd)"
-
-# Print original output so the solution can be verified by SATVerifier
-echo "$output"
+# Execute the solver, with duplicated output:
+# - One to the terminal so it can be verified by SATVerifier and we record the 'latest' log
+# - One to our variable so we can return the correct status to Sparkle
+exec 5>&1
+output="$($cmd |tee >(cat - >&5))"
 
 # Parse the output of the solver
 while IFS= read -r line; do

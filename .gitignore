@@ -2,6 +2,8 @@
 *.egg-info
 .coverage
 .xml
+
+# Platform folders
 Solvers/*
 Extractors/*
 Instances/*
@@ -9,12 +11,14 @@ Output/*
 Snapshots/*
 Settings/*
 Tmp/*
+
+# PyTest dump
 tests/test_files/tmp
 
 # RunSolver compilation
-sparkle/Components/runsolver/src/*.o
-sparkle/Components/runsolver/src/runsolver.d
-sparkle/Components/runsolver/src/runsolver
+src/sparkle/Components/runsolver/src/*.o
+src/sparkle/Components/runsolver/src/runsolver.d
+src/sparkle/Components/runsolver/src/runsolver
 
 # Example source files
 Examples/Resources/CCAG/Solvers/TCA/src/
@@ -22,17 +26,20 @@ Examples/Resources/CCAG/Solvers/FastCA/src/
 Examples/Resources/CVRP/Solvers/VRP_SISRs/src/
 
 # Downloaded Configurators, but do not ignore the target algorithms
-sparkle/configurator/implementations/SMAC2/*
-!sparkle/configurator/implementations/SMAC2/smac2_target_algorithm.py
-sparkle/configurator/implementations/ParamILS/*
-!sparkle/configurator/implementations/ParamILS/paramils_target_algorithm.py
+src/sparkle/configurator/implementations/SMAC2/*
+!src/sparkle/configurator/implementations/SMAC2/smac2_target_algorithm.py
+src/sparkle/configurator/implementations/ParamILS/*
+!src/sparkle/configurator/implementations/ParamILS/paramils_target_algorithm.py
 
 # Downloaded AblationAnalysis
-sparkle/configurator/implementations/ablationAnalysis-0.9.4/*
+src/sparkle/configurator/implementations/ablationAnalysis-0.9.4/*
 
 # Generated documentation 
 Documentation/source/_generated/
 Documentation/build
+
+# Virtual Environments
+venv/
 
 # Common IDE
 .idea

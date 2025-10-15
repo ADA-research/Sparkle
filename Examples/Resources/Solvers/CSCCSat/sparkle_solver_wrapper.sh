@@ -41,10 +41,11 @@ sparkleoutput()
 trap sparkleoutput 0 SIGTERM SIGINT SIGQUIT SIGABRT SIGHUP
 
 # This Solver does not have configurable parameters, continue to execution
-output="$($cmd)"
-
-# Print original output so the solution can be verified by SATVerifier
-echo "$output"
+# Execute the solver, with duplicated output:
+# - One to the terminal so it can be verified by SATVerifier and we record the 'latest' log
+# - One to our variable so we can return the correct status to Sparkle
+exec 5>&1
+output="$($cmd |tee >(cat - >&5))"
 
 # Parse the output
 while IFS= read -r line; do
