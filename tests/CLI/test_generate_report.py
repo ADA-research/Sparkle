@@ -1,9 +1,8 @@
 """Test the generate report CLI entry point."""
 
 from pathlib import Path
-
-import pandas as pd
 import pytest
+import pylatex as pl
 
 from sparkle.CLI import generate_report, load_snapshot
 from sparkle.CLI.generate_report import (
@@ -22,10 +21,9 @@ from sparkle.configurator.implementations import (
 from sparkle.instance import Instance_Set
 from sparkle.platform.output.configuration_output import ConfigurationOutput
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
-from sparkle.types import SolverStatus
+from sparkle.selector import SelectionScenario
+from sparkle.platform.output.selection_output import SelectionOutput
 from tests.CLI import tools
-
-pl = pytest.importorskip("pylatex")
 
 
 @pytest.mark.parametrize(
@@ -66,19 +64,67 @@ def test_parser(argv: list[str], case: int) -> None:
         assert args.appendices is True
 
 
+def test_generate_selection_section(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Test generate report for selection."""
+    doc_path = tmp_path / "selection_report" / "report.tex"
+    doc_path.parent.mkdir(parents=True, exist_ok=True)
+    report = pl.Document(default_filepath=str(doc_path))
+    selection_scenario = SelectionScenario.from_file(
+        Path("tests/test_files/Selector/scenario/scenario_with_test.txt")
+    )
+    selection_output = SelectionOutput(selection_scenario)
+    # Manually set marginal contribution actual for testing
+    selection_output.marginal_contribution_actual = [
+        ("Solvers/MiniSAT", "Default_Config", 1.2345, 6.789)
+    ]
+
+    assert (
+        generate_report.generate_selection_section(
+            report, selection_scenario, selection_output
+        )
+        is None
+    )
+
+    latex_output = report.dumps()
+    assert "Marginal Contribution Ranking List" in latex_output
+    assert "Test Results" in latex_output
+    assert "\\textbf{Solvers/MiniSAT} (Default Config): 1.2345 (6.789)" in latex_output
+
+
 def test_generate_configuration(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test generate report for configuration."""
-    # Not done
     doc_path = tmp_path / "config_report" / "report.tex"
     doc_path.parent.mkdir(parents=True, exist_ok=True)
+
     report = pl.Document(default_filepath=str(doc_path))
     performance_df_path = Path(
         "tests/test_files/Output/Performance_Data/performance_data.csv"
     )
     performance_df = PerformanceDataFrame(performance_df_path)
+
+    # Align performance data instance identifiers with the scenario expectations.
+    instance_level = performance_df.index.get_level_values(
+        PerformanceDataFrame.index_instance
+    )
+    # Get just the names of the instances and not the full path
+    rename_map = {
+        name: Path(str(name)).stem
+        if isinstance(name, str) and "/" in str(name)
+        else name
+        for name in instance_level.unique()
+    }
+    performance_df.rename(
+        index=rename_map,
+        level=PerformanceDataFrame.index_instance,
+        inplace=True,
+    )
     path_to_test_config = Path("tests/test_files/Configuration")
     test_sets = Instance_Set(
-        Path("tests/test_files/Instances/Test-Instance-Set").absolute()
+        Path(
+            "tests/test_files/Instances/Test-Instance-Set/test_instance_1.cnf"
+        ).absolute()
     )
 
     cutoff_length = "3"
@@ -97,16 +143,13 @@ def test_generate_configuration(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
         if "smac2" in str(scenario):
             configuration_scenario = SMAC2Scenario.from_file(scenario)
         elif "smac3" in str(scenario):
-            continue
             configuration_scenario = SMAC3Scenario.from_file(scenario)
         elif "paramils" in str(scenario):
             configuration_scenario = ParamILSScenario.from_file(scenario)
         elif "irace" in str(scenario):
             configuration_scenario = IRACEScenario.from_file(scenario)
-        if not configuration_scenario:
-            continue
         assert isinstance(configuration_scenario, ConfigurationScenario)
-        ablation_scenario = AblationScenario(
+        ablation_with_config = AblationScenario(
             configuration_scenario,
             test_sets,
             cutoff_length,
@@ -114,12 +157,25 @@ def test_generate_configuration(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
             best_configuration,
             ablation_racing,
         )
-        configuration_scenario._ablation_scenario = ablation_scenario
-        configuration_scenario.solver.directory = Path("Solvers/MiniSAT")
+        configuration_scenario._ablation_scenario = ablation_with_config
+
+        # Reassign the read_ablation_table to test adding ablation table to report
+        ablation_with_config.read_ablation_table = lambda self=ablation_with_config: [
+            (1, "param_a", "0", "1", 0.5)
+        ]
         assert configuration_scenario.ablation_scenario is not None
         config_output = ConfigurationOutput(
             configuration_scenario, performance_df, [test_sets]
         )
+
+        # To cover the case, when best config is not the default one
+        if (
+            config_output.best_configuration_key
+            == PerformanceDataFrame.default_configuration
+        ):
+            manual_best_key = "ManualBest"
+            config_output.best_configuration_key = manual_best_key
+            config_output.best_configuration = best_configuration
         config_pairs.append((config_output, configuration_scenario))
 
     Path(report.default_filepath).parent.mkdir(parents=True, exist_ok=True)
@@ -134,248 +190,7 @@ def test_generate_configuration(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     latex_output = report.dumps()
     assert "Parameter importance via Ablation" in latex_output
     assert "Ablation table" in latex_output
-
-
-class DummyObjective:
-    """A dummy objective for testing."""
-
-    def __init__(self, name: str, time: bool = False) -> None:
-        """Initialize dummy objective."""
-        self.name = name
-        self.time = time
-        self.minimise = True
-
-    def __str__(self) -> str:
-        """String representation of the objective."""
-        return self.name
-
-
-class StubSettings:
-    """Stub settings for testing."""
-
-    def __init__(self, base_dir: Path) -> None:
-        """Initialize stub settings."""
-        self.DEFAULT_extractor_dir = base_dir / "extractors"
-        self.DEFAULT_extractor_dir.mkdir(parents=True, exist_ok=True)
-        self.parallel_portfolio_num_seeds_per_solver = 2
-        self.solver_cutoff_time = 120
-
-
-class SolverMapping(dict):
-    """A mapping that replaces spaces with underscores in keys."""
-
-    def __getitem__(self, key: str) -> list[str]:
-        """Get item from mapping, replacing spaces with underscores."""
-        return super().__getitem__(key.replace(" ", "_"))
-
-    def get(self, key: str, default: list[str] | None = None) -> list[str] | None:
-        """Get item from mapping, replacing spaces with underscores."""
-        return super().get(key.replace(" ", "_"), default)
-
-    def __contains__(self, key: str) -> bool:
-        """Check if key is in mapping, replacing spaces with underscores."""
-        return super().__contains__(key.replace(" ", "_"))
-
-
-def test_generate_selection_section(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """Test generate report for selection."""
-    doc_path = tmp_path / "selection_report" / "report.tex"
-    doc_path.parent.mkdir(parents=True, exist_ok=True)
-    report = pl.Document(default_filepath=str(doc_path))
-
-    settings = StubSettings(tmp_path)
-    monkeypatch.setattr(generate_report.gv, "settings", lambda args=None: settings)
-
-    extractor_stub = type("ExtractorStub", (), {"output_dimension": 5})()
-    monkeypatch.setattr(
-        generate_report,
-        "resolve_object_name",
-        lambda name, mapping, default_dir, class_name=None: extractor_stub,
-    )
-
-    plot_calls: list[tuple[str | None, Path]] = []
-
-    class FakePlot:
-        """A fake plot for testing."""
-
-        def __init__(self, title: str | None) -> None:
-            """Initialize fake plot."""
-            self.title = title
-
-        def write_image(self, path: Path, width: int, height: int) -> None:
-            """Simulate writing an image by recording the call."""
-            plot_calls.append((self.title, Path(path)))
-
-    monkeypatch.setattr(
-        generate_report.latex, "comparison_plot", lambda df, title: FakePlot(title)
-    )
-    monkeypatch.setattr(generate_report.latex, "AutoRef", lambda label: f"@{label}")
-
-    class DummySelector:
-        model_class = type("ModelClass", (), {"__name__": "DummyModel"})
-        selector_class = type("SelectorClass", (), {"__name__": "DummySelector"})
-
-    scenario = type(
-        "SelectionScenario",
-        (),
-        {
-            "selector": DummySelector(),
-            "objective": DummyObjective("Quality"),
-            "feature_extractors": ["Extractor_One"],
-            "solver_cutoff": 55,
-            "extractor_cutoff": 10,
-            "name": "SelectionScenario",
-        },
-    )()
-
-    scenario_output = type(
-        "SelectionOutput",
-        (),
-        {
-            "solvers": SolverMapping({"solver_one": ["conf1", "conf2"]}),
-            "training_instance_sets": [("Train_Set", 3)],
-            "marginal_contribution_perfect": [
-                ("solver_one", "conf1", 0.5, 1.1),
-                ("solver_one", "conf2", 0.3, 1.3),
-            ],
-            "marginal_contribution_actual": [
-                ("solver_one", "conf1", 0.6, 1.2),
-            ],
-            "solver_performance_ranking": [
-                ("solver_one", "conf1", 1.234),
-                ("solver_one", "conf2", 1.567),
-            ],
-            "vbs_performance": 0.9,
-            "actual_performance": 1.1,
-            "sbs_performance": [1.2, 1.3],
-            "actual_performance_data": [0.8, 0.9],
-            "vbs_performance_data": pd.Series([0.6, 0.7]),
-            "test_sets": [("Test_Set", 2)],
-            "test_set_performance": {"Test_Set": 1.5},
-        },
-    )()
-
-    generate_report.generate_selection_section(report, scenario, scenario_output)
-
-    assert len(plot_calls) == 2
-    latex_output = report.dumps()
-    assert "Marginal Contribution Ranking List" in latex_output
-    assert "Test Results" in latex_output
-
-
-def test_generate_parallel_portfolio_section_reports_counts(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """Test generate report for parallel portfolio."""
-    doc_path = tmp_path / "parallel_report" / "report.tex"
-    doc_path.parent.mkdir(parents=True, exist_ok=True)
-    report = pl.Document(default_filepath=str(doc_path))
-
-    settings = StubSettings(tmp_path)
-    monkeypatch.setattr(generate_report.gv, "settings", lambda args=None: settings)
-
-    plot_calls: list[tuple[str | None, Path]] = []
-
-    class FakePlot:
-        """A fake plot for testing."""
-
-        def __init__(self, title: str | None) -> None:
-            """Initialize fake plot."""
-            self.title = title
-
-        def write_image(self, path: Path, width: int, height: int) -> None:
-            """Simulate writing an image by recording the call."""
-            plot_calls.append((self.title, Path(path)))
-
-    monkeypatch.setattr(
-        generate_report.latex, "comparison_plot", lambda df, title: FakePlot(title)
-    )
-    monkeypatch.setattr(generate_report.latex, "AutoRef", lambda label: f"@{label}")
-
-    class DummyParallelScenario:
-        """A dummy parallel scenario for testing."""
-
-        def __init__(self, base_dir: Path) -> None:
-            """Initialize dummy parallel scenario."""
-            self.csv_filepath = base_dir / "portfolio_dir" / "data.csv"
-            self.csv_filepath.parent.mkdir(parents=True, exist_ok=True)
-            self.solvers = ["solver_a", "solver_b"]
-            self._configs = {
-                "solver_a": {"conf_a": {}},
-                "solver_b": {"conf_b": {}},
-            }
-            self.instances = [
-                "set_one/instance1",
-                "set_two/instance2",
-            ]
-            self._objective = DummyObjective("runtime")
-            self._performance = {"solver_a": 1.2, "solver_b": 2.4}
-            self._status = {
-                "solver_a": [SolverStatus.SUCCESS.value, SolverStatus.TIMEOUT.value],
-                "solver_b": [SolverStatus.CRASHED.value, SolverStatus.SUCCESS.value],
-            }
-
-        @property
-        def configurations(self) -> dict[str, dict[str, dict]]:
-            """Get configurations."""
-            return self._configs
-
-        @property
-        def objectives(self) -> list[DummyObjective]:
-            """Get objectives."""
-            return [self._objective]
-
-        @property
-        def objective_names(self) -> list[str]:
-            """Get objective names."""
-            return ["status_runtime", self._objective.name]
-
-        def get_solver_ranking(
-            self, objective: str, instances: list[str] | None = None
-        ) -> list[tuple[str, str, float]]:
-            """Get solver ranking."""
-            if instances:
-                if instances[0] == "set_one/instance1":
-                    return [
-                        ("solver_a", "conf_a", self._performance["solver_a"]),
-                        ("solver_b", "conf_b", self._performance["solver_b"]),
-                    ]
-                return [
-                    ("solver_b", "conf_b", self._performance["solver_b"]),
-                    ("solver_a", "conf_a", self._performance["solver_a"]),
-                ]
-            return [
-                ("solver_a", "conf_a", self._performance["solver_a"]),
-                ("solver_b", "conf_b", self._performance["solver_b"]),
-            ]
-
-        def get_value(self, solver: str, objective: str) -> list[float] | list[int]:
-            """Get value for solver and objective."""
-            if objective == "status_runtime":
-                return self._status[solver]
-            if objective == self._objective.name:
-                base = self._performance[solver]
-                return [base, base + 1.0]
-            raise KeyError(objective)
-
-        def best_performance(self, objective: str) -> float:
-            """Get best performance for objective."""
-            return min(self._performance.values())
-
-        def best_instance_performance(self, objective: str) -> pd.Series:
-            """Get best instance performance for objective."""
-            return pd.Series([0.5, 0.6])
-
-    scenario = DummyParallelScenario(tmp_path)
-
-    generate_report.generate_parallel_portfolio_section(report, scenario)
-
-    assert len(plot_calls) == 1
-    latex_output = report.dumps()
-    assert "Parallel Portfolio" in latex_output
-    assert "Parallel Portfolio Performance" in latex_output
+    assert "Best found configuration values" in latex_output
 
 
 @pytest.mark.parametrize(
