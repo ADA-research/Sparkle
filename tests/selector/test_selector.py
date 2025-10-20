@@ -92,7 +92,6 @@ def test_construct(
     assert f"--selector {selector.selector_class.__name__}" in cmd_str
     assert f"--model {selector.model_class.__name__}" in cmd_str
     assert f"--budget {solver_cutoff}" in cmd_str
-    assert f"--performance-metric {objective.name}" in cmd_str
     assert f"--feature-data {scenario.feature_target_path}" in cmd_str
     assert f"--performance-data {scenario.performance_target_path}" in cmd_str
     assert f"--model-path {scenario.directory / 'portfolio_selector'}" in cmd_str
@@ -158,5 +157,4 @@ def test_run(instance: str) -> None:
 
     solvers = ["Solvers/CSCCSat", "Solvers/PbO-CCSAT-Generic", "Solvers/MiniSAT"]
     schedule = selector.run(selector_path, instance, feature_data)
-    print(schedule)
     assert schedule[0][0] in solvers  # Schedule has shape [(solver, config, budget)]

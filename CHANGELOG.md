@@ -2,7 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.9.6] - ??/??/2025
+## [0.9.5.1] - 15/10/2025
 
 ### Added
 - A native python RunSolver implementation, an alternative for users when Roussel's RunSolver is not an option. [Issue#192]
@@ -10,6 +10,7 @@ Notable changes to Sparkle will be documented in this file.
 ### Changed
 - Sparkle's autocomplete installation is now based on the `Venv` activation script instead of the user's bash profile. [Issue#194]
 - Moved from `setup.py` to `pyproject.toml` structure.
+- Upgraded ASF to latest version (0.1.3) including various bugfixes with regards to running selectors locally.
 
 ### Fixed
 

@@ -1,7 +1,8 @@
 # _Sparkle_
 
-[![Tests](https://ada-research.github.io/Sparkle/_static/junit/junit-badge.svg)](https://ada-research.github.io/Sparkle/_static/junit/index.html)
-[![Coverage Status](https://ada-research.github.io/Sparkle/_static/coverage/coverage-badge.svg)](https://ada-research.github.io/Sparkle/_static/coverage/index.html)
+[![tests count](https://ada-research.github.io/Sparkle/_static/junit/junit-badge.svg)](https://ada-research.github.io/Sparkle/_static/junit/index.html)
+![tests](https://github.com/ada-research/sparkle/actions/workflows/unittest.yml/badge.svg)
+[![coverage](https://ada-research.github.io/Sparkle/_static/coverage/coverage-badge.svg)](https://ada-research.github.io/Sparkle/_static/coverage/index.html)
 ![linter](https://github.com/ada-research/sparkle/actions/workflows/linter.yml/badge.svg?event=push)
 ![docs](https://github.com/ada-research/sparkle/actions/workflows/documentation.yml/badge.svg?event=push)
 

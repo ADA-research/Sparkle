@@ -3,7 +3,7 @@ solver_cutoff: 60
 extractor_cutoff: 60
 ablate: False
 objective: PAR10
-selector_performance_data: Selector/selector_performance.csv
-performance_data: Selector/performance_data.csv
-feature_data: Selector/feature_data.csv
+selector_performance_data: scenario/selector_performance.csv
+performance_data: scenario/performance_data.csv
+feature_data: scenario/feature_data.csv
 feature_extractors: SAT-features-competition2012_revised_without_SatELite
