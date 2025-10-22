@@ -11,7 +11,6 @@ Otherwise, you should create a new issue.
 ### Issue contents checklist
 - **Summary**
   - Give a one sentence summary of what the bug or issue is about.
-  - Estimate how much work you think addressing the issue takes ranging from XS, S, M, L, to XL and put this between brackets at the beginning of the summary.
   - For bugs, clearly indicate whether it affects the `main` branch to facilitate a fix being expedited and quickly merged into the `main` branch.
 - **Contents**
   - Describe the problem in more detail.
@@ -19,53 +18,37 @@ Otherwise, you should create a new issue.
   - Give instructions on how to reproduce the error.
     - This could be commands to run.
   - Make a suggestion on how to fix the issue if you have one.
-- **Type**
-  - Most issues will either be a `bug` or a `task`. A bug should fix an error, whereas a task should be an improvement.
-  - `epic` and `story` are reserved for overarching issue management and should only be used in agreement with lead developers.
-- **Priority**
-  - Assign bugs as high priority and improvements as medium.
 - **Assign**
   - If the issue is related and isolated to the part of Sparkle you are working on, feel free to assign the issue to yourself. Otherwise, leave it unassigned.
 
 ## Branching for issues and bugs
-In general, give branches a descriptive name (e.g., by creating the branch through the related Jira issue, which uses the issue ID and name in the branch name).
-
-### Bugs affecting the `main` branch
-For bug fixes affecting the `main` branch, create a branch from `main`, and implement the fix there. If unsure, first try to reproduce the bug on the `main` branch.
-When ready, create a pull request towards the `main` branch, clearly indicating it should also be merged into the `development` branch.
-Make sure to also update the `CHANGELOG.md` and the version number with a minor version (after the dot) when ready to merge to main. E.g., 0.4.1 changes to 0.4.2.
+In general, give branches a descriptive name (e.g., use the issue ID and name in the branch name).
 
 ### All other development
 The development is done on the `development` branch. Before starting your own work, make sure you have the pre-commit pipeline installed to avoid any ruff issues on the GitHub, by running `pre-commit install` in the sparkle environment.
 To make changes to Sparkle, please create a branch from `development` and add your code there.
-If, during testing, you need to clean up local files, please do so using the custom git command `git sparkle-clean` as this preserves certain untracked files that are necessary to run Sparkle (and which would be removed when simply running `git clean -dxf`). To make this command locally available, run `git config alias.sparkle-clean "clean -dxf -e Sparkle.egg-info"` once.
 When ready, create a pull request towards the `development` branch.
 
 ## Pull requests, review, and merge protocol
-1. Prior to creating a pull request, **the author(s) of the changes are expected to ensure the general, code style and testing conditions below are satisfied**. To avoid burning through our build minutes on Github, this is easily tested locally by running "ruff" or "pytest" in the main sparkle directory in your branch.
+1. Prior to creating a pull request, **the author(s) of the changes are expected to ensure the general, code style and testing conditions below are satisfied**. To avoid running GitHub actions unnecessarily, run the `pytest` locally before creating a PR or pushing new versions of the PR to GitHub.
 2. Pull requests should be reviewed by at least one member of the Sparkle development team.
 3. Once all reviewers have approved the pull request it can be merged. Make sure issue branches are deleted upon merger to avoid excessively many dormant branches. In principle the last reviewer to approve should do the merge immediately. However, if this does not work because, e.g., a final (minor) change is requested, or they forget, someone else can take over the responsibility.
 
 ### General
 1. Ensure the branch to be merged is up-to-date with the target branch.
-2. Ensure the pipelines run successfully within the `sparkle` conda environment.
-3. Ensure a useful and accurate entry to the `CHANGELOG.md` is included.
+2. Ensure the pipelines run successfully within the `sparkle` venv.
+3. Ensure a useful and accurate entry to the `CHANGELOG.md` is included, which will be flagged by the changelog enforcer otherwise.
 4. Ensure tests are adapted or new ones are created to cover possible new functionalities.
 5. In case of changes to the dependencies, make sure it installs correctly in a new virtual environment. Since the environment can affect all code, make sure ALL tests, examples, etc. run correctly.
-6. Carefully check any changes to files in the `Settings/` directory. Are they truly needed?
 
 ### Code style
 The coding style consistency is a work in progress, and existing code may not adhere to the points below. Please favour the style discussed here over the style of whatever existing code you are working on, so we can gradually move to a consistent code base.
 
-1. Ensure the code is easily readable and understandable.
+1. Ensure the code is easily readable and understandable; use interpetable functions and variable names, preferring longer names over short ones.
 2. Ensure comments explain code that cannot be written in an easily readable and understandable way.
-3. Adhere to the [PEP8](https://pep8.org/) style guide.
-3. Make sure the code style rules pass by running `ruff`.
-4. Ensure useful and accurate docstrings are included, and follow the [Google style](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for them. End parameter description sentences always with a dot.
+3. Adhere to the [PEP8](https://pep8.org/) style guide: Make sure the code style rules pass by running `ruff`.
+4. Ensure useful and accurate docstrings are included, and follow the [Google style](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for them.
 5. Ensure useful and accurate type hints are included.
-6. Use fstrings over other string formatting.
-7. Use pathlib over other path manipulators.
-8. Prefer interpretable function names over shorter ones.
 
 ### Testing
 1. Make sure the unit tests pass by running `pytest`.
@@ -84,17 +67,14 @@ When releasing a new version (including bugfix versions) of Sparkle to the `main
 6. Only if all checks were passed successfully, move on to the steps for release. Otherwise, first fix what is failing and then re-do all the checks.
 
 ### Release
-1. Create a branch with the version number of the release from the `development` branch, named ``release/$VERSION''
-2. Update and commit `CHANGELOG.md` by creating a header with the release number and date; move everything from the `[unreleased]` header to the new release header (leaving the `[unreleased]` header empty for the next release).
-3. Update and commit `sparkle/about.py` by changing the version number.
-4. If there were updates to the CLI and/or the examples.md, make sure to re-compile their files for the Documentation. Run `md_to_sh.py` in the Documentation directory to compile the example .mds to executable .sh files, and run `command_descriptions.py` to automatically re-create the documentation for the CLI commands and their arguments. Run `mod_descriptions.py` to update the package descriptions. The documentation itself is after release automatically compiled and deployed to github pages.
-5. Merge the new version branch into both `development` and `main`, DO NOT delete the version branch!
-6. Hit the release button on GitHub.
+1. Update `CHANGELOG.md` by creating a header with the release number and date; move everything from the `[unreleased]` header to the new release header (leaving the `[unreleased]` header empty for the next release). Update `pyproject.toml` by changing the version number. Commit and add a git tag to this commit with the version number as "git commit -m 'VERSION_NUMBER'" followed by "git tag VERSION_NUMBER" and afterwards push.
+2. If there were updates to the CLI and/or the examples.md, make sure to re-compile their files for the Documentation. Run `md_to_sh.py` in the Documentation directory to compile the example .mds to executable .sh files, and run `command_descriptions.py` to automatically re-create the documentation for the CLI commands and their arguments. Run `mod_descriptions.py` to update the package descriptions. The documentation itself is after release automatically compiled and deployed to github pages.
+3. Merge the `development` branch into `main`, DO NOT delete the development branch!
+4. Hit the release button on GitHub.
 
 ## CHANGELOG
 
-The file `CHANGELOG.md` aims to track changes between versions.
-When making changes, please add a short description in the `[Unreleased]` section, under a relevant subsection (`Added`, `Changed`, `Fixed`, `Removed` or `Deprecated`).
+The file `CHANGELOG.md` aims to track changes between versions. When making changes, please add a short description in the `[Unreleased]` section, under a relevant subsection (`Added`, `Changed`, `Fixed`, `Removed` or `Deprecated`).
 
 ## Tests
 Sparkle has a variety of tests to make sure our changes impact the code base in the intended manner of the developer.
@@ -115,3 +95,6 @@ pytest is installed with the base requirements of Sparkle and is run automatical
 
 In addition to the unit tests, Sparkle also has a series of end-to-end smoke tests that verify the commands to run without errors. These tests are in `tests/CLI/*`. In general these have been designed to run on a Slurm cluster, however some have been made available to run locally on Linux. It is imperative that it functions on Slurm, and ideally has the same behaviour locally/without Slurm.
 
+### Performance tests
+
+Sparkle also has high load performance tests that should only be executed locally to verify the impact of running on a cluster on the outcome. Run with `--performance` to inspect, and be prepared to wait several minutes.
