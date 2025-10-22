@@ -311,6 +311,16 @@ def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     instances_path = Path("Instances")
     instances_path.mkdir(parents=True, exist_ok=True)
 
+    with pytest.raises(SystemExit) as only_json_wrapped:
+        assert generate_report.main(only_json_args) is None
+    assert only_json_wrapped.type is SystemExit
+    assert only_json_wrapped.value.code == 0
+    assert Path("Output/Analysis/JSON/output.json").exists()
+    # report.pdf shouldn't be there
+    assert not Path("Output/Analysis/report/report.pdf").exists()
+    json_content = Path("Output/Analysis/JSON/output.json").read_text()
+    assert json_content.strip() == "{}"
+
     with pytest.raises(SystemExit) as empty_wrapped:
         assert generate_report.main(empty_args) is None
     assert empty_wrapped.type is SystemExit
@@ -323,18 +333,6 @@ def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     # Report file should have no appendices for empty args
     tex_content = Path("Output/Analysis/report/report.tex").read_text()
     assert "appendix" not in tex_content
-    # Delete .pdf, to check only_json next
-    Path("Output/Analysis/report/report.pdf").unlink()
-
-    with pytest.raises(SystemExit) as only_json_wrapped:
-        assert generate_report.main(only_json_args) is None
-    assert only_json_wrapped.type is SystemExit
-    assert only_json_wrapped.value.code == 0
-    assert Path("Output/Analysis/JSON/output.json").exists()
-    # report.pdf shouldn't be there
-    assert not Path("Output/Analysis/report/report.pdf").exists()
-    json_content = Path("Output/Analysis/JSON/output.json").read_text()
-    assert json_content.strip() == "{}"
 
     with pytest.raises(SystemExit) as full_wrapped:
         assert generate_report.main(full_args) is None
