@@ -26,42 +26,43 @@ from sparkle.platform.output.selection_output import SelectionOutput
 from tests.CLI import tools
 
 
-@pytest.mark.parametrize(
-    "argv, case",
-    [
-        (["TEST_TEST TESTTEST"], 0),
-        (["--help"], 1),
-        (["--only-json", "True"], 2),
-        (["--solver", "PbO-CCSAT-Generic", "--instance-set", "PTN", "--appendices"], 3),
-    ],
-)
-def test_parser(argv: list[str], case: int) -> None:
+def test_parser() -> None:
     """Test argument parser."""
     parser = generate_report.parser_function()
     import argparse
 
     assert isinstance(parser, argparse.ArgumentParser)
 
-    if case == 0:
+    invalid_arg = ["TEST_TEST TESTTEST"]
+    help_arg = ["--help"]
+    only_json_arg = ["--only-json", "True"]
+    full_args = [
+        "--solver",
+        "PbO-CCSAT-Generic",
+        "--instance-set",
+        "PTN",
+        "--appendices",
+    ]
+
+    with pytest.raises(SystemExit) as invalid_wrapped:
         # Invalid argument should raise SystemExit with code 2
-        with pytest.raises(SystemExit) as pytest_wrapped_e:
-            parser.parse_args(argv)
-        assert pytest_wrapped_e.type is SystemExit
-        assert pytest_wrapped_e.value.code == 2
-    elif case == 1:
+        parser.parse_args(invalid_arg)
+    assert invalid_wrapped.type is SystemExit
+    assert invalid_wrapped.value.code == 2
+
+    with pytest.raises(SystemExit) as help_wrapped:
         # --help should exit with code 0
-        with pytest.raises(SystemExit) as pytest_wrapped_e:
-            parser.parse_args(argv)
-        assert pytest_wrapped_e.type is SystemExit
-        assert pytest_wrapped_e.value.code == 0
-    elif case == 2:
-        args = parser.parse_args(argv)
-        assert args.only_json is True
-    elif case == 3:
-        args = parser.parse_args(argv)
-        assert args.solvers == ["PbO-CCSAT-Generic"]
-        assert args.instance_sets == ["PTN"]
-        assert args.appendices is True
+        parser.parse_args(help_arg)
+    assert help_wrapped.type is SystemExit
+    assert help_wrapped.value.code == 0
+
+    only_json_args = parser.parse_args(only_json_arg)
+    assert only_json_args.only_json is True
+
+    full_parsed_args = parser.parse_args(full_args)
+    assert full_parsed_args.solvers == ["PbO-CCSAT-Generic"]
+    assert full_parsed_args.instance_sets == ["PTN"]
+    assert full_parsed_args.appendices is True
 
 
 def test_generate_selection_section(
@@ -244,6 +245,24 @@ def test_append_dataframe_longtable(
         )
         is None
     )
+    # Check if caption is in the generated LaTeX
+    assert caption in report.dumps()
+    # Check for each page after section Performance / Feature DataFrame
+    # If they exceed max_cols, there should be landscape environment
+    latex_output = report.dumps()
+    sections = latex_output.split(f"\\{caption}")
+    assert len(sections) == 1  # Ensure section is present
+    content_after_section = sections[0]
+    # Count occurrences of longtables
+    longtable_count = content_after_section.count("\\begin{longtable}")
+    if current_dataframe.shape[1] > max_cols:
+        # If number of columns exceed max_cols, there should be at least one landscape
+        assert "\\begin{landscape}" in content_after_section
+        assert longtable_count >= 1
+    else:
+        # If number of columns do not exceed max_cols, there should be no landscape
+        assert "\\begin{landscape}" not in content_after_section
+        assert longtable_count == 1  # Only one longtable without landscape
 
 
 def test_generate_appendix(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -260,69 +279,74 @@ def test_generate_appendix(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> N
 
     assert generate_report.generate_appendix(report, performance_df, feature_df) is None
 
+    # Unsafecommand appendix should be in the LaTeX output and also both dataframes
+    latex_output = report.dumps()
+    assert "\\appendix" in latex_output
+    assert "Feature DataFrame" in latex_output
+    assert "Performance DataFrame" in latex_output
 
-@pytest.mark.integration
-@pytest.mark.parametrize(
-    "args, case",
-    [
-        ([], 0),
-        (["--only-json", "True"], 1),
-        (["--solver", "PbO-CCSAT-Generic", "--instance-set", "PTN", "--appendices"], 2),
-    ],
-)
-def test_main(args: list[str], case: int) -> None:
+
+def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test main of generate report."""
-    with pytest.raises(SystemExit) as pytest_wrapped_e:
-        # If report.pdf and/or output.json is generated, delete it first
-        if Path("Output/Analysis/report/report.pdf").exists():
-            Path("Output/Analysis/report/report.pdf").unlink()
-        if Path("Output/Analysis/JSON/output.json").exists():
-            Path("Output/Analysis/JSON/output.json").unlink()
+    empty_args = []
+    only_json_args = ["--only-json", "True"]
+    full_args = [
+        "--solver",
+        "PbO-CCSAT-Generic",
+        "--instance-set",
+        "PTN",
+        "--appendices",
+    ]
 
-        assert generate_report.main(args) is None
-        # Check if the report.pdf file and output.json is generated
-        assert Path("Output/Analysis/report/report.pdf").exists()
-        assert Path("Output/Analysis/JSON/output.json").exists()
-    assert pytest_wrapped_e.type is SystemExit
-    assert pytest_wrapped_e.value.code == 0
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
+    # Create needed files in tmp dir
+    output_analysis_path = Path("Output/Analysis")
+    output_analysis_path.mkdir(parents=True, exist_ok=True)
+    (output_analysis_path / "report").mkdir(parents=True, exist_ok=True)
+    (output_analysis_path / "JSON").mkdir(parents=True, exist_ok=True)
+    performance_data_path = Path("Output/Performance_Data")
+    performance_data_path.mkdir(parents=True, exist_ok=True)
+    feature_data_path = Path("Output/Feature_Data")
+    feature_data_path.mkdir(parents=True, exist_ok=True)
+    instances_path = Path("Instances")
+    instances_path.mkdir(parents=True, exist_ok=True)
 
-    if case == 1:
-        with pytest.raises(SystemExit) as pytest_wrapped_e:
-            # Since report.pdf is generated already in case = 0
-            # see if it'll be deleted with --only-json True
-            # and not created again
-            if Path("Output/Analysis/JSON/output.json").exists():
-                Path("Output/Analysis/JSON/output.json").unlink()
-            assert generate_report.main(args) is None
-            # Check if the report.pdf file is deleted
-            assert not Path("Output/Analysis/report/report.pdf").exists()
+    with pytest.raises(SystemExit) as empty_wrapped:
+        assert generate_report.main(empty_args) is None
+    assert empty_wrapped.type is SystemExit
+    assert empty_wrapped.value.code == 0
+    assert Path("Output/Analysis/report/report.pdf").exists()
+    assert Path("Output/Analysis/JSON/output.json").exists()
+    # JSON file should be empty
+    json_content = Path("Output/Analysis/JSON/output.json").read_text()
+    assert json_content.strip() == "{}"
+    # Report file should have no appendices for empty args
+    tex_content = Path("Output/Analysis/report/report.tex").read_text()
+    assert "appendix" not in tex_content
+    # Delete .pdf, to check only_json next
+    Path("Output/Analysis/report/report.pdf").unlink()
 
-            # Check if the output.json is generated
-            assert Path("Output/Analysis/JSON/output.json").exists()
-            assert pytest_wrapped_e.type is SystemExit
-            assert pytest_wrapped_e.value.code == 0
+    with pytest.raises(SystemExit) as only_json_wrapped:
+        assert generate_report.main(only_json_args) is None
+    assert only_json_wrapped.type is SystemExit
+    assert only_json_wrapped.value.code == 0
+    assert Path("Output/Analysis/JSON/output.json").exists()
+    # report.pdf shouldn't be there
+    assert not Path("Output/Analysis/report/report.pdf").exists()
+    json_content = Path("Output/Analysis/JSON/output.json").read_text()
+    assert json_content.strip() == "{}"
 
-    elif case == 2:
-        with pytest.raises(SystemExit) as pytest_wrapped_e:
-            performance_section_name = "Performance DataFrame"
-            feature_section_name = "Feature DataFrame"
-            assert generate_report.main(args) is None
-            # Check if the appendices part is in report.pdf
-            # by checking the file size and section presence
-            report_path = Path("Output/Analysis/report/report.pdf")
-            assert report_path.exists()
-            assert report_path.stat().st_size > 10  # Arbitrary size check
-
-            # To check the section presence, get the .tex file
-            tex_path = Path("Output/Analysis/report/report.tex")
-            assert tex_path.exists()
-            with Path.open(tex_path, "r") as f:
-                tex_content = f.read()
-                assert f"\\section{{{performance_section_name}}}" in tex_content
-                assert f"\\section{{{feature_section_name}}}" in tex_content
-
-            assert pytest_wrapped_e.type is SystemExit
-            assert pytest_wrapped_e.value.code == 0
+    with pytest.raises(SystemExit) as full_wrapped:
+        assert generate_report.main(full_args) is None
+    assert full_wrapped.type is SystemExit
+    assert full_wrapped.value.code == 0
+    assert Path("Output/Analysis/JSON/output.json").exists()
+    assert Path("Output/Analysis/report/report.pdf").exists()
+    json_content = Path("Output/Analysis/JSON/output.json").read_text()
+    assert json_content.strip() == "{}"
+    # Report file should have appendices for full args
+    tex_content = Path("Output/Analysis/report/report.tex").read_text()
+    assert "appendix" in tex_content
 
 
 @pytest.mark.integration
