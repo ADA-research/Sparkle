@@ -290,11 +290,15 @@ def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test main of generate report."""
     empty_args = []
     only_json_args = ["--only-json", "True"]
+    instances_path = (Path("Examples") / "Resources" / "Instances" / "PTN").absolute()
+    solver_path = (
+        Path("Examples") / "Resources" / "Solvers" / "PbO-CCSAT-Generic"
+    ).absolute()
     full_args = [
         "--solver",
-        "PbO-CCSAT-Generic",
+        f"{solver_path.name}",
         "--instance-set",
-        "PTN",
+        f"{instances_path.name}",
         "--appendices",
     ]
 
