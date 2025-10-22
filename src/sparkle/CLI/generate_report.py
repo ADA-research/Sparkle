@@ -773,13 +773,13 @@ def append_dataframe_longtable(
         df_copy = df.copy()
         if isinstance(df_copy.columns, pd.MultiIndex):
             new_cols = []
-            for clmn in df_copy.columns:
+            for column in df_copy.columns:
                 new_cols.append(
                     tuple(
                         wrap_fixed_shortstack(last_path_segment(index), width_per_cell)
                         if isinstance(index, str)
                         else index
-                        for index in clmn
+                        for index in column
                     )
                 )
             names = [
