@@ -910,15 +910,11 @@ def generate_appendix(
     Returns:
         None
     """
-    # preamble
-    for pkg in ("longtable", "pdflscape", "caption", "booktabs", "placeins"):
-        package = pl.Package(pkg)
-        if package not in report.packages:
-            report.packages.append(package)
-
+    report.packages.append(pl.Package("pdflscape"))  # Landscape pages
+    report.packages.append(pl.Package("longtable"))  # Long tables
+    report.packages.append(pl.Package("booktabs"))  # Better table formatting
     report.append(pl.NewPage())
     report.append(pl.NoEscape(r"\clearpage"))
-    report.append(pl.NoEscape(r"\FloatBarrier"))
     report.append(pl.UnsafeCommand("appendix"))
     report.append(pl.Section("Performance DataFrame"))
 
@@ -942,8 +938,6 @@ def generate_appendix(
         wide_threshold=WIDE_TABLE_THRESHOLD,
         num_keys=NUM_KEYS_FDF,
     )
-
-    report.append(pl.NoEscape(r"\FloatBarrier"))
 
 
 def main(argv: list[str]) -> None:
