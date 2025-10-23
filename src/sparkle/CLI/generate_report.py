@@ -121,10 +121,10 @@ def generate_configuration_section(
     for setting, value in scenario.serialise().items():
         # Keep only the last path segment for paths
         # Otherwise tables get too wide and we can't see other values
-        t = str(value).strip().replace("\\", "/")
-        parts = [p for p in t.split("/") if p]
-        if parts[-1]:
-            tabular.add_row([setting, parts[-1]])
+        stripped_value = str(value).strip().replace("\\", "/")
+        segments = [segment for segment in stripped_value.split("/") if segment]
+        if segments[-1]:
+            tabular.add_row([setting, segments[-1]])
         else:
             tabular.add_row([setting, "None"])
     table_conf_settings = pl.Table(position="h")
@@ -730,11 +730,11 @@ def append_dataframe_longtable(
     import math
     from typing import Union
 
-    def latex_escape_text(s: str) -> str:
+    def latex_escape_text(string: str) -> str:
         """Escape special LaTeX characters in a string."""
         # escape text, but insert our own LaTeX macro around it
         return (
-            s.replace("\\", r"\textbackslash{}")
+            string.replace("\\", r"\textbackslash{}")
             .replace("&", r"\&")
             .replace("%", r"\%")
             .replace("$", r"\$")
@@ -748,9 +748,11 @@ def append_dataframe_longtable(
 
     def last_path_segment(text: str) -> str:
         """Keep only the last non-empty path-like segment. Handles both back and forwardslashes. Removes any leading/trailing slashes."""
-        t = str(text).strip().replace("\\", "/")
-        parts = [p for p in t.split("/") if p]  # ignore empty segments
-        return parts[-1] if parts else ""
+        stripped_text = str(text).strip().replace("\\", "/")
+        segments = [
+            segment for segment in stripped_text.split("/") if segment
+        ]  # ignore empty segments
+        return segments[-1] if segments else ""
 
     def wrap_fixed_shortstack(cell: str, width: int = MAX_CELL_LEN) -> str:
         """Wrap long text to a fixed width for LaTeX tables."""
@@ -771,13 +773,13 @@ def append_dataframe_longtable(
         df_copy = df.copy()
         if isinstance(df_copy.columns, pd.MultiIndex):
             new_cols = []
-            for tup in df_copy.columns:
+            for column in df_copy.columns:
                 new_cols.append(
                     tuple(
                         wrap_fixed_shortstack(last_path_segment(index), width_per_cell)
                         if isinstance(index, str)
                         else index
-                        for index in tup
+                        for index in column
                     )
                 )
             names = [
@@ -811,8 +813,10 @@ def append_dataframe_longtable(
         if float_cell.is_integer():
             return str(int(float_cell))
         # round to MAX_DEC, then strip trailing zeros
-        s = f"{round(float_cell, MAX_DEC):.{MAX_DEC}f}".rstrip("0").rstrip(".")
-        return s
+        stripped_cell = f"{round(float_cell, MAX_DEC):.{MAX_DEC}f}".rstrip("0").rstrip(
+            "."
+        )
+        return stripped_cell
 
     df_copy = df.copy()
 
@@ -906,15 +910,11 @@ def generate_appendix(
     Returns:
         None
     """
-    # preamble
-    for pkg in ("longtable", "pdflscape", "caption", "booktabs", "placeins"):
-        p = pl.Package(pkg)
-        if p not in report.packages:
-            report.packages.append(p)
-
+    report.packages.append(pl.Package("pdflscape"))  # Landscape pages
+    report.packages.append(pl.Package("longtable"))  # Long tables
+    report.packages.append(pl.Package("booktabs"))  # Better table formatting
     report.append(pl.NewPage())
     report.append(pl.NoEscape(r"\clearpage"))
-    report.append(pl.NoEscape(r"\FloatBarrier"))
     report.append(pl.UnsafeCommand("appendix"))
     report.append(pl.Section("Performance DataFrame"))
 
@@ -938,8 +938,6 @@ def generate_appendix(
         wide_threshold=WIDE_TABLE_THRESHOLD,
         num_keys=NUM_KEYS_FDF,
     )
-
-    report.append(pl.NoEscape(r"\FloatBarrier"))
 
 
 def main(argv: list[str]) -> None:
@@ -965,55 +963,68 @@ def main(argv: list[str]) -> None:
     if args.solvers:
         solvers = [
             resolve_object_name(
-                s, gv.solver_nickname_mapping, gv.settings().DEFAULT_solver_dir, Solver
+                solver,
+                gv.solver_nickname_mapping,
+                gv.settings().DEFAULT_solver_dir,
+                Solver,
             )
-            for s in args.solvers
+            for solver in args.solvers
         ]
         configuration_scenarios = [
-            s
-            for s in configuration_scenarios
-            if s.solver.directory in [s.directory for s in solvers]
+            scenario
+            for scenario in configuration_scenarios
+            if scenario.solver.directory in [solver.directory for solver in solvers]
         ]
         selection_scenarios = [
-            s
-            for s in selection_scenarios
-            if set(s.solvers).intersection([str(s.directory) for s in solvers])
+            scenario
+            for scenario in selection_scenarios
+            if set(scenario.solvers).intersection(
+                [str(solver.directory) for solver in solvers]
+            )
         ]
         parallel_portfolio_scenarios = [
-            s
-            for s in parallel_portfolio_scenarios
-            if set(s.solvers).intersection([str(s.directory) for s in solvers])
+            scenario
+            for scenario in parallel_portfolio_scenarios
+            if set(scenario.solvers).intersection(
+                [str(solver.directory) for solver in solvers]
+            )
         ]
     if args.instance_sets:
         instance_sets = [
             resolve_object_name(
-                s,
+                instance_set,
                 gv.instance_set_nickname_mapping,
                 gv.settings().DEFAULT_instance_dir,
                 Instance_Set,
             )
-            for s in args.instance_sets
+            for instance_set in args.instance_sets
         ]
         configuration_scenarios = [
-            s
-            for s in configuration_scenarios
-            if s.instance_set.directory in [s.directory for s in instance_sets]
+            scenario
+            for scenario in configuration_scenarios
+            if scenario.instance_set.directory
+            in [instance_set.directory for instance_set in instance_sets]
         ]
         selection_scenarios = [
-            s
-            for s in selection_scenarios
-            if set(s.instance_sets).intersection([str(s.name) for s in instance_sets])
+            scenario
+            for scenario in selection_scenarios
+            if set(scenario.instance_sets).intersection(
+                [str(instance_set.name) for instance_set in instance_sets]
+            )
         ]
         parallel_portfolio_scenarios = [
-            s
-            for s in parallel_portfolio_scenarios
-            if set(s.instance_sets).intersection([str(s.name) for s in instance_sets])
+            scenario
+            for scenario in parallel_portfolio_scenarios
+            if set(scenario.instance_sets).intersection(
+                [str(instance_set.name) for instance_set in instance_sets]
+            )
         ]
 
     processed_configuration_scenarios = []
     processed_selection_scenarios = []
     possible_test_sets = [
-        Instance_Set(p) for p in gv.settings().DEFAULT_instance_dir.iterdir()
+        Instance_Set(possible_test_set)
+        for possible_test_set in gv.settings().DEFAULT_instance_dir.iterdir()
     ]
     for configuration_scenario in configuration_scenarios:
         processed_configuration_scenarios.append(
@@ -1067,9 +1078,9 @@ def main(argv: list[str]) -> None:
     newbibpath = report_directory / "report.bib"
     shutil.copy(bibpath, newbibpath)
     # BUGFIX for unknown package load in PyLatex
-    p = pl.package.Package("lastpage")
-    if p in report.packages:
-        report.packages.remove(p)
+    lastpage_package = pl.package.Package("lastpage")
+    if lastpage_package in report.packages:
+        report.packages.remove(lastpage_package)
     report.packages.append(
         pl.package.Package(
             "geometry",
