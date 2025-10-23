@@ -3,8 +3,8 @@
 The Sparkle package offers an extensive _Command Line Interface_ (CLI) to allow for easy interaction with the platform. If you haven't installed the package already, see the {ref}`Install Sparkle <quick-install>` page.
 
 ```{note}
-Sparkle currently relies on [Slurm](https://slurm.schedmd.com/), but in some cases works locally as well.
-Sparkle also relies on [RunSolver](http://www.cril.univ-artois.fr/~roussel/runsolver/), which is a Linux based program. Thus Sparkle can only run on Linux based systems in many cases.
+Sparkle currently relies on [Slurm](https://slurm.schedmd.com/), but in many cases works locally as well.
+Sparkle also relies on [RunSolver](http://www.cril.univ-artois.fr/~roussel/runsolver/), which is a Linux based program. However, Sparkle has a Python based alternative called PyRunSolver, which will be automatically defaulted to automatically.
 ```
 
 To initialise a new Sparkle platform, select a (preferably new / empty) directory, and run in the terminal:
