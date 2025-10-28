@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 from pathlib import Path
-from typing import Any
+from typing import Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sparkle.solver import Solver
+    from sparkle.selector import Extractor
 
 
 class ArgumentContainer:
@@ -307,6 +311,10 @@ NoSavePlatformArgument = ArgumentContainer(
     },
 )
 
+ObjectiveArgument = ArgumentContainer(
+    names=["--objective"], kwargs={"type": str, "help": "the objective to use."}
+)
+
 RecomputeFeaturesArgument = ArgumentContainer(
     names=["--recompute"],
     kwargs={
@@ -476,6 +484,28 @@ SolutionVerifierArgument = ArgumentContainer(
     },
 )
 
-ObjectiveArgument = ArgumentContainer(
-    names=["--objective"], kwargs={"type": str, "help": "the objective to use."}
+WrapPathArgument = ArgumentContainer(
+    names=["path"], kwargs={"type": Path, "help": "path to the directory to wrap"}
+)
+
+WrapTargetArgument = ArgumentContainer(
+    names=["target"], kwargs={"type": Path, "help": "relative path to the target executable"}
+)
+
+WrapTypeArgument = ArgumentContainer(
+    names=["type"],
+    kwargs={
+        "type": str,
+        "choices": [Solver, Extractor],
+        "help": "type of the target to wrap",
+    },
+)
+
+WrapGeneratePCSArgument = ArgumentContainer(
+    names=["--generate-pcs"],
+    kwargs={
+        "required": False,
+        "action": "store_true",
+        "help": "generate a Solver Parameter Configuration Space (PCS) file for the target",
+    },
 )

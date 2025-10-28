@@ -98,14 +98,12 @@ class Settings:
     # Example settings path
     DEFAULT_example_settings_path = Path(DEFAULT_components / "sparkle_settings.ini")
 
+    # Wrapper templates pathing
+    DEFAULT_solver_wrapper_template = DEFAULT_components / "sparkle_solver_wrapper.sh"
+
     # Runsolver component
     DEFAULT_runsolver_dir = DEFAULT_components / "runsolver" / "src"
     DEFAULT_runsolver_exec = DEFAULT_runsolver_dir / "runsolver"
-
-    # Ablation component
-    DEFAULT_ablation_dir = DEFAULT_components / "ablationAnalysis-0.9.4"
-    DEFAULT_ablation_exec = DEFAULT_ablation_dir / "ablationAnalysis"
-    DEFAULT_ablation_validation_exec = DEFAULT_ablation_dir / "ablationValidation"
 
     # Default input directory pathing
     DEFAULT_solver_dir = cwd_prefix / "Solvers"
