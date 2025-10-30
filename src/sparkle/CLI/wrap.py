@@ -25,7 +25,7 @@ def cli_to_configspace(
     """Attempts to process CLI help string to a ConfigSpace representation.
 
     Args:
-        input_data: CLI help string.
+        input_data: CLI help string containing parameter data.
         name: Name to give to the ConfigSpace
 
     Returns:
