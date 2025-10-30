@@ -1,34 +1,37 @@
 """Command to wrap users' Solvers / Feature extractors for Sparkle."""
+
 import sys
 import re
 import argparse
 from pathlib import Path
 
-from runrunner import Runner
 
 from sparkle.solver import Solver
 from sparkle.selector.extractor import Extractor
 from sparkle.platform import Settings
-from sparkle.types import SolverStatus
 
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help import global_variables as gv
 
-import ConfigSpace as cs
-from ConfigSpace.types import NotSet
+import ConfigSpace
+import numpy as np
+from ConfigSpace.types import NotSet, i64
 
 
-def cli_to_configspace(input_data: str) -> cs.ConfigurationSpace:
+def cli_to_configspace(
+    input_data: str, name: str = None
+) -> ConfigSpace.ConfigurationSpace:
     """Attempts to process CLI help string to a ConfigSpace representation.
-    
+
     Args:
-        input: CLI help string.
+        input_data: CLI help string.
+        name: Name to give to the ConfigSpace
 
     Returns:
         ConfigSpace object.
     """
-    space = cs.ConfigurationSpace()
+    space = ConfigSpace.ConfigurationSpace(name=name)
 
     parameter_data = []
     first_group = False
@@ -44,86 +47,153 @@ def cli_to_configspace(input_data: str) -> cs.ConfigurationSpace:
         else:
             parameter_data[-1] = parameter_data[-1] + " " + line
     name_pattern = r"(?<!\S)--?[\w-]+"
-    print("For each parameter we need to know the parameter type, please choose for each found name the following:")
-    print("1: Integer\n2: Float\n3: Ordinal\n4: Categorical\n5: Boolean\n6: Skip [Do not add this parameter]\n")
+    int_min, int_max = (
+        int(np.iinfo(i64).min / 10),
+        int(np.iinfo(i64).max / 10),
+    )  # ConfigSpace bug on positive max size? Also causes an error during sampling
+    float_min, float_max = -sys.maxsize, sys.maxsize
+    print(
+        "For each parameter we need to know the parameter type, please choose for each found out of the following:"
+    )
+    print(
+        "\t- Integer\n\t- Float\n\t- Ordinal\n\t- Categorical\n\t- Boolean\n\t- Empty/Skip [Do not add this parameter]\n"
+    )
     for parameter in parameter_data:
         matches = re.findall(name_pattern, parameter)
         for match in matches:
             name = match.strip("-")
-            if len(name) == 1 and len(matches) > 1:  # Short version of the parameter, continue
+            if (
+                len(name) == 1 and len(matches) > 1
+            ):  # Short version of the parameter, continue
                 continue
             break
+
         print(f"\nParameter [{name}]: ")
         print(f"Description: {parameter}")
-        #print(f"Please specify the parameter type: ", end="")
-        value = input(f"Please specify the parameter type: ")
-        if value == "6":
+        value = input("Please specify the parameter type: ")
+        if value.lower() in ["", "empty", "skip"]:
+            print("> Skipping parameter...")
             continue
-        #print(f"Please specify the parameter default value (Empty for not set): ", end="")
-        default = input(f"Please specify the parameter default value (Empty for not set): ")
+        default = input(
+            "Please specify the parameter default value (Empty for not set): "
+        )
         if default == "":
             default = NotSet
-        match value:
-            case "1":  # Integer
-                print("Please specify the integer lower and upper limit separated by a comma (,): ", end="")
-                lower, upper = input().split(",")
-                if default != NotSet:
-                    default = int(default)
-                space.add_hyperparameter(
-                    cs.UniformIntegerHyperparameter(
-                        name=name,
-                        lower=int(lower),
-                        upper=int(upper),
-                        default_value=int(default),
-                        meta=parameter,
-                    )
+
+        match value.lower():
+            case "integer" | "int" | "1":  # Integer
+                lower, upper = input(
+                    "Please specify the integer lower and upper limit separated by a comma (,). Empty defaults to -max / max: "
+                ).split(",")
+                lower, upper = lower.strip(), upper.strip()
+                lower = int_min if lower == "" else i64(lower)
+                upper = int_max if upper == "" else i64(upper)
+                default = int(default) if default != NotSet else None
+                log = (
+                    input("Should the values be sampled on a log-scale? (y/n): ").lower()
+                    == "y"
                 )
-            case "2":  # Float
-                print("Please specify the float lower and upper limit separated by a comma (,): ", end="")
+                try:
+                    space.add(
+                        ConfigSpace.UniformIntegerHyperparameter(
+                            name=name,
+                            lower=lower,
+                            upper=upper,
+                            default_value=default,
+                            log=log,
+                            meta=parameter,
+                        )
+                    )
+                except Exception as e:
+                    print("The following exception occured: ", e)
+                    print("Continuing to the next parameter...")
+                    continue
+            case "float" | "2":  # Float
+                print(
+                    "Please specify the float lower and upper limit separated by a comma (,). Empty defaults to -max / max: ",
+                    end="",
+                )
                 lower, upper = input().split(",", maxsplit=1)
-                space.add_hyperparameter(
-                    cs.UniformFloatHyperparameter(
-                        name=name,
-                        lower=float(lower),
-                        upper=float(upper),
-                        default_value=float(default),
-                        meta=parameter,
-                    )
+                lower, upper = lower.strip(), upper.strip()
+                lower = float_min if lower == "" else float(lower)
+                upper = float_max if upper == "" else float(upper)
+                default = float(default) if default != NotSet else None
+                log = (
+                    input("Should the values be sampled on a log-scale? (y/n): ").lower()
+                    == "y"
                 )
-            case "3":  # Ordinal
-                print("Please specify the ordinal ascending sequence separated by a comma (,): ", end="")
-                sequence = input("Please specify the ordinal ascending sequence separated by a comma (,): ").split(",")
+                try:
+                    space.add(
+                        ConfigSpace.UniformFloatHyperparameter(
+                            name=name,
+                            lower=lower,
+                            upper=upper,
+                            default_value=default,
+                            log=log,
+                            meta=parameter,
+                        )
+                    )
+                except Exception as e:
+                    print("The following exception occured: ", e)
+                    print("Continuing to the next parameter...")
+                    continue
+            case "ordinal" | "ord" | "3":  # Ordinal
+                print(
+                    "Please specify the ordinal ascending sequence separated by a comma (,): ",
+                    end="",
+                )
+                sequence = input(
+                    "Please specify the ordinal ascending sequence separated by a comma (,): "
+                ).split(",")
                 if default != NotSet:
                     while default not in sequence:
-                        default = input("Please specify the default value from the sequence: ")
-                space.add_hyperparameter(
-                    cs.OrdinalHyperparameter(
-                        name=name,
-                        sequence=sequence,
-                        default_value=default,
-                        meta=parameter,
+                        default = input(
+                            "Please specify the default value from the sequence: "
+                        )
+                try:
+                    space.add(
+                        ConfigSpace.OrdinalHyperparameter(
+                            name=name,
+                            sequence=sequence,
+                            default_value=default,
+                            meta=parameter,
+                        )
                     )
-                )
-            case "4":  # Categorical
-                choices = input("Please specify the categorical options separated by a comma (,): ").split(",")
+                except Exception as e:
+                    print("The following exception occured: ", e)
+                    print("Continuing to the next parameter...")
+                    continue
+            case "categorical" | "cat" | "4":  # Categorical
+                choices = input(
+                    "Please specify the categorical options separated by a comma (,): "
+                ).split(",")
                 choices = [option.strip() for option in choices]
                 if default != NotSet:
                     while default not in choices:
-                        default = input("Please specify the default value from the choices: ")
-                space.add_hyperparameter(
-                    cs.CategoricalHyperparameter(
-                        name=name,
-                        choices=choices,
-                        default_value=default,
-                        meta=parameter,
+                        default = input(
+                            "Please specify the default value from the choices: "
+                        )
+                try:
+                    space.add(
+                        ConfigSpace.CategoricalHyperparameter(
+                            name=name,
+                            choices=choices,
+                            default_value=default,
+                            meta=parameter,
+                        )
                     )
-                )
-            case "5":  # Boolean
+                except Exception as e:
+                    print("The following exception occured: ", e)
+                    print("Continuing to the next parameter...")
+                    continue
+            case "boolean" | "bool" | "5":  # Boolean
                 if default != NotSet:
                     while default not in ["True", "False"]:
-                        default = input("Please specify the default value as True/False: ")
-                space.add_hyperparameter(
-                    cs.CategoricalHyperparameter(
+                        default = input(
+                            "Please specify the default value as True/False: "
+                        )
+                space.add(
+                    ConfigSpace.CategoricalHyperparameter(
                         name=name,
                         choices=["True", "False"],
                         default_value=default,
@@ -131,7 +201,7 @@ def cli_to_configspace(input_data: str) -> cs.ConfigurationSpace:
                 )
             case _:  # Skip
                 continue
-    return cs
+    return space
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -143,7 +213,9 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(*ac.WrapPathArgument.names, **ac.WrapPathArgument.kwargs)
     parser.add_argument(*ac.WrapTargetArgument.names, **ac.WrapTargetArgument.kwargs)
     parser.add_argument(*ac.WrapTypeArgument.names, **ac.WrapTypeArgument.kwargs)
-    parser.add_argument(*ac.WrapGeneratePCSArgument.names, **ac.WrapGeneratePCSArgument.kwargs)
+    parser.add_argument(
+        *ac.WrapGeneratePCSArgument.names, **ac.WrapGeneratePCSArgument.kwargs
+    )
     # # Settings arguments
     # parser.add_argument(
     #     *Settings.OPTION_solver_cutoff_time.args,
@@ -160,36 +232,57 @@ def main(argv: list[str]) -> None:
 
     # Log command call
     sl.log_command(sys.argv, settings.random_state)
+    type_map = {
+        "extractor": Extractor,
+        "feature-extractor": Extractor,
+        "solver": Solver,
+        "Extractor": Extractor,
+        "Feature-Extractor": Extractor,
+        "Solver": Solver,
+        "FeatureExtractor": Extractor,
+    }
+    type = type_map[args.type]
 
     print(f"Wrapping {type.__name__} in directory {args.path} ...")
     path: Path = args.path
     if not path.exists():
         raise ValueError(f"Directory {path} does not exist.")
 
-    target_path: Path = path / args.target
+    target_path: Path = args.target
+    if (
+        path not in target_path.parents
+    ):  # Allow the user to flexibly specify the target (as path/executable or just executable)
+        target_path = path / args.target
+
     if not target_path.exists():
         raise ValueError(f"Target executable {target_path} does not exist.")
 
-    if args.type == Solver:
-        target_wrapper = path / Solver.wrapper
+    if type == Solver:
+        target_wrapper = path / (
+            Solver._wrapper_file + Settings.DEFAULT_solver_wrapper_template.suffix
+        )
         if target_wrapper.exists():
             print(f"WARNING: Wrapper {target_wrapper} already exists. Skipping...")
         else:
             template_data = Settings.DEFAULT_solver_wrapper_template.open().read()
-            template_data = template_data.replace("@@@YOUR_EXECUTABLE_HERE@@@", args.target)
+            template_data = template_data.replace(
+                "@@@YOUR_EXECUTABLE_HERE@@@", str(target_path.relative_to(path))
+            )
             target_wrapper.open("w").write(template_data)
         if args.generate_pcs:
-            pcs_file: Path = path / Solver.pcs_file
+            pcs_file: Path = path / "sparkle_PCS.yaml"
             if pcs_file.exists():
                 print(f"WARNING: PCS file {pcs_file} already exists. Skipping...")
             else:
                 import subprocess
-                input_data = subprocess.run([str(target_path), "--help"], capture_output=True).stdout.decode("utf-8")
-                cs = cli_to_configspace(input_data)
-                cs.to_yaml(pcs_file)
-                pcs_file.open("w").write(" ")
-    elif args.type == Extractor:
-        raise NotImplementedError
+
+                input_data = subprocess.run(
+                    [str(target_path), "--help"], capture_output=True
+                ).stdout.decode("utf-8")
+                space = cli_to_configspace(input_data, name=target_path.stem)
+                space.to_yaml(pcs_file)
+    elif type == Extractor:
+        raise NotImplementedError("Feature extractor wrapping not implemented yet.")
 
     sys.exit(0)
 

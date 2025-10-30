@@ -70,13 +70,13 @@ def main(argv: list[str]) -> None:
             print(object.get_configuration_space())
         if not os.access(object.wrapper_file, os.X_OK):
             print(
-                f"Wrapper {object.wrapper_file} is not executable!"
+                f"Wrapper {object.wrapper_file} is not executable! "
                 f"Check that wrapper execution rights are set for all."
             )
             sys.exit(-1)
         if args.instance_path:  # Instance to test with
             object._runsolver_exec = settings.DEFAULT_runsolver_exec
-            if not object.runsolver_exec.exists():
+            if False and not object.runsolver_exec.exists():
                 print(
                     f"Runsolver {object.runsolver_exec} not found. "
                     "Checking without Runsolver currently not supported."
@@ -90,7 +90,7 @@ def main(argv: list[str]) -> None:
                     settings.solver_cutoff_time if settings.solver_cutoff_time else 5
                 )
                 configuration = {}
-                if object.pcs_file:
+                if object.pcs_file:  # TODO: Make
                     print("\nSample Configuration:")
                     sample_conf = object.get_configuration_space().sample_configuration()
                     print(sample_conf)
@@ -104,7 +104,13 @@ def main(argv: list[str]) -> None:
                     log_dir=sl.caller_log_dir,
                     run_on=Runner.LOCAL,
                 )
-                print("Result:")
+                log = [p for p in sl.caller_log_dir.iterdir() if p.suffix == ".rawres"]
+                if len(log) > 0:
+                    print("\nSolver Output:")
+                    print(log[0].open().read())
+                else:
+                    print("\nERROR: Solver Log output not found!\n")
+                print("\nResult:")
                 for obj in objectives:  # Check objectives
                     if obj.name not in result:
                         print(f"\tSolver output is missing objective {obj.name}")

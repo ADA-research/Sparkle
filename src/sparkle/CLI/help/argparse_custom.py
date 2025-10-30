@@ -2,11 +2,7 @@
 
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from sparkle.solver import Solver
-    from sparkle.selector import Extractor
+from typing import Any
 
 
 class ArgumentContainer:
@@ -489,14 +485,24 @@ WrapPathArgument = ArgumentContainer(
 )
 
 WrapTargetArgument = ArgumentContainer(
-    names=["target"], kwargs={"type": Path, "help": "relative path to the target executable"}
+    names=["target"],
+    kwargs={"type": Path, "help": "relative path to the target executable"},
 )
 
 WrapTypeArgument = ArgumentContainer(
     names=["type"],
     kwargs={
         "type": str,
-        "choices": [Solver, Extractor],
+        "choices": [
+            "Solver",
+            "Extractor",
+            "FeatureExtractor",
+            "Feature-Extractor",
+            "solver",
+            "extractor",
+            "feature-extractor",
+            "feature-extractor",
+        ],
         "help": "type of the target to wrap",
     },
 )
