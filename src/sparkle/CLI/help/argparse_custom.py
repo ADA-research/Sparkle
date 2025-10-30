@@ -72,18 +72,18 @@ CancelJobsArgument = ArgumentContainer(
 CheckTypeArgument = ArgumentContainer(
     names=["type"],
     kwargs={
-        "choices": [
-            "extractor",
-            "feature-extractor",
-            "solver",
-            "instance-set",
-            "ExtractorFeature-Extractor",
-            "Instance-Set",
-            "Solver",
-            "FeatureExtractor",
-            "InstanceSet",
-        ],
-        "help": "type of the object to check",
+        # "choices": [
+        #     "extractor",
+        #     "feature-extractor",
+        #     "solver",
+        #     "instance-set",
+        #     "ExtractorFeature-Extractor",
+        #     "Instance-Set",
+        #     "Solver",
+        #     "FeatureExtractor",
+        #     "InstanceSet",
+        # ],
+        "help": "type of the object to check (Solver, Extractor, InstanceSet)",
     },
 )
 
@@ -493,17 +493,17 @@ WrapTypeArgument = ArgumentContainer(
     names=["type"],
     kwargs={
         "type": str,
-        "choices": [
-            "Solver",
-            "Extractor",
-            "FeatureExtractor",
-            "Feature-Extractor",
-            "solver",
-            "extractor",
-            "feature-extractor",
-            "feature-extractor",
-        ],
-        "help": "type of the target to wrap",
+        # "choices": [
+        #     "Solver",
+        #     "Extractor",
+        #     "FeatureExtractor",
+        #     "Feature-Extractor",
+        #     "solver",
+        #     "extractor",
+        #     "feature-extractor",
+        #     "feature-extractor",
+        # ],
+        "help": "type of the target to wrap (Solver or Extractor)",
     },
 )
 

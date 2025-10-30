@@ -82,9 +82,13 @@ def cli_to_configspace(
 
         match value.lower():
             case "integer" | "int" | "1":  # Integer
-                lower, upper = input(
-                    "Please specify the integer lower and upper limit separated by a comma (,). Empty defaults to -max / max: "
-                ).split(",")
+                lower, upper = None, None
+                while lower is None or upper is None:
+                    user_input = input(
+                        "Please specify the integer lower and upper limit separated by a comma (,). Empty defaults to -max / max: "
+                    )
+                    if "," in user_input:
+                        lower, upper = user_input.split(",", maxsplit=1)
                 lower, upper = lower.strip(), upper.strip()
                 lower = int_min if lower == "" else i64(lower)
                 upper = int_max if upper == "" else i64(upper)
@@ -109,11 +113,13 @@ def cli_to_configspace(
                     print("Continuing to the next parameter...")
                     continue
             case "float" | "2":  # Float
-                print(
-                    "Please specify the float lower and upper limit separated by a comma (,). Empty defaults to -max / max: ",
-                    end="",
-                )
-                lower, upper = input().split(",", maxsplit=1)
+                lower, upper = None, None
+                while lower is None or upper is None:
+                    user_input = input(
+                        "Please specify the float lower and upper limit separated by a comma (,). Empty defaults to -max / max: "
+                    )
+                    if "," in user_input:
+                        lower, upper = user_input.split(",", maxsplit=1)
                 lower, upper = lower.strip(), upper.strip()
                 lower = float_min if lower == "" else float(lower)
                 upper = float_max if upper == "" else float(upper)
@@ -142,9 +148,12 @@ def cli_to_configspace(
                     "Please specify the ordinal ascending sequence separated by a comma (,): ",
                     end="",
                 )
-                sequence = input(
-                    "Please specify the ordinal ascending sequence separated by a comma (,): "
-                ).split(",")
+                sequence = [
+                    s.strip()
+                    for s in input(
+                        "Please specify the ordinal ascending sequence separated by a comma (,): "
+                    ).split(",")
+                ]
                 if default != NotSet:
                     while default not in sequence:
                         default = input(
@@ -164,9 +173,12 @@ def cli_to_configspace(
                     print("Continuing to the next parameter...")
                     continue
             case "categorical" | "cat" | "4":  # Categorical
-                choices = input(
-                    "Please specify the categorical options separated by a comma (,): "
-                ).split(",")
+                choices = [
+                    s.strip()
+                    for s in input(
+                        "Please specify the categorical options separated by a comma (,): "
+                    ).split(",")
+                ]
                 choices = [option.strip() for option in choices]
                 if default != NotSet:
                     while default not in choices:
@@ -210,9 +222,9 @@ def parser_function() -> argparse.ArgumentParser:
         description="Command to wrap input solvers and feature extractors."
         "Specify a path to the directory containing your solvers."
     )
+    parser.add_argument(*ac.WrapTypeArgument.names, **ac.WrapTypeArgument.kwargs)
     parser.add_argument(*ac.WrapPathArgument.names, **ac.WrapPathArgument.kwargs)
     parser.add_argument(*ac.WrapTargetArgument.names, **ac.WrapTargetArgument.kwargs)
-    parser.add_argument(*ac.WrapTypeArgument.names, **ac.WrapTypeArgument.kwargs)
     parser.add_argument(
         *ac.WrapGeneratePCSArgument.names, **ac.WrapGeneratePCSArgument.kwargs
     )
@@ -241,6 +253,12 @@ def main(argv: list[str]) -> None:
         "Solver": Solver,
         "FeatureExtractor": Extractor,
     }
+
+    if args.type not in type_map:
+        options_text = "\n".join([f"\t- {value}" for value in type_map.keys()])
+        raise ValueError(
+            f"Unknown type {args.type}. Please choose from:\n{options_text}"
+        )
     type = type_map[args.type]
 
     print(f"Wrapping {type.__name__} in directory {args.path} ...")
@@ -269,6 +287,7 @@ def main(argv: list[str]) -> None:
                 "@@@YOUR_EXECUTABLE_HERE@@@", str(target_path.relative_to(path))
             )
             target_wrapper.open("w").write(template_data)
+            target_wrapper.chmod(0o755)  # Set read and execution rights for all
         if args.generate_pcs:
             pcs_file: Path = path / "sparkle_PCS.yaml"
             if pcs_file.exists():

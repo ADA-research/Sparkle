@@ -57,6 +57,11 @@ def main(argv: list[str]) -> None:
         "FeatureExtractor": Extractor,
         "InstanceSet": Instance_Set,
     }
+    if args.type not in type_map:
+        options_text = "\n".join([f"\t- {value}" for value in type_map.keys()])
+        raise ValueError(
+            f"Unknown type {args.type}. Please choose from:\n{options_text}"
+        )
     type = type_map[args.type]
     print(f"Checking {type.__name__} in directory {args.path} ...")
     object = type(args.path)
