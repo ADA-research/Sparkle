@@ -2,11 +2,7 @@
 
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from sparkle.solver import Solver
-    from sparkle.selector import Extractor
+from typing import Any
 
 
 class ArgumentContainer:
@@ -76,18 +72,18 @@ CancelJobsArgument = ArgumentContainer(
 CheckTypeArgument = ArgumentContainer(
     names=["type"],
     kwargs={
-        "choices": [
-            "extractor",
-            "feature-extractor",
-            "solver",
-            "instance-set",
-            "ExtractorFeature-Extractor",
-            "Instance-Set",
-            "Solver",
-            "FeatureExtractor",
-            "InstanceSet",
-        ],
-        "help": "type of the object to check",
+        # "choices": [
+        #     "extractor",
+        #     "feature-extractor",
+        #     "solver",
+        #     "instance-set",
+        #     "ExtractorFeature-Extractor",
+        #     "Instance-Set",
+        #     "Solver",
+        #     "FeatureExtractor",
+        #     "InstanceSet",
+        # ],
+        "help": "type of the object to check (Solver, Extractor, InstanceSet)",
     },
 )
 
@@ -489,15 +485,25 @@ WrapPathArgument = ArgumentContainer(
 )
 
 WrapTargetArgument = ArgumentContainer(
-    names=["target"], kwargs={"type": Path, "help": "relative path to the target executable"}
+    names=["target"],
+    kwargs={"type": Path, "help": "relative path to the target executable"},
 )
 
 WrapTypeArgument = ArgumentContainer(
     names=["type"],
     kwargs={
         "type": str,
-        "choices": [Solver, Extractor],
-        "help": "type of the target to wrap",
+        # "choices": [
+        #     "Solver",
+        #     "Extractor",
+        #     "FeatureExtractor",
+        #     "Feature-Extractor",
+        #     "solver",
+        #     "extractor",
+        #     "feature-extractor",
+        #     "feature-extractor",
+        # ],
+        "help": "type of the target to wrap (Solver or Extractor)",
     },
 )
 

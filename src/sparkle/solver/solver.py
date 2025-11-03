@@ -95,10 +95,12 @@ class Solver(SparkleCallable):
     def pcs_file(self: Solver) -> Path:
         """Get path of the parameter file."""
         if self._pcs_file is None:
-            files = sorted([p for p in self.directory.iterdir() if p.suffix == ".pcs"])
-            if len(files) == 0:
-                return None
-            self._pcs_file = files[0]
+            # First try to resolve by extension .pcs
+            for file in self.directory.iterdir():
+                convention = PCSConverter.get_convention(file)
+                if convention != PCSConvention.UNKNOWN:
+                    self._pcs_file = file
+                    return self._pcs_file
         return self._pcs_file
 
     @property

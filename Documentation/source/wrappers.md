@@ -1,9 +1,21 @@
 (solver-wrapper)=
 # Wrapping your Algorithm
 
-When using Sparkle for your specific projects, you will want to plug in your own algorithms into the platform. To that end, a piece of wrapper code of about ~50 lines must be written to make sure the platform is able to submit calls to your algorithm, as well as parse the output. This should in general not take longer than five minutes to write.
+When using Sparkle for your specific projects, you will want to plug in your own algorithms into the platform. To that end, a piece of wrapper code of about ~50 lines must be written to make sure the platform is able to submit calls to your algorithm, as well as parse the output. This should in general not take longer than five minutes to write. An extensive description on the file itself is given in the first subsection of this page.
 
-A template for the wrapper that connects your algorithm with Sparkle is available at `Examples/Resources/Solvers/template/` where a Python and Bash version are given. In this template a few steps need to be filled in with your own algorithm, such as setting the name of your executable and parsing its output. You can also compare the different example solvers to get an idea for what kind of changes are needed. We recommend writing your wrapper using the Bash template, as it offers the fastest execution time, unless your solver itself is written in Python.
+As a good starting point for a Bash wrapper, you can call the `wrap` command in sparkle like so;
+
+```bash
+sparkle wrap solver path/to/my/solver path/to/my/solver/executable --generate-pcs 
+```
+
+This will take the wrapper template and write it for you in your solver directory with the executable variable in place. Note that `path/to/my/solver/executable` can also be relative, e.g. `executable` as second argument would also suffice. The `--generate-pcs` will open an interactive session that attempts to extract all arguments from your `executable` by running it with `--help`. In this interactive sessions you can choose which parameters should be added, with which type and default value. This will then create a ConfigSpace Yaml file, which you can easily edit afterwards for more detailed settings, such as adding forbidden clauses or conditional parameters.
+
+Alternatively, the raw templates for the wrapper that connects your algorithm with Sparkle is available at `Examples/Resources/Solvers/template/` where a [Python](https://github.com/ADA-research/Sparkle/blob/main/Examples/Resources/Solvers/template/sparkle_solver_wrapper.py) and [Bash](https://github.com/ADA-research/Sparkle/blob/main/Examples/Resources/Solvers/template/sparkle_solver_wrapper.sh) version are given. In this template a few steps need to be filled in with your own algorithm, such as setting the name of your executable and parsing its output. You can also compare the different example solvers in this directory to get an idea for what kind of changes are needed.
+
+```{note}
+We recommend writing your wrapper using the Bash template, as it offers the fastest execution time, unless your solver itself is written in Python.
+```
 
 It is important to Sparkle that the last line of output is a dictionary that Sparkle can process. In the example scripts there are details on how to handle Kill Signals, s.t. you can make sure that in any call your wrapper will output a specific structure.
 
