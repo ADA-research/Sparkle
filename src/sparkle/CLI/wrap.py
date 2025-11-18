@@ -1,6 +1,7 @@
 """Command to wrap users' Solvers / Feature extractors for Sparkle."""
 
 import sys
+import subprocess
 import re
 import argparse
 from pathlib import Path
@@ -228,11 +229,6 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         *ac.WrapGeneratePCSArgument.names, **ac.WrapGeneratePCSArgument.kwargs
     )
-    # # Settings arguments
-    # parser.add_argument(
-    #     *Settings.OPTION_solver_cutoff_time.args,
-    #     **Settings.OPTION_solver_cutoff_time.kwargs,
-    # )
     return parser
 
 
@@ -293,8 +289,6 @@ def main(argv: list[str]) -> None:
             if pcs_file.exists():
                 print(f"WARNING: PCS file {pcs_file} already exists. Skipping...")
             else:
-                import subprocess
-
                 input_data = subprocess.run(
                     [str(target_path), "--help"], capture_output=True
                 ).stdout.decode("utf-8")

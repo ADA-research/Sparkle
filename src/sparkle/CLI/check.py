@@ -95,7 +95,7 @@ def main(argv: list[str]) -> None:
                     settings.solver_cutoff_time if settings.solver_cutoff_time else 5
                 )
                 configuration = {}
-                if object.pcs_file:  # TODO: Make
+                if object.pcs_file:
                     print("\nSample Configuration:")
                     sample_conf = object.get_configuration_space().sample_configuration()
                     print(sample_conf)
