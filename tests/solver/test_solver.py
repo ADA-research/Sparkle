@@ -30,10 +30,13 @@ class TestSolver(TestCase):
 
     def test_pcs_file_correct_name(self: TestSolver) -> None:
         """Test if get_pcs_file() returns the correct path if file exists."""
-        (self.solver_path / "paramfile.pcs").open("a").close()
+        parameter_file = self.solver_path / "paramfile.pcs"
+        shutil.copyfile(
+            Path("tests", "test_files", "Solvers", "Test-Solver", "Test-Solver.pcs"),
+            parameter_file,
+        )
 
         solver = Solver(self.solver_path)
-
         self.assertEqual(solver.pcs_file, self.solver_path / "paramfile.pcs")
 
     def test_pcs_file_none(self: TestSolver) -> None:
@@ -43,11 +46,16 @@ class TestSolver(TestCase):
 
     def test_pcs_file_multiple(self: TestSolver) -> None:
         """Test for SystemExit if get_pcs_file() is called, but multiple files exist."""
-        (self.solver_path / "paramfile.pcs").open("a").close()
-        (self.solver_path / "paramfile_PORTED.pcs").open("a").close()
+        original = self.solver_path / "paramfile.pcs"
+        (self.solver_path / "paramfile_PORTED.pcs").open("a").close()  # Distraction
+
+        shutil.copyfile(
+            Path("tests", "test_files", "Solvers", "Test-Solver", "Test-Solver.pcs"),
+            original,
+        )
 
         solver = Solver(self.solver_path)
-        assert solver.pcs_file == self.solver_path / "paramfile.pcs"
+        assert solver.pcs_file == original
 
     def test_is_deterministic(self: TestSolver) -> None:
         """Test if deterministic correctly returns value."""

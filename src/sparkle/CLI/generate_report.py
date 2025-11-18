@@ -1108,13 +1108,16 @@ def main(argv: list[str]) -> None:
     report.append(pl.Section("Introduction"))
     # TODO: A quick overview to the introduction on whats considered in the report
     # regarding Solvers, Instance Sets and Feature Extractors
+    solver_tool = (
+        "RunSolver" if gv.settings().DEFAULT_runsolver_exec.exists() else "PyRunSolver"
+    )
     report.append(
         pl.UnsafeCommand(
             r"emph{Sparkle}~\cite{Hoos15} is a multi-agent problem-solving platform based on"
             r" Programming by Optimisation (PbO)~\cite{Hoos12}, and would provide a number "
             "of effective algorithm optimisation techniques (such as automated algorithm "
             "configuration, portfolio-based algorithm selection, etc.) to accelerate the "
-            "existing solvers."
+            f"existing solvers. All computation and memory measurements are done by {solver_tool}."
         )
     )
 

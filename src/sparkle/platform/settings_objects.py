@@ -98,6 +98,9 @@ class Settings:
     # Example settings path
     DEFAULT_example_settings_path = Path(DEFAULT_components / "sparkle_settings.ini")
 
+    # Wrapper templates pathing
+    DEFAULT_solver_wrapper_template = DEFAULT_components / "sparkle_solver_wrapper.sh"
+
     # Runsolver component
     DEFAULT_runsolver_dir = DEFAULT_components / "runsolver" / "src"
     DEFAULT_runsolver_exec = DEFAULT_runsolver_dir / "runsolver"

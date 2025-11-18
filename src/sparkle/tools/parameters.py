@@ -74,8 +74,10 @@ class PCSConverter:
             return PCSConvention.ConfigSpace
         except Exception:
             pass
-
-        file_contents = file.open().readlines()
+        try:
+            file_contents = file.open().readlines()
+        except Exception:
+            return PCSConvention.UNKNOWN
         for line in file_contents:
             if line.startswith("#"):  # Comment line
                 continue

@@ -72,18 +72,18 @@ CancelJobsArgument = ArgumentContainer(
 CheckTypeArgument = ArgumentContainer(
     names=["type"],
     kwargs={
-        "choices": [
-            "extractor",
-            "feature-extractor",
-            "solver",
-            "instance-set",
-            "ExtractorFeature-Extractor",
-            "Instance-Set",
-            "Solver",
-            "FeatureExtractor",
-            "InstanceSet",
-        ],
-        "help": "type of the object to check",
+        # "choices": [
+        #     "extractor",
+        #     "feature-extractor",
+        #     "solver",
+        #     "instance-set",
+        #     "ExtractorFeature-Extractor",
+        #     "Instance-Set",
+        #     "Solver",
+        #     "FeatureExtractor",
+        #     "InstanceSet",
+        # ],
+        "help": "type of the object to check (Solver, Extractor, InstanceSet)",
     },
 )
 
@@ -307,6 +307,10 @@ NoSavePlatformArgument = ArgumentContainer(
     },
 )
 
+ObjectiveArgument = ArgumentContainer(
+    names=["--objective"], kwargs={"type": str, "help": "the objective to use."}
+)
+
 RecomputeFeaturesArgument = ArgumentContainer(
     names=["--recompute"],
     kwargs={
@@ -476,6 +480,28 @@ SolutionVerifierArgument = ArgumentContainer(
     },
 )
 
-ObjectiveArgument = ArgumentContainer(
-    names=["--objective"], kwargs={"type": str, "help": "the objective to use."}
+WrapPathArgument = ArgumentContainer(
+    names=["path"], kwargs={"type": Path, "help": "path to the directory to wrap"}
+)
+
+WrapTargetArgument = ArgumentContainer(
+    names=["target"],
+    kwargs={"type": Path, "help": "relative path to the target executable"},
+)
+
+WrapTypeArgument = ArgumentContainer(
+    names=["type"],
+    kwargs={
+        "type": str,
+        "help": "type of the target to wrap (Solver or Extractor)",
+    },
+)
+
+WrapGeneratePCSArgument = ArgumentContainer(
+    names=["--generate-pcs"],
+    kwargs={
+        "required": False,
+        "action": "store_true",
+        "help": "generate a Solver Parameter Configuration Space (PCS) file for the target",
+    },
 )
