@@ -493,16 +493,6 @@ WrapTypeArgument = ArgumentContainer(
     names=["type"],
     kwargs={
         "type": str,
-        # "choices": [
-        #     "Solver",
-        #     "Extractor",
-        #     "FeatureExtractor",
-        #     "Feature-Extractor",
-        #     "solver",
-        #     "extractor",
-        #     "feature-extractor",
-        #     "feature-extractor",
-        # ],
         "help": "type of the target to wrap (Solver or Extractor)",
     },
 )
