@@ -96,7 +96,8 @@ class Solver(SparkleCallable):
         """Get path of the parameter file."""
         if self._pcs_file is None:
             for file in self.directory.iterdir():
-                print(file)
+                if file.name == Solver.meta_data:
+                    continue  # Skip this file, never correct
                 convention = PCSConverter.get_convention(file)
                 if convention != PCSConvention.UNKNOWN:
                     self._pcs_file = file
