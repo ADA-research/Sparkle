@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import configparser
 from enum import Enum
 from pathlib import Path
@@ -900,6 +901,14 @@ class Settings:
             Settings.SECTION_general, "objectives"
         ):
             objectives = self.__settings[Settings.SECTION_general]["objectives"]
+            stripped = objectives.strip()
+            if stripped.startswith("[") and stripped.endswith("]"):
+                try:
+                    parsed = ast.literal_eval(stripped)
+                    if isinstance(parsed, (list, tuple)):
+                        objectives = ",".join(str(value).strip() for value in parsed)
+                except (ValueError, SyntaxError):
+                    pass  # Leave objectives as-is; validation below will raise
             if "status" not in objectives:
                 objectives += ",status:metric"
             if "cpu_time" not in objectives:
