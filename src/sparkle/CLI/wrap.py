@@ -47,6 +47,8 @@ def cli_to_configspace(
             continue
         else:
             parameter_data[-1] = parameter_data[-1] + " " + line
+    if not parameter_data:
+        return space
     name_pattern = r"(?<!\S)--?[\w-]+"
     int_min, int_max = (
         int(np.iinfo(i64).min / 10),
@@ -289,10 +291,20 @@ def main(argv: list[str]) -> None:
             if pcs_file.exists():
                 print(f"WARNING: PCS file {pcs_file} already exists. Skipping...")
             else:
-                input_data = subprocess.run(
+                solver_call = subprocess.run(
                     [str(target_path), "--help"], capture_output=True
-                ).stdout.decode("utf-8")
+                )
+                input_data = (
+                    solver_call.stdout.decode("utf-8")
+                    + "\n"
+                    + solver_call.stderr.decode("utf-8")
+                )
                 space = cli_to_configspace(input_data, name=target_path.stem)
+                if len(space) == 0:  # Failed to extract anything
+                    print(
+                        "Could not extract any parameters from the executable. No PCS file was created."
+                    )
+                    sys.exit(-1)
                 space.to_yaml(pcs_file)
     elif type == Extractor:
         raise NotImplementedError("Feature extractor wrapping not implemented yet.")
