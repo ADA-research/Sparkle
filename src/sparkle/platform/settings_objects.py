@@ -908,9 +908,25 @@ class Settings:
                 objectives += ",wall_time:metric"
             if "memory" not in objectives:
                 objectives += ",memory:metric"
-            self.__sparkle_objectives = [
-                resolve_objective(obj) for obj in objectives.split(",")
-            ]
+            resolved_objectives: list[SparkleObjective] = []
+            invalid_objectives: list[str] = []
+            for objective in objectives.split(","):
+                stripped_objective = objective.strip()
+                if stripped_objective == "":
+                    continue
+                resolved = resolve_objective(stripped_objective)
+                if resolved is None:
+                    invalid_objectives.append(stripped_objective)
+                    continue
+                resolved_objectives.append(resolved)
+            if invalid_objectives:
+                invalid = ", ".join(invalid_objectives)
+                raise ValueError(
+                    "Invalid objective value(s) configured: "
+                    f"{invalid}. Please update the 'objectives' entry in "
+                    "Settings/sparkle_settings.ini or adjust the CLI arguments."
+                )
+            self.__sparkle_objectives = resolved_objectives
         return self.__sparkle_objectives
 
     @property
