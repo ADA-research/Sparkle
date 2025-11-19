@@ -62,6 +62,24 @@ class PCSConverter:
     )
 
     @staticmethod
+    def parse_irace_categorical_values(raw_values: str) -> list[str]:
+        """Split unquoted IRACE categorical values into strings."""
+        stripped = raw_values.strip()
+        if stripped.startswith("c(") and stripped.endswith(")"):
+            stripped = stripped[2:-1]
+        elif stripped and stripped[0] in "({[" and stripped[-1] in ")}]":
+            stripped = stripped[1:-1]
+        values = []
+        for token in stripped.split(","):
+            token = token.strip()
+            if not token:
+                continue
+            if len(token) >= 2 and token[0] == token[-1] and token[0] in ("'", '"'):
+                token = token[1:-1]
+            values.append(token)
+        return values
+
+    @staticmethod
     def get_convention(file: Path) -> PCSConvention:
         """Determines the format of a pcs file."""
         try:
@@ -423,7 +441,14 @@ class PCSConverter:
                 # NOTE: IRACE supports depedent parameter domains, e.g. parameters which
                 # domain relies on another parameter: p2 "--p2" r ("p1", "p1 + 10")"
                 # and is limited to the operators: +,-, *, /, %%, min, max
-                values = ast.literal_eval(parameter.group("values"))
+                raw_values = parameter.group("values")
+                try:
+                    values = ast.literal_eval(raw_values)
+                except (SyntaxError, ValueError):
+                    if parameter_type in {"c", "o"}:
+                        values = PCSConverter.parse_irace_categorical_values(raw_values)
+                    else:
+                        raise
                 scale = parameter.group("scale")
                 conditions = parameter.group("conditions")
                 comment = parameter.group("comment")

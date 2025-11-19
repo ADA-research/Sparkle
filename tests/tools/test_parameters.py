@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import ConfigSpace
+from ConfigSpace.conditions import InCondition
 
 from sparkle.tools.parameters import PCSConverter, PCSConvention
 
@@ -37,6 +38,27 @@ def test_irace_pcs_to_configspace() -> None:
     for param in list(expected.keys()):
         expected[param].default_value = configspace[param].default_value
     assert str(configspace) == str(expected)
+
+
+def test_irace_unquoted_categorical_values() -> None:
+    """Ensure IRACE categorical tokens without quotes are parsed."""
+    irace_file = Path("tests/test_files/pcs/unquoted_irace.pcs")
+    configspace = PCSConverter.parse(irace_file)
+    assert tuple(configspace["cat_param"].choices) == ("foo", "bar", "baz")
+    assert tuple(configspace["ord_param"].sequence) == ("slow", "medium", "fast")
+    assert configspace["real_param"].lower == 0.0
+    assert configspace["real_param"].upper == 1.0
+    flag_param = configspace["flag_param"]
+    dependent_param = configspace["dependent_param"]
+    matching_conditions = [
+        cond
+        for cond in configspace.conditions
+        if isinstance(cond, InCondition)
+        and cond.child == dependent_param
+        and cond.parent == flag_param
+    ]
+    assert matching_conditions
+    assert matching_conditions[0].values == ["on"]
 
 
 def test_configspace_to_smac2() -> None:

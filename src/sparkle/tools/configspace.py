@@ -126,6 +126,10 @@ def recursive_conversion(
         right = recursive_conversion(item.comparators, configspace, target_parameter)
         operator = item.ops[0]
         if isinstance(left, Hyperparameter):  # Convert to HP type
+            if isinstance(operator, ast.In) and (
+                not isinstance(right, Iterable) or isinstance(right, str)
+            ):
+                right = [right]
             if isinstance(right, Iterable) and not isinstance(right, str):
                 right = [type(left.default_value)(v) for v in right]
                 if len(right) == 1 and not isinstance(operator, ast.In):

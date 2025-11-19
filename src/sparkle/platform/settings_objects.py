@@ -1,18 +1,19 @@
 """Classes and Enums to control settings."""
 
 from __future__ import annotations
-import configparser
+
 import argparse
+import configparser
 from enum import Enum
 from pathlib import Path
 from typing import Any, NamedTuple, Optional
 
 from runrunner import Runner
 
-from sparkle.types import SparkleObjective, resolve_objective
-from sparkle.configurator.configurator import Configurator
 from sparkle.configurator import implementations as cim
+from sparkle.configurator.configurator import Configurator
 from sparkle.platform.cli_types import VerbosityLevel
+from sparkle.types import SparkleObjective, resolve_objective
 
 
 class Option(NamedTuple):
@@ -863,7 +864,14 @@ class Settings:
             value = argsv.__dict__[argument]
             if value is None:
                 continue  # Skip None
-            value = value.name if isinstance(value, Enum) else str(value)
+            if isinstance(value, (list, tuple)):
+
+                def _normalise(v: Any) -> str:
+                    return v.name if isinstance(v, Enum) else str(v)
+
+                value = ",".join(_normalise(v).strip() for v in value if v is not None)
+            else:
+                value = value.name if isinstance(value, Enum) else str(value)
             for section in self.sections_options.keys():
                 if argument in self.sections_options[section]:
                     index = self.sections_options[section].index(argument)
