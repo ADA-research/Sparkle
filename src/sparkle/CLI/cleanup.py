@@ -164,6 +164,9 @@ def main(argv: list[str]) -> None:
     elif args.logs:
         remove_temporary_files()
         print("Cleaned platform of log files!")
+    elif not args.performance_data:
+        print(parser.print_help())
+        sys.exit(1)
     sys.exit(0)
 
 
