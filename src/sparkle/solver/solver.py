@@ -482,8 +482,13 @@ class Solver(SparkleCallable):
             Dictionary representing the parsed solver output
         """
         used_runsolver = False
-        if solver_call is not None and len(solver_call) > 2:
-            used_runsolver = True
+        if (
+            solver_call is not None
+            and len(solver_call) > 2
+            and solver_call[0].endswith("runsolver")
+            or solver_call[1].endswith("py_runsolver.py")
+        ):
+            used_runsolver = True  # PyRunsolver or RunSolver was used
             parsed_output = RunSolver.get_solver_output(solver_call, solver_output)
         else:
             parsed_output = ast.literal_eval(solver_output)
