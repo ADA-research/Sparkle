@@ -162,6 +162,14 @@ def cli_to_configspace(
                         default = input(
                             "Please specify the default value from the sequence: "
                         )
+                elif default not in sequence:
+                    print(
+                        "The default value is not in the sequence, please specify a new default value, or leave empty to add it to the sequence."
+                    )
+                    while default != "" or default not in sequence:
+                        default = input("Default value: ")
+                    if default == "":
+                        sequence.append(default)
                 try:
                     space.add(
                         ConfigSpace.OrdinalHyperparameter(
@@ -188,6 +196,14 @@ def cli_to_configspace(
                         default = input(
                             "Please specify the default value from the choices: "
                         )
+                elif default not in choices:
+                    print(
+                        "The default value is not in the choices, please specify a new default value, or leave empty to add it to the choices."
+                    )
+                    while default != "" or default not in choices:
+                        default = input("Default value: ")
+                    if default == "":
+                        choices.append(default)
                 try:
                     space.add(
                         ConfigSpace.CategoricalHyperparameter(
