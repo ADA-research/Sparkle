@@ -183,21 +183,17 @@ def run_solvers_performance_data(
         If the run is local return a QueuedRun object with the information concerning
         the run.
     """
-    # List of jobs to do
-    jobs = performance_data.get_job_list(rerun=rerun)
+    jobs = performance_data.get_job_list(rerun=rerun)  # List of jobs to do
 
     # Edit jobs to incorporate file paths
-    jobs_with_paths = []
-    for solver, config, instance, run in jobs:
+    for index, (solver, config, instance, run) in enumerate(jobs):
         instance_path = resolve_instance_name(
             instance, gv.settings().DEFAULT_instance_dir
         )
-        jobs_with_paths.append((solver, config, instance_path, run))
-    jobs = jobs_with_paths
+        jobs[index] = (solver, config, instance_path, run)
 
     print(f"Total number of jobs to run: {len(jobs)}")
-    # If there are no jobs, stop
-    if len(jobs) == 0:
+    if len(jobs) == 0:  # If there are no jobs, stop
         return None
 
     if run_on == Runner.LOCAL:
@@ -205,18 +201,18 @@ def run_solvers_performance_data(
     elif run_on == Runner.SLURM:
         print("Running the solvers through Slurm")
 
-    solvers = performance_data.solvers if solvers is None else solvers
     if solvers is None:
-        solver_keys = performance_data.solvers
-        solvers = [Solver(Path(s)) for s in solver_keys]
-    else:  # Filter the Solvers
-        solver_keys = [str(s.directory) for s in solvers]
-        jobs = [j for j in jobs if j[0] in solver_keys]
-    # Filter the instances
-    if instances is not None:
+        solvers = [Solver(Path(s)) for s in performance_data.solvers]
+    else:  # Filter the Solvers in remaining jobs
+        jobs = [
+            (solvers[solvers.index(s)], c, i, r) for (s, c, i, r) in jobs if s in solvers
+        ]
+
+    if instances is not None:  # Filter the instances
         jobs = [j for j in jobs if j[2] in instances]
+
     # Sort the jobs per solver
-    solver_jobs = {p_solver: {} for p_solver, _, _, _ in jobs}
+    solver_jobs = {p_solver: {} for p_solver in solvers}
     for p_solver, p_config, p_instance, p_run in jobs:
         if p_config not in solver_jobs[p_solver]:
             solver_jobs[p_solver][p_config] = {}
@@ -224,18 +220,19 @@ def run_solvers_performance_data(
             solver_jobs[p_solver][p_config][p_instance] = [p_run]
         else:
             solver_jobs[p_solver][p_config][p_instance].append(p_run)
+
     runrunner_runs = []
     if run_on == Runner.LOCAL:
         print(f"Cutoff time for each solver run: {cutoff_time} seconds")
-    for solver, solver_key in zip(solvers, solver_keys):
-        for solver_config in solver_jobs[solver_key].keys():
-            solver_instances = solver_jobs[solver_key][solver_config].keys()
+    for solver in solvers:
+        for solver_config in solver_jobs[solver].keys():
+            solver_instances = solver_jobs[solver][solver_config].keys()
             run_ids = [
-                solver_jobs[solver_key][solver_config][instance]
+                solver_jobs[solver][solver_config][instance]
                 for instance in solver_instances
             ]
             if solver_instances == []:
-                print(f"Warning: No jobs for instances found for solver {solver_key}")
+                print(f"Warning: No jobs for instances found for solver {solver}")
                 continue
             run = solver.run_performance_dataframe(
                 solver_instances,

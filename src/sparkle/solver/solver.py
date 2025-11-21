@@ -91,6 +91,20 @@ class Solver(SparkleCallable):
             f"\t- Wrapper: {self.wrapper}"
         )
 
+    def __eq__(self: Solver, other: Any) -> bool:
+        """Checks whether two solvers are equal."""
+        if isinstance(other, Solver):
+            return other.directory == self.directory
+        elif isinstance(other, str):
+            return other == self.name or Path(other) == self.directory
+        elif isinstance(other, Path):
+            return other == self.directory
+        return False
+
+    def __hash__(self: Solver) -> int:
+        """Pass to parent class hash function. Should be inherited but does not work without this."""
+        return super().__hash__()
+
     @property
     def pcs_file(self: Solver) -> Path:
         """Get path of the parameter file."""

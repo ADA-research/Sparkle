@@ -97,3 +97,23 @@ class TestSolver(TestCase):
         """Test if run_performance_dataframe correctly adds to RunRunner queue."""
         # TODO: write test
         pass
+
+    def test_equality(self: TestSolver) -> None:
+        """Test if __eq__ correctly returns value."""
+        solver1 = Solver(self.solver_path)
+        solver2 = Solver(self.solver_path)
+        alternate_solver1 = Solver(Path("Examples/Resources/Solvers/PbO-CCSAT-Generic"))
+        alternate_solver2 = Solver(Path("Examples/Resources/Solvers/MiniSAT"))
+        # Solver equality should be testable on str (name) and Path (directory)
+        self.assertEqual(solver1, solver2)
+        self.assertEqual(solver1.name, solver2)
+        self.assertEqual(solver1.directory, solver2)
+        # Test on list
+        self.assertTrue(solver1.name in [solver2, alternate_solver1, alternate_solver2])
+        self.assertTrue(
+            solver1.directory in [solver2, alternate_solver1, alternate_solver2]
+        )
+        self.assertTrue(
+            str(solver1.directory) in [solver2, alternate_solver1, alternate_solver2]
+        )
+        self.assertFalse(solver1 in [alternate_solver1, alternate_solver2])
