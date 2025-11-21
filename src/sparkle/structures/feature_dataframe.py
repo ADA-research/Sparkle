@@ -1,6 +1,7 @@
 """Module to manage feature data files and common operations on them."""
 
 from __future__ import annotations
+import warnings
 import pandas as pd
 import math
 from pathlib import Path
@@ -81,7 +82,9 @@ class FeatureDataFrame(pd.DataFrame):
         """Add one or more instances to the dataframe."""
         if values is None:
             values = FeatureDataFrame.missing_value
-        self[instance] = values
+        with warnings.catch_warnings():  # Block Pandas Performance Warnings
+            warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
+            self[instance] = values
 
     def remove_extractor(self: FeatureDataFrame, extractor: str) -> None:
         """Remove an extractor from the dataframe."""

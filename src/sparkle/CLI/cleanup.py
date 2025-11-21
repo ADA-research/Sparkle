@@ -13,6 +13,7 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help import snapshot_help as snh
 from sparkle.CLI.help import jobs as jobs_help
+from sparkle.CLI.help import resolve_instance_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -138,20 +139,51 @@ def main(argv: list[str]) -> None:
                     performance_data.remove_configuration(solver, config_id)
                     removed_configurations += 1
         if removed_configurations:
-            performance_data.save_csv()
-        print(
-            f"Removed {removed_configurations} empty configurations from the "
-            "Performance DataFrame."
-        )
+            print(
+                f"Removed {removed_configurations} empty configurations from the "
+                "Performance DataFrame."
+            )
 
         index_num = len(performance_data.index)
         # We only clean lines that are completely empty
         performance_data.remove_empty_runs()
-        performance_data.save_csv()
         print(
             f"Removed {index_num - len(performance_data.index)} rows from the "
             f"Performance DataFrame, leaving {len(performance_data.index)} rows."
         )
+
+        # Sanity check all indices, clean lines that are broken
+        # NOTE: This check is quite e
+        objective_errors, instance_errors, run_id_errors = 0, 0, 0
+        known_objectives = [o.name for o in gv.settings().objectives]
+        wrong_indices = []
+        for objective, instance, run_id in performance_data.index:
+            if objective not in known_objectives:
+                objective_errors += 1
+                wrong_indices.append((objective, instance, run_id))
+                # print("Objective issue:", objective)
+            elif isinstance(run_id, str) and not run_id.isdigit():
+                run_id_errors += 1
+                wrong_indices.append((objective, instance, run_id))
+                # print("Run id issue:", run_id)
+            else:
+                # NOTE: This check is very expensive, and it would be better if we could pass all the instances at once instead
+                instance_path = resolve_instance_name(
+                    instance, target=gv.settings().DEFAULT_instance_dir
+                )
+                if instance_path is None:
+                    instance_errors += 1
+                    wrong_indices.append((objective, instance, run_id))
+
+        print(
+            f"Found {len(wrong_indices)} in the PerformanceDataFrame ({objective_errors} objective errors, {instance_errors} instance errors, {run_id_errors} run id errors).\n"
+            "Removing from PerformanceDataFrame..."
+        )
+        performance_data.drop(wrong_indices, inplace=True)
+        print(
+            f"Removed {len(wrong_indices)} rows from the PerformanceDataFrame, leaving {len(performance_data.index)} rows."
+        )
+        performance_data.save_csv()
 
     if args.all:
         shutil.rmtree(gv.settings().DEFAULT_output, ignore_errors=True)
