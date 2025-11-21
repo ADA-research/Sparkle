@@ -73,7 +73,7 @@ class PerformanceDataFrame(pd.DataFrame):
                 dtype={
                     PerformanceDataFrame.column_value: str,
                     PerformanceDataFrame.column_seed: int,
-                    PerformanceDataFrame.index_run: int,
+                    # PerformanceDataFrame.index_run: int,  # NOTE: Preferrably, this would be set, but it is not included in the "on_bad_lines=skip" case for error lines.
                 },
                 comment="$",
             )  # $ For extra data lines
@@ -768,6 +768,10 @@ class PerformanceDataFrame(pd.DataFrame):
                 if value is None or (
                     isinstance(value, (int, float)) and math.isnan(value)
                 ):
+                    # NOTE: Force Run to be int, as it can be float on accident
+                    if math.isnan(run):
+                        continue
+                    run = int(run)
                     result.append(tuple([solver, config, instance, run]))
         # Filter duplicates while keeping the order conistent
         return list(dict.fromkeys(result))
