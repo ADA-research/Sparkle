@@ -38,12 +38,24 @@ def comparison_plot(
     """
     from scipy import stats
 
-    # Determine if data is log scale, linregress tells us how linear the data is
-    linregress = stats.linregress(
-        data_frame[data_frame.columns[0]].to_numpy(),
-        data_frame[data_frame.columns[1]].to_numpy(),
-    )
-    log_scale = not (linregress.rvalue > 0.65 and linregress.pvalue < 0.05)
+    x_values = data_frame[data_frame.columns[0]].to_numpy(dtype=float)
+    y_values = data_frame[data_frame.columns[1]].to_numpy(dtype=float)
+    valid_mask = ~(np.isnan(x_values) | np.isnan(y_values))
+    x_values = x_values[valid_mask]
+    y_values = y_values[valid_mask]
+
+    # Determine if data is log scale, linregress tells us how linear the data is.
+    # Guard against degenerate data (single point or no variance) to avoid SciPy warnings.
+    if (
+        x_values.size >= 2
+        and y_values.size >= 2
+        and np.ptp(x_values) > 0
+        and np.ptp(y_values) > 0
+    ):
+        linregress = stats.linregress(x_values, y_values)
+        log_scale = not (linregress.rvalue > 0.65 and linregress.pvalue < 0.05)
+    else:
+        log_scale = False
 
     if log_scale and (data_frame < 0).any(axis=None):
         # Log scale cannot deal with negative and zero values, set to smallest non zero
