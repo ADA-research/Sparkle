@@ -91,6 +91,20 @@ class Solver(SparkleCallable):
             f"\t- Wrapper: {self.wrapper}"
         )
 
+    def __eq__(self: Solver, other: Any) -> bool:
+        """Checks whether two solvers are equal."""
+        if isinstance(other, Solver):
+            return other.directory == self.directory
+        elif isinstance(other, str):
+            return other == self.name or Path(other) == self.directory
+        elif isinstance(other, Path):
+            return other == self.directory
+        return False
+
+    def __hash__(self: Solver) -> int:
+        """Pass to parent class hash function. Should be inherited but does not work without this."""
+        return super().__hash__()
+
     @property
     def pcs_file(self: Solver) -> Path:
         """Get path of the parameter file."""
@@ -482,8 +496,13 @@ class Solver(SparkleCallable):
             Dictionary representing the parsed solver output
         """
         used_runsolver = False
-        if solver_call is not None and len(solver_call) > 2:
-            used_runsolver = True
+        if (
+            solver_call is not None
+            and len(solver_call) > 2
+            and solver_call[0].endswith("runsolver")
+            or solver_call[1].endswith("py_runsolver.py")
+        ):
+            used_runsolver = True  # PyRunsolver or RunSolver was used
             parsed_output = RunSolver.get_solver_output(solver_call, solver_output)
         else:
             parsed_output = ast.literal_eval(solver_output)

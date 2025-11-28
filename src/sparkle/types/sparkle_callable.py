@@ -21,6 +21,10 @@ class SparkleCallable:
         self.name = directory.name
         self._runsolver_exec = runsolver_exec
 
+    def __hash__(self) -> int:
+        """Hash callable based on the directory."""
+        return self.directory.__hash__()
+
     @property
     def runsolver_exec(self: SparkleCallable) -> Path:
         """Return the path of the runsolver executable."""

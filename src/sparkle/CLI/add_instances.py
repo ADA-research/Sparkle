@@ -83,9 +83,9 @@ def main(argv: list[str]) -> None:
         gv.settings().DEFAULT_performance_data_path,
         objectives=gv.settings().objectives,
     )
+    feature_data.add_instances(new_instance_set.instance_names)
     for instance_name in new_instance_set.instance_names:
         # Construct a name path due to multi-file instances
-        feature_data.add_instances(str(instance_name))
         performance_data.add_instance(str(instance_name))
     feature_data.save_csv()
     performance_data.save_csv()
