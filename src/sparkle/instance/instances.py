@@ -164,7 +164,7 @@ class IterableFileInstanceSet(InstanceSet):
             if p.suffix in IterableFileInstanceSet.supported_filetypes
         ]
         self._size = IterableFileInstanceSet.__determine_size__(self._instance_paths[0])
-        self._instance_names = [p.stem for p in self._instance_paths]
+        self._instance_names = [p.name for p in self._instance_paths]
 
     @property
     def size(self: IterableFileInstanceSet) -> int:
