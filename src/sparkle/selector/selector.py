@@ -91,7 +91,7 @@ class Selector:
         """
         selection_scenario.create_scenario()
         metadata = self.build_metadata_from_scenario(selection_scenario)
-        selector = self.selector_class(self.model_class, metadata)
+        selector = self.instantiate_selector(metadata)
         cmd = asf_cli.build_cli_command(
             selector,
             selection_scenario.feature_target_path,
@@ -292,6 +292,24 @@ class Selector:
             maximize=maximize,
             budget=budget,
         )
+
+    def instantiate_selector(
+        self: Selector, metadata: ScenarioMetadata
+    ) -> AbstractModelBasedSelector:
+        """Instantiate selector handling differing ASF constructor signatures."""
+        # Try common constructor patterns
+        for args, kwargs in (
+            ((self.model_class, metadata), {}),
+            ((), {"model_class": self.model_class, "metadata": metadata}),
+            ((metadata,), {}),
+            ((), {"metadata": metadata}),
+        ):
+            try:
+                return self.selector_class(*args, **kwargs)
+            except TypeError:
+                continue
+        # If none matched, re-raise using the default pattern for visibility
+        return self.selector_class(self.model_class, metadata)
 
 
 class SelectionScenario:
