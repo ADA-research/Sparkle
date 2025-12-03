@@ -92,6 +92,11 @@ class Selector:
         selection_scenario.create_scenario()
         metadata = self.build_metadata_from_scenario(selection_scenario)
         selector = self.instantiate_selector(metadata)
+        # Ensure selector carries a usable model_class for ASF CLI build
+        if not hasattr(selector, "model_class") or isinstance(
+            getattr(selector, "model_class", None), ScenarioMetadata
+        ):
+            selector.model_class = self.model_class
         cmd = asf_cli.build_cli_command(
             selector,
             selection_scenario.feature_target_path,
