@@ -4,11 +4,27 @@ from __future__ import annotations
 import random
 from pathlib import Path
 
+from dataclasses import dataclass
+
 from sklearn.base import ClassifierMixin, RegressorMixin
 from asf.cli import cli_train as asf_cli
 from asf.predictors import AbstractPredictor
 from asf.selectors.abstract_model_based_selector import AbstractModelBasedSelector
-from asf.scenario.scenario_metadata import ScenarioMetadata
+
+try:  # Compatibility: some ASF builds expose ScenarioMetadata elsewhere
+    from asf.scenario.scenario_metadata import ScenarioMetadata
+except ImportError:
+
+    @dataclass
+    class ScenarioMetadata:  # type: ignore[misc]
+        """Fallback dataclass for ASF ScenarioMetadata when import fails."""
+
+        algorithms: list[str]
+        features: list[str]
+        performance_metric: str | list[str]
+        maximize: bool
+        budget: int | None
+
 
 import runrunner as rrr
 from runrunner import Runner, Run
