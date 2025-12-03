@@ -74,7 +74,7 @@ class Selector:
             The construction Run
         """
         selection_scenario.create_scenario()
-        metadata = self._build_metadata_from_scenario(selection_scenario)
+        metadata = self.build_metadata_from_scenario(selection_scenario)
         selector = self.selector_class(self.model_class, metadata)
         cmd = asf_cli.build_cli_command(
             selector,
@@ -116,7 +116,7 @@ class Selector:
         instance_features = instance_features.T  # ASF dataframe structure
         selector = self.selector_class.load(selector_path)
         if not hasattr(selector, "metadata") or selector.metadata is None:
-            selector.metadata = self._build_metadata_from_artifacts(
+            selector.metadata = self.build_metadata_from_artifacts(
                 selector_path, feature_data, selector
             )
         schedule = selector.predict(instance_features)

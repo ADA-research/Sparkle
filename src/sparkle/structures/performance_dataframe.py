@@ -826,6 +826,8 @@ class PerformanceDataFrame(pd.DataFrame):
         )
         # Aggregate the instances
         sub_series = subdf.agg(func=objective.instance_aggregator.__name__)
+        # Drop NaN values
+        # If all values are NaN, raise an error
         sub_series = sub_series.dropna()
         if sub_series.empty:
             raise ValueError(

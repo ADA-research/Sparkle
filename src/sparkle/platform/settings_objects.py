@@ -865,6 +865,10 @@ class Settings:
             value = argsv.__dict__[argument]
             if value is None:
                 continue  # Skip None
+
+            # Convert lists/tuples and Enums to strings.
+            # List1: [A, B, C] -> "A,B,C"
+            # Enum: Enum.VALUE -> "VALUE"
             if isinstance(value, (list, tuple)):
 
                 def _normalise(v: Any) -> str:
