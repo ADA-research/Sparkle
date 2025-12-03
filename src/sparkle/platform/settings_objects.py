@@ -906,6 +906,7 @@ class Settings:
         ):
             objectives = self.__settings[Settings.SECTION_general]["objectives"]
             stripped = objectives.strip()
+            # Check if the objectives are given as a list/tuple string, example: [accuracy:max] vs. accuracy:max
             if stripped.startswith("[") and stripped.endswith("]"):
                 try:
                     parsed = ast.literal_eval(stripped)

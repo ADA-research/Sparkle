@@ -65,16 +65,21 @@ class PCSConverter:
     def parse_irace_categorical_values(raw_values: str) -> list[str]:
         """Split unquoted IRACE categorical values into strings."""
         stripped = raw_values.strip()
+        # check for enclosing like c("option1", "option2")
         if stripped.startswith("c(") and stripped.endswith(")"):
+            # Remove the c( and ) and get the inner content: "option1", "option2"
             stripped = stripped[2:-1]
+        # check for enclosing like ("option1", "option2") or ['option1', 'option2'] or {option1, option2}
         elif stripped and stripped[0] in "({[" and stripped[-1] in ")}]":
+            # Remove the enclosing brackets and get: option1, option2
             stripped = stripped[1:-1]
         values = []
         for token in stripped.split(","):
             token = token.strip()
-            if not token:
+            if not token:  # Empty token
                 continue
             if len(token) >= 2 and token[0] == token[-1] and token[0] in ("'", '"'):
+                # Remove enclosing quotes
                 token = token[1:-1]
             values.append(token)
         return values

@@ -218,7 +218,7 @@ class Selector:
         feature_data: FeatureDataFrame,
         selector_obj: AbstractModelBasedSelector,
     ) -> ScenarioMetadata:
-        """Fallback metadata reconstruction for legacy selector artefacts."""
+        """Fallback metadata reconstruction for legacy selector artifacts."""
         budget = getattr(selector_obj, "budget", None)
         maximize = getattr(selector_obj, "maximize", False)
         performance_metric = getattr(selector_obj, "performance_metric", "")
