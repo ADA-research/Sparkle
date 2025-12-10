@@ -826,10 +826,8 @@ class PerformanceDataFrame(pd.DataFrame):
         )
         # Aggregate the instances
         sub_series = subdf.agg(func=objective.instance_aggregator.__name__)
-        # Drop NaN values
-        # If all values are NaN, raise an error
         sub_series = sub_series.dropna()
-        if sub_series.empty:
+        if sub_series.empty:  # If all values are NaN, raise an error
             raise ValueError(
                 f"No valid performance measurements for solver '{solver}' "
                 f"and objective '{objective.name}'."

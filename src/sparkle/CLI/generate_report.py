@@ -240,18 +240,6 @@ def generate_configuration_section(
             )
             report.append(table_status_values)
 
-    if scenario_output.performance_data_missing:
-        report.append(pl.Subsection("Performance Data Unavailable"))
-        report.append(
-            "No valid performance measurements were available for this scenario, "
-            "so the comparative analysis could not be generated. "
-        )
-        if scenario_output.performance_data_missing_reason:
-            report.append(
-                f"Reported reason: {scenario_output.performance_data_missing_reason}"
-            )
-        return
-
     # 4. Report the results of the best configuration on the training set vs the default
     report.append(
         pl.Subsection(

@@ -4,26 +4,11 @@ from __future__ import annotations
 import random
 from pathlib import Path
 
-from dataclasses import dataclass
 
 from sklearn.base import ClassifierMixin, RegressorMixin
 from asf.cli import cli_train as asf_cli
 from asf.predictors import AbstractPredictor
 from asf.selectors.abstract_model_based_selector import AbstractModelBasedSelector
-
-try:  # Compatibility: some ASF builds expose ScenarioMetadata elsewhere
-    from asf.scenario.scenario_metadata import ScenarioMetadata
-except ImportError:
-
-    @dataclass
-    class ScenarioMetadata:  # type: ignore[misc]
-        """Fallback dataclass for ASF ScenarioMetadata when import fails."""
-
-        algorithms: list[str]
-        features: list[str]
-        performance_metric: str | list[str]
-        maximize: bool
-        budget: int | None
 
 
 import runrunner as rrr
@@ -90,13 +75,11 @@ class Selector:
             The construction Run
         """
         selection_scenario.create_scenario()
-        metadata = self.build_metadata_from_scenario(selection_scenario)
-        selector = self.instantiate_selector(metadata)
-        # Ensure selector carries a usable model_class for ASF CLI build
-        if not hasattr(selector, "model_class") or isinstance(
-            getattr(selector, "model_class", None), ScenarioMetadata
-        ):
-            selector.model_class = self.model_class
+        selector = self.selector_class(
+            model_class=self.model_class,
+            budget=selection_scenario.solver_cutoff,
+            maximize=not selection_scenario.objective.minimise,
+        )
         cmd = asf_cli.build_cli_command(
             selector,
             selection_scenario.feature_target_path,
@@ -136,10 +119,6 @@ class Selector:
         instance_features.index = instance_features.index.map("_".join)  # Reduce
         instance_features = instance_features.T  # ASF dataframe structure
         selector = self.selector_class.load(selector_path)
-        if not hasattr(selector, "metadata") or selector.metadata is None:
-            selector.metadata = self.build_metadata_from_artifacts(
-                selector_path, feature_data, selector
-            )
         schedule = selector.predict(instance_features)
         if schedule is None:
             print(f"ERROR: Selector {self.name} failed predict schedule!")
@@ -218,103 +197,6 @@ class Selector:
         if run_on == Runner.LOCAL:
             r.wait()
         return r
-
-    def build_metadata_from_scenario(
-        self: Selector, selection_scenario: SelectionScenario
-    ) -> ScenarioMetadata:
-        """Construct ASF ScenarioMetadata from a SelectionScenario."""
-        algorithms = selection_scenario.performance_data.columns.to_list()
-        features = selection_scenario.feature_data.columns.to_list()
-        return ScenarioMetadata(
-            algorithms=algorithms,
-            features=features,
-            performance_metric=str(selection_scenario.objective.name),
-            maximize=not selection_scenario.objective.minimise,
-            budget=selection_scenario.solver_cutoff,
-        )
-
-    def build_metadata_from_artifacts(
-        self: Selector,
-        selector_path: Path,
-        feature_data: FeatureDataFrame,
-        selector_obj: AbstractModelBasedSelector,
-    ) -> ScenarioMetadata:
-        """Fallback metadata reconstruction for legacy selector artifacts."""
-        budget = getattr(selector_obj, "budget", None)
-        maximize = getattr(selector_obj, "maximize", False)
-        performance_metric = getattr(selector_obj, "performance_metric", "")
-
-        algorithms: list[str] = []
-        # Try common neighbouring performance data files to recover solver names
-        candidates = [
-            selector_path.parent / "selector_train_performance_data.csv",
-            selector_path.parent / "performance_data.csv",
-            selector_path.with_suffix(".csv"),
-        ]
-        for candidate in candidates:
-            if candidate.exists():
-                # First try via PerformanceDataFrame (handles multi-index storage)
-                try:
-                    perf_df = PerformanceDataFrame(candidate)
-                    algos: list[str] = []
-                    for solver, config_id, meta in perf_df.columns:
-                        if meta != PerformanceDataFrame.column_value:
-                            continue
-                        name = f"{solver}_{config_id}"
-                        if name not in algos:
-                            algos.append(name)
-                    algorithms = algos or perf_df.solvers
-                    if algorithms:
-                        break
-                except Exception:
-                    print(f"Warning: Could not read performance data from {candidate}!")
-                # Fallback: plain CSV with instances as index and solvers as columns
-                try:
-                    import pandas as pd
-
-                    df = pd.read_csv(candidate, index_col=0)
-                    if df.shape[1] > 0:
-                        algorithms = df.columns.to_list()
-                        break
-                except Exception:
-                    print(f"Warning: Could not read CSV data from {candidate}!")
-
-        if not algorithms and hasattr(selector_obj, "classifier"):
-            cls = selector_obj.classifier
-            if hasattr(cls, "classes_"):
-                algorithms = [str(c) for c in cls.classes_]
-
-        features = (
-            feature_data.features
-            if hasattr(feature_data, "features")
-            else feature_data.columns.to_list()
-        )
-
-        return ScenarioMetadata(
-            algorithms=algorithms,
-            features=features,
-            performance_metric=performance_metric,
-            maximize=maximize,
-            budget=budget,
-        )
-
-    def instantiate_selector(
-        self: Selector, metadata: ScenarioMetadata
-    ) -> AbstractModelBasedSelector:
-        """Instantiate selector handling differing ASF constructor signatures."""
-        # Try common constructor patterns
-        for args, kwargs in (
-            ((self.model_class, metadata), {}),
-            ((), {"model_class": self.model_class, "metadata": metadata}),
-            ((metadata,), {}),
-            ((), {"metadata": metadata}),
-        ):
-            try:
-                return self.selector_class(*args, **kwargs)
-            except TypeError:
-                continue
-        # If none matched, re-raise using the default pattern for visibility
-        return self.selector_class(self.model_class, metadata)
 
 
 class SelectionScenario:

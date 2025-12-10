@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import ast
 import configparser
 from enum import Enum
 from pathlib import Path
@@ -865,18 +864,7 @@ class Settings:
             value = argsv.__dict__[argument]
             if value is None:
                 continue  # Skip None
-
-            # Convert lists/tuples and Enums to strings.
-            # List1: [A, B, C] -> "A,B,C"
-            # Enum: Enum.VALUE -> "VALUE"
-            if isinstance(value, (list, tuple)):
-
-                def _normalise(v: Any) -> str:
-                    return v.name if isinstance(v, Enum) else str(v)
-
-                value = ",".join(_normalise(v).strip() for v in value if v is not None)
-            else:
-                value = value.name if isinstance(value, Enum) else str(value)
+            value = value.name if isinstance(value, Enum) else str(value)
             for section in self.sections_options.keys():
                 if argument in self.sections_options[section]:
                     index = self.sections_options[section].index(argument)
@@ -905,42 +893,17 @@ class Settings:
             Settings.SECTION_general, "objectives"
         ):
             objectives = self.__settings[Settings.SECTION_general]["objectives"]
-            stripped = objectives.strip()
-            # Check if the objectives are given as a list/tuple string, example: [accuracy:max] vs. accuracy:max
-            if stripped.startswith("[") and stripped.endswith("]"):
-                try:
-                    parsed = ast.literal_eval(stripped)
-                    if isinstance(parsed, (list, tuple)):
-                        objectives = ",".join(str(value).strip() for value in parsed)
-                except (ValueError, SyntaxError):
-                    pass  # Leave objectives as-is; validation below will raise
-            if "status" not in objectives:
+            if "status:metric" not in objectives:
                 objectives += ",status:metric"
-            if "cpu_time" not in objectives:
+            if "cpu_time:metric" not in objectives:
                 objectives += ",cpu_time:metric"
-            if "wall_time" not in objectives:
+            if "wall_time:metric" not in objectives:
                 objectives += ",wall_time:metric"
-            if "memory" not in objectives:
+            if "memory:metric" not in objectives:
                 objectives += ",memory:metric"
-            resolved_objectives: list[SparkleObjective] = []
-            invalid_objectives: list[str] = []
-            for objective in objectives.split(","):
-                stripped_objective = objective.strip()
-                if stripped_objective == "":
-                    continue
-                resolved = resolve_objective(stripped_objective)
-                if resolved is None:
-                    invalid_objectives.append(stripped_objective)
-                    continue
-                resolved_objectives.append(resolved)
-            if invalid_objectives:
-                invalid = ", ".join(invalid_objectives)
-                raise ValueError(
-                    "Invalid objective value(s) configured: "
-                    f"{invalid}. Please update the 'objectives' entry in "
-                    "Settings/sparkle_settings.ini or adjust the CLI arguments."
-                )
-            self.__sparkle_objectives = resolved_objectives
+            self.__sparkle_objectives = [
+                resolve_objective(obj) for obj in objectives.split(",")
+            ]
         return self.__sparkle_objectives
 
     @property

@@ -111,14 +111,6 @@ class ConfigurationOutput:
             self.test_instance_sets.append(test_set)
         self.directory = config_scenario.directory
         self.config_scenario = config_scenario
-        self.performance_data_missing = False
-        self.performance_data_missing_reason: str | None = None
-        self.default_performance_train: float | None = None
-        self.default_performance_per_instance_train: list[float] = []
-        self.best_configuration_key: str | None = None
-        self.best_performance_train: float | None = None
-        self.best_configuration = None
-        self.instance_set_results: dict[str, ConfigurationResult] = {}
 
         # Retrieve all configurations
         solver_key = str(self.solver.directory)
@@ -128,102 +120,98 @@ class ConfigurationOutput:
         )
 
         # Retrieve configuration performances
-        try:
-            train_instances = self.instance_set_train.instance_names
-            # Retrieve Default (No configuration) performance
-            _, self.default_performance_train = (
-                performance_data_config.configuration_performance(
-                    solver_key,
-                    PerformanceDataFrame.default_configuration,
-                    objective=self.config_scenario.sparkle_objectives[0],
-                    instances=train_instances,
-                )
+        train_instances = self.instance_set_train.instance_names
+        # Retrieve Default (No configuration) performance
+        _, self.default_performance_train = (
+            performance_data_config.configuration_performance(
+                solver_key,
+                PerformanceDataFrame.default_configuration,
+                objective=self.config_scenario.sparkle_objectives[0],
+                instances=train_instances,
             )
+        )
 
-            _, self.default_performance_per_instance_train = (
+        _, self.default_performance_per_instance_train = (
+            performance_data_config.configuration_performance(
+                solver_key,
+                PerformanceDataFrame.default_configuration,
+                objective=self.config_scenario.sparkle_objectives[0],
+                instances=train_instances,
+                per_instance=True,
+            )
+        )
+
+        # Retrieve best found configuration
+        self.best_configuration_key, self.best_performance_train = (
+            performance_data_config.best_configuration(
+                solver_key,
+                objective=self.config_scenario.sparkle_objective,
+                instances=train_instances,
+            )
+        )
+        self.best_configuration = self.all_configurations[
+            config_keys.index(self.best_configuration_key)
+        ]
+
+        # TODO keep all instance set performance data together in a dictionary instead
+        # of variables for train and test
+        # Shitty hack to get status objective
+        status_objective = [
+            o
+            for o in performance_data_config.objective_names
+            if o.lower().startswith("status")
+        ][0]
+        self.instance_set_results: dict[str, ConfigurationResult] = {}
+        for instance_set in self.test_instance_sets + [self.instance_set_train]:
+            instances = instance_set.instance_names
+            _, default_performance_per_instance = (
                 performance_data_config.configuration_performance(
                     solver_key,
                     PerformanceDataFrame.default_configuration,
-                    objective=self.config_scenario.sparkle_objectives[0],
-                    instances=train_instances,
+                    objective=self.config_scenario.sparkle_objective,
+                    instances=instances,
                     per_instance=True,
                 )
             )
-
-            # Retrieve best found configuration
-            self.best_configuration_key, self.best_performance_train = (
-                performance_data_config.best_configuration(
+            _, best_conf_performance_per_instance = (
+                performance_data_config.configuration_performance(
                     solver_key,
+                    self.best_configuration_key,
                     objective=self.config_scenario.sparkle_objective,
-                    instances=train_instances,
+                    instances=instances,
+                    per_instance=True,
                 )
             )
-            self.best_configuration = self.all_configurations[
-                config_keys.index(self.best_configuration_key)
-            ]
-
-            # TODO keep all instance set performance data together in a dictionary instead
-            # of variables for train and test
-            # Shitty hack to get status objective
-            status_objective = [
-                o
-                for o in performance_data_config.objective_names
-                if o.lower().startswith("status")
-            ][0]
-            for instance_set in self.test_instance_sets + [self.instance_set_train]:
-                instances = instance_set.instance_names
-                _, default_performance_per_instance = (
-                    performance_data_config.configuration_performance(
-                        solver_key,
-                        PerformanceDataFrame.default_configuration,
-                        objective=self.config_scenario.sparkle_objective,
-                        instances=instances,
-                        per_instance=True,
-                    )
+            instance_status_default = {
+                str(i): performance_data_config.get_value(
+                    solver_key,
+                    configuration=PerformanceDataFrame.default_configuration,
+                    objective=status_objective,
+                    instance=[i],
                 )
-                _, best_conf_performance_per_instance = (
-                    performance_data_config.configuration_performance(
-                        solver_key,
-                        self.best_configuration_key,
-                        objective=self.config_scenario.sparkle_objective,
-                        instances=instances,
-                        per_instance=True,
-                    )
+                for i in instances
+            }
+            instance_status_best_conf = {
+                str(i): performance_data_config.get_value(
+                    solver_key,
+                    configuration=self.best_configuration_key,
+                    objective=status_objective,
+                    instance=[i],
                 )
-                instance_status_default = {
-                    str(i): performance_data_config.get_value(
-                        solver_key,
-                        configuration=PerformanceDataFrame.default_configuration,
-                        objective=status_objective,
-                        instance=[i],
-                    )
-                    for i in instances
-                }
-                instance_status_best_conf = {
-                    str(i): performance_data_config.get_value(
-                        solver_key,
-                        configuration=self.best_configuration_key,
-                        objective=status_objective,
-                        instance=[i],
-                    )
-                    for i in instances
-                }
-                self.instance_set_results[instance_set.name] = ConfigurationResult(
-                    instance_set.name,
-                    default_performance_per_instance,
-                    best_conf_performance_per_instance,
-                    instance_status_default,
-                    instance_status_best_conf,
-                    self.config_scenario.sparkle_objectives[0],
-                )
-        except ValueError as exc:
-            self.performance_data_missing = True
-            self.performance_data_missing_reason = str(exc)
-            return
+                for i in instances
+            }
+            self.instance_set_results[instance_set.name] = ConfigurationResult(
+                instance_set.name,
+                default_performance_per_instance,
+                best_conf_performance_per_instance,
+                instance_status_default,
+                instance_status_best_conf,
+                self.config_scenario.sparkle_objectives[0],
+            )
 
     def serialise(self: ConfigurationOutput) -> dict:
         """Serialise the configuration output."""
-        output = {
+        return {
             "solver": self.solver.name,
             "configurator": self.configurator.__name__,
             "best_configuration": self.best_configuration,
@@ -233,10 +221,3 @@ class ConfigurationOutput:
                 for key, value in self.config_scenario.serialise().items()
             },
         }
-        if self.performance_data_missing:
-            output["performance_data_missing"] = True
-            if self.performance_data_missing_reason:
-                output["performance_data_missing_reason"] = (
-                    self.performance_data_missing_reason
-                )
-        return output
