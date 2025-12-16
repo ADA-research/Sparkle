@@ -864,7 +864,12 @@ class Settings:
             value = argsv.__dict__[argument]
             if value is None:
                 continue  # Skip None
-            value = value.name if isinstance(value, Enum) else str(value)
+            if isinstance(value, Enum):
+                value = value.name
+            elif isinstance(value, list):
+                value = ",".join([str(s) for s in value])
+            else:
+                value = str(value)
             for section in self.sections_options.keys():
                 if argument in self.sections_options[section]:
                     index = self.sections_options[section].index(argument)
