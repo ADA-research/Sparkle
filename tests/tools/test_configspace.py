@@ -4,6 +4,7 @@ import ast
 
 from ConfigSpace import ConfigurationSpace
 from ConfigSpace.conditions import (
+    AndConjunction,
     EqualsCondition,
     GreaterThanCondition,
     InCondition,
@@ -14,6 +15,7 @@ from ConfigSpace.conditions import (
 from ConfigSpace.forbidden import (
     ForbiddenAndConjunction,
     ForbiddenEqualsClause,
+    ForbiddenGreaterThanRelation,
     ForbiddenInClause,
     ForbiddenLessThanRelation,
 )
@@ -175,6 +177,21 @@ def test_tuple_with_param_name_in_values_raises() -> None:
         recursive_conversion(tuple_node, StubCS())
 
 
+def test_tuple_with_non_param_name_returns_string() -> None:
+    """Tuple element that is not a known parameter should be kept as string."""
+
+    class StubCS:
+        def get(self, name: str) -> None:
+            return None
+
+        def values(self) -> list[object]:
+            return []  # no params known
+
+    tuple_node = ast.Tuple(elts=[ast.Name(id="bar")])
+    values = recursive_conversion(tuple_node, StubCS())
+    assert values == ["bar"]
+
+
 def test_binop_not_supported() -> None:
     """Binary operations should raise NotImplementedError."""
 
@@ -202,6 +219,15 @@ def test_bool_or_condition_and_forbidden() -> None:
         "flag == 'on' or depth < limit", configuration_space
     )
     assert isinstance(forbidden, ForbiddenOrConjunction)
+
+
+def test_and_condition_returns_andconjunction() -> None:
+    """Bool AND with target parameter should return AndConjunction."""
+    configuration_space, flag, depth, target = build_configspace()
+    condition = expression_to_configspace(
+        "flag == 'on' and depth < 2", configuration_space, target_parameter=target
+    )
+    assert isinstance(condition, AndConjunction)
 
 
 def test_unknown_bool_operator_raises() -> None:
@@ -258,6 +284,22 @@ def test_less_equal_and_greater_equal_conditions_errors() -> None:
         expression_to_configspace(
             "depth >= 4", configuration_space, target_parameter=target
         )
+
+
+def test_forbidden_le_ge_relations() -> None:
+    """<=, >, >= should return forbidden relations when not conditions."""
+    configuration_space, _, depth, _ = build_configspace()
+    limit = UniformIntegerHyperparameter("limit", lower=0, upper=10)
+    configuration_space.add(limit)
+
+    le_forbidden = expression_to_configspace("depth <= limit", configuration_space)
+    assert isinstance(le_forbidden, ForbiddenLessThanEqualsRelation)
+
+    gt_forbidden = expression_to_configspace("depth > limit", configuration_space)
+    assert isinstance(gt_forbidden, ForbiddenGreaterThanRelation)
+
+    ge_forbidden = expression_to_configspace("depth >= limit", configuration_space)
+    assert isinstance(ge_forbidden, ForbiddenGreaterThanEqualsRelation)
 
 
 def test_comparison_conditions_and_forbiddens() -> None:
@@ -336,6 +378,15 @@ def test_forbidden_relations_with_vectors() -> None:
     arr = np.array([[2.0, 3.0], [1.0, 2.0]])
     mask = gt_eq.is_forbidden_vector_array(arr)
     assert mask.tolist() == [True, True]
+
+    # Missing keys short-circuit to False
+    assert lt_eq.is_forbidden_value({"a": 1}) is False  # right missing
+    assert lt_eq.is_forbidden_value({"b": 1}) is False  # left missing
+    assert gt_eq.is_forbidden_value({"b": 1}) is False  # left missing
+    assert gt_eq.is_forbidden_value({"a": 1}) is False  # right missing
+    # NaN short-circuits to False
+    assert lt_eq.is_forbidden_vector(np.array([np.nan, 1.0])) is False
+    assert gt_eq.is_forbidden_vector(np.array([1.0, np.nan])) is False
 
 
 def test_forbidden_clauses_greater_less_variants() -> None:
