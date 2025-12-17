@@ -41,10 +41,11 @@ def comparison_plot(
     x_values = data_frame[data_frame.columns[0]].to_numpy(dtype=float)
     y_values = data_frame[data_frame.columns[1]].to_numpy(dtype=float)
     valid_mask = ~(np.isnan(x_values) | np.isnan(y_values))
+
+    # Filter out NaN values
     x_values = x_values[valid_mask]
     y_values = y_values[valid_mask]
 
-    # Determine if data is log scale, linregress tells us how linear the data is.
     # Guard against degenerate data (single point or no variance) to avoid SciPy warnings.
     if (
         x_values.size >= 2
@@ -52,7 +53,9 @@ def comparison_plot(
         and np.ptp(x_values) > 0
         and np.ptp(y_values) > 0
     ):
-        linregress = stats.linregress(x_values, y_values)
+        linregress = stats.linregress(x_values, y_values)  # Perform linear regression
+
+        # Determine if log scale is appropriate based on correlation by checking r-value and p-value
         log_scale = not (linregress.rvalue > 0.65 and linregress.pvalue < 0.05)
     else:
         log_scale = False
