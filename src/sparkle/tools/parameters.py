@@ -62,29 +62,6 @@ class PCSConverter:
     )
 
     @staticmethod
-    def parse_irace_categorical_values(raw_values: str) -> list[str]:
-        """Split unquoted IRACE categorical values into strings."""
-        stripped = raw_values.strip()
-        # check for enclosing like c("option1", "option2")
-        if stripped.startswith("c(") and stripped.endswith(")"):
-            # Remove the c( and ) and get the inner content: "option1", "option2"
-            stripped = stripped[2:-1]
-        # check for enclosing like ("option1", "option2") or ['option1', 'option2'] or {option1, option2}
-        elif stripped and stripped[0] in "({[" and stripped[-1] in ")}]":
-            # Remove the enclosing brackets and get: option1, option2
-            stripped = stripped[1:-1]
-        values = []
-        for token in stripped.split(","):
-            token = token.strip()
-            if not token:  # Empty token
-                continue
-            if len(token) >= 2 and token[0] == token[-1] and token[0] in ("'", '"'):
-                # Remove enclosing quotes
-                token = token[1:-1]
-            values.append(token)
-        return values
-
-    @staticmethod
     def get_convention(file: Path) -> PCSConvention:
         """Determines the format of a pcs file."""
         try:
@@ -447,13 +424,31 @@ class PCSConverter:
                 # domain relies on another parameter: p2 "--p2" r ("p1", "p1 + 10")"
                 # and is limited to the operators: +,-, *, /, %%, min, max
                 raw_values = parameter.group("values")
-                try:
+                if parameter_type in {"c", "o"}:
+                    stripped_values = raw_values.strip()
+                    if stripped_values.startswith("c(") and stripped_values.endswith(
+                        ")"
+                    ):
+                        stripped_values = stripped_values[2:-1]
+                    elif (
+                        stripped_values
+                        and stripped_values[0] in "({["
+                        and stripped_values[-1] in ")}]"
+                    ):
+                        stripped_values = stripped_values[1:-1]
+                    values = []
+                    categorical_token_pattern = re.compile(
+                        r'\s*(?:"([^"]*)"|\'([^\']*)\'|([^,]+?))\s*(?:,|$)'
+                    )
+                    for match in categorical_token_pattern.finditer(stripped_values):
+                        token = match.group(1) or match.group(
+                            2
+                        )  # double or single quotes
+                        if token is None:
+                            token = match.group(3).strip()  # unquoted
+                        values.append(token)
+                else:
                     values = ast.literal_eval(raw_values)
-                except (SyntaxError, ValueError):
-                    if parameter_type in {"c", "o"}:
-                        values = PCSConverter.parse_irace_categorical_values(raw_values)
-                    else:
-                        raise
                 scale = parameter.group("scale")
                 conditions = parameter.group("conditions")
                 comment = parameter.group("comment")
