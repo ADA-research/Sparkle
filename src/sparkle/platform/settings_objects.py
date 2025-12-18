@@ -12,7 +12,6 @@ from typing import Any, NamedTuple, Optional
 
 from runrunner import Runner
 
-from sparkle.configurator.implementations import resolve_configurator
 from sparkle.platform.cli_types import VerbosityLevel
 from sparkle.types import SparkleObjective, resolve_objective
 
@@ -922,6 +921,9 @@ class Settings:
         if self.__general_sparkle_configurator is None and self.__settings.has_option(
             Settings.OPTION_configurator.section, Settings.OPTION_configurator.name
         ):
+            # NOTE: Import here for speed up if not using configurator
+            from sparkle.configurator.implementations import resolve_configurator
+
             self.__general_sparkle_configurator = resolve_configurator(
                 self.__settings.get(
                     Settings.OPTION_configurator.section,

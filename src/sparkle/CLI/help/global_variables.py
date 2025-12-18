@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
 """Definitions of constants broadly used in Sparkle."""
 
+from __future__ import annotations
+from typing import TYPE_CHECKING
 import ast
 from argparse import Namespace
 import random
 import numpy as np
 
 from sparkle.platform.settings_objects import Settings
-from sparkle.structures import PerformanceDataFrame
-from sparkle.configurator.configurator import ConfigurationScenario
-from sparkle.configurator.implementations import (
-    SMAC2Scenario,
-    SMAC3Scenario,
-    ParamILSScenario,
-    IRACEScenario,
-)
-from sparkle.selector import SelectionScenario
 
+if TYPE_CHECKING:
+    from sparkle.configurator.configurator import ConfigurationScenario
+    from sparkle.selector import SelectionScenario
+    from sparkle.structures import PerformanceDataFrame
 
 __settings: Settings = None
 
@@ -54,6 +51,14 @@ def configuration_scenarios(refresh: bool = False) -> list[ConfigurationScenario
     global __configuration_scenarios
     config_path = Settings.DEFAULT_configuration_output
     if __configuration_scenarios is None or refresh:
+        # NOTE: Import here for platform speedup
+        from sparkle.configurator.implementations import (
+            SMAC2Scenario,
+            SMAC3Scenario,
+            ParamILSScenario,
+            IRACEScenario,
+        )
+
         __configuration_scenarios = []
         for f in config_path.glob("*/*/*.*"):  # We look for files at depth three
             if "scenario" not in f.name:
@@ -74,6 +79,9 @@ def selection_scenarios(refresh: bool = False) -> list[SelectionScenario]:
     global __selection_scenarios
     selection_path = Settings.DEFAULT_selection_output
     if __selection_scenarios is None or refresh:
+        # NOTE: Import here for speedup
+        from sparkle.selector import SelectionScenario
+
         __selection_scenarios = []
         for f in selection_path.glob("*/*/*.txt"):  # We look for files at depth three
             if "scenario" not in f.name:
@@ -85,6 +93,9 @@ def selection_scenarios(refresh: bool = False) -> list[SelectionScenario]:
 def parallel_portfolio_scenarios() -> list[PerformanceDataFrame]:
     """Fetch all known parallel portfolio scenarios."""
     parallel_portfolio_path = Settings.DEFAULT_parallel_portfolio_output
+    # NOTE: Import here to speedup
+    from sparkle.structures import PerformanceDataFrame
+
     return [PerformanceDataFrame(f) for f in parallel_portfolio_path.glob("*/*.csv")]
 
 
