@@ -74,6 +74,28 @@ dependencies = [
     "tqdm==4.66.5",
 ]
 
+[project.optional-dependencies]
+dev = ["sparkle[tooling,test]"]
+tooling = [
+    "ruff==0.12.7",
+    "pep8-naming==0.13.2",
+    "pre-commit==3.7.1" 
+]
+test = [
+    "pytest==8.1.1",
+    "pytest-mock==3.10.0",
+    "pytest-cov==5.0.0",
+    "pytest-html==4.1.1"
+]
+docs = [
+    "myst-parser",
+    "Sphinx",
+    "sphinxcontrib-jsmath",
+    "sphinxcontrib-autoprogram",
+    "sphinx-copybutton",
+    "sphinx_rtd_theme==2.0.0",
+]
+
 # To ensure package get shipped with data files
 [build-system]
 requires = [

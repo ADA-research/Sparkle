@@ -22,7 +22,7 @@ jobs:
       run: |
         python3 -m venv venv/
         source venv/bin/activate  # Activate the new environment
-        pip install -r dev-requirements.txt  # Devtools
+        pip install -e .[tooling]  # Devtools
 
     - name: Lint with Ruff
       run: |

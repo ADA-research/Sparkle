@@ -99,7 +99,10 @@ For detailed installation instructions see the documentation: https://ada-resear
 
 ### Developer installation
 
-The file `dev-requirements.txt` is used for developer mode of the Sparkle package and contains several extra packages for testing. You can install the requirements from this file into your `venv` to be able to use the devtools for Sparkle.
+To install sparkle in development mode:
+1. Pull the repository
+2. Create a new Python venv and activate it, making sure it has the right Python version
+3. Run, in the main directory of the repository, `pip install -e .[dev]`, to install dev dependencies alongside the package
 
 #### Examples
 

@@ -45,9 +45,7 @@ jobs:
         run: |
           python3 -m venv venv/
           source venv/bin/activate  # Activate the new environment
-          pip install -e .  # Install Sparkle from the repo
-          pip install -r dev-requirements.txt  # Devtools
-          pip install -r Documentation/requirements.txt
+          pip install -e .[dev,docs]  # Install Sparkle from the repo
           pip install genbadge[tests,coverage]
       - name: Install RunSolver dependencies
         run: |
