@@ -58,6 +58,16 @@ def test_read_from_file() -> None:
     assert settings.configurator_number_of_runs == 9
     assert settings.configurator_solver_call_budget is None
     assert settings.configurator_max_iterations is None
+    assert settings.get_configurator_settings(settings.configurator.name) == {
+        "cli_cores": None,
+        "cpu_time": None,
+        "max_iterations": None,
+        "solver_calls": None,
+        "solver_cutoff_time": 60,
+        "target_cutoff_length": "max",
+        "use_cpu_time_in_tunertime": None,
+        "wallclock_time": 600,
+    }
 
     # Ablation
     assert settings.ablation_racing_flag is False

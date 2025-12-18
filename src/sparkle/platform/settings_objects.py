@@ -1,6 +1,8 @@
 """Classes and Enums to control settings."""
 
 from __future__ import annotations
+from typing import TYPE_CHECKING
+
 
 import argparse
 import configparser
@@ -10,10 +12,13 @@ from typing import Any, NamedTuple, Optional
 
 from runrunner import Runner
 
-from sparkle.configurator import implementations as cim
-from sparkle.configurator.configurator import Configurator
+from sparkle.configurator.implementations import resolve_configurator
 from sparkle.platform.cli_types import VerbosityLevel
 from sparkle.types import SparkleObjective, resolve_objective
+
+
+if TYPE_CHECKING:
+    from sparkle.configurator.configurator import Configurator
 
 
 class Option(NamedTuple):
@@ -917,7 +922,7 @@ class Settings:
         if self.__general_sparkle_configurator is None and self.__settings.has_option(
             Settings.OPTION_configurator.section, Settings.OPTION_configurator.name
         ):
-            self.__general_sparkle_configurator = cim.resolve_configurator(
+            self.__general_sparkle_configurator = resolve_configurator(
                 self.__settings.get(
                     Settings.OPTION_configurator.section,
                     Settings.OPTION_configurator.name,
@@ -1416,7 +1421,9 @@ class Settings:
         }
         # In the settings below, we default to the configurator general settings if no
         # specific configurator settings are given, by using the [None] or [Value]
-        if configurator_name == cim.SMAC2.__name__:
+        if (
+            configurator_name == "SMAC2"
+        ):  # NOTE: This is hardcoded, but doing it through imports slows done the ENTIRETY of the Sparkle substantially
             # Return all settings from the SMAC2 section
             configurator_settings.update(
                 {
@@ -1429,7 +1436,9 @@ class Settings:
                     or configurator_settings["max_iterations"],
                 }
             )
-        elif configurator_name == cim.SMAC3.__name__:
+        elif (
+            configurator_name == "SMAC3"
+        ):  # NOTE: This is hardcoded, but doing it through imports slows done the ENTIRETY of the Sparkle substantially
             # Return all settings from the SMAC3 section
             del configurator_settings["max_iterations"]  # SMAC3 does not have this?
             configurator_settings.update(
@@ -1453,7 +1462,9 @@ class Settings:
                 for key, value in configurator_settings.items()
                 if value is not None
             }
-        elif configurator_name == cim.IRACE.__name__:
+        elif (
+            configurator_name == "IRACE"
+        ):  # NOTE: This is hardcoded, but doing it through imports slows done the ENTIRETY of the Sparkle substantially
             # Return all settings from the IRACE section
             configurator_settings.update(
                 {
@@ -1472,7 +1483,9 @@ class Settings:
                 configurator_settings["solver_calls"] = (
                     self.configurator_solver_call_budget
                 )
-        elif configurator_name == cim.ParamILS.__name__:
+        elif (
+            configurator_name == "ParamILS"
+        ):  # NOTE: This is hardcoded, but doing it through imports slows done the ENTIRETY of the Sparkle substantially
             configurator_settings.update(
                 {
                     "tuner_timeout": self.paramils_cpu_time_budget,
