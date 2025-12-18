@@ -1,18 +1,19 @@
 """Classes and Enums to control settings."""
 
 from __future__ import annotations
-import configparser
+
 import argparse
+import configparser
 from enum import Enum
 from pathlib import Path
 from typing import Any, NamedTuple, Optional
 
 from runrunner import Runner
 
-from sparkle.types import SparkleObjective, resolve_objective
-from sparkle.configurator.configurator import Configurator
 from sparkle.configurator import implementations as cim
+from sparkle.configurator.configurator import Configurator
 from sparkle.platform.cli_types import VerbosityLevel
+from sparkle.types import SparkleObjective, resolve_objective
 
 
 class Option(NamedTuple):
@@ -897,13 +898,13 @@ class Settings:
             Settings.SECTION_general, "objectives"
         ):
             objectives = self.__settings[Settings.SECTION_general]["objectives"]
-            if "status" not in objectives:
+            if "status:metric" not in objectives:
                 objectives += ",status:metric"
-            if "cpu_time" not in objectives:
+            if "cpu_time:metric" not in objectives:
                 objectives += ",cpu_time:metric"
-            if "wall_time" not in objectives:
+            if "wall_time:metric" not in objectives:
                 objectives += ",wall_time:metric"
-            if "memory" not in objectives:
+            if "memory:metric" not in objectives:
                 objectives += ",memory:metric"
             self.__sparkle_objectives = [
                 resolve_objective(obj) for obj in objectives.split(",")

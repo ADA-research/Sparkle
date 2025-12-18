@@ -826,6 +826,12 @@ class PerformanceDataFrame(pd.DataFrame):
         )
         # Aggregate the instances
         sub_series = subdf.agg(func=objective.instance_aggregator.__name__)
+        sub_series = sub_series.dropna()
+        if sub_series.empty:  # If all values are NaN, raise an error
+            raise ValueError(
+                f"No valid performance measurements for solver '{solver}' "
+                f"and objective '{objective.name}'."
+            )
         # Select the best configuration
         best_conf = sub_series.idxmin() if objective.minimise else sub_series.idxmax()
         if per_instance:  # Return a list of instance results

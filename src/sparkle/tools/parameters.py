@@ -423,7 +423,32 @@ class PCSConverter:
                 # NOTE: IRACE supports depedent parameter domains, e.g. parameters which
                 # domain relies on another parameter: p2 "--p2" r ("p1", "p1 + 10")"
                 # and is limited to the operators: +,-, *, /, %%, min, max
-                values = ast.literal_eval(parameter.group("values"))
+                raw_values = parameter.group("values")
+                if parameter_type in {"c", "o"}:
+                    stripped_values = raw_values.strip()
+                    if stripped_values.startswith("c(") and stripped_values.endswith(
+                        ")"
+                    ):
+                        stripped_values = stripped_values[2:-1]
+                    elif (
+                        stripped_values
+                        and stripped_values[0] in "({["
+                        and stripped_values[-1] in ")}]"
+                    ):
+                        stripped_values = stripped_values[1:-1]
+                    values = []
+                    categorical_token_pattern = re.compile(
+                        r'\s*(?:"([^"]*)"|\'([^\']*)\'|([^,]+?))\s*(?:,|$)'
+                    )
+                    for match in categorical_token_pattern.finditer(stripped_values):
+                        token = match.group(1) or match.group(
+                            2
+                        )  # double or single quotes
+                        if token is None:
+                            token = match.group(3).strip()  # unquoted
+                        values.append(token)
+                else:
+                    values = ast.literal_eval(raw_values)
                 scale = parameter.group("scale")
                 conditions = parameter.group("conditions")
                 comment = parameter.group("comment")

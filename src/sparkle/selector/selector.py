@@ -4,10 +4,12 @@ from __future__ import annotations
 import random
 from pathlib import Path
 
+
 from sklearn.base import ClassifierMixin, RegressorMixin
 from asf.cli import cli_train as asf_cli
 from asf.predictors import AbstractPredictor
 from asf.selectors.abstract_model_based_selector import AbstractModelBasedSelector
+
 
 import runrunner as rrr
 from runrunner import Runner, Run
