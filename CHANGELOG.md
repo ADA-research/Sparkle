@@ -20,16 +20,6 @@ Notable changes to Sparkle will be documented in this file.
 
 ### Added
 - sparkle wrap command to make using solvers easier in Sparkle [Issue#204]
-
-### Changed
-
-### Fixed
-
-### [Known issues]
-
-## [0.9.5.1] - 15/10/2025
-
-### Added
 - A native python RunSolver implementation, an alternative for users when Roussel's RunSolver is not an option. [Issue#192]
 
 ### Changed
