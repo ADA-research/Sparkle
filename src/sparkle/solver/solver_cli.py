@@ -3,6 +3,7 @@
 """Run a solver, read/write to performance dataframe."""
 
 import sys
+import ast
 from filelock import FileLock
 import argparse
 from pathlib import Path
@@ -127,7 +128,11 @@ def main(argv: list[str]) -> None:
     )
 
     if args.configuration:  # Configuration provided, override
-        configuration = parse_commandline_dict(args.configuration)
+        if isinstance(args.configuration, list):
+            configuration = parse_commandline_dict(args.configuration)
+        else:
+            configuration = ast.literal_eval(args.configuration)
+        print(configuration)
         config_id = configuration["configuration_id"]
     elif (
         (

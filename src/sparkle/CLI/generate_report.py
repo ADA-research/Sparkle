@@ -1039,7 +1039,13 @@ def main(argv: list[str]) -> None:
         processed_selection_scenarios.append(
             (SelectionOutput(selection_scenario), selection_scenario)
         )
-
+    if (
+        not configuration_scenarios
+        and not selection_scenarios
+        and not parallel_portfolio_scenarios
+    ):
+        print("No scenarios found. Exiting.")
+        sys.exit(-1)
     raw_output = gv.settings().DEFAULT_output_analysis / "JSON"
     if raw_output.exists():  # Clean
         shutil.rmtree(raw_output)
