@@ -127,8 +127,9 @@ def test_organise_output(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
 
     scenario = SMAC3Scenario(solver, instance_set, objectives, 3, Path(), solver_calls=5)
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
-    configuration = SMAC3.organise_output(file, None, scenario, None)
+    configuration = SMAC3.organise_output(file, None, scenario, "SMAC3_0")
     expected = {
+        "configuration_id": "SMAC3_0",
         "init_solution": "2",
         "perform_aspiration": "1",
         "perform_clause_weight": "0",
