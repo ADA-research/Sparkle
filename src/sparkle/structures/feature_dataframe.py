@@ -32,7 +32,9 @@ class FeatureDataFrame(pd.DataFrame):
         if csv_filepath.exists():
             # Read from file
             temp_df = pd.read_csv(
-                csv_filepath, index_col=FeatureDataFrame.multi_dim_names
+                csv_filepath, 
+                index_col=FeatureDataFrame.multi_dim_names,
+                on_bad_lines="skip",
             )
             super().__init__(temp_df)
             self.csv_filepath = csv_filepath
