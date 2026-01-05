@@ -174,15 +174,15 @@ def main(argv: list[str]) -> None:
                 if instance_path is None:
                     instance_errors += 1
                     wrong_indices.append((objective, instance, run_id))
-
-        print(
-            f"Found {len(wrong_indices)} in the PerformanceDataFrame ({objective_errors} objective errors, {instance_errors} instance errors, {run_id_errors} run id errors).\n"
-            "Removing from PerformanceDataFrame..."
-        )
-        performance_data.drop(wrong_indices, inplace=True)
-        print(
-            f"Removed {len(wrong_indices)} rows from the PerformanceDataFrame, leaving {len(performance_data.index)} rows."
-        )
+        if wrong_indices:
+            print(
+                f"Found {len(wrong_indices)} in the PerformanceDataFrame ({objective_errors} objective errors, {instance_errors} instance errors, {run_id_errors} run id errors).\n"
+                "Removing from PerformanceDataFrame..."
+            )
+            performance_data.drop(wrong_indices, inplace=True)
+            print(
+                f"Removed {len(wrong_indices)} rows from the PerformanceDataFrame, leaving {len(performance_data.index)} rows."
+            )
         performance_data.save_csv()
 
     if args.all:
