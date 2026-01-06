@@ -20,14 +20,6 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-# ---------- sanity checks ----------
-[[ -z "$EXTRACTOR_DIR" || -z "$INSTANCE_FILE" ]] && {
-  echo "Missing required arguments" >&2
-  exit 1
-}
-
-EXE="$EXTRACTOR_DIR/features"
-
 # ---------- load generated FEATURE_MAP ----------
 FEATURE_MAP=$(cat <<'EOF'
 nvarsOrig,base,n_vars_original
@@ -179,16 +171,27 @@ while IFS=',' read -r key group name; do
   FEATURE_MAP_DICT["$key"]="$group|$name"
 done <<< "$FEATURE_MAP"
 
-# ---------- -features mode ----------
-if $FEATURES; then
-  for k in "${!FEATURE_MAP_DICT[@]}"; do
+# ---------- -features mode: print Python-style list of tuples ----------
+if [[ "$FEATURES" == true ]]; then
+  RESULT="["
+  for k in $(printf "%s\n" "${!FEATURE_MAP_DICT[@]}" | sort); do
     v="${FEATURE_MAP_DICT[$k]}"
-    group="${v%%|*}"
-    name="${v##*|}"
-    printf "(%s, %s)\n" "$group" "$name"
+    GROUP="${v%%|*}"
+    NAME="${v##*|}"
+    RESULT+="('$GROUP', '$NAME'), "
   done
+  RESULT="${RESULT%, }]"  # remove trailing comma + space
+  printf "%s\n" "$RESULT"
   exit 0
 fi
+
+# ---------- sanity checks ----------
+[[ -z "$EXTRACTOR_DIR" || -z "$INSTANCE_FILE" ]] && {
+  echo "Missing required arguments" >&2
+  exit 1
+}
+
+EXE="$EXTRACTOR_DIR/features"
 
 # ---------- build command string ----------
 CMD="$EXE"

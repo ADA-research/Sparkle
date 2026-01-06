@@ -111,9 +111,16 @@ CleanupArgumentLogs = ArgumentContainer(
 
 CleanUpPerformanceDataArgument = ArgumentContainer(
     names=["--performance-data"],
-    kwargs={"action": "store_true", "help": "clean performance data from empty lines"},
+    kwargs={
+        "action": "store_true",
+        "help": "clean performance data from errorneous lines",
+    },
 )
 
+CleanUpFeatureDataArgument = ArgumentContainer(
+    names=["--feature-data"],
+    kwargs={"action": "store_true", "help": "clean feature data from errorneous lines"},
+)
 
 ConfigurationArgument = ArgumentContainer(
     names=["--configuration"],

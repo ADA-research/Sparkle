@@ -122,9 +122,9 @@ class FeatureDataFrame(pd.DataFrame):
         extractor: str,
         feature_group: str,
         feature_name: str,
-    ) -> None:
+    ) -> float:
         """Return a value in the dataframe."""
-        return self.loc[(feature_group, feature_name, extractor), instance]
+        return self.loc[(feature_group, feature_name, extractor), instance].values[0]
 
     def set_value(
         self: FeatureDataFrame,

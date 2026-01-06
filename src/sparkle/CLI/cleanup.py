@@ -2,11 +2,14 @@
 """Command to remove temporary files not affecting the platform state."""
 
 import re
+import math
 import sys
 import argparse
 import shutil
 
-from sparkle.structures import PerformanceDataFrame
+from runrunner.base import Status
+
+from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import global_variables as gv
@@ -30,6 +33,10 @@ def parser_function() -> argparse.ArgumentParser:
         *ac.CleanUpPerformanceDataArgument.names,
         **ac.CleanUpPerformanceDataArgument.kwargs,
     )
+    parser.add_argument(
+        *ac.CleanUpFeatureDataArgument.names,
+        **ac.CleanUpFeatureDataArgument.kwargs,
+    )
     return parser
 
 
@@ -51,7 +58,6 @@ def check_logs_performance_data(performance_data: PerformanceDataFrame) -> int:
         r"(?P<config_id>\S+)\s*:\s*"
         r"(?P<target_value>\S+)$"
     )
-    import math
 
     # Only iterate over slurm log files
     log_files = [
@@ -91,6 +97,65 @@ def check_logs_performance_data(performance_data: PerformanceDataFrame) -> int:
     return count
 
 
+def check_logs_feature_data(feature_data: FeatureDataFrame) -> int:
+    """Check if the feature data is missing values that can be extracted from the logs.
+
+    Args:
+        feature_data (FeatureDataFrame): The feature data.
+
+    Returns:
+        int: The number of updated values.
+    """
+    # empty_indices = performance_data.empty_indices
+    pattern = re.compile(
+        r"^(?P<extractor>\S+)\s*"
+        r"(?P<instance>\S+)\s*"
+        r"(?P<feature_group>\S+)\s*"
+        r"(?P<feature_name>\S+)\s*\|\s*"
+        r"(?P<target_value>\S+)$"
+    )
+
+    # Only iterate over slurm log files
+    log_files = [
+        f
+        for f in gv.settings().DEFAULT_log_output.glob("**/*")
+        if f.is_file() and f.suffix == ".out"
+    ]
+    count = 0
+    for log in log_files:
+        for line in log.read_text().splitlines():
+            match = pattern.match(line)
+            if match:
+                extractor = match.group("extractor")
+                instance = match.group("instance")
+                feature_group = match.group("feature_group")
+                feature_name = match.group("feature_name")
+                target_value = match.group("target_value")
+                current_value = feature_data.get_value(
+                    instance, extractor, feature_group, feature_name
+                )
+                # TODO: Would be better to extract all nan indices from PDF and check against this?
+                if (
+                    (
+                        isinstance(current_value, (int, float))
+                        and math.isnan(current_value)
+                    )
+                    or isinstance(current_value, str)
+                    and current_value == "nan"
+                ):
+                    feature_data.set_value(
+                        instance,
+                        extractor,
+                        feature_group,
+                        feature_name,
+                        target_value,
+                    )
+                    count += 1
+    if count:
+        feature_data.save_csv()
+    return count
+
+
 def remove_temporary_files() -> None:
     """Remove temporary files. Only removes files not affecting the sparkle state."""
     shutil.rmtree(gv.settings().DEFAULT_log_output, ignore_errors=True)
@@ -110,8 +175,6 @@ def main(argv: list[str]) -> None:
 
     if args.performance_data:
         # Check if we can cleanup the PerformanceDataFrame if necessary
-        from runrunner.base import Status
-
         running_jobs = jobs_help.get_runs_from_file(
             gv.settings().DEFAULT_log_output, filter=[Status.WAITING, Status.RUNNING]
         )
@@ -185,6 +248,22 @@ def main(argv: list[str]) -> None:
             )
         performance_data.save_csv()
 
+    if args.feature_data:
+        running_jobs = jobs_help.get_runs_from_file(
+            gv.settings().DEFAULT_log_output, filter=[Status.WAITING, Status.RUNNING]
+        )
+        if len(running_jobs) > 0:
+            print("WARNING: There are still running jobs! Continue cleaning? [y/n]")
+            a = input()
+            if a != "y":
+                sys.exit(0)
+        feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
+        count = check_logs_feature_data(feature_data)
+        print(
+            f"Extracted {count} values from the logs and placed them in the FeatureDataFrame."
+        )
+        # TODO: Can do other cleanup like index verification and empty line removal etc
+
     if args.all:
         shutil.rmtree(gv.settings().DEFAULT_output, ignore_errors=True)
         snh.create_working_dirs()
@@ -196,7 +275,7 @@ def main(argv: list[str]) -> None:
     elif args.logs:
         remove_temporary_files()
         print("Cleaned platform of log files!")
-    elif not args.performance_data:
+    elif not args.performance_data and not args.feature_data:
         print(parser.print_help())
         sys.exit(1)
     sys.exit(0)

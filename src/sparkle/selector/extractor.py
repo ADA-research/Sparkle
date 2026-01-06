@@ -20,7 +20,7 @@ from sparkle.instance import InstanceSet
 class Extractor(SparkleCallable):
     """Extractor base class for extracting features from instances."""
 
-    wrapper = "sparkle_extractor_wrapper.py"
+    wrapper_file_name = "sparkle_extractor_wrapper"
     extractor_cli = Path(__file__).parent / "extractor_cli.py"
 
     output_pattern = re.compile(
@@ -39,6 +39,7 @@ class Extractor(SparkleCallable):
         self._features = None
         self._feature_groups = None
         self._groupwise_computation = None
+        self._wrapper: Path = None
 
     def __str__(self: Extractor) -> str:
         """Return the string representation of the extractor."""
@@ -54,6 +55,16 @@ class Extractor(SparkleCallable):
             f"\t- Output Dimension (# Features): {self.output_dimension}\n"
             f"\t- Groupwise Computation Enabled: {self.groupwise_computation}"
         )
+
+    @property
+    def wrapper(self: Extractor) -> Path:
+        """Determines the Path to the Extractor wrapper."""
+        if self._wrapper is None:
+            if (self.directory / f"{Extractor.wrapper_file_name}.sh").exists():
+                self._wrapper = self.directory / f"{Extractor.wrapper_file_name}.sh"
+            elif (self.directory / f"{Extractor.wrapper_file_name}.py").exists():
+                self._wrapper = self.directory / f"{Extractor.wrapper_file_name}.py"
+        return self._wrapper
 
     @property
     def features(self: Extractor) -> list[tuple[str, str]]:
