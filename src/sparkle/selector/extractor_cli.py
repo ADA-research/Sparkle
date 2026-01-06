@@ -69,11 +69,16 @@ if __name__ == "__main__":
         log_dir=log_dir,
     )
 
+    for feature_group, feature_name, value in features:
+        print(
+            f"{extractor_path.name} {instance_name} {feature_group} {feature_name} | {value}"
+        )  # For logging purposes
+
     # Now that we have our result, we write it to the FeatureDataCSV with a FileLock
     lock = FileLock(f"{feature_data_csv_path}.lock")
     if features is not None:
-        print(f"Writing features to CSV: {instance_name}, {extractor_path.name}")
-        with lock.acquire(timeout=60):
+        print("Writing features to file...")  # For logging purposes
+        with lock.acquire(timeout=600):
             feature_data = FeatureDataFrame(feature_data_csv_path)
             instance_key = (
                 instance_name

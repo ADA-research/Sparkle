@@ -32,9 +32,10 @@ class FeatureDataFrame(pd.DataFrame):
         if csv_filepath.exists():
             # Read from file
             temp_df = pd.read_csv(
-                csv_filepath, 
+                csv_filepath,
                 index_col=FeatureDataFrame.multi_dim_names,
                 on_bad_lines="skip",
+                skip_blank_lines=True,
             )
             super().__init__(temp_df)
             self.csv_filepath = csv_filepath
@@ -211,4 +212,5 @@ class FeatureDataFrame(pd.DataFrame):
         csv_filepath = self.csv_filepath if csv_filepath is None else csv_filepath
         if csv_filepath is None:
             raise ValueError("Cannot save DataFrame: no `csv_filepath` was provided.")
+        self.sort_index(inplace=True)
         self.to_csv(csv_filepath)

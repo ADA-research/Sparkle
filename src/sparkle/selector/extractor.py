@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Any
 from pathlib import Path
 import ast
+import re
 import subprocess
 
 import runrunner as rrr
@@ -21,6 +22,10 @@ class Extractor(SparkleCallable):
 
     wrapper = "sparkle_extractor_wrapper.py"
     extractor_cli = Path(__file__).parent / "extractor_cli.py"
+
+    output_pattern = re.compile(
+        r"^(?P<timestamp1>\d+\.\d+)/(?P<timestamp2>\d+\.\d+)\s+(?P<output>.*?\S)\s*$"
+    )
 
     def __init__(self: Extractor, directory: Path) -> None:
         """Initialize solver.
@@ -174,15 +179,10 @@ class Extractor(SparkleCallable):
                         f"\t-stderr: '{job.stderr}'\n"
                     )
                 return None
-            # RunRunner adds a timestamp before the statement
-            import re
-
-            pattern = re.compile(
-                r"^(?P<timestamp1>\d+\.\d+)\/(?P<timestamp2>\d+\.\d+)\s+(?P<output>.*)$"
-            )
             output = []
             for job in extractor_run.jobs:
-                match = pattern.match(job.stdout)
+                # RunRunner adds a timestamp before the statement
+                match = self.output_pattern.match(job.stdout)
                 if match:
                     output.append(ast.literal_eval(match.group("output")))
             if len(output) == 1:

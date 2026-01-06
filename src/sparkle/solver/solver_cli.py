@@ -215,12 +215,6 @@ def main(argv: list[str]) -> None:
 
     # Desyncronize from other possible jobs writing to the same file
     time.sleep(random.random() * 100)
-    # TESTLOG
-    # lock = FileLock("test.log.lock")
-    # with lock.acquire(timeout=600):
-    #     with Path("test.log").open("a") as f:
-    #         for objective in objectives:
-    #             f.write(f"{objective.name}, {instance_name}, {args.run_index} | {solver} {config_id}: {solver_output[objective.name]}, {seed}\n")
 
     # Now that we have all the results, we can add them to the performance dataframe
     lock = FileLock(f"{args.performance_dataframe}.lock")  # Lock the file
