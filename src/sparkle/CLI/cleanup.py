@@ -126,15 +126,16 @@ def check_logs_feature_data(feature_data: FeatureDataFrame) -> int:
         for line in log.read_text().splitlines():
             match = pattern.match(line)
             if match:
+                target_value = float(match.group("target_value"))  # Must be a float
+                if math.isnan(target_value):
+                    continue
                 extractor = match.group("extractor")
                 instance = match.group("instance")
                 feature_group = match.group("feature_group")
                 feature_name = match.group("feature_name")
-                target_value = match.group("target_value")
                 current_value = feature_data.get_value(
                     instance, extractor, feature_group, feature_name
                 )
-                # TODO: Would be better to extract all nan indices from PDF and check against this?
                 if (
                     (
                         isinstance(current_value, (int, float))
@@ -262,6 +263,28 @@ def main(argv: list[str]) -> None:
         print(
             f"Extracted {count} values from the logs and placed them in the FeatureDataFrame."
         )
+
+        wrong_indices = []
+        for group, feature, extractor in feature_data.index:
+            # print(feature)
+            # print(isinstance(feature, str))
+            # print(isinstance(feature, float))
+            # print(feature.lower() in ("", "nan"))
+            # print(math.isnan(feature))
+            # print(isinstance(feature, str) and feature.lower() in ("", "nan") or isinstance(feature, float) and math.isnan(feature))
+            if (
+                (isinstance(group, str) and group.lower() in ("", "nan"))
+                or (isinstance(group, float) and math.isnan(group))
+                or (isinstance(feature, str) and feature.lower() in ("", "nan"))
+                or (isinstance(feature, float) and math.isnan(feature))
+                or (isinstance(extractor, str) and extractor.lower() in ("", "nan"))
+                or (isinstance(extractor, float) and math.isnan(extractor))
+            ):  # Unrecognisable row, delete
+                wrong_indices.append((group, feature, extractor))
+        if wrong_indices:
+            feature_data.drop(wrong_indices, inplace=True)
+            feature_data.save_csv()
+            print(f"Deleted {len(wrong_indices)} faulty indices.")
         # TODO: Can do other cleanup like index verification and empty line removal etc
 
     if args.all:
