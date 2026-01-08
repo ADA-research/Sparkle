@@ -2,7 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.9.6]
+## [0.9.6] - ??/??/2026
 
 ### Added
 - Broader coverage for configuration-space parsing to guard conditional/forbidden handling regressions. [Bug#206]
@@ -14,7 +14,9 @@ Notable changes to Sparkle will be documented in this file.
 
 ### Fixed
 - Performance data cleaning now drops `NaN` entries per sub-series and raises if a whole sub-series is `NaN`, avoiding silent failures. [Bug#206]
+- Improved the ability of concurrent writing by PDF. [Issue#215]
 - Various performance speed up for CLI commands.
+- Various bug fixes for Extractors. [Bug#212]
 
 ## [0.9.5.1] - 15/10/2025
 
