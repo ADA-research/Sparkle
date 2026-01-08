@@ -82,7 +82,9 @@ def main(argv: list[str]) -> None:
     if predict_schedule is None:  # Selector Failed to produce prediction
         sys.exit(-1)
 
-    print("Predicting done! Running schedule...")
+    print(
+        f"Predicting done! Running schedule [{', '.join(str(x) for x in predict_schedule)}] ..."
+    )
     performance_data = selector_scenario.selector_performance_data
     selector_output = {}
     for solver, config_id, cutoff_time in predict_schedule:
@@ -106,11 +108,13 @@ def main(argv: list[str]) -> None:
             else:
                 selector_output[key] = solver_output[key]
         print(f"\t- Calling solver {solver.name} ({config_id}) done!")
-
-        if solver_output["status"].positive:
-            print(f"{instance} was solved by {solver.name} ({config_id})")
+        solver_status = solver_output["status"]
+        if solver_status.positive:
+            print(
+                f"[{solver_status}] {solver.name} ({config_id}) was succesfull on {instance}"
+            )
             break
-        print(f"{instance} is not solved in this call")
+        print(f"[{solver_status}] {solver.name} ({config_id}) failed on {instance}")
 
     selector_value = selector_output[selector_scenario.objective.name]
     if selector_scenario.objective.post_process:
@@ -138,8 +142,8 @@ def main(argv: list[str]) -> None:
                 selector_scenario.__selector_solver_name__,
                 instance_name,
                 objective=selector_scenario.objective.name,
+                append_write_csv=True,
             )
-            performance_data.save_csv()
         lock.release()
     except Timeout:
         print(f"ERROR: Cannot acquire File Lock on {performance_data}.")

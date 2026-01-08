@@ -88,7 +88,12 @@ class PerformanceDataFrame(pd.DataFrame):
                 ]
             configurations = {s: {} for s in self.solvers}
             for solver, config_key, config in configuration_lines[1:]:  # Skip header
-                configurations[solver][config_key] = ast.literal_eval(config.strip('"'))
+                if (
+                    solver in configurations
+                ):  # Only add configurations to already known solvers, based on the columns
+                    configurations[solver][config_key] = ast.literal_eval(
+                        config.strip('"')
+                    )
         else:  # New PerformanceDataFrame
             # Initialize empty DataFrame
             run_ids = list(range(1, n_runs + 1))  # We count runs from 1
@@ -675,7 +680,14 @@ class PerformanceDataFrame(pd.DataFrame):
             if isinstance(writeable, pd.Series):  # Single row, convert to pd.DataFrame
                 writeable = self.loc[[(objective, instance, run)], :]
             # Append the new rows to the dataframe csv file
-            writeable.to_csv(self.csv_filepath, mode="a", header=False)
+            import os
+
+            csv_string = writeable.to_csv(header=False)  # Convert to the csv lines
+            for line in csv_string.splitlines():
+                fd = os.open(f"{self.csv_filepath}", os.O_WRONLY | os.O_APPEND)
+                os.write(fd, f"{line}\n".encode("utf-8"))  # Encode to create buffer
+                # Open and close for each line to minimise possibilities of conflict
+                os.close(fd)
 
     def get_value(
         self: PerformanceDataFrame,

@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Any
 from pathlib import Path
 import ast
+import re
 import subprocess
 
 import runrunner as rrr
@@ -19,8 +20,12 @@ from sparkle.instance import InstanceSet
 class Extractor(SparkleCallable):
     """Extractor base class for extracting features from instances."""
 
-    wrapper = "sparkle_extractor_wrapper.py"
+    wrapper_file_name = "sparkle_extractor_wrapper"
     extractor_cli = Path(__file__).parent / "extractor_cli.py"
+
+    output_pattern = re.compile(
+        r"^(?P<timestamp1>\d+\.\d+)/(?P<timestamp2>\d+\.\d+)\s+(?P<output>.*?\S)\s*$"
+    )
 
     def __init__(self: Extractor, directory: Path) -> None:
         """Initialize solver.
@@ -34,6 +39,7 @@ class Extractor(SparkleCallable):
         self._features = None
         self._feature_groups = None
         self._groupwise_computation = None
+        self._wrapper: Path = None
 
     def __str__(self: Extractor) -> str:
         """Return the string representation of the extractor."""
@@ -51,11 +57,21 @@ class Extractor(SparkleCallable):
         )
 
     @property
+    def wrapper(self: Extractor) -> Path:
+        """Determines the Path to the Extractor wrapper."""
+        if self._wrapper is None:
+            if (self.directory / f"{Extractor.wrapper_file_name}.sh").exists():
+                self._wrapper = self.directory / f"{Extractor.wrapper_file_name}.sh"
+            elif (self.directory / f"{Extractor.wrapper_file_name}.py").exists():
+                self._wrapper = self.directory / f"{Extractor.wrapper_file_name}.py"
+        return self._wrapper
+
+    @property
     def features(self: Extractor) -> list[tuple[str, str]]:
         """Determines the features of the extractor."""
         if self._features is None:
             extractor_process = subprocess.run(
-                [self.directory / Extractor.wrapper, "-features"], capture_output=True
+                [self.wrapper, "-features"], capture_output=True
             )
             self._features = ast.literal_eval(extractor_process.stdout.decode())
         return self._features
@@ -76,9 +92,7 @@ class Extractor(SparkleCallable):
     def groupwise_computation(self: Extractor) -> bool:
         """Determines if you can call the extractor per group for parallelisation."""
         if self._groupwise_computation is None:
-            extractor_help = subprocess.run(
-                [self.directory / Extractor.wrapper, "-h"], capture_output=True
-            )
+            extractor_help = subprocess.run([self.wrapper, "-h"], capture_output=True)
             # Not the cleanest / most precise way to determine this
             self._groupwise_computation = (
                 "-feature_group" in extractor_help.stdout.decode()
@@ -111,7 +125,7 @@ class Extractor(SparkleCallable):
         if not isinstance(instance, list):
             instance = [instance]
         cmd_list_extractor = [
-            f"{self.directory / Extractor.wrapper}",
+            f"{self.wrapper}",
             "-extractor_dir",
             f"{self.directory}/",
             "-instance_file",
@@ -174,15 +188,10 @@ class Extractor(SparkleCallable):
                         f"\t-stderr: '{job.stderr}'\n"
                     )
                 return None
-            # RunRunner adds a timestamp before the statement
-            import re
-
-            pattern = re.compile(
-                r"^(?P<timestamp1>\d+\.\d+)\/(?P<timestamp2>\d+\.\d+)\s+(?P<output>.*)$"
-            )
             output = []
             for job in extractor_run.jobs:
-                match = pattern.match(job.stdout)
+                # RunRunner adds a timestamp before the statement
+                match = self.output_pattern.match(job.stdout)
                 if match:
                     output.append(ast.literal_eval(match.group("output")))
             if len(output) == 1:

@@ -80,7 +80,7 @@ def resolve_instance_name(
                 instances.append(Instance_Set(instance_dir))
         target = instances
 
-    out_set = None
+    out_set, instance_path = None, None
     for instance_set in target:
         instance_path = instance_set.get_path_by_name(name)
         if instance_path is None:
