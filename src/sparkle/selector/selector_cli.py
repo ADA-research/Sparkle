@@ -82,7 +82,9 @@ def main(argv: list[str]) -> None:
     if predict_schedule is None:  # Selector Failed to produce prediction
         sys.exit(-1)
 
-    print("Predicting done! Running schedule...")
+    print(
+        f"Predicting done! Running schedule [{', '.join(str(x) for x in predict_schedule)}] ..."
+    )
     performance_data = selector_scenario.selector_performance_data
     selector_output = {}
     for solver, config_id, cutoff_time in predict_schedule:

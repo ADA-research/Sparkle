@@ -10,6 +10,8 @@ OUTPUT_FILE=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    -h) FEATURES=true ;;
+    -help) FEATURES=true ;;
     -features) FEATURES=true ;;
     -extractor_dir) EXTRACTOR_DIR="$2"; shift ;;
     -instance_file) INSTANCE_FILE="$2"; shift ;;

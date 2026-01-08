@@ -127,7 +127,7 @@ class Selector:
         schedule = schedule[instance]
         for index, (solver, time) in enumerate(schedule):
             # Split solver name back into solver and config id
-            solver_name, conf_index = solver.split("_", maxsplit=1)
+            solver_name, conf_index = solver.rsplit("_", maxsplit=1)
             schedule[index] = (solver_name, conf_index, time)
         return schedule
 
@@ -411,5 +411,6 @@ class SelectionScenario:
             feature_data=Path(values["feature_data"]),
             feature_extractors=values["feature_extractors"].split(","),
             solver_cutoff=float(values["solver_cutoff"]),
+            extractor_cutoff=float(values["extractor_cutoff"]),
             ablate=ast.literal_eval(values["ablate"]),
         )

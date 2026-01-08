@@ -124,7 +124,7 @@ class FeatureDataFrame(pd.DataFrame):
         feature_name: str,
     ) -> float:
         """Return a value in the dataframe."""
-        return self.loc[(feature_group, feature_name, extractor), instance].values[0]
+        return self.loc[(feature_group, feature_name, extractor), instance]
 
     def set_value(
         self: FeatureDataFrame,

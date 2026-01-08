@@ -88,7 +88,12 @@ class PerformanceDataFrame(pd.DataFrame):
                 ]
             configurations = {s: {} for s in self.solvers}
             for solver, config_key, config in configuration_lines[1:]:  # Skip header
-                configurations[solver][config_key] = ast.literal_eval(config.strip('"'))
+                if (
+                    solver in configurations
+                ):  # Only add configurations to already known solvers, based on the columns
+                    configurations[solver][config_key] = ast.literal_eval(
+                        config.strip('"')
+                    )
         else:  # New PerformanceDataFrame
             # Initialize empty DataFrame
             run_ids = list(range(1, n_runs + 1))  # We count runs from 1

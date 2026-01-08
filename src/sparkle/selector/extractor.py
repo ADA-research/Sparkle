@@ -71,7 +71,7 @@ class Extractor(SparkleCallable):
         """Determines the features of the extractor."""
         if self._features is None:
             extractor_process = subprocess.run(
-                [self.directory / Extractor.wrapper, "-features"], capture_output=True
+                [self.wrapper, "-features"], capture_output=True
             )
             self._features = ast.literal_eval(extractor_process.stdout.decode())
         return self._features
@@ -92,9 +92,7 @@ class Extractor(SparkleCallable):
     def groupwise_computation(self: Extractor) -> bool:
         """Determines if you can call the extractor per group for parallelisation."""
         if self._groupwise_computation is None:
-            extractor_help = subprocess.run(
-                [self.directory / Extractor.wrapper, "-h"], capture_output=True
-            )
+            extractor_help = subprocess.run([self.wrapper, "-h"], capture_output=True)
             # Not the cleanest / most precise way to determine this
             self._groupwise_computation = (
                 "-feature_group" in extractor_help.stdout.decode()
@@ -127,7 +125,7 @@ class Extractor(SparkleCallable):
         if not isinstance(instance, list):
             instance = [instance]
         cmd_list_extractor = [
-            f"{self.directory / Extractor.wrapper}",
+            f"{self.wrapper}",
             "-extractor_dir",
             f"{self.directory}/",
             "-instance_file",
