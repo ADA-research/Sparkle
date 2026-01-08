@@ -36,7 +36,6 @@ class Selector:
             selector_class: The (name of) Selector class to construct.
             model_class: The (name of) model class the selector will use.
         """
-        print(selector_class, model_class)
         if isinstance(selector_class, str):  # Resolve class name
             from asf import selectors
 
