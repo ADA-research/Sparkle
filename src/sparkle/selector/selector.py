@@ -36,6 +36,7 @@ class Selector:
             selector_class: The (name of) Selector class to construct.
             model_class: The (name of) model class the selector will use.
         """
+        print(selector_class, model_class)
         if isinstance(selector_class, str):  # Resolve class name
             from asf import selectors
 
@@ -44,6 +45,7 @@ class Selector:
             from sklearn import ensemble
 
             model_class = getattr(ensemble, model_class)
+
         self.selector_class = selector_class
         self.model_class = model_class
 
