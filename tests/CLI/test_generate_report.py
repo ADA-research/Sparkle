@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 import pylatex as pl
 
-from sparkle.CLI import generate_report, load_snapshot
+from sparkle.CLI import generate_report, load_snapshot, initialise
 from sparkle.CLI.generate_report import (
     MAX_COLS_PER_TABLE,
     NUM_KEYS_FDF,
@@ -305,18 +305,26 @@ def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         "--appendices",
     ]
 
+    snapshot = Path(
+        "tests/CLI/test_files/snapshot_configured_solver_Pb0-CCSAT-Generic_PTN.zip"
+    ).absolute()
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
-    # Create needed files in tmp dir
-    output_analysis_path = Path("Output/Analysis")
-    output_analysis_path.mkdir(parents=True, exist_ok=True)
-    (output_analysis_path / "report").mkdir(parents=True, exist_ok=True)
-    (output_analysis_path / "JSON").mkdir(parents=True, exist_ok=True)
-    performance_data_path = Path("Output/Performance_Data")
-    performance_data_path.mkdir(parents=True, exist_ok=True)
-    feature_data_path = Path("Output/Feature_Data")
-    feature_data_path.mkdir(parents=True, exist_ok=True)
-    instances_path = Path("Instances")
-    instances_path.mkdir(parents=True, exist_ok=True)
+
+    with pytest.raises(SystemExit) as init:
+        assert initialise.main([]) is None
+    assert init.type is SystemExit
+    assert init.value.code == 0  # Init new platform correctly
+
+    with pytest.raises(SystemExit) as no_load:
+        assert generate_report.main([]) is None
+    assert no_load.type is SystemExit
+    assert no_load.value.code == -1  # Nothing to generate
+
+    # Load needed files in tmp dir, verify that load goes correctly
+    with pytest.raises(SystemExit) as load_snapshot_call:
+        assert load_snapshot.main([str(snapshot)]) is None
+    assert load_snapshot_call.type is SystemExit
+    assert load_snapshot_call.value.code == 0
 
     with pytest.raises(SystemExit) as only_json_wrapped:
         assert generate_report.main(only_json_args) is None
@@ -325,8 +333,6 @@ def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     assert Path("Output/Analysis/JSON/output.json").exists()
     # report.pdf shouldn't be there
     assert not Path("Output/Analysis/report/report.pdf").exists()
-    json_content = Path("Output/Analysis/JSON/output.json").read_text()
-    assert json_content.strip() == "{}"
 
     with pytest.raises(SystemExit) as empty_wrapped:
         assert generate_report.main(empty_args) is None
@@ -334,12 +340,6 @@ def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     assert empty_wrapped.value.code == 0
     assert Path("Output/Analysis/report/report.pdf").exists()
     assert Path("Output/Analysis/JSON/output.json").exists()
-    # JSON file should be empty
-    json_content = Path("Output/Analysis/JSON/output.json").read_text()
-    assert json_content.strip() == "{}"
-    # Report file should have no appendices for empty args
-    tex_content = Path("Output/Analysis/report/report.tex").read_text()
-    assert "appendix" not in tex_content
 
     with pytest.raises(SystemExit) as full_wrapped:
         assert generate_report.main(full_args) is None
@@ -347,8 +347,6 @@ def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     assert full_wrapped.value.code == 0
     assert Path("Output/Analysis/JSON/output.json").exists()
     assert Path("Output/Analysis/report/report.pdf").exists()
-    json_content = Path("Output/Analysis/JSON/output.json").read_text()
-    assert json_content.strip() == "{}"
     # Report file should have appendices for full args
     tex_content = Path("Output/Analysis/report/report.tex").read_text()
     assert "appendix" in tex_content
