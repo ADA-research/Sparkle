@@ -2,6 +2,7 @@
 set -euo pipefail
 
 # ---------- argument parsing ----------
+HELP=false
 FEATURES=false
 EXTRACTOR_DIR=""
 INSTANCE_FILE=""
@@ -10,8 +11,8 @@ OUTPUT_FILE=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -h) FEATURES=true ;;
-    -help) FEATURES=true ;;
+    -h) HELP=true ;;
+    -help) HELP=true ;;
     -features) FEATURES=true ;;
     -extractor_dir) EXTRACTOR_DIR="$2"; shift ;;
     -instance_file) INSTANCE_FILE="$2"; shift ;;
@@ -21,6 +22,25 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
+
+if [[ "$HELP" == true ]]; then
+  RESULT="["
+  for k in $(printf "%s\n" "${!FEATURE_MAP_DICT[@]}" | sort); do
+    v="${FEATURE_MAP_DICT[$k]}"
+    GROUP="${v%%|*}"
+    NAME="${v##*|}"
+    RESULT+="('$GROUP', '$NAME'), "
+  done
+  RESULT="${RESULT%, }]"  # remove trailing comma + space
+  printf "%s\n" "$RESULT"
+  echo "-h --help show this string\n"\
+       "-features show the features produced by the extractor"\
+       "-extractor_dir directory where the extractor executable is located"\
+       "-instance_file file to produce features for"\
+       "-feature_group feature group to run the extractor for. If not provided, runs for all groups."\
+       "-output_file file to write output to. If not present, print features instead."\
+  exit 0
+fi
 
 # ---------- load generated FEATURE_MAP ----------
 FEATURE_MAP=$(cat <<'EOF'

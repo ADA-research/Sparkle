@@ -108,11 +108,13 @@ def main(argv: list[str]) -> None:
             else:
                 selector_output[key] = solver_output[key]
         print(f"\t- Calling solver {solver.name} ({config_id}) done!")
-
-        if solver_output["status"].positive:
-            print(f"{instance} was solved by {solver.name} ({config_id})")
+        solver_status = solver_output["status"]
+        if solver_status.positive:
+            print(
+                f"[{solver_status}] {solver.name} ({config_id}) was succesfull on {instance}"
+            )
             break
-        print(f"{instance} is not solved in this call")
+        print(f"[{solver_status}] {solver.name} ({config_id}) failed on {instance}")
 
     selector_value = selector_output[selector_scenario.objective.name]
     if selector_scenario.objective.post_process:
