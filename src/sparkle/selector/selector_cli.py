@@ -140,8 +140,8 @@ def main(argv: list[str]) -> None:
                 selector_scenario.__selector_solver_name__,
                 instance_name,
                 objective=selector_scenario.objective.name,
+                append_write_csv=True,
             )
-            performance_data.save_csv()
         lock.release()
     except Timeout:
         print(f"ERROR: Cannot acquire File Lock on {performance_data}.")
