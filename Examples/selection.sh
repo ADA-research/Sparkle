@@ -67,7 +67,7 @@ sparkle run portfolio selector --selection-scenario Output/Selection/MultiClassC
 
 # Run the portfolio selector on a testing instance *set*
 
-sparkle run portfolio selector Examples/Resources/Instances/PTN2/
+sparkle run portfolio selector --selection-scenario Output/Selection/MultiClassClassifier_RandomForestClassifier/ --instance-set Examples/Resources/Instances/PTN2/
 sparkle jobs  # Wait for the portfolio selector to be done running on the testing instance set
 
 #### Generate a report including results on the test set
