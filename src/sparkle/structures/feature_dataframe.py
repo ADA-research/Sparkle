@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 import warnings
-import pandas as pd
 import math
 from pathlib import Path
+
+import pandas as pd
 
 
 class FeatureDataFrame(pd.DataFrame):
@@ -133,9 +134,21 @@ class FeatureDataFrame(pd.DataFrame):
         feature_group: str,
         feature_name: str,
         value: float,
+        append_write_csv: bool = False,
     ) -> None:
         """Set a value in the dataframe."""
         self.loc[(feature_group, feature_name, extractor), instance] = value
+        if append_write_csv:
+            writeable = self.loc[(feature_group, feature_name, extractor), instance]
+            # Append the new rows to the dataframe csv file
+            import os
+
+            csv_string = writeable.to_csv(header=False)  # Convert to the csv lines
+            for line in csv_string.splitlines():
+                fd = os.open(f"{self.csv_filepath}", os.O_WRONLY | os.O_APPEND)
+                os.write(fd, f"{line}\n".encode("utf-8"))  # Encode to create buffer
+                # Open and close for each line to minimise possibilities of conflict
+                os.close(fd)
 
     def has_missing_vectors(self: FeatureDataFrame) -> bool:
         """Returns True if there are any Extractors still to be run on any instance."""
@@ -197,6 +210,16 @@ class FeatureDataFrame(pd.DataFrame):
     def num_features(self: FeatureDataFrame) -> int:
         """Return the number of features in the dataframe."""
         return self.shape[0]
+
+    @property
+    def num_instances(self: FeatureDataFrame) -> int:
+        """Return the number of instances in the dataframe."""
+        return self.shape[1]
+
+    @property
+    def num_extractors(self: FeatureDataFrame) -> int:
+        """Return the number of extractors in the dataframe."""
+        return self.index.get_level_values("Extractor").unique().size
 
     @property
     def features(self: FeatureDataFrame) -> list[str]:

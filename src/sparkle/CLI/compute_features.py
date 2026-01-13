@@ -4,7 +4,6 @@
 from __future__ import annotations
 import sys
 import argparse
-from pathlib import Path
 
 from runrunner.base import Run, Runner
 
@@ -18,7 +17,7 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help.nicknames import resolve_instance_name
+from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -29,6 +28,10 @@ def parser_function() -> argparse.ArgumentParser:
         "and instances."
     )
     parser.add_argument(
+        *ac.InstanceSetPathsArgument.names, **ac.InstanceSetPathsArgument.kwargs
+    )
+    parser.add_argument(*ac.ExtractorsArgument.names, **ac.ExtractorsArgument.kwargs)
+    parser.add_argument(
         *ac.RecomputeFeaturesArgument.names, **ac.RecomputeFeaturesArgument.kwargs
     )
     # Settings arguments
@@ -38,7 +41,7 @@ def parser_function() -> argparse.ArgumentParser:
 
 
 def compute_features(
-    feature_data: Path | FeatureDataFrame,
+    feature_data: FeatureDataFrame,
     recompute: bool,
     run_on: Runner = Runner.SLURM,
 ) -> list[Run]:
@@ -48,7 +51,7 @@ def compute_features(
     The results are then stored in the csv file specified by feature_data_csv_path.
 
     Args:
-        feature_data: Feature Data Frame to use, or path to read it from.
+        feature_data: Feature Data Frame to use
         recompute: Specifies if features should be recomputed.
         run_on: Runner
             On which computer or cluster environment to run the solvers.
@@ -57,8 +60,6 @@ def compute_features(
     Returns:
         The Slurm job or Local job
     """
-    if isinstance(feature_data, Path):
-        feature_data = FeatureDataFrame(feature_data)
     if recompute:
         feature_data.reset_dataframe()
     jobs = feature_data.remaining_jobs()
@@ -75,7 +76,7 @@ def compute_features(
             "No feature computation jobs to run; stopping execution! To recompute "
             "feature values use the --recompute flag."
         )
-        return None
+        return
     cutoff = gv.settings().extractor_cutoff_time
     instance_paths = set()
     grouped_job_list: dict[str, dict[str, list[str]]] = {}
@@ -135,9 +136,56 @@ def main(argv: list[str]) -> None:
         )
         sys.exit()
 
+    # Load feature data
+    feature_data = FeatureDataFrame(settings.DEFAULT_feature_data_path)
+
+    # Filter instances or extractors
+    if args.instance_path:
+        instances = []
+        for instance_arg in args.instance_path:
+            instance: InstanceSet = resolve_object_name(
+                instance_arg,
+                gv.instance_set_nickname_mapping,
+                settings.DEFAULT_instance_dir,
+                Instance_Set,
+            )
+            if instance is None:
+                raise ValueError(
+                    f"Argument Error! Could not resolve instance: '{instance_arg}'"
+                )
+            for i in instance.instance_names:
+                instances.append(i)
+
+        for instance in feature_data.instances:
+            if instance not in instances:
+                feature_data.remove_instances(instance)
+        if feature_data.num_instances == 0:
+            raise ValueError("Argument Error! No instances left after filtering.")
+    if args.extractors:
+        extractors = []
+        for extractor in args.extractors:
+            extractor: Extractor = resolve_object_name(
+                extractor,
+                nickname_dict=gv.extractor_nickname_mapping,
+                target_dir=settings.DEFAULT_extractor_dir,
+                class_name=Extractor,
+            )
+            if extractor is None:
+                raise ValueError(
+                    f"Argument Error! Could not resolve extractor: '{extractor}'"
+                )
+            extractors.append(extractor.name)
+        for extractor in feature_data.extractors:
+            if extractor not in extractors:
+                feature_data.remove_extractor(extractor)
+        if feature_data.num_extractors == 0:
+            raise ValueError(
+                "Argument Error! No feature extractors left after filtering."
+            )
+
     # Start compute features
     print("Start computing features ...")
-    compute_features(settings.DEFAULT_feature_data_path, args.recompute, run_on)
+    compute_features(feature_data, args.recompute, run_on)
 
     # Write used settings to file
     gv.settings().write_used_settings()

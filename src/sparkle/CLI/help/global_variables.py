@@ -117,3 +117,4 @@ for data_path in file_storage_data_mapping.keys():
 
 solver_nickname_mapping = file_storage_data_mapping[solver_nickname_list_path]
 instance_set_nickname_mapping = file_storage_data_mapping[instances_nickname_path]
+extractor_nickname_mapping = file_storage_data_mapping[extractor_nickname_list_path]

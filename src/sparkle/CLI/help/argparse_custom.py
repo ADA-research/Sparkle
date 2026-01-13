@@ -158,6 +158,17 @@ DownloadExamplesArgument = ArgumentContainer(
     },
 )
 
+ExtractorsArgument = ArgumentContainer(
+    names=["--extractors", "--extractor_paths", "--extractor", "--extractor_path"],
+    kwargs={
+        "required": False,
+        "metavar": "extractor",
+        "type": str,
+        "nargs": "+",
+        "help": "path or nickname of the feature extractor(s)",
+    },
+)
+
 ExtractorPathArgument = ArgumentContainer(
     names=["extractor_path"],
     kwargs={
