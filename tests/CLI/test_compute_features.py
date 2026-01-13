@@ -90,7 +90,7 @@ def test_compute_features_command(
                 "--run-on",
                 "slurm",
                 "--instances",
-                "bce7824.cnf",
+                "PTN/bce7824.cnf",
             ]
         )
     cli_tools.kill_slurm_jobs()
