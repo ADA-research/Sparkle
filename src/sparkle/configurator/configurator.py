@@ -106,7 +106,7 @@ class Configurator:
             rrr.add_to_queue(
                 runner=run_on,
                 cmd=configuration_commands,
-                name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
+                name=f"{self.name} {scenario.solver.name} on {scenario.instance_set.name}",
                 base_dir=base_dir,
                 output_path=output,
                 parallel_jobs=num_parallel_jobs,
@@ -676,7 +676,7 @@ class AblationScenario:
         run_ablation = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
-            name=f"Ablation analysis: {self.solver.name} on {self.train_set.name}",
+            name=f"Ablation analysis {self.solver.name} on {self.train_set.name}",
             base_dir=log_dir,
             path=self.scenario_dir,
             sbatch_options=sbatch_options,
@@ -702,7 +702,7 @@ class AblationScenario:
             run_ablation_validation = rrr.add_to_queue(
                 runner=run_on,
                 cmd=cmd,
-                name=f"Ablation validation: Test set {self.test_set.name}",
+                name=f"Ablation validation Test set {self.test_set.name}",
                 path=self.validation_dir,
                 base_dir=log_dir,
                 dependencies=run_ablation,

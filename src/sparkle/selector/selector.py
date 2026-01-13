@@ -89,7 +89,7 @@ class Selector:
         )
         cmd = [" ".join([str(c) for c in cmd])]
 
-        job_name = job_name or f"Selector Construction: {selection_scenario.name}"
+        job_name = job_name or f"Selector Construction {selection_scenario.name}"
         construct = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
@@ -178,7 +178,7 @@ class Selector:
         ]
 
         job_name = (
-            f"Run Selector: {self.name} on {len(instances)} instances"
+            f"Run Selector {self.name} on {len(instances)} instances"
             if not job_name
             else job_name
         )
