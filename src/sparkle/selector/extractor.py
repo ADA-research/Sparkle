@@ -247,7 +247,7 @@ class Extractor(SparkleCallable):
             for instance_path in instances
         ]
 
-        job_name = f"Run Extractor: {self.name} on {len(instances)} instances"
+        job_name = f"Run Extractor: {self.name} on {feature_group} for {len(instances)} instances"
         import subprocess
 
         run = rrr.add_to_queue(
