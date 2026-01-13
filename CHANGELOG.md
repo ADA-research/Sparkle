@@ -6,6 +6,7 @@ Notable changes to Sparkle will be documented in this file.
 
 ### Added
 - Broader coverage for configuration-space parsing to guard conditional/forbidden handling regressions. [Bug#206]
+- Added filtering arguments for `compute features` command; user can now compute features for specific instances and extractors [Issue#211]
 
 ### Changed
 - Comparison plots now filter out `NaN` points before choosing linear/log scale and rendering. [Bug#206]
