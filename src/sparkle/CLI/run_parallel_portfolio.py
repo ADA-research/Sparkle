@@ -441,7 +441,7 @@ def submit_jobs(
     return rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
-        name=f"Parallel Portfolio: {solver_names}",
+        name=f"Parallel Portfolio {solver_names}",
         parallel_jobs=parallel_jobs,
         base_dir=sl.caller_log_dir,
         srun_options=["-N1", "-n1"] + sbatch_options,
@@ -521,7 +521,7 @@ def main(argv: list[str]) -> None:
     if args.portfolio_name is not None:  # Use a nickname
         portfolio_path = settings.DEFAULT_parallel_portfolio_output / args.portfolio_name
     else:  # Generate a timestamped nickname
-        timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.gmtime(time.time()))
+        timestamp = time.strftime("%Y-%m-%d-%H.%M.%S", time.gmtime(time.time()))
         randintstamp = int(random.getrandbits(32))
         portfolio_path = (
             settings.DEFAULT_parallel_portfolio_output / f"{timestamp}_{randintstamp}"

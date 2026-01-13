@@ -64,3 +64,36 @@ def test_compute_features_command(
     # Check the exit status
     assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == 0
+
+    # Check filters
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        compute_features.main(
+            [
+                "--settings-file",
+                str(settings_path),
+                "--run-on",
+                "slurm",
+                "--extractors",
+                "SAT-features-competition2012_revised_without_SatELite",
+            ]
+        )
+    cli_tools.kill_slurm_jobs()
+    # Check the exit status
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0
+
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        compute_features.main(
+            [
+                "--settings-file",
+                str(settings_path),
+                "--run-on",
+                "slurm",
+                "--instances",
+                "PTN/bce7824.cnf",
+            ]
+        )
+    cli_tools.kill_slurm_jobs()
+    # Check the exit status
+    assert pytest_wrapped_e.type is SystemExit
+    assert pytest_wrapped_e.value.code == 0

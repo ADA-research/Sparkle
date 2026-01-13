@@ -17,7 +17,7 @@ from sparkle.platform import Settings
 def save_current_platform(name: str = None) -> None:
     """Store the current Sparkle platform in a .zip file."""
     if name is None:
-        time_stamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
+        time_stamp = time.strftime("%Y-%m-%d-%H.%M.%S", time.localtime(time.time()))
         try:
             login = os.getlogin()
         except Exception:  # Can fail on for example CI pipelines

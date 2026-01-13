@@ -69,7 +69,7 @@ def test_irace_configure(mock_add_to_queue: Mock) -> None:
         cmd=cmds,
         output_path=outputs,
         parallel_jobs=None,
-        name=f"{IRACE.__name__}: {conf_scenario.solver.name} on "
+        name=f"{IRACE.__name__} {conf_scenario.solver.name} on "
         f"{conf_scenario.instance_set.name}",
         sbatch_options=[],
         prepend=None,
