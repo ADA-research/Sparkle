@@ -14,6 +14,7 @@ Notable changes to Sparkle will be documented in this file.
 - Membership checks in parsed conditions/forbiddens now normalise single values into lists to ensure matching works as intended. [Bug#206]
 
 ### Fixed
+- Solver wrapper templates now assign solver executables in both path branches and exit early on failed subprocess launches, avoiding NameErrors and clearer error reporting. [Bug#207]
 - Performance data cleaning now drops `NaN` entries per sub-series and raises if a whole sub-series is `NaN`, avoiding silent failures. [Bug#206]
 - Improved the ability of concurrent writing by PDF. [Issue#215]
 - Various performance speed up for CLI commands.
