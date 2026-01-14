@@ -22,10 +22,8 @@ del args["cutoff_time"]
 del args["seed"]
 
 solver_name = "MetaVC"
-if solver_dir != Path("."):
-    solver_exec = f"{solver_dir / solver_name}"
-else:
-    f"./{solver_name}"
+solver_exec = f"{solver_dir / solver_name}" if solver_dir != Path(".") else f"./{solver_name}"
+
 
 '''
 c Usage: ./MetaVC   (*Required*)
@@ -84,6 +82,12 @@ try:
                                  capture_output=True)
 except Exception as ex:
     print(f"Solver call failed with exception:\n{ex}")
+    sys.exit(1)
+
+if solver_call.returncode != 0:
+    print(f"Solver call failed with return code {solver_call.returncode}")
+    print(solver_call.stderr.decode())
+    sys.exit(solver_call.returncode)
 
 # Convert Solver output to dictionary for configurator target algorithm script
 output_str = solver_call.stdout.decode()

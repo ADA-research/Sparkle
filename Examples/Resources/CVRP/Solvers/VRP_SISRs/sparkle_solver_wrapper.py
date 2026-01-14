@@ -14,7 +14,6 @@ args_dict = parse_solver_wrapper_args(sys.argv[1:])
 solver_dir = args_dict["solver_dir"]
 instance = args_dict["instance"]
 seed = args_dict["seed"]
-seed = args_dict["seed"]
 
 # Construct the base solver call
 solver_binary = "VRP_SISRs"
@@ -29,10 +28,15 @@ params = get_solver_call_params(args_dict)
 
 # Execute the solver call
 try:
-    solver_call = subprocess.run(solver_cmd + params,
-                                 capture_output=True)
+    solver_call = subprocess.run(solver_cmd + params, capture_output=True)
 except Exception as ex:
     print(f"Solver call failed with exception:\n{ex}")
+    sys.exit(1)
+
+if solver_call.returncode != 0:
+    print(f"Solver call failed with return code {solver_call.returncode}")
+    print(solver_call.stderr.decode())
+    sys.exit(solver_call.returncode)
 
 output_str = solver_call.stdout.decode()
 print(output_str)  # Print original output so it can be verified
