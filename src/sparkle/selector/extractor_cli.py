@@ -92,8 +92,9 @@ if __name__ == "__main__":
                     feature_group,
                     feature_name,
                     float(value),
+                    # append_write_csv=True
                 )
-            feature_data.save_csv()
+                feature_data.save_csv()
         lock.release()
     else:
         print(

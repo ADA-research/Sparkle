@@ -128,6 +128,7 @@ class PerformanceDataFrame(pd.DataFrame):
                             (solver, config_id, PerformanceDataFrame.column_value),
                         ]
                     )
+            print(column_tuples)
             mcolumns = pd.MultiIndex.from_tuples(
                 column_tuples,
                 names=[
