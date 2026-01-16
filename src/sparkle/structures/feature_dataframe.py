@@ -38,7 +38,7 @@ class FeatureDataFrame(pd.DataFrame):
             temp_df = pd.read_csv(
                 csv_filepath,
                 # index_col=FeatureDataFrame.multi_dim_names,
-                header=[0, 1, 2],
+                header=[0, 1, 2, 3],
                 index_col=[0],
                 dtype={
                     FeatureDataFrame.extractor_dim: str,
@@ -50,6 +50,7 @@ class FeatureDataFrame(pd.DataFrame):
                 skip_blank_lines=True,
             )
             super().__init__(temp_df)
+            self.index.name = FeatureDataFrame.instances_index_dim
             self.csv_filepath = csv_filepath
         # Create a new dataframe
         else:
@@ -68,8 +69,6 @@ class FeatureDataFrame(pd.DataFrame):
                         FeatureDataFrame.feature_name_dim,
                     )
                 ]
-            # if not instances:
-            #     instances = [str(FeatureDataFrame.missing_value)] #["PLACEHOLDER"]
             # Initialise new dataframe
             multi_columns = pd.MultiIndex.from_tuples(
                 multi_column_lists, names=self.multi_dim_column_names
@@ -80,10 +79,25 @@ class FeatureDataFrame(pd.DataFrame):
                 columns=multi_columns,
                 dtype=float,
             )
-            self.index.name = "Instances"
-            #            self.index.
+            self.index.name = FeatureDataFrame.instances_index_dim
             self.csv_filepath = csv_filepath
             self.save_csv()
+
+        # print(self.index)
+        # input()
+        if self.index.duplicated().any():  # Drop all duplicates except for last
+            self.reset_index(inplace=True)  # Reset index to column
+            self.drop_duplicates(
+                subset=self.columns[0], keep="last", inplace=True
+            )  # filter duplicates from index column
+            self.set_index(
+                self.columns[0], inplace=True
+            )  # Restore the Instance Index (in-place)
+            self.index.name = FeatureDataFrame.instances_index_dim
+
+        # Sort the index to optimize lookup speed
+        self.sort_index(axis=0, inplace=True)
+        self.sort_index(axis=1, inplace=True)
 
     def add_extractor(
         self: FeatureDataFrame,
@@ -169,29 +183,27 @@ class FeatureDataFrame(pd.DataFrame):
 
     def set_value(
         self: FeatureDataFrame,
-        instance: str | list[str],
+        instance: str,
         extractor: str,
         feature_group: str,
-        feature_name: str,
+        feature_name: str | list[str],
         value: float | list[float],
         append_write_csv: bool = False,
     ) -> None:
         """Set a value in the dataframe."""
-        if isinstance(instance, list) and isinstance(value, list):
-            if len(instance) != len(value):
+        if isinstance(feature_name, list) and isinstance(value, list):
+            if len(feature_name) != len(value):
                 raise ValueError(
-                    f"Instances and values must be the same length ({len(instance)}, {len(value)})."
+                    f"feature_name and values must be the same length ({len(feature_name)}, {len(value)})."
                 )
-        elif isinstance(instance, list) or isinstance(value, list):
+        elif isinstance(feature_name, list) or isinstance(value, list):
             raise ValueError(
-                f"Instance parameter and value must be the same type ({type(instance)}, {type(value)})."
+                f"feature_name parameter and value must be the same type ({type(feature_name)}, {type(value)})."
             )
         # self.loc[(feature_group, feature_name, extractor), instance] = value
         self.loc[instance, (extractor, feature_group, feature_name)] = value
         if append_write_csv:
-            writeable = self.loc[
-                [(feature_group, feature_name, extractor)], :
-            ]  # Take line
+            writeable = self.loc[[instance], :]  # Take line
             # Append the new rows to the dataframe csv file
             import os
 
