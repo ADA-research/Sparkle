@@ -225,8 +225,12 @@ class FeatureDataFrame(pd.DataFrame):
                     remaining_jobs.append((instance, extractor, group))
         return list(set(remaining_jobs))  # Filter duplicates
 
-    def get_instance(self: FeatureDataFrame, instance: str) -> list[float]:
+    def get_instance(
+        self: FeatureDataFrame, instance: str, as_dataframe: bool = False
+    ) -> list[float]:
         """Return the feature vector of an instance."""
+        if as_dataframe:
+            return self.loc[[instance]]
         return self.loc[instance].tolist()
 
     def impute_missing_values(self: FeatureDataFrame) -> None:
