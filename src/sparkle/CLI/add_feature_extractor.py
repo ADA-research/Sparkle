@@ -80,6 +80,10 @@ def main(argv: list[str]) -> None:
         )
         sys.exit(-1)
 
+    # Get the extractor features groups and names from the wrapper, try to add to FDF
+    feature_dataframe = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
+    feature_dataframe.add_extractor(extractor_source.name, extractor_source.features)
+
     if args.no_copy:
         print(
             f"Creating symbolic link from {extractor_source_path} "
@@ -92,6 +96,8 @@ def main(argv: list[str]) -> None:
         shutil.copytree(extractor_source_path, extractor_target_path, dirs_exist_ok=True)
 
     extractor = Extractor(extractor_target_path)
+    # Everything passed, can save FDF
+    feature_dataframe.save_csv()
 
     # Add RunSolver executable to the solver
     runsolver_path = gv.settings().DEFAULT_runsolver_exec
@@ -108,11 +114,6 @@ def main(argv: list[str]) -> None:
         runsolver_target.chmod(runsolver_target.stat().st_mode | stat.S_IEXEC)
     else:
         print("Warning! RunSolver does not exists. Falling back to PyRunSolver.")
-
-    # Get the extractor features groups and names from the wrapper
-    feature_dataframe = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
-    feature_dataframe.add_extractor(extractor.name, extractor.features)
-    feature_dataframe.save_csv()
 
     print(f"Adding feature extractor {extractor_target_path.name} done!")
 

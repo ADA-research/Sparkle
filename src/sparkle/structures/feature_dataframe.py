@@ -38,7 +38,7 @@ class FeatureDataFrame(pd.DataFrame):
             temp_df = pd.read_csv(
                 csv_filepath,
                 # index_col=FeatureDataFrame.multi_dim_names,
-                header=[0, 1, 2, 3],
+                header=[0, 1, 2],
                 index_col=[0],
                 dtype={
                     FeatureDataFrame.extractor_dim: str,
@@ -83,8 +83,6 @@ class FeatureDataFrame(pd.DataFrame):
             self.csv_filepath = csv_filepath
             self.save_csv()
 
-        # print(self.index)
-        # input()
         if self.index.duplicated().any():  # Drop all duplicates except for last
             self.reset_index(inplace=True)  # Reset index to column
             self.drop_duplicates(
@@ -114,14 +112,18 @@ class FeatureDataFrame(pd.DataFrame):
                 Defaults to FeatureDataFrame.missing_value.
         """
         if values is None:
-            values = [self.missing_value] * len(extractor_features)
-        if self.num_extractors == 1 and str(math.nan) in self.extractors:
-            self.drop(
-                str(math.nan), axis=1, level=FeatureDataFrame.extractor_dim, inplace=True
-            )
+            values = [self.missing_value] * len(
+                extractor_features
+            )  # Single missing value for each feature
         # Unfold to indices to lists
         for index, (feature_group, feature) in enumerate(extractor_features):
             self[(extractor, feature_group, feature)] = values[index]
+        if (
+            self.num_extractors == 2 and str(math.nan) in self.extractors
+        ):  # Upon successfull adding of the extractor, remove the nan extractor
+            self.drop(
+                str(math.nan), axis=1, level=FeatureDataFrame.extractor_dim, inplace=True
+            )
 
     def add_instances(
         self: FeatureDataFrame, instance: str | list[str], values: list[float] = None
@@ -257,7 +259,9 @@ class FeatureDataFrame(pd.DataFrame):
 
     def reset_dataframe(self: FeatureDataFrame) -> bool:
         """Resets all values to FeatureDataFrame.missing_value."""
-        self.loc[:, :] = FeatureDataFrame.missing_value
+        self.loc[:, (slice(None), slice(None), slice(None))] = (
+            FeatureDataFrame.missing_value
+        )
 
     def sort(self: FeatureDataFrame) -> None:
         """Sorts the DataFrame by Multi-Index for readability."""
