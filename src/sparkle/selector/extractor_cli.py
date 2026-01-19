@@ -69,6 +69,9 @@ if __name__ == "__main__":
         log_dir=log_dir,
     )
 
+    if features is None or len(features) == 0:
+        raise ValueError("No features found! Check extractor logs.")
+
     feature_data_per_group = {}
     for feature_group, feature_name, value in features:
         if feature_group not in feature_data_per_group:
