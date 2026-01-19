@@ -24,7 +24,7 @@ class Extractor(SparkleCallable):
     extractor_cli = Path(__file__).parent / "extractor_cli.py"
 
     output_pattern = re.compile(
-        r"^(?P<timestamp1>\d+\.\d+)/(?P<timestamp2>\d+\.\d+)\s+(?P<output>.*?\S)\s*$"
+        r"(?P<timestamp1>\d+\.\d+)\/(?P<timestamp2>\d+\.\d+)\s*(?P<output>\[[^\]]*\])(?:\r)?.*"
     )
 
     def __init__(self: Extractor, directory: Path) -> None:
@@ -177,6 +177,7 @@ class Extractor(SparkleCallable):
         )
         run_on = Runner.LOCAL  # TODO: Let this function also handle Slurm runs
         extractor_run = rrr.add_to_queue(runner=run_on, cmd=" ".join(cmd_extractor))
+        # TODO: Add options to extract values from RunRunner to determine timeouts and handle accordingly
         if isinstance(extractor_run, LocalRun):
             extractor_run.wait()
             if extractor_run.status == Status.ERROR:

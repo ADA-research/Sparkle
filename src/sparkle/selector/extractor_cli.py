@@ -70,7 +70,9 @@ if __name__ == "__main__":
     )
 
     if features is None or len(features) == 0:
-        raise ValueError("No features found! Check extractor logs.")
+        raise ValueError(
+            "No features found! This may be due to a timeout. Check extractor logs."
+        )
 
     feature_data_per_group = {}
     for feature_group, feature_name, value in features:
