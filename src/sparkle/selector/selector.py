@@ -112,13 +112,13 @@ class Selector:
         feature_data: FeatureDataFrame,
     ) -> list:
         """Run the Selector, returning the prediction schedule upon success."""
-        instance_features = feature_data[
-            [
-                instance,
-            ]
-        ]
-        instance_features.index = instance_features.index.map("_".join)  # Reduce
-        instance_features = instance_features.T  # ASF dataframe structure
+        instance_features = feature_data.get_instance(instance, as_dataframe=True)
+        # instance_features = feature_data[
+        #     [
+        #         instance,
+        #     ]
+        # ]
+        # instance_features.columns = instance_features.columns.map("_".join)  # Reduce columns multi index
         selector = self.selector_class.load(selector_path)
         schedule = selector.predict(instance_features)
         if schedule is None:
@@ -285,9 +285,11 @@ class SelectionScenario:
             self.feature_extractors = feature_data.extractors
             # Features requires instances as index, columns as feature names
             feature_target = feature_data.copy()
-            feature_target.index = feature_target.index.map("_".join)  # Reduce Index
+            feature_target.columns = feature_target.columns.map(
+                "_".join
+            )  # Reduce Column Multi Index to single
             # ASF -> feature columns, instance rows
-            self.feature_data: pd.DataFrame = feature_target.T.astype(float)
+            self.feature_data: pd.DataFrame = feature_target.astype(float)
             self.feature_target_path: Path = self.directory / "feature_data.csv"
         else:  # Read from Path
             self.feature_extractors = feature_extractors

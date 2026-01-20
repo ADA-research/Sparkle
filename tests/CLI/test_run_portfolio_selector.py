@@ -71,7 +71,7 @@ def test_run_portfolio_selector_command(
     # Run set test slurm
     scenario = (
         "Output/Selection/MultiClassClassifier_RandomForestClassifier/"
-        "CSCCSat_MiniSAT_PbO-CCSAT-Generic/scenario.txt"
+        "CSCCSat_PbO-CCSAT-Generic/scenario.txt"
     )
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         run_portfolio_selector.main(

@@ -62,6 +62,15 @@ if __name__ == "__main__":
         instance_list = [str(instance_path)]
 
     extractor = Extractor(extractor_path)
+    if args.feature_group:
+        print(
+            f"Calling {extractor.name} with feature group {args.feature_group} for instance {instance_list} with cutoff {cutoff_extractor}"
+        )
+    else:
+        print(
+            f"Calling {extractor.name} for instance {instance_list} with cutoff {cutoff_extractor}"
+        )
+
     features = extractor.run(
         instance_list,
         feature_group=args.feature_group,
@@ -69,15 +78,25 @@ if __name__ == "__main__":
         log_dir=log_dir,
     )
 
+    if features is None or len(features) == 0:
+        raise ValueError(
+            "No features found! This may be due to a timeout. Check extractor logs."
+        )
+
+    feature_data_per_group = {}
     for feature_group, feature_name, value in features:
+        if feature_group not in feature_data_per_group:
+            feature_data_per_group[feature_group] = [[], []]
         print(
             f"{extractor_path.name} {instance_name} {feature_group} {feature_name} | {value}"
         )  # For logging purposes
+        feature_data_per_group[feature_group][0] += [feature_name]
+        feature_data_per_group[feature_group][1] += [float(value)]
 
     # Now that we have our result, we write it to the FeatureDataCSV with a FileLock
     lock = FileLock(f"{feature_data_csv_path}.lock")
     if features is not None:
-        print("Writing features to file...")  # For logging purposes
+        print("Writing features to file...")
         with lock.acquire(timeout=600):
             feature_data = FeatureDataFrame(feature_data_csv_path)
             instance_key = (
@@ -85,16 +104,21 @@ if __name__ == "__main__":
                 if instance_name in feature_data.instances
                 else str(instance_path[0].with_suffix(""))
             )
-            for feature_group, feature_name, value in features:
+            for feature_group, (
+                feature_names,
+                feature_values,
+            ) in feature_data_per_group.items():
+                # for feature_group, feature_name, value in features:
                 feature_data.set_value(
                     instance_key,
                     extractor_path.name,
                     feature_group,
-                    feature_name,
-                    float(value),
+                    feature_names,
+                    feature_values,
+                    append_write_csv=True,
                 )
-            feature_data.save_csv()
         lock.release()
+        print("Writing successful!")
     else:
         print(
             "EXCEPTION during retrieving extractor results.\n"

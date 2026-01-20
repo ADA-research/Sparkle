@@ -263,29 +263,9 @@ def main(argv: list[str]) -> None:
         print(
             f"Extracted {count} values from the logs and placed them in the FeatureDataFrame."
         )
-
-        wrong_indices = []
-        for group, feature, extractor in feature_data.index:
-            # print(feature)
-            # print(isinstance(feature, str))
-            # print(isinstance(feature, float))
-            # print(feature.lower() in ("", "nan"))
-            # print(math.isnan(feature))
-            # print(isinstance(feature, str) and feature.lower() in ("", "nan") or isinstance(feature, float) and math.isnan(feature))
-            if (
-                (isinstance(group, str) and group.lower() in ("", "nan"))
-                or (isinstance(group, float) and math.isnan(group))
-                or (isinstance(feature, str) and feature.lower() in ("", "nan"))
-                or (isinstance(feature, float) and math.isnan(feature))
-                or (isinstance(extractor, str) and extractor.lower() in ("", "nan"))
-                or (isinstance(extractor, float) and math.isnan(extractor))
-            ):  # Unrecognisable row, delete
-                wrong_indices.append((group, feature, extractor))
-        if wrong_indices:
-            feature_data.drop(wrong_indices, inplace=True)
-            feature_data.save_csv()
-            print(f"Deleted {len(wrong_indices)} faulty indices.")
+        feature_data.save_csv()
         # TODO: Can do other cleanup like index verification and empty line removal etc
+        # For example, we can check if each index references a valid instance, if not, remove the line
 
     if args.all:
         shutil.rmtree(gv.settings().DEFAULT_output, ignore_errors=True)

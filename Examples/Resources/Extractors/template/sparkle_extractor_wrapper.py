@@ -1,66 +1,59 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Template for users to create Feature Extractor wrappers."""
-
-import time
+"""Extractor wrapper for SAT2012."""
 import sys
-import random
 import argparse
+from enum import Enum
 import subprocess
 from pathlib import Path
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-features", action="store_true",
-                    help="Only print features and their groups as a list of tuples.")
+parser = argparse.ArgumentParser(description="Handle I/O for the extractor.")
+parser.add_argument("-features", action="store_true", help="Argument to return the features this extractor provides (Group + name, as list of tuples)")
 parser.add_argument("-extractor_dir", type=str, help="Path to the extractor directory")
 parser.add_argument("-instance_file", type=str, help="Path to the instance file")
-# You can add the "feature_group" argument if you want to allow parallelisation of
-# computation on a single instance.
-# You will need to write code to handle the computation of a single feature group
-# by your extractor.
-# parser.add_argument("-feature_group", type=str, help="The feature group to compute for
-# this instance. If not present, all will be computed.")
 parser.add_argument("-output_file", type=str, help="Path to the output file")
 args = parser.parse_args()
 
-# Define your feature names as {output_feature_name: (feature_group, feature_name)}
-# (Optional) Map your feature names to the Sparkle feature enums to unify your extractor
-# with various other extractors
+# TODO: Define possible feature mappings here, consisting of a group and feature name (tuple)
+
 feature_mapping = {}
 
 if args.features:
-    # Return a list of feature names and their feature groups as
-    # [(feature_group, feature_name), ...]
-    print([feature_mapping[key] for key in feature_mapping.keys()])
+    # Print the stringified features and the group they belong to
+    print([(feature_mapping[key][0].value, feature_mapping[key][1].value
+           if isinstance(feature_mapping[key][1], Enum) else feature_mapping[key][1])
+           for key in feature_mapping.keys()])
     sys.exit()
 
-extractor_dir = args.extractor_dir
-instance_path = args.instance_file
-output_file = args.output_file
+extractor_dir = Path(args.extractor_dir)
+instance_path = Path(args.instance_file)
+output_file = Path(args.output_file) if args.output_file else None
 
-# Set this to your executable descriptions or place your python code here
-extractor_name = "Example"
-executable_name = "features"
-executable = Path(extractor_dir) / executable_name
+extractor_name = ... # Name of the extractor
+executable_name = "features"  # name of the executable
+executable = extractor_dir / executable_name  # path to the executable
 
-raw_result_file_name = Path(
-    f"{extractor_dir}{executable_name}_"
-    f"{Path(instance_path).name}_"
-    f"{time.strftime('%Y%m%d-%H%M%S')}_{int(random.getrandbits(32))}"
-    ".rawres")
-tmp_output = Path("TMP") / raw_result_file_name
+extractor = subprocess.run([extractor_dir / executable_name, instance_path],
+                           capture_output=True)
 
-command_line = [Path(extractor_dir) / executable_name, instance_path, tmp_output]
+if extractor.returncode != 0:  # Error handling, TODO: Possible more errors
+    print(extractor.stdout.decode())
+    print(extractor.stderr.decode())
+    sys.exit(extractor.returncode)
 
-subprocess.run(command_line, stdout=raw_result_file_name.open("w+"))
-
-# Read all lines from the raw output file
-raw_text = Path(raw_result_file_name).read_text()
+# Read all lines from the input file
+raw_lines = extractor.stdout.decode().splitlines()
 
 # Process raw result file and write to the final result file
-with open(output_file, "w") as out_file:
-    # Do some post processing if needed here
-    out_file.write(raw_text)
+processed_features = []
+for i, feature in enumerate(features):
+    feature_group, feature_name = feature_mapping[feature]
+    if isinstance(feature_name, Enum):
+        feature_name = feature_name.value
+    processed_features.append((feature_group.value, feature_name, values[i]))  # Results must be returned as a list of TUPLES
 
-# Deletes temporary files
-raw_result_file_name.unlink(missing_ok=True)
+if output_file is not None:
+    with open(output_file, "w") as out_file:
+        out_file.write(str(processed_features))
+else:
+    print(processed_features)
