@@ -62,12 +62,15 @@ if __name__ == "__main__":
         instance_list = [str(instance_path)]
 
     extractor = Extractor(extractor_path)
-    print(
-        f"Calling {extractor.name} for instance {instance_list}"
-        " with feature group {args.feature_group}"
-        if args.feature_group
-        else f" with cutoff {cutoff_extractor} ..."
-    )
+    if args.feature_group:
+        print(
+            f"Calling {extractor.name} with feature group {args.feature_group} for instance {instance_list} with cutoff {cutoff_extractor}"
+        )
+    else:
+        print(
+            f"Calling {extractor.name} for instance {instance_list} with cutoff {cutoff_extractor}"
+        )
+
     features = extractor.run(
         instance_list,
         feature_group=args.feature_group,
