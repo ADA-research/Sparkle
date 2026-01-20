@@ -192,7 +192,8 @@ class Extractor(SparkleCallable):
             output = []
             for job in extractor_run.jobs:
                 # RunRunner adds a timestamp before the statement
-                match = self.output_pattern.match(job.stdout)
+                o = job.stdout
+                match = self.output_pattern.match(o)
                 if match:
                     output.append(ast.literal_eval(match.group("output")))
             if len(output) == 1:
