@@ -150,7 +150,7 @@ if len(raw_lines) >= 2:
         feature_group, feature_name = feature_mapping[feature]
         if isinstance(feature_name, Enum):
             feature_name = feature_name.value
-        processed_features.append([feature_group.value, feature_name, values[i]])
+        processed_features.append((feature_group.value, feature_name, values[i]))
 else:
     # Failed to compute features
     sys.exit(extractor.stdout.decode())
