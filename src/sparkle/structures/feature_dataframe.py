@@ -284,7 +284,6 @@ class FeatureDataFrame(pd.DataFrame):
     @property
     def instances(self: FeatureDataFrame) -> list[str]:
         """Return the instances in the dataframe."""
-        # return self.columns
         return self.index
 
     @property

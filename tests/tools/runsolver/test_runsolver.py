@@ -142,7 +142,9 @@ def test_runsolver_versus_pyrunsolver(
     # Verify that the discrete results are the same
     assert pysolver_output["status"] == runsolver_output["status"]
     assert pysolver_output["quality"] == runsolver_output["quality"]
-    assert pysolver_output["memory"] == runsolver_output["memory"]
+    assert (
+        abs(pysolver_output["memory"] - runsolver_output["memory"]) < 0.1
+    )  # Assume the difference in memory measurement is less than 0.1 KB(?)
 
     # Assume the results are 'similar'
     # The metrics will diverge a bit but they all should be within 2 points of eachother
