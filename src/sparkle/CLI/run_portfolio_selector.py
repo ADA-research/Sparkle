@@ -73,6 +73,7 @@ def main(argv: list[str]) -> None:
     test_case_path.mkdir(exist_ok=True)
     feature_dataframe = FeatureDataFrame(test_case_path / "feature_data.csv")
     feature_dataframe.remove_instances(feature_dataframe.instances)
+    print(feature_dataframe.extractors)
     for extractor_name in selector_scenario.feature_extractors:
         extractor = resolve_object_name(
             extractor_name,

@@ -111,19 +111,33 @@ class FeatureDataFrame(pd.DataFrame):
             values: Initial values of the Extractor per instance in the dataframe.
                 Defaults to FeatureDataFrame.missing_value.
         """
+        if extractor in self.extractors:
+            print(
+                f"WARNING: Tried adding already existing extractor {extractor} to "
+                f"Feature DataFrame: {self.csv_filepath}"
+            )
+            return
         if values is None:
             values = [self.missing_value] * len(
                 extractor_features
             )  # Single missing value for each feature
+        extractor_dim = self.columns.get_level_values(FeatureDataFrame.extractor_dim)
         # Unfold to indices to lists
         for index, (feature_group, feature) in enumerate(extractor_features):
             self[(extractor, feature_group, feature)] = values[index]
-        if (
-            self.num_extractors == 2 and str(math.nan) in self.extractors
-        ):  # Upon successfull adding of the extractor, remove the nan extractor
-            self.drop(
-                str(math.nan), axis=1, level=FeatureDataFrame.extractor_dim, inplace=True
-            )
+        if self.num_extractors > 1:
+            # Upon successfull adding of the extractor, remove the nan extractor
+            if str(math.nan) in extractor_dim:
+                self.drop(
+                    str(math.nan),
+                    axis=1,
+                    level=FeatureDataFrame.extractor_dim,
+                    inplace=True,
+                )
+            elif math.nan in extractor_dim:
+                self.drop(
+                    math.nan, axis=1, level=FeatureDataFrame.extractor_dim, inplace=True
+                )
 
     def add_instances(
         self: FeatureDataFrame, instance: str | list[str], values: list[float] = None
@@ -144,7 +158,7 @@ class FeatureDataFrame(pd.DataFrame):
         # if self.num_extractors == 0:
         if self.num_extractors == 0:  # make sure we have atleast one 'extractor'
             self.add_extractor(
-                FeatureDataFrame.missing_value,
+                str(FeatureDataFrame.missing_value),
                 [(FeatureDataFrame.missing_value, FeatureDataFrame.feature_name_dim)],
             )
 
@@ -276,8 +290,13 @@ class FeatureDataFrame(pd.DataFrame):
     @property
     def extractors(self: FeatureDataFrame) -> list[str]:
         """Returns all unique extractors in the DataFrame."""
-        # return self.index.get_level_values("Extractor").unique().to_list()
-        return self.columns.get_level_values("Extractor").unique().to_list()
+        return [
+            x
+            for x in self.columns.get_level_values(
+                FeatureDataFrame.extractor_dim
+            ).unique()
+            if str(x) != str(FeatureDataFrame.missing_value)
+        ]
 
     @property
     def num_features(self: FeatureDataFrame) -> int:
