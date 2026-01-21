@@ -37,6 +37,10 @@ def parser_function() -> argparse.ArgumentParser:
     # Settings arguments
     parser.add_argument(*ac.SettingsFileArgument.names, **ac.SettingsFileArgument.kwargs)
     parser.add_argument(*Settings.OPTION_run_on.args, **Settings.OPTION_run_on.kwargs)
+    parser.add_argument(
+        *Settings.OPTION_no_groupwise_computation.args,
+        **Settings.OPTION_no_groupwise_computation.kwargs,
+    )
     return parser
 
 
@@ -60,13 +64,37 @@ def compute_features(
     Returns:
         The Slurm job or Local job
     """
+
+    def group_jobs(
+        jobs: list[tuple[str, str, str]],
+        instances: list[InstanceSet],
+        no_groupwise_computation: bool,
+    ) -> dict[str, dict[str | None, list[str]]]:
+        """Group jobs per extractor and feature group, with optional groupwise override."""
+        grouped_job_list: dict[str, dict[str | None, set[str]]] = {}
+
+        for instance_name, extractor_name, feature_group in jobs:
+            if extractor_name not in grouped_job_list:
+                grouped_job_list[extractor_name] = {}
+            effective_group = None if no_groupwise_computation else feature_group
+            if effective_group not in grouped_job_list[extractor_name]:
+                grouped_job_list[extractor_name][effective_group] = set()
+            instance_path = resolve_instance_name(str(instance_name), instances)
+            grouped_job_list[extractor_name][effective_group].add(instance_path)
+
+        return {
+            extractor: {group: list(paths) for group, paths in feature_groups.items()}
+            for extractor, feature_groups in grouped_job_list.items()
+        }
+
+    settings = gv.settings()
     if recompute:
         feature_data.reset_dataframe()
     jobs = feature_data.remaining_jobs()
 
     # Lookup all instances to resolve the instance paths later
     instances: list[InstanceSet] = []
-    for instance_dir in gv.settings().DEFAULT_instance_dir.iterdir():
+    for instance_dir in settings.DEFAULT_instance_dir.iterdir():
         if instance_dir.is_dir():
             instances.append(Instance_Set(instance_dir))
 
@@ -77,36 +105,31 @@ def compute_features(
             "feature values use the --recompute flag."
         )
         return
-    cutoff = gv.settings().extractor_cutoff_time
-    instance_paths = set()
-    grouped_job_list: dict[str, dict[str, list[str]]] = {}
+    cutoff = settings.extractor_cutoff_time
+    grouped_job_list = group_jobs(jobs, instances, settings.no_groupwise_computation)
 
-    # Group the jobs by extractor/feature group
-    for instance_name, extractor_name, feature_group in jobs:
-        if extractor_name not in grouped_job_list:
-            grouped_job_list[extractor_name] = {}
-        if feature_group not in grouped_job_list[extractor_name]:
-            grouped_job_list[extractor_name][feature_group] = []
-        instance_path = resolve_instance_name(str(instance_name), instances)
-        grouped_job_list[extractor_name][feature_group].append(instance_path)
-
-    sbatch_options = gv.settings().sbatch_settings
-    slurm_prepend = gv.settings().slurm_job_prepend
+    sbatch_options = settings.sbatch_settings
+    slurm_prepend = settings.slurm_job_prepend
     srun_options = ["-N1", "-n1"] + sbatch_options
     runs = []
     for extractor_name, feature_groups in grouped_job_list.items():
-        extractor_path = gv.settings().DEFAULT_extractor_dir / extractor_name
+        extractor_path = settings.DEFAULT_extractor_dir / extractor_name
         extractor = Extractor(extractor_path)
         for feature_group, instance_paths in feature_groups.items():
             run = extractor.run_cli(
                 instance_paths,
                 feature_data,
                 cutoff,
-                feature_group if extractor.groupwise_computation else None,
+                (
+                    feature_group
+                    if extractor.groupwise_computation
+                    and not settings.no_groupwise_computation
+                    else None
+                ),
                 run_on,
                 sbatch_options,
                 srun_options,
-                gv.settings().slurm_jobs_in_parallel,
+                settings.slurm_jobs_in_parallel,
                 slurm_prepend,
                 log_dir=sl.caller_log_dir,
             )
