@@ -167,6 +167,10 @@ class Extractor(SparkleCallable):
 
         Returns:
             The features or None if an output file is used, or features can not be found.
+
+        Raises:
+            TimeoutError: If the extractor was cut off by RunSolver.
+            RuntimeError: If the extractor failed to run or produced no features.
         """
         log_dir = Path() if log_dir is None else log_dir
         if feature_group is not None and not self.groupwise_computation:
@@ -175,27 +179,68 @@ class Extractor(SparkleCallable):
         cmd_extractor = self.build_cmd(
             instance, feature_group, output_file, cutoff_time, log_dir
         )
+
+        # Find runsolver values file if applicable
+        runsolver_values_path = None
+        if cutoff_time is not None:
+            for flag in ("-v", "--var"):
+                if flag in cmd_extractor:
+                    flag_index = cmd_extractor.index(flag)
+                    if flag_index + 1 < len(cmd_extractor):
+                        runsolver_values_path = Path(cmd_extractor[flag_index + 1])
+                        break
+
+        def decode_stream(stream: Any) -> str:
+            """Normalize stdout/stderr to a string, decoding bytes and handling None."""
+            if stream is None:
+                return ""
+            if isinstance(stream, bytes):
+                return stream.decode(errors="replace")
+            return str(stream)
+
         run_on = Runner.LOCAL  # TODO: Let this function also handle Slurm runs
         extractor_run = rrr.add_to_queue(runner=run_on, cmd=" ".join(cmd_extractor))
-        # TODO: Add options to extract values from RunRunner to determine timeouts and handle accordingly
         if isinstance(extractor_run, LocalRun):
             extractor_run.wait()
+
+            job_logs = [
+                (decode_stream(job.stdout), decode_stream(job.stderr))
+                for job in extractor_run.jobs
+            ]
+
+            if (
+                runsolver_values_path is not None
+                and RunSolver.get_status(runsolver_values_path, None)
+                == SolverStatus.TIMEOUT
+            ):
+                raise TimeoutError(
+                    f"{self.name} timed out after {cutoff_time}s on {instance}."
+                )
+
             if extractor_run.status == Status.ERROR:
-                print(f"{self.name} failed to compute features for {instance}.")
-                for i, job in enumerate(extractor_run.jobs):
-                    print(
-                        f"Job {i} error yielded was:\n"
-                        f"\t-stdout: '{job.stdout}'\n"
-                        f"\t-stderr: '{job.stderr}'\n"
-                    )
-                return None
+                error_details = "\n".join(
+                    f"Job {i} stdout:\n{stdout or '<empty>'}\nstderr:\n{stderr or '<empty>'}"
+                    for i, (stdout, stderr) in enumerate(job_logs)
+                )
+                raise RuntimeError(
+                    f"{self.name} failed to compute features for {instance}.\n"
+                    f"{error_details}"
+                )
             output = []
-            for job in extractor_run.jobs:
+            for job, (stdout, _) in zip(extractor_run.jobs, job_logs):
                 # RunRunner adds a timestamp before the statement
-                # o = job.stdout
-                match = self.output_pattern.match(job.stdout)
+                match = self.output_pattern.match(stdout)
                 if match:
                     output.append(ast.literal_eval(match.group("output")))
+            if not output and output_file is None:
+                output_details = "\n".join(
+                    f"Job {i} stdout:\n{stdout or '<empty>'}\nstderr:\n{stderr or '<empty>'}"
+                    for i, (stdout, stderr) in enumerate(job_logs)
+                )
+                raise RuntimeError(
+                    f"{self.name} did not produce feature values for {instance}.\n"
+                    f"{output_details}"
+                )
             if len(output) == 1:
                 return output[0]
             return output
