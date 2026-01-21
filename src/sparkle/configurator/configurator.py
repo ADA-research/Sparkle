@@ -566,13 +566,15 @@ class AblationScenario:
             "sourceConfiguration = DEFAULT\n"
             f'targetConfiguration = "{opt_config_str}"'
         )
-        config_file.open("w").write(config)
+        with config_file.open("w") as file:
+            file.write(config)
         # Write config to validation directory
         conf_valid = config.replace(
             f"execdir = {self.tmp_dir.absolute()}\n",
             f"execdir = {self.validation_dir_tmp.absolute()}\n",
         )
-        (self.validation_dir / config_file.name).open("w").write(conf_valid)
+        with self.validation_dir.open("w") as file:
+            file.write(conf_valid)
         return self.validation_dir / config_file.name
 
     def create_instance_file(self: AblationScenario, test: bool = False) -> Path:
