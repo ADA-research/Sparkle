@@ -195,6 +195,7 @@ class Extractor(SparkleCallable):
             if stream is None:
                 return ""
             if isinstance(stream, bytes):
+                # use replace to substitute undecodable bytes with replacement character
                 return stream.decode(errors="replace")
             return str(stream)
 
