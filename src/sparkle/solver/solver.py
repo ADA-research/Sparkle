@@ -118,6 +118,15 @@ class Solver(SparkleCallable):
                     return self._pcs_file
         return self._pcs_file
 
+    def get_pcs_file_type(self: Solver, convention: PCSConvention) -> Path:
+        """Get path of the parameter file of a specific convention."""
+        for file in self.directory.iterdir():
+            if file.name == Solver.meta_data:
+                continue  # Skip this file, never correct
+            if PCSConverter.get_convention(file) == convention:
+                return file
+        return None
+
     @property
     def wrapper_extension(self: Solver) -> str:
         """Get the extension of the wrapper file."""

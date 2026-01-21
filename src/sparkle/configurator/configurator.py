@@ -13,6 +13,7 @@ import runrunner as rrr
 from runrunner import Runner, Run
 
 from sparkle.solver import Solver
+from sparkle.tools.parameters import PCSConvention
 from sparkle.instance import InstanceSet, Instance_Set
 from sparkle.structures import PerformanceDataFrame
 from sparkle.types import SparkleObjective
@@ -535,7 +536,8 @@ class AblationScenario:
 
         smac_run_obj = "RUNTIME" if objective.time else "QUALITY"
         objective_str = "MEAN10" if objective.time else "MEAN"
-        pcs_file_path = f"{self.config_scenario.solver.pcs_file.absolute()}"
+        # Fetch the SMAC2 PCS file path
+        pcs_file_path = f"{self.config_scenario.solver.get_pcs_file_type(PCSConvention.SMAC).absolute()}"
 
         # Create config file
         config_file = self.scenario_dir / "ablation_config.txt"
