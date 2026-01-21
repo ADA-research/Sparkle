@@ -248,6 +248,11 @@ class FeatureDataFrame(pd.DataFrame):
         """
         remaining_jobs = []
         for extractor, group, _ in self.columns:
+            if (
+                extractor == str(FeatureDataFrame.missing_value)
+                or extractor == FeatureDataFrame.missing_value
+            ):
+                continue
             for instance in self.index:
                 if self.loc[instance, (extractor, group, slice(None))].isnull().all():
                     remaining_jobs.append((instance, extractor, group))
