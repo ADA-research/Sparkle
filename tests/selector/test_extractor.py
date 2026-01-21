@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 from pathlib import Path
+from types import SimpleNamespace
 import pytest
-from sparkle.selector import Extractor
 from unittest.mock import patch
+from runrunner.base import Status
+from sparkle.selector import Extractor
+from sparkle.types import SolverStatus
 
 
 test_dir_2024 = Path("Examples/Resources/Extractors/SAT-features-competition2024/")
@@ -179,10 +182,57 @@ def test_build_cmd() -> None:
     pass
 
 
-def test_run() -> None:
-    """Test for method run."""
-    # TODO: Write test
-    pass
+def test_run_returns_parsed_output() -> None:
+    """Extractor.run returns parsed feature tuples on success."""
+    stdout = '12.34/56.78\t[("grp", "feat", 1.0)]'
+    fake_run = SimpleNamespace(
+        status=Status.COMPLETED,
+        jobs=[SimpleNamespace(stdout=stdout, stderr="")],
+        wait=lambda: None,
+    )
+
+    with patch("runrunner.add_to_queue", return_value=fake_run):
+        result = extractor_2012.run(Path("dummy"))
+
+    assert result == [("grp", "feat", 1.0)]
+
+
+def test_run_raises_on_error_status() -> None:
+    """Extractor.run raises RuntimeError when the LocalRun reports ERROR."""
+    fake_run = SimpleNamespace(
+        status=Status.ERROR,
+        jobs=[SimpleNamespace(stdout="12.34/56.78\t", stderr="Traceback: boom")],
+        wait=lambda: None,
+    )
+
+    with patch("runrunner.add_to_queue", return_value=fake_run):
+        with pytest.raises(RuntimeError):
+            extractor_2012.run(Path("dummy"))
+
+
+def test_run_raises_on_timeout(tmp_path: Path) -> None:
+    """Extractor.run raises TimeoutError when RunSolver reports TIMEOUT."""
+    fake_val = tmp_path / "fake.val"
+    fake_run = SimpleNamespace(
+        status=Status.COMPLETED,
+        jobs=[SimpleNamespace(stdout='12.34/56.78\t[("grp", "feat", 1.0)]', stderr="")],
+        wait=lambda: None,
+    )
+
+    with (
+        patch.object(
+            extractor_2012,
+            "build_cmd",
+            return_value=["wrapper", "-v", str(fake_val), "other"],
+        ),
+        patch("runrunner.add_to_queue", return_value=fake_run),
+        patch(
+            "sparkle.selector.extractor.RunSolver.get_status",
+            return_value=SolverStatus.TIMEOUT,
+        ),
+    ):
+        with pytest.raises(TimeoutError):
+            extractor_2012.run(Path("dummy"), cutoff_time=10)
 
 
 def test_output_regex() -> None:
