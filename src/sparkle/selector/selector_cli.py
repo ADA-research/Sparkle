@@ -64,8 +64,6 @@ def main(argv: list[str]) -> None:
     # Run portfolio selector
     print(f"Sparkle portfolio selector predicting for instance {instance_name} ...")
     feature_instance_name = instance_name
-    print(feature_data.instances)
-    print(feature_data)
     if instance_name not in feature_data.instances:
         if Path(instance_name).name in feature_data.instances:
             feature_instance_name = Path(instance_name).name
