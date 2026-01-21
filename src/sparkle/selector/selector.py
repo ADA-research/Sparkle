@@ -128,7 +128,8 @@ class Selector:
         schedule = schedule[instance]
         for index, (solver, time) in enumerate(schedule):
             # Split solver name back into solver and config id
-            solver_name, conf_index = solver.rsplit("_", maxsplit=1)
+            # NOTE: There is an issue with this incase the Solver name has an "_" in its name... We need to change the delimiter to different character(s)
+            solver_name, conf_index = solver.split("_", maxsplit=1)
             schedule[index] = (solver_name, conf_index, time)
         return schedule
 
