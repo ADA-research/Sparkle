@@ -2,7 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.9.6] - ??/??/2026
+## [0.9.6] - 21/01/2026
 
 ### Added
 - Broader coverage for configuration-space parsing to guard conditional/forbidden handling regressions. [Bug#206]
