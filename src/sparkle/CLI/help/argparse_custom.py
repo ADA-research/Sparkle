@@ -72,18 +72,18 @@ CancelJobsArgument = ArgumentContainer(
 CheckTypeArgument = ArgumentContainer(
     names=["type"],
     kwargs={
-        "choices": [
-            "extractor",
-            "feature-extractor",
-            "solver",
-            "instance-set",
-            "ExtractorFeature-Extractor",
-            "Instance-Set",
-            "Solver",
-            "FeatureExtractor",
-            "InstanceSet",
-        ],
-        "help": "type of the object to check",
+        # "choices": [
+        #     "extractor",
+        #     "feature-extractor",
+        #     "solver",
+        #     "instance-set",
+        #     "ExtractorFeature-Extractor",
+        #     "Instance-Set",
+        #     "Solver",
+        #     "FeatureExtractor",
+        #     "InstanceSet",
+        # ],
+        "help": "type of the object to check (Solver, Extractor, InstanceSet)",
     },
 )
 
@@ -111,9 +111,16 @@ CleanupArgumentLogs = ArgumentContainer(
 
 CleanUpPerformanceDataArgument = ArgumentContainer(
     names=["--performance-data"],
-    kwargs={"action": "store_true", "help": "clean performance data from empty lines"},
+    kwargs={
+        "action": "store_true",
+        "help": "clean performance data from errorneous lines",
+    },
 )
 
+CleanUpFeatureDataArgument = ArgumentContainer(
+    names=["--feature-data"],
+    kwargs={"action": "store_true", "help": "clean feature data from errorneous lines"},
+)
 
 ConfigurationArgument = ArgumentContainer(
     names=["--configuration"],
@@ -148,6 +155,17 @@ DownloadExamplesArgument = ArgumentContainer(
         "default": False,
         "required": False,
         "help": "Download the Examples into the directory.",
+    },
+)
+
+ExtractorsArgument = ArgumentContainer(
+    names=["--extractors", "--extractor_paths", "--extractor", "--extractor_path"],
+    kwargs={
+        "required": False,
+        "metavar": "extractor",
+        "type": str,
+        "nargs": "+",
+        "help": "path or nickname of the feature extractor(s)",
     },
 )
 
@@ -305,6 +323,10 @@ NoSavePlatformArgument = ArgumentContainer(
         "required": False,
         "help": "do not save the platform upon re-initialisation.",
     },
+)
+
+ObjectiveArgument = ArgumentContainer(
+    names=["--objective"], kwargs={"type": str, "help": "the objective to use."}
 )
 
 RecomputeFeaturesArgument = ArgumentContainer(
@@ -476,6 +498,28 @@ SolutionVerifierArgument = ArgumentContainer(
     },
 )
 
-ObjectiveArgument = ArgumentContainer(
-    names=["--objective"], kwargs={"type": str, "help": "the objective to use."}
+WrapPathArgument = ArgumentContainer(
+    names=["path"], kwargs={"type": Path, "help": "path to the directory to wrap"}
+)
+
+WrapTargetArgument = ArgumentContainer(
+    names=["target"],
+    kwargs={"type": Path, "help": "relative path to the target executable"},
+)
+
+WrapTypeArgument = ArgumentContainer(
+    names=["type"],
+    kwargs={
+        "type": str,
+        "help": "type of the target to wrap (Solver or Extractor)",
+    },
+)
+
+WrapGeneratePCSArgument = ArgumentContainer(
+    names=["--generate-pcs"],
+    kwargs={
+        "required": False,
+        "action": "store_true",
+        "help": "generate a Solver Parameter Configuration Space (PCS) file for the target",
+    },
 )

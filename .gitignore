@@ -40,6 +40,7 @@ Documentation/build
 
 # Virtual Environments
 venv/
+.venv/
 
 # Common IDE
 .idea

@@ -1,0 +1,6 @@
+### Minimal IRACE PCS to test bare categorical tokens
+cat_param "--cat_param " c (foo,bar,baz)
+ord_param "--ord_param " o (slow,medium,fast)
+real_param "--real_param " r (0.0, 1.0)
+flag_param "--flag_param " c (on,off)
+dependent_param "--dependent_param " i (1, 5) | flag_param %in% (on)

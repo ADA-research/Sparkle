@@ -1,0 +1,10 @@
+selector: MultiClassClassifier_RandomForestClassifier
+solver_cutoff: 60
+extractor_cutoff: 60
+ablate: False
+objective: PAR10
+selector_performance_data: tests/test_files/Selector/scenario/selector_performance.csv
+performance_data: tests/test_files/Selector/scenario/performance_data.csv
+feature_data: tests/test_files/Selector/scenario/feature_data.csv
+feature_extractors: Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite
+test_set: tests/test_files/Instances/Test-Instance-Set/test_instance_1.cnf

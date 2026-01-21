@@ -3,6 +3,7 @@
 """Run a solver, read/write to performance dataframe."""
 
 import sys
+import ast
 from filelock import FileLock
 import argparse
 from pathlib import Path
@@ -127,7 +128,11 @@ def main(argv: list[str]) -> None:
     )
 
     if args.configuration:  # Configuration provided, override
-        configuration = parse_commandline_dict(args.configuration)
+        if isinstance(args.configuration, list):
+            configuration = parse_commandline_dict(args.configuration)
+        else:
+            configuration = ast.literal_eval(args.configuration)
+        print(configuration)
         config_id = configuration["configuration_id"]
     elif (
         (
@@ -210,12 +215,6 @@ def main(argv: list[str]) -> None:
 
     # Desyncronize from other possible jobs writing to the same file
     time.sleep(random.random() * 100)
-    # TESTLOG
-    # lock = FileLock("test.log.lock")
-    # with lock.acquire(timeout=600):
-    #     with Path("test.log").open("a") as f:
-    #         for objective in objectives:
-    #             f.write(f"{objective.name}, {instance_name}, {args.run_index} | {solver} {config_id}: {solver_output[objective.name]}, {seed}\n")
 
     # Now that we have all the results, we can add them to the performance dataframe
     lock = FileLock(f"{args.performance_dataframe}.lock")  # Lock the file

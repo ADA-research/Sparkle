@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Any
 from pathlib import Path
 import ast
+import re
 import subprocess
 
 import runrunner as rrr
@@ -19,8 +20,12 @@ from sparkle.instance import InstanceSet
 class Extractor(SparkleCallable):
     """Extractor base class for extracting features from instances."""
 
-    wrapper = "sparkle_extractor_wrapper.py"
+    wrapper_file_name = "sparkle_extractor_wrapper"
     extractor_cli = Path(__file__).parent / "extractor_cli.py"
+
+    output_pattern = re.compile(
+        r"(?P<timestamp1>\d+\.\d+)\/(?P<timestamp2>\d+\.\d+)\s*(?P<output>\[[^\]]*\])(?:\r)?.*"
+    )
 
     def __init__(self: Extractor, directory: Path) -> None:
         """Initialize solver.
@@ -34,6 +39,7 @@ class Extractor(SparkleCallable):
         self._features = None
         self._feature_groups = None
         self._groupwise_computation = None
+        self._wrapper: Path = None
 
     def __str__(self: Extractor) -> str:
         """Return the string representation of the extractor."""
@@ -51,11 +57,21 @@ class Extractor(SparkleCallable):
         )
 
     @property
+    def wrapper(self: Extractor) -> Path:
+        """Determines the Path to the Extractor wrapper."""
+        if self._wrapper is None:
+            if (self.directory / f"{Extractor.wrapper_file_name}.sh").exists():
+                self._wrapper = self.directory / f"{Extractor.wrapper_file_name}.sh"
+            elif (self.directory / f"{Extractor.wrapper_file_name}.py").exists():
+                self._wrapper = self.directory / f"{Extractor.wrapper_file_name}.py"
+        return self._wrapper
+
+    @property
     def features(self: Extractor) -> list[tuple[str, str]]:
         """Determines the features of the extractor."""
         if self._features is None:
             extractor_process = subprocess.run(
-                [self.directory / Extractor.wrapper, "-features"], capture_output=True
+                [self.wrapper, "-features"], capture_output=True
             )
             self._features = ast.literal_eval(extractor_process.stdout.decode())
         return self._features
@@ -76,9 +92,7 @@ class Extractor(SparkleCallable):
     def groupwise_computation(self: Extractor) -> bool:
         """Determines if you can call the extractor per group for parallelisation."""
         if self._groupwise_computation is None:
-            extractor_help = subprocess.run(
-                [self.directory / Extractor.wrapper, "-h"], capture_output=True
-            )
+            extractor_help = subprocess.run([self.wrapper, "-h"], capture_output=True)
             # Not the cleanest / most precise way to determine this
             self._groupwise_computation = (
                 "-feature_group" in extractor_help.stdout.decode()
@@ -111,7 +125,7 @@ class Extractor(SparkleCallable):
         if not isinstance(instance, list):
             instance = [instance]
         cmd_list_extractor = [
-            f"{self.directory / Extractor.wrapper}",
+            f"{self.wrapper}",
             "-extractor_dir",
             f"{self.directory}/",
             "-instance_file",
@@ -153,6 +167,10 @@ class Extractor(SparkleCallable):
 
         Returns:
             The features or None if an output file is used, or features can not be found.
+
+        Raises:
+            TimeoutError: If the extractor was cut off by RunSolver.
+            RuntimeError: If the extractor failed to run or produced no features.
         """
         log_dir = Path() if log_dir is None else log_dir
         if feature_group is not None and not self.groupwise_computation:
@@ -161,30 +179,69 @@ class Extractor(SparkleCallable):
         cmd_extractor = self.build_cmd(
             instance, feature_group, output_file, cutoff_time, log_dir
         )
+
+        # Find runsolver values file if applicable
+        runsolver_values_path = None
+        if cutoff_time is not None:
+            for flag in ("-v", "--var"):
+                if flag in cmd_extractor:
+                    flag_index = cmd_extractor.index(flag)
+                    if flag_index + 1 < len(cmd_extractor):
+                        runsolver_values_path = Path(cmd_extractor[flag_index + 1])
+                        break
+
+        def decode_stream(stream: Any) -> str:
+            """Normalize stdout/stderr to a string, decoding bytes and handling None."""
+            if stream is None:
+                return ""
+            if isinstance(stream, bytes):
+                # use replace to substitute undecodable bytes with replacement character
+                return stream.decode(errors="replace")
+            return str(stream)
+
         run_on = Runner.LOCAL  # TODO: Let this function also handle Slurm runs
         extractor_run = rrr.add_to_queue(runner=run_on, cmd=" ".join(cmd_extractor))
         if isinstance(extractor_run, LocalRun):
             extractor_run.wait()
-            if extractor_run.status == Status.ERROR:
-                print(f"{self.name} failed to compute features for {instance}.")
-                for i, job in enumerate(extractor_run.jobs):
-                    print(
-                        f"Job {i} error yielded was:\n"
-                        f"\t-stdout: '{job.stdout}'\n"
-                        f"\t-stderr: '{job.stderr}'\n"
-                    )
-                return None
-            # RunRunner adds a timestamp before the statement
-            import re
 
-            pattern = re.compile(
-                r"^(?P<timestamp1>\d+\.\d+)\/(?P<timestamp2>\d+\.\d+)\s+(?P<output>.*)$"
-            )
+            job_logs = [
+                (decode_stream(job.stdout), decode_stream(job.stderr))
+                for job in extractor_run.jobs
+            ]
+
+            if (
+                runsolver_values_path is not None
+                and RunSolver.get_status(runsolver_values_path, None)
+                == SolverStatus.TIMEOUT
+            ):
+                raise TimeoutError(
+                    f"{self.name} timed out after {cutoff_time}s on {instance}."
+                )
+
+            if extractor_run.status == Status.ERROR:
+                error_details = "\n".join(
+                    f"Job {i} stdout:\n{stdout or '<empty>'}\nstderr:\n{stderr or '<empty>'}"
+                    for i, (stdout, stderr) in enumerate(job_logs)
+                )
+                raise RuntimeError(
+                    f"{self.name} failed to compute features for {instance}.\n"
+                    f"{error_details}"
+                )
             output = []
-            for job in extractor_run.jobs:
-                match = pattern.match(job.stdout)
+            for job, (stdout, _) in zip(extractor_run.jobs, job_logs):
+                # RunRunner adds a timestamp before the statement
+                match = self.output_pattern.match(stdout)
                 if match:
                     output.append(ast.literal_eval(match.group("output")))
+            if not output and output_file is None:
+                output_details = "\n".join(
+                    f"Job {i} stdout:\n{stdout or '<empty>'}\nstderr:\n{stderr or '<empty>'}"
+                    for i, (stdout, stderr) in enumerate(job_logs)
+                )
+                raise RuntimeError(
+                    f"{self.name} did not produce feature values for {instance}.\n"
+                    f"{output_details}"
+                )
             if len(output) == 1:
                 return output[0]
             return output
@@ -238,7 +295,7 @@ class Extractor(SparkleCallable):
             for instance_path in instances
         ]
 
-        job_name = f"Run Extractor: {self.name} on {len(instances)} instances"
+        job_name = f"Run Extractor {self.name} on {feature_group} for {len(instances)} instances"
         import subprocess
 
         run = rrr.add_to_queue(

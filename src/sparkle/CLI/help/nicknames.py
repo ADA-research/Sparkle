@@ -3,7 +3,7 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import Callable
-from sparkle.instance import Instance_Set, InstanceSet
+from sparkle.instance import Instance_Set, InstanceSet, MultiFileInstanceSet
 
 
 def resolve_object_name(
@@ -80,17 +80,17 @@ def resolve_instance_name(
                 instances.append(Instance_Set(instance_dir))
         target = instances
 
-    out_set = None
+    out_set, instance_path = None, None
     for instance_set in target:
         instance_path = instance_set.get_path_by_name(name)
         if instance_path is None:
             continue
         out_set = instance_set
         # Handle multi file instance
-        instance_path = (
-            [instance_path] if not isinstance(instance_path, list) else instance_path
-        )
-        instance_path = " ".join(str(p) for p in instance_path)
+        if isinstance(instance_set, MultiFileInstanceSet):
+            instance_path = (
+                [instance_path] if not isinstance(instance_path, list) else instance_path
+            )
+            instance_path = " ".join(str(p) for p in instance_path)
         break
-
     return instance_path if return_path else out_set

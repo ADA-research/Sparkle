@@ -11,10 +11,9 @@ from pathlib import Path
 
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help import snapshot_help as snh
-from sparkle.CLI.help import global_variables as gv
-from sparkle.configurator.implementations import IRACE, SMAC2, ParamILS
+
 from sparkle.platform import Settings
-from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
+from sparkle.CLI.help import global_variables as gv
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -95,6 +94,10 @@ def initialise_sparkle(
         rebuild_runsolver: Will clean the RunSolver executable and rebuild it.
     """
     print("Start initialising Sparkle platform ...")
+    # NOTE: Import here for speedup
+    from sparkle.configurator.implementations import IRACE, SMAC2, ParamILS
+    from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
+
     if detect_sparkle_platform_exists(check=all):
         print("Current Sparkle platform found!")
         if save_existing_platform:

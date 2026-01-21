@@ -13,6 +13,7 @@ import runrunner as rrr
 from runrunner import Runner, Run
 
 from sparkle.solver import Solver
+from sparkle.tools.parameters import PCSConvention
 from sparkle.instance import InstanceSet, Instance_Set
 from sparkle.structures import PerformanceDataFrame
 from sparkle.types import SparkleObjective
@@ -106,7 +107,7 @@ class Configurator:
             rrr.add_to_queue(
                 runner=run_on,
                 cmd=configuration_commands,
-                name=f"{self.name}: {scenario.solver.name} on {scenario.instance_set.name}",
+                name=f"{self.name} {scenario.solver.name} on {scenario.instance_set.name}",
                 base_dir=base_dir,
                 output_path=output,
                 parallel_jobs=num_parallel_jobs,
@@ -535,7 +536,13 @@ class AblationScenario:
 
         smac_run_obj = "RUNTIME" if objective.time else "QUALITY"
         objective_str = "MEAN10" if objective.time else "MEAN"
-        pcs_file_path = f"{self.config_scenario.solver.pcs_file.absolute()}"
+        # Fetch the SMAC2 PCS file path
+        pcs_file_path = self.config_scenario.solver.get_pcs_file_type(PCSConvention.SMAC)
+        if not pcs_file_path:
+            raise ValueError(
+                "Could not find SMAC2 PCS file, which is required for ablation analysis."
+            )
+        pcs_file_path = pcs_file_path.absolute()
 
         # Create config file
         config_file = self.scenario_dir / "ablation_config.txt"
@@ -559,13 +566,15 @@ class AblationScenario:
             "sourceConfiguration = DEFAULT\n"
             f'targetConfiguration = "{opt_config_str}"'
         )
-        config_file.open("w").write(config)
+        with config_file.open("w") as file:
+            file.write(config)
         # Write config to validation directory
         conf_valid = config.replace(
             f"execdir = {self.tmp_dir.absolute()}\n",
             f"execdir = {self.validation_dir_tmp.absolute()}\n",
         )
-        (self.validation_dir / config_file.name).open("w").write(conf_valid)
+        with (self.validation_dir / config_file.name).open("w") as file:
+            file.write(conf_valid)
         return self.validation_dir / config_file.name
 
     def create_instance_file(self: AblationScenario, test: bool = False) -> Path:
@@ -676,7 +685,7 @@ class AblationScenario:
         run_ablation = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
-            name=f"Ablation analysis: {self.solver.name} on {self.train_set.name}",
+            name=f"Ablation analysis {self.solver.name} on {self.train_set.name}",
             base_dir=log_dir,
             path=self.scenario_dir,
             sbatch_options=sbatch_options,
@@ -702,7 +711,7 @@ class AblationScenario:
             run_ablation_validation = rrr.add_to_queue(
                 runner=run_on,
                 cmd=cmd,
-                name=f"Ablation validation: Test set {self.test_set.name}",
+                name=f"Ablation validation Test set {self.test_set.name}",
                 path=self.validation_dir,
                 base_dir=log_dir,
                 dependencies=run_ablation,

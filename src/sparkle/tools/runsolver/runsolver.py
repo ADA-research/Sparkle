@@ -172,7 +172,7 @@ class RunSolver:
                 # Looking for arg names
                 continue
             conf = conf.strip()
-            if conf == "-o" or conf == "--solver-data":
+            if conf in ["-o", "--solver-data"]:
                 # solver output was redirected
                 solver_data_file = Path(runsolver_configuration[idx + 1])
                 if solver_data_file.exists():
@@ -182,11 +182,11 @@ class RunSolver:
                         "[RunSolver] Could not find Solver output file: "
                         f"{solver_data_file}"
                     )
-            if "-v" in conf or "--var" in conf:
+            if conf in ["-v", "--var"]:
                 value_data_file = Path(runsolver_configuration[idx + 1])
-            if "--cpu-limit" in conf:
+            if conf == "--cpu-limit":
                 cutoff_time = float(runsolver_configuration[idx + 1])
-            if "-w" in conf or "--watcher-data" in conf:
+            if conf in ["-w", "--watcher-data"]:
                 watch_file = Path(runsolver_configuration[idx + 1])
                 args_str = RunSolver.get_solver_args(watch_file)
                 if args_str == "":  # Could not find log file or args

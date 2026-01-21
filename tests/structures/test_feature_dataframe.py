@@ -36,7 +36,7 @@ def test_feature_dataframe_constructor(tmp_path: Path) -> None:
         extractor_data=SAMPLE_EXTRACTOR_DATA,
     )
     assert feature_df_new.csv_filepath == csv_path
-    assert feature_df_new.index.names == FeatureDataFrame.multi_dim_names
+    assert feature_df_new.columns.names == FeatureDataFrame.multi_dim_column_names
     assert csv_path.exists()
     assert feature_df_new.num_features == 3
     assert sorted(feature_df_new.instances) == sorted(SAMPLE_INSTANCES)
@@ -74,11 +74,11 @@ def test_add_instances(feature_df: FeatureDataFrame) -> None:
 
     feature_df.add_instances("Instance_Z")
     assert "Instance_Z" in feature_df.instances
-    assert feature_df["Instance_Z"].isnull().all()
+    assert feature_df.loc["Instance_Z"].isnull().all()
 
     feature_df.add_instances("Instance_W", values=[1.0] * feature_df.num_features)
     assert "Instance_W" in feature_df.instances
-    assert (feature_df["Instance_W"] == 1.0).all()
+    assert (feature_df.loc["Instance_W"] == 1.0).all()
 
 
 def test_remove_extractor(feature_df: FeatureDataFrame) -> None:
@@ -120,7 +120,7 @@ def test_get_feature_groups(feature_df: FeatureDataFrame) -> None:
 def test_get_value(feature_df: FeatureDataFrame) -> None:
     """Test for method get_value."""
     # Set a known value to test retrieval
-    feature_df.loc[("Group1", "Feature1", "ExtractorA"), "Instance_X"] = 42.0
+    feature_df.loc["Instance_X", ("ExtractorA", "Group1", "Feature1")] = 42.0
     value = feature_df.get_value("Instance_X", "ExtractorA", "Group1", "Feature1")
     assert value == 42.0
 
@@ -161,8 +161,11 @@ def test_has_missing_vectors(feature_df: FeatureDataFrame) -> None:
 
     # SCENARIO 2: One feature group is completely missing
     feature_df.loc[:, :] = 1.0
-    group1_mask = feature_df.index.get_level_values("FeatureGroup") == "Group1"
-    feature_df.loc[group1_mask, :] = FeatureDataFrame.missing_value
+    group1_mask = (
+        feature_df.columns.get_level_values(FeatureDataFrame.feature_group_dim)
+        == "Group1"
+    )
+    feature_df.loc[:, group1_mask] = FeatureDataFrame.missing_value
     assert feature_df.has_missing_vectors()
 
     # SCENARIO 3: One instance is completely missing
@@ -197,7 +200,7 @@ def test_get_remaining_jobs(feature_df: FeatureDataFrame) -> None:
 def test_get_instance(feature_df: FeatureDataFrame) -> None:
     """Test for method get_instance."""
     features = [10.0, 20.0, 30.0]
-    feature_df["Instance_Y"] = features
+    feature_df.loc["Instance_Y"] = features
 
     retrieved_features = feature_df.get_instance("Instance_Y")
     assert retrieved_features == features
@@ -213,7 +216,7 @@ def test_impute_missing_values(feature_df: FeatureDataFrame) -> None:
 
     # Test for a feature (row) missing in every instance
     feature_df.reset_dataframe()
-    feature_df.loc[("Group1", "Feature1", "ExtractorA"), :] = [2.0, 4.0]
+    feature_df[("ExtractorA", "Group1", "Feature1")] = [2.0, 4.0]
     # Row ("Group1", "Feature2", "ExtractorA") is all NaN.
     feature_df.impute_missing_values()
     # Imputing a row of all NaNs should result in NaNs
@@ -241,7 +244,7 @@ def test_reset_dataframe(feature_df: FeatureDataFrame) -> None:
 
 def test_sort(feature_df: FeatureDataFrame) -> None:
     """Test for method sort."""
-    feature_df.add_extractor("AAA_Extractor", [("Group0", "Feature0")])
+    feature_df.add_instances("AAA_INSTANCE_NUMERO1")
     assert not feature_df.index.is_monotonic_increasing
 
     feature_df.sort()

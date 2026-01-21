@@ -45,44 +45,59 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
 
-    extractor_source = Path(args.extractor_path)
-    if not extractor_source.exists():
-        print(f'Feature extractor path "{extractor_source}" does not exist!')
+    extractor_source_path = Path(args.extractor_path)
+    if not extractor_source_path.exists():
+        print(f'Feature extractor path "{extractor_source_path}" does not exist!')
         sys.exit(-1)
 
     nickname_str = args.nickname
 
     # Start add feature extractor
-    extractor_target_path = gv.settings().DEFAULT_extractor_dir / extractor_source.name
+    extractor_target_path = (
+        gv.settings().DEFAULT_extractor_dir / extractor_source_path.name
+    )
 
     if extractor_target_path.exists():
         print(
-            f"Feature extractor {extractor_source.name} already exists! "
+            f"Feature extractor {extractor_source_path.name} already exists! "
             "Can not add feature extractor."
         )
         sys.exit(-1)
 
-    if args.no_copy:
-        print(
-            f"Creating symbolic link from {extractor_source} "
-            f"to {extractor_target_path}..."
-        )
-        extractor_target_path.symlink_to(extractor_source.absolute())
-    else:
-        print(f"Copying feature extractor {extractor_source.name} ...")
-        extractor_target_path.mkdir()
-        shutil.copytree(extractor_source, extractor_target_path, dirs_exist_ok=True)
-
     # Check execution permissions for wrapper
-    extractor_wrapper = extractor_target_path / Extractor.wrapper
-    if not extractor_wrapper.is_file() or not os.access(extractor_wrapper, os.X_OK):
+    extractor_source = Extractor(extractor_source_path)
+    if extractor_source.wrapper is None:
         print(
-            f"The file {extractor_wrapper} does not exist or is \
+            f"The Extractor has no wrapper in its directory; please check that the directory {extractor_source_path} contains a file with the name '{Extractor.wrapper_file_name}'!"
+        )
+        sys.exit(-1)
+    if not extractor_source.wrapper.is_file() or not os.access(
+        extractor_source.wrapper, os.X_OK
+    ):
+        print(
+            f"The file {extractor_source.wrapper} does not exist or is \
               not executable."
         )
         sys.exit(-1)
 
+    # Get the extractor features groups and names from the wrapper, try to add to FDF
+    feature_dataframe = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
+    feature_dataframe.add_extractor(extractor_source.name, extractor_source.features)
+
+    if args.no_copy:
+        print(
+            f"Creating symbolic link from {extractor_source_path} "
+            f"to {extractor_target_path}..."
+        )
+        extractor_target_path.symlink_to(extractor_source_path.absolute())
+    else:
+        print(f"Copying feature extractor {extractor_source_path.name} ...")
+        extractor_target_path.mkdir()
+        shutil.copytree(extractor_source_path, extractor_target_path, dirs_exist_ok=True)
+
     extractor = Extractor(extractor_target_path)
+    # Everything passed, can save FDF
+    feature_dataframe.save_csv()
 
     # Add RunSolver executable to the solver
     runsolver_path = gv.settings().DEFAULT_runsolver_exec
@@ -99,11 +114,6 @@ def main(argv: list[str]) -> None:
         runsolver_target.chmod(runsolver_target.stat().st_mode | stat.S_IEXEC)
     else:
         print("Warning! RunSolver does not exists. Falling back to PyRunSolver.")
-
-    # Get the extractor features groups and names from the wrapper
-    feature_dataframe = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
-    feature_dataframe.add_extractor(extractor.name, extractor.features)
-    feature_dataframe.save_csv()
 
     print(f"Adding feature extractor {extractor_target_path.name} done!")
 

@@ -126,6 +126,15 @@ def recursive_conversion(
         right = recursive_conversion(item.comparators, configspace, target_parameter)
         operator = item.ops[0]
         if isinstance(left, Hyperparameter):  # Convert to HP type
+            # Handle special case for 'in' operator with single value
+            # "text" -> ["text"], 5 -> [5]
+            # We want to ensure that the right side is a list for 'in' operator
+            # So that we can check membership correctly:
+            # Not: hp in "hp"  but: hp in ["hp", "hp2", ...]
+            if isinstance(operator, ast.In) and (
+                not isinstance(right, Iterable) or isinstance(right, str)
+            ):
+                right = [right]
             if isinstance(right, Iterable) and not isinstance(right, str):
                 right = [type(left.default_value)(v) for v in right]
                 if len(right) == 1 and not isinstance(operator, ast.In):

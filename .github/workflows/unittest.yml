@@ -36,8 +36,7 @@ jobs:
       run: |
         python3 -m venv venv/
         source venv/bin/activate  # Activate the new environment
-        pip install -e .  # Install Sparkle from the repo
-        pip install -r dev-requirements.txt  # Devtools
+        pip install -e .[dev]  # Install Sparkle from the repo with dev dependencies
     - name: Install RunSolver dependencies
       run: |
         sudo apt-get install libnuma-dev

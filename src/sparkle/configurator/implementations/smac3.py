@@ -140,6 +140,7 @@ class SMAC3(Configurator):
         best_config = configurations[
             config_evals.index(objective.solver_aggregator(config_evals))
         ]
+        best_config["configuration_id"] = configuration_id
         return Configurator.save_configuration(
             scenario, configuration_id, best_config, output_target
         )

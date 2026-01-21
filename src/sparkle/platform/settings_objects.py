@@ -1,18 +1,23 @@
 """Classes and Enums to control settings."""
 
 from __future__ import annotations
-import configparser
+from typing import TYPE_CHECKING
+
+
 import argparse
+import configparser
 from enum import Enum
 from pathlib import Path
 from typing import Any, NamedTuple, Optional
 
 from runrunner import Runner
 
-from sparkle.types import SparkleObjective, resolve_objective
-from sparkle.configurator.configurator import Configurator
-from sparkle.configurator import implementations as cim
 from sparkle.platform.cli_types import VerbosityLevel
+from sparkle.types import SparkleObjective, resolve_objective
+
+
+if TYPE_CHECKING:
+    from sparkle.configurator.configurator import Configurator
 
 
 class Option(NamedTuple):
@@ -97,6 +102,9 @@ class Settings:
 
     # Example settings path
     DEFAULT_example_settings_path = Path(DEFAULT_components / "sparkle_settings.ini")
+
+    # Wrapper templates pathing
+    DEFAULT_solver_wrapper_template = DEFAULT_components / "sparkle_solver_wrapper.sh"
 
     # Runsolver component
     DEFAULT_runsolver_dir = DEFAULT_components / "runsolver" / "src"
@@ -860,7 +868,12 @@ class Settings:
             value = argsv.__dict__[argument]
             if value is None:
                 continue  # Skip None
-            value = value.name if isinstance(value, Enum) else str(value)
+            if isinstance(value, Enum):
+                value = value.name
+            elif isinstance(value, list):
+                value = ",".join([str(s) for s in value])
+            else:
+                value = str(value)
             for section in self.sections_options.keys():
                 if argument in self.sections_options[section]:
                     index = self.sections_options[section].index(argument)
@@ -889,13 +902,13 @@ class Settings:
             Settings.SECTION_general, "objectives"
         ):
             objectives = self.__settings[Settings.SECTION_general]["objectives"]
-            if "status" not in objectives:
+            if "status:metric" not in objectives:
                 objectives += ",status:metric"
-            if "cpu_time" not in objectives:
+            if "cpu_time:metric" not in objectives:
                 objectives += ",cpu_time:metric"
-            if "wall_time" not in objectives:
+            if "wall_time:metric" not in objectives:
                 objectives += ",wall_time:metric"
-            if "memory" not in objectives:
+            if "memory:metric" not in objectives:
                 objectives += ",memory:metric"
             self.__sparkle_objectives = [
                 resolve_objective(obj) for obj in objectives.split(",")
@@ -908,7 +921,10 @@ class Settings:
         if self.__general_sparkle_configurator is None and self.__settings.has_option(
             Settings.OPTION_configurator.section, Settings.OPTION_configurator.name
         ):
-            self.__general_sparkle_configurator = cim.resolve_configurator(
+            # NOTE: Import here for speed up if not using configurator
+            from sparkle.configurator.implementations import resolve_configurator
+
+            self.__general_sparkle_configurator = resolve_configurator(
                 self.__settings.get(
                     Settings.OPTION_configurator.section,
                     Settings.OPTION_configurator.name,
@@ -1407,7 +1423,9 @@ class Settings:
         }
         # In the settings below, we default to the configurator general settings if no
         # specific configurator settings are given, by using the [None] or [Value]
-        if configurator_name == cim.SMAC2.__name__:
+        if (
+            configurator_name == "SMAC2"
+        ):  # NOTE: This is hardcoded, but doing it through imports slows done the ENTIRETY of the Sparkle substantially
             # Return all settings from the SMAC2 section
             configurator_settings.update(
                 {
@@ -1420,7 +1438,9 @@ class Settings:
                     or configurator_settings["max_iterations"],
                 }
             )
-        elif configurator_name == cim.SMAC3.__name__:
+        elif (
+            configurator_name == "SMAC3"
+        ):  # NOTE: This is hardcoded, but doing it through imports slows done the ENTIRETY of the Sparkle substantially
             # Return all settings from the SMAC3 section
             del configurator_settings["max_iterations"]  # SMAC3 does not have this?
             configurator_settings.update(
@@ -1444,7 +1464,9 @@ class Settings:
                 for key, value in configurator_settings.items()
                 if value is not None
             }
-        elif configurator_name == cim.IRACE.__name__:
+        elif (
+            configurator_name == "IRACE"
+        ):  # NOTE: This is hardcoded, but doing it through imports slows done the ENTIRETY of the Sparkle substantially
             # Return all settings from the IRACE section
             configurator_settings.update(
                 {
@@ -1463,7 +1485,9 @@ class Settings:
                 configurator_settings["solver_calls"] = (
                     self.configurator_solver_call_budget
                 )
-        elif configurator_name == cim.ParamILS.__name__:
+        elif (
+            configurator_name == "ParamILS"
+        ):  # NOTE: This is hardcoded, but doing it through imports slows done the ENTIRETY of the Sparkle substantially
             configurator_settings.update(
                 {
                     "tuner_timeout": self.paramils_cpu_time_budget,

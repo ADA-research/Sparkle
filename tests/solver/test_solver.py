@@ -30,10 +30,13 @@ class TestSolver(TestCase):
 
     def test_pcs_file_correct_name(self: TestSolver) -> None:
         """Test if get_pcs_file() returns the correct path if file exists."""
-        (self.solver_path / "paramfile.pcs").open("a").close()
+        parameter_file = self.solver_path / "paramfile.pcs"
+        shutil.copyfile(
+            Path("tests", "test_files", "Solvers", "Test-Solver", "Test-Solver.pcs"),
+            parameter_file,
+        )
 
         solver = Solver(self.solver_path)
-
         self.assertEqual(solver.pcs_file, self.solver_path / "paramfile.pcs")
 
     def test_pcs_file_none(self: TestSolver) -> None:
@@ -43,11 +46,16 @@ class TestSolver(TestCase):
 
     def test_pcs_file_multiple(self: TestSolver) -> None:
         """Test for SystemExit if get_pcs_file() is called, but multiple files exist."""
-        (self.solver_path / "paramfile.pcs").open("a").close()
-        (self.solver_path / "paramfile_PORTED.pcs").open("a").close()
+        original = self.solver_path / "paramfile.pcs"
+        (self.solver_path / "paramfile_PORTED.pcs").open("a").close()  # Distraction
+
+        shutil.copyfile(
+            Path("tests", "test_files", "Solvers", "Test-Solver", "Test-Solver.pcs"),
+            original,
+        )
 
         solver = Solver(self.solver_path)
-        assert solver.pcs_file == self.solver_path / "paramfile.pcs"
+        assert solver.pcs_file == original
 
     def test_is_deterministic(self: TestSolver) -> None:
         """Test if deterministic correctly returns value."""
@@ -89,3 +97,23 @@ class TestSolver(TestCase):
         """Test if run_performance_dataframe correctly adds to RunRunner queue."""
         # TODO: write test
         pass
+
+    def test_equality(self: TestSolver) -> None:
+        """Test if __eq__ correctly returns value."""
+        solver1 = Solver(self.solver_path)
+        solver2 = Solver(self.solver_path)
+        alternate_solver1 = Solver(Path("Examples/Resources/Solvers/PbO-CCSAT-Generic"))
+        alternate_solver2 = Solver(Path("Examples/Resources/Solvers/MiniSAT"))
+        # Solver equality should be testable on str (name) and Path (directory)
+        self.assertEqual(solver1, solver2)
+        self.assertEqual(solver1.name, solver2)
+        self.assertEqual(solver1.directory, solver2)
+        # Test on list
+        self.assertTrue(solver1.name in [solver2, alternate_solver1, alternate_solver2])
+        self.assertTrue(
+            solver1.directory in [solver2, alternate_solver1, alternate_solver2]
+        )
+        self.assertTrue(
+            str(solver1.directory) in [solver2, alternate_solver1, alternate_solver2]
+        )
+        self.assertFalse(solver1 in [alternate_solver1, alternate_solver2])

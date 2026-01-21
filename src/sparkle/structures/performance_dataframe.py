@@ -70,7 +70,11 @@ class PerformanceDataFrame(pd.DataFrame):
                 header=[0, 1, 2],
                 index_col=[0, 1, 2],
                 on_bad_lines="skip",
-                dtype={"Value": str, "Seed": int},
+                dtype={
+                    PerformanceDataFrame.column_value: str,
+                    PerformanceDataFrame.column_seed: int,
+                    # PerformanceDataFrame.index_run: int,  # NOTE: Preferrably, this would be set, but it is not included in the "on_bad_lines=skip" case for error lines.
+                },
                 comment="$",
             )  # $ For extra data lines
             super().__init__(df)
@@ -84,7 +88,12 @@ class PerformanceDataFrame(pd.DataFrame):
                 ]
             configurations = {s: {} for s in self.solvers}
             for solver, config_key, config in configuration_lines[1:]:  # Skip header
-                configurations[solver][config_key] = ast.literal_eval(config.strip('"'))
+                if (
+                    solver in configurations
+                ):  # Only add configurations to already known solvers, based on the columns
+                    configurations[solver][config_key] = ast.literal_eval(
+                        config.strip('"')
+                    )
         else:  # New PerformanceDataFrame
             # Initialize empty DataFrame
             run_ids = list(range(1, n_runs + 1))  # We count runs from 1
@@ -671,7 +680,14 @@ class PerformanceDataFrame(pd.DataFrame):
             if isinstance(writeable, pd.Series):  # Single row, convert to pd.DataFrame
                 writeable = self.loc[[(objective, instance, run)], :]
             # Append the new rows to the dataframe csv file
-            writeable.to_csv(self.csv_filepath, mode="a", header=False)
+            import os
+
+            csv_string = writeable.to_csv(header=False)  # Convert to the csv lines
+            for line in csv_string.splitlines():
+                fd = os.open(f"{self.csv_filepath}", os.O_WRONLY | os.O_APPEND)
+                os.write(fd, f"{line}\n".encode("utf-8"))  # Encode to create buffer
+                # Open and close for each line to minimise possibilities of conflict
+                os.close(fd)
 
     def get_value(
         self: PerformanceDataFrame,
@@ -764,10 +780,13 @@ class PerformanceDataFrame(pd.DataFrame):
                 if value is None or (
                     isinstance(value, (int, float)) and math.isnan(value)
                 ):
+                    # NOTE: Force Run to be int, as it can be float on accident
+                    if math.isnan(run):
+                        continue
+                    run = int(run)
                     result.append(tuple([solver, config, instance, run]))
         # Filter duplicates while keeping the order conistent
-        result = list(dict.fromkeys(result))
-        return result
+        return list(dict.fromkeys(result))
 
     def configuration_performance(
         self: PerformanceDataFrame,
@@ -819,6 +838,12 @@ class PerformanceDataFrame(pd.DataFrame):
         )
         # Aggregate the instances
         sub_series = subdf.agg(func=objective.instance_aggregator.__name__)
+        sub_series = sub_series.dropna()
+        if sub_series.empty:  # If all values are NaN, raise an error
+            raise ValueError(
+                f"No valid performance measurements for solver '{solver}' (Configuration: '{configuration}') "
+                f"and objective '{objective.name}'."
+            )
         # Select the best configuration
         best_conf = sub_series.idxmin() if objective.minimise else sub_series.idxmax()
         if per_instance:  # Return a list of instance results

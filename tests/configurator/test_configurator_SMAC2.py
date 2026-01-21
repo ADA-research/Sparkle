@@ -74,7 +74,7 @@ class TestConfiguratorSMAC2(TestCase):
             runner=rrr.Runner.SLURM,
             base_dir=self.base_dir,
             cmd=expected_cmds,
-            name=f"{SMAC2.__name__}: {self.conf_scenario.solver.name} on "
+            name=f"{SMAC2.__name__} {self.conf_scenario.solver.name} on "
             f"{self.conf_scenario.instance_set.name}",
             output_path=expected_outputs,
             parallel_jobs=None,

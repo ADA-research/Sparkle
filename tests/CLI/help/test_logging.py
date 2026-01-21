@@ -15,7 +15,7 @@ def test_update_caller() -> None:
 
 def test_update_caller_file_path() -> None:
     """Test _update_caller_file_path uses the right file name and creates it."""
-    timestamp = "18-08-2023_12:34:56"
+    timestamp = "18-08-2023_12.34.56"
     sl._update_caller_file_path(timestamp)
 
     assert isinstance(sl.caller_out_dir, Path)

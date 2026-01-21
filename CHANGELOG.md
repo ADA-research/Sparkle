@@ -2,9 +2,30 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.9.6] - ??/??/2026
+
+### Added
+- Broader coverage for configuration-space parsing to guard conditional/forbidden handling regressions. [Bug#206]
+- Added filtering arguments for `compute features` command; user can now compute features for specific instances and extractors [Issue#211]
+
+### Changed
+- Comparison plots now filter out `NaN` points before choosing linear/log scale and rendering. [Bug#206]
+- IRACE parameter parsing now accepts categorical values whether they are double-quoted, single-quoted, or unquoted. [Bug#206]
+- Membership checks in parsed conditions/forbiddens now normalise single values into lists to ensure matching works as intended. [Bug#206]
+
+### Fixed
+- Solver wrapper templates now assign solver executables in both path branches and exit early on failed subprocess launches, avoiding NameErrors and clearer error reporting. [Bug#207]
+- Performance data cleaning now drops `NaN` entries per sub-series and raises if a whole sub-series is `NaN`, avoiding silent failures. [Bug#206]
+- Improved the ability of concurrent writing by PDF. [Issue#215]
+- Various performance speed up for CLI commands.
+- Various bug fixes for Extractors. [Bug#212]
+- Extractor.run now raises on RunSolver timeouts and extractor failures instead of returning empty results, surfacing stdout/stderr in the exception. [Issue#214]
+- Included append writing for Feature Extractors for more stable FeatureDataFrames. [Issue#219]
+
 ## [0.9.5.1] - 15/10/2025
 
 ### Added
+- sparkle wrap command to make using solvers easier in Sparkle [Issue#204]
 - A native python RunSolver implementation, an alternative for users when Roussel's RunSolver is not an option. [Issue#192]
 
 ### Changed

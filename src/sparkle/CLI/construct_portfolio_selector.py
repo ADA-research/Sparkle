@@ -117,6 +117,15 @@ def main(argv: list[str]) -> None:
     run_on = settings.run_on
 
     print("Start constructing Sparkle portfolio selector ...")
+    if settings.selection_class is None or settings.selection_model is None:
+        print(
+            "Selector class or model not set! Values:\n"
+            f"\t - Class: {settings.selection_class}\n"
+            f"\t - Model: {settings.selection_model}\n"
+            "Please specify these values in the sparkle settings."
+        )
+        sys.exit(-1)
+
     selector = Selector(settings.selection_class, settings.selection_model)
 
     instance_set = None

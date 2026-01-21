@@ -2,6 +2,7 @@
 """Sparkle command to load a Sparkle platform from a .zip file."""
 
 import sys
+import itertools
 import argparse
 from pathlib import Path
 
@@ -28,15 +29,20 @@ def main(argv: list[str]) -> None:
     # Process command line arguments
     args = parser.parse_args(argv)
     snapshot_help.load_snapshot(Path(args.snapshot_file_path))
-    # Make sure we have Solver execution rights again after unpacking
-    for solver in gv.settings().DEFAULT_solver_dir.iterdir():
-        if solver.is_dir():
-            for file in solver.iterdir():
+    # Make sure we have Solver/Extractor execution rights again after unpacking
+    for executable_dir in itertools.chain(
+        gv.settings().DEFAULT_solver_dir.iterdir(),
+        gv.settings().DEFAULT_extractor_dir.iterdir(),
+    ):
+        if executable_dir.is_dir():
+            for file in executable_dir.iterdir():
                 if file.is_file():
                     file.chmod(0o755)
+
     # Reset Global variables as they should be re-read from snapshot
     gv.__settings = None
-    gv.__latest_scenario = None
+    gv.__configuration_scenarios = None
+    gv.__selection_scenarios = None
     sys.exit(0)
 
 

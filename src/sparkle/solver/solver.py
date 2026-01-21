@@ -91,15 +91,41 @@ class Solver(SparkleCallable):
             f"\t- Wrapper: {self.wrapper}"
         )
 
+    def __eq__(self: Solver, other: Any) -> bool:
+        """Checks whether two solvers are equal."""
+        if isinstance(other, Solver):
+            return other.directory == self.directory
+        elif isinstance(other, str):
+            return other == self.name or Path(other) == self.directory
+        elif isinstance(other, Path):
+            return other == self.directory
+        return False
+
+    def __hash__(self: Solver) -> int:
+        """Pass to parent class hash function. Should be inherited but does not work without this."""
+        return super().__hash__()
+
     @property
     def pcs_file(self: Solver) -> Path:
         """Get path of the parameter file."""
         if self._pcs_file is None:
-            files = sorted([p for p in self.directory.iterdir() if p.suffix == ".pcs"])
-            if len(files) == 0:
-                return None
-            self._pcs_file = files[0]
+            for file in self.directory.iterdir():
+                if file.name == Solver.meta_data:
+                    continue  # Skip this file, never correct
+                convention = PCSConverter.get_convention(file)
+                if convention != PCSConvention.UNKNOWN:
+                    self._pcs_file = file
+                    return self._pcs_file
         return self._pcs_file
+
+    def get_pcs_file_type(self: Solver, convention: PCSConvention) -> Path:
+        """Get path of the parameter file of a specific convention."""
+        for file in self.directory.iterdir():
+            if file.name == Solver.meta_data:
+                continue  # Skip this file, never correct
+            if PCSConverter.get_convention(file) == convention:
+                return file
+        return None
 
     @property
     def wrapper_extension(self: Solver) -> str:
@@ -272,7 +298,7 @@ class Solver(SparkleCallable):
                 )
                 cmds.append(" ".join(solver_cmd))
 
-        commandname = f"Run Solver: {self.name} on {set_label}"
+        commandname = f"Run Solver {self.name} on {set_label}"
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
@@ -429,7 +455,7 @@ class Solver(SparkleCallable):
                 combinations, configuration_args
             )
         ]
-        job_name = f"Run: {self.name} on {set_name}" if job_name is None else job_name
+        job_name = f"Run {self.name} on {set_name}" if job_name is None else job_name
         r = rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
@@ -479,8 +505,13 @@ class Solver(SparkleCallable):
             Dictionary representing the parsed solver output
         """
         used_runsolver = False
-        if solver_call is not None and len(solver_call) > 2:
-            used_runsolver = True
+        if (
+            solver_call is not None
+            and len(solver_call) > 2
+            and solver_call[0].endswith("runsolver")
+            or solver_call[1].endswith("py_runsolver.py")
+        ):
+            used_runsolver = True  # PyRunsolver or RunSolver was used
             parsed_output = RunSolver.get_solver_output(solver_call, solver_output)
         else:
             parsed_output = ast.literal_eval(solver_output)

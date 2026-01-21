@@ -4,10 +4,12 @@ from __future__ import annotations
 import random
 from pathlib import Path
 
+
 from sklearn.base import ClassifierMixin, RegressorMixin
 from asf.cli import cli_train as asf_cli
 from asf.predictors import AbstractPredictor
 from asf.selectors.abstract_model_based_selector import AbstractModelBasedSelector
+
 
 import runrunner as rrr
 from runrunner import Runner, Run
@@ -42,6 +44,7 @@ class Selector:
             from sklearn import ensemble
 
             model_class = getattr(ensemble, model_class)
+
         self.selector_class = selector_class
         self.model_class = model_class
 
@@ -86,7 +89,7 @@ class Selector:
         )
         cmd = [" ".join([str(c) for c in cmd])]
 
-        job_name = job_name or f"Selector Construction: {selection_scenario.name}"
+        job_name = job_name or f"Selector Construction {selection_scenario.name}"
         construct = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
@@ -109,13 +112,13 @@ class Selector:
         feature_data: FeatureDataFrame,
     ) -> list:
         """Run the Selector, returning the prediction schedule upon success."""
-        instance_features = feature_data[
-            [
-                instance,
-            ]
-        ]
-        instance_features.index = instance_features.index.map("_".join)  # Reduce
-        instance_features = instance_features.T  # ASF dataframe structure
+        instance_features = feature_data.get_instance(instance, as_dataframe=True)
+        # instance_features = feature_data[
+        #     [
+        #         instance,
+        #     ]
+        # ]
+        # instance_features.columns = instance_features.columns.map("_".join)  # Reduce columns multi index
         selector = self.selector_class.load(selector_path)
         schedule = selector.predict(instance_features)
         if schedule is None:
@@ -125,6 +128,7 @@ class Selector:
         schedule = schedule[instance]
         for index, (solver, time) in enumerate(schedule):
             # Split solver name back into solver and config id
+            # NOTE: There is an issue with this incase the Solver name has an "_" in its name... We need to change the delimiter to different character(s)
             solver_name, conf_index = solver.split("_", maxsplit=1)
             schedule[index] = (solver_name, conf_index, time)
         return schedule
@@ -175,7 +179,7 @@ class Selector:
         ]
 
         job_name = (
-            f"Run Selector: {self.name} on {len(instances)} instances"
+            f"Run Selector {self.name} on {len(instances)} instances"
             if not job_name
             else job_name
         )
@@ -282,9 +286,11 @@ class SelectionScenario:
             self.feature_extractors = feature_data.extractors
             # Features requires instances as index, columns as feature names
             feature_target = feature_data.copy()
-            feature_target.index = feature_target.index.map("_".join)  # Reduce Index
+            feature_target.columns = feature_target.columns.map(
+                "_".join
+            )  # Reduce Column Multi Index to single
             # ASF -> feature columns, instance rows
-            self.feature_data: pd.DataFrame = feature_target.T.astype(float)
+            self.feature_data: pd.DataFrame = feature_target.astype(float)
             self.feature_target_path: Path = self.directory / "feature_data.csv"
         else:  # Read from Path
             self.feature_extractors = feature_extractors
@@ -409,5 +415,6 @@ class SelectionScenario:
             feature_data=Path(values["feature_data"]),
             feature_extractors=values["feature_extractors"].split(","),
             solver_cutoff=float(values["solver_cutoff"]),
+            extractor_cutoff=float(values["extractor_cutoff"]),
             ablate=ast.literal_eval(values["ablate"]),
         )

@@ -3,8 +3,11 @@
 from __future__ import annotations
 from pathlib import Path
 import pytest
+from unittest.mock import patch, MagicMock
+from runrunner.base import Status
+from runrunner.local import LocalRun, LocalJob
 from sparkle.selector import Extractor
-from unittest.mock import patch
+from sparkle.types import SolverStatus
 
 
 test_dir_2024 = Path("Examples/Resources/Extractors/SAT-features-competition2024/")
@@ -179,10 +182,69 @@ def test_build_cmd() -> None:
     pass
 
 
-def test_run() -> None:
-    """Test for method run."""
-    # TODO: Write test
-    pass
+def test_run_returns_parsed_output() -> None:
+    """Extractor.run returns parsed feature tuples on success."""
+    stdout = '12.34/56.78\t[("grp", "feat", 1.0)]'
+    job = MagicMock(spec=LocalJob)
+    job.stdout = stdout
+    job.stderr = ""
+    fake_run = MagicMock(spec=LocalRun)
+    fake_run.status = Status.COMPLETED
+    fake_run.jobs = [job]
+    fake_run.wait.return_value = None
+
+    with patch("runrunner.add_to_queue", return_value=fake_run):
+        result = extractor_2012.run(Path("dummy"))
+
+    assert result == [("grp", "feat", 1.0)]
+
+
+def test_run_raises_on_error_status() -> None:
+    """Extractor.run raises RuntimeError when the LocalRun reports ERROR."""
+    job = MagicMock(spec=LocalJob)
+    job.stdout = "12.34/56.78\t"
+    job.stderr = "Traceback: boom"
+    fake_run = MagicMock(spec=LocalRun)
+    fake_run.status = Status.ERROR
+    fake_run.jobs = [job]
+    fake_run.wait.return_value = None
+
+    with patch("runrunner.add_to_queue", return_value=fake_run):
+        with pytest.raises(RuntimeError):
+            extractor_2012.run(Path("dummy"))
+
+
+def test_run_raises_on_timeout(tmp_path: Path) -> None:
+    """Extractor.run raises TimeoutError when RunSolver reports TIMEOUT."""
+    fake_val = tmp_path / "fake.val"
+    job = MagicMock(spec=LocalJob)
+    job.stdout = '12.34/56.78\t[("grp", "feat", 1.0)]'
+    job.stderr = ""
+    fake_run = MagicMock(spec=LocalRun)
+    fake_run.status = Status.COMPLETED
+    fake_run.jobs = [job]
+    fake_run.wait.return_value = None
+
+    with (
+        patch.object(
+            extractor_2012,
+            "build_cmd",
+            return_value=["wrapper", "-v", str(fake_val), "other"],
+        ),
+        patch("runrunner.add_to_queue", return_value=fake_run),
+        patch(
+            "sparkle.selector.extractor.RunSolver.get_status",
+            return_value=SolverStatus.TIMEOUT,
+        ),
+    ):
+        with pytest.raises(TimeoutError):
+            extractor_2012.run(Path("dummy"), cutoff_time=10)
+
+
+def test_output_regex() -> None:
+    """Test for the regex matching the log output."""
+    example = b"128.48/126.01\t[('base', 'n_vars_original', '238290.000000000'), ('base', 'n_clauses_original', '936006.000000000'), ('base', 'n_vars', '152765.000000000'), ('base', 'n_clauses', '490809.000000000'), ('base', 'reduced_vars', '0.559846824'), ('base', 'reduced_clauses', '0.907067719'), ('base', 'pre_featuretime', '7.420000000'), ('base', 'vars_clauses_ratio', '0.311251424'), ('base', 'Postive-Negative-Literals_clause_ratio_mean', '0.264139411'), ('base', 'Postive-Negative-Literals_clause_coefficient_of_variation', '1.055339007'), ('base', 'Postive-Negative-Literals_clause_ratio_minimum', '0.000000000'), ('base', 'Postive-Negative-Literals_clause_ratio_maximum', '1.000000000'), ('base', 'Postive-Negative-Literals_clause_ratio_entropy', '0.921241405'), ('base', 'Variable-Clause-Graph_clause_mean', '0.000016969'), ('base', 'Variable-Clause-Graph_clause_coefficient_of_variation', '0.189575956'), ('base', 'Variable-Clause-Graph_clause_min', '0.000013092'), ('base', 'Variable-Clause-Graph_clause_max', '0.000019638'), ('base', 'Variable-Clause-Graph_clause_entropy', '0.676041040'), ('base', 'unary', '0.000000000'), ('base', 'binary', '0.407781846'), ('base', 'trinary', '1.000000000'), ('base', 'feature_time', '0.030000000'), ('base', 'Variable-Clause-Graph_variable_mean', '0.000016989'), ('base', 'Variable-Clause-Graph_variable_coefficient_of_variation', '2.060640058'), ('base', 'Variable-Clause-Graph_variable_min', '0.000004075'), ('base', 'Variable-Clause-Graph_variable_max', '0.001558651'), ('base', 'Variable-Clause-Graph_variable_entropy', '2.045314316'), ('base', 'Postive-Negative-Literals_variable_mean', '0.058496362'), ('base', 'Postive-Negative-Literals_variable_standard_deviation', '0.090059060'), ('base', 'Postive-Negative-Literals_variable_min', '0.000000000'), ('base', 'Postive-Negative-Literals_variable_max', '0.866666667'), ('base', 'Postive-Negative-Literals_variable_entropy', '1.062020368'), ('base', 'Horn-Formula_variable_mean', '0.000010448'), ('base', 'Horn-Formula_variable_coefficient_of_variation', '2.251917377'), ('base', 'Horn-Formula_variable_min', '0.000002037'), ('base', 'Horn-Formula_variable_max', '0.000817018'), ('base', 'Horn-Formula_variable_entropy', '1.709661624'), ('base', 'Horn-Formula_clauses_fraction', '0.665303611'), ('base', 'Variable-Graph_variable_mean', '0.000010813'), ('base', 'Variable-Graph_variable_coefficient_of_variation', '2.579094033'), ('base', 'Variable-Graph_variable_min', '0.000002037'), ('base', 'Variable-Graph_variable_max', '0.001175610'), ('base', 'Kevin-Leyton-Brown_feature_time', '21.040000000'), ('base', 'Clause-Graph_clause_mean', '0.000115884'), ('base', 'Clause-Graph_clause_coefficient_of_variation', '1.703620171'), ('base', 'Clause-Graph_clause_min', '0.000002037'), ('base', 'Clause-Graph_clause_max', '0.000882217'), ('base', 'Clause-Graph_clause_entropy', '3.687603682'), ('base', 'Clause-Graph_cluster_coefficient_mean', '0.255763369'), ('base', 'Clause-Graph_cluster_coefficient_of_variation', '0.699031298'), ('base', 'Clause-Graph_cluster_coefficient_min', '0.006896478'), ('base', 'Clause-Graph_cluster_coefficient_max', '1.000000000'), ('base', 'Clause-Graph_cluster_coefficient_entropy', '3.324503014'), ('base', 'Clause-Graph_feature_time', '90.520000000')]\r\n".decode()
+    assert Extractor.output_pattern.match(example) is not None
 
 
 def test_get_feature_vector() -> None:
