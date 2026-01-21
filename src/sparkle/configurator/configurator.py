@@ -573,7 +573,7 @@ class AblationScenario:
             f"execdir = {self.tmp_dir.absolute()}\n",
             f"execdir = {self.validation_dir_tmp.absolute()}\n",
         )
-        with self.validation_dir.open("w") as file:
+        with (self.validation_dir / config_file.name).open("w") as file:
             file.write(conf_valid)
         return self.validation_dir / config_file.name
 
