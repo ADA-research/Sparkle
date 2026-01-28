@@ -82,6 +82,9 @@ def compute_features(
             instance_path = resolve_instance_name(str(instance_name), instances)
             grouped_job_list[extractor_name][effective_group].add(instance_path)
 
+        # Keep sets internally for fast de-duplication, but return lists so callers
+        # get a stable, serialisable structure (e.g. for logging/JSON or deterministic
+        # submission order) instead of unordered sets.
         return {
             extractor: {group: list(paths) for group, paths in feature_groups.items()}
             for extractor, feature_groups in grouped_job_list.items()
