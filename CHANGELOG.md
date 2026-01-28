@@ -2,7 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.9.6] - ??/??/2026
+## [0.9.6] - 21/01/2026
 
 ### Added
 - Broader coverage for configuration-space parsing to guard conditional/forbidden handling regressions. [Bug#206]
@@ -21,6 +21,7 @@ Notable changes to Sparkle will be documented in this file.
 - Improved the ability of concurrent writing by PDF. [Issue#215]
 - Various performance speed up for CLI commands.
 - Various bug fixes for Extractors. [Bug#212]
+- Extractor.run now raises on RunSolver timeouts and extractor failures instead of returning empty results, surfacing stdout/stderr in the exception. [Issue#214]
 - Included append writing for Feature Extractors for more stable FeatureDataFrames. [Issue#219]
 
 ## [0.9.5.1] - 15/10/2025
