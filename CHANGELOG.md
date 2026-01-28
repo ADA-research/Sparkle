@@ -7,11 +7,13 @@ Notable changes to Sparkle will be documented in this file.
 ### Added
 - Broader coverage for configuration-space parsing to guard conditional/forbidden handling regressions. [Bug#206]
 - Added filtering arguments for `compute features` command; user can now compute features for specific instances and extractors [Issue#211]
+- New `no_groupwise_computation` setting/CLI flag to disable per-feature-group extractor runs when splitting is not desired.
 
 ### Changed
 - Comparison plots now filter out `NaN` points before choosing linear/log scale and rendering. [Bug#206]
 - IRACE parameter parsing now accepts categorical values whether they are double-quoted, single-quoted, or unquoted. [Bug#206]
 - Membership checks in parsed conditions/forbiddens now normalise single values into lists to ensure matching works as intended. [Bug#206]
+- `compute_features` now respects `no_groupwise_computation` by collapsing submissions that would otherwise split by feature group. [Issue#210]
 
 ### Fixed
 - Solver wrapper templates now assign solver executables in both path branches and exit early on failed subprocess launches, avoiding NameErrors and clearer error reporting. [Bug#207]

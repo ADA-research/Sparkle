@@ -194,6 +194,18 @@ class Settings:
         tuple("cutoff_time_each_feature_computation"),
         "Extractor cutoff time in seconds.",
     )
+    OPTION_no_groupwise_computation = Option(
+        "no_groupwise_computation",
+        SECTION_general,
+        bool,
+        False,
+        tuple(),
+        "Disable feature-group-wise extractor execution.",
+        cli_kwargs={
+            "action": "store_true",
+            "default": None,
+        },
+    )
     OPTION_run_on = Option(
         "run_on",
         SECTION_general,
@@ -637,6 +649,7 @@ class Settings:
             OPTION_configurator,
             OPTION_solver_cutoff_time,
             OPTION_extractor_cutoff_time,
+            OPTION_no_groupwise_computation,
             OPTION_run_on,
             OPTION_appendices,
             OPTION_verbosity,
@@ -721,6 +734,7 @@ class Settings:
         self.__general_sparkle_configurator: Configurator = None
         self.__solver_cutoff_time: int = None
         self.__extractor_cutoff_time: int = None
+        self.__no_groupwise_computation: bool = None
         self.__run_on: Runner = None
         self.__appendices: bool = False
         self.__verbosity_level: VerbosityLevel = None
@@ -949,6 +963,15 @@ class Settings:
                 Settings.OPTION_extractor_cutoff_time
             )
         return self.__extractor_cutoff_time
+
+    @property
+    def no_groupwise_computation(self: Settings) -> bool:
+        """Disable running extractors per feature group."""
+        if self.__no_groupwise_computation is None:
+            self.__no_groupwise_computation = self._abstract_getter(
+                Settings.OPTION_no_groupwise_computation
+            )
+        return self.__no_groupwise_computation
 
     @property
     def run_on(self: Settings) -> Runner:
