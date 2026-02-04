@@ -7,7 +7,7 @@ Notable changes to Sparkle will be documented in this file.
 ### Added
 - Broader coverage for configuration-space parsing to guard conditional/forbidden handling regressions. [Bug#206]
 - Added filtering arguments for `compute features` command; user can now compute features for specific instances and extractors [Issue#211]
-- New `no_groupwise_computation` setting/CLI flag to disable per-feature-group extractor runs when splitting is not desired.
+- New `no_groupwise_computation` setting/CLI flag to disable per-feature-group extractor runs when splitting is not desired. [Issue#210]
 
 ### Changed
 - Comparison plots now filter out `NaN` points before choosing linear/log scale and rendering. [Bug#206]

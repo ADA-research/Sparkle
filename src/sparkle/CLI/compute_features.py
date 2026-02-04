@@ -71,24 +71,18 @@ def compute_features(
         no_groupwise_computation: bool,
     ) -> dict[str, dict[str | None, list[str]]]:
         """Group jobs per extractor and feature group, with optional groupwise override."""
-        grouped_job_list: dict[str, dict[str | None, set[str]]] = {}
+        grouped_job_list: dict[str, dict[str | None, list[str]]] = {}
 
         for instance_name, extractor_name, feature_group in jobs:
             if extractor_name not in grouped_job_list:
                 grouped_job_list[extractor_name] = {}
             effective_group = None if no_groupwise_computation else feature_group
             if effective_group not in grouped_job_list[extractor_name]:
-                grouped_job_list[extractor_name][effective_group] = set()
+                grouped_job_list[extractor_name][effective_group] = []
             instance_path = resolve_instance_name(str(instance_name), instances)
-            grouped_job_list[extractor_name][effective_group].add(instance_path)
+            grouped_job_list[extractor_name][effective_group].append(instance_path)
 
-        # Keep sets internally for fast de-duplication, but return lists so callers
-        # get a stable, serialisable structure (e.g. for logging/JSON or deterministic
-        # submission order) instead of unordered sets.
-        return {
-            extractor: {group: list(paths) for group, paths in feature_groups.items()}
-            for extractor, feature_groups in grouped_job_list.items()
-        }
+        return grouped_job_list
 
     settings = gv.settings()
     if recompute:
