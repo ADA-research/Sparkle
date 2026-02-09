@@ -38,8 +38,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(*ac.SettingsFileArgument.names, **ac.SettingsFileArgument.kwargs)
     parser.add_argument(*Settings.OPTION_run_on.args, **Settings.OPTION_run_on.kwargs)
     parser.add_argument(
-        *Settings.OPTION_no_groupwise_computation.args,
-        **Settings.OPTION_no_groupwise_computation.kwargs,
+        *Settings.OPTION_groupwise_computation.args,
+        **Settings.OPTION_groupwise_computation.kwargs,
     )
     return parser
 
@@ -68,7 +68,7 @@ def compute_features(
     def group_jobs(
         jobs: list[tuple[str, str, str]],
         instances: list[InstanceSet],
-        no_groupwise_computation: bool,
+        groupwise_computation: bool,
     ) -> dict[str, dict[str | None, list[str]]]:
         """Group jobs per extractor and feature group, with optional groupwise override."""
         grouped_job_list: dict[str, dict[str | None, list[str]]] = {}
@@ -76,7 +76,7 @@ def compute_features(
         for instance_name, extractor_name, feature_group in jobs:
             if extractor_name not in grouped_job_list:
                 grouped_job_list[extractor_name] = {}
-            effective_group = None if no_groupwise_computation else feature_group
+            effective_group = None if not groupwise_computation else feature_group
             if effective_group not in grouped_job_list[extractor_name]:
                 grouped_job_list[extractor_name][effective_group] = []
             instance_path = resolve_instance_name(str(instance_name), instances)
@@ -103,7 +103,7 @@ def compute_features(
         )
         return
     cutoff = settings.extractor_cutoff_time
-    grouped_job_list = group_jobs(jobs, instances, settings.no_groupwise_computation)
+    grouped_job_list = group_jobs(jobs, instances, settings.groupwise_computation)
 
     sbatch_options = settings.sbatch_settings
     slurm_prepend = settings.slurm_job_prepend
@@ -119,8 +119,7 @@ def compute_features(
                 cutoff,
                 (
                     feature_group
-                    if extractor.groupwise_computation
-                    and not settings.no_groupwise_computation
+                    if extractor.groupwise_computation and settings.groupwise_computation
                     else None
                 ),
                 run_on,
