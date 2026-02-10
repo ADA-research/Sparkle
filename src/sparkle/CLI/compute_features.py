@@ -17,7 +17,7 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
+from sparkle.CLI.help.nicknames import resolve_object_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -64,30 +64,9 @@ def compute_features(
     Returns:
         The Slurm job or Local job
     """
-
-    def group_jobs(
-        jobs: list[tuple[str, str, str]],
-        instances: list[InstanceSet],
-        groupwise_computation: bool,
-    ) -> dict[str, dict[str | None, list[str]]]:
-        """Group jobs per extractor and feature group, with optional groupwise override."""
-        grouped_job_list: dict[str, dict[str | None, list[str]]] = {}
-
-        for instance_name, extractor_name, feature_group in jobs:
-            if extractor_name not in grouped_job_list:
-                grouped_job_list[extractor_name] = {}
-            effective_group = None if not groupwise_computation else feature_group
-            if effective_group not in grouped_job_list[extractor_name]:
-                grouped_job_list[extractor_name][effective_group] = []
-            instance_path = resolve_instance_name(str(instance_name), instances)
-            grouped_job_list[extractor_name][effective_group].append(instance_path)
-
-        return grouped_job_list
-
     settings = gv.settings()
     if recompute:
         feature_data.reset_dataframe()
-    jobs = feature_data.remaining_jobs()
 
     # Lookup all instances to resolve the instance paths later
     instances: list[InstanceSet] = []
@@ -95,16 +74,19 @@ def compute_features(
         if instance_dir.is_dir():
             instances.append(Instance_Set(instance_dir))
 
+    grouped_job_list = feature_data.group_remaining_jobs(
+        settings.groupwise_computation, instances
+    )
+
     # If there are no jobs, stop
-    if not jobs:
+    if not grouped_job_list:
         print(
             "No feature computation jobs to run; stopping execution! To recompute "
             "feature values use the --recompute flag."
         )
         return
-    cutoff = settings.extractor_cutoff_time
-    grouped_job_list = group_jobs(jobs, instances, settings.groupwise_computation)
 
+    cutoff = settings.extractor_cutoff_time
     sbatch_options = settings.sbatch_settings
     slurm_prepend = settings.slurm_job_prepend
     srun_options = ["-N1", "-n1"] + sbatch_options

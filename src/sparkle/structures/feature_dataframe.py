@@ -3,6 +3,8 @@
 from __future__ import annotations
 import math
 from pathlib import Path
+from sparkle.instance import InstanceSet
+from sparkle.CLI.help.nicknames import resolve_instance_name
 
 import pandas as pd
 
@@ -257,6 +259,34 @@ class FeatureDataFrame(pd.DataFrame):
                 if self.loc[instance, (extractor, group, slice(None))].isnull().all():
                     remaining_jobs.append((instance, extractor, group))
         return list(set(remaining_jobs))  # Filter duplicates
+
+    def group_remaining_jobs(
+        self: FeatureDataFrame,
+        groupwise_computation: bool,
+        instances: list[InstanceSet],
+    ) -> dict[str, dict[str | None, list[str]]]:
+        """Return remaining jobs grouped by extractor and (optional) feature group.
+
+        Args:
+            groupwise_computation: If False, feature groups are collapsed into a single group (None) per extractor.
+            instances: List of InstanceSet objects to resolve instance paths.
+
+        Returns:
+            Dict mapping extractor -> feature_group (or None) -> list of resolved instance
+            paths (as strings).
+        """
+        grouped: dict[str, dict[str | None, list[str]]] = {}
+
+        for instance, extractor, feature_group in self.remaining_jobs():
+            if extractor not in grouped:
+                grouped[extractor] = {}
+            effective_group = feature_group if groupwise_computation else None
+            if effective_group not in grouped[extractor]:
+                grouped[extractor][effective_group] = []
+            instance_path = resolve_instance_name(str(instance), instances)
+            grouped[extractor][effective_group].append(instance_path)
+
+        return grouped
 
     def get_instance(
         self: FeatureDataFrame, instance: str, as_dataframe: bool = False
