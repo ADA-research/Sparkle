@@ -241,14 +241,28 @@ class FeatureDataFrame(pd.DataFrame):
                 return True
         return False
 
-    def remaining_jobs(self: FeatureDataFrame) -> list[tuple[str, str, str]]:
-        """Determines needed feature computations per instance/extractor/group.
+    def remaining_jobs(
+        self: FeatureDataFrame,
+        *,
+        groupwise_computation: bool = True,
+        instances: list[InstanceSet],
+    ) -> list[tuple[str, str, str]] | dict[str, dict[str | None, list[str]]]:
+        """Return remaining jobs grouped for extractor execution.
+
+        Args:
+            groupwise_computation: If True, jobs are grouped per feature group. If False
+                (or None), feature groups collapse to the `None` key per extractor.
+            instances: List of `InstanceSet` objects used to resolve instance names to
+                instance paths via `resolve_instance_name(...)`. This must be provided.
 
         Returns:
-            list: A list of tuples representing (Instance, Extractor, Feature Group).
-                that needs to be computed.
+            A dict of the form `{extractor: {feature_group_or_None: [instance_path, ...]}}`,
+            where `instance_path` values are resolved strings.
+
+        Raises:
+            ValueError: If an instance name cannot be resolved using the provided `instances`.
         """
-        remaining_jobs = []
+        jobs: list[tuple[str, str, str]] = []
         for extractor, group, _ in self.columns:
             if (
                 extractor == str(FeatureDataFrame.missing_value)
@@ -257,33 +271,21 @@ class FeatureDataFrame(pd.DataFrame):
                 continue
             for instance in self.index:
                 if self.loc[instance, (extractor, group, slice(None))].isnull().all():
-                    remaining_jobs.append((instance, extractor, group))
-        return list(set(remaining_jobs))  # Filter duplicates
+                    jobs.append((instance, extractor, group))
+        jobs = list(set(jobs))  # Filter duplicates
 
-    def group_remaining_jobs(
-        self: FeatureDataFrame,
-        groupwise_computation: bool,
-        instances: list[InstanceSet],
-    ) -> dict[str, dict[str | None, list[str]]]:
-        """Return remaining jobs grouped by extractor and (optional) feature group.
-
-        Args:
-            groupwise_computation: If False, feature groups are collapsed into a single group (None) per extractor.
-            instances: List of InstanceSet objects to resolve instance paths.
-
-        Returns:
-            Dict mapping extractor -> feature_group (or None) -> list of resolved instance
-            paths (as strings).
-        """
         grouped: dict[str, dict[str | None, list[str]]] = {}
-
-        for instance, extractor, feature_group in self.remaining_jobs():
+        for instance, extractor, feature_group in jobs:
             if extractor not in grouped:
                 grouped[extractor] = {}
             effective_group = feature_group if groupwise_computation else None
             if effective_group not in grouped[extractor]:
                 grouped[extractor][effective_group] = []
             instance_path = resolve_instance_name(str(instance), instances)
+            if instance_path is None:
+                raise ValueError(
+                    f"Could not resolve instance name '{instance}' using the provided instance sets."
+                )
             grouped[extractor][effective_group].append(instance_path)
 
         return grouped

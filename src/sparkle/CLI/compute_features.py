@@ -74,8 +74,9 @@ def compute_features(
         if instance_dir.is_dir():
             instances.append(Instance_Set(instance_dir))
 
-    grouped_job_list = feature_data.group_remaining_jobs(
-        settings.groupwise_computation, instances
+    grouped_job_list = feature_data.remaining_jobs(
+        groupwise_computation=settings.groupwise_computation,
+        instances=instances,
     )
 
     # If there are no jobs, stop
