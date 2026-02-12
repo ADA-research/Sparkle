@@ -3,7 +3,7 @@
 from __future__ import annotations
 import math
 from pathlib import Path
-from sparkle.instance import InstanceSet
+from sparkle.instance import InstanceSet, Instance_Set
 from sparkle.CLI.help.nicknames import resolve_instance_name
 
 import pandas as pd
@@ -245,18 +245,26 @@ class FeatureDataFrame(pd.DataFrame):
         self: FeatureDataFrame,
         *,
         groupwise_computation: bool = True,
-        instances: list[InstanceSet],
+        instances: Path | list[InstanceSet] | None = None,
     ) -> list[tuple[str, str, str]] | dict[str, dict[str | None, list[str]]]:
         """Return remaining jobs grouped for extractor execution.
 
         Args:
             groupwise_computation: If True, jobs are grouped per feature group. If False
                 (or None), feature groups collapse to the `None` key per extractor.
-            instances: List of `InstanceSet` objects used to resolve instance names to
-                instance paths via `resolve_instance_name(...)`. This must be provided.
+            instances: Either a path to the default instance-set directory *or* a list
+                of `InstanceSet` objects used to resolve instance names to instance
+                paths via `resolve_instance_name(...)`.
+
+                If omitted (`None`), this method returns a flat list of remaining jobs
+                as `(instance_name, extractor, feature_group)` tuples (no path
+                resolution / grouping).
 
         Returns:
-            A dict of the form `{extractor: {feature_group_or_None: [instance_path, ...]}}`,
+            If `instances is None`, a list of `(instance_name, extractor, feature_group)`
+            tuples.
+
+            Otherwise, a dict of the form `{extractor: {feature_group_or_None: [instance_path, ...]}}`,
             where `instance_path` values are resolved strings.
 
         Raises:
@@ -274,6 +282,18 @@ class FeatureDataFrame(pd.DataFrame):
                     jobs.append((instance, extractor, group))
         jobs = list(set(jobs))  # Filter duplicates
 
+        if instances is None:
+            return jobs
+
+        instance_sets: list[InstanceSet]
+        if isinstance(instances, Path):
+            instance_sets = []
+            for instance_dir in instances.iterdir():
+                if instance_dir.is_dir():
+                    instance_sets.append(Instance_Set(instance_dir))
+        else:
+            instance_sets = instances
+
         grouped: dict[str, dict[str | None, list[str]]] = {}
         for instance, extractor, feature_group in jobs:
             if extractor not in grouped:
@@ -281,12 +301,12 @@ class FeatureDataFrame(pd.DataFrame):
             effective_group = feature_group if groupwise_computation else None
             if effective_group not in grouped[extractor]:
                 grouped[extractor][effective_group] = []
-            instance_path = resolve_instance_name(str(instance), instances)
+            instance_path = resolve_instance_name(str(instance), instance_sets)
             if instance_path is None:
                 raise ValueError(
                     f"Could not resolve instance name '{instance}' using the provided instance sets."
                 )
-            grouped[extractor][effective_group].append(instance_path)
+            grouped[extractor][effective_group].append(str(instance_path))
 
         return grouped
 
