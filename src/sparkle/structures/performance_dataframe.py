@@ -742,7 +742,7 @@ class PerformanceDataFrame(pd.DataFrame):
             return value.mean()
         return value
 
-    def get_job_list(
+    def remaining_jobs(
         self: PerformanceDataFrame, rerun: bool = False
     ) -> list[tuple[str, str]]:
         """Return a list of performance computation jobs there are to be done.
