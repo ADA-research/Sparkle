@@ -78,7 +78,7 @@ def print_performance_computation_jobs(
         performance_data: The Performance data
         verbose: Indicating, if output should be verbose
     """
-    jobs = performance_data.get_job_list()
+    jobs = performance_data.remaining_jobs()
 
     print(
         f"Currently Sparkle has {len(jobs)} remaining performance computation"

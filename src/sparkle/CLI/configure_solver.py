@@ -197,7 +197,7 @@ def main(argv: list[str]) -> None:
     # Run the default configuration
     default_jobs = [
         (solver, config_id, instance, run_id)
-        for solver, config_id, instance, run_id in performance_data.get_job_list()
+        for solver, config_id, instance, run_id in performance_data.remaining_jobs()
         if config_id == PerformanceDataFrame.default_configuration
     ]
 

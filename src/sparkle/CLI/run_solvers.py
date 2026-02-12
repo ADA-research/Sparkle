@@ -183,7 +183,7 @@ def run_solvers_performance_data(
         If the run is local return a QueuedRun object with the information concerning
         the run.
     """
-    jobs = performance_data.get_job_list(rerun=rerun)  # List of jobs to do
+    jobs = performance_data.remaining_jobs(rerun=rerun)  # List of jobs to do
 
     # Edit jobs to incorporate file paths
     for index, (solver, config, instance, run) in enumerate(jobs):
