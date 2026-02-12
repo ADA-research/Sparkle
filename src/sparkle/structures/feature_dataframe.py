@@ -3,7 +3,7 @@
 from __future__ import annotations
 import math
 from pathlib import Path
-from sparkle.instance import InstanceSet, Instance_Set
+from sparkle.instance import InstanceSet
 from sparkle.CLI.help.nicknames import resolve_instance_name
 
 import pandas as pd
@@ -243,9 +243,8 @@ class FeatureDataFrame(pd.DataFrame):
 
     def remaining_jobs(
         self: FeatureDataFrame,
-        *,
+        instances: list[InstanceSet],
         groupwise_computation: bool = True,
-        instances: Path | list[InstanceSet] | None = None,
     ) -> list[tuple[str, str, str]] | dict[str, dict[str | None, list[str]]]:
         """Return remaining jobs grouped for extractor execution.
 
@@ -282,18 +281,6 @@ class FeatureDataFrame(pd.DataFrame):
                     jobs.append((instance, extractor, group))
         jobs = list(set(jobs))  # Filter duplicates
 
-        if instances is None:
-            return jobs
-
-        instance_sets: list[InstanceSet]
-        if isinstance(instances, Path):
-            instance_sets = []
-            for instance_dir in instances.iterdir():
-                if instance_dir.is_dir():
-                    instance_sets.append(Instance_Set(instance_dir))
-        else:
-            instance_sets = instances
-
         grouped: dict[str, dict[str | None, list[str]]] = {}
         for instance, extractor, feature_group in jobs:
             if extractor not in grouped:
@@ -301,7 +288,7 @@ class FeatureDataFrame(pd.DataFrame):
             effective_group = feature_group if groupwise_computation else None
             if effective_group not in grouped[extractor]:
                 grouped[extractor][effective_group] = []
-            instance_path = resolve_instance_name(str(instance), instance_sets)
+            instance_path = resolve_instance_name(str(instance), instances)
             if instance_path is None:
                 raise ValueError(
                     f"Could not resolve instance name '{instance}' using the provided instance sets."

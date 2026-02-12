@@ -68,9 +68,15 @@ def compute_features(
     if recompute:
         feature_data.reset_dataframe()
 
+    # Lookup all instances to resolve the instance paths later
+    instances: list[InstanceSet] = []
+    for instance_dir in settings.DEFAULT_instance_dir.iterdir():
+        if instance_dir.is_dir():
+            instances.append(Instance_Set(instance_dir))
+
     grouped_job_list = feature_data.remaining_jobs(
+        instances=instances,
         groupwise_computation=settings.groupwise_computation,
-        instances=settings.DEFAULT_instance_dir,
     )
 
     # If there are no jobs, stop
@@ -94,11 +100,7 @@ def compute_features(
                 instance_paths,
                 feature_data,
                 cutoff,
-                (
-                    feature_group
-                    if extractor.groupwise_computation and settings.groupwise_computation
-                    else None
-                ),
+                feature_group,
                 run_on,
                 sbatch_options,
                 srun_options,
