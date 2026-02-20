@@ -240,7 +240,7 @@ def main(argv: list[str]) -> None:
                     wrong_indices.append((objective, instance, run_id))
         if wrong_indices:
             print(
-                f"Found {len(wrong_indices)} in the PerformanceDataFrame ({objective_errors} objective errors, {instance_errors} instance errors, {run_id_errors} run id errors).\n"
+                f"Found {len(wrong_indices)} wrong indices in the PerformanceDataFrame ({objective_errors} objective errors, {instance_errors} instance errors, {run_id_errors} run id errors).\n"
                 "Removing from PerformanceDataFrame..."
             )
             performance_data.drop(wrong_indices, inplace=True)
