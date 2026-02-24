@@ -193,21 +193,34 @@ def test_get_remaining_jobs(
     feature_df: FeatureDataFrame, instance_sets: list[InstanceSet]
 ) -> None:
     """Test for method get_remaining_jobs."""
-    grouped_jobs = feature_df.remaining_jobs(instances=instance_sets)
+    flat_jobs = feature_df.remaining_jobs()
     expected_jobs = {
         ("Instance_X", "ExtractorA", "Group1"),
         ("Instance_Y", "ExtractorA", "Group1"),
         ("Instance_X", "ExtractorB", "Group2"),
         ("Instance_Y", "ExtractorB", "Group2"),
     }
-    assert set(grouped_jobs) == expected_jobs
+    assert set(flat_jobs) == expected_jobs
+
+    grouped_jobs = feature_df.remaining_jobs(instances=instance_sets)
+    assert set(grouped_jobs) == {"ExtractorA", "ExtractorB"}
+    assert set(grouped_jobs["ExtractorA"]) == {"Group1"}
+    assert set(grouped_jobs["ExtractorB"]) == {"Group2"}
+    assert set(Path(path).stem for path in grouped_jobs["ExtractorA"]["Group1"]) == {
+        "Instance_X",
+        "Instance_Y",
+    }
+    assert set(Path(path).stem for path in grouped_jobs["ExtractorB"]["Group2"]) == {
+        "Instance_X",
+        "Instance_Y",
+    }
 
     # Complete one job by filling its value
     feature_df.set_value("Instance_X", "ExtractorB", "Group2", "Feature3", 1.0)
 
-    grouped_jobs_after = feature_df.remaining_jobs(instances=instance_sets)
-    assert ("Instance_X", "ExtractorB", "Group2") not in grouped_jobs_after
-    assert len(grouped_jobs_after) == 3
+    flat_jobs_after = feature_df.remaining_jobs()
+    assert ("Instance_X", "ExtractorB", "Group2") not in flat_jobs_after
+    assert len(flat_jobs_after) == 3
 
 
 def test_get_instance(feature_df: FeatureDataFrame) -> None:
