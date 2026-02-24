@@ -62,7 +62,7 @@ def compute_features(
             Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
 
     Returns:
-        The Slurm job or Local job
+        Submitted runs. Empty if there are no jobs to execute.
     """
     settings = gv.settings()
     if recompute:
@@ -85,7 +85,7 @@ def compute_features(
             "No feature computation jobs to run; stopping execution! To recompute "
             "feature values use the --recompute flag."
         )
-        return
+        return []
 
     cutoff = settings.extractor_cutoff_time
     sbatch_options = settings.sbatch_settings

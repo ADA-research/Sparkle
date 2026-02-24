@@ -243,7 +243,7 @@ class FeatureDataFrame(pd.DataFrame):
 
     def remaining_jobs(
         self: FeatureDataFrame,
-        instances: list[InstanceSet],
+        instances: Path | list[InstanceSet] | None = None,
         groupwise_computation: bool = True,
     ) -> list[tuple[str, str, str]] | dict[str, dict[str | None, list[str]]]:
         """Return remaining jobs grouped for extractor execution.
@@ -251,13 +251,12 @@ class FeatureDataFrame(pd.DataFrame):
         Args:
             groupwise_computation: If True, jobs are grouped per feature group. If False
                 (or None), feature groups collapse to the `None` key per extractor.
-            instances: Either a path to the default instance-set directory *or* a list
-                of `InstanceSet` objects used to resolve instance names to instance
+            instances: Optional. Either a path to the default instance-set directory
+                or a list of `InstanceSet` objects used to resolve instance names to
                 paths via `resolve_instance_name(...)`.
 
                 If omitted (`None`), this method returns a flat list of remaining jobs
-                as `(instance_name, extractor, feature_group)` tuples (no path
-                resolution / grouping).
+                as `(instance_name, extractor, feature_group)` tuples.
 
         Returns:
             If `instances is None`, a list of `(instance_name, extractor, feature_group)`
@@ -269,17 +268,48 @@ class FeatureDataFrame(pd.DataFrame):
         Raises:
             ValueError: If an instance name cannot be resolved using the provided `instances`.
         """
-        jobs: list[tuple[str, str, str]] = []
-        for extractor, group, _ in self.columns:
-            if (
-                extractor == str(FeatureDataFrame.missing_value)
-                or extractor == FeatureDataFrame.missing_value
-            ):
-                continue
-            for instance in self.index:
-                if self.loc[instance, (extractor, group, slice(None))].isnull().all():
-                    jobs.append((instance, extractor, group))
-        jobs = list(set(jobs))  # Filter duplicates
+        extractor_values = self.columns.get_level_values(FeatureDataFrame.extractor_dim)
+
+        # Filter out extractors that have no missing values for any instance or feature group by creating a boolean mask of valid extractors and applying it to the DataFrame.
+        valid_columns = [
+            str(extractor) != str(FeatureDataFrame.missing_value)
+            for extractor in extractor_values
+        ]
+        target_df = self.loc[:, valid_columns]
+
+        if target_df.empty:
+            return [] if instances is None else {}
+
+        # Reduce all feature columns into one boolean per (extractor, feature_group).
+        # missing_groups indicates whether there are any missing values for that extractor and feature group across all instances.
+        missing_groups = (
+            target_df.isnull()
+            .T.groupby(
+                level=[
+                    FeatureDataFrame.extractor_dim,
+                    FeatureDataFrame.feature_group_dim,
+                ]
+            )
+            .all()
+            .T
+        )
+
+        # Stack the missing groups to create a MultiIndex for easier iteration.
+        # The index will be (instance, extractor, feature_group) and the value( which is True if missing, False otherwise) will indicate if that combination is missing.
+        stacked_missing = missing_groups.stack(
+            [FeatureDataFrame.extractor_dim, FeatureDataFrame.feature_group_dim]
+        )
+
+        # Extract the missing jobs as a list of tuples (instance, extractor, feature_group) where the value is True (indicating missing).
+        jobs = [
+            (instance, extractor, feature_group)
+            for (instance, extractor, feature_group) in stacked_missing.index[
+                stacked_missing
+            ]
+        ]
+
+        if instances is None:
+            return jobs
 
         grouped: dict[str, dict[str | None, list[str]]] = {}
         for instance, extractor, feature_group in jobs:
