@@ -157,12 +157,15 @@ def main(argv: list[str]) -> None:
     solver = Solver(solver_directory)  # Recreate solver from its new directory
     if solver.pcs_file is not None:
         # Generate missing PCS files
-        # TODO: Only generate missing files
-        print("Generating missing PCS files...")
-        solver.port_pcs(PCSConvention.IRACE)  # Create PCS file for IRACE
-        print("Generating IRACE done!")
-        solver.port_pcs(PCSConvention.ParamILS)  # Create PCS file for ParamILS
-        print("Generating ParamILS done!")
+        print("Checking for missing PCS files to generate...")
+        if solver.get_pcs_file_type(PCSConvention.IRACE) is None:
+            solver.port_pcs(PCSConvention.IRACE)  # Create PCS file for IRACE
+            print("\t- Generating IRACE done!")
+        if solver.get_pcs_file_type(PCSConvention.ParamILS) is None:
+            solver.port_pcs(PCSConvention.ParamILS)  # Create PCS file for ParamILS
+            print("\t- Generating ParamILS done!")
+
+    print(f"Solver {solver.name} added to platform!")
 
     # Write used settings to file
     gv.settings().write_used_settings()

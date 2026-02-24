@@ -109,7 +109,11 @@ class Solver(SparkleCallable):
     def pcs_file(self: Solver) -> Path:
         """Get path of the parameter file."""
         if self._pcs_file is None:
-            for file in self.directory.iterdir():
+            files = sorted(
+                [p for p in self.directory.iterdir() if p.is_file()],
+                key=lambda x: len(x.stem),
+            )
+            for file in files:  # Loop through the files in ascending order of name (stem) length, to avoid selecting a Sparkle generated file
                 if file.name == Solver.meta_data:
                     continue  # Skip this file, never correct
                 convention = PCSConverter.get_convention(file)

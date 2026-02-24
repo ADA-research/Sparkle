@@ -271,7 +271,13 @@ class PCSConverter:
                     values = sorted(values)
                     if any([isinstance(v, float) for v in values]):
                         parameter_type = float
-                    else:
+                    elif any(
+                        [isinstance(v, bool) for v in values]
+                    ):  # Without this check, Booleans will be considered integers by Python
+                        # Convert the booleans back to strings for ConfigSpace
+                        values = [str(v) for v in values]
+                        parameter_type = str
+                    elif any([isinstance(v, int) for v in values]):
                         parameter_type = int
                 except Exception:  # of strings (Categorical)
                     values = values.replace("{", "").replace("}", "").split(",")
