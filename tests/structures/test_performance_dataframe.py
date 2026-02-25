@@ -160,7 +160,6 @@ def test_solver_configurations() -> None:
     for solver in pd_mo.solvers:
         assert solver in pd_mo.attrs
         assert len(pd_mo.attrs[solver]) == 5
-        print(pd_mo.attrs)
         for config in pd_mo.attrs[solver]:
             assert isinstance(pd_mo.attrs[solver][config], dict)
 
