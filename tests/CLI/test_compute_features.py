@@ -101,7 +101,7 @@ def test_compute_features_command(
     assert pytest_wrapped_e.value.code == 0
 
 
-def test_compute_features() -> None:
+def test_compute_features(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test compute features function."""
     csv_path = (
         Path("tests")
@@ -110,6 +110,7 @@ def test_compute_features() -> None:
         / "Feature_Data"
         / "example_feature_data.csv"
     )
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     feature_data = FeatureDataFrame(csv_filepath=csv_path)
 
     runs = compute_features.compute_features(feature_data=feature_data, recompute=True)
@@ -117,7 +118,9 @@ def test_compute_features() -> None:
     assert isinstance(runs[0], SlurmRun)
 
 
-def test_compute_features_no_jobs() -> None:
+def test_compute_features_no_jobs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test compute features function when there are no jobs to run."""
     csv_path = (
         Path("tests")
@@ -126,6 +129,7 @@ def test_compute_features_no_jobs() -> None:
         / "Feature_Data"
         / "completed_feature_data.csv"
     )
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     feature_data = FeatureDataFrame(csv_filepath=csv_path)
 
     runs = compute_features.compute_features(feature_data=feature_data, recompute=False)
