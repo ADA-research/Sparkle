@@ -8,6 +8,10 @@ from tests.CLI import tools as cli_tools
 from sparkle.structures import FeatureDataFrame
 from runrunner.slurm import SlurmRun
 
+TEST_FEATURE_DATA_DIR = (
+    Path(__file__).resolve().parents[1] / "test_files" / "Output" / "Feature_Data"
+)
+
 
 @pytest.mark.integration
 def test_compute_features_command(
@@ -110,8 +114,8 @@ def test_compute_features(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> No
         / "Feature_Data"
         / "example_feature_data.csv"
     )
-    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     feature_data = FeatureDataFrame(csv_filepath=csv_path)
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
 
     runs = compute_features.compute_features(feature_data=feature_data, recompute=True)
     assert len(runs) == 1
@@ -129,8 +133,8 @@ def test_compute_features_no_jobs(
         / "Feature_Data"
         / "completed_feature_data.csv"
     )
-    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     feature_data = FeatureDataFrame(csv_filepath=csv_path)
+    monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
 
     runs = compute_features.compute_features(feature_data=feature_data, recompute=False)
     assert runs == []
