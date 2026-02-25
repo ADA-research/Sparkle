@@ -793,8 +793,13 @@ class PerformanceDataFrame(pd.DataFrame):
             ]
         )
 
+        # stacked_missing is a Series with MultiIndex
+        # (instance, run, solver, config) and boolean values.
+        # Add jobs only when value is True.
         result = []
-        for instance, run, solver, config in stacked_missing[stacked_missing].index:
+        for (instance, run, solver, config), is_missing in stacked_missing.items():
+            if not bool(is_missing):
+                continue
             # NOTE: Keep historical behavior of skipping invalid run identifiers.
             if pd.isna(run):
                 continue
