@@ -6,7 +6,7 @@ import pytest
 from pathlib import Path
 
 from sparkle.structures import FeatureDataFrame
-from sparkle.instance import InstanceSet, Instance_Set
+from sparkle.instance import InstanceSet
 
 SAMPLE_EXTRACTOR_DATA = {
     "ExtractorA": [("Group1", "Feature1"), ("Group1", "Feature2")],
@@ -25,16 +25,6 @@ def feature_df(tmp_path: Path) -> FeatureDataFrame:
         extractor_data=SAMPLE_EXTRACTOR_DATA,
     )
     return feature_df
-
-
-@pytest.fixture
-def instance_sets(tmp_path: Path) -> list[InstanceSet]:
-    """Pytest fixture to provide InstanceSet objects resolving SAMPLE_INSTANCES."""
-    instance_dir = tmp_path / "instances"
-    instance_dir.mkdir()
-    for instance_name in SAMPLE_INSTANCES:
-        (instance_dir / f"{instance_name}.txt").write_text("")
-    return [Instance_Set(instance_dir)]
 
 
 def test_feature_dataframe_constructor(tmp_path: Path) -> None:
@@ -189,9 +179,7 @@ def test_has_missing_vectors(feature_df: FeatureDataFrame) -> None:
     assert not feature_df.has_missing_vectors()
 
 
-def test_get_remaining_jobs(
-    feature_df: FeatureDataFrame, instance_sets: list[InstanceSet]
-) -> None:
+def test_get_remaining_jobs(feature_df: FeatureDataFrame) -> None:
     """Test for method get_remaining_jobs."""
     flat_jobs = feature_df.remaining_jobs()
     expected_jobs = {
@@ -201,6 +189,8 @@ def test_get_remaining_jobs(
         ("Instance_Y", "ExtractorB", "Group2"),
     }
     assert set(flat_jobs) == expected_jobs
+
+    instance_sets = [InstanceSet(SAMPLE_INSTANCES)]
 
     grouped_jobs = feature_df.remaining_jobs(instances=instance_sets)
     assert set(grouped_jobs) == {"ExtractorA", "ExtractorB"}
