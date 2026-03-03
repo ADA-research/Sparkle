@@ -29,24 +29,49 @@ class Selector:
         self: Selector,
         selector_class: AbstractModelBasedSelector,
         model_class: AbstractPredictor | ClassifierMixin | RegressorMixin,
+        tuning: bool,
+        # preproccessors: from sklearn.base import TransformerMixin models?
+        # presolvers: asf.presolvers
+        runcount_limit : int=None # Limit on smac runs
+        
     ) -> None:
         """Initialize the Selector object.
 
         Args:
-            selector_class: The (name of) Selector class to construct.
+            selector_class: The (name of) Selector class to construct. May be multiple if tuning is enabled.
+            If None, and tuning is enabled, defaults to all possible selectors.
             model_class: The (name of) model class the selector will use.
         """
+        self.tuning = tuning
         if isinstance(selector_class, str):  # Resolve class name
             from asf import selectors
 
             selector_class = getattr(selectors, selector_class)
+        elif isinstance(selector_class, list):
+            if not self.tuning:
+                raise ValueError("Tuning must be enabled to specify multiple selectors.")
+            from asf import selectors
+            for index, value in enumerate(selector_class):
+                if isinstance(value, str):
+                    selector_class[index] = getattr(selectors, value)
+        elif isinstance(selector_class, None):
+            if not tuning:
+                raise ValueError("Selector class must be specified if tuning is disabled.")
+            import asf.selectors as asf_selectors
+            selector_class = asf_selectors.__all__
+
         if isinstance(model_class, str):  # Resolve class name
             from sklearn import ensemble
-
             model_class = getattr(ensemble, model_class)
+
+        if runcount_limit is None and self.tuning:
+            raise ValueError("SMAC3 runcount_limit must be specified if tuning is enabled.")
+        if runcount_limit and not self.tuning:
+            runcount_limit = None  # Disable as it is not relevant
 
         self.selector_class = selector_class
         self.model_class = model_class
+        self.runcount_limit = runcount_limit
 
     @property
     def name(self: Selector) -> str:
@@ -86,6 +111,10 @@ class Selector:
             selection_scenario.feature_target_path,
             selection_scenario.performance_target_path,
             selection_scenario.selector_file_path,
+            tuning=self.tuning,
+            maximize=not selection_scenario.objective.minimise,
+            runcount_limit=self.runcount_limit,
+            # presolver_budget: budget for presolvers
         )
         cmd = [" ".join([str(c) for c in cmd])]
 
@@ -113,12 +142,6 @@ class Selector:
     ) -> list:
         """Run the Selector, returning the prediction schedule upon success."""
         instance_features = feature_data.get_instance(instance, as_dataframe=True)
-        # instance_features = feature_data[
-        #     [
-        #         instance,
-        #     ]
-        # ]
-        # instance_features.columns = instance_features.columns.map("_".join)  # Reduce columns multi index
         selector = self.selector_class.load(selector_path)
         schedule = selector.predict(instance_features)
         if schedule is None:
