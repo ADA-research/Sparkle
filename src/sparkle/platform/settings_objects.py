@@ -291,7 +291,8 @@ class Settings:
         str,
         None,
         ("class",),
-        "Can contain any of the class names as defined in asf.selectors.",
+        "Can contain any of the class names as defined in asf.selectors. Should be a single class if tuning is not enabled, otherwise multiple.",
+        cli_kwargs={"nargs": "+"},
     )
     OPTION_selection_model = Option(
         "selector_model",
@@ -312,6 +313,14 @@ class Settings:
             "contribution_threshold",
         ),
         "The minimum marginal contribution a solver (configuration) must have to be used for the selector.",
+    )
+    OPTION_tuning = Option(
+        "tuning",
+        SECTION_selection,
+        bool,
+        False,
+        tuple(),
+        "Set a flag indicating whether Selector tuning should be used.",
     )
 
     # SMAC2 Options
