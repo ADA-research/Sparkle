@@ -320,56 +320,61 @@ def test_save_csv(feature_df: FeatureDataFrame, tmp_path: Path) -> None:
     pd.testing.assert_frame_equal(feature_df, fdf_new_reloaded)
 
 
-def _jobs_v_current(stacked_missing: pd.Series) -> list[tuple[str, str, str]]:
-    return stacked_missing[stacked_missing].index.tolist()
-
-
-def _jobs_v_loc_lookup(stacked_missing: pd.Series) -> list[tuple[str, str, str]]:
-    return [
-        (instance, extractor, feature_group)
-        for (instance, extractor, feature_group) in stacked_missing.index
-        if stacked_missing.loc[instance, extractor, feature_group]
-    ]
-
-
-def _jobs_v_index_mask(stacked_missing: pd.Series) -> list[tuple[str, str, str]]:
-    return [
-        (instance, extractor, feature_group)
-        for (instance, extractor, feature_group) in stacked_missing.index[
-            stacked_missing
-        ]
-    ]
-
-
-def _jobs_v_numpy_index_mask(stacked_missing: pd.Series) -> list[tuple[str, str, str]]:
-    return stacked_missing.index[stacked_missing.to_numpy()].tolist()
-
-
-def _jobs_v_take_nonzero(stacked_missing: pd.Series) -> list[tuple[str, str, str]]:
-    missing_positions = stacked_missing.to_numpy().nonzero()[0]
-    return stacked_missing.index.take(missing_positions).tolist()
-
-
-def _job_extraction_versions() -> dict[
+def job_extraction_versions() -> dict[
     str, Callable[[pd.Series], list[tuple[str, str, str]]]
 ]:
+    """Map implementation labels to candidate job-extraction functions."""
+
+    def jobs_v_current(stacked_missing: pd.Series) -> list[tuple[str, str, str]]:
+        """Return jobs via Series self-mask and index extraction."""
+        return stacked_missing[stacked_missing].index.tolist()
+
+    def jobs_v_loc_lookup(stacked_missing: pd.Series) -> list[tuple[str, str, str]]:
+        """Return jobs via full index scan with per-entry .loc lookup."""
+        return [
+            (instance, extractor, feature_group)
+            for (instance, extractor, feature_group) in stacked_missing.index
+            if stacked_missing.loc[instance, extractor, feature_group]
+        ]
+
+    def jobs_v_index_mask(stacked_missing: pd.Series) -> list[tuple[str, str, str]]:
+        """Return jobs by masking the MultiIndex with the Series booleans."""
+        return [
+            (instance, extractor, feature_group)
+            for (instance, extractor, feature_group) in stacked_missing.index[
+                stacked_missing
+            ]
+        ]
+
+    def jobs_v_numpy_index_mask(
+        stacked_missing: pd.Series,
+    ) -> list[tuple[str, str, str]]:
+        """Return jobs by masking the MultiIndex with a NumPy boolean array."""
+        return stacked_missing.index[stacked_missing.to_numpy()].tolist()
+
+    def jobs_v_take_nonzero(stacked_missing: pd.Series) -> list[tuple[str, str, str]]:
+        """Return jobs by taking index positions where the mask is True."""
+        missing_positions = stacked_missing.to_numpy().nonzero()[0]
+        return stacked_missing.index.take(missing_positions).tolist()
+
     return {
-        "current_series_mask": _jobs_v_current,
-        "loop_with_loc": _jobs_v_loc_lookup,
-        "loop_with_index_mask": _jobs_v_index_mask,
-        "index_numpy_mask": _jobs_v_numpy_index_mask,
-        "index_take_nonzero": _jobs_v_take_nonzero,
+        "current_series_mask": jobs_v_current,
+        "loop_with_loc": jobs_v_loc_lookup,
+        "loop_with_index_mask": jobs_v_index_mask,
+        "index_numpy_mask": jobs_v_numpy_index_mask,
+        "index_take_nonzero": jobs_v_take_nonzero,
     }
 
 
-def _benchmark_job_extraction_versions(
+def benchmark_job_extraction_versions(
     stacked_missing: pd.Series,
     versions: dict[str, Callable[[pd.Series], list[tuple[str, str, str]]]],
     iterations: int = 20,
 ) -> dict[str, float]:
+    """Return average runtime per implementation over repeated iterations."""
     timings: dict[str, float] = {}
     for name, get_jobs in versions.items():
-        get_jobs(stacked_missing)  # Warm up.
+        get_jobs(stacked_missing)  # Warm up once to reduce first-run noise.
         start = perf_counter()
         for _ in range(iterations):
             get_jobs(stacked_missing)
@@ -443,7 +448,7 @@ def test_remaining_jobs_job_extraction_versions_equivalent(
     stacked_missing_benchmark: pd.Series,
 ) -> None:
     """Ensure all job extraction variants return the same output."""
-    versions = _job_extraction_versions()
+    versions = job_extraction_versions()
     baseline = versions["current_series_mask"](stacked_missing_benchmark)
 
     for name, get_jobs in versions.items():
@@ -457,14 +462,14 @@ def test_remaining_jobs_job_extraction_benchmark(
     stacked_missing_benchmark: pd.Series,
 ) -> None:
     """Benchmark alternative implementations used to build remaining jobs."""
-    versions = _job_extraction_versions()
+    versions = job_extraction_versions()
     baseline = versions["current_series_mask"](stacked_missing_benchmark)
     for name, get_jobs in versions.items():
         assert get_jobs(stacked_missing_benchmark) == baseline, (
             f"Version '{name}' does not match baseline output."
         )
 
-    timings = _benchmark_job_extraction_versions(
+    timings = benchmark_job_extraction_versions(
         stacked_missing=stacked_missing_benchmark,
         versions=versions,
         iterations=50,
