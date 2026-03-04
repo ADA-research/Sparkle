@@ -259,18 +259,27 @@ class FeatureDataFrame(pd.DataFrame):
         """
         extractor_values = self.columns.get_level_values(FeatureDataFrame.extractor_dim)
 
-        # Filter out extractors that have no missing values for any instance or feature group by creating a boolean mask of valid extractors and applying it to the DataFrame.
+        # Extractor labels for every feature column (level 0 of the column MultiIndex).
+        # We use this to remove synthetic placeholder extractor columns.
         valid_columns = [
             str(extractor) != str(FeatureDataFrame.missing_value)
             for extractor in extractor_values
         ]
+        # DataFrame restricted to real extractor columns only.
         target_df = self.loc[:, valid_columns]
 
         if target_df.empty:
             return []
 
-        # One boolean per (instance, extractor, feature_group):
-        # True means the full feature group is still missing for that instance.
+        # Build one boolean per (instance, extractor, feature_group):
+        # 1) target_df.isnull(): mark missing cells as True.
+        # 2) .T: move feature columns to the index for grouping by MultiIndex levels.
+        # 3) .groupby(level=[Extractor, FeatureGroup]).all():
+        #    collapse all feature names in the same group.
+        #    Result is True only if the *entire* group is missing for an instance.
+        # 4) final .T: restore instances on rows.
+        # So missing_groups.loc[instance, (extractor, feature_group)] == True
+        # means this job still has to be computed.
         missing_groups = (
             target_df.isnull()
             .T.groupby(
@@ -283,20 +292,31 @@ class FeatureDataFrame(pd.DataFrame):
             .T
         )
         if groupwise_computation:
+            # Convert the 2D table to a Series with MultiIndex:
+            # (instance, extractor, feature_group) -> bool(is_missing_group).
             stacked_missing = missing_groups.stack(
                 [FeatureDataFrame.extractor_dim, FeatureDataFrame.feature_group_dim]
             )
+            # Keep only True entries and return their index tuples as jobs.
             remaining_jobs = stacked_missing[stacked_missing].index.to_list()
             return remaining_jobs
 
-        # Collapse feature groups into one boolean per (instance, extractor).
+        # Collapse feature groups into one boolean per (instance, extractor):
+        # after this reduction, True means at least one required group for this
+        # extractor/instance pair is still missing and should be scheduled.
         missing_values_with_no_group = (
             missing_groups.T.groupby(level=[FeatureDataFrame.extractor_dim]).all().T
         )
+        # Convert collapsed table to Series:
+        # (instance, extractor) -> bool(is_missing_extractor).
         stacked_missing = missing_values_with_no_group.stack(
             [FeatureDataFrame.extractor_dim]
         )
-        remaining_jobs = stacked_missing[stacked_missing].index.to_list()
+        # Keep only missing entries and expand to a 3-tuple shape by filling
+        # the feature-group slot with None:
+        # (instance, extractor, None).
+        jobs = stacked_missing[stacked_missing].index.to_list()
+        remaining_jobs = [(instance, extractor, None) for instance, extractor in jobs]
         return remaining_jobs
 
     def get_instance(

@@ -91,7 +91,7 @@ def compute_features(
         extractor = Extractor(extractor_path)
 
         instance_path = resolve_instance_name(
-            str(instance_name), settings.DEFAULT_instance_dir
+            instance_name, settings.DEFAULT_instance_dir
         )
         if isinstance(instance_path, str):
             instance_path = [Path(instance_path)]
