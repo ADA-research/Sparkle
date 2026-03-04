@@ -312,10 +312,13 @@ class FeatureDataFrame(pd.DataFrame):
         stacked_missing = missing_values_with_no_group.stack(
             [FeatureDataFrame.extractor_dim]
         )
+
+        # Keep only True entries(indicating missing values) and return their index tuples as jobs
+        jobs = stacked_missing[stacked_missing].index.to_list()
+
         # Keep only missing entries and expand to a 3-tuple shape by filling
         # the feature-group slot with None:
         # (instance, extractor, None).
-        jobs = stacked_missing[stacked_missing].index.to_list()
         remaining_jobs = [(instance, extractor, None) for instance, extractor in jobs]
         return remaining_jobs
 
