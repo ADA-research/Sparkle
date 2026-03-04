@@ -255,7 +255,7 @@ class FeatureDataFrame(pd.DataFrame):
 
         Returns:
             A flat list of remaining jobs, always in the shape
-            `(instance_name, extractor_name, feature_group_or_None)`.
+            `(instance_name, extractor_name, feature_group | None)`.
         """
         extractor_values = self.columns.get_level_values(FeatureDataFrame.extractor_dim)
 

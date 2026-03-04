@@ -93,15 +93,14 @@ def compute_features(
         instance_path = resolve_instance_name(
             instance_name, settings.DEFAULT_instance_dir
         )
-        if isinstance(instance_path, str):
-            instance_path = [Path(instance_path)]
-        elif instance_path is None:
-            raise ValueError(
-                f"Could not resolve instance name '{instance_name}' using the default instance directory."
-            )
+        instance_paths = []
+        if isinstance(instance_path, list):
+            instance_paths = [Path(path) for path in instance_path]
+        elif isinstance(instance_path, (str, Path)):
+            instance_paths = [Path(instance_path)]
 
         run = extractor.run_cli(
-            instance_path,
+            instance_paths,
             feature_data,
             cutoff,
             feature_group,
