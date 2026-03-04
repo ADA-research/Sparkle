@@ -3,10 +3,11 @@
 import math
 import pandas as pd
 import pytest
+from collections.abc import Callable
 from pathlib import Path
+from time import perf_counter
 
 from sparkle.structures import FeatureDataFrame
-from sparkle.instance import Instance_Set
 
 SAMPLE_EXTRACTOR_DATA = {
     "ExtractorA": [("Group1", "Feature1"), ("Group1", "Feature2")],
@@ -179,42 +180,32 @@ def test_has_missing_vectors(feature_df: FeatureDataFrame) -> None:
     assert not feature_df.has_missing_vectors()
 
 
-def test_get_remaining_jobs(feature_df: FeatureDataFrame, tmp_path: Path) -> None:
+def test_get_remaining_jobs(feature_df: FeatureDataFrame) -> None:
     """Test for method get_remaining_jobs."""
-    flat_jobs = feature_df.remaining_jobs()
-    expected_jobs = {
+    group_jobs = feature_df.remaining_jobs()
+    expected_group_jobs = {
         ("Instance_X", "ExtractorA", "Group1"),
         ("Instance_Y", "ExtractorA", "Group1"),
         ("Instance_X", "ExtractorB", "Group2"),
         ("Instance_Y", "ExtractorB", "Group2"),
     }
-    assert set(flat_jobs) == expected_jobs
+    assert set(group_jobs) == expected_group_jobs
 
-    instance_dir = tmp_path / "instances"
-    instance_dir.mkdir()
-    for instance_name in SAMPLE_INSTANCES:
-        (instance_dir / f"{instance_name}.txt").write_text("dummy\n")
-    instance_sets = [Instance_Set(instance_dir)]
-
-    grouped_jobs = feature_df.remaining_jobs(instances=instance_sets)
-    assert set(grouped_jobs) == {"ExtractorA", "ExtractorB"}
-    assert set(grouped_jobs["ExtractorA"]) == {"Group1"}
-    assert set(grouped_jobs["ExtractorB"]) == {"Group2"}
-    assert set(Path(path).stem for path in grouped_jobs["ExtractorA"]["Group1"]) == {
-        "Instance_X",
-        "Instance_Y",
+    collapsed_jobs = feature_df.remaining_jobs(groupwise_computation=False)
+    expected_collapsed_jobs = {
+        ("Instance_X", "ExtractorA", None),
+        ("Instance_Y", "ExtractorA", None),
+        ("Instance_X", "ExtractorB", None),
+        ("Instance_Y", "ExtractorB", None),
     }
-    assert set(Path(path).stem for path in grouped_jobs["ExtractorB"]["Group2"]) == {
-        "Instance_X",
-        "Instance_Y",
-    }
+    assert set(collapsed_jobs) == expected_collapsed_jobs
 
     # Complete one job by filling its value
     feature_df.set_value("Instance_X", "ExtractorB", "Group2", "Feature3", 1.0)
 
-    flat_jobs_after = feature_df.remaining_jobs()
-    assert ("Instance_X", "ExtractorB", "Group2") not in flat_jobs_after
-    assert len(flat_jobs_after) == 3
+    collapsed_jobs_after = feature_df.remaining_jobs(groupwise_computation=False)
+    assert ("Instance_X", "ExtractorB", None) not in collapsed_jobs_after
+    assert len(collapsed_jobs_after) == 3
 
 
 def test_get_instance(feature_df: FeatureDataFrame) -> None:
@@ -327,3 +318,160 @@ def test_save_csv(feature_df: FeatureDataFrame, tmp_path: Path) -> None:
     assert new_csv_path.exists()
     fdf_new_reloaded = FeatureDataFrame(new_csv_path)
     pd.testing.assert_frame_equal(feature_df, fdf_new_reloaded)
+
+
+def _jobs_v_current(stacked_missing: pd.Series) -> list[tuple[str, str, str]]:
+    return stacked_missing[stacked_missing].index.tolist()
+
+
+def _jobs_v_loc_lookup(stacked_missing: pd.Series) -> list[tuple[str, str, str]]:
+    return [
+        (instance, extractor, feature_group)
+        for (instance, extractor, feature_group) in stacked_missing.index
+        if stacked_missing.loc[instance, extractor, feature_group]
+    ]
+
+
+def _jobs_v_index_mask(stacked_missing: pd.Series) -> list[tuple[str, str, str]]:
+    return [
+        (instance, extractor, feature_group)
+        for (instance, extractor, feature_group) in stacked_missing.index[
+            stacked_missing
+        ]
+    ]
+
+
+def _jobs_v_numpy_index_mask(stacked_missing: pd.Series) -> list[tuple[str, str, str]]:
+    return stacked_missing.index[stacked_missing.to_numpy()].tolist()
+
+
+def _jobs_v_take_nonzero(stacked_missing: pd.Series) -> list[tuple[str, str, str]]:
+    missing_positions = stacked_missing.to_numpy().nonzero()[0]
+    return stacked_missing.index.take(missing_positions).tolist()
+
+
+def _job_extraction_versions() -> dict[
+    str, Callable[[pd.Series], list[tuple[str, str, str]]]
+]:
+    return {
+        "current_series_mask": _jobs_v_current,
+        "loop_with_loc": _jobs_v_loc_lookup,
+        "loop_with_index_mask": _jobs_v_index_mask,
+        "index_numpy_mask": _jobs_v_numpy_index_mask,
+        "index_take_nonzero": _jobs_v_take_nonzero,
+    }
+
+
+def _benchmark_job_extraction_versions(
+    stacked_missing: pd.Series,
+    versions: dict[str, Callable[[pd.Series], list[tuple[str, str, str]]]],
+    iterations: int = 20,
+) -> dict[str, float]:
+    timings: dict[str, float] = {}
+    for name, get_jobs in versions.items():
+        get_jobs(stacked_missing)  # Warm up.
+        start = perf_counter()
+        for _ in range(iterations):
+            get_jobs(stacked_missing)
+        timings[name] = (perf_counter() - start) / iterations
+    return timings
+
+
+@pytest.fixture(scope="module")
+def stacked_missing_benchmark(tmp_path_factory: pytest.TempPathFactory) -> pd.Series:
+    """Build a large stacked missing mask using a real FeatureDataFrame."""
+    benchmark_dir = tmp_path_factory.mktemp("fdf_benchmark")
+    csv_path = benchmark_dir / "remaining_jobs_benchmark.csv"
+
+    num_instances = 400
+    num_extractors = 16
+    num_groups = 5
+    num_features_per_group = 6
+
+    instances = [f"Instance_{idx:04d}" for idx in range(num_instances)]
+    extractor_data: dict[str, list[tuple[str, str]]] = {}
+    for extractor_idx in range(num_extractors):
+        extractor = f"Extractor_{extractor_idx:02d}"
+        extractor_features = []
+        for group_idx in range(num_groups):
+            group = f"Group_{group_idx:02d}"
+            for feature_idx in range(num_features_per_group):
+                feature_name = f"Feature_{feature_idx:02d}"
+                extractor_features.append((group, feature_name))
+        extractor_data[extractor] = extractor_features
+
+    feature_df = FeatureDataFrame(
+        csv_filepath=csv_path,
+        instances=instances,
+        extractor_data=extractor_data,
+    )
+
+    first_feature_columns = [
+        (extractor, f"Group_{group_idx:02d}", "Feature_00")
+        for extractor in extractor_data
+        for group_idx in range(num_groups)
+    ]
+    for column_idx, column in enumerate(first_feature_columns):
+        non_missing_mask = [
+            (instance_idx + column_idx) % 3 == 0 for instance_idx in range(num_instances)
+        ]
+        feature_df.loc[non_missing_mask, column] = float(column_idx + 1)
+
+    extractor_values = feature_df.columns.get_level_values(
+        FeatureDataFrame.extractor_dim
+    )
+    valid_columns = [
+        str(extractor) != str(FeatureDataFrame.missing_value)
+        for extractor in extractor_values
+    ]
+    target_df = feature_df.loc[:, valid_columns]
+    missing_groups = (
+        target_df.isnull()
+        .T.groupby(
+            level=[FeatureDataFrame.extractor_dim, FeatureDataFrame.feature_group_dim]
+        )
+        .all()
+        .T
+    )
+    return missing_groups.stack(
+        [FeatureDataFrame.extractor_dim, FeatureDataFrame.feature_group_dim]
+    )
+
+
+@pytest.mark.performance
+def test_remaining_jobs_job_extraction_versions_equivalent(
+    stacked_missing_benchmark: pd.Series,
+) -> None:
+    """Ensure all job extraction variants return the same output."""
+    versions = _job_extraction_versions()
+    baseline = versions["current_series_mask"](stacked_missing_benchmark)
+
+    for name, get_jobs in versions.items():
+        assert get_jobs(stacked_missing_benchmark) == baseline, (
+            f"Version '{name}' does not match baseline output."
+        )
+
+
+@pytest.mark.performance
+def test_remaining_jobs_job_extraction_benchmark(
+    stacked_missing_benchmark: pd.Series,
+) -> None:
+    """Benchmark alternative implementations used to build remaining jobs."""
+    versions = _job_extraction_versions()
+    baseline = versions["current_series_mask"](stacked_missing_benchmark)
+    for name, get_jobs in versions.items():
+        assert get_jobs(stacked_missing_benchmark) == baseline, (
+            f"Version '{name}' does not match baseline output."
+        )
+
+    timings = _benchmark_job_extraction_versions(
+        stacked_missing=stacked_missing_benchmark,
+        versions=versions,
+        iterations=50,
+    )
+
+    print("\nremaining_jobs job extraction benchmark (seconds per call):")
+    for name in sorted(timings, key=timings.get):
+        print(f"  {name}: {timings[name]:.8f}")
+
+    assert len(timings) == len(versions)

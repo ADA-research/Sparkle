@@ -3,8 +3,6 @@
 from __future__ import annotations
 import math
 from pathlib import Path
-from sparkle.instance import InstanceSet
-from sparkle.CLI.help.nicknames import resolve_instance_name
 
 import pandas as pd
 
@@ -243,30 +241,21 @@ class FeatureDataFrame(pd.DataFrame):
 
     def remaining_jobs(
         self: FeatureDataFrame,
-        instances: Path | list[InstanceSet] | None = None,
         groupwise_computation: bool = True,
-    ) -> list[tuple[str, str, str]] | dict[str, dict[str | None, list[str]]]:
-        """Return remaining jobs grouped for extractor execution.
+    ) -> list[tuple[str, str | None, str]]:
+        """Return remaining feature-computation jobs.
 
         Args:
-            groupwise_computation: If True, jobs are grouped per feature group. If False
-                (or None), feature groups collapse to the `None` key per extractor.
-            instances: Optional. Either a path to the default instance-set directory
-                or a list of `InstanceSet` objects used to resolve instance names to
-                paths via `resolve_instance_name(...)`.
-
-                If omitted (`None`), this method returns a flat list of remaining jobs
-                as `(instance_name, extractor, feature_group)` tuples.
+            groupwise_computation:
+                If True, jobs are kept per feature group and returned as
+                `(instance_name, extractor_name, feature_group)` tuples.
+                If False, feature groups are collapsed and the return value uses
+                `None` for the feature-group position:
+                `(instance_name, extractor_name, None)`.
 
         Returns:
-            If `instances is None`, a list of `(instance_name, extractor, feature_group)`
-            tuples.
-
-            Otherwise, a dict of the form `{extractor: {feature_group_or_None: [instance_path, ...]}}`,
-            where `instance_path` values are resolved strings.
-
-        Raises:
-            ValueError: If an instance name cannot be resolved using the provided `instances`.
+            A flat list of remaining jobs, always in the shape
+            `(instance_name, extractor_name, feature_group_or_None)`.
         """
         extractor_values = self.columns.get_level_values(FeatureDataFrame.extractor_dim)
 
@@ -278,10 +267,10 @@ class FeatureDataFrame(pd.DataFrame):
         target_df = self.loc[:, valid_columns]
 
         if target_df.empty:
-            return [] if instances is None else {}
+            return []
 
-        # Reduce all feature columns into one boolean per (extractor, feature_group).
-        # missing_groups indicates whether there are any missing values for that extractor and feature group across all instances.
+        # One boolean per (instance, extractor, feature_group):
+        # True means the full feature group is still missing for that instance.
         missing_groups = (
             target_df.isnull()
             .T.groupby(
@@ -293,44 +282,22 @@ class FeatureDataFrame(pd.DataFrame):
             .all()
             .T
         )
+        if groupwise_computation:
+            stacked_missing = missing_groups.stack(
+                [FeatureDataFrame.extractor_dim, FeatureDataFrame.feature_group_dim]
+            )
+            remaining_jobs = stacked_missing[stacked_missing].index.to_list()
+            return remaining_jobs
 
-        # Stack the missing groups to create a MultiIndex for easier iteration.
-        # The index will be (instance, extractor, feature_group) and the value( which is True if missing, False otherwise) will indicate if that combination is missing.
-        stacked_missing = missing_groups.stack(
-            [FeatureDataFrame.extractor_dim, FeatureDataFrame.feature_group_dim]
+        # Collapse feature groups into one boolean per (instance, extractor).
+        missing_values_with_no_group = (
+            missing_groups.T.groupby(level=[FeatureDataFrame.extractor_dim]).all().T
         )
-
-        # fastest in benchmark: mask the MultiIndex with a NumPy boolean array.
-        # 0.00369851 s/call
-        jobs_index_numpy_mask = stacked_missing.index[
-            stacked_missing.to_numpy()
-        ].tolist()
-
-        # 2nd fastest in benchmark: filter the Series first, then take its index.
-        # 0.00377215 s/call
-        # jobs_series_mask = stacked_missing[stacked_missing].index.tolist()
-
-        # Keep one active result while preserving both implementations for readability comparison.
-        jobs = jobs_index_numpy_mask
-
-        if instances is None:
-            return jobs
-
-        grouped: dict[str, dict[str | None, list[str]]] = {}
-        for instance, extractor, feature_group in jobs:
-            if extractor not in grouped:
-                grouped[extractor] = {}
-            effective_group = feature_group if groupwise_computation else None
-            if effective_group not in grouped[extractor]:
-                grouped[extractor][effective_group] = []
-            instance_path = resolve_instance_name(str(instance), instances)
-            if instance_path is None:
-                raise ValueError(
-                    f"Could not resolve instance name '{instance}' using the provided instance sets."
-                )
-            grouped[extractor][effective_group].append(str(instance_path))
-
-        return grouped
+        stacked_missing = missing_values_with_no_group.stack(
+            [FeatureDataFrame.extractor_dim]
+        )
+        remaining_jobs = stacked_missing[stacked_missing].index.to_list()
+        return remaining_jobs
 
     def get_instance(
         self: FeatureDataFrame, instance: str, as_dataframe: bool = False
