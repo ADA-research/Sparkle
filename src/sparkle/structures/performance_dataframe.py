@@ -740,7 +740,7 @@ class PerformanceDataFrame(pd.DataFrame):
 
     def remaining_jobs(
         self: PerformanceDataFrame, rerun: bool = False
-    ) -> list[tuple[str, str, str, int | float]]:
+    ) -> list[tuple[str, str, str, int]]:
         """Return a list of performance computation jobs there are to be done.
 
         Get a list of jobs to run from the performance data.

@@ -242,7 +242,7 @@ class FeatureDataFrame(pd.DataFrame):
     def remaining_jobs(
         self: FeatureDataFrame,
         groupwise_computation: bool = True,
-    ) -> list[tuple[str, str | None, str]]:
+    ) -> list[tuple[str, str, str | None]]:
         """Return remaining feature-computation jobs.
 
         Args:
@@ -257,16 +257,10 @@ class FeatureDataFrame(pd.DataFrame):
             A flat list of remaining jobs, always in the shape
             `(instance_name, extractor_name, feature_group | None)`.
         """
-        extractor_values = self.columns.get_level_values(FeatureDataFrame.extractor_dim)
+        extractor_values = self.extractors
 
-        # Extractor labels for every feature column (level 0 of the column MultiIndex).
-        # We use this to remove synthetic placeholder extractor columns.
-        valid_columns = [
-            str(extractor) != str(FeatureDataFrame.missing_value)
-            for extractor in extractor_values
-        ]
         # DataFrame restricted to real extractor columns only.
-        target_df = self.loc[:, valid_columns]
+        target_df = self.loc[:, extractor_values]
 
         if target_df.empty:
             return []
@@ -298,8 +292,8 @@ class FeatureDataFrame(pd.DataFrame):
                 [FeatureDataFrame.extractor_dim, FeatureDataFrame.feature_group_dim]
             )
             # Keep only True entries and return their index tuples as jobs.
-            remaining_jobs = stacked_missing[stacked_missing].index.to_list()
-            return remaining_jobs
+            # Getting tuples like this was the fastest (according to benchmark tests) and most understandable.
+            return stacked_missing[stacked_missing].index.to_list()
 
         # Collapse feature groups into one boolean per (instance, extractor):
         # after this reduction, True means at least one required group for this
@@ -319,8 +313,7 @@ class FeatureDataFrame(pd.DataFrame):
         # Keep only missing entries and expand to a 3-tuple shape by filling
         # the feature-group slot with None:
         # (instance, extractor, None).
-        remaining_jobs = [(instance, extractor, None) for instance, extractor in jobs]
-        return remaining_jobs
+        return [(instance, extractor, None) for instance, extractor in jobs]
 
     def get_instance(
         self: FeatureDataFrame, instance: str, as_dataframe: bool = False
