@@ -53,13 +53,13 @@ def test_load_duplicate_index() -> None:
     assert len(corrected_pdf.index) == 2  # Six lines representing two indices
 
 
-def test_get_job_list() -> None:
-    """Test job list method, without and with recompute bool."""
-    job_list = []
-    result = pd.get_job_list()
-    assert result == job_list
+def test_remaining_jobs() -> None:
+    """Test remaining jobs method, without and with recompute bool."""
+    remaining_jobs = []
+    result = pd.remaining_jobs()
+    assert result == remaining_jobs
 
-    job_list = [
+    remaining_jobs = [
         ("AlgorithmA", "Default", "Instance1", 1),
         ("AlgorithmA", "Default", "Instance2", 1),
         ("AlgorithmA", "Default", "Instance3", 1),
@@ -86,12 +86,12 @@ def test_get_job_list() -> None:
         ("AlgorithmE", "Default", "Instance4", 1),
         ("AlgorithmE", "Default", "Instance5", 1),
     ]
-    result = pd.get_job_list(rerun=True)
-    assert set(result) == set(job_list)
+    result = pd.remaining_jobs(rerun=True)
+    assert set(result) == set(remaining_jobs)
 
     csv_actual_path = Path("tests/test_files/performance/actual-data-job-list.csv")
     actual_df = PerformanceDataFrame(csv_actual_path)
-    result = actual_df.get_job_list()
+    result = actual_df.remaining_jobs()
     # Only default was run in this data case
     for solver, config, instance, run in result:
         assert config != PerformanceDataFrame.default_configuration
@@ -160,7 +160,6 @@ def test_solver_configurations() -> None:
     for solver in pd_mo.solvers:
         assert solver in pd_mo.attrs
         assert len(pd_mo.attrs[solver]) == 5
-        print(pd_mo.attrs)
         for config in pd_mo.attrs[solver]:
             assert isinstance(pd_mo.attrs[solver][config], dict)
 

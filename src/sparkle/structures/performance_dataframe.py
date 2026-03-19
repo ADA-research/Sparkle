@@ -130,11 +130,7 @@ class PerformanceDataFrame(pd.DataFrame):
                     )
             mcolumns = pd.MultiIndex.from_tuples(
                 column_tuples,
-                names=[
-                    PerformanceDataFrame.column_solver,
-                    PerformanceDataFrame.column_configuration,
-                    PerformanceDataFrame.column_meta,
-                ],
+                names=PerformanceDataFrame.multi_column_names,
             )
             # Set dtype object to avoid inferring float for categorical objectives
             super().__init__(
@@ -161,7 +157,7 @@ class PerformanceDataFrame(pd.DataFrame):
             )  # Drop duplicates
             self.set_index(idx_cols, inplace=True)  # Restore the MultiIndex (in-place)
             self.index.rename(
-                self.multi_index_names, inplace=True
+                PerformanceDataFrame.multi_index_names, inplace=True
             )  # Restore level names
 
         # Sort the index to optimize lookup speed
@@ -742,12 +738,12 @@ class PerformanceDataFrame(pd.DataFrame):
             return value.mean()
         return value
 
-    def get_job_list(
+    def remaining_jobs(
         self: PerformanceDataFrame, rerun: bool = False
-    ) -> list[tuple[str, str]]:
+    ) -> list[tuple[str, str, str, int]]:
         """Return a list of performance computation jobs there are to be done.
 
-        Get a list of tuple[instance, solver] to run from the performance data.
+        Get a list of jobs to run from the performance data.
         If rerun is False (default), get only the tuples that don't have a
         value, else (True) get all the tuples.
 
@@ -757,36 +753,61 @@ class PerformanceDataFrame(pd.DataFrame):
         Returns:
             A tuple of (solver, config, instance, run) combinations
         """
-        # Drop the seed as we are looking for nan values, not seeds
+        # Drop the seed as we are looking for missing objective values, not seeds.
         df = self.drop(
             PerformanceDataFrame.column_seed,
             axis=1,
             level=PerformanceDataFrame.column_meta,
         )
         df = df.droplevel(PerformanceDataFrame.column_meta, axis=1)
-        if rerun:  # Return all combinations
-            # Drop objective, not needed
-            df = df.droplevel(PerformanceDataFrame.index_objective, axis=0)
-            result = [
-                tuple(column) + tuple(index)
-                for column, index in itertools.product(df.columns, df.index)
+
+        # Each job is identified by (instance, run, solver, config), independent of
+        # objective. Collapse objective level once to avoid duplicate generation.
+        if rerun:
+            job_index = df.index.droplevel(PerformanceDataFrame.index_objective).unique()
+            return [
+                (solver, config, instance, run)
+                for (solver, config), (instance, run) in itertools.product(
+                    df.columns, job_index
+                )
             ]
-        else:
-            result = []
-            for (solver, config), (objective, instance, run) in itertools.product(
-                df.columns, df.index
-            ):
-                value = df.loc[(objective, instance, run), (solver, config)]
-                if value is None or (
-                    isinstance(value, (int, float)) and math.isnan(value)
-                ):
-                    # NOTE: Force Run to be int, as it can be float on accident
-                    if math.isnan(run):
-                        continue
-                    run = int(run)
-                    result.append(tuple([solver, config, instance, run]))
-        # Filter duplicates while keeping the order conistent
-        return list(dict.fromkeys(result))
+
+        # Compute a per-job missingness mask:
+        # True means at least one objective value is still missing.
+        missing_jobs = (
+            df.isna()
+            .groupby(
+                level=[
+                    PerformanceDataFrame.index_instance,
+                    PerformanceDataFrame.index_run,
+                ],
+                sort=False,
+            )
+            .any()
+        )
+        # Stack the solver and configuration levels to get a MultiIndex of (instance, run, solver, config) with a boolean value indicating missingness of that job.
+        stacked_missing = missing_jobs.stack(
+            [
+                PerformanceDataFrame.column_solver,
+                PerformanceDataFrame.column_configuration,
+            ]
+        )
+
+        # stacked_missing is a Series with MultiIndex
+        # (instance, run, solver, config) and boolean values.
+        # Add jobs only when value is True.
+        result = []
+        for (instance, run, solver, config), is_missing in stacked_missing.items():
+            if not bool(is_missing):
+                continue
+            # NOTE: Keep historical behavior of skipping invalid run identifiers.
+            if pd.isna(run):
+                continue
+            # NOTE: Force Run to be int, as it can be float on accident.
+            if isinstance(run, (int, float, np.integer, np.floating)):
+                run = int(run)
+            result.append((solver, config, instance, run))
+        return result
 
     def configuration_performance(
         self: PerformanceDataFrame,

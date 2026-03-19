@@ -2,6 +2,16 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.9.6.1] - ??/??/2026
+
+### Added
+- New `groupwise_computation` setting/CLI flag to disable per-feature-group extractor runs when splitting is not desired. [Issue#210]
+
+### Changed
+- `compute_features` now respects `groupwise_computation` by collapsing submissions that would otherwise split by feature group. [Issue#210]
+
+### Fixed
+
 ## [0.9.6] - 21/01/2026
 
 ### Added

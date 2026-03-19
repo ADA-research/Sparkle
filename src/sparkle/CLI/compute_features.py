@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 import argparse
 
+from pathlib import Path
 from runrunner.base import Run, Runner
 
 from sparkle.selector import Extractor
@@ -17,7 +18,7 @@ from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
+from sparkle.CLI.help.nicknames import resolve_instance_name, resolve_object_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -37,6 +38,10 @@ def parser_function() -> argparse.ArgumentParser:
     # Settings arguments
     parser.add_argument(*ac.SettingsFileArgument.names, **ac.SettingsFileArgument.kwargs)
     parser.add_argument(*Settings.OPTION_run_on.args, **Settings.OPTION_run_on.kwargs)
+    parser.add_argument(
+        *Settings.OPTION_groupwise_computation.args,
+        **Settings.OPTION_groupwise_computation.kwargs,
+    )
     return parser
 
 
@@ -58,59 +63,55 @@ def compute_features(
             Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
 
     Returns:
-        The Slurm job or Local job
+        Submitted runs. Empty if there are no jobs to execute.
     """
+    settings = gv.settings()
     if recompute:
         feature_data.reset_dataframe()
-    jobs = feature_data.remaining_jobs()
 
-    # Lookup all instances to resolve the instance paths later
-    instances: list[InstanceSet] = []
-    for instance_dir in gv.settings().DEFAULT_instance_dir.iterdir():
-        if instance_dir.is_dir():
-            instances.append(Instance_Set(instance_dir))
+    remaining_jobs = feature_data.remaining_jobs(
+        groupwise_computation=settings.groupwise_computation
+    )
 
     # If there are no jobs, stop
-    if not jobs:
+    if not remaining_jobs:
         print(
             "No feature computation jobs to run; stopping execution! To recompute "
             "feature values use the --recompute flag."
         )
-        return
-    cutoff = gv.settings().extractor_cutoff_time
-    instance_paths = set()
-    grouped_job_list: dict[str, dict[str, list[str]]] = {}
+        return []
 
-    # Group the jobs by extractor/feature group
-    for instance_name, extractor_name, feature_group in jobs:
-        if extractor_name not in grouped_job_list:
-            grouped_job_list[extractor_name] = {}
-        if feature_group not in grouped_job_list[extractor_name]:
-            grouped_job_list[extractor_name][feature_group] = []
-        instance_path = resolve_instance_name(str(instance_name), instances)
-        grouped_job_list[extractor_name][feature_group].append(instance_path)
-
-    sbatch_options = gv.settings().sbatch_settings
-    slurm_prepend = gv.settings().slurm_job_prepend
+    cutoff = settings.extractor_cutoff_time
+    sbatch_options = settings.sbatch_settings
+    slurm_prepend = settings.slurm_job_prepend
     srun_options = ["-N1", "-n1"] + sbatch_options
     runs = []
-    for extractor_name, feature_groups in grouped_job_list.items():
-        extractor_path = gv.settings().DEFAULT_extractor_dir / extractor_name
+    for instance_name, extractor_name, feature_group in remaining_jobs:
+        extractor_path = settings.DEFAULT_extractor_dir / extractor_name
         extractor = Extractor(extractor_path)
-        for feature_group, instance_paths in feature_groups.items():
-            run = extractor.run_cli(
-                instance_paths,
-                feature_data,
-                cutoff,
-                feature_group if extractor.groupwise_computation else None,
-                run_on,
-                sbatch_options,
-                srun_options,
-                gv.settings().slurm_jobs_in_parallel,
-                slurm_prepend,
-                log_dir=sl.caller_log_dir,
-            )
-            runs.append(run)
+
+        instance_path = resolve_instance_name(
+            instance_name, settings.DEFAULT_instance_dir
+        )
+        instance_paths = []
+        if isinstance(instance_path, list):
+            instance_paths = [Path(path) for path in instance_path]
+        elif isinstance(instance_path, (str, Path)):
+            instance_paths = [Path(instance_path)]
+
+        run = extractor.run_cli(
+            instance_paths,
+            feature_data,
+            cutoff,
+            feature_group,
+            run_on,
+            sbatch_options,
+            srun_options,
+            settings.slurm_jobs_in_parallel,
+            slurm_prepend,
+            log_dir=sl.caller_log_dir,
+        )
+        runs.append(run)
     return runs
 
 

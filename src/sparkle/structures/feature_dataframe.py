@@ -239,24 +239,81 @@ class FeatureDataFrame(pd.DataFrame):
                 return True
         return False
 
-    def remaining_jobs(self: FeatureDataFrame) -> list[tuple[str, str, str]]:
-        """Determines needed feature computations per instance/extractor/group.
+    def remaining_jobs(
+        self: FeatureDataFrame,
+        groupwise_computation: bool = True,
+    ) -> list[tuple[str, str, str | None]]:
+        """Return remaining feature-computation jobs.
+
+        Args:
+            groupwise_computation:
+                If True, jobs are kept per feature group and returned as
+                `(instance_name, extractor_name, feature_group)` tuples.
+                If False, feature groups are collapsed and the return value uses
+                `None` for the feature-group position:
+                `(instance_name, extractor_name, None)`.
 
         Returns:
-            list: A list of tuples representing (Instance, Extractor, Feature Group).
-                that needs to be computed.
+            A flat list of remaining jobs, always in the shape
+            `(instance_name, extractor_name, feature_group | None)`.
         """
-        remaining_jobs = []
-        for extractor, group, _ in self.columns:
-            if (
-                extractor == str(FeatureDataFrame.missing_value)
-                or extractor == FeatureDataFrame.missing_value
-            ):
-                continue
-            for instance in self.index:
-                if self.loc[instance, (extractor, group, slice(None))].isnull().all():
-                    remaining_jobs.append((instance, extractor, group))
-        return list(set(remaining_jobs))  # Filter duplicates
+        extractor_values = self.extractors
+
+        # DataFrame restricted to real extractor columns only.
+        target_df = self.loc[:, extractor_values]
+
+        if target_df.empty:
+            return []
+
+        # Build one boolean per (instance, extractor, feature_group):
+        # 1) target_df.isnull(): mark missing cells as True.
+        # 2) .T: move feature columns to the index for grouping by MultiIndex levels.
+        # 3) .groupby(level=[Extractor, FeatureGroup]).all():
+        #    collapse all feature names in the same group.
+        #    Result is True only if the *entire* group is missing for an instance.
+        # 4) final .T: restore instances on rows.
+        # So missing_groups.loc[instance, (extractor, feature_group)] == True
+        # means this job still has to be computed.
+        missing_groups = (
+            target_df.isnull()
+            .T.groupby(
+                level=[
+                    FeatureDataFrame.extractor_dim,
+                    FeatureDataFrame.feature_group_dim,
+                ]
+            )
+            .all()
+            .T
+        )
+        if groupwise_computation:
+            # Convert the 2D table to a Series with MultiIndex:
+            # (instance, extractor, feature_group) -> bool(is_missing_group).
+            stacked_missing = missing_groups.stack(
+                [FeatureDataFrame.extractor_dim, FeatureDataFrame.feature_group_dim]
+            )
+            # Keep only True entries and return their index tuples as jobs.
+            # Getting tuples like this was the fastest (according to benchmark tests) and most understandable.
+            return stacked_missing[stacked_missing].index.to_list()
+
+        # Collapse feature groups into one boolean per (instance, extractor):
+        # after this reduction, True means at least one required group for this
+        # extractor/instance pair is still missing and should be scheduled.
+        missing_values_with_no_group = (
+            missing_groups.T.groupby(level=[FeatureDataFrame.extractor_dim]).all().T
+        )
+        # Convert collapsed table to Series:
+        # (instance, extractor) -> bool(is_missing_extractor).
+        stacked_missing = missing_values_with_no_group.stack(
+            [FeatureDataFrame.extractor_dim]
+        )
+
+        # Keep only True entries(indicating missing values) and return their index tuples as jobs
+        jobs = stacked_missing[stacked_missing].index.to_list()
+
+        # Keep only missing entries and expand to a 3-tuple shape by filling
+        # the feature-group slot with None:
+        # (instance, extractor, None).
+        return [(instance, extractor, None) for instance, extractor in jobs]
 
     def get_instance(
         self: FeatureDataFrame, instance: str, as_dataframe: bool = False

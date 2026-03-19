@@ -180,21 +180,30 @@ def test_has_missing_vectors(feature_df: FeatureDataFrame) -> None:
 
 def test_get_remaining_jobs(feature_df: FeatureDataFrame) -> None:
     """Test for method get_remaining_jobs."""
-    jobs = feature_df.remaining_jobs()
-    expected_jobs = {
+    group_jobs = feature_df.remaining_jobs()
+    expected_group_jobs = {
         ("Instance_X", "ExtractorA", "Group1"),
         ("Instance_Y", "ExtractorA", "Group1"),
         ("Instance_X", "ExtractorB", "Group2"),
         ("Instance_Y", "ExtractorB", "Group2"),
     }
-    assert set(jobs) == expected_jobs
+    assert set(group_jobs) == expected_group_jobs
+
+    collapsed_jobs = feature_df.remaining_jobs(groupwise_computation=False)
+    expected_collapsed_jobs = {
+        ("Instance_X", "ExtractorA", None),
+        ("Instance_Y", "ExtractorA", None),
+        ("Instance_X", "ExtractorB", None),
+        ("Instance_Y", "ExtractorB", None),
+    }
+    assert set(collapsed_jobs) == expected_collapsed_jobs
 
     # Complete one job by filling its value
     feature_df.set_value("Instance_X", "ExtractorB", "Group2", "Feature3", 1.0)
 
-    remaining_jobs = feature_df.remaining_jobs()
-    assert ("Instance_X", "ExtractorB", "Group2") not in remaining_jobs
-    assert len(remaining_jobs) == 3
+    collapsed_jobs_after = feature_df.remaining_jobs(groupwise_computation=False)
+    assert ("Instance_X", "ExtractorB", None) not in collapsed_jobs_after
+    assert len(collapsed_jobs_after) == 3
 
 
 def test_get_instance(feature_df: FeatureDataFrame) -> None:
