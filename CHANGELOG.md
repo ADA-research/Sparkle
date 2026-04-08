@@ -6,8 +6,10 @@ Notable changes to Sparkle will be documented in this file.
 
 ### Added
 - New `groupwise_computation` setting/CLI flag to disable per-feature-group extractor runs when splitting is not desired. [Issue#210]
+- Sparkle now detects active jobs that are writing to the Performance or Feature data before allowing structural modifications to those files. [Issue#209]
 
 ### Changed
+- Adding or removing solvers, instances, and feature extractors, as well as running the portfolio selector and cleaning up data, will now be blocked or require user confirmation if jobs are currently running or scheduled that write to the relevant data files. [Issue#209]
 - `compute_features` now respects `groupwise_computation` by collapsing submissions that would otherwise split by feature group. [Issue#210]
 
 ### Fixed
