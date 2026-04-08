@@ -12,6 +12,8 @@ from sparkle.CLI.help import logging as sl
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
+from sparkle.CLI.help import jobs as jobs_help
+from sparkle.types import DataFileLock
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -63,6 +65,11 @@ def main(argv: list[str]) -> None:
             key=nickname,
             remove=True,
         )
+
+    jobs_help.check_running_waiting_jobs(
+        gv.settings().DEFAULT_log_output,
+        {DataFileLock.PERFORMANCE},
+    )
 
     if gv.settings().DEFAULT_performance_data_path.exists():
         performance_data = PerformanceDataFrame(

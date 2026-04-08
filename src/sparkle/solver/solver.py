@@ -459,7 +459,9 @@ class Solver(SparkleCallable):
                 combinations, configuration_args
             )
         ]
-        job_name = f"Run {self.name} on {set_name}" if job_name is None else job_name
+        job_name = (
+            f"Run Solver {self.name} on {set_name}" if job_name is None else job_name
+        )
         r = rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,

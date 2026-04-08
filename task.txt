@@ -1,0 +1,9 @@
+Whilst Sparkle is running computations that must be saved to PerformanceDataframe or FeatureDataframe, the file structures (.csv) must **not** be changed before the computations are complete to avoid errors. To do so, it would be good if Sparkle can automatically detect jobs that are 'locking' the file; if so, commands such as adding/removing solvers, instances or extractors may not be executed.
+
+Possible solution;
+
+1. Add a tag to each possible command (possibly an enum) that indicates whether the file 'locks' the pdf or fdf.
+2. Have the add/remove commands check which jobs are running/scheduled, and if any have this tag
+3. If so, yield warning and sys.exit(-1)
+
+The 'tagging' of these commands must be done in a clean manner (For example enums) and must be fast to check. Note that for jobs that are waiting, but are cancelled in the mean time could cause errors: In this situation it would be better to ask the user if they want to continue. For running jobs, we could ask the user to continue or simply suggest they cancel the running jobs first.
