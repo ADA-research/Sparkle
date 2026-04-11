@@ -174,11 +174,9 @@ def main(argv: list[str]) -> None:
     args = parser.parse_args(argv)
 
     if args.performance_data:
-        # Check if we can cleanup the PerformanceDataFrame if necessary
         jobs_help.check_running_waiting_jobs(
             gv.settings().DEFAULT_log_output, {DataFileLock.PERFORMANCE}
         )
-
         performance_data = PerformanceDataFrame(
             gv.settings().DEFAULT_performance_data_path
         )

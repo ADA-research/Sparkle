@@ -7,8 +7,8 @@ from enum import Enum
 class DataFileLock(Enum):
     """Indicates which CSV data file a job will write to."""
 
-    PERFORMANCE = "performance"  # performance_dataframe.csv
-    FEATURE = "feature"  # feature_dataframe.csv
+    PERFORMANCE = "PERFORMANCE_DATA"  # performance_dataframe.csv
+    FEATURE = "FEATURE_DATA"  # feature_dataframe.csv
 
 
 class SolverStatus(str, Enum):
