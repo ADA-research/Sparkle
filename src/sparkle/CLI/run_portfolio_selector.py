@@ -16,6 +16,7 @@ from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.instance import Instance_Set, InstanceSet
 from sparkle.CLI.compute_features import compute_features
 from sparkle.selector import SelectionScenario, Extractor
+from sparkle.CLI.help import jobs as jobs_help
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -68,6 +69,10 @@ def main(argv: list[str]) -> None:
 
     run_on = settings.run_on
     selector_scenario = SelectionScenario.from_file(args.selection_scenario)
+    jobs_help.check_running_waiting_jobs(
+        settings.DEFAULT_log_output,
+    )
+
     # Create a new feature dataframe for this run, compute the features
     test_case_path = selector_scenario.directory / data_set.name
     test_case_path.mkdir(exist_ok=True)

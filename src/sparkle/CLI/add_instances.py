@@ -14,6 +14,7 @@ from sparkle.CLI.help import logging as sl
 
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
+from sparkle.CLI.help import jobs as jobs_help
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -75,6 +76,10 @@ def main(argv: list[str]) -> None:
         print("\nCopying done!")
     # Refresh the instance set as the target instance set
     new_instance_set = Instance_Set(instances_target)
+
+    jobs_help.check_running_waiting_jobs(
+        gv.settings().DEFAULT_log_output,
+    )
 
     # Add the instances to the Feature Data / Performance Data
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)

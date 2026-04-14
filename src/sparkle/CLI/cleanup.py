@@ -7,9 +7,8 @@ import sys
 import argparse
 import shutil
 
-from runrunner.base import Status
-
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
+from sparkle.types import DataFileLock
 
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import global_variables as gv
@@ -175,16 +174,9 @@ def main(argv: list[str]) -> None:
     args = parser.parse_args(argv)
 
     if args.performance_data:
-        # Check if we can cleanup the PerformanceDataFrame if necessary
-        running_jobs = jobs_help.get_runs_from_file(
-            gv.settings().DEFAULT_log_output, filter=[Status.WAITING, Status.RUNNING]
+        jobs_help.check_running_waiting_jobs(
+            gv.settings().DEFAULT_log_output, {DataFileLock.PERFORMANCE}
         )
-        if len(running_jobs) > 0:
-            print("WARNING: There are still running jobs! Continue cleaning? [y/n]")
-            a = input()
-            if a != "y":
-                sys.exit(0)
-
         performance_data = PerformanceDataFrame(
             gv.settings().DEFAULT_performance_data_path
         )
@@ -250,14 +242,9 @@ def main(argv: list[str]) -> None:
         performance_data.save_csv()
 
     if args.feature_data:
-        running_jobs = jobs_help.get_runs_from_file(
-            gv.settings().DEFAULT_log_output, filter=[Status.WAITING, Status.RUNNING]
+        jobs_help.check_running_waiting_jobs(
+            gv.settings().DEFAULT_log_output, {DataFileLock.FEATURE}
         )
-        if len(running_jobs) > 0:
-            print("WARNING: There are still running jobs! Continue cleaning? [y/n]")
-            a = input()
-            if a != "y":
-                sys.exit(0)
         feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
         count = check_logs_feature_data(feature_data)
         print(
