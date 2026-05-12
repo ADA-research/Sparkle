@@ -1,0 +1,6 @@
+{
+    "name": "Run Extractor MockExtractor on instance_set2",
+    "base_dir": "/tmp",
+    "dependencies": [],
+    "jobs": [{"cmd": "echo mock", "job_state": "pending"}]
+}

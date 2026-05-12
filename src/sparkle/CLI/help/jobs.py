@@ -10,13 +10,6 @@ from runrunner.slurm import SlurmRun
 from sparkle.types import DataFileLock
 
 
-# Maps job name prefixes to the data file they lock
-JOB_NAME_LOCKS: dict[str, DataFileLock] = {
-    "Run Solver ": DataFileLock.PERFORMANCE,
-    "Run Extractor ": DataFileLock.FEATURE,
-}
-
-
 def get_locking_runs(
     path: Path,
     locks: set[DataFileLock],
@@ -31,12 +24,17 @@ def get_locking_runs(
         A tuple (running, waiting) of SlurmRun lists that overlap with the
         given locks.
     """
+    # Maps job name prefixes to the data file they lock
+    job_name_locks: dict[str, DataFileLock] = {
+        "Run Solver ": DataFileLock.PERFORMANCE,
+        "Run Extractor ": DataFileLock.FEATURE,
+    }
     running = []
     waiting = []
     # Collect only the name prefixes that correspond to the requested lock types,
     # so we skip jobs that write to unrelated data files.
     relevant_prefixes = {
-        prefix for prefix, lock in JOB_NAME_LOCKS.items() if lock in locks
+        prefix for prefix, lock in job_name_locks.items() if lock in locks
     }
     for run in get_runs_from_file(path, filter=[Status.RUNNING, Status.WAITING]):
         if any(run.name.startswith(prefix) for prefix in relevant_prefixes):
@@ -47,7 +45,9 @@ def get_locking_runs(
     return running, waiting
 
 
-def check_running_waiting_jobs(path: Path, locks: set[DataFileLock] = None) -> None:
+def check_running_waiting_jobs(
+    path: Path, locks: set[DataFileLock] | None = None
+) -> None:
     """Check for running/waiting jobs that lock the calling command's data files.
 
     For standard CLI commands (locks=None): derives the relevant locks by looking
@@ -113,7 +113,7 @@ def check_running_waiting_jobs(path: Path, locks: set[DataFileLock] = None) -> N
 
 
 def get_runs_from_file(
-    path: Path, print_error: bool = False, filter: list[Status] = None
+    path: Path, print_error: bool = False, filter: list[Status] | None = None
 ) -> list[SlurmRun]:
     """Retrieve all run objects from file storage.
 

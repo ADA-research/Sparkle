@@ -1,0 +1,6 @@
+{
+    "name": "Run Solver MockSolver on instance_set",
+    "base_dir": "/tmp",
+    "dependencies": [],
+    "jobs": [{"cmd": "echo mock", "job_state": "running"}]
+}
