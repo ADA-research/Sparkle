@@ -11,7 +11,7 @@ SAMPLE_EXTRACTOR_DATA = {
     "ExtractorA": [("Group1", "Feature1"), ("Group1", "Feature2")],
     "ExtractorB": [("Group2", "Feature3")],
 }
-SAMPLE_INSTANCES = ["Instance_X", "Instance_Y"]
+SAMPLE_INSTANCES = [("TestSet", "Instance_X"), ("TestSet", "Instance_Y")]
 
 
 @pytest.fixture
@@ -20,7 +20,7 @@ def feature_df(tmp_path: Path) -> FeatureDataFrame:
     csv_path = tmp_path / "test.csv"
     feature_df = FeatureDataFrame(
         csv_filepath=csv_path,
-        instances=SAMPLE_INSTANCES,
+        instance_pairs=SAMPLE_INSTANCES,
         extractor_data=SAMPLE_EXTRACTOR_DATA,
     )
     return feature_df
@@ -32,24 +32,28 @@ def test_feature_dataframe_constructor(tmp_path: Path) -> None:
     csv_path = tmp_path / "new_features.csv"
     feature_df_new = FeatureDataFrame(
         csv_filepath=csv_path,
-        instances=SAMPLE_INSTANCES,
+        instance_pairs=SAMPLE_INSTANCES,
         extractor_data=SAMPLE_EXTRACTOR_DATA,
     )
     assert feature_df_new.csv_filepath == csv_path
     assert feature_df_new.columns.names == FeatureDataFrame.multi_dim_column_names
     assert csv_path.exists()
     assert feature_df_new.num_features == 3
-    assert sorted(feature_df_new.instances) == sorted(SAMPLE_INSTANCES)
+    assert sorted(feature_df_new.instance_pairs) == sorted(SAMPLE_INSTANCES)
     # Check if every cell of the dataframe is nan
     assert feature_df_new.isnull().all().all()
 
     # Scenario 2: Load a DataFrame from an existing file
-    feature_df_new.set_value("Instance_X", "ExtractorA", "Group1", "Feature1", 123.45)
+    feature_df_new.set_value(
+        ("TestSet", "Instance_X"), "ExtractorA", "Group1", "Feature1", 123.45
+    )
     feature_df_new.save_csv()
 
     feature_df_loaded = FeatureDataFrame(csv_filepath=csv_path)
     assert (
-        feature_df_loaded.get_value("Instance_X", "ExtractorA", "Group1", "Feature1")
+        feature_df_loaded.get_value(
+            ("TestSet", "Instance_X"), "ExtractorA", "Group1", "Feature1"
+        )
         == 123.45
     )
 
@@ -64,21 +68,25 @@ def test_add_extractor(feature_df: FeatureDataFrame) -> None:
     assert "ExtractorC" in feature_df.extractors
     assert feature_df.num_features == initial_feature_count + 1
     # Verify that the new row is filled with NaNs
-    value = feature_df.get_value("Instance_X", "ExtractorC", "Group3", "Feature4")
+    value = feature_df.get_value(
+        ("TestSet", "Instance_X"), "ExtractorC", "Group3", "Feature4"
+    )
     assert math.isnan(value)
 
 
 def test_add_instances(feature_df: FeatureDataFrame) -> None:
     """Test for method add_instances."""
-    assert "Instance_Z" not in feature_df.instances
+    assert ("TestSet", "Instance_Z") not in feature_df.instance_pairs
 
-    feature_df.add_instances("Instance_Z")
-    assert "Instance_Z" in feature_df.instances
-    assert feature_df.loc["Instance_Z"].isnull().all()
+    feature_df.add_instances(("TestSet", "Instance_Z"))
+    assert ("TestSet", "Instance_Z") in feature_df.instance_pairs
+    assert feature_df.loc[("TestSet", "Instance_Z")].isnull().all()
 
-    feature_df.add_instances("Instance_W", values=[1.0] * feature_df.num_features)
-    assert "Instance_W" in feature_df.instances
-    assert (feature_df.loc["Instance_W"] == 1.0).all()
+    feature_df.add_instances(
+        ("TestSet", "Instance_W"), values=[1.0] * feature_df.num_features
+    )
+    assert ("TestSet", "Instance_W") in feature_df.instance_pairs
+    assert (feature_df.loc[("TestSet", "Instance_W")] == 1.0).all()
 
 
 def test_remove_extractor(feature_df: FeatureDataFrame) -> None:
@@ -94,15 +102,15 @@ def test_remove_extractor(feature_df: FeatureDataFrame) -> None:
 
 
 def test_remove_instances(feature_df: FeatureDataFrame) -> None:
-    """Test for method remove_instances."""
-    assert "Instance_X" in feature_df.instances
+    """Test for method remove_instance_pairs."""
+    assert ("TestSet", "Instance_X") in feature_df.instance_pairs
 
-    feature_df.remove_instances("Instance_X")
-    assert "Instance_X" not in feature_df.instances
+    feature_df.remove_instance_pairs(("TestSet", "Instance_X"))
+    assert ("TestSet", "Instance_X") not in feature_df.instance_pairs
 
-    feature_df.remove_instances(["Instance_Y"])
-    assert "Instance_Y" not in feature_df.instances
-    assert len(feature_df.instances) == 0
+    feature_df.remove_instance_pairs([("TestSet", "Instance_Y")])
+    assert ("TestSet", "Instance_Y") not in feature_df.instance_pairs
+    assert len(feature_df.instance_pairs) == 0
 
 
 def test_get_feature_groups(feature_df: FeatureDataFrame) -> None:
@@ -120,21 +128,29 @@ def test_get_feature_groups(feature_df: FeatureDataFrame) -> None:
 def test_get_value(feature_df: FeatureDataFrame) -> None:
     """Test for method get_value."""
     # Set a known value to test retrieval
-    feature_df.loc["Instance_X", ("ExtractorA", "Group1", "Feature1")] = 42.0
-    value = feature_df.get_value("Instance_X", "ExtractorA", "Group1", "Feature1")
+    feature_df.loc[("TestSet", "Instance_X"), ("ExtractorA", "Group1", "Feature1")] = (
+        42.0
+    )
+    value = feature_df.get_value(
+        ("TestSet", "Instance_X"), "ExtractorA", "Group1", "Feature1"
+    )
     assert value == 42.0
 
 
 def test_set_value(feature_df: FeatureDataFrame) -> None:
     """Test for method set_value."""
     initial_value = feature_df.get_value(
-        "Instance_Y", "ExtractorB", "Group2", "Feature3"
+        ("TestSet", "Instance_Y"), "ExtractorB", "Group2", "Feature3"
     )
     assert math.isnan(initial_value)
 
-    feature_df.set_value("Instance_Y", "ExtractorB", "Group2", "Feature3", -1.5)
+    feature_df.set_value(
+        ("TestSet", "Instance_Y"), "ExtractorB", "Group2", "Feature3", -1.5
+    )
 
-    new_value = feature_df.get_value("Instance_Y", "ExtractorB", "Group2", "Feature3")
+    new_value = feature_df.get_value(
+        ("TestSet", "Instance_Y"), "ExtractorB", "Group2", "Feature3"
+    )
     assert new_value == -1.5
 
 
@@ -146,16 +162,32 @@ def test_has_missing_vectors(feature_df: FeatureDataFrame) -> None:
     # SCENARIO 1: Atleast one missing value per instance for all extractors
     feature_df.loc[:, :] = 1.0
     feature_df.set_value(
-        "Instance_X", "ExtractorA", "Group1", "Feature1", FeatureDataFrame.missing_value
+        ("TestSet", "Instance_X"),
+        "ExtractorA",
+        "Group1",
+        "Feature1",
+        FeatureDataFrame.missing_value,
     )
     feature_df.set_value(
-        "Instance_X", "ExtractorB", "Group2", "Feature3", FeatureDataFrame.missing_value
+        ("TestSet", "Instance_X"),
+        "ExtractorB",
+        "Group2",
+        "Feature3",
+        FeatureDataFrame.missing_value,
     )
     feature_df.set_value(
-        "Instance_Y", "ExtractorA", "Group1", "Feature1", FeatureDataFrame.missing_value
+        ("TestSet", "Instance_Y"),
+        "ExtractorA",
+        "Group1",
+        "Feature1",
+        FeatureDataFrame.missing_value,
     )
     feature_df.set_value(
-        "Instance_Y", "ExtractorB", "Group2", "Feature3", FeatureDataFrame.missing_value
+        ("TestSet", "Instance_Y"),
+        "ExtractorB",
+        "Group2",
+        "Feature3",
+        FeatureDataFrame.missing_value,
     )
     assert feature_df.has_missing_vectors()
 
@@ -170,7 +202,7 @@ def test_has_missing_vectors(feature_df: FeatureDataFrame) -> None:
 
     # SCENARIO 3: One instance is completely missing
     feature_df.loc[:, :] = 1.0
-    feature_df["Instance_Y"] = FeatureDataFrame.missing_value
+    feature_df.loc[("TestSet", "Instance_Y")] = FeatureDataFrame.missing_value
     assert feature_df.has_missing_vectors()
 
     # SCENARIO 4: Completly filled feature dataframe
@@ -182,46 +214,55 @@ def test_get_remaining_jobs(feature_df: FeatureDataFrame) -> None:
     """Test for method get_remaining_jobs."""
     group_jobs = feature_df.remaining_jobs()
     expected_group_jobs = {
-        ("Instance_X", "ExtractorA", "Group1"),
-        ("Instance_Y", "ExtractorA", "Group1"),
-        ("Instance_X", "ExtractorB", "Group2"),
-        ("Instance_Y", "ExtractorB", "Group2"),
+        (("TestSet", "Instance_X"), "ExtractorA", "Group1"),
+        (("TestSet", "Instance_Y"), "ExtractorA", "Group1"),
+        (("TestSet", "Instance_X"), "ExtractorB", "Group2"),
+        (("TestSet", "Instance_Y"), "ExtractorB", "Group2"),
     }
     assert set(group_jobs) == expected_group_jobs
 
     collapsed_jobs = feature_df.remaining_jobs(groupwise_computation=False)
     expected_collapsed_jobs = {
-        ("Instance_X", "ExtractorA", None),
-        ("Instance_Y", "ExtractorA", None),
-        ("Instance_X", "ExtractorB", None),
-        ("Instance_Y", "ExtractorB", None),
+        (("TestSet", "Instance_X"), "ExtractorA", None),
+        (("TestSet", "Instance_Y"), "ExtractorA", None),
+        (("TestSet", "Instance_X"), "ExtractorB", None),
+        (("TestSet", "Instance_Y"), "ExtractorB", None),
     }
     assert set(collapsed_jobs) == expected_collapsed_jobs
 
     # Complete one job by filling its value
-    feature_df.set_value("Instance_X", "ExtractorB", "Group2", "Feature3", 1.0)
+    feature_df.set_value(
+        ("TestSet", "Instance_X"), "ExtractorB", "Group2", "Feature3", 1.0
+    )
 
     collapsed_jobs_after = feature_df.remaining_jobs(groupwise_computation=False)
-    assert ("Instance_X", "ExtractorB", None) not in collapsed_jobs_after
+    assert (("TestSet", "Instance_X"), "ExtractorB", None) not in collapsed_jobs_after
     assert len(collapsed_jobs_after) == 3
 
 
 def test_get_instance(feature_df: FeatureDataFrame) -> None:
     """Test for method get_instance."""
     features = [10.0, 20.0, 30.0]
-    feature_df.loc["Instance_Y"] = features
+    feature_df.loc[("TestSet", "Instance_Y")] = features
 
-    retrieved_features = feature_df.get_instance("Instance_Y")
+    retrieved_features = feature_df.get_instance(("TestSet", "Instance_Y"))
     assert retrieved_features == features
 
 
 def test_impute_missing_values(feature_df: FeatureDataFrame) -> None:
     """Test for method impute_missing_values."""
     # Test with one missing value in a row
-    feature_df.set_value("Instance_X", "ExtractorA", "Group1", "Feature1", 10.0)
+    feature_df.set_value(
+        ("TestSet", "Instance_X"), "ExtractorA", "Group1", "Feature1", 10.0
+    )
     # The value for Instance_Y in the same row is NaN and the row mean is 10.0.
     feature_df.impute_missing_values()
-    assert feature_df.get_value("Instance_Y", "ExtractorA", "Group1", "Feature1") == 10.0
+    assert (
+        feature_df.get_value(
+            ("TestSet", "Instance_Y"), "ExtractorA", "Group1", "Feature1"
+        )
+        == 10.0
+    )
 
     # Test for a feature (row) missing in every instance
     feature_df.reset_dataframe()
@@ -229,7 +270,9 @@ def test_impute_missing_values(feature_df: FeatureDataFrame) -> None:
     # Row ("Group1", "Feature2", "ExtractorA") is all NaN.
     feature_df.impute_missing_values()
     # Imputing a row of all NaNs should result in NaNs
-    value = feature_df.get_value("Instance_X", "ExtractorA", "Group1", "Feature2")
+    value = feature_df.get_value(
+        ("TestSet", "Instance_X"), "ExtractorA", "Group1", "Feature2"
+    )
     assert math.isnan(value)
 
 
@@ -253,18 +296,20 @@ def test_reset_dataframe(feature_df: FeatureDataFrame) -> None:
 
 def test_sort(feature_df: FeatureDataFrame) -> None:
     """Test for method sort."""
-    feature_df.add_instances("AAA_INSTANCE_NUMERO1")
+    feature_df.add_instances(("AAA", "INSTANCE_NUMERO1"))
     assert not feature_df.index.is_monotonic_increasing
 
     feature_df.sort()
     assert feature_df.index.is_monotonic_increasing
 
 
-def test_instances(feature_df: FeatureDataFrame) -> None:
-    """Test instances property."""
-    assert sorted(feature_df.instances) == sorted(SAMPLE_INSTANCES)
-    feature_df.add_instances("New_Instance")
-    assert sorted(feature_df.instances) == sorted(SAMPLE_INSTANCES + ["New_Instance"])
+def test_instance_pairs(feature_df: FeatureDataFrame) -> None:
+    """Test instance_pairs property."""
+    assert sorted(feature_df.instance_pairs) == sorted(SAMPLE_INSTANCES)
+    feature_df.add_instances(("TestSet", "New_Instance"))
+    assert sorted(feature_df.instance_pairs) == sorted(
+        SAMPLE_INSTANCES + [("TestSet", "New_Instance")]
+    )
 
 
 def test_extractors(feature_df: FeatureDataFrame) -> None:
@@ -305,7 +350,9 @@ def features(feature_df: FeatureDataFrame) -> None:
 def test_save_csv(feature_df: FeatureDataFrame, tmp_path: Path) -> None:
     """Test for method save_csv."""
     # Test saving to the default path
-    feature_df.set_value("Instance_X", "ExtractorA", "Group1", "Feature1", 1.0)
+    feature_df.set_value(
+        ("TestSet", "Instance_X"), "ExtractorA", "Group1", "Feature1", 1.0
+    )
     feature_df.save_csv()
     fdf_reloaded = FeatureDataFrame(feature_df.csv_filepath)
     pd.testing.assert_frame_equal(feature_df, fdf_reloaded)

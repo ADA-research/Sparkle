@@ -147,10 +147,10 @@ def test_run_parallel_portfolio(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
             f"be equal to {len([instance_file.all_paths])} "
             f"in the instance set, but got {pdf.num_instances}."
         )
-        for instance_path in pdf.instances:
-            assert instance_path in single_instances_str, (
+        for instance_pair in pdf.instance_pairs:
+            assert instance_pair[1] in single_instances_str, (
                 "Expected instances in pdf to be in the instance set "
-                f"{single_instances_str}, but got {instance_path}."
+                f"{single_instances_str}, but got {instance_pair}."
             )
 
         assert pdf.num_solvers == len(solvers), (

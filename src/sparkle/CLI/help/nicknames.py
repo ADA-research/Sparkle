@@ -50,18 +50,24 @@ def resolve_object_name(
 
 
 def resolve_instance_name(
-    name: str, target: Path | list[InstanceSet], return_path: bool = True
+    name: str | tuple[str, str],
+    target: Path | list[InstanceSet],
+    return_path: bool = True,
 ) -> str | InstanceSet:
     """Attempts to resolve an instance name.
 
     Args:
-        name: The name to resolve
+        name: The name to resolve. May be a plain instance name or a
+            (set_name, instance_name) pair, in which case the instance name is used.
         target: Path to look for instance sets or the instance sets directly
         return_path: Whether to return the path of the instance or the instance set
 
     Returns:
         The path or the instance set of the given instance name
     """
+    # An instance pair (set_name, instance_name) may be passed; resolve by instance name
+    if isinstance(name, tuple):
+        name = name[1]
     # Check if name is a multi file instance path
 
     # Check if the name is already an instance file path

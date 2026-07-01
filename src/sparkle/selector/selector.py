@@ -108,24 +108,31 @@ class Selector:
     def run(
         self: Selector,
         selector_path: Path,
-        instance: str,
+        instance: str | tuple[str, str],
         feature_data: FeatureDataFrame,
     ) -> list:
         """Run the Selector, returning the prediction schedule upon success."""
-        instance_features = feature_data.get_instance(instance, as_dataframe=True)
-        # instance_features = feature_data[
-        #     [
-        #         instance,
-        #     ]
-        # ]
-        # instance_features.columns = instance_features.columns.map("_".join)  # Reduce columns multi index
+        if isinstance(instance, str):
+            instance_path = Path(instance)
+            instance_pair: tuple[str, str] = (
+                instance_path.parent.name,
+                instance_path.stem,
+            )
+        else:
+            instance_pair = instance
+        instance_features = feature_data.get_instance(instance_pair, as_dataframe=True)
+        # ASF was trained on plain instance names, drop InstanceSet level
+        instance_features = instance_features.droplevel(
+            FeatureDataFrame.instance_set_index_dim
+        )
         selector = self.selector_class.load(selector_path)
         schedule = selector.predict(instance_features)
         if schedule is None:
             print(f"ERROR: Selector {self.name} failed predict schedule!")
             return None
         # ASF presents result as schedule per instance, we only use one in this setting
-        schedule = schedule[instance]
+        instance_name = instance_pair[1]
+        schedule = schedule[instance_name]
         for index, (solver, time) in enumerate(schedule):
             # Split solver name back into solver and config id
             # NOTE: There is an issue with this incase the Solver name has an "_" in its name... We need to change the delimiter to different character(s)
@@ -251,6 +258,19 @@ class SelectionScenario:
             )
 
         if isinstance(performance_data, PerformanceDataFrame):  # Convert
+            # Store (InstanceSet, Instance) pairs before collapsing index for ASF
+            self.training_instance_pairs: list[tuple[str, str]] = list(
+                dict.fromkeys(
+                    zip(
+                        performance_data.index.get_level_values(
+                            PerformanceDataFrame.index_instance_set
+                        ),
+                        performance_data.index.get_level_values(
+                            PerformanceDataFrame.index_instance
+                        ),
+                    )
+                )
+            )
             # Convert the dataframes to Selector Format
             new_column_names: list[str] = []
             for solver, config_id, _ in performance_data.columns:
@@ -271,8 +291,10 @@ class SelectionScenario:
             )
             self.performance_data.columns = new_column_names
             # Requires instances as index for both, columns as features / solvers
-            # TODO: This should be an aggregation instead?
-            self.performance_data.index = self.performance_data.index.droplevel("Run")
+            # Drop InstanceSet and Run levels so ASF sees plain instance names
+            self.performance_data.index = self.performance_data.index.droplevel(
+                [PerformanceDataFrame.index_instance_set, PerformanceDataFrame.index_run]
+            )
             # Enforce data type to be numeric
             self.performance_data = self.performance_data.astype(float)
             self.performance_target_path = self.directory / "performance_data.csv"
@@ -281,6 +303,16 @@ class SelectionScenario:
                 performance_data, index_col=0
             )
             self.performance_target_path: Path = performance_data
+            # The flat performance CSV is indexed by instance name only; recover the
+            # (set, instance) training pairs by matching those names against the selector
+            # performance data, which keeps the full pair index. Without this, a scenario
+            # loaded from file would report zero training instances.
+            training_names = set(self.performance_data.index)
+            self.training_instance_pairs: list[tuple[str, str]] = [
+                pair
+                for pair in self.selector_performance_data.instance_pairs
+                if pair[1] in training_names
+            ]
 
         if isinstance(feature_data, FeatureDataFrame):  # Convert
             self.feature_extractors = feature_data.extractors
@@ -289,6 +321,10 @@ class SelectionScenario:
             feature_target.columns = feature_target.columns.map(
                 "_".join
             )  # Reduce Column Multi Index to single
+            # Drop InstanceSet level so ASF sees plain instance names
+            feature_target.index = feature_target.index.droplevel(
+                FeatureDataFrame.instance_set_index_dim
+            )
             # ASF -> feature columns, instance rows
             self.feature_data: pd.DataFrame = feature_target.astype(float)
             self.feature_target_path: Path = self.directory / "feature_data.csv"
@@ -328,33 +364,42 @@ class SelectionScenario:
                 )
 
     @property
-    def training_instances(self: SelectionScenario) -> list[str]:
-        """Get the training instances."""
-        return self.performance_data.index.to_list()
+    def training_instances(self: SelectionScenario) -> list[tuple[str, str]]:
+        """Get the training instances as (set_name, instance_name) pairs."""
+        return self.training_instance_pairs
 
     @property
-    def test_instances(self: SelectionScenario) -> list[str]:
-        """Get the test instances."""
-        instances = self.selector_performance_data.instances
-        return [i for i in instances if i not in self.training_instances]
+    def test_instances(self: SelectionScenario) -> list[tuple[str, str]]:
+        """Get the test instances as (set_name, instance_name) pairs."""
+        training_set = set(self.training_instances)
+        return [
+            instance_pair
+            for instance_pair in self.selector_performance_data.instance_pairs
+            if instance_pair not in training_set
+        ]
 
     @property
     def training_instance_sets(self: SelectionScenario) -> list[str]:
         """Get the training instance sets."""
-        # NOTE: This no longer works as instances no longer have their set in the name
-        return list(set(Path(i).parent.name for i in self.training_instances))
+        return list(
+            dict.fromkeys(instance_pair[0] for instance_pair in self.training_instances)
+        )
 
     @property
     def test_instance_sets(self: SelectionScenario) -> list[str]:
         """Get the test instance sets."""
-        # NOTE: This no longer works as instances no longer have their set in the name
-        return list(set(Path(i).parent.name for i in self.test_instances))
+        return list(
+            dict.fromkeys(instance_pair[0] for instance_pair in self.test_instances)
+        )
 
     @property
     def instance_sets(self: SelectionScenario) -> list[str]:
         """Get all the instance sets used in this scenario."""
         return list(
-            set(Path(i).parent.name for i in self.selector_performance_data.instances)
+            dict.fromkeys(
+                instance_pair[0]
+                for instance_pair in self.selector_performance_data.instance_pairs
+            )
         )
 
     @property

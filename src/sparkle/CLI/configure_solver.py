@@ -172,12 +172,16 @@ def main(argv: list[str]) -> None:
         remaining_instance_jobs = set(
             [instance for instance, _, _ in feature_data.remaining_jobs()]
         )
-        for instance in instance_set_train.instance_paths:
-            if str(instance) not in feature_data.instances:
-                print(f"ERROR: Train Instance {instance} not found in feature data.")
+        for instance_pair in instance_set_train.instance_pairs:
+            if instance_pair not in feature_data.instance_pairs:
+                print(
+                    f"ERROR: Train Instance {instance_pair} not found in feature data."
+                )
                 invalid = True
-            elif instance in remaining_instance_jobs:  # Check jobs
-                print(f"ERROR: Features have not been computed for instance {instance}.")
+            elif instance_pair in remaining_instance_jobs:  # Check jobs
+                print(
+                    f"ERROR: Features have not been computed for instance {instance_pair}."
+                )
                 invalid = True
         if invalid:
             sys.exit(-1)

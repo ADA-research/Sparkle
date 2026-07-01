@@ -32,7 +32,7 @@ def compute_selector_marginal_contribution(
     selector_performance = selection_scenario.objective.instance_aggregator(
         selection_scenario.selector_performance_data.get_value(
             SelectionScenario.__selector_solver_name__,
-            instance=selection_scenario.training_instances,
+            instance_pair=selection_scenario.training_instances,
             objective=selection_scenario.objective.name,
         )
     )
@@ -47,7 +47,7 @@ def compute_selector_marginal_contribution(
         ablated_selector_performance = ablation_scenario.objective.instance_aggregator(
             ablation_scenario.selector_performance_data.get_value(
                 SelectionScenario.__selector_solver_name__,
-                instance=ablation_scenario.training_instances,
+                instance_pair=ablation_scenario.training_instances,
                 objective=ablation_scenario.objective.name,
             )
         )
@@ -93,13 +93,25 @@ class SelectionOutput:
         self.training_instances = selection_scenario.training_instances
         training_instance_sets = selection_scenario.training_instance_sets
         self.training_instance_sets = [
-            (instance_set, sum(instance_set in s for s in self.training_instances))
+            (
+                instance_set,
+                sum(
+                    instance_pair[0] == instance_set
+                    for instance_pair in self.training_instances
+                ),
+            )
             for instance_set in training_instance_sets
         ]
         self.test_instances = selection_scenario.test_instances
         test_sets = selection_scenario.test_instance_sets
         self.test_sets = [
-            (instance_set, sum(instance_set in s for s in self.test_instances))
+            (
+                instance_set,
+                sum(
+                    instance_pair[0] == instance_set
+                    for instance_pair in self.test_instances
+                ),
+            )
             for instance_set in test_sets
         ]
         self.cutoff_time = selection_scenario.solver_cutoff
@@ -109,7 +121,7 @@ class SelectionOutput:
         solver_performance_data.remove_solver(SelectionScenario.__selector_solver_name__)
 
         self.solver_performance_ranking = solver_performance_data.get_solver_ranking(
-            instances=self.training_instances, objective=self.objective
+            instance_pairs=self.training_instances, objective=self.objective
         )
 
         self.solver_data = self.get_solver_data(solver_performance_data)
@@ -123,7 +135,7 @@ class SelectionOutput:
         self.sbs_performance = solver_performance_data.get_value(
             solver=self.solver_performance_ranking[0][0],
             configuration=self.solver_performance_ranking[0][1],
-            instance=self.training_instances,
+            instance_pair=self.training_instances,
             objective=self.objective.name,
         )
 
@@ -131,7 +143,7 @@ class SelectionOutput:
         self.marginal_contribution_perfect = (
             solver_performance_data.marginal_contribution(
                 selection_scenario.objective,
-                instances=self.training_instances,
+                instance_pairs=self.training_instances,
                 sort=True,
             )
         )
@@ -141,7 +153,8 @@ class SelectionOutput:
         )
         # Collect performance data
         self.vbs_performance_data = solver_performance_data.best_instance_performance(
-            instances=self.training_instances, objective=selection_scenario.objective
+            instance_pairs=self.training_instances,
+            objective=selection_scenario.objective,
         )
         self.vbs_performance = selection_scenario.objective.instance_aggregator(
             self.vbs_performance_data
@@ -150,22 +163,22 @@ class SelectionOutput:
         self.test_set_performance = {} if self.test_sets else None
         for test_set, _ in self.test_sets:
             test_set_instances = [
-                instance for instance in self.test_instances if test_set in instance
+                instance for instance in self.test_instances if instance[0] == test_set
             ]
             test_perf = selection_scenario.selector_performance_data.best_performance(
                 exclude_solvers=[
-                    s
-                    for s in selection_scenario.selector_performance_data.solvers
-                    if s != SelectionScenario.__selector_solver_name__
+                    solver
+                    for solver in selection_scenario.selector_performance_data.solvers
+                    if solver != SelectionScenario.__selector_solver_name__
                 ],
-                instances=test_set_instances,
+                instance_pairs=test_set_instances,
                 objective=selection_scenario.objective,
             )
             self.test_set_performance[test_set] = test_perf
         self.actual_performance_data = (
             selection_scenario.selector_performance_data.get_value(
                 solver=SelectionScenario.__selector_solver_name__,
-                instance=self.training_instances,
+                instance_pair=self.training_instances,
                 objective=self.objective.name,
             )
         )
@@ -200,16 +213,22 @@ class SelectionOutput:
             "metric": sp.metric,
         }
 
-    def serialise_instances(self: SelectionOutput, instances: list[str]) -> dict:
+    def serialise_instances(
+        self: SelectionOutput, instance_pairs: list[tuple[str, str]]
+    ) -> dict:
         """Transform Instances to dictionary format."""
-        instance_sets = set(Path(instance).parent.name for instance in instances)
+        instance_sets = dict.fromkeys(
+            instance_pair[0] for instance_pair in instance_pairs
+        )
         return {
             "number_of_instance_sets": len(instance_sets),
             "instance_sets": [
                 {
                     "name": instance_set,
                     "number_of_instances": sum(
-                        [1 if instance_set in instance else 0 for instance in instances]
+                        1
+                        for instance_pair in instance_pairs
+                        if instance_pair[0] == instance_set
                     ),
                 }
                 for instance_set in instance_sets

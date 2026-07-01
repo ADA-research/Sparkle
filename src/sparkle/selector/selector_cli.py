@@ -47,12 +47,13 @@ def main(argv: list[str]) -> None:
     instance_set = Instance_Set(args.instance)
     instance = str(instance_set.instance_paths[0])
     instance_name = instance_set.instance_names[0]
+    instance_pair = (instance_set.directory.name, instance_name)
     seed = args.seed
     if seed is None:
         # Try to read from PerformanceDataFrame
         seed = selector_scenario.selector_performance_data.get_value(
             selector_scenario.__selector_solver_name__,
-            instance_name,
+            instance_pair,
             solver_fields=[PerformanceDataFrame.column_seed],
         )
         if seed is None:  # Still no value
@@ -63,18 +64,11 @@ def main(argv: list[str]) -> None:
     # Note: Following code could be adjusted to run entire instance set
     # Run portfolio selector
     print(f"Sparkle portfolio selector predicting for instance {instance_name} ...")
-    feature_instance_name = instance_name
-    if instance_name not in feature_data.instances:
-        if Path(instance_name).name in feature_data.instances:
-            feature_instance_name = Path(instance_name).name
-        elif str(instance) in feature_data.instances:
-            feature_instance_name = str(instance)
-        elif str(Path(instance).with_suffix("")) in feature_data.instances:
-            feature_instance_name = str(Path(instance).with_suffix(""))
-        else:
-            raise ValueError(
-                f"Could not resolve {instance} features in {feature_data.csv_filepath}"
-            )
+    if instance_pair not in feature_data.instance_pairs:
+        raise ValueError(
+            f"Could not resolve {instance} features in {feature_data.csv_filepath}"
+        )
+    feature_instance_name = instance_pair
     predict_schedule = selector_scenario.selector.run(
         selector_scenario.selector_file_path, feature_instance_name, feature_data
     )
@@ -140,7 +134,7 @@ def main(argv: list[str]) -> None:
             performance_data.set_value(
                 selector_value,
                 selector_scenario.__selector_solver_name__,
-                instance_name,
+                instance_pair,
                 objective=selector_scenario.objective.name,
                 append_write_csv=True,
             )

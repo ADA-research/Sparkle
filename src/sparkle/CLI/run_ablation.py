@@ -112,7 +112,7 @@ def main(argv: list[str]) -> None:
     best_configuration_key, _ = performance_data.best_configuration(
         str(solver.directory),
         config_scenario.sparkle_objective,
-        instances=instance_set_train.instance_names,
+        instance_pairs=instance_set_train.instance_pairs,
     )
     best_configuration = performance_data.get_full_configuration(
         str(solver.directory), best_configuration_key

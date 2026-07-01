@@ -75,7 +75,7 @@ def create_performance_dataframe(
     Returns:
         pdf: PerformanceDataFrame object initialized with solvers and instances.
     """
-    instances = instances_set.instance_names
+    instance_pairs = instances_set.instance_pairs
     solvers = [str(s.directory) for s in solvers]
     objectives = gv.settings().objectives
     csv_path = portfolio_path / "results.csv"
@@ -83,7 +83,7 @@ def create_performance_dataframe(
         csv_filepath=csv_path,
         solvers=solvers,
         objectives=objectives,
-        instances=instances,
+        instance_pairs=instance_pairs,
     )
 
 
@@ -182,7 +182,11 @@ def monitor_jobs(
                         # All seeds of a solver were killed on instance, set status kill
                         if solver_kills[solver_index] == seeds_per_solver:
                             solver_name = solvers[solver_index].name
-                            job_output_dict[instance.stem][solver_name]["status"] = (
+                            # Use the set's canonical instance name (aligned by index with
+                            # the paths), matching the key job_output_dict was built with;
+                            # instance.stem would miss it for suffix-kept collisions.
+                            instance_name = instances_set.instance_names[i]
+                            job_output_dict[instance_name][solver_name]["status"] = (
                                 SolverStatus.KILLED
                             )
             pbar.update(sum(instances_done) - prev_done)
@@ -335,11 +339,16 @@ def print_and_write_results(
                 "Wall clock time)"
             )
 
-    instance_map = {Path(p).name: p for p in pdf.instances}
+    # Every job in this run belongs to instances_set, so pair each result with that set
+    # name directly. A name-only map would collapse identically named instances from
+    # different sets onto one key and let them overwrite each other; scoping to the known
+    # set keeps (SetA, inst1) and (SetB, inst1) distinct.
+    valid_pairs = set(pdf.instance_pairs)
     solver_map = {Path(s).name: s for s in pdf.solvers}
     for instance, instance_dict in job_output_dict.items():
-        instance_name = Path(instance).name
-        instance_full_path = instance_map.get(instance_name, instance)
+        instance_pair = (instances_set.name, instance)
+        if instance_pair not in valid_pairs:
+            continue
         for solver, objective_dict in instance_dict.items():
             solver_name = Path(solver).name
             solver_full_path = solver_map.get(solver_name, solver)
@@ -351,7 +360,7 @@ def print_and_write_results(
                 pdf.set_value(
                     value=obj_val,
                     solver=solver_full_path,
-                    instance=instance_full_path,
+                    instance_pair=instance_pair,
                     objective=obj_name,
                 )
     pdf.save_csv()
@@ -379,8 +388,12 @@ def build_command_list(
     seeds_per_solver = gv.settings().parallel_portfolio_num_seeds_per_solver
     cmd_list = []
 
-    # Create a command for each instance-solver-seed combination
-    for instance, solver in itertools.product(instances_set._instance_paths, solvers):
+    # Create a command for each instance-solver-seed combination. Zip names with paths so
+    # each seed is written to the canonical (set_name, instance_name) pair the pdf is keyed
+    # by; instance.stem would drop the suffix for stem-collision instances.
+    for (instance_name, instance), solver in itertools.product(
+        zip(instances_set.instance_names, instances_set._instance_paths), solvers
+    ):
         for _ in range(seeds_per_solver):
             seed = int(random.getrandbits(32))
             solver_call_list = solver.build_cmd(
@@ -396,7 +409,7 @@ def build_command_list(
                 performance_data.set_value(
                     value=seed,
                     solver=str(solver.directory),
-                    instance=instance.stem,
+                    instance_pair=(instances_set.name, instance_name),
                     objective=objective.name,
                     solver_fields=["Seed"],
                 )

@@ -105,9 +105,15 @@ def main(argv: list[str]) -> None:
     instance_path: list[Path] = args.instance
     # If instance is only one file then we don't need a list
     instance_path = instance_path[0] if len(instance_path) == 1 else instance_path
+    instance_set_name = (
+        instance_path.parent.name
+        if isinstance(instance_path, Path)
+        else instance_path[0].parent.name
+    )
     instance_name = (
         instance_path.stem if isinstance(instance_path, Path) else instance_path[0].stem
     )
+    instance_pair = (instance_set_name, instance_name)
     run_index = args.run_index
     # Ensure stringifcation of path objects
     if isinstance(instance_path, list):
@@ -160,7 +166,12 @@ def main(argv: list[str]) -> None:
             best_configuration_instances: list[str] = args.best_configuration_instances
             # Get the unique instance names
             best_configuration_instances = list(
-                set([Path(instance).stem for instance in best_configuration_instances])
+                set(
+                    [
+                        (Path(instance).parent.name, Path(instance).stem)
+                        for instance in best_configuration_instances
+                    ]
+                )
             )
             target_objective = (
                 resolve_objective(args.target_objective)
@@ -170,7 +181,7 @@ def main(argv: list[str]) -> None:
             config_id, _ = performance_dataframe.best_configuration(
                 solver=str(args.solver),
                 objective=target_objective,
-                instances=best_configuration_instances,
+                instance_pairs=best_configuration_instances,
             )
             configuration = performance_dataframe.get_full_configuration(
                 str(args.solver), config_id
@@ -223,7 +234,7 @@ def main(argv: list[str]) -> None:
         performance_dataframe.set_value(
             result,
             solver=str(args.solver),
-            instance=instance_name,
+            instance_pair=instance_pair,
             configuration=config_id,
             objective=[o.name for o in objectives],
             run=run_index,

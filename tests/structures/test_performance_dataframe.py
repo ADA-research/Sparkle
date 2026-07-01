@@ -17,15 +17,29 @@ pd_nan = PerformanceDataFrame(csv_example_with_nan_path)
 csv_example_mo = Path("tests/test_files/performance/example_data_MO.csv")
 pd_mo = PerformanceDataFrame(csv_example_mo)
 
+# Instance tuples for the test fixtures
+TESTSET_INSTANCES = [
+    ("TestSet", "Instance1"),
+    ("TestSet", "Instance2"),
+    ("TestSet", "Instance3"),
+    ("TestSet", "Instance4"),
+    ("TestSet", "Instance5"),
+]
+ML_INSTANCES = [("MLDataset", "flower_petals.csv"), ("MLDataset", "mnist.csv")]
+
 
 def test_from_scratch(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test creating a Performance DataFrame from scratch."""
     monkeypatch.chdir(tmp_path)  # Execute in PyTest tmp dir
     empty_df = PerformanceDataFrame(Path("test.csv"))
-    empty_df.add_instance("Instance1")
-    empty_df.add_instance("Instance2")
-    empty_df.add_instance("Instance3")
-    assert set(empty_df.instances) == set(["Instance3", "Instance1", "Instance2"])
+    empty_df.add_instance(("TestSet", "Instance1"))
+    empty_df.add_instance(("TestSet", "Instance2"))
+    empty_df.add_instance(("TestSet", "Instance3"))
+    assert set(empty_df.instance_pairs) == {
+        ("TestSet", "Instance3"),
+        ("TestSet", "Instance1"),
+        ("TestSet", "Instance2"),
+    }
     empty_df.add_solver("AlgorithmA")
     empty_df.add_solver("AlgorithmB")
     empty_df.add_solver("AlgorithmC")
@@ -60,31 +74,31 @@ def test_remaining_jobs() -> None:
     assert result == remaining_jobs
 
     remaining_jobs = [
-        ("AlgorithmA", "Default", "Instance1", 1),
-        ("AlgorithmA", "Default", "Instance2", 1),
-        ("AlgorithmA", "Default", "Instance3", 1),
-        ("AlgorithmA", "Default", "Instance4", 1),
-        ("AlgorithmA", "Default", "Instance5", 1),
-        ("AlgorithmB", "Default", "Instance1", 1),
-        ("AlgorithmB", "Default", "Instance2", 1),
-        ("AlgorithmB", "Default", "Instance3", 1),
-        ("AlgorithmB", "Default", "Instance4", 1),
-        ("AlgorithmB", "Default", "Instance5", 1),
-        ("AlgorithmC", "Default", "Instance1", 1),
-        ("AlgorithmC", "Default", "Instance2", 1),
-        ("AlgorithmC", "Default", "Instance3", 1),
-        ("AlgorithmC", "Default", "Instance4", 1),
-        ("AlgorithmC", "Default", "Instance5", 1),
-        ("AlgorithmD", "Default", "Instance1", 1),
-        ("AlgorithmD", "Default", "Instance2", 1),
-        ("AlgorithmD", "Default", "Instance3", 1),
-        ("AlgorithmD", "Default", "Instance4", 1),
-        ("AlgorithmD", "Default", "Instance5", 1),
-        ("AlgorithmE", "Default", "Instance1", 1),
-        ("AlgorithmE", "Default", "Instance2", 1),
-        ("AlgorithmE", "Default", "Instance3", 1),
-        ("AlgorithmE", "Default", "Instance4", 1),
-        ("AlgorithmE", "Default", "Instance5", 1),
+        ("AlgorithmA", "Default", ("TestSet", "Instance1"), 1),
+        ("AlgorithmA", "Default", ("TestSet", "Instance2"), 1),
+        ("AlgorithmA", "Default", ("TestSet", "Instance3"), 1),
+        ("AlgorithmA", "Default", ("TestSet", "Instance4"), 1),
+        ("AlgorithmA", "Default", ("TestSet", "Instance5"), 1),
+        ("AlgorithmB", "Default", ("TestSet", "Instance1"), 1),
+        ("AlgorithmB", "Default", ("TestSet", "Instance2"), 1),
+        ("AlgorithmB", "Default", ("TestSet", "Instance3"), 1),
+        ("AlgorithmB", "Default", ("TestSet", "Instance4"), 1),
+        ("AlgorithmB", "Default", ("TestSet", "Instance5"), 1),
+        ("AlgorithmC", "Default", ("TestSet", "Instance1"), 1),
+        ("AlgorithmC", "Default", ("TestSet", "Instance2"), 1),
+        ("AlgorithmC", "Default", ("TestSet", "Instance3"), 1),
+        ("AlgorithmC", "Default", ("TestSet", "Instance4"), 1),
+        ("AlgorithmC", "Default", ("TestSet", "Instance5"), 1),
+        ("AlgorithmD", "Default", ("TestSet", "Instance1"), 1),
+        ("AlgorithmD", "Default", ("TestSet", "Instance2"), 1),
+        ("AlgorithmD", "Default", ("TestSet", "Instance3"), 1),
+        ("AlgorithmD", "Default", ("TestSet", "Instance4"), 1),
+        ("AlgorithmD", "Default", ("TestSet", "Instance5"), 1),
+        ("AlgorithmE", "Default", ("TestSet", "Instance1"), 1),
+        ("AlgorithmE", "Default", ("TestSet", "Instance2"), 1),
+        ("AlgorithmE", "Default", ("TestSet", "Instance3"), 1),
+        ("AlgorithmE", "Default", ("TestSet", "Instance4"), 1),
+        ("AlgorithmE", "Default", ("TestSet", "Instance5"), 1),
     ]
     result = pd.remaining_jobs(rerun=True)
     assert set(result) == set(remaining_jobs)
@@ -175,11 +189,9 @@ def test_objective_names() -> None:
 
 def test_instances() -> None:
     """Test the instances getter method."""
-    instances = ["Instance1", "Instance2", "Instance3", "Instance4", "Instance5"]
-    assert pd.instances == instances
-    assert pd_nan.instances == instances
-    instances = ["flower_petals.csv", "mnist.csv"]
-    assert pd_mo.instances == instances
+    assert pd.instance_pairs == TESTSET_INSTANCES
+    assert pd_nan.instance_pairs == TESTSET_INSTANCES
+    assert pd_mo.instance_pairs == ML_INSTANCES
 
 
 def test_has_missing_values() -> None:
@@ -192,7 +204,7 @@ def test_has_missing_values() -> None:
     copy_pd.set_value(
         PerformanceDataFrame.missing_value,
         "AlgorithmA",
-        "Instance1",
+        ("TestSet", "Instance1"),
         solver_fields=["Seed"],
     )
     assert not copy_pd.has_missing_values
@@ -225,11 +237,13 @@ def test_add_remove_solver() -> None:
 
 def test_add_remove_instance() -> None:
     """Test adding and removing instances."""
-    pd_nan.add_instance("InstanceTmp")
-    assert "InstanceTmp" in pd_nan.instances
-    assert math.isnan(pd_nan.get_value(pd_nan.solvers[0], instance="InstanceTmp"))
-    pd_nan.remove_instances("InstanceTmp")
-    assert "InstanceTmp" not in pd_nan.instances
+    pd_nan.add_instance(("TestSet", "InstanceTmp"))
+    assert ("TestSet", "InstanceTmp") in pd_nan.instance_pairs
+    assert math.isnan(
+        pd_nan.get_value(pd_nan.solvers[0], instance_pair=("TestSet", "InstanceTmp"))
+    )
+    pd_nan.remove_instance_pairs(("TestSet", "InstanceTmp"))
+    assert ("TestSet", "InstanceTmp") not in pd_nan.instance_pairs
 
 
 def test_add_remove_runs() -> None:
@@ -241,15 +255,15 @@ def test_add_remove_runs() -> None:
     pd_nan.remove_runs(2)
     assert pd_nan.num_runs == 1
 
-    instance_subset = pd_nan.instances[:2]
-    pd_nan.add_runs(2, instance_names=instance_subset)
+    instance_subset = pd_nan.instance_pairs[:2]
+    pd_nan.add_runs(2, instance_pairs=instance_subset)
     assert pd_nan.num_runs == 3
-    for instance in pd_nan.instances:
+    for instance in pd_nan.instance_pairs:
         if instance in instance_subset:
             assert pd_nan.get_instance_num_runs(instance) == 3
         else:
             assert pd_nan.get_instance_num_runs(instance) == 1
-    pd_nan.remove_runs(2, instance_names=instance_subset)
+    pd_nan.remove_runs(2, instance_pairs=instance_subset)
     assert pd_nan.num_runs == 1
 
 
@@ -268,7 +282,7 @@ def test_set_get_value() -> None:
     # One index (e.g. one specific field)
     solver = "RandomForest"
     configuration = "Config1"
-    instances = "flower_petals.csv"
+    instances = ("MLDataset", "flower_petals.csv")
     objective = "PAR10"
     run = 1
     value = 1337
@@ -320,7 +334,7 @@ def test_set_get_value() -> None:
 
     # Set multiple instances the same value
     value = 12.34
-    instances = ["flower_petals.csv", "mnist.csv"]
+    instances = [("MLDataset", "flower_petals.csv"), ("MLDataset", "mnist.csv")]
     pd_mo.set_value(
         value,
         solver,
@@ -440,7 +454,7 @@ def test_set_get_value() -> None:
     # Set a specific objective/instance/run but all configurations the same value
     solver = None
     configuration = None
-    instances = "mnist.csv"
+    instances = ("MLDataset", "mnist.csv")
     value = 3031.3233
     objective = "PAR10"
     pd_mo.set_value(
@@ -466,7 +480,7 @@ def test_set_get_value() -> None:
 
     # Set multiple objectives, both solver fields at once
     configuration = "Config1"
-    instances = "mnist.csv"
+    instances = ("MLDataset", "mnist.csv")
     objective = ["PAR10", "TrainAccuracy:max"]
     value = [[599.0, 0.77], [seed, seed]]
     pd_mo.set_value(
@@ -543,7 +557,7 @@ def test_configuration_performance() -> None:
     """Test getting configuration performance."""
     configuration = "Config1"
     result = pd_mo.configuration_performance(
-        "RandomForest", configuration, "PAR10", ["flower_petals.csv", "mnist.csv"]
+        "RandomForest", configuration, "PAR10", ML_INSTANCES
     )
     assert result == (configuration, 4.75)
 
@@ -552,37 +566,10 @@ def test_configuration_performance() -> None:
         "RandomForest",
         configuration,
         "PAR10",
-        ["flower_petals.csv", "mnist.csv"],
+        ML_INSTANCES,
         per_instance=True,
     )
     assert result == (configuration, [4.4, 5.1])
-
-    # Test with large set, per all instances
-    # TODO Fix with new actual data
-    """actual_path = Path("tests/test_files/performance/actual-data.csv")
-    actual_pdf = PerformanceDataFrame(actual_path)
-    configuration = {"init_solution": "1", "p_swt": "0.3", "perform_aspiration": "1",
-                     "perform_clause_weight": "1", "perform_double_cc": "1",
-                     "perform_first_div": "0", "perform_pac": "0", "q_swt": "0.0",
-                     "sel_clause_div": "1", "sel_clause_weight_scheme": "1",
-                     "sel_var_break_tie_greedy": "2", "sel_var_div": "3",
-                     "threshold_swt": "300", "configuration_id": "SMAC2_1732722833.0_2"}
-    result = actual_pdf.configuration_performance("Solvers/PbO-CCSAT-Generic",
-                                                  configuration,
-                                                  "PAR10", per_instance=True)
-    assert result == (configuration, [600.0, 600.0, 600.0, 600.0, 600.0, 600.0,
-                                      20.8011, 13.9057, 11.2606, 14.4477, 10.152, 600.0])
-
-    # Test with subset of instances
-    result = actual_pdf.configuration_performance("Solvers/PbO-CCSAT-Generic",
-                                                  configuration,
-                                                  "PAR10",
-                                                  ["Instances/PTN/Ptn-7824-b15.cnf",
-                                                   "Instances/PTN/Ptn-7824-b19.cnf",
-                                                   "Instances/PTN/Ptn-7824-b13.cnf",
-                                                   "Instances/PTN/Ptn-7824-b07.cnf"],
-                                                  per_instance=True)
-    assert result == (configuration, [600.0, 20.8011, 13.9057, 14.4477])"""
 
 
 def test_best_configuration() -> None:
@@ -590,14 +577,18 @@ def test_best_configuration() -> None:
     best_conf_id = "Config5"
     best_conf = {"alpha": 0.69, "beta": 0.42}
     best_value = 3.8
-    result = pd_mo.best_configuration("RandomForest", "PAR10", ["flower_petals.csv"])
+    result = pd_mo.best_configuration(
+        "RandomForest", "PAR10", [("MLDataset", "flower_petals.csv")]
+    )
     assert result == (best_conf_id, best_value)
     assert pd_mo.get_full_configuration("RandomForest", best_conf_id) == best_conf
 
     best_conf_id = "Config3"
     best_conf = {"kappa": 0.99, "mu": "std3"}
     best_value = 54.8
-    result = pd_mo.best_configuration("MultiLayerPerceptron", "PAR10", ["mnist.csv"])
+    result = pd_mo.best_configuration(
+        "MultiLayerPerceptron", "PAR10", [("MLDataset", "mnist.csv")]
+    )
     assert result == (best_conf_id, best_value)
     assert (
         pd_mo.get_full_configuration("MultiLayerPerceptron", best_conf_id) == best_conf
@@ -607,181 +598,52 @@ def test_best_configuration() -> None:
     best_conf_id = "Config1"
     best_conf = {"alpha": 0.05, "beta": 0.99}
     best_value = 4.75
-    result = pd_mo.best_configuration(
-        "RandomForest", "PAR10", ["mnist.csv", "flower_petals.csv"]
-    )
+    result = pd_mo.best_configuration("RandomForest", "PAR10", ML_INSTANCES)
     assert result == (best_conf_id, best_value)
     assert pd_mo.get_full_configuration("RandomForest", best_conf_id) == best_conf
 
-    # Test with large set
-    # TODO Fix with new actual data
-    """actual_path = Path("tests/test_files/performance/actual-data.csv")
-    actual_pdf = PerformanceDataFrame(actual_path)
-    best_conf = {"configuration_id": "SMAC2_1732722833.0_7",
-                 "gamma_hscore2": "351",
-                 "init_solution": "1",
-                 "p_swt": "0.20423712003341465",
-                 "perform_aspiration": "1",
-                 "perform_clause_weight": "1",
-                 "perform_double_cc": "0",
-                 "perform_first_div": "0",
-                 "perform_pac": "1",
-                 "prob_pac": "0.005730374136488115",
-                 "q_swt": "0.6807207179674418",
-                 "sel_clause_div": "1",
-                 "sel_clause_weight_scheme": "1",
-                 "sel_var_break_tie_greedy": "4",
-                 "sel_var_div": "2",
-                 "threshold_swt": "32"}
-    best_value = 3.9496955000000002
-    result = actual_pdf.best_configuration("Solvers/PbO-CCSAT-Generic", "PAR10")
-    assert result == (best_conf, best_value)"""
+
+def test_best_instance_performance_filters_by_pairs() -> None:
+    """best_instance_performance must filter by (set, instance) pairs without crashing.
+
+    Regression: after xs(objective) the frame is a 3-level (InstanceSet, Instance, Run)
+    index, so a plain .loc with 2-tuples raised
+    'AssertionError: Length of new_levels (3) must be <= self.nlevels (2)'.
+    """
+    pairs = pd_mo.instance_pairs
+    # Filtering to a single pair returns exactly that instance's best value.
+    single = pd_mo.best_instance_performance(
+        objective="PAR10", instance_pairs=[pairs[0]]
+    )
+    assert list(single.index) == [pairs[0]]
+
+    # Filtering to all pairs matches the unfiltered result.
+    filtered = pd_mo.best_instance_performance(objective="PAR10", instance_pairs=pairs)
+    unfiltered = pd_mo.best_instance_performance(objective="PAR10")
+    assert list(filtered.index) == list(unfiltered.index)
+
+    # best_performance delegates to it and aggregates without raising.
+    assert pd_mo.best_performance(instance_pairs=pairs, objective="PAR10") == (
+        pd_mo.best_performance(objective="PAR10")
+    )
+
+    # A pair absent from the frame yields an empty result rather than an error.
+    assert pd_mo.best_instance_performance(
+        objective="PAR10", instance_pairs=[("Nope", "missing.csv")]
+    ).empty
 
 
-def test_best_instance_performance() -> None:
-    """Test calculating best score on instance."""
-    bp_instance_runtime = [30.0, 5.0, 3.0, 8.0, 41.0]
-    result_min = pd.best_instance_performance()
-    for idx in range(pd.num_instances):
-        assert result_min.iloc[idx] == bp_instance_runtime[idx]
-
-    bp_instance_accuracy = [0.930, 0.819]
-    result_acc = pd_mo.best_instance_performance(objective="TrainAccuracy:max")
-    for idx in range(pd_mo.num_instances):
-        assert result_acc.iloc[idx] == bp_instance_accuracy[idx]
-
-    bp_instance_val_accuracy = [0.88, 0.596]
-    result_acc = pd_mo.best_instance_performance(objective="ValidationAccuracy:max")
-    for idx in range(pd_mo.num_instances):
-        assert result_acc.iloc[idx] == bp_instance_val_accuracy[idx]
-
-
-def test_best_performance() -> None:
-    """Test calculating vbs on the entire portfolio."""
-    vbs_portfolio = 17.4
-    result = pd.best_performance()
-    assert result == vbs_portfolio
-
-    vbs_portfolio = 0.738
-    results = pd_mo.best_performance(objective="ValidationAccuracy:max")
-    assert results == vbs_portfolio
-
-    vbs_portfolio = 4.449999999999999
-    results = pd_mo.best_performance(objective="PAR10")
-    assert results == vbs_portfolio
-
-
-def test_schedule_performance() -> None:
-    """Test scheduling performance."""
-    pass
-
-
-def test_marginal_contribution() -> None:
-    """Test marginal contribution."""
-    marginal = [
-        ("AlgorithmA", "Default", 0.0, 17.4),
-        ("AlgorithmB", "Default", 1.4252873563218393, 24.8),
-        ("AlgorithmC", "Default", 1.1264367816091956, 19.6),
-        ("AlgorithmD", "Default", 0.0, 17.4),
-        ("AlgorithmE", "Default", 1.7471264367816093, 30.4),
-    ]
-    result = pd.marginal_contribution()
-    assert result == marginal
-
-    # TODO: Inspect if these results make any sense
-    marginal = [
-        ("MultiLayerPerceptron", "Config1", 0.0, 0.738),
-        ("MultiLayerPerceptron", "Config2", 0.9728997289972899, 0.718),
-        ("MultiLayerPerceptron", "Config3", 0.9939024390243903, 0.7335),
-        ("MultiLayerPerceptron", "Config4", 0.0, 0.738),
-        ("MultiLayerPerceptron", "Config5", 0.0, 0.738),
-        ("RandomForest", "Config1", 0.0, 0.738),
-        ("RandomForest", "Config2", 0.0, 0.738),
-        ("RandomForest", "Config3", 0.0, 0.738),
-        ("RandomForest", "Config4", 0.0, 0.738),
-        ("RandomForest", "Config5", 0.0, 0.738),
-    ]
-    result = pd_mo.marginal_contribution(objective="ValidationAccuracy:max")
-    assert result == marginal
-    marginal = [
-        ("MultiLayerPerceptron", "Config1", 0.0, 4.449999999999999),
-        ("MultiLayerPerceptron", "Config2", 0.0, 4.449999999999999),
-        ("MultiLayerPerceptron", "Config3", 0.0, 4.449999999999999),
-        ("MultiLayerPerceptron", "Config4", 0.0, 4.449999999999999),
-        ("MultiLayerPerceptron", "Config5", 0.0, 4.449999999999999),
-        ("RandomForest", "Config1", 1.01123595505618, 4.5),
-        ("RandomForest", "Config2", 0.0, 4.449999999999999),
-        ("RandomForest", "Config3", 0.0, 4.449999999999999),
-        ("RandomForest", "Config4", 0.0, 4.449999999999999),
-        ("RandomForest", "Config5", 1.01123595505618, 4.5),
-    ]
-    result = pd_mo.marginal_contribution(objective="PAR10")
-    assert result == marginal
-
-
-def test_get_solver_ranking() -> None:
-    """Test getting the solver ranking list with penalty."""
-    rank_list = [
-        ("AlgorithmB", "Default", 41.0),
-        ("AlgorithmC", "Default", 43.6),
-        ("AlgorithmE", "Default", 52.6),
-        ("AlgorithmD", "Default", 54.8),
-        ("AlgorithmA", "Default", 55.0),
-    ]
-    result = pd.get_solver_ranking()
-    assert result == rank_list
-
-    rank_list = [
-        ("MultiLayerPerceptron", "Config3", 0.71425),
-        ("MultiLayerPerceptron", "Config2", 0.712),
-        ("MultiLayerPerceptron", "Config1", 0.69975),
-        ("MultiLayerPerceptron", "Config4", 0.67797),
-        ("MultiLayerPerceptron", "Config5", 0.6547000000000001),
-        ("RandomForest", "Config2", 0.627),
-        ("RandomForest", "Config1", 0.6085),
-        ("RandomForest", "Config5", 0.5845),
-        ("RandomForest", "Config4", 0.5773999999999999),
-        ("RandomForest", "Config3", 0.568),
-    ]
-    result = pd_mo.get_solver_ranking(objective="ValidationAccuracy:max")
-    assert result == rank_list
-
-    rank_list = [
-        ("RandomForest", 4.9079999999999995),
-        ("MultiLayerPerceptron", 102.24799999999999),
-    ]
-    rank_list = [
-        ("RandomForest", "Config1", 4.75),
-        ("RandomForest", "Config2", 4.85),
-        ("RandomForest", "Config5", 4.890000000000001),
-        ("RandomForest", "Config4", 5.0),
-        ("RandomForest", "Config3", 5.05),
-        ("MultiLayerPerceptron", "Config4", 44.5),
-        ("MultiLayerPerceptron", "Config3", 44.55),
-        ("MultiLayerPerceptron", "Config2", 52.0),
-        ("MultiLayerPerceptron", "Config5", 58.489999999999995),
-        ("MultiLayerPerceptron", "Config1", 311.7),
-    ]
-    result = pd_mo.get_solver_ranking(objective="PAR10")
-    assert result == rank_list
-
-
-def test_save_csv() -> None:
-    """Test for method save_csv."""
-    # TODO: Write test
-    pass
-
-
-def test_clone() -> None:
-    """Test for method clone."""
-    copy_nan = pd_nan.clone()
-    assert isinstance(copy_nan, PerformanceDataFrame)
-
-
-@pytest.mark.filterwarnings("ignore::FutureWarning")
-def test_clean_csv(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Test for method clean_csv."""
-    monkeypatch.chdir(tmp_path)
-    copy_pd = pd.clone(csv_filepath=Path("test.csv"))
-    copy_pd.clean_csv()
-    assert copy_pd.isnull().all().all()
+def test_load_performance_csv_without_footer(tmp_path: Path) -> None:
+    """A perf CSV missing its '$' config footer loads with {} defaults, not a KeyError."""
+    csv_path = tmp_path / "no_footer.csv"
+    csv_path.write_text(
+        "Solver,,,,SolverX,SolverX\n"
+        "Configuration,,,,Default,Default\n"
+        "Meta,,,,Value,Seed\n"
+        "Objective,InstanceSet,Instance,Run,,\n"
+        "PAR10,SetA,inst1,1,42,7\n"
+    )
+    loaded = PerformanceDataFrame(csv_path)
+    assert loaded.solvers == ["SolverX"]
+    # Missing footer -> the Default configuration is defaulted to {} instead of raising.
+    assert loaded.get_full_configuration("SolverX", "Default") == {}

@@ -157,10 +157,12 @@ def main(argv: list[str]) -> None:
     )
     if instance_set is not None:
         removable_instances = [
-            i for i in performance_data.instances if i not in instance_set.instance_names
+            instance_pair
+            for instance_pair in performance_data.instance_pairs
+            if instance_pair not in instance_set.instance_pairs
         ]
-        performance_data.remove_instances(removable_instances)
-        feature_data.remove_instances(removable_instances)
+        performance_data.remove_instance_pairs(removable_instances)
+        feature_data.remove_instance_pairs(removable_instances)
 
     if args.solvers is not None:
         solvers = args.solvers
@@ -263,8 +265,8 @@ def main(argv: list[str]) -> None:
 
     # Validate the selector to run on the given instances
     instances = [
-        resolve_instance_name(instance, Settings.DEFAULT_instance_dir)
-        for instance in performance_data.instances
+        resolve_instance_name(instance_pair, Settings.DEFAULT_instance_dir)
+        for instance_pair in performance_data.instance_pairs
     ]
     selector_validation = selector.run_cli(
         selection_scenario.scenario_file,

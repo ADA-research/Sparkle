@@ -86,7 +86,8 @@ def compute_features(
     slurm_prepend = settings.slurm_job_prepend
     srun_options = ["-N1", "-n1"] + sbatch_options
     runs = []
-    for instance_name, extractor_name, feature_group in remaining_jobs:
+    for instance_pair, extractor_name, feature_group in remaining_jobs:
+        _, instance_name = instance_pair
         extractor_path = settings.DEFAULT_extractor_dir / extractor_name
         extractor = Extractor(extractor_path)
 
@@ -140,9 +141,9 @@ def main(argv: list[str]) -> None:
     # Load feature data
     feature_data = FeatureDataFrame(settings.DEFAULT_feature_data_path)
 
-    # Filter instances or extractors
+    # Narrow the work down to only the instances and/or extractors the user named on CLI by filtering the full FDF.
     if args.instance_path:
-        instances = []
+        instances = set()
         for instance_arg in args.instance_path:
             instance: InstanceSet = resolve_object_name(
                 instance_arg,
@@ -154,16 +155,20 @@ def main(argv: list[str]) -> None:
                 raise ValueError(
                     f"Argument Error! Could not resolve instance: '{instance_arg}'"
                 )
-            for i in instance.instance_names:
-                instances.append(i)
+            # resolve_object_name may hand back a single-file FileInstanceSet whose .name
+            # is the file stem rather than the owning set (e.g. "PTN/bce7824.cnf" -> name
+            # "bce7824"). The FeatureDataFrame is keyed by the owning set, so pair each
+            # requested instance with its directory name to match how it was stored.
+            for instance_name in instance.instance_names:
+                instances.add((instance.directory.name, instance_name))
 
-        for instance in feature_data.instances:
-            if instance not in instances:
-                feature_data.remove_instances(instance)
+        for instance_pair in feature_data.instance_pairs:
+            if instance_pair not in instances:
+                feature_data.remove_instance_pairs(instance_pair)
         if feature_data.num_instances == 0:
             raise ValueError("Argument Error! No instances left after filtering.")
     if args.extractors:
-        extractors = []
+        extractors = set()
         for extractor in args.extractors:
             extractor: Extractor = resolve_object_name(
                 extractor,
@@ -175,7 +180,7 @@ def main(argv: list[str]) -> None:
                 raise ValueError(
                     f"Argument Error! Could not resolve extractor: '{extractor}'"
                 )
-            extractors.append(extractor.name)
+            extractors.add(extractor.name)
         for extractor in feature_data.extractors:
             if extractor not in extractors:
                 feature_data.remove_extractor(extractor)

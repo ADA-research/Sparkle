@@ -576,9 +576,9 @@ def generate_parallel_portfolio_section(
                 )
             )
     report.append("The following Instance Sets were used in the portfolio:")
-    instance_sets = set(Path(instance).parent.name for instance in scenario.instances)
+    instance_sets = set(set_name for set_name, _ in scenario.instance_pairs)
     instance_set_count = [
-        len([i for i in scenario.instances if Path(i).parent.name == s])
+        sum(1 for set_name, _ in scenario.instance_pairs if set_name == s)
         for s in instance_sets
     ]
     with report.create(pl.Itemize()) as instance_set_latex_list:
@@ -595,8 +595,10 @@ def generate_parallel_portfolio_section(
         "following performance of the solvers was found over the instances: "
     )
     best_solver_count = {solver: 0 for solver in scenario.solvers}
-    for instance in scenario.instances:
-        ranking = scenario.get_solver_ranking(objective=objective, instances=[instance])
+    for instance_pair in scenario.instance_pairs:
+        ranking = scenario.get_solver_ranking(
+            objective=objective, instance_pairs=[instance_pair]
+        )
         best_solver_count[ranking[0][0]] += 1
 
     with report.create(pl.Itemize()) as latex_list:

@@ -139,3 +139,37 @@ def test_file_instance_set_directory() -> None:
         (p for p in dir_content if p.stem == "Ptn-7824-b01"), None
     )
     assert file_instance_set.get_path_by_name("DoesNotExist") is None
+
+
+def test_file_instance_set_stem_collision(tmp_path: Path) -> None:
+    """Files sharing a stem keep their suffix to stay distinct; others keep the stem."""
+    collide_csv = tmp_path / "instance1.csv"
+    collide_cnf = tmp_path / "instance1.cnf"
+    other = tmp_path / "other.cnf"
+    for path in (collide_csv, collide_cnf, other):
+        path.write_text("")
+
+    # A mixed-suffix directory is not all .csv/.npy, so it routes to FileInstanceSet.
+    instance_set = Instance_Set(tmp_path)
+    assert isinstance(instance_set, FileInstanceSet)
+
+    # Suffix is kept only for the colliding stem; the non-colliding file keeps its stem.
+    assert set(instance_set.instance_names) == {
+        "instance1.csv",
+        "instance1.cnf",
+        "other",
+    }
+
+    # The two colliding files resolve to distinct paths by their full names.
+    assert instance_set.get_path_by_name("instance1.csv") == collide_csv
+    assert instance_set.get_path_by_name("instance1.cnf") == collide_cnf
+    assert instance_set.get_path_by_name("other") == other
+
+    # The instance pairs keep both colliding instances distinct.
+    pairs = instance_set.instance_pairs
+    assert (instance_set.name, "instance1.csv") in pairs
+    assert (instance_set.name, "instance1.cnf") in pairs
+
+    # Single-file construction scans siblings, so it names the instance consistently.
+    assert FileInstanceSet(collide_csv).instance_names == ["instance1.csv"]
+    assert FileInstanceSet(other).instance_names == ["other"]
