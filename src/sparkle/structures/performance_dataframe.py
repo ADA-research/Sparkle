@@ -702,7 +702,7 @@ class PerformanceDataFrame(pd.DataFrame):
         self: PerformanceDataFrame,
         value: float | str | list[float | str] | list[list[float | str]],
         solver: str | list[str],
-        instance_pair: tuple[str, str] | None,
+        instance_pair: tuple[str, str] | list[tuple[str, str]] | None,
         configuration: str = None,
         objective: str | list[str] = None,
         run: int | list[int] = None,
@@ -740,9 +740,12 @@ class PerformanceDataFrame(pd.DataFrame):
         configuration = configuration if configuration else slice(configuration)
         objective = objective if objective else slice(objective)
         run = run if run else slice(run)
-        if instance_pair is None:
+        if instance_pair is None:  # None selects all instances
             inst_set, inst_name = slice(None), slice(None)
-        else:
+        elif isinstance(instance_pair, list):  # Multiple (set, instance) pairs
+            inst_set = [pair[0] for pair in instance_pair]
+            inst_name = [pair[1] for pair in instance_pair]
+        else:  # A single (set, instance) pair
             inst_set, inst_name = instance_pair
         row_idx = (objective, inst_set, inst_name, run)
         # Convert column indices to slices for setting multiple columns
@@ -769,7 +772,7 @@ class PerformanceDataFrame(pd.DataFrame):
     def get_value(
         self: PerformanceDataFrame,
         solver: str | list[str] = None,
-        instance_pair: tuple[str, str] | None = None,
+        instance_pair: tuple[str, str] | list[tuple[str, str]] | None = None,
         configuration: str = None,
         objective: str = None,
         run: int = None,
@@ -798,9 +801,12 @@ class PerformanceDataFrame(pd.DataFrame):
         objective = objective if objective else slice(objective)
         solver_fields = solver_fields if solver_fields else slice(solver_fields)
         run = run if run else slice(run)
-        if instance_pair is None:
+        if instance_pair is None:  # None selects all instances
             inst_set, inst_name = slice(None), slice(None)
-        else:
+        elif isinstance(instance_pair, list):  # Multiple (set, instance) pairs
+            inst_set = [pair[0] for pair in instance_pair]
+            inst_name = [pair[1] for pair in instance_pair]
+        else:  # A single (set, instance) pair
             inst_set, inst_name = instance_pair
         row_idx = (objective, inst_set, inst_name, run)
         target = self.loc[row_idx, (solver, configuration, solver_fields)].values

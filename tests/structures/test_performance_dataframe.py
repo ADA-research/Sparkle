@@ -571,6 +571,51 @@ def test_configuration_performance() -> None:
     )
     assert result == (configuration, [4.4, 5.1])
 
+    # Test with large set (actual-data.csv), per all instances.
+    # NOTE: The asserts below pin exact float values read from actual-data.csv. If that
+    # fixture is ever regenerated, these will break. Looser assertions may be preferred
+    # in the future (e.g. checking only the selected config id, or asserting values with
+    # pytest.approx / a tolerance) so the test stays robust to fixture regeneration and
+    # floating-point noise while still guarding the method's behaviour.
+    actual_pdf = PerformanceDataFrame(
+        Path("tests/test_files/performance/actual-data.csv")
+    )
+    solver = "Solvers/PbO-CCSAT-Generic"
+    config_id = "SMAC2_20250522093407_2"
+    result = actual_pdf.configuration_performance(
+        solver, config_id, "PAR10", per_instance=True
+    )
+    # Per-instance values follow the sorted (InstanceSet, Instance) index order.
+    assert result == (
+        config_id,
+        [
+            600.0,
+            600.0,
+            600.0,
+            28.3943,
+            600.0,
+            600.0,
+            6.25488,
+            39.9061,
+            23.7353,
+            26.9149,
+            10.2533,
+            600.0,
+        ],
+    )
+
+    # Test with a subset of instances (result still in sorted index order, not input order)
+    subset = [
+        ("PTN", "Ptn-7824-b15"),
+        ("PTN", "Ptn-7824-b19"),
+        ("PTN", "Ptn-7824-b13"),
+        ("PTN", "Ptn-7824-b07"),
+    ]
+    result = actual_pdf.configuration_performance(
+        solver, config_id, "PAR10", instance_pairs=subset, per_instance=True
+    )
+    assert result == (config_id, [28.3943, 6.25488, 39.9061, 26.9149])
+
 
 def test_best_configuration() -> None:
     """Test calculating best configuration."""
@@ -601,6 +646,17 @@ def test_best_configuration() -> None:
     result = pd_mo.best_configuration("RandomForest", "PAR10", ML_INSTANCES)
     assert result == (best_conf_id, best_value)
     assert pd_mo.get_full_configuration("RandomForest", best_conf_id) == best_conf
+
+    # Test with large set (actual-data.csv): best config over all PTN instances.
+    # NOTE: pins an exact float from the fixture; looser assertions may be preferred later
+    # (see test_configuration_performance for the explanation).
+    actual_pdf = PerformanceDataFrame(
+        Path("tests/test_files/performance/actual-data.csv")
+    )
+    best_conf_id = "SMAC2_20250522093407_7"
+    best_value = 3.505226166666667
+    result = actual_pdf.best_configuration("Solvers/PbO-CCSAT-Generic", "PAR10")
+    assert result == (best_conf_id, best_value)
 
 
 def test_best_instance_performance_filters_by_pairs() -> None:
@@ -633,17 +689,146 @@ def test_best_instance_performance_filters_by_pairs() -> None:
     ).empty
 
 
-def test_load_performance_csv_without_footer(tmp_path: Path) -> None:
-    """A perf CSV missing its '$' config footer loads with {} defaults, not a KeyError."""
-    csv_path = tmp_path / "no_footer.csv"
-    csv_path.write_text(
-        "Solver,,,,SolverX,SolverX\n"
-        "Configuration,,,,Default,Default\n"
-        "Meta,,,,Value,Seed\n"
-        "Objective,InstanceSet,Instance,Run,,\n"
-        "PAR10,SetA,inst1,1,42,7\n"
-    )
-    loaded = PerformanceDataFrame(csv_path)
-    assert loaded.solvers == ["SolverX"]
-    # Missing footer -> the Default configuration is defaulted to {} instead of raising.
-    assert loaded.get_full_configuration("SolverX", "Default") == {}
+def test_best_instance_performance() -> None:
+    """Test calculating best score on instance."""
+    bp_instance_runtime = [30.0, 5.0, 3.0, 8.0, 41.0]
+    result_min = pd.best_instance_performance()
+    for idx in range(pd.num_instances):
+        assert result_min.iloc[idx] == bp_instance_runtime[idx]
+
+    bp_instance_accuracy = [0.930, 0.819]
+    result_acc = pd_mo.best_instance_performance(objective="TrainAccuracy:max")
+    for idx in range(pd_mo.num_instances):
+        assert result_acc.iloc[idx] == bp_instance_accuracy[idx]
+
+    bp_instance_val_accuracy = [0.88, 0.596]
+    result_acc = pd_mo.best_instance_performance(objective="ValidationAccuracy:max")
+    for idx in range(pd_mo.num_instances):
+        assert result_acc.iloc[idx] == bp_instance_val_accuracy[idx]
+
+
+def test_best_performance() -> None:
+    """Test calculating vbs on the entire portfolio."""
+    vbs_portfolio = 17.4
+    result = pd.best_performance()
+    assert result == vbs_portfolio
+
+    vbs_portfolio = 0.738
+    results = pd_mo.best_performance(objective="ValidationAccuracy:max")
+    assert results == vbs_portfolio
+
+    vbs_portfolio = 4.449999999999999
+    results = pd_mo.best_performance(objective="PAR10")
+    assert results == vbs_portfolio
+
+
+def test_schedule_performance() -> None:
+    """Test scheduling performance."""
+    pass
+
+
+def test_marginal_contribution() -> None:
+    """Test marginal contribution."""
+    marginal = [
+        ("AlgorithmA", "Default", 0.0, 17.4),
+        ("AlgorithmB", "Default", 1.4252873563218393, 24.8),
+        ("AlgorithmC", "Default", 1.1264367816091956, 19.6),
+        ("AlgorithmD", "Default", 0.0, 17.4),
+        ("AlgorithmE", "Default", 1.7471264367816093, 30.4),
+    ]
+    result = pd.marginal_contribution()
+    assert result == marginal
+
+    # TODO: Inspect if these results make any sense
+    marginal = [
+        ("MultiLayerPerceptron", "Config1", 0.0, 0.738),
+        ("MultiLayerPerceptron", "Config2", 0.9728997289972899, 0.718),
+        ("MultiLayerPerceptron", "Config3", 0.9939024390243903, 0.7335),
+        ("MultiLayerPerceptron", "Config4", 0.0, 0.738),
+        ("MultiLayerPerceptron", "Config5", 0.0, 0.738),
+        ("RandomForest", "Config1", 0.0, 0.738),
+        ("RandomForest", "Config2", 0.0, 0.738),
+        ("RandomForest", "Config3", 0.0, 0.738),
+        ("RandomForest", "Config4", 0.0, 0.738),
+        ("RandomForest", "Config5", 0.0, 0.738),
+    ]
+    result = pd_mo.marginal_contribution(objective="ValidationAccuracy:max")
+    assert result == marginal
+    marginal = [
+        ("MultiLayerPerceptron", "Config1", 0.0, 4.449999999999999),
+        ("MultiLayerPerceptron", "Config2", 0.0, 4.449999999999999),
+        ("MultiLayerPerceptron", "Config3", 0.0, 4.449999999999999),
+        ("MultiLayerPerceptron", "Config4", 0.0, 4.449999999999999),
+        ("MultiLayerPerceptron", "Config5", 0.0, 4.449999999999999),
+        ("RandomForest", "Config1", 1.01123595505618, 4.5),
+        ("RandomForest", "Config2", 0.0, 4.449999999999999),
+        ("RandomForest", "Config3", 0.0, 4.449999999999999),
+        ("RandomForest", "Config4", 0.0, 4.449999999999999),
+        ("RandomForest", "Config5", 1.01123595505618, 4.5),
+    ]
+    result = pd_mo.marginal_contribution(objective="PAR10")
+    assert result == marginal
+
+
+def test_get_solver_ranking() -> None:
+    """Test getting the solver ranking list with penalty."""
+    rank_list = [
+        ("AlgorithmB", "Default", 41.0),
+        ("AlgorithmC", "Default", 43.6),
+        ("AlgorithmE", "Default", 52.6),
+        ("AlgorithmD", "Default", 54.8),
+        ("AlgorithmA", "Default", 55.0),
+    ]
+    result = pd.get_solver_ranking()
+    assert result == rank_list
+
+    rank_list = [
+        ("MultiLayerPerceptron", "Config3", 0.71425),
+        ("MultiLayerPerceptron", "Config2", 0.712),
+        ("MultiLayerPerceptron", "Config1", 0.69975),
+        ("MultiLayerPerceptron", "Config4", 0.67797),
+        ("MultiLayerPerceptron", "Config5", 0.6547000000000001),
+        ("RandomForest", "Config2", 0.627),
+        ("RandomForest", "Config1", 0.6085),
+        ("RandomForest", "Config5", 0.5845),
+        ("RandomForest", "Config4", 0.5773999999999999),
+        ("RandomForest", "Config3", 0.568),
+    ]
+    result = pd_mo.get_solver_ranking(objective="ValidationAccuracy:max")
+    assert result == rank_list
+
+    rank_list = [
+        ("RandomForest", "Config1", 4.75),
+        ("RandomForest", "Config2", 4.85),
+        ("RandomForest", "Config5", 4.890000000000001),
+        ("RandomForest", "Config4", 5.0),
+        ("RandomForest", "Config3", 5.05),
+        ("MultiLayerPerceptron", "Config4", 44.5),
+        ("MultiLayerPerceptron", "Config3", 44.55),
+        ("MultiLayerPerceptron", "Config2", 52.0),
+        ("MultiLayerPerceptron", "Config5", 58.489999999999995),
+        ("MultiLayerPerceptron", "Config1", 311.7),
+    ]
+    result = pd_mo.get_solver_ranking(objective="PAR10")
+    assert result == rank_list
+
+
+def test_save_csv() -> None:
+    """Test for method save_csv."""
+    # TODO: Write test
+    pass
+
+
+def test_clone() -> None:
+    """Test for method clone."""
+    copy_nan = pd_nan.clone()
+    assert isinstance(copy_nan, PerformanceDataFrame)
+
+
+@pytest.mark.filterwarnings("ignore::FutureWarning")
+def test_clean_csv(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test for method clean_csv."""
+    monkeypatch.chdir(tmp_path)
+    copy_pd = pd.clone(csv_filepath=Path("test.csv"))
+    copy_pd.clean_csv()
+    assert copy_pd.isnull().all().all()

@@ -8,3 +8,7 @@ PAR10,PTN,Ptn-7824-b01,1,600.0,42,
 wall_time,PTN,Ptn-7824-b01,1,,,
 wall_time,PTN,Ptn-7824-b01,1,,,55.9,42
 wall_time,PTN,Ptn-7824-b01,1,64.9,42,
+
+$Solver,configuration_id,Configuration
+$Solvers/PbO-CCSAT-Generic,Default,{}
+$Solvers/PbO-CCSAT-Generic,Config1,{}
