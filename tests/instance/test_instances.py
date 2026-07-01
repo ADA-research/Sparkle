@@ -98,7 +98,11 @@ def test_multi_file_instance_set_directory() -> None:
     )
     assert multi_file_instance_set.name == "CCAG"
     assert str(multi_file_instance_set) == "CCAG"
-    assert multi_file_instance_set.get_path_by_name("Banking1") == dir_dict["Banking1"]
+    # Compare as sets: get_path_by_name returns instances.csv order while dir_dict follows
+    # Path.iterdir() order, which is filesystem-dependent.
+    assert set(multi_file_instance_set.get_path_by_name("Banking1")) == set(
+        dir_dict["Banking1"]
+    )
     assert multi_file_instance_set.get_path_by_name("DoesNotExist") is None
 
 
