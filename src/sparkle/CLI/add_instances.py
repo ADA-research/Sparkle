@@ -89,7 +89,7 @@ def main(argv: list[str]) -> None:
         objectives=gv.settings().objectives,
     )
     instance_pairs = new_instance_set.instance_pairs
-    feature_data.add_instances(instance_pairs)
+    feature_data.add_instance(instance_pairs)
     for instance_pair in instance_pairs:
         performance_data.add_instance(instance_pair)
     feature_data.save_csv()

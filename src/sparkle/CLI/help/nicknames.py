@@ -50,53 +50,58 @@ def resolve_object_name(
 
 
 def resolve_instance_name(
-    name: str | tuple[str, str],
-    target: Path | list[InstanceSet],
-    return_path: bool = True,
-) -> str | InstanceSet:
-    """Attempts to resolve an instance name.
+    instance_pair: tuple[str, str],
+    instance_set: str | Path | list[InstanceSet],
+) -> str | Path | list[Path] | None:
+    """Attempts to resolve an instance pair to its file path(s).
 
     Args:
-        name: The name to resolve. May be a plain instance name or a
-            (set_name, instance_name) pair, in which case the instance name is used.
-        target: Path to look for instance sets or the instance sets directly
-        return_path: Whether to return the path of the instance or the instance set
+        instance_pair: The (set_name, instance_name) pair to resolve. The set_name is
+            used to look in the correct set, so instances sharing a name across
+            different sets are not confused with one another.
+        instance_set: Where to look for the instance. Either a str/Path to a directory
+            containing instance sets, or the instance sets themselves as a list.
 
     Returns:
-        The path or the instance set of the given instance name
+        The path of the instance (multi-file instances are returned as a space-joined
+        string of their paths), or None if it cannot be resolved.
     """
-    # An instance pair (set_name, instance_name) may be passed; resolve by instance name
-    if isinstance(name, tuple):
-        name = name[1]
-    # Check if name is a multi file instance path
+    set_name, instance_name = instance_pair
 
     # Check if the name is already an instance file path
-    name_path = Path(name)
+    name_path = Path(instance_name)
     if name_path.exists() and name_path.is_file():
-        return name
+        return instance_name
     # Attempt to find files
-    matches = [p for p in name_path.parent.glob(name_path.name + ".*")]
+    matches = [path for path in name_path.parent.glob(name_path.name + ".*")]
     if matches:
-        return " ".join(str(p) for p in matches)  # Concat for multi file instance
-    # Target is a path to a directory that contains instance directories
-    elif isinstance(target, Path):
-        instances = []
-        for instance_dir in target.iterdir():
-            if instance_dir.is_dir():
-                instances.append(Instance_Set(instance_dir))
-        target = instances
+        return " ".join(str(path) for path in matches)  # Concat for multi file instance
+    # Normalise instance_set into a list of InstanceSet objects. A str/Path points to a
+    # directory that contains instance set directories.
+    if isinstance(instance_set, (str, Path)):
+        instance_sets = [
+            Instance_Set(instance_dir)
+            for instance_dir in Path(instance_set).iterdir()
+            if instance_dir.is_dir()
+        ]
+    else:
+        instance_sets = instance_set
+    # We know which set the instance belongs to: restrict the search to that set so a
+    # shared instance name in another set cannot shadow it. Fall back to all sets if the
+    # named set is not among those given.
+    matching_sets = [inst_set for inst_set in instance_sets if inst_set.name == set_name]
+    search_sets = matching_sets if matching_sets else instance_sets
 
-    out_set, instance_path = None, None
-    for instance_set in target:
-        instance_path = instance_set.get_path_by_name(name)
+    instance_path = None
+    for current_set in search_sets:
+        instance_path = current_set.get_path_by_name(instance_name)
         if instance_path is None:
             continue
-        out_set = instance_set
         # Handle multi file instance
-        if isinstance(instance_set, MultiFileInstanceSet):
+        if isinstance(current_set, MultiFileInstanceSet):
             instance_path = (
                 [instance_path] if not isinstance(instance_path, list) else instance_path
             )
             instance_path = " ".join(str(p) for p in instance_path)
         break
-    return instance_path if return_path else out_set
+    return instance_path

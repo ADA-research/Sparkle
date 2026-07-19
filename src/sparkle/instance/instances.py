@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 from pathlib import Path
-from collections import Counter
 
 import csv
 import numpy as np
@@ -93,44 +92,16 @@ class FileInstanceSet(InstanceSet):
             # Single instance set
             self._instance_paths = [target]
             self.directory = target.parent
-            # If a sibling shares this file's stem (e.g. instance1.csv vs instance1.cnf),
-            # a bare stem would be ambiguous; keep the full filename to stay distinct and
-            # consistent with how the whole-directory set names this instance.
-            colliding = (
-                sum(
-                    1
-                    for p in self.directory.iterdir()
-                    if p.is_file() and p.stem == target.stem
-                )
-                > 1
-            )
-            if colliding:
-                print(
-                    f"WARNING: Instance set '{self.name}' has files sharing the stem "
-                    f"'{target.stem}'; keeping the suffix to disambiguate."
-                )
-            self._instance_names = [target.name if colliding else target.stem]
+            # NOTE: We name instances by their stem, assuming every instance in the set
+            # shares the same extension (which is the case in general). If a set ever
+            # mixes extensions on the same stem (e.g. instance1.cnf and instance1.csv),
+            # the bare stems would collide; in that case keep the full filename
+            # (target.name) here to disambiguate.
+            self._instance_names = [target.stem]
         else:
             # Default situation, treat each file in the directory as an instance
             self._instance_paths = [p for p in self.directory.iterdir()]
-            # Detect stem collisions (e.g. instance1.csv vs instance1.cnf): a bare stem
-            # would map both files to the same identity. For colliding stems only, keep
-            # the full filename (with suffix) so each instance stays distinct; the rest
-            # keep the clean stem.
-            # For example -> stem_counts = {"instance1": 2, "other": 1}, keep the .name of instance1 against collision
-            stem_counts = Counter(p.stem for p in self._instance_paths)
-            collisions = sorted(
-                {stem for stem, count in stem_counts.items() if count > 1}
-            )
-            if collisions:
-                print(
-                    f"WARNING: Instance set '{self.name}' has files sharing stem(s) "
-                    f"{collisions}; keeping the suffix to disambiguate them."
-                )
-            self._instance_names = [
-                p.name if stem_counts[p.stem] > 1 else p.stem
-                for p in self._instance_paths
-            ]
+            self._instance_names = [p.stem for p in self._instance_paths]
 
     @property
     def name(self: FileInstanceSet) -> str:

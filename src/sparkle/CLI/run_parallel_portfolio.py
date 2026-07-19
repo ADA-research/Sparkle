@@ -391,8 +391,9 @@ def build_command_list(
     # Create a command for each instance-solver-seed combination. Zip names with paths so
     # each seed is written to the canonical (set_name, instance_name) pair the pdf is keyed
     # by; instance.stem would drop the suffix for stem-collision instances.
+    # e.g.: (instance_name, instance) = ("Ptn-7824-b01", Path("Instances/PTN/Ptn-7824-b01.cnf"))
     for (instance_name, instance), solver in itertools.product(
-        zip(instances_set.instance_names, instances_set._instance_paths), solvers
+        zip(instances_set.instance_names, instances_set.instance_paths), solvers
     ):
         for _ in range(seeds_per_solver):
             seed = int(random.getrandbits(32))

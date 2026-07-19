@@ -473,16 +473,23 @@ class PerformanceDataFrame(pd.DataFrame):
 
     def add_instance(
         self: PerformanceDataFrame,
-        instance_pair: tuple[str, str],
+        instance_pair: tuple[str, str] | list[tuple[str, str]],
         initial_values: Any | list[Any] = None,
     ) -> None:
-        """Add an instance to the DataFrame.
+        """Add one or more instances to the DataFrame.
 
         Args:
-            instance_pair: A (set_name, instance_name) pair.
-            initial_values: The values assigned for each index of the new instance.
-                If list, must match the column dimension (Value, Seed, Configuration).
+            instance_pair: A (set_name, instance_name) pair, or a list of such pairs
+                to add multiple instances at once.
+            initial_values: The values assigned for each index of the new instance(s).
+                The same values are used for every added instance. If a list, it must
+                match the column dimension (Value, Seed, Configuration).
         """
+        # Normalise to a list of pairs so the index is built and sorted only once.
+        instance_pairs = (
+            [instance_pair] if isinstance(instance_pair, tuple) else instance_pair
+        )
+        # Normalise initial_values into a full row once; it is shared by every instance.
         initial_values = initial_values or self.missing_value
         if not isinstance(initial_values, list):
             initial_values = (
@@ -493,22 +500,27 @@ class PerformanceDataFrame(pd.DataFrame):
         elif len(initial_values) == len(PerformanceDataFrame.multi_column_names):
             initial_values = initial_values * self.num_solvers
 
-        if instance_pair in self.instance_pairs:
-            print(
-                f"WARNING: Tried adding already existing instance {instance_pair} "
-                f"to Performance DataFrame: {self.csv_filepath}"
-            )
-            return
-        # Add rows for all combinations
-        for objective, run in itertools.product(self.objective_names, self.run_ids):
-            self.loc[(objective,) + instance_pair + (run,)] = initial_values
-        if self.num_instances == 2:  # Remove nan instance
+        existing_pairs = set(self.instance_pairs)
+        for instance_pair in instance_pairs:
+            if instance_pair in existing_pairs:
+                print(
+                    f"WARNING: Tried adding already existing instance {instance_pair} "
+                    f"to Performance DataFrame: {self.csv_filepath}"
+                )
+                continue
+            existing_pairs.add(instance_pair)  # Guard against duplicates in the input
+            # Add rows for all combinations
+            for objective, run in itertools.product(self.objective_names, self.run_ids):
+                self.loc[(objective,) + instance_pair + (run,)] = initial_values
+
+        # Remove the placeholder nan instance now that real instances exist.
+        if self.num_instances > 1:
             for inst_pair in self.instance_pairs:
                 instance_set, instance = inst_pair
                 if not isinstance(instance, str) and math.isnan(float(instance)):
-                    self.remove_instance_pairs(inst_pair)
+                    self.remove_instance(inst_pair)
                     break
-        # Sort the index to optimize lookup speed
+        # Sort the index once to optimize lookup speed
         self.sort_index(axis=0, inplace=True)
 
     def add_runs(
@@ -603,7 +615,7 @@ class PerformanceDataFrame(pd.DataFrame):
             inplace=True,
         )
 
-    def remove_instance_pairs(
+    def remove_instance(
         self: PerformanceDataFrame,
         instance_pairs: tuple[str, str] | list[tuple[str, str]],
     ) -> None:

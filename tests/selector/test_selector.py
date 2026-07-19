@@ -137,14 +137,14 @@ def test_construct_all_configurations(
 
 
 @pytest.mark.parametrize(
-    "instance",
+    "instance_pair",
     [
-        "Instances/PTN/Ptn-7824-b03.cnf",
-        "Instances/PTN/Ptn-7824-b15.cnf",
-        "Instances/PTN/Ptn-7824-b21.cnf",
+        ("PTN", "Ptn-7824-b03"),
+        ("PTN", "Ptn-7824-b15"),
+        ("PTN", "Ptn-7824-b21"),
     ],
 )
-def test_run(instance: str) -> None:
+def test_run(instance_pair: tuple[str, str]) -> None:
     """Test for method run."""
     selector = Selector(MultiClassClassifier, RandomForestClassifier)
     selector_path = Path("tests/test_files/Selector/portfolio_selector_test")
@@ -152,5 +152,5 @@ def test_run(instance: str) -> None:
     feature_data = FeatureDataFrame(feature_data_path)
 
     solvers = ["Solvers/CSCCSat", "Solvers/PbO-CCSAT-Generic", "Solvers/MiniSAT"]
-    schedule = selector.run(selector_path, instance, feature_data)
+    schedule = selector.run(selector_path, instance_pair, feature_data)
     assert schedule[0][0] in solvers  # Schedule has shape [(solver, config, budget)]

@@ -61,8 +61,8 @@ def main(argv: list[str]) -> None:
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
     instance_pairs = old_instance_set.instance_pairs
-    feature_data.remove_instance_pairs(instance_pairs)
-    performance_data.remove_instance_pairs(instance_pairs)
+    feature_data.remove_instance(instance_pairs)
+    performance_data.remove_instance(instance_pairs)
 
     feature_data.save_csv()
     performance_data.save_csv()

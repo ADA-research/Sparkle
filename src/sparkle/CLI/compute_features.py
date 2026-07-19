@@ -164,7 +164,7 @@ def main(argv: list[str]) -> None:
 
         for instance_pair in feature_data.instance_pairs:
             if instance_pair not in instances:
-                feature_data.remove_instance_pairs(instance_pair)
+                feature_data.remove_instance(instance_pair)
         if feature_data.num_instances == 0:
             raise ValueError("Argument Error! No instances left after filtering.")
     if args.extractors:

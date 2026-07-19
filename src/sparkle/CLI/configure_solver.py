@@ -221,9 +221,9 @@ def main(argv: list[str]) -> None:
     if default_jobs:
         # Edit jobs to incorporate file paths
         instances = []
-        for _, _, instance, _ in default_jobs:
+        for _, _, instance_pair, _ in default_jobs:
             instance_path = resolve_instance_name(
-                instance, settings.DEFAULT_instance_dir
+                instance_pair, settings.DEFAULT_instance_dir
             )
             instances.append(instance_path)
         default_job = solver.run_performance_dataframe(

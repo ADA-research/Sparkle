@@ -161,8 +161,8 @@ def main(argv: list[str]) -> None:
             for instance_pair in performance_data.instance_pairs
             if instance_pair not in instance_set.instance_pairs
         ]
-        performance_data.remove_instance_pairs(removable_instances)
-        feature_data.remove_instance_pairs(removable_instances)
+        performance_data.remove_instance(removable_instances)
+        feature_data.remove_instance(removable_instances)
 
     if args.solvers is not None:
         solvers = args.solvers

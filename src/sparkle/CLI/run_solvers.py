@@ -187,9 +187,8 @@ def run_solvers_performance_data(
 
     # Edit jobs to incorporate file paths
     for index, (solver, config, instance_pair, run) in enumerate(jobs):
-        instance_set_name, instance_name = instance_pair
         instance_path = resolve_instance_name(
-            instance_name, gv.settings().DEFAULT_instance_dir
+            instance_pair, gv.settings().DEFAULT_instance_dir
         )
         jobs[index] = (solver, config, instance_path, run)
 

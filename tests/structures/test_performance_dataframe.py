@@ -242,7 +242,7 @@ def test_add_remove_instance() -> None:
     assert math.isnan(
         pd_nan.get_value(pd_nan.solvers[0], instance_pair=("TestSet", "InstanceTmp"))
     )
-    pd_nan.remove_instance_pairs(("TestSet", "InstanceTmp"))
+    pd_nan.remove_instance(("TestSet", "InstanceTmp"))
     assert ("TestSet", "InstanceTmp") not in pd_nan.instance_pairs
 
 

@@ -144,7 +144,7 @@ class FeatureDataFrame(pd.DataFrame):
                     math.nan, axis=1, level=FeatureDataFrame.extractor_dim, inplace=True
                 )
 
-    def add_instances(
+    def add_instance(
         self: FeatureDataFrame,
         instance_pairs: tuple[str, str] | list[tuple[str, str]],
         values: list[float] = None,
@@ -153,7 +153,8 @@ class FeatureDataFrame(pd.DataFrame):
 
         Args:
             instance_pairs: A (set_name, instance_name) pair or list of such pairs.
-            values: Optional initial values for all features.
+            values: Optional initial values for all features. The same values are
+                used for every added instance.
         """
         if isinstance(instance_pairs, tuple):
             instance_pairs = [instance_pairs]
@@ -172,7 +173,7 @@ class FeatureDataFrame(pd.DataFrame):
                 [(FeatureDataFrame.missing_value, FeatureDataFrame.feature_name_dim)],
             )
 
-    def remove_instance_pairs(
+    def remove_instance(
         self: FeatureDataFrame,
         instance_pairs: tuple[str, str] | list[tuple[str, str]],
     ) -> None:
@@ -181,6 +182,8 @@ class FeatureDataFrame(pd.DataFrame):
         Args:
             instance_pairs: A (set_name, instance_name) pair or list of such pairs.
         """
+        if isinstance(instance_pairs, tuple):
+            instance_pairs = [instance_pairs]
         self.drop(instance_pairs, axis=0, inplace=True)
 
     def get_feature_groups(
@@ -204,7 +207,8 @@ class FeatureDataFrame(pd.DataFrame):
 
     def get_value(
         self: FeatureDataFrame,
-        instance_pair: tuple[str, str],
+        instance_set: str,
+        instance: str,
         extractor: str,
         feature_group: str,
         feature_name: str,
@@ -212,7 +216,8 @@ class FeatureDataFrame(pd.DataFrame):
         """Return a value in the dataframe.
 
         Args:
-            instance_pair: A (set_name, instance_name) pair.
+            instance_set: Name of the instance set the instance belongs to.
+            instance: Name of the instance.
             extractor: Name of the extractor.
             feature_group: Name of the feature group.
             feature_name: Name of the feature.
@@ -220,11 +225,14 @@ class FeatureDataFrame(pd.DataFrame):
         Returns:
             The value.
         """
-        return self.loc[instance_pair, (extractor, feature_group, feature_name)]
+        return self.loc[
+            (instance_set, instance), (extractor, feature_group, feature_name)
+        ]
 
     def set_value(
         self: FeatureDataFrame,
-        instance_pair: tuple[str, str],
+        instance_set: str,
+        instance: str,
         extractor: str,
         feature_group: str,
         feature_name: str | list[str],
@@ -234,7 +242,8 @@ class FeatureDataFrame(pd.DataFrame):
         """Set a value in the dataframe.
 
         Args:
-            instance_pair: A (set_name, instance_name) pair.
+            instance_set: Name of the instance set the instance belongs to.
+            instance: Name of the instance.
             extractor: Name of the extractor.
             feature_group: Name of the feature group.
             feature_name: Name of the feature.
@@ -250,6 +259,7 @@ class FeatureDataFrame(pd.DataFrame):
             raise ValueError(
                 f"feature_name parameter and value must be the same type ({type(feature_name)}, {type(value)})."
             )
+        instance_pair = (instance_set, instance)
         self.loc[instance_pair, (extractor, feature_group, feature_name)] = value
         if append_write_csv:
             writeable = self.loc[[instance_pair], :]  # Take line
@@ -353,18 +363,21 @@ class FeatureDataFrame(pd.DataFrame):
 
     def get_instance(
         self: FeatureDataFrame,
-        instance_pair: tuple[str, str],
+        instance_set: str,
+        instance: str,
         as_dataframe: bool = False,
     ) -> list[float]:
         """Return the feature vector of an instance pair.
 
         Args:
-            instance_pair: A (set_name, instance_name) pair.
+            instance_set: Name of the instance set the instance belongs to.
+            instance: Name of the instance.
             as_dataframe: True if instances should be returned as df.
 
         Returns:
             The feature vector of an instance pair.
         """
+        instance_pair = (instance_set, instance)
         if as_dataframe:
             return self.loc[[instance_pair]]
         return self.loc[instance_pair].tolist()

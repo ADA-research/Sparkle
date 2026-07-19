@@ -287,8 +287,10 @@ class SMAC3Scenario(ConfigurationScenario):
 
         if self.feature_data is not None:
             instance_features = {
-                instance: self.feature_data.get_instance(str(instance))
-                for instance in self.instance_set.instance_paths
+                path: self.feature_data.get_instance(set_name, instance_name)
+                for path, (set_name, instance_name) in zip(
+                    self.instance_set.instance_paths, self.instance_set.instance_pairs
+                )
             }
         else:
             # 'If no instance features are passed, the runhistory encoder can not

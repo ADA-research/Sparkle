@@ -108,19 +108,19 @@ class Selector:
     def run(
         self: Selector,
         selector_path: Path,
-        instance: str | tuple[str, str],
+        instance_pair: tuple[str, str],
         feature_data: FeatureDataFrame,
     ) -> list:
-        """Run the Selector, returning the prediction schedule upon success."""
-        if isinstance(instance, str):
-            instance_path = Path(instance)
-            instance_pair: tuple[str, str] = (
-                instance_path.parent.name,
-                instance_path.stem,
-            )
-        else:
-            instance_pair = instance
-        instance_features = feature_data.get_instance(instance_pair, as_dataframe=True)
+        """Run the Selector, returning the prediction schedule upon success.
+
+        Args:
+            selector_path: The path to the selector to run.
+            instance_pair: The (set_name, instance_name) pair to predict for. The set
+                name is required because the feature data is keyed on the pair, so a bare
+                instance name (or file path) could resolve to the wrong set.
+            feature_data: The instance feature data to use.
+        """
+        instance_features = feature_data.get_instance(*instance_pair, as_dataframe=True)
         # ASF was trained on plain instance names, drop InstanceSet level
         instance_features = instance_features.droplevel(
             FeatureDataFrame.instance_set_index_dim
@@ -131,7 +131,7 @@ class Selector:
             print(f"ERROR: Selector {self.name} failed predict schedule!")
             return None
         # ASF presents result as schedule per instance, we only use one in this setting
-        instance_name = instance_pair[1]
+        instance_set, instance_name = instance_pair
         schedule = schedule[instance_name]
         for index, (solver, time) in enumerate(schedule):
             # Split solver name back into solver and config id

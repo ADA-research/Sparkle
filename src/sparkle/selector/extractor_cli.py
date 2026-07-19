@@ -76,7 +76,7 @@ if __name__ == "__main__":
         # Fallback (no match found): keep prior behaviour of (parent dir name, stem).
         (instance_path[0].parent.name, instance_path[0].stem),
     )
-    instance_name = instance_pair[1]
+    instance_set_name, instance_name = instance_pair
     extractor_path = args.extractor
     feature_data_csv_path = args.feature_csv
     cutoff_extractor = args.cutoff
@@ -114,7 +114,7 @@ if __name__ == "__main__":
         if feature_group not in feature_data_per_group:
             feature_data_per_group[feature_group] = [[], []]
         print(
-            f"{extractor_path.name} {instance_name} {feature_group} {feature_name} | {value}"
+            f"{extractor_path.name} {instance_set_name} {instance_name} {feature_group} {feature_name} | {value}"
         )  # For logging purposes
         feature_data_per_group[feature_group][0] += [feature_name]
         feature_data_per_group[feature_group][1] += [float(value)]
@@ -131,7 +131,7 @@ if __name__ == "__main__":
             ) in feature_data_per_group.items():
                 # for feature_group, feature_name, value in features:
                 feature_data.set_value(
-                    instance_pair,
+                    *instance_pair,
                     extractor_path.name,
                     feature_group,
                     feature_names,

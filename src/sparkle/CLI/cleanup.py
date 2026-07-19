@@ -51,6 +51,7 @@ def check_logs_performance_data(performance_data: PerformanceDataFrame) -> int:
     # empty_indices = performance_data.empty_indices
     pattern = re.compile(
         r"^(?P<objective>\S+)\s*,\s*"
+        r"(?P<instance_set>\S+)\s*,\s*"
         r"(?P<instance>\S+)\s*,\s*"
         r"(?P<run_id>\S+)\s*\|\s*"
         r"(?P<solver>\S+)\s*,\s*"
@@ -75,18 +76,10 @@ def check_logs_performance_data(performance_data: PerformanceDataFrame) -> int:
                 solver = match.group("solver")
                 config_id = match.group("config_id")
                 target_value = match.group("target_value")
-                # The log only records the bare instance name; recover the
-                # (set_name, instance_name) pair from the dataframe.
-                instance_pair = next(
-                    (
-                        pair
-                        for pair in performance_data.instance_pairs
-                        if pair[1] == instance
-                    ),
-                    None,
-                )
-                if instance_pair is None:  # Unknown instance, skip
-                    continue
+                # The log records the (set_name, instance_name) pair directly.
+                instance_pair = (match.group("instance_set"), instance)
+                if instance_pair not in performance_data.instance_pairs:
+                    continue  # Unknown instance, skip
                 current_value = performance_data.get_value(
                     solver, instance_pair, config_id, objective, run_id
                 )
@@ -120,6 +113,7 @@ def check_logs_feature_data(feature_data: FeatureDataFrame) -> int:
     # empty_indices = performance_data.empty_indices
     pattern = re.compile(
         r"^(?P<extractor>\S+)\s*"
+        r"(?P<instance_set>\S+)\s*"
         r"(?P<instance>\S+)\s*"
         r"(?P<feature_group>\S+)\s*"
         r"(?P<feature_name>\S+)\s*\|\s*"
@@ -144,20 +138,12 @@ def check_logs_feature_data(feature_data: FeatureDataFrame) -> int:
                 instance = match.group("instance")
                 feature_group = match.group("feature_group")
                 feature_name = match.group("feature_name")
-                # The log only records the bare instance name; recover the
-                # (set_name, instance_name) pair from the dataframe.
-                instance_pair = next(
-                    (
-                        pair
-                        for pair in feature_data.instance_pairs
-                        if pair[1] == instance
-                    ),
-                    None,
-                )
-                if instance_pair is None:  # Unknown instance, skip
-                    continue
+                # The log records the (set_name, instance_name) pair directly.
+                instance_pair = (match.group("instance_set"), instance)
+                if instance_pair not in feature_data.instance_pairs:
+                    continue  # Unknown instance, skip
                 current_value = feature_data.get_value(
-                    instance_pair, extractor, feature_group, feature_name
+                    *instance_pair, extractor, feature_group, feature_name
                 )
                 if (
                     (
@@ -168,7 +154,7 @@ def check_logs_feature_data(feature_data: FeatureDataFrame) -> int:
                     and current_value == "nan"
                 ):
                     feature_data.set_value(
-                        instance_pair,
+                        *instance_pair,
                         extractor,
                         feature_group,
                         feature_name,
@@ -249,7 +235,8 @@ def main(argv: list[str]) -> None:
             else:
                 # NOTE: This check is very expensive, and it would be better if we could pass all the instances at once instead
                 instance_path = resolve_instance_name(
-                    instance, target=gv.settings().DEFAULT_instance_dir
+                    (instance_set, instance),
+                    instance_set=gv.settings().DEFAULT_instance_dir,
                 )
                 if instance_path is None:
                     instance_errors += 1

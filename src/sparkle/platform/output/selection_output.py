@@ -226,9 +226,7 @@ class SelectionOutput:
                 {
                     "name": instance_set,
                     "number_of_instances": sum(
-                        1
-                        for instance_pair in instance_pairs
-                        if instance_pair[0] == instance_set
+                        1 for set, _ in instance_pairs if set == instance_set
                     ),
                 }
                 for instance_set in instance_sets
