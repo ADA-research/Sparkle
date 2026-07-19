@@ -102,6 +102,6 @@ def resolve_instance_name(
             instance_path = (
                 [instance_path] if not isinstance(instance_path, list) else instance_path
             )
-            instance_path = " ".join(str(p) for p in instance_path)
+            instance_path = " ".join(str(path) for path in instance_path)
         break
     return instance_path

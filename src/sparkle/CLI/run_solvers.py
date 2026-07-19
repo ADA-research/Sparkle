@@ -205,11 +205,13 @@ def run_solvers_performance_data(
         solvers = [Solver(Path(s)) for s in performance_data.solvers]
     else:  # Filter the Solvers in remaining jobs
         jobs = [
-            (solvers[solvers.index(s)], c, i, r) for (s, c, i, r) in jobs if s in solvers
+            (solvers[solvers.index(solver)], configuration, instance, run)
+            for (solver, configuration, instance, run) in jobs
+            if solver in solvers
         ]
 
     if instances is not None:  # Filter the instances
-        jobs = [j for j in jobs if j[2] in instances]
+        jobs = [job for job in jobs if job[2] in instances]
 
     # Sort the jobs per solver
     solver_jobs = {p_solver: {} for p_solver in solvers}
@@ -251,7 +253,7 @@ def run_solvers_performance_data(
                 # Do some printing?
                 pass
     if run_on == Runner.SLURM:
-        num_jobs = sum(len(r.jobs) for r in runrunner_runs)
+        num_jobs = sum(len(run.jobs) for run in runrunner_runs)
         print(f"Total number of jobs submitted: {num_jobs}")
 
     return runrunner_runs
@@ -296,7 +298,9 @@ def main(argv: list[str]) -> None:
         ]
     else:
         solvers = [
-            Solver(p) for p in settings.DEFAULT_solver_dir.iterdir() if p.is_dir()
+            Solver(solver)
+            for solver in settings.DEFAULT_solver_dir.iterdir()
+            if solver.is_dir()
         ]
 
     if args.instance_path:
@@ -367,13 +371,13 @@ def main(argv: list[str]) -> None:
             configurations = []
             for solver in solvers:
                 configurations.append([])
-                for c in args.configuration:
-                    if c not in performance_dataframe.configuration_ids:
-                        raise ValueError(f"Configuration id {c} not found.")
-                    if c in performance_dataframe.get_configurations(
+                for configuration in args.configuration:
+                    if configuration not in performance_dataframe.configuration_ids:
+                        raise ValueError(f"Configuration id {configuration} not found.")
+                    if configuration in performance_dataframe.get_configurations(
                         str(solver.directory)
                     ):
-                        configurations[-1].append(c)
+                        configurations[-1].append(configuration)
         elif args.all_configurations:  # All known configurations
             configurations = [
                 performance_dataframe.get_configurations(str(solver.directory))
@@ -417,7 +421,7 @@ def main(argv: list[str]) -> None:
     elif run_on == Runner.SLURM:
         print(
             "Running solvers through Slurm with job id(s): "
-            f"{','.join(r.run_id for r in runs if r is not None)}"
+            f"{','.join(run.run_id for run in runs if run is not None)}"
         )
     sys.exit(0)
 

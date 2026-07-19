@@ -166,25 +166,35 @@ def main(argv: list[str]) -> None:
 
     if args.solvers is not None:
         solvers = args.solvers
-        removeable_solvers = [s for s in performance_data.solvers if s not in solvers]
+        removeable_solvers = [
+            solver for solver in performance_data.solvers if solver not in solvers
+        ]
         performance_data.remove_solver(removeable_solvers)
     else:
         solvers = sorted(
-            [str(s) for s in gv.settings().DEFAULT_solver_dir.iterdir() if s.is_dir()]
+            [
+                str(solver)
+                for solver in gv.settings().DEFAULT_solver_dir.iterdir()
+                if solver.is_dir()
+            ]
         )
 
     # Check what configurations should be considered
     if args.best_configuration:
         configurations = {
-            s: performance_data.best_configuration(s, objective=objective)
-            for s in solvers
+            solver: performance_data.best_configuration(solver, objective=objective)
+            for solver in solvers
         }
     elif args.default_configuration:
-        configurations = {s: PerformanceDataFrame.default_configuration for s in solvers}
+        configurations = {
+            solver: PerformanceDataFrame.default_configuration for solver in solvers
+        }
     else:
-        configurations = {s: performance_data.get_configurations(s) for s in solvers}
+        configurations = {
+            solver: performance_data.get_configurations(solver) for solver in solvers
+        }
         if not args.all_configurations:  # Take the only configuration
-            if any(len(c) > 1 for c in configurations.values()):
+            if any(len(configuration) > 1 for configuration in configurations.values()):
                 print("ERROR: More than one configuration for the following solvers:")
                 for solver, config in configurations.items():
                     if len(config) > 1:
@@ -195,9 +205,9 @@ def main(argv: list[str]) -> None:
                 )
     for solver in solvers:
         removeable_configs = [
-            c
-            for c in performance_data.get_configurations(solver)
-            if c not in configurations[solver]
+            configuration
+            for configuration in performance_data.get_configurations(solver)
+            if configuration not in configurations[solver]
         ]
         performance_data.remove_configuration(solver, removeable_configs)
 

@@ -109,7 +109,11 @@ def main(argv: list[str]) -> None:
                     log_dir=sl.caller_log_dir,
                     run_on=Runner.LOCAL,
                 )
-                log = [p for p in sl.caller_log_dir.iterdir() if p.suffix == ".rawres"]
+                log = [
+                    path
+                    for path in sl.caller_log_dir.iterdir()
+                    if path.suffix == ".rawres"
+                ]
                 if len(log) > 0:
                     print("\nSolver Output:")
                     print(log[0].open().read())

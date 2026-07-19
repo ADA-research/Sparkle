@@ -169,12 +169,12 @@ class IterableFileInstanceSet(InstanceSet):
         """
         super().__init__(target)
         self._instance_paths = [
-            p
-            for p in self.directory.iterdir()
-            if p.suffix in IterableFileInstanceSet.supported_filetypes
+            path
+            for path in self.directory.iterdir()
+            if path.suffix in IterableFileInstanceSet.supported_filetypes
         ]
         self._size = IterableFileInstanceSet.__determine_size__(self._instance_paths[0])
-        self._instance_names = [p.name for p in self._instance_paths]
+        self._instance_names = [path.name for path in self._instance_paths]
 
     @property
     def size(self: IterableFileInstanceSet) -> int:

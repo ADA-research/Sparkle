@@ -79,7 +79,7 @@ def main(argv: list[str]) -> None:
     )
     if solver is None:
         print(f"Could not resolve Solver path/name {args.solver}!")
-        print([p for p in settings.DEFAULT_solver_dir.iterdir()])
+        print([solver_path for solver_path in settings.DEFAULT_solver_dir.iterdir()])
         sys.exit(-1)
 
     instance_set_train: InstanceSet = resolve_object_name(

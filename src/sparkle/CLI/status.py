@@ -113,21 +113,21 @@ def main(argv: list[str]) -> None:
 
     print("========Sparkle System Status========\n")
     print_objects_list(
-        [s for s in gv.settings().DEFAULT_solver_dir.iterdir()],
+        [solver for solver in gv.settings().DEFAULT_solver_dir.iterdir()],
         "Solver",
         args.verbosity,
     )
     if args.verbosity:
         print()
     print_objects_list(
-        [e for e in gv.settings().DEFAULT_extractor_dir.iterdir()],
+        [extractor for extractor in gv.settings().DEFAULT_extractor_dir.iterdir()],
         "Extractor",
         args.verbosity,
     )
     if args.verbosity:
         print()
     print_objects_list(
-        [i for i in gv.settings().DEFAULT_instance_dir.iterdir()],
+        [instance for instance in gv.settings().DEFAULT_instance_dir.iterdir()],
         "Instance Set",
         args.verbosity,
     )

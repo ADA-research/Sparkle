@@ -82,10 +82,10 @@ class PerformanceDataFrame(pd.DataFrame):
             super().__init__(df)
             self.csv_filepath = csv_filepath
             # Load configuration mapping
-            with self.csv_filepath.open() as f:
+            with self.csv_filepath.open() as file:
                 configuration_lines = [
                     line.strip().strip("$").split(",", maxsplit=2)
-                    for line in f.readlines()
+                    for line in file.readlines()
                     if line.startswith("$")
                 ]
             configurations = {solver: {} for solver in self.solvers}

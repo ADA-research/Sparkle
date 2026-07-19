@@ -857,14 +857,14 @@ class Settings:
         # Create needed directories if they don't exist
         file_path.parent.mkdir(parents=True, exist_ok=True)
         # We don't write empty sections
-        for s in self.__settings.sections():
-            if not self.__settings[s]:
-                self.__settings.remove_section(s)
+        for section in self.__settings.sections():
+            if not self.__settings[section]:
+                self.__settings.remove_section(section)
         with file_path.open("w") as fout:
             self.__settings.write(fout)
-        for s in self.sections_options.keys():
-            if s not in self.__settings.sections():
-                self.__settings.add_section(s)
+        for section in self.sections_options.keys():
+            if section not in self.__settings.sections():
+                self.__settings.add_section(section)
 
     def write_used_settings(self: Settings) -> None:
         """Write the used settings to the default locations."""

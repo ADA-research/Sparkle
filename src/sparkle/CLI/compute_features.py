@@ -87,12 +87,11 @@ def compute_features(
     srun_options = ["-N1", "-n1"] + sbatch_options
     runs = []
     for instance_pair, extractor_name, feature_group in remaining_jobs:
-        _, instance_name = instance_pair
         extractor_path = settings.DEFAULT_extractor_dir / extractor_name
         extractor = Extractor(extractor_path)
 
         instance_path = resolve_instance_name(
-            instance_name, settings.DEFAULT_instance_dir
+            instance_pair, settings.DEFAULT_instance_dir
         )
         instance_paths = []
         if isinstance(instance_path, list):
