@@ -102,11 +102,13 @@ class ConfigurationOutput:
         for test_set in possible_test_sets:
             if test_set.name == self.instance_set_train.name:
                 continue
-            for instance_pair in test_set.instance_pairs:
+            for instance_set, instance_name in test_set.instance_pairs:
                 if (
-                    instance_pair not in performance_data_config.instance_pairs
-                    or performance_data_config.is_missing(
-                        str(self.solver.directory), instance_pair
+                    instance_set,
+                    instance_name,
+                ) not in performance_data_config.instance_pairs or (
+                    performance_data_config.is_missing(
+                        str(self.solver.directory), instance_set, instance_name
                     )
                 ):
                     break

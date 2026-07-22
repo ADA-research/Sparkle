@@ -139,11 +139,11 @@ def check_logs_feature_data(feature_data: FeatureDataFrame) -> int:
                 feature_group = match.group("feature_group")
                 feature_name = match.group("feature_name")
                 # The log records the (set_name, instance_name) pair directly.
-                instance_pair = (match.group("instance_set"), instance)
-                if instance_pair not in feature_data.instance_pairs:
+                instance_set = match.group("instance_set")
+                if (instance_set, instance) not in feature_data.instance_pairs:
                     continue  # Unknown instance, skip
                 current_value = feature_data.get_value(
-                    *instance_pair, extractor, feature_group, feature_name
+                    instance_set, instance, extractor, feature_group, feature_name
                 )
                 if (
                     (
@@ -154,7 +154,8 @@ def check_logs_feature_data(feature_data: FeatureDataFrame) -> int:
                     and current_value == "nan"
                 ):
                     feature_data.set_value(
-                        *instance_pair,
+                        instance_set,
+                        instance,
                         extractor,
                         feature_group,
                         feature_name,
@@ -235,8 +236,9 @@ def main(argv: list[str]) -> None:
             else:
                 # NOTE: This check is very expensive, and it would be better if we could pass all the instances at once instead
                 instance_path = resolve_instance_name(
-                    (instance_set, instance),
-                    instance_set=gv.settings().DEFAULT_instance_dir,
+                    instance_set,
+                    instance,
+                    search_location=gv.settings().DEFAULT_instance_dir,
                 )
                 if instance_path is None:
                     instance_errors += 1

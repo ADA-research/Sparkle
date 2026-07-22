@@ -90,8 +90,7 @@ def main(argv: list[str]) -> None:
     )
     instance_pairs = new_instance_set.instance_pairs
     feature_data.add_instance(instance_pairs)
-    for instance_pair in instance_pairs:
-        performance_data.add_instance(instance_pair)
+    performance_data.add_instance(instance_pairs)
     feature_data.save_csv()
     performance_data.save_csv()
 

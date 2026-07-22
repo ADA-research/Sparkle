@@ -95,10 +95,7 @@ class SelectionOutput:
         self.training_instance_sets = [
             (
                 instance_set,
-                sum(
-                    instance_pair[0] == instance_set
-                    for instance_pair in self.training_instances
-                ),
+                sum(inst_set == instance_set for inst_set, _ in self.training_instances),
             )
             for instance_set in training_instance_sets
         ]
@@ -107,10 +104,7 @@ class SelectionOutput:
         self.test_sets = [
             (
                 instance_set,
-                sum(
-                    instance_pair[0] == instance_set
-                    for instance_pair in self.test_instances
-                ),
+                sum(inst_set == instance_set for inst_set, _ in self.test_instances),
             )
             for instance_set in test_sets
         ]
@@ -217,16 +211,14 @@ class SelectionOutput:
         self: SelectionOutput, instance_pairs: list[tuple[str, str]]
     ) -> dict:
         """Transform Instances to dictionary format."""
-        instance_sets = dict.fromkeys(
-            instance_pair[0] for instance_pair in instance_pairs
-        )
+        instance_sets = dict.fromkeys(instance_set for instance_set, _ in instance_pairs)
         return {
             "number_of_instance_sets": len(instance_sets),
             "instance_sets": [
                 {
                     "name": instance_set,
                     "number_of_instances": sum(
-                        1 for set, _ in instance_pairs if set == instance_set
+                        1 for inst_set, _ in instance_pairs if inst_set == instance_set
                     ),
                 }
                 for instance_set in instance_sets

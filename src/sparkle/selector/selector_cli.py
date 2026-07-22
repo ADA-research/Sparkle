@@ -68,9 +68,11 @@ def main(argv: list[str]) -> None:
         raise ValueError(
             f"Could not resolve {instance} features in {feature_data.csv_filepath}"
         )
-    feature_instance_name = instance_pair
     predict_schedule = selector_scenario.selector.run(
-        selector_scenario.selector_file_path, feature_instance_name, feature_data
+        selector_scenario.selector_file_path,
+        instance_set.directory.name,
+        instance_name,
+        feature_data,
     )
 
     if predict_schedule is None:  # Selector Failed to produce prediction

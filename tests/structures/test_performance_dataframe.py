@@ -258,11 +258,12 @@ def test_add_remove_runs() -> None:
     instance_subset = pd_nan.instance_pairs[:2]
     pd_nan.add_runs(2, instance_pairs=instance_subset)
     assert pd_nan.num_runs == 3
-    for instance in pd_nan.instance_pairs:
-        if instance in instance_subset:
-            assert pd_nan.get_instance_num_runs(instance) == 3
+    for instance_pair in pd_nan.instance_pairs:
+        instance_set, instance_name = instance_pair
+        if instance_pair in instance_subset:
+            assert pd_nan.get_instance_num_runs(instance_set, instance_name) == 3
         else:
-            assert pd_nan.get_instance_num_runs(instance) == 1
+            assert pd_nan.get_instance_num_runs(instance_set, instance_name) == 1
     pd_nan.remove_runs(2, instance_pairs=instance_subset)
     assert pd_nan.num_runs == 1
 

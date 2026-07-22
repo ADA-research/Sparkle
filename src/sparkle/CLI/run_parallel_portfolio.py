@@ -76,7 +76,7 @@ def create_performance_dataframe(
         pdf: PerformanceDataFrame object initialized with solvers and instances.
     """
     instance_pairs = instances_set.instance_pairs
-    solvers = [str(s.directory) for s in solvers]
+    solvers = [str(solver.directory) for solver in solvers]
     objectives = gv.settings().objectives
     csv_path = portfolio_path / "results.csv"
     return PerformanceDataFrame(

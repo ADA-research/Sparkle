@@ -11,14 +11,14 @@ from runrunner.base import Run, Runner
 from sparkle.selector import Extractor
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import FeatureDataFrame
-from sparkle.instance import Instance_Set, InstanceSet
+from sparkle.instance import Instance_Set, InstanceSet, resolve_instance_name
 
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help.nicknames import resolve_instance_name, resolve_object_name
+from sparkle.CLI.help.nicknames import resolve_object_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -86,12 +86,12 @@ def compute_features(
     slurm_prepend = settings.slurm_job_prepend
     srun_options = ["-N1", "-n1"] + sbatch_options
     runs = []
-    for instance_pair, extractor_name, feature_group in remaining_jobs:
+    for (instance_set, instance_name), extractor_name, feature_group in remaining_jobs:
         extractor_path = settings.DEFAULT_extractor_dir / extractor_name
         extractor = Extractor(extractor_path)
 
         instance_path = resolve_instance_name(
-            instance_pair, settings.DEFAULT_instance_dir
+            instance_set, instance_name, settings.DEFAULT_instance_dir
         )
         instance_paths = []
         if isinstance(instance_path, list):
@@ -161,9 +161,12 @@ def main(argv: list[str]) -> None:
             for instance_name in instance.instance_names:
                 instances.add((instance.directory.name, instance_name))
 
-        for instance_pair in feature_data.instance_pairs:
-            if instance_pair not in instances:
-                feature_data.remove_instance(instance_pair)
+        filtered_instances = [
+            (instance_set, instance_name)
+            for instance_set, instance_name in feature_data.instance_pairs
+            if (instance_set, instance_name) not in instances
+        ]
+        feature_data.remove_instance(filtered_instances)
         if feature_data.num_instances == 0:
             raise ValueError("Argument Error! No instances left after filtering.")
     if args.extractors:

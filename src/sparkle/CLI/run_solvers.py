@@ -13,12 +13,12 @@ from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
 from sparkle.structures import PerformanceDataFrame
 from sparkle.types import SparkleObjective, resolve_objective
-from sparkle.instance import InstanceSet
+from sparkle.instance import InstanceSet, resolve_instance_name
 from sparkle.platform.settings_objects import Settings
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
+from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.CLI.initialise import check_for_initialise
 
 
@@ -186,9 +186,9 @@ def run_solvers_performance_data(
     jobs = performance_data.remaining_jobs(rerun=rerun)  # List of jobs to do
 
     # Edit jobs to incorporate file paths
-    for index, (solver, config, instance_pair, run) in enumerate(jobs):
+    for index, (solver, config, (instance_set, instance_name), run) in enumerate(jobs):
         instance_path = resolve_instance_name(
-            instance_pair, gv.settings().DEFAULT_instance_dir
+            instance_set, instance_name, gv.settings().DEFAULT_instance_dir
         )
         jobs[index] = (solver, config, instance_path, run)
 

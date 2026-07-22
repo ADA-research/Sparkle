@@ -108,19 +108,23 @@ class Selector:
     def run(
         self: Selector,
         selector_path: Path,
-        instance_pair: tuple[str, str],
+        instance_set: str,
+        instance_name: str,
         feature_data: FeatureDataFrame,
     ) -> list:
         """Run the Selector, returning the prediction schedule upon success.
 
         Args:
             selector_path: The path to the selector to run.
-            instance_pair: The (set_name, instance_name) pair to predict for. The set
-                name is required because the feature data is keyed on the pair, so a bare
-                instance name (or file path) could resolve to the wrong set.
+            instance_set: The name of the set the instance belongs to. Required because
+                the feature data is keyed on the (set, instance) pair, so a bare instance
+                name (or file path) could resolve to the wrong set.
+            instance_name: The name of the instance to predict for.
             feature_data: The instance feature data to use.
         """
-        instance_features = feature_data.get_instance(*instance_pair, as_dataframe=True)
+        instance_features = feature_data.get_instance(
+            instance_set, instance_name, as_dataframe=True
+        )
         # ASF was trained on plain instance names, drop InstanceSet level
         instance_features = instance_features.droplevel(
             FeatureDataFrame.instance_set_index_dim
@@ -131,7 +135,6 @@ class Selector:
             print(f"ERROR: Selector {self.name} failed predict schedule!")
             return None
         # ASF presents result as schedule per instance, we only use one in this setting
-        instance_set, instance_name = instance_pair
         schedule = schedule[instance_name]
         for index, (solver, time) in enumerate(schedule):
             # Split solver name back into solver and config id
@@ -309,9 +312,9 @@ class SelectionScenario:
             # loaded from file would report zero training instances.
             training_names = set(self.performance_data.index)
             self.training_instance_pairs: list[tuple[str, str]] = [
-                pair
-                for pair in self.selector_performance_data.instance_pairs
-                if pair[1] in training_names
+                (instance_set, instance_name)
+                for instance_set, instance_name in self.selector_performance_data.instance_pairs
+                if instance_name in training_names
             ]
 
         if isinstance(feature_data, FeatureDataFrame):  # Convert
@@ -382,14 +385,14 @@ class SelectionScenario:
     def training_instance_sets(self: SelectionScenario) -> list[str]:
         """Get the training instance sets."""
         return list(
-            dict.fromkeys(instance_pair[0] for instance_pair in self.training_instances)
+            dict.fromkeys(instance_set for instance_set, _ in self.training_instances)
         )
 
     @property
     def test_instance_sets(self: SelectionScenario) -> list[str]:
         """Get the test instance sets."""
         return list(
-            dict.fromkeys(instance_pair[0] for instance_pair in self.test_instances)
+            dict.fromkeys(instance_set for instance_set, _ in self.test_instances)
         )
 
     @property
@@ -397,8 +400,8 @@ class SelectionScenario:
         """Get all the instance sets used in this scenario."""
         return list(
             dict.fromkeys(
-                instance_pair[0]
-                for instance_pair in self.selector_performance_data.instance_pairs
+                instance_set
+                for instance_set, _ in self.selector_performance_data.instance_pairs
             )
         )
 

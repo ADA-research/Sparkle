@@ -7,7 +7,7 @@ import argparse
 from runrunner.base import Runner
 
 from sparkle.selector import Selector, SelectionScenario
-from sparkle.instance import Instance_Set
+from sparkle.instance import Instance_Set, resolve_instance_name
 
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
@@ -15,7 +15,7 @@ from sparkle.types import resolve_objective
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
+from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.CLI.initialise import check_for_initialise
 
 
@@ -275,8 +275,8 @@ def main(argv: list[str]) -> None:
 
     # Validate the selector to run on the given instances
     instances = [
-        resolve_instance_name(instance_pair, Settings.DEFAULT_instance_dir)
-        for instance_pair in performance_data.instance_pairs
+        resolve_instance_name(instance_set, instance_name, Settings.DEFAULT_instance_dir)
+        for instance_set, instance_name in performance_data.instance_pairs
     ]
     selector_validation = selector.run_cli(
         selection_scenario.scenario_file,

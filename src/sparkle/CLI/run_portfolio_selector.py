@@ -94,8 +94,7 @@ def main(argv: list[str]) -> None:
 
     # Results need to be stored in the performance data object of the scenario:
     # Add the instance set to it
-    for instance_pair in data_set.instance_pairs:
-        selector_scenario.selector_performance_data.add_instance(instance_pair)
+    selector_scenario.selector_performance_data.add_instance(data_set.instance_pairs)
     selector_scenario.selector_performance_data.save_csv()
 
     selector_run = selector_scenario.selector.run_cli(

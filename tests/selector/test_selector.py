@@ -152,5 +152,6 @@ def test_run(instance_pair: tuple[str, str]) -> None:
     feature_data = FeatureDataFrame(feature_data_path)
 
     solvers = ["Solvers/CSCCSat", "Solvers/PbO-CCSAT-Generic", "Solvers/MiniSAT"]
-    schedule = selector.run(selector_path, instance_pair, feature_data)
+    instance_set, instance_name = instance_pair
+    schedule = selector.run(selector_path, instance_set, instance_name, feature_data)
     assert schedule[0][0] in solvers  # Schedule has shape [(solver, config, budget)]

@@ -13,6 +13,7 @@ import time
 from runrunner import Runner
 
 from sparkle.solver import Solver
+from sparkle.instance import resolve_instance_pair
 from sparkle.types import resolve_objective
 from sparkle.structures import PerformanceDataFrame
 from sparkle.tools.solver_wrapper_parsing import parse_commandline_dict
@@ -116,15 +117,11 @@ def main(argv: list[str]) -> None:
     instance_path: list[Path] = args.instance
     # If instance is only one file then we don't need a list
     instance_path = instance_path[0] if len(instance_path) == 1 else instance_path
-    instance_set_name = (
-        instance_path.parent.name
-        if isinstance(instance_path, Path)
-        else instance_path[0].parent.name
-    )
-    instance_name = (
-        instance_path.stem if isinstance(instance_path, Path) else instance_path[0].stem
-    )
-    instance_pair = (instance_set_name, instance_name)
+    # The PerformanceDataFrame is keyed by the canonical (set_name, instance_name) pair.
+    # Deriving the name from the path with .stem is only correct for FileInstanceSet, so
+    # resolve it from the owning set instead and let the subclass supply its convention.
+    instance_pair = resolve_instance_pair(instance_path)
+    instance_set_name, instance_name = instance_pair
     run_index = args.run_index
     # Ensure stringifcation of path objects
     if isinstance(instance_path, list):
@@ -141,7 +138,9 @@ def main(argv: list[str]) -> None:
     seed = args.seed if args.seed else random.randint(0, 2**32 - 1)
     # Parse the provided objectives if present
     objectives = (
-        [resolve_objective(o) for o in args.objectives] if args.objectives else None
+        [resolve_objective(objective) for objective in args.objectives]
+        if args.objectives
+        else None
     )
 
     if args.configuration:  # Configuration provided, override
@@ -241,7 +240,7 @@ def main(argv: list[str]) -> None:
             solver=str(args.solver),
             instance_pair=instance_pair,
             configuration=config_id,
-            objective=[o.name for o in objectives],
+            objective=[objective.name for objective in objectives],
             run=run_index,
             solver_fields=solver_fields,
             append_write_csv=True,  # We do not have to save the PDF here, thanks to this argument

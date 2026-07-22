@@ -304,24 +304,25 @@ class PerformanceDataFrame(pd.DataFrame):
     def is_missing(
         self: PerformanceDataFrame,
         solver: str,
-        instance_pair: tuple[str, str],
+        instance_set: str,
+        instance_name: str,
     ) -> int:
         """Check whether a solver has any missing values for an instance.
 
         Args:
             solver: Solver to be checked.
-            instance_pair: A (set_name, instance_name) pair.
+            instance_set: The name of the set the instance belongs to.
+            instance_name: The name of the instance.
 
         Returns:
             True(1) if any value (excluding the seed) is missing for the given
             solver/instance combination across all objectives, configurations
             and runs, False otherwise.
         """
-        set_name, inst = instance_pair
         return (
             self.xs(solver, axis=1)
-            .xs(set_name, axis=0, level=PerformanceDataFrame.index_instance_set)
-            .xs(inst, axis=0, level=PerformanceDataFrame.index_instance)
+            .xs(instance_set, axis=0, level=PerformanceDataFrame.index_instance_set)
+            .xs(instance_name, axis=0, level=PerformanceDataFrame.index_instance)
             .drop(
                 PerformanceDataFrame.column_seed,
                 level=PerformanceDataFrame.column_meta,
@@ -701,13 +702,18 @@ class PerformanceDataFrame(pd.DataFrame):
     def reset_value(
         self: PerformanceDataFrame,
         solver: str,
-        instance_pair: tuple[str, str],
+        instance_set: str,
+        instance_name: str,
         objective: str = None,
         run: int = None,
     ) -> None:
         """Reset a value in the dataframe."""
         self.set_value(
-            PerformanceDataFrame.missing_value, solver, instance_pair, objective, run
+            PerformanceDataFrame.missing_value,
+            solver,
+            (instance_set, instance_name),
+            objective,
+            run,
         )
 
     def set_value(
@@ -753,13 +759,13 @@ class PerformanceDataFrame(pd.DataFrame):
         objective = objective if objective else slice(objective)
         run = run if run else slice(run)
         if instance_pair is None:  # None selects all instances
-            inst_set, inst_name = slice(None), slice(None)
+            instance_set, instance_name = slice(None), slice(None)
         elif isinstance(instance_pair, list):  # Multiple (set, instance) pairs
-            inst_set = [pair[0] for pair in instance_pair]
-            inst_name = [pair[1] for pair in instance_pair]
+            instance_set = [inst_set for inst_set, inst_name in instance_pair]
+            instance_name = [inst_name for inst_set, inst_name in instance_pair]
         else:  # A single (set, instance) pair
-            inst_set, inst_name = instance_pair
-        row_idx = (objective, inst_set, inst_name, run)
+            instance_set, instance_name = instance_pair
+        row_idx = (objective, instance_set, instance_name, run)
         # Convert column indices to slices for setting multiple columns
         value = [value] if not isinstance(value, list) else value
         # NOTE: We currently forloop levels here, as it allows us to set the same
@@ -814,13 +820,13 @@ class PerformanceDataFrame(pd.DataFrame):
         solver_fields = solver_fields if solver_fields else slice(solver_fields)
         run = run if run else slice(run)
         if instance_pair is None:  # None selects all instances
-            inst_set, inst_name = slice(None), slice(None)
+            instance_set, instance_name = slice(None), slice(None)
         elif isinstance(instance_pair, list):  # Multiple (set, instance) pairs
-            inst_set = [pair[0] for pair in instance_pair]
-            inst_name = [pair[1] for pair in instance_pair]
+            instance_set = [inst_set for inst_set, inst_name in instance_pair]
+            instance_name = [inst_name for inst_set, inst_name in instance_pair]
         else:  # A single (set, instance) pair
-            inst_set, inst_name = instance_pair
-        row_idx = (objective, inst_set, inst_name, run)
+            instance_set, instance_name = instance_pair
+        row_idx = (objective, instance_set, instance_name, run)
         target = self.loc[row_idx, (solver, configuration, solver_fields)].values
         # Reduce dimensions when relevant
         if len(target) > 0 and isinstance(target[0], np.ndarray) and len(target[0]) == 1:
@@ -831,15 +837,18 @@ class PerformanceDataFrame(pd.DataFrame):
         return target
 
     def get_instance_num_runs(
-        self: PerformanceDataFrame, instance_pair: tuple[str, str]
+        self: PerformanceDataFrame, instance_set: str, instance_name: str
     ) -> int:
         """Return the number of runs for an instance.
 
         Args:
-            instance_pair: A (set_name, instance_name) pair.
+            instance_set: The name of the set the instance belongs to.
+            instance_name: The name of the instance.
         """
         # We assume each objective has the same index for Instance/Runs
-        return len(self.loc[(self.objective_names[0],) + instance_pair].index)
+        return len(
+            self.loc[(self.objective_names[0], instance_set, instance_name)].index
+        )
 
     # Calculables
 
@@ -847,7 +856,8 @@ class PerformanceDataFrame(pd.DataFrame):
         self: PerformanceDataFrame,
         objective: str = None,
         solver: str = None,
-        instance_pair: tuple[str, str] = None,
+        instance_set: str = None,
+        instance_name: str = None,
     ) -> float:
         """Return the mean value of a slice of the dataframe.
 
@@ -858,7 +868,10 @@ class PerformanceDataFrame(pd.DataFrame):
             objective: Objective to compute the mean over. If None, it is resolved
                 via verify_objective (the sole objective for single objective data).
             solver: Solver name to restrict the slice to. None includes all solvers.
-            instance_pair: A (set_name, instance_name) pair, or None for all instances.
+            instance_set: Name of the instance set to restrict the slice to. None
+                includes all instance sets.
+            instance_name: Name of the instance to restrict the slice to. None
+                includes all instances.
 
         Returns:
             The mean of all values in the selected slice.
@@ -867,20 +880,19 @@ class PerformanceDataFrame(pd.DataFrame):
         subset = self.xs(objective, level=PerformanceDataFrame.index_objective)
         if solver is not None:
             subset = subset.xs(solver, axis=1, drop_level=False)
-        if instance_pair is not None:
-            # instance_pair is a 2-level key spanning the InstanceSet and Instance row
-            # levels, so narrow each level in turn: first on the set name, then on the
-            # instance name. drop_level=False keeps the remaining MultiIndex levels
-            # intact so the slice still aligns for the .mean() below.
-            set_name, inst = instance_pair
+        # The set name and the instance name live on two separate row levels, so narrow
+        # each level in turn. drop_level=False keeps the remaining MultiIndex levels
+        # intact so the slice still aligns for the .mean() below.
+        if instance_set is not None:
             subset = subset.xs(
-                set_name,
+                instance_set,
                 axis=0,
                 level=PerformanceDataFrame.index_instance_set,
                 drop_level=False,
             )
+        if instance_name is not None:
             subset = subset.xs(
-                inst,
+                instance_name,
                 axis=0,
                 level=PerformanceDataFrame.index_instance,
                 drop_level=False,

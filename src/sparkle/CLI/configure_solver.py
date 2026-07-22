@@ -11,13 +11,13 @@ from runrunner import Runner
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
+from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.CLI.help import argparse_custom as ac
 
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.solver import Solver
-from sparkle.instance import Instance_Set
+from sparkle.instance import Instance_Set, resolve_instance_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -221,9 +221,9 @@ def main(argv: list[str]) -> None:
     if default_jobs:
         # Edit jobs to incorporate file paths
         instances = []
-        for _, _, instance_pair, _ in default_jobs:
+        for _, _, (instance_set, instance_name), _ in default_jobs:
             instance_path = resolve_instance_name(
-                instance_pair, settings.DEFAULT_instance_dir
+                instance_set, instance_name, settings.DEFAULT_instance_dir
             )
             instances.append(instance_path)
         default_job = solver.run_performance_dataframe(
@@ -252,8 +252,12 @@ def main(argv: list[str]) -> None:
             run_index = list(
                 set(
                     [
-                        performance_data.get_instance_num_runs(str(i))
-                        for i in instance_set_test.instance_names
+                        performance_data.get_instance_num_runs(
+                            test_set_name, test_instance_name
+                        )
+                        for test_set_name, test_instance_name in (
+                            instance_set_test.instance_pairs
+                        )
                     ]
                 )
             )
