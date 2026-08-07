@@ -52,8 +52,9 @@ if __name__ == "__main__":
     # Instance agument is a list to allow for multifile instances
     instance_path: list[Path] = args.instance
     # We only receive the instance path on the CLI, but the FeatureDataFrame is keyed by
-    # the canonical (set_name, instance_name) pair, so resolve it from the path.
-    instance_set_name, instance_name = resolve_instance_pair(instance_path)
+    # the canonical (set_name, instance_name) pair, so resolve it from the path. All files
+    # of a multi-file instance share the same pair, so the first file resolves it.
+    instance_set_name, instance_name = resolve_instance_pair(instance_path[0])
     extractor_path = args.extractor
     feature_data_csv_path = args.feature_csv
     cutoff_extractor = args.cutoff

@@ -11,13 +11,13 @@ from runrunner import Runner
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help.nicknames import resolve_object_name
+from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
 from sparkle.CLI.help import argparse_custom as ac
 
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.solver import Solver
-from sparkle.instance import Instance_Set, resolve_instance_name
+from sparkle.instance import Instance_Set
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -219,13 +219,20 @@ def main(argv: list[str]) -> None:
 
     # If we have default configurations that need to be run, schedule them too
     if default_jobs:
-        # Edit jobs to incorporate file paths
-        instances = []
+        # Edit jobs to incorporate file paths. A set deduplicates instances that
+        # repeat across default jobs (one job per remaining run), since
+        # run_performance_dataframe re-expands over all runs itself.
+        # NOTE: This relies on resolve_instance_name returning hashable values (a Path,
+        # or a space-joined str for multi-file instances). If it is ever changed to
+        # return a list[Path], set.add would raise TypeError: unhashable type: 'list',
+        # and this would need to join/normalise the paths first.
+        # instances = list(dict.fromkeys(...))
+        instances = set()
         for _, _, (instance_set, instance_name), _ in default_jobs:
             instance_path = resolve_instance_name(
                 instance_set, instance_name, settings.DEFAULT_instance_dir
             )
-            instances.append(instance_path)
+            instances.add(instance_path)
         default_job = solver.run_performance_dataframe(
             instances,
             performance_data,
@@ -253,11 +260,9 @@ def main(argv: list[str]) -> None:
                 set(
                     [
                         performance_data.get_instance_num_runs(
-                            test_set_name, test_instance_name
+                            instance_set_test.name, test_instance_name
                         )
-                        for test_set_name, test_instance_name in (
-                            instance_set_test.instance_pairs
-                        )
+                        for test_instance_name in instance_set_test.instance_names
                     ]
                 )
             )

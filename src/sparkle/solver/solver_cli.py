@@ -115,13 +115,14 @@ def main(argv: list[str]) -> None:
     print(f"Running Solver and read/writing results with {args.performance_dataframe}")
     # Resolve possible multi-file instance
     instance_path: list[Path] = args.instance
-    # If instance is only one file then we don't need a list
-    instance_path = instance_path[0] if len(instance_path) == 1 else instance_path
     # The PerformanceDataFrame is keyed by the canonical (set_name, instance_name) pair.
     # Deriving the name from the path with .stem is only correct for FileInstanceSet, so
     # resolve it from the owning set instead and let the subclass supply its convention.
-    instance_pair = resolve_instance_pair(instance_path)
+    # All files of a multi-file instance share the same pair, so the first file resolves it.
+    instance_pair = resolve_instance_pair(instance_path[0])
     instance_set_name, instance_name = instance_pair
+    # If instance is only one file then we don't need a list
+    instance_path = instance_path[0] if len(instance_path) == 1 else instance_path
     run_index = args.run_index
     # Ensure stringifcation of path objects
     if isinstance(instance_path, list):

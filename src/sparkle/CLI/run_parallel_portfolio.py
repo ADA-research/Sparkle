@@ -24,7 +24,7 @@ from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.platform.settings_objects import Settings
 from sparkle.solver import Solver
-from sparkle.instance import Instance_Set, InstanceSet
+from sparkle.instance import Instance_Set, InstanceSet, resolve_instance_pair
 from sparkle.types import SolverStatus, resolve_objective, UseTime
 from sparkle.structures import PerformanceDataFrame
 
@@ -400,13 +400,13 @@ def build_command_list(
     seeds_per_solver = gv.settings().parallel_portfolio_num_seeds_per_solver
     cmd_list = []
 
-    # Create a command for each instance-solver-seed combination. Zip names with paths so
-    # each seed is written to the canonical (set_name, instance_name) pair the pdf is keyed
-    # by; instance.stem would drop the suffix for stem-collision instances.
-    # e.g.: (instance_name, instance) = ("Ptn-7824-b01", Path("Instances/PTN/Ptn-7824-b01.cnf"))
-    for (instance_name, instance), solver in itertools.product(
-        zip(instances_set.instance_names, instances_set.instance_paths), solvers
-    ):
+    # Create a command for each instance-solver-seed combination. The pdf is keyed by the
+    # canonical (set_name, instance_name) pair, which cannot be derived from the path with
+    # stem/name (each InstanceSet subclass names its instances differently), so re-derive
+    # it from the path via resolve_instance_pair.
+    for instance, solver in itertools.product(instances_set.instance_paths, solvers):
+        # instance is a single path, so this resolves directly to its pair.
+        instance_pair = resolve_instance_pair(instance)
         for _ in range(seeds_per_solver):
             seed = int(random.getrandbits(32))
             solver_call_list = solver.build_cmd(
@@ -422,7 +422,7 @@ def build_command_list(
                 performance_data.set_value(
                     value=seed,
                     solver=str(solver.directory),
-                    instance_pair=(instances_set.name, instance_name),
+                    instance_pair=instance_pair,
                     objective=objective.name,
                     solver_fields=["Seed"],
                 )

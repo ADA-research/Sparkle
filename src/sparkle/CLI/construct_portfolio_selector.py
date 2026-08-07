@@ -7,7 +7,7 @@ import argparse
 from runrunner.base import Runner
 
 from sparkle.selector import Selector, SelectionScenario
-from sparkle.instance import Instance_Set, resolve_instance_name
+from sparkle.instance import Instance_Set
 
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
@@ -15,7 +15,7 @@ from sparkle.types import resolve_objective
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.help.nicknames import resolve_object_name
+from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
 from sparkle.CLI.initialise import check_for_initialise
 
 

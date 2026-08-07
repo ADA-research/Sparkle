@@ -11,14 +11,14 @@ from runrunner.base import Run, Runner
 from sparkle.selector import Extractor
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import FeatureDataFrame
-from sparkle.instance import Instance_Set, InstanceSet, resolve_instance_name
+from sparkle.instance import Instance_Set, InstanceSet
 
 
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.initialise import check_for_initialise
-from sparkle.CLI.help.nicknames import resolve_object_name
+from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
 
 
 def parser_function() -> argparse.ArgumentParser:

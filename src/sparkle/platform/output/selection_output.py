@@ -217,8 +217,12 @@ class SelectionOutput:
             "instance_sets": [
                 {
                     "name": instance_set,
-                    "number_of_instances": sum(
-                        1 for inst_set, _ in instance_pairs if inst_set == instance_set
+                    "number_of_instances": len(
+                        [
+                            inst_set
+                            for inst_set, _ in instance_pairs
+                            if inst_set == instance_set
+                        ]
                     ),
                 }
                 for instance_set in instance_sets

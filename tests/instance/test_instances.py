@@ -2,14 +2,17 @@
 
 from pathlib import Path
 from collections import defaultdict
+
+import pytest
+
 from sparkle.instance import (
     FileInstanceSet,
     IterableFileInstanceSet,
     MultiFileInstanceSet,
     Instance_Set,
-    resolve_instance_name,
     resolve_instance_pair,
 )
+from sparkle.CLI.help.nicknames import resolve_instance_name
 
 
 def test_resolve_instance_set() -> None:
@@ -148,13 +151,13 @@ def test_file_instance_set_directory() -> None:
 
 
 def test_resolve_instance_pair() -> None:
-    """Test resolving an instance path to its stored (set_name, instance_name) pair."""
-    # Every subclass names its instances differently, so the resolved pair must match
-    # what the set itself stores rather than being derived from the path.
+    """Test resolving a single instance path to its stored (set_name, instance_name) pair."""
+    # A single Path resolves to its pair directly (not wrapped in a list). Every subclass
+    # names its instances differently, so the pair must match what the set itself stores
+    # rather than being derived from the path.
     for instance_dir in (
         Path("Examples/Resources/Instances/PTN"),  # FileInstanceSet: stem
         Path("tests/test_files/Instances/Iris"),  # Iterable: name with suffix
-        Path("Examples/Resources/CCAG/Instances/CCAG"),  # MultiFile: from CSV
     ):
         instance_set = Instance_Set(instance_dir)
         for pair, path in zip(instance_set.instance_pairs, instance_set.instance_paths):
@@ -169,6 +172,47 @@ def test_resolve_instance_pair() -> None:
     # Unknown paths fall back to (parent directory name, file stem)
     unknown = Path("Examples/Resources/Instances/PTN/DoesNotExist.cnf")
     assert resolve_instance_pair(unknown) == ("PTN", "DoesNotExist")
+
+
+def test_resolve_instance_pair_multiple() -> None:
+    """Test resolving a list of paths to a pair per path, in input order."""
+    ptn = Path("Examples/Resources/Instances/PTN")
+    iris = Path("tests/test_files/Instances/Iris")
+    ccag = Path("Examples/Resources/CCAG/Instances/CCAG")
+    # Each path is resolved independently, so pairs come back one per path, in order,
+    # even when the paths span different sets and all three subclasses (FileInstanceSet,
+    # IterableFileInstanceSet, MultiFileInstanceSet), each with its own naming convention.
+    paths = [
+        ptn / "Ptn-7824-b01.cnf",  # FileInstanceSet: stem
+        iris / "Iris1.csv",  # IterableFileInstanceSet: name with suffix
+        ptn / "Ptn-7824-b03.cnf",  # back to the first set
+        ccag / "Banking1.model",  # MultiFileInstanceSet: name from CSV
+    ]
+    assert resolve_instance_pair(paths) == [
+        ("PTN", "Ptn-7824-b01"),
+        ("Iris", "Iris1.csv"),
+        ("PTN", "Ptn-7824-b03"),
+        ("CCAG", "Banking1"),
+    ]
+
+    # A multi-file instance's files each resolve to the same pair (one per file), since
+    # every path is treated independently.
+    assert resolve_instance_pair(
+        [ccag / "Banking1.model", ccag / "Banking1.constraints"]
+    ) == [("CCAG", "Banking1"), ("CCAG", "Banking1")]
+
+
+def test_resolve_instance_pair_missing_set() -> None:
+    """Test that a path whose set directory does not exist raises rather than guessing.
+
+    A missing file inside an existing set falls back to (dir name, stem), but a missing
+    set directory raises: Instance_Set(path.parent) reaches iterdir() on a directory that
+    is not there. Fabricating a pair here would write a phantom key to the data frame.
+    """
+    missing_set = Path("Examples/Resources/Instances/GhostSet/foo.cnf")
+    assert not missing_set.parent.exists()
+    with pytest.raises(FileNotFoundError):
+        resolve_instance_pair(missing_set)
 
 
 def test_resolve_instance_name() -> None:

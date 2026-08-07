@@ -13,12 +13,12 @@ from sparkle.solver import Solver
 from sparkle.instance import Instance_Set
 from sparkle.structures import PerformanceDataFrame
 from sparkle.types import SparkleObjective, resolve_objective
-from sparkle.instance import InstanceSet, resolve_instance_name
+from sparkle.instance import InstanceSet
 from sparkle.platform.settings_objects import Settings
 from sparkle.CLI.help import global_variables as gv
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import argparse_custom as ac
-from sparkle.CLI.help.nicknames import resolve_object_name
+from sparkle.CLI.help.nicknames import resolve_object_name, resolve_instance_name
 from sparkle.CLI.initialise import check_for_initialise
 
 
