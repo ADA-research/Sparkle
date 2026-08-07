@@ -19,16 +19,6 @@ from sparkle.structures import PerformanceDataFrame
 from sparkle.tools.solver_wrapper_parsing import parse_commandline_dict
 
 
-def parse_instance_pair(value: str) -> tuple[str, str]:
-    """Parse a 'set_name,instance_name' CLI token into a (set_name, instance_name) tuple."""
-    parts = value.split(",")
-    if len(parts) != 2:
-        raise argparse.ArgumentTypeError(
-            f"Expected an instance pair as 'set_name,instance_name' but got '{value}'."
-        )
-    return (parts[0], parts[1])
-
-
 def main(argv: list[str]) -> None:
     """Main function of the command."""
     # Define command line arguments
@@ -100,7 +90,7 @@ def main(argv: list[str]) -> None:
     parser.add_argument(
         "--best-configuration-instances",
         required=False,
-        type=parse_instance_pair,
+        type=str,
         nargs="+",
         metavar="SET_NAME,INSTANCE_NAME",
         help="If given, will ignore any given configurations, and try to"
@@ -174,9 +164,9 @@ def main(argv: list[str]) -> None:
             objectives = performance_dataframe.objectives
 
         if args.best_configuration_instances:  # Determine best configuration
-            # The pairs arrive already as (set_name, instance_name); just deduplicate.
+            # Each token is a 'set_name,instance_name' pair, split into a tuple on the comma
             best_configuration_instances: list[tuple[str, str]] = list(
-                set(args.best_configuration_instances)
+                {tuple(pair.split(",")) for pair in args.best_configuration_instances}
             )
             target_objective = (
                 resolve_objective(args.target_objective)
