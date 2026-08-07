@@ -24,7 +24,7 @@ from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.platform.settings_objects import Settings
 from sparkle.solver import Solver
-from sparkle.instance import Instance_Set, InstanceSet
+from sparkle.instance import Instance_Set, InstanceSet, resolve_instance_pair
 from sparkle.types import SolverStatus, resolve_objective, UseTime
 from sparkle.structures import PerformanceDataFrame
 
@@ -75,15 +75,15 @@ def create_performance_dataframe(
     Returns:
         pdf: PerformanceDataFrame object initialized with solvers and instances.
     """
-    instances = instances_set.instance_names
-    solvers = [str(s.directory) for s in solvers]
+    instance_pairs = instances_set.instance_pairs
+    solvers = [str(solver.directory) for solver in solvers]
     objectives = gv.settings().objectives
     csv_path = portfolio_path / "results.csv"
     return PerformanceDataFrame(
         csv_filepath=csv_path,
         solvers=solvers,
         objectives=objectives,
-        instances=instances,
+        instance_pairs=instance_pairs,
     )
 
 
@@ -100,17 +100,29 @@ def init_default_objectives() -> list:
     # setting start values for objectives that are always present
     objectives = gv.settings().objectives
     cutoff = gv.settings().solver_cutoff_time
-    cpu_time_key = [o.name for o in objectives if o.name.startswith("cpu_time")][0]
-    status_key = [o.name for o in objectives if o.name.startswith("status")][0]
-    wall_time_key = [o.name for o in objectives if o.name.startswith("wall_time")][0]
+    cpu_time_key = [
+        objective.name
+        for objective in objectives
+        if objective.name.startswith("cpu_time")
+    ][0]
+    status_key = [
+        objective.name for objective in objectives if objective.name.startswith("status")
+    ][0]
+    wall_time_key = [
+        objective.name
+        for objective in objectives
+        if objective.name.startswith("wall_time")
+    ][0]
     default_objective_values = {}
 
-    for o in objectives:
-        default_value = float(sys.maxsize) if o.minimise else 0
+    for objective in objectives:
+        default_value = float(sys.maxsize) if objective.minimise else 0
         # Default values for time objectives can be linked to cutoff time
-        if o.time and o.post_process:
-            default_value = o.post_process(default_value, cutoff, SolverStatus.KILLED)
-        default_objective_values[o.name] = default_value
+        if objective.time and objective.post_process:
+            default_value = objective.post_process(
+                default_value, cutoff, SolverStatus.KILLED
+            )
+        default_objective_values[objective.name] = default_value
     default_objective_values[status_key] = SolverStatus.UNKNOWN  # Overwrite status
     return default_objective_values, cpu_time_key, status_key, wall_time_key
 
@@ -182,7 +194,11 @@ def monitor_jobs(
                         # All seeds of a solver were killed on instance, set status kill
                         if solver_kills[solver_index] == seeds_per_solver:
                             solver_name = solvers[solver_index].name
-                            job_output_dict[instance.stem][solver_name]["status"] = (
+                            # Use the set's canonical instance name (aligned by index with
+                            # the paths), matching the key job_output_dict was built with;
+                            # instance.stem would miss it for suffix-kept collisions.
+                            instance_name = instances_set.instance_names[i]
+                            job_output_dict[instance_name][solver_name]["status"] = (
                                 SolverStatus.KILLED
                             )
             pbar.update(sum(instances_done) - prev_done)
@@ -200,9 +216,9 @@ def wait_for_logs(cmd_list: list[str]) -> None:
     for cmd in cmd_list:
         runsolver_configuration = cmd.split(" ")[:11]
         logs = [
-            Path(p)
-            for p in runsolver_configuration
-            if Path(p).suffix in [".log", ".val", ".rawres"]
+            Path(config)
+            for config in runsolver_configuration
+            if Path(config).suffix in [".log", ".val", ".rawres"]
         ]
         if not all(p.exists() for p in logs):
             time.sleep(check_interval)
@@ -247,7 +263,7 @@ def update_results_from_logs(
         cmd_output = job_output_dict[instance_name][solver_obj.name]
         if cpu_time > 0.0 and cpu_time < cmd_output[cpu_time_key]:
             for key, value in solver_output.items():
-                if key in [o.name for o in objectives]:
+                if key in [objective.name for objective in objectives]:
                     job_output_dict[instance_name][solver_obj.name][key] = value
             if cmd_output.get("status") != SolverStatus.KILLED:
                 cmd_output["status"] = solver_output.get("status")
@@ -320,8 +336,8 @@ def print_and_write_results(
         index_str = f"[{index + 1}/{num_instances}] "
         instance_output = job_output_dict[instance_name]
         if all(
-            instance_output[k][status_key] == SolverStatus.TIMEOUT
-            for k in instance_output
+            instance_output[output][status_key] == SolverStatus.TIMEOUT
+            for output in instance_output
         ):
             print(f"\n{index_str}{instance_name} was not solved within the cutoff-time.")
             continue
@@ -335,11 +351,16 @@ def print_and_write_results(
                 "Wall clock time)"
             )
 
-    instance_map = {Path(p).name: p for p in pdf.instances}
-    solver_map = {Path(s).name: s for s in pdf.solvers}
+    # Every job in this run belongs to instances_set, so pair each result with that set
+    # name directly. A name-only map would collapse identically named instances from
+    # different sets onto one key and let them overwrite each other; scoping to the known
+    # set keeps (SetA, inst1) and (SetB, inst1) distinct.
+    valid_pairs = set(pdf.instance_pairs)
+    solver_map = {Path(solver).name: solver for solver in pdf.solvers}
     for instance, instance_dict in job_output_dict.items():
-        instance_name = Path(instance).name
-        instance_full_path = instance_map.get(instance_name, instance)
+        instance_pair = (instances_set.name, instance)
+        if instance_pair not in valid_pairs:
+            continue
         for solver, objective_dict in instance_dict.items():
             solver_name = Path(solver).name
             solver_full_path = solver_map.get(solver_name, solver)
@@ -351,7 +372,7 @@ def print_and_write_results(
                 pdf.set_value(
                     value=obj_val,
                     solver=solver_full_path,
-                    instance=instance_full_path,
+                    instance_pair=instance_pair,
                     objective=obj_name,
                 )
     pdf.save_csv()
@@ -379,8 +400,13 @@ def build_command_list(
     seeds_per_solver = gv.settings().parallel_portfolio_num_seeds_per_solver
     cmd_list = []
 
-    # Create a command for each instance-solver-seed combination
-    for instance, solver in itertools.product(instances_set._instance_paths, solvers):
+    # Create a command for each instance-solver-seed combination. The pdf is keyed by the
+    # canonical (set_name, instance_name) pair, which cannot be derived from the path with
+    # stem/name (each InstanceSet subclass names its instances differently), so re-derive
+    # it from the path via resolve_instance_pair.
+    for instance, solver in itertools.product(instances_set.instance_paths, solvers):
+        # instance is a single path, so this resolves directly to its pair.
+        instance_pair = resolve_instance_pair(instance)
         for _ in range(seeds_per_solver):
             seed = int(random.getrandbits(32))
             solver_call_list = solver.build_cmd(
@@ -396,7 +422,7 @@ def build_command_list(
                 performance_data.set_value(
                     value=seed,
                     solver=str(solver.directory),
-                    instance=instance.stem,
+                    instance_pair=instance_pair,
                     objective=objective.name,
                     solver_fields=["Seed"],
                 )
@@ -436,7 +462,7 @@ def submit_jobs(
     )
 
     sbatch_options = gv.settings().sbatch_settings
-    solver_names = ", ".join([s.name for s in solvers])
+    solver_names = ", ".join([solver.name for solver in solvers])
     # Jobs are added in to the runrunner object in the same order they are provided
     return rrr.add_to_queue(
         runner=run_on,
@@ -469,8 +495,8 @@ def main(argv: list[str]) -> None:
 
     if args.solvers is not None:
         solver_paths = [
-            resolve_object_name("".join(s), target_dir=settings.DEFAULT_solver_dir)
-            for s in args.solvers
+            resolve_object_name("".join(solver), target_dir=settings.DEFAULT_solver_dir)
+            for solver in args.solvers
         ]
         if None in solver_paths:
             print("Some solvers not recognised! Check solver names:")
@@ -478,10 +504,12 @@ def main(argv: list[str]) -> None:
                 if solver_paths[i] is None:
                     print(f'\t- "{solver_paths[i]}" ')
             sys.exit(-1)
-        solvers = [Solver(p) for p in solver_paths]
+        solvers = [Solver(solver_path) for solver_path in solver_paths]
     else:
         solvers = [
-            Solver(p) for p in settings.DEFAULT_solver_dir.iterdir() if p.is_dir()
+            Solver(solver)
+            for solver in settings.DEFAULT_solver_dir.iterdir()
+            if solver.is_dir()
         ]
 
     portfolio_path = args.portfolio_name

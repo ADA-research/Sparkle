@@ -576,10 +576,10 @@ def generate_parallel_portfolio_section(
                 )
             )
     report.append("The following Instance Sets were used in the portfolio:")
-    instance_sets = set(Path(instance).parent.name for instance in scenario.instances)
+    instance_sets = set(set_name for set_name, _ in scenario.instance_pairs)
     instance_set_count = [
-        len([i for i in scenario.instances if Path(i).parent.name == s])
-        for s in instance_sets
+        sum(1 for set_name, _ in scenario.instance_pairs if set_name == instance_set)
+        for instance_set in instance_sets
     ]
     with report.create(pl.Itemize()) as instance_set_latex_list:
         for set_name, set_size in zip(instance_sets, instance_set_count):
@@ -595,8 +595,10 @@ def generate_parallel_portfolio_section(
         "following performance of the solvers was found over the instances: "
     )
     best_solver_count = {solver: 0 for solver in scenario.solvers}
-    for instance in scenario.instances:
-        ranking = scenario.get_solver_ranking(objective=objective, instances=[instance])
+    for instance_pair in scenario.instance_pairs:
+        ranking = scenario.get_solver_ranking(
+            objective=objective, instance_pairs=[instance_pair]
+        )
         best_solver_count[ranking[0][0]] += 1
 
     with report.create(pl.Itemize()) as latex_list:
@@ -614,7 +616,9 @@ def generate_parallel_portfolio_section(
     solver_cancelled_count = {solver: 0 for solver in scenario.solvers}
     solver_timeout_count = {solver: 0 for solver in scenario.solvers}
     status_objective = [
-        o for o in scenario.objective_names if o.lower().startswith("status")
+        objective
+        for objective in scenario.objective_names
+        if objective.lower().startswith("status")
     ][0]
     cancelled_status = [
         SolverStatus.UNKNOWN,

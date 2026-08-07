@@ -25,9 +25,11 @@ def save_current_platform(name: str = None) -> None:
         name = f"Snapshot_{login}_{time_stamp}"
     snapshot_tmp_path = gv.settings().DEFAULT_snapshot_dir / name
     snapshot_tmp_path.mkdir(parents=True)  # Create temporary directory for zip
-    available_dirs = [p.name for p in Path.cwd().iterdir()]
+    available_dirs = [path.name for path in Path.cwd().iterdir()]
     root_working_dirs = [
-        p for p in gv.settings().DEFAULT_working_dirs if p.name in available_dirs
+        path
+        for path in gv.settings().DEFAULT_working_dirs
+        if path.name in available_dirs
     ]
     for working_dir in root_working_dirs:
         if working_dir.exists():

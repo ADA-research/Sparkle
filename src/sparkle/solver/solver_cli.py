@@ -13,6 +13,7 @@ import time
 from runrunner import Runner
 
 from sparkle.solver import Solver
+from sparkle.instance import resolve_instance_pair
 from sparkle.types import resolve_objective
 from sparkle.structures import PerformanceDataFrame
 from sparkle.tools.solver_wrapper_parsing import parse_commandline_dict
@@ -91,11 +92,12 @@ def main(argv: list[str]) -> None:
         required=False,
         type=str,
         nargs="+",
+        metavar="SET_NAME,INSTANCE_NAME",
         help="If given, will ignore any given configurations, and try to"
         " determine the best found configurations over the given "
-        "instances. Uses the 'target-objective' given in the arguments"
-        " or the first one given by the dataframe to determine the best"
-        "configuration.",
+        "instances, each passed as a 'set_name,instance_name' pair. Uses the"
+        " 'target-objective' given in the arguments or the first one given by"
+        " the dataframe to determine the best configuration.",
     )
     args = parser.parse_args(argv)
     # Process command line arguments
@@ -103,11 +105,14 @@ def main(argv: list[str]) -> None:
     print(f"Running Solver and read/writing results with {args.performance_dataframe}")
     # Resolve possible multi-file instance
     instance_path: list[Path] = args.instance
+    # The PerformanceDataFrame is keyed by the canonical (set_name, instance_name) pair.
+    # Deriving the name from the path with .stem is only correct for FileInstanceSet, so
+    # resolve it from the owning set instead and let the subclass supply its convention.
+    # All files of a multi-file instance share the same pair, so the first file resolves it.
+    instance_pair = resolve_instance_pair(instance_path[0])
+    instance_set_name, instance_name = instance_pair
     # If instance is only one file then we don't need a list
     instance_path = instance_path[0] if len(instance_path) == 1 else instance_path
-    instance_name = (
-        instance_path.stem if isinstance(instance_path, Path) else instance_path[0].stem
-    )
     run_index = args.run_index
     # Ensure stringifcation of path objects
     if isinstance(instance_path, list):
@@ -124,7 +129,9 @@ def main(argv: list[str]) -> None:
     seed = args.seed if args.seed else random.randint(0, 2**32 - 1)
     # Parse the provided objectives if present
     objectives = (
-        [resolve_objective(o) for o in args.objectives] if args.objectives else None
+        [resolve_objective(objective) for objective in args.objectives]
+        if args.objectives
+        else None
     )
 
     if args.configuration:  # Configuration provided, override
@@ -157,10 +164,9 @@ def main(argv: list[str]) -> None:
             objectives = performance_dataframe.objectives
 
         if args.best_configuration_instances:  # Determine best configuration
-            best_configuration_instances: list[str] = args.best_configuration_instances
-            # Get the unique instance names
-            best_configuration_instances = list(
-                set([Path(instance).stem for instance in best_configuration_instances])
+            # Each token is a 'set_name,instance_name' pair, split into a tuple on the comma
+            best_configuration_instances: list[tuple[str, str]] = list(
+                {tuple(pair.split(",")) for pair in args.best_configuration_instances}
             )
             target_objective = (
                 resolve_objective(args.target_objective)
@@ -170,7 +176,7 @@ def main(argv: list[str]) -> None:
             config_id, _ = performance_dataframe.best_configuration(
                 solver=str(args.solver),
                 objective=target_objective,
-                instances=best_configuration_instances,
+                instance_pairs=best_configuration_instances,
             )
             configuration = performance_dataframe.get_full_configuration(
                 str(args.solver), config_id
@@ -210,7 +216,7 @@ def main(argv: list[str]) -> None:
     print("Appending the following objective values:")  # {', '.join(objective_values)}")
     for objective in objectives:
         print(
-            f"{objective.name}, {instance_name}, {args.run_index} | {args.solver}, {config_id}: {solver_output[objective.name]}"
+            f"{objective.name}, {instance_set_name}, {instance_name}, {args.run_index} | {args.solver}, {config_id}: {solver_output[objective.name]}"
         )
 
     # Desyncronize from other possible jobs writing to the same file
@@ -223,9 +229,9 @@ def main(argv: list[str]) -> None:
         performance_dataframe.set_value(
             result,
             solver=str(args.solver),
-            instance=instance_name,
+            instance_pair=instance_pair,
             configuration=config_id,
-            objective=[o.name for o in objectives],
+            objective=[objective.name for objective in objectives],
             run=run_index,
             solver_fields=solver_fields,
             append_write_csv=True,  # We do not have to save the PDF here, thanks to this argument

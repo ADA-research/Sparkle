@@ -8,10 +8,15 @@ Notable changes to Sparkle will be documented in this file.
 - New `groupwise_computation` setting/CLI flag to disable per-feature-group extractor runs when splitting is not desired. [Issue#210]
 - Sparkle now detects active jobs that are writing to the Performance or Feature data before allowing structural modifications to those files. [Issue#209]
 - Added unit tests for the job locking functionality introduced in `jobs.py`. [Issue#209]
+- `instance_pairs` property on `InstanceSet`, returning `(set_name, instance_name)` tuples, and pair-based accessors on the Performance and Feature data frames. [Issue#230]
+- `sparkle.instance.resolve_instance_pair`, which resolves an instance file path back to the `(set_name, instance_name)` pair as it is stored in the data frames. [Issue#230]
 
 ### Changed
 - Adding or removing solvers, instances, and feature extractors, as well as running the portfolio selector and cleaning up data, will now be blocked or require user confirmation if jobs are currently running or scheduled that write to the relevant data files. [Issue#209]
 - `compute_features` now respects `groupwise_computation` by collapsing submissions that would otherwise split by feature group. [Issue#210]
+- `PerformanceDataFrame` now uses a 4-level row index `(Objective, InstanceSet, Instance, Run)` and `FeatureDataFrame` a 2-level `(InstanceSet, Instance)` index, making `(set, instance)` pairs first-class so instances with the same name in different sets no longer collide. [Issue#230]
+- Data frame API is now pair-based: the `instances` property is replaced by `instance_pairs`.
+- `resolve_instance_name` now takes the owning instance set name, so instances sharing a name across different sets are no longer confused with one another. [Issue#230]
 
 ### Fixed
 

@@ -41,6 +41,11 @@ class InstanceSet:
         return self._instance_names
 
     @property
+    def instance_pairs(self: InstanceSet) -> list[tuple[str, str]]:
+        """Return list of (set_name, instance_name) tuples."""
+        return [(self.name, name) for name in self._instance_names]
+
+    @property
     def instances(self: InstanceSet) -> list[str]:
         """Get instance names with relative path."""
         return [str(p.with_suffix("")) for p in self._instance_paths]
@@ -86,8 +91,13 @@ class FileInstanceSet(InstanceSet):
         if target.is_file():
             # Single instance set
             self._instance_paths = [target]
-            self._instance_names = [target.stem]
             self.directory = target.parent
+            # NOTE: We name instances by their stem, assuming every instance in the set
+            # shares the same extension (which is the case in general). If a set ever
+            # mixes extensions on the same stem (e.g. instance1.cnf and instance1.csv),
+            # the bare stems would collide; in that case keep the full filename
+            # (target.name) here to disambiguate.
+            self._instance_names = [target.stem]
         else:
             # Default situation, treat each file in the directory as an instance
             self._instance_paths = [p for p in self.directory.iterdir()]
@@ -159,12 +169,12 @@ class IterableFileInstanceSet(InstanceSet):
         """
         super().__init__(target)
         self._instance_paths = [
-            p
-            for p in self.directory.iterdir()
-            if p.suffix in IterableFileInstanceSet.supported_filetypes
+            path
+            for path in self.directory.iterdir()
+            if path.suffix in IterableFileInstanceSet.supported_filetypes
         ]
         self._size = IterableFileInstanceSet.__determine_size__(self._instance_paths[0])
-        self._instance_names = [p.name for p in self._instance_paths]
+        self._instance_names = [path.name for path in self._instance_paths]
 
     @property
     def size(self: IterableFileInstanceSet) -> int:

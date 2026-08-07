@@ -426,7 +426,10 @@ class Solver(SparkleCallable):
         objective_arg = f"--target-objective {objective.name}" if objective else ""
         train_arg = (
             "--best-configuration-instances "
-            + " ".join([str(i) for i in train_set.instance_paths])
+            + " ".join(
+                f"{set_name},{instance_name}"
+                for set_name, instance_name in train_set.instance_pairs
+            )
             if train_set
             else ""
         )

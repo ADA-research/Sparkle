@@ -8,6 +8,7 @@ from filelock import FileLock
 
 from sparkle.structures import FeatureDataFrame
 from sparkle.selector import Extractor
+from sparkle.instance import resolve_instance_pair
 
 
 if __name__ == "__main__":
@@ -50,7 +51,10 @@ if __name__ == "__main__":
 
     # Instance agument is a list to allow for multifile instances
     instance_path: list[Path] = args.instance
-    instance_name = instance_path[0].stem
+    # We only receive the instance path on the CLI, but the FeatureDataFrame is keyed by
+    # the canonical (set_name, instance_name) pair, so resolve it from the path. All files
+    # of a multi-file instance share the same pair, so the first file resolves it.
+    instance_set_name, instance_name = resolve_instance_pair(instance_path[0])
     extractor_path = args.extractor
     feature_data_csv_path = args.feature_csv
     cutoff_extractor = args.cutoff
@@ -88,7 +92,7 @@ if __name__ == "__main__":
         if feature_group not in feature_data_per_group:
             feature_data_per_group[feature_group] = [[], []]
         print(
-            f"{extractor_path.name} {instance_name} {feature_group} {feature_name} | {value}"
+            f"{extractor_path.name} {instance_set_name} {instance_name} {feature_group} {feature_name} | {value}"
         )  # For logging purposes
         feature_data_per_group[feature_group][0] += [feature_name]
         feature_data_per_group[feature_group][1] += [float(value)]
@@ -99,18 +103,14 @@ if __name__ == "__main__":
         print("Writing features to file...")
         with lock.acquire(timeout=600):
             feature_data = FeatureDataFrame(feature_data_csv_path)
-            instance_key = (
-                instance_name
-                if instance_name in feature_data.instances
-                else str(instance_path[0].with_suffix(""))
-            )
             for feature_group, (
                 feature_names,
                 feature_values,
             ) in feature_data_per_group.items():
                 # for feature_group, feature_name, value in features:
                 feature_data.set_value(
-                    instance_key,
+                    instance_set_name,
+                    instance_name,
                     extractor_path.name,
                     feature_group,
                     feature_names,

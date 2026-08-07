@@ -172,12 +172,16 @@ def main(argv: list[str]) -> None:
         remaining_instance_jobs = set(
             [instance for instance, _, _ in feature_data.remaining_jobs()]
         )
-        for instance in instance_set_train.instance_paths:
-            if str(instance) not in feature_data.instances:
-                print(f"ERROR: Train Instance {instance} not found in feature data.")
+        for instance_pair in instance_set_train.instance_pairs:
+            if instance_pair not in feature_data.instance_pairs:
+                print(
+                    f"ERROR: Train Instance {instance_pair} not found in feature data."
+                )
                 invalid = True
-            elif instance in remaining_instance_jobs:  # Check jobs
-                print(f"ERROR: Features have not been computed for instance {instance}.")
+            elif instance_pair in remaining_instance_jobs:  # Check jobs
+                print(
+                    f"ERROR: Features have not been computed for instance {instance_pair}."
+                )
                 invalid = True
         if invalid:
             sys.exit(-1)
@@ -215,13 +219,20 @@ def main(argv: list[str]) -> None:
 
     # If we have default configurations that need to be run, schedule them too
     if default_jobs:
-        # Edit jobs to incorporate file paths
-        instances = []
-        for _, _, instance, _ in default_jobs:
+        # Edit jobs to incorporate file paths. A set deduplicates instances that
+        # repeat across default jobs (one job per remaining run), since
+        # run_performance_dataframe re-expands over all runs itself.
+        # NOTE: This relies on resolve_instance_name returning hashable values (a Path,
+        # or a space-joined str for multi-file instances). If it is ever changed to
+        # return a list[Path], set.add would raise TypeError: unhashable type: 'list',
+        # and this would need to join/normalise the paths first.
+        # instances = list(dict.fromkeys(...))
+        instances = set()
+        for _, _, (instance_set, instance_name), _ in default_jobs:
             instance_path = resolve_instance_name(
-                instance, settings.DEFAULT_instance_dir
+                instance_set, instance_name, settings.DEFAULT_instance_dir
             )
-            instances.append(instance_path)
+            instances.add(instance_path)
         default_job = solver.run_performance_dataframe(
             instances,
             performance_data,
@@ -248,8 +259,10 @@ def main(argv: list[str]) -> None:
             run_index = list(
                 set(
                     [
-                        performance_data.get_instance_num_runs(str(i))
-                        for i in instance_set_test.instance_names
+                        performance_data.get_instance_num_runs(
+                            instance_set_test.name, test_instance_name
+                        )
+                        for test_instance_name in instance_set_test.instance_names
                     ]
                 )
             )

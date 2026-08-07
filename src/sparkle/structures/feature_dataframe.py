@@ -14,13 +14,15 @@ class FeatureDataFrame(pd.DataFrame):
     extractor_dim = "Extractor"
     feature_group_dim = "FeatureGroup"
     feature_name_dim = "FeatureName"
-    instances_index_dim = "Instances"
+    instance_set_index_dim = "InstanceSet"
+    instance_index_dim = "Instance"
+    multi_dim_index_names = [instance_set_index_dim, instance_index_dim]
     multi_dim_column_names = [extractor_dim, feature_group_dim, feature_name_dim]
 
     def __init__(
         self: FeatureDataFrame,
         csv_filepath: Path,
-        instances: list[str] = [],
+        instance_pairs: list[tuple[str, str]] = [],
         extractor_data: dict[str, list[tuple[str, str]]] = {},
     ) -> None:
         """Initialise a FeatureDataFrame object.
@@ -28,29 +30,28 @@ class FeatureDataFrame(pd.DataFrame):
         Arguments:
             csv_filepath: The Path for the CSV storage. If it does not exist,
                 a new DataFrame will be initialised and stored here.
-            instances: The list of instances (Columns) to be added to the DataFrame.
+            instance_pairs: The list of (set_name, instance_name) pairs to be added.
             extractor_data: A dictionary with extractor names as key, and a list of
                 tuples ordered as [(feature_group, feature_name), ...] as value.
         """
         # Initialize a dataframe from an existing file
         if csv_filepath.exists():
-            # Read from file
+            # Read the 2-level (InstanceSet, Instance) row index and 3-level
+            # (Extractor, FeatureGroup, FeatureName) column header.
             temp_df = pd.read_csv(
                 csv_filepath,
-                # index_col=FeatureDataFrame.multi_dim_names,
                 header=[0, 1, 2],
-                index_col=[0],
+                index_col=[0, 1],
                 dtype={
                     FeatureDataFrame.extractor_dim: str,
                     FeatureDataFrame.feature_group_dim: str,
                     FeatureDataFrame.feature_name_dim: str,
-                    FeatureDataFrame.instances_index_dim: str,
                 },
                 on_bad_lines="skip",
                 skip_blank_lines=True,
             )
+            temp_df.index.names = FeatureDataFrame.multi_dim_index_names
             super().__init__(temp_df)
-            self.index.name = FeatureDataFrame.instances_index_dim
             self.csv_filepath = csv_filepath
         # Create a new dataframe
         else:
@@ -73,25 +74,29 @@ class FeatureDataFrame(pd.DataFrame):
             multi_columns = pd.MultiIndex.from_tuples(
                 multi_column_lists, names=self.multi_dim_column_names
             )
+            if instance_pairs:
+                index = pd.MultiIndex.from_tuples(
+                    instance_pairs, names=self.multi_dim_index_names
+                )
+            else:
+                index = pd.MultiIndex.from_tuples([], names=self.multi_dim_index_names)
             super().__init__(
                 data=self.missing_value,
-                index=instances,
+                index=index,
                 columns=multi_columns,
                 dtype=float,
             )
-            self.index.name = FeatureDataFrame.instances_index_dim
             self.csv_filepath = csv_filepath
             self.save_csv()
 
         if self.index.duplicated().any():  # Drop all duplicates except for last
-            self.reset_index(inplace=True)  # Reset index to column
+            self.reset_index(inplace=True)  # Reset index to columns
+            idx_cols = self.columns[:2].tolist()  # Both InstanceSet and Instance cols
             self.drop_duplicates(
-                subset=self.columns[0], keep="last", inplace=True
-            )  # filter duplicates from index column
-            self.set_index(
-                self.columns[0], inplace=True
-            )  # Restore the Instance Index (in-place)
-            self.index.name = FeatureDataFrame.instances_index_dim
+                subset=idx_cols, keep="last", inplace=True
+            )  # filter duplicates from index columns
+            self.set_index(idx_cols, inplace=True)  # Restore the MultiIndex (in-place)
+            self.index.names = FeatureDataFrame.multi_dim_index_names
 
         # Sort the index to optimize lookup speed
         self.sort_index(axis=0, inplace=True)
@@ -139,18 +144,24 @@ class FeatureDataFrame(pd.DataFrame):
                     math.nan, axis=1, level=FeatureDataFrame.extractor_dim, inplace=True
                 )
 
-    def add_instances(
-        self: FeatureDataFrame, instance: str | list[str], values: list[float] = None
+    def add_instance(
+        self: FeatureDataFrame,
+        instance_pairs: tuple[str, str] | list[tuple[str, str]],
+        values: list[float] = None,
     ) -> None:
-        """Add one or more instances to the dataframe."""
-        if values is None:
-            values = FeatureDataFrame.missing_value
-        if isinstance(instance, str):
-            instance = [instance]
-        # with warnings.catch_warnings():  # Block Pandas Performance Warnings
-        #     warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
-        for i in instance:
-            self.loc[i] = values
+        """Add one or more instances to the dataframe.
+
+        Args:
+            instance_pairs: A (set_name, instance_name) pair or list of such pairs.
+            values: Optional initial values for all features. The same values are
+                used for every added instance.
+        """
+        if isinstance(instance_pairs, tuple):
+            instance_pairs = [instance_pairs]
+        fill = values if values else FeatureDataFrame.missing_value
+        row_values = fill if isinstance(fill, list) else [fill] * len(self.columns)
+        for instance_pair in instance_pairs:
+            self.loc[instance_pair, :] = row_values
 
     def remove_extractor(self: FeatureDataFrame, extractor: str) -> None:
         """Remove an extractor from the dataframe."""
@@ -162,10 +173,18 @@ class FeatureDataFrame(pd.DataFrame):
                 [(FeatureDataFrame.missing_value, FeatureDataFrame.feature_name_dim)],
             )
 
-    def remove_instances(self: FeatureDataFrame, instances: str | list[str]) -> None:
-        """Remove an instance from the dataframe."""
-        # self.drop(instances, axis=1, inplace=True)
-        self.drop(instances, axis=0, inplace=True)
+    def remove_instance(
+        self: FeatureDataFrame,
+        instance_pairs: tuple[str, str] | list[tuple[str, str]],
+    ) -> None:
+        """Remove one or more instances from the dataframe.
+
+        Args:
+            instance_pairs: A (set_name, instance_name) pair or list of such pairs.
+        """
+        if isinstance(instance_pairs, tuple):
+            instance_pairs = [instance_pairs]
+        self.drop(instance_pairs, axis=0, inplace=True)
 
     def get_feature_groups(
         self: FeatureDataFrame, extractor: str | list[str] = None
@@ -188,17 +207,31 @@ class FeatureDataFrame(pd.DataFrame):
 
     def get_value(
         self: FeatureDataFrame,
+        instance_set: str,
         instance: str,
         extractor: str,
         feature_group: str,
         feature_name: str,
     ) -> float:
-        """Return a value in the dataframe."""
-        # return self.loc[(feature_group, feature_name, extractor), instance]
-        return self.loc[instance, (extractor, feature_group, feature_name)]
+        """Return a value in the dataframe.
+
+        Args:
+            instance_set: Name of the instance set the instance belongs to.
+            instance: Name of the instance.
+            extractor: Name of the extractor.
+            feature_group: Name of the feature group.
+            feature_name: Name of the feature.
+
+        Returns:
+            The value.
+        """
+        return self.loc[
+            (instance_set, instance), (extractor, feature_group, feature_name)
+        ]
 
     def set_value(
         self: FeatureDataFrame,
+        instance_set: str,
         instance: str,
         extractor: str,
         feature_group: str,
@@ -206,7 +239,17 @@ class FeatureDataFrame(pd.DataFrame):
         value: float | list[float],
         append_write_csv: bool = False,
     ) -> None:
-        """Set a value in the dataframe."""
+        """Set a value in the dataframe.
+
+        Args:
+            instance_set: Name of the instance set the instance belongs to.
+            instance: Name of the instance.
+            extractor: Name of the extractor.
+            feature_group: Name of the feature group.
+            feature_name: Name of the feature.
+            value: The value to set.
+            append_write_csv: CSV to be written to.
+        """
         if isinstance(feature_name, list) and isinstance(value, list):
             if len(feature_name) != len(value):
                 raise ValueError(
@@ -216,10 +259,10 @@ class FeatureDataFrame(pd.DataFrame):
             raise ValueError(
                 f"feature_name parameter and value must be the same type ({type(feature_name)}, {type(value)})."
             )
-        # self.loc[(feature_group, feature_name, extractor), instance] = value
-        self.loc[instance, (extractor, feature_group, feature_name)] = value
+        instance_pair = (instance_set, instance)
+        self.loc[instance_pair, (extractor, feature_group, feature_name)] = value
         if append_write_csv:
-            writeable = self.loc[[instance], :]  # Take line
+            writeable = self.loc[[instance_pair], :]  # Take line
             # Append the new rows to the dataframe csv file
             import os
 
@@ -233,29 +276,28 @@ class FeatureDataFrame(pd.DataFrame):
     def has_missing_vectors(self: FeatureDataFrame) -> bool:
         """Returns True if there are any Extractors still to be run on any instance."""
         for extractor in self.extractors:
-            if (
-                self[extractor].isnull().all().all()
-            ):  # First all for the column, second all for the feature groups
+            # True if any instance has ALL features null for this extractor
+            if self[extractor].isnull().all(axis=1).any():
                 return True
         return False
 
     def remaining_jobs(
         self: FeatureDataFrame,
         groupwise_computation: bool = True,
-    ) -> list[tuple[str, str, str | None]]:
+    ) -> list[tuple[tuple[str, str], str, str | None]]:
         """Return remaining feature-computation jobs.
 
         Args:
             groupwise_computation:
                 If True, jobs are kept per feature group and returned as
-                `(instance_name, extractor_name, feature_group)` tuples.
+                `((set_name, instance_name), extractor_name, feature_group)` tuples.
                 If False, feature groups are collapsed and the return value uses
                 `None` for the feature-group position:
-                `(instance_name, extractor_name, None)`.
+                `((set_name, instance_name), extractor_name, None)`.
 
         Returns:
             A flat list of remaining jobs, always in the shape
-            `(instance_name, extractor_name, feature_group | None)`.
+            `((set_name, instance_name), extractor_name, feature_group | None)`.
         """
         extractor_values = self.extractors
 
@@ -287,41 +329,58 @@ class FeatureDataFrame(pd.DataFrame):
         )
         if groupwise_computation:
             # Convert the 2D table to a Series with MultiIndex:
-            # (instance, extractor, feature_group) -> bool(is_missing_group).
+            # (set_name, instance_name, extractor, feature_group) -> bool.
             stacked_missing = missing_groups.stack(
-                [FeatureDataFrame.extractor_dim, FeatureDataFrame.feature_group_dim]
+                [FeatureDataFrame.extractor_dim, FeatureDataFrame.feature_group_dim],
+                future_stack=True,
             )
-            # Keep only True entries and return their index tuples as jobs.
-            # Getting tuples like this was the fastest (according to benchmark tests) and most understandable.
-            return stacked_missing[stacked_missing].index.to_list()
+            # Keep only True entries and repack as ((set_name, instance_name), extractor, feature_group).
+            return [
+                ((set_name, instance_name), extractor, feature_group)
+                for set_name, instance_name, extractor, feature_group in stacked_missing[
+                    stacked_missing
+                ].index.to_list()
+            ]
 
         # Collapse feature groups into one boolean per (instance, extractor):
-        # after this reduction, True means at least one required group for this
-        # extractor/instance pair is still missing and should be scheduled.
         missing_values_with_no_group = (
             missing_groups.T.groupby(level=[FeatureDataFrame.extractor_dim]).all().T
         )
         # Convert collapsed table to Series:
-        # (instance, extractor) -> bool(is_missing_extractor).
+        # (set_name, instance_name, extractor) -> bool.
         stacked_missing = missing_values_with_no_group.stack(
-            [FeatureDataFrame.extractor_dim]
+            [FeatureDataFrame.extractor_dim],
+            future_stack=True,
         )
 
-        # Keep only True entries(indicating missing values) and return their index tuples as jobs
-        jobs = stacked_missing[stacked_missing].index.to_list()
-
-        # Keep only missing entries and expand to a 3-tuple shape by filling
-        # the feature-group slot with None:
-        # (instance, extractor, None).
-        return [(instance, extractor, None) for instance, extractor in jobs]
+        # Keep only True entries and expand to 3-tuple with feature-group slot = None.
+        return [
+            ((set_name, instance_name), extractor, None)
+            for set_name, instance_name, extractor in stacked_missing[
+                stacked_missing
+            ].index.to_list()
+        ]
 
     def get_instance(
-        self: FeatureDataFrame, instance: str, as_dataframe: bool = False
+        self: FeatureDataFrame,
+        instance_set: str,
+        instance: str,
+        as_dataframe: bool = False,
     ) -> list[float]:
-        """Return the feature vector of an instance."""
+        """Return the feature vector of an instance pair.
+
+        Args:
+            instance_set: Name of the instance set the instance belongs to.
+            instance: Name of the instance.
+            as_dataframe: True if instances should be returned as df.
+
+        Returns:
+            The feature vector of an instance pair.
+        """
+        instance_pair = (instance_set, instance)
         if as_dataframe:
-            return self.loc[[instance]]
-        return self.loc[instance].tolist()
+            return self.loc[[instance_pair]]
+        return self.loc[instance_pair].tolist()
 
     def impute_missing_values(self: FeatureDataFrame) -> None:
         """Imputes all NaN values by taking the average feature value."""
@@ -344,9 +403,9 @@ class FeatureDataFrame(pd.DataFrame):
         self.sort_index(inplace=True)
 
     @property
-    def instances(self: FeatureDataFrame) -> list[str]:
-        """Return the instances in the dataframe."""
-        return self.index
+    def instance_pairs(self: FeatureDataFrame) -> list[tuple[str, str]]:
+        """Return the (set_name, instance_name) pairs in the dataframe."""
+        return self.index.tolist()
 
     @property
     def extractors(self: FeatureDataFrame) -> list[str]:
