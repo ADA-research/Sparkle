@@ -94,11 +94,11 @@ def compute_features(
             instance_set, instance_name, settings.DEFAULT_instance_dir
         )
         if instance_path is None:
-            print(
+            raise ValueError(
                 f"ERROR: The instance {instance_name} ({instance_set}) could not be found. "
                 f"Please make sure the path is correct."
             )
-            sys.exit(-1)
+
         instance_paths = []
         if isinstance(instance_path, list):
             instance_paths = [Path(path) for path in instance_path]
