@@ -59,12 +59,11 @@ The coding style consistency is a work in progress, and existing code may not ad
 When releasing a new version (including bugfix versions) of Sparkle to the `main` branch, the protocol below should be followed. First the checks should be performed. If at any step anything fails, it should first be fixed and then ALL checks should be performed again from scratch, starting from point 1.
 
 ### Checks
-1. Freshly install the conda environment. Remove the old one with `deactivate` followed by deleting the directory and create it again with `env` followed by `pip install -e .`. Optionally, you can run `pip install -e .[dev]`. In principle, these environments are equal except that the dev environment has a few extra packages to run pytests and ruff.
-2. Make sure the code style rules pass by running `ruff` (make sure the `sparkle` conda environment is installed and active).
-3. Make sure the unit tests pass by running `pytest` (make sure the `sparkle` conda environment is installed and active). You can combine this step and the next step by running `pytest --all`.
-4. Make sure the integration tests pass by running `pytest --integration` (make sure the `sparkle` conda environment is installed and active).
-5. Make sure the examples in `Examples/` execute correctly (all `.sh` files).
-6. Only if all checks were passed successfully, move on to the steps for release. Otherwise, first fix what is failing and then re-do all the checks.
+1. Freshly install the pip environment. Remove the old one with `source deactivate` followed by deleting the directory and create it again with `python3 -m venv .venv` followed by `source .venv/bin/activate` and `pip install -e .[dev]`. Optionally, you could run `pip install -e .` and run the examples manually. In principle, these environments are equal except that the dev environment has a few extra packages to run pytests and ruff.
+2. Make sure the code style rules pass by running `ruff check` (make sure the `sparkle` virtual environment is installed and active).
+3. Make sure the unit tests pass by running `pytest` (make sure the `sparkle` virtual environment is installed and active). You can combine this step and the next step by running `pytest --all`.
+4. Make sure the integration tests pass by running `pytest --integration` (make sure the `sparkle` virtual environment is installed and active).
+5. Only if all checks were passed successfully, move on to the steps for release. Otherwise, first fix what is failing and then re-do all the checks.
 
 ### Release
 1. Update `CHANGELOG.md` by creating a header with the release number and date; move everything from the `[unreleased]` header to the new release header (leaving the `[unreleased]` header empty for the next release). Update `pyproject.toml` by changing the version number. Commit and add a git tag to this commit with the version number as "git commit -m 'VERSION_NUMBER'" followed by "git tag VERSION_NUMBER" and afterwards push.
