@@ -93,12 +93,19 @@ def compute_features(
         instance_path = resolve_instance_name(
             instance_set, instance_name, settings.DEFAULT_instance_dir
         )
+        if instance_path is None:
+            print(
+                f"ERROR: The instance {instance_name} ({instance_set}) could not be found. "
+                f"Please make sure the path is correct."
+            )
+            sys.exit(-1)
         instance_paths = []
         if isinstance(instance_path, list):
             instance_paths = [Path(path) for path in instance_path]
         elif isinstance(instance_path, (str, Path)):
             instance_paths = [Path(instance_path)]
-
+        print(instance_path)
+        print(instance_paths, extractor_path, feature_group, cutoff, run_on)
         run = extractor.run_cli(
             instance_paths,
             feature_data,
