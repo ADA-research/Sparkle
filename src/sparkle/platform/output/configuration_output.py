@@ -193,18 +193,18 @@ class ConfigurationOutput:
                     solver_key,
                     configuration=PerformanceDataFrame.default_configuration,
                     objective=status_objective,
-                    instance_pair=(instance_set.name, instance_name),
+                    instance_pair=(instance_set_name, instance_name),
                 )
-                for instance_name in instance_set.instance_names
+                for instance_set_name, instance_name in instance_pairs
             }
             instance_status_best_conf = {
                 instance_name: performance_data_config.get_value(
                     solver_key,
                     configuration=self.best_configuration_key,
                     objective=status_objective,
-                    instance_pair=(instance_set.name, instance_name),
+                    instance_pair=(instance_set_name, instance_name),
                 )
-                for instance_name in instance_set.instance_names
+                for instance_set_name, instance_name in instance_pairs
             }
             self.instance_set_results[instance_set.name] = ConfigurationResult(
                 instance_set.name,
