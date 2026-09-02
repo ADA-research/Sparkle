@@ -17,7 +17,13 @@ def test_compute_features_external_instance(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test computing features for an instance outside the platform directory."""
-    settings_path = cli_tools.get_settings_path()
+    settings_source = cli_tools.get_settings_path()
+    settings_path = tmp_path / "sparkle_settings.ini"
+    settings_path.write_text(
+        settings_source.read_text().replace(
+            "extractor_cutoff_time = 1", "extractor_cutoff_time = 60"
+        )
+    )
     extractor_path = (
         Path("Examples") / "Resources" / "Extractors" / "SAT-features-competition2012_"
         "revised_without_SatELite"
