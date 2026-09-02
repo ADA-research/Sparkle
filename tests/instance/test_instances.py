@@ -120,6 +120,7 @@ def test_file_instance_set_single_file() -> None:
     assert single_instance_set.all_paths == [single_instance]
     assert single_instance_set.instance_paths == [single_instance]
     assert single_instance_set.instance_names == ["Ptn-7824-b01"]
+    assert single_instance_set.instance_pairs == [("PTN", "Ptn-7824-b01")]
     assert single_instance_set.instances == [
         str(p.with_suffix("")) for p in single_instance_set.instance_paths
     ]

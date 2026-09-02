@@ -43,7 +43,7 @@ class InstanceSet:
     @property
     def instance_pairs(self: InstanceSet) -> list[tuple[str, str]]:
         """Return list of (set_name, instance_name) tuples."""
-        return [(self.name, name) for name in self._instance_names]
+        return [(self.directory.name, name) for name in self._instance_names]
 
     @property
     def instances(self: InstanceSet) -> list[str]:

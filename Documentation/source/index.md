@@ -175,7 +175,7 @@ Aaron Berger
 Koen van der Blom,
 Noah Peil,
 Brian Schiller,
-Emir Pisiciri
+Emir Pisirici
 
 ### Contact
 sparkle@aim.rwth-aachen.de

@@ -90,7 +90,12 @@ def main(argv: list[str]) -> None:
 
     feature_dataframe.add_instance(data_set.instance_pairs)
     feature_dataframe.save_csv()
-    feature_runs = compute_features(feature_dataframe, recompute=False, run_on=run_on)
+    feature_runs = compute_features(
+        feature_dataframe,
+        recompute=False,
+        run_on=run_on,
+        instance_sets=[data_set],
+    )
 
     # Results need to be stored in the performance data object of the scenario:
     # Add the instance set to it

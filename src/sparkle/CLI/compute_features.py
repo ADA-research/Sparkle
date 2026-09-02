@@ -49,6 +49,7 @@ def compute_features(
     feature_data: FeatureDataFrame,
     recompute: bool,
     run_on: Runner = Runner.SLURM,
+    instance_sets: list[InstanceSet] = None,
 ) -> list[Run]:
     """Compute features for all instance and feature extractor combinations.
 
@@ -61,6 +62,8 @@ def compute_features(
         run_on: Runner
             On which computer or cluster environment to run the solvers.
             Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
+        instance_sets: Optional resolved instance sets to search. By default, instances
+            are resolved from the registered platform instance directory.
 
     Returns:
         Submitted runs. Empty if there are no jobs to execute.
@@ -85,13 +88,16 @@ def compute_features(
     sbatch_options = settings.sbatch_settings
     slurm_prepend = settings.slurm_job_prepend
     srun_options = ["-N1", "-n1"] + sbatch_options
+    search_location = (
+        settings.DEFAULT_instance_dir if instance_sets is None else instance_sets
+    )
     runs = []
     for (instance_set, instance_name), extractor_name, feature_group in remaining_jobs:
         extractor_path = settings.DEFAULT_extractor_dir / extractor_name
         extractor = Extractor(extractor_path)
 
         instance_path = resolve_instance_name(
-            instance_set, instance_name, settings.DEFAULT_instance_dir
+            instance_set, instance_name, search_location
         )
         if instance_path is None:
             raise ValueError(

@@ -625,6 +625,8 @@ class PerformanceDataFrame(pd.DataFrame):
         Args:
             instance_pairs: A (set_name, instance_name) pair or list of such pairs.
         """
+        if not instance_pairs:
+            return
         if isinstance(instance_pairs, tuple):
             instance_pairs = [instance_pairs]
         num_instance_pairs = len(instance_pairs)

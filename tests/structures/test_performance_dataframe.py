@@ -237,6 +237,10 @@ def test_add_remove_solver() -> None:
 
 def test_add_remove_instance() -> None:
     """Test adding and removing instances."""
+    instance_pairs = pd_nan.instance_pairs
+    pd_nan.remove_instance([])
+    assert pd_nan.instance_pairs == instance_pairs
+
     pd_nan.add_instance(("TestSet", "InstanceTmp"))
     assert ("TestSet", "InstanceTmp") in pd_nan.instance_pairs
     assert math.isnan(
