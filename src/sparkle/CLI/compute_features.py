@@ -110,8 +110,7 @@ def compute_features(
             instance_paths = [Path(path) for path in instance_path]
         elif isinstance(instance_path, (str, Path)):
             instance_paths = [Path(instance_path)]
-        print(instance_path)
-        print(instance_paths, extractor_path, feature_group, cutoff, run_on)
+
         run = extractor.run_cli(
             instance_paths,
             feature_data,
