@@ -45,7 +45,7 @@ def main(argv: list[str]) -> None:
     selector_scenario = SelectionScenario.from_file(args.selector_scenario)
     feature_data = FeatureDataFrame(Path(args.feature_data))
     instance_set = Instance_Set(args.instance)
-    instance = str(instance_set.instance_paths[0])
+    instance = instance_set.instance_paths[0]
     instance_name = instance_set.instance_names[0]
     instance_pair = (instance_set.directory.name, instance_name)
     seed = args.seed
@@ -91,7 +91,7 @@ def main(argv: list[str]) -> None:
             f"on instance {instance}..."
         )
         solver_output = solver.run(  # Runs locally by default
-            instance,
+            instance_set,
             objectives=[selector_scenario.objective],
             seed=seed,
             cutoff_time=cutoff_time,

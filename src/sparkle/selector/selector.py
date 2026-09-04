@@ -174,18 +174,16 @@ class Selector:
         # NOTE: The selector object and the scenario selector could differ which could
         # cause unintended behaviour (e.g. running a different selector than desired)
         instances = (
-            instance_set
-            if isinstance(instance_set, list)
-            else instance_set.instance_paths
+            instance_set if isinstance(instance_set, list) else instance_set.instances
         )
         commands = [
             f"python3 {Selector.selector_cli} "
             f"--selector-scenario {scenario_path} "
-            f"--instance {instance_path} "
+            f"--instance {instance} "
             f"--feature-data {feature_data} "
             f"--log-dir {log_dir} "
             f"--seed {random.randint(0, 2**32 - 1)}"
-            for instance_path in instances
+            for instance in instances
         ]
 
         job_name = (

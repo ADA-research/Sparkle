@@ -51,7 +51,7 @@ sparkle jobs
 
 # Construct a portfolio selector, using the previously computed features and the results of running the solvers. We again set the objective measure to quality.
 
-sparkle construct_portfolio_selector
+sparkle construct_portfolio_selector --minimum-marginal-contribution 0
 
 ### Running the selector
 
