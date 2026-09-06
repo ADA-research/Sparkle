@@ -60,10 +60,11 @@ Make sure feature computation and solver performance computation are done before
 sparkle jobs
 ```
 
-Construct a portfolio selector, using the previously computed features and the results of running the solvers. We again set the objective measure to quality.
+Construct a portfolio selector, using the previously computed features and the results of running the solvers. We disable marginal-contribution filtering because FastCA and TCA can tie on the quality objective; otherwise both solvers could be removed as redundant.
 
 ```bash
 sparkle construct_portfolio_selector --minimum-marginal-contribution 0
+sparkle jobs  # Wait for the constructor to complete its computations
 ```
 
 ### Running the selector

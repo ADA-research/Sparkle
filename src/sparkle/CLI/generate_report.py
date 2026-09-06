@@ -378,11 +378,19 @@ def generate_selection_section(
                 gv.settings().DEFAULT_extractor_dir,
                 class_name=Extractor,
             )
+            if extractor is not None:
+                output_dimension = extractor.output_dimension
+            else:
+                extractor_name = Path(feature_extractor_name).name
+                output_dimension = sum(
+                    column.startswith(f"{extractor_name}_")
+                    or column.endswith(f"_{extractor_name}")
+                    for column in scenario.feature_data.columns
+                )
             feature_extractor_name = feature_extractor_name.replace("_", " ")  # Latex
             feature_extractor_latex_list.add_item(
                 pl.UnsafeCommand(
-                    f"textbf{{{feature_extractor_name}}} "
-                    f"({extractor.output_dimension} features)"
+                    f"textbf{{{feature_extractor_name}}} ({output_dimension} features)"
                 )
             )
     # Report Training results

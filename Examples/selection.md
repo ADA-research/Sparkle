@@ -62,6 +62,12 @@ sparkle construct portfolio selector --solver-ablation
 sparkle jobs  # Wait for the constructor to complete its computations
 ```
 
+The scenario directory is named after the solvers that remain after marginal-contribution filtering. Resolve the generated path instead of assuming a fixed solver combination, because the retained solvers depend on their performance.
+
+```bash
+SELECTION_SCENARIO=$(find Output/Selection/MultiClassClassifier_RandomForestClassifier -mindepth 2 -maxdepth 2 -name scenario.txt -printf '%T@ %h\n' | sort -nr | head -1 | cut -d' ' -f2-)
+```
+
 ### Generate a report
 
 Generate an experimental report detailing the experimental procedure and performance information; this will be located at `Output/Selection/Sparkle_Report.pdf`
@@ -77,7 +83,7 @@ sparkle generate report
 Run the portfolio selector on a *single* testing instance; the result will be printed to the command line if you add `--run-on local` to the command.
 
 ```bash
-sparkle run portfolio selector --selection-scenario Output/Selection/MultiClassClassifier_RandomForestClassifier/CSCCSat_PbO-CCSAT-Generic --instance-set Examples/Resources/Instances/PTN2/Ptn-7824-b02.cnf
+sparkle run portfolio selector --selection-scenario "$SELECTION_SCENARIO" --instance-set Examples/Resources/Instances/PTN2/Ptn-7824-b02.cnf
 ```
 
 ### Run on an instance set
@@ -85,7 +91,7 @@ sparkle run portfolio selector --selection-scenario Output/Selection/MultiClassC
 Run the portfolio selector on a testing instance *set*
 
 ```bash
-sparkle run portfolio selector --selection-scenario Output/Selection/MultiClassClassifier_RandomForestClassifier/CSCCSat_PbO-CCSAT-Generic --instance-set Examples/Resources/Instances/PTN2/
+sparkle run portfolio selector --selection-scenario "$SELECTION_SCENARIO" --instance-set Examples/Resources/Instances/PTN2/
 sparkle jobs  # Wait for the portfolio selector to be done running on the testing instance set
 ```
 
