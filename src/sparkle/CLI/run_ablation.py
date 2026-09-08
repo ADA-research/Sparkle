@@ -79,7 +79,7 @@ def main(argv: list[str]) -> None:
     )
     if solver is None:
         print(f"Could not resolve Solver path/name {args.solver}!")
-        print([p for p in settings.DEFAULT_solver_dir.iterdir()])
+        print([solver_path for solver_path in settings.DEFAULT_solver_dir.iterdir()])
         sys.exit(-1)
 
     instance_set_train: InstanceSet = resolve_object_name(
@@ -112,7 +112,7 @@ def main(argv: list[str]) -> None:
     best_configuration_key, _ = performance_data.best_configuration(
         str(solver.directory),
         config_scenario.sparkle_objective,
-        instances=instance_set_train.instance_names,
+        instance_pairs=instance_set_train.instance_pairs,
     )
     best_configuration = performance_data.get_full_configuration(
         str(solver.directory), best_configuration_key

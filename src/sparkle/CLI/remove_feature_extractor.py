@@ -13,6 +13,7 @@ from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.selector import Extractor
+from sparkle.CLI.help import jobs as jobs_help
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -61,6 +62,10 @@ def main(argv: list[str]) -> None:
                 remove=True,
             )
             break
+
+    jobs_help.check_running_waiting_jobs(
+        gv.settings().DEFAULT_log_output,
+    )
 
     if gv.settings().DEFAULT_feature_data_path.exists():
         feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)

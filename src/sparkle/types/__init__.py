@@ -7,7 +7,7 @@ from typing import Callable
 
 from sparkle.types.sparkle_callable import SparkleCallable
 from sparkle.types.features import FeatureGroup, FeatureSubgroup, FeatureType
-from sparkle.types.status import SolverStatus
+from sparkle.types.status import SolverStatus, DataFileLock
 from sparkle.types import objective
 from sparkle.types.objective import SparkleObjective, UseTime
 

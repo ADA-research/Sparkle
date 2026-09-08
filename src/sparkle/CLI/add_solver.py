@@ -17,6 +17,7 @@ from sparkle.solver import Solver, verifiers
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
+from sparkle.CLI.help import jobs as jobs_help
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -137,6 +138,10 @@ def main(argv: list[str]) -> None:
     else:
         print("Warning! RunSolver does not exists. Falling back to PyRunSolver.")
 
+    jobs_help.check_running_waiting_jobs(
+        gv.settings().DEFAULT_log_output,
+    )
+
     performance_data = PerformanceDataFrame(
         gv.settings().DEFAULT_performance_data_path,
         objectives=gv.settings().objectives,
@@ -157,12 +162,15 @@ def main(argv: list[str]) -> None:
     solver = Solver(solver_directory)  # Recreate solver from its new directory
     if solver.pcs_file is not None:
         # Generate missing PCS files
-        # TODO: Only generate missing files
-        print("Generating missing PCS files...")
-        solver.port_pcs(PCSConvention.IRACE)  # Create PCS file for IRACE
-        print("Generating IRACE done!")
-        solver.port_pcs(PCSConvention.ParamILS)  # Create PCS file for ParamILS
-        print("Generating ParamILS done!")
+        print("Checking for missing PCS files to generate...")
+        if solver.get_pcs_file_type(PCSConvention.IRACE) is None:
+            solver.port_pcs(PCSConvention.IRACE)  # Create PCS file for IRACE
+            print("\t- Generating IRACE done!")
+        if solver.get_pcs_file_type(PCSConvention.ParamILS) is None:
+            solver.port_pcs(PCSConvention.ParamILS)  # Create PCS file for ParamILS
+            print("\t- Generating ParamILS done!")
+
+    print(f"Solver {solver.name} added to platform!")
 
     # Write used settings to file
     gv.settings().write_used_settings()

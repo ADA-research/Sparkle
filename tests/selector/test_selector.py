@@ -5,6 +5,7 @@ from unittest.mock import patch, Mock
 
 from pathlib import Path
 from sparkle.selector import Selector, SelectionScenario
+from sparkle.instance import Instance_Set
 from sparkle.types.objective import PAR
 from runrunner.base import Runner
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
@@ -137,14 +138,14 @@ def test_construct_all_configurations(
 
 
 @pytest.mark.parametrize(
-    "instance",
+    "instance_pair",
     [
-        "Instances/PTN/Ptn-7824-b03.cnf",
-        "Instances/PTN/Ptn-7824-b15.cnf",
-        "Instances/PTN/Ptn-7824-b21.cnf",
+        ("PTN", "Ptn-7824-b03"),
+        ("PTN", "Ptn-7824-b15"),
+        ("PTN", "Ptn-7824-b21"),
     ],
 )
-def test_run(instance: str) -> None:
+def test_run(instance_pair: tuple[str, str]) -> None:
     """Test for method run."""
     selector = Selector(MultiClassClassifier, RandomForestClassifier)
     selector_path = Path("tests/test_files/Selector/portfolio_selector_test")
@@ -152,5 +153,24 @@ def test_run(instance: str) -> None:
     feature_data = FeatureDataFrame(feature_data_path)
 
     solvers = ["Solvers/CSCCSat", "Solvers/PbO-CCSAT-Generic", "Solvers/MiniSAT"]
-    schedule = selector.run(selector_path, instance, feature_data)
+    instance_set, instance_name = instance_pair
+    schedule = selector.run(selector_path, instance_set, instance_name, feature_data)
     assert schedule[0][0] in solvers  # Schedule has shape [(solver, config, budget)]
+
+
+@patch("runrunner.add_to_queue")
+def test_run_cli_multi_file_instance(mock_add_queue: Mock) -> None:
+    """Pass a multi-file instance to the CLI by its logical path."""
+    selector = Selector(MultiClassClassifier, RandomForestClassifier)
+    instance_path = Path("Examples/Resources/CCAG/Instances/CCAG/Banking1")
+
+    selector.run_cli(
+        Path("scenario.txt"),
+        Instance_Set(instance_path),
+        Path("feature_data.csv"),
+        run_on=Runner.SLURM,
+        log_dir=Path("logs"),
+    )
+
+    command = mock_add_queue.call_args.kwargs["cmd"][0]
+    assert f"--instance {instance_path} --feature-data feature_data.csv" in command

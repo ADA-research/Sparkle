@@ -32,7 +32,7 @@ def test_solver_cli(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     pdf = PerformanceDataFrame(
         Path("performance_data.csv"),
         solvers=[str(solver_path)],
-        instances=[instance_path.stem],
+        instance_pairs=[(instance_path.parent.name, instance_path.stem)],
         objectives=["PAR10"],
     )
 
@@ -66,7 +66,7 @@ def test_solver_cli(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         assert (
             pdf.get_value(
                 solver=str(solver_path),
-                instance=instance_path.stem,
+                instance_pair=(instance_path.parent.name, instance_path.stem),
                 configuration=PerformanceDataFrame.default_configuration,
                 run=1,
                 objective="PAR10",

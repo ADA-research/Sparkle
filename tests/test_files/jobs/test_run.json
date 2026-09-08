@@ -1,0 +1,1 @@
+{"name": "test_run", "base_dir": ".", "dependencies": [], "sbatch_options": [], "srun_options": [], "jobs": [], "parallel_jobs": 2, "submitted": false, "run_id": null, "prepend": [""]}

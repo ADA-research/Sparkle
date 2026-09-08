@@ -64,7 +64,7 @@ class Option(NamedTuple):
 
         # If this option uses a boolean flag action, argparse must NOT receive 'type'
         action = kw.get("action")
-        if action in ("store_true", "store_false"):
+        if action in ("store_true", "store_false", argparse.BooleanOptionalAction):
             return kw
 
         # Otherwise include the base 'type'
@@ -193,6 +193,18 @@ class Settings:
         None,
         tuple("cutoff_time_each_feature_computation"),
         "Extractor cutoff time in seconds.",
+    )
+    OPTION_groupwise_computation = Option(
+        "groupwise_computation",
+        SECTION_general,
+        bool,
+        True,
+        tuple(),
+        "Run extractors per feature group (use --no-groupwise-computation to disable).",
+        cli_kwargs={
+            "action": argparse.BooleanOptionalAction,
+            "default": None,
+        },
     )
     OPTION_run_on = Option(
         "run_on",
@@ -637,6 +649,7 @@ class Settings:
             OPTION_configurator,
             OPTION_solver_cutoff_time,
             OPTION_extractor_cutoff_time,
+            OPTION_groupwise_computation,
             OPTION_run_on,
             OPTION_appendices,
             OPTION_verbosity,
@@ -721,6 +734,7 @@ class Settings:
         self.__general_sparkle_configurator: Configurator = None
         self.__solver_cutoff_time: int = None
         self.__extractor_cutoff_time: int = None
+        self.__groupwise_computation: bool = None
         self.__run_on: Runner = None
         self.__appendices: bool = False
         self.__verbosity_level: VerbosityLevel = None
@@ -843,14 +857,14 @@ class Settings:
         # Create needed directories if they don't exist
         file_path.parent.mkdir(parents=True, exist_ok=True)
         # We don't write empty sections
-        for s in self.__settings.sections():
-            if not self.__settings[s]:
-                self.__settings.remove_section(s)
+        for section in self.__settings.sections():
+            if not self.__settings[section]:
+                self.__settings.remove_section(section)
         with file_path.open("w") as fout:
             self.__settings.write(fout)
-        for s in self.sections_options.keys():
-            if s not in self.__settings.sections():
-                self.__settings.add_section(s)
+        for section in self.sections_options.keys():
+            if section not in self.__settings.sections():
+                self.__settings.add_section(section)
 
     def write_used_settings(self: Settings) -> None:
         """Write the used settings to the default locations."""
@@ -949,6 +963,15 @@ class Settings:
                 Settings.OPTION_extractor_cutoff_time
             )
         return self.__extractor_cutoff_time
+
+    @property
+    def groupwise_computation(self: Settings) -> bool:
+        """Whether to run extractors per feature group."""
+        if self.__groupwise_computation is None:
+            self.__groupwise_computation = self._abstract_getter(
+                Settings.OPTION_groupwise_computation
+            )
+        return self.__groupwise_computation
 
     @property
     def run_on(self: Settings) -> Runner:

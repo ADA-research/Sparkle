@@ -109,7 +109,11 @@ class Solver(SparkleCallable):
     def pcs_file(self: Solver) -> Path:
         """Get path of the parameter file."""
         if self._pcs_file is None:
-            for file in self.directory.iterdir():
+            files = sorted(
+                [p for p in self.directory.iterdir() if p.is_file()],
+                key=lambda x: len(x.stem),
+            )
+            for file in files:  # Loop through the files in ascending order of name (stem) length, to avoid selecting a Sparkle generated file
                 if file.name == Solver.meta_data:
                     continue  # Skip this file, never correct
                 convention = PCSConverter.get_convention(file)
@@ -422,7 +426,10 @@ class Solver(SparkleCallable):
         objective_arg = f"--target-objective {objective.name}" if objective else ""
         train_arg = (
             "--best-configuration-instances "
-            + " ".join([str(i) for i in train_set.instance_paths])
+            + " ".join(
+                f"{set_name},{instance_name}"
+                for set_name, instance_name in train_set.instance_pairs
+            )
             if train_set
             else ""
         )
@@ -455,7 +462,9 @@ class Solver(SparkleCallable):
                 combinations, configuration_args
             )
         ]
-        job_name = f"Run {self.name} on {set_name}" if job_name is None else job_name
+        job_name = (
+            f"Run Solver {self.name} on {set_name}" if job_name is None else job_name
+        )
         r = rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,

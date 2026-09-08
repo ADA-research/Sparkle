@@ -14,6 +14,7 @@ from sparkle.CLI.help import logging as sl
 
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
+from sparkle.CLI.help import jobs as jobs_help
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -76,6 +77,10 @@ def main(argv: list[str]) -> None:
     # Refresh the instance set as the target instance set
     new_instance_set = Instance_Set(instances_target)
 
+    jobs_help.check_running_waiting_jobs(
+        gv.settings().DEFAULT_log_output,
+    )
+
     # Add the instances to the Feature Data / Performance Data
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
     # When adding instances, an empty performance DF has no objectives yet
@@ -83,10 +88,9 @@ def main(argv: list[str]) -> None:
         gv.settings().DEFAULT_performance_data_path,
         objectives=gv.settings().objectives,
     )
-    feature_data.add_instances(new_instance_set.instance_names)
-    for instance_name in new_instance_set.instance_names:
-        # Construct a name path due to multi-file instances
-        performance_data.add_instance(str(instance_name))
+    instance_pairs = new_instance_set.instance_pairs
+    feature_data.add_instance(instance_pairs)
+    performance_data.add_instance(instance_pairs)
     feature_data.save_csv()
     performance_data.save_csv()
 

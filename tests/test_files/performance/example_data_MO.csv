@@ -1,13 +1,13 @@
-Solver,,,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron
-Configuration,,,Config1,Config1,Config2,Config2,Config3,Config3,Config4,Config4,Config5,Config5,Config1,Config1,Config2,Config2,Config3,Config3,Config4,Config4,Config5,Config5
-Meta,,,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed
-Objective,Instance,Run,,,,,,,,,,,,,,,,,,,,
-PAR10,flower_petals.csv,1,4.4,1,4.5,1,4.3,1,3.9,1,3.8,1,23.4,1,44.5,1,34.3,1,33.9,1,59.0,1
-PAR10,mnist.csv,1,5.1,1,5.2,1,5.8,1,6.1,1,5.98,1,600.0,1,59.5,1,54.8,1,55.1,1,57.98,1
-TrainAccuracy:max,flower_petals.csv,1,0.87,1,0.88,1,0.86,1,0.865,1,0.812,1,0.93,1,0.92,1,0.9,1,0.91,1,0.905,1
-TrainAccuracy:max,mnist.csv,1,0.43,1,0.4,1,0.398,1,0.419,1,0.448,1,0.75,1,0.74,1,0.6398,1,0.819,1,0.7648,1
-ValidationAccuracy:max,flower_petals.csv,1,0.83,1,0.81,1,0.84,1,0.82,1,0.79,1,0.8125,1,0.88,1,0.8325,1,0.82114,1,0.7304,1
-ValidationAccuracy:max,mnist.csv,1,0.387,1,0.444,1,0.296,1,0.3348,1,0.379,1,0.587,1,0.544,1,0.596,1,0.5348,1,0.579,1
+Solver,,,,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,RandomForest,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron,MultiLayerPerceptron
+Configuration,,,,Config1,Config1,Config2,Config2,Config3,Config3,Config4,Config4,Config5,Config5,Config1,Config1,Config2,Config2,Config3,Config3,Config4,Config4,Config5,Config5
+Meta,,,,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed,Value,Seed
+Objective,InstanceSet,Instance,Run,,,,,,,,,,,,,,,,,,,,
+PAR10,MLDataset,flower_petals.csv,1,4.4,1,4.5,1,4.3,1,3.9,1,3.8,1,23.4,1,44.5,1,34.3,1,33.9,1,59.0,1
+PAR10,MLDataset,mnist.csv,1,5.1,1,5.2,1,5.8,1,6.1,1,5.98,1,600.0,1,59.5,1,54.8,1,55.1,1,57.98,1
+TrainAccuracy:max,MLDataset,flower_petals.csv,1,0.87,1,0.88,1,0.86,1,0.865,1,0.812,1,0.93,1,0.92,1,0.9,1,0.91,1,0.905,1
+TrainAccuracy:max,MLDataset,mnist.csv,1,0.43,1,0.4,1,0.398,1,0.419,1,0.448,1,0.75,1,0.74,1,0.6398,1,0.819,1,0.7648,1
+ValidationAccuracy:max,MLDataset,flower_petals.csv,1,0.83,1,0.81,1,0.84,1,0.82,1,0.79,1,0.8125,1,0.88,1,0.8325,1,0.82114,1,0.7304,1
+ValidationAccuracy:max,MLDataset,mnist.csv,1,0.387,1,0.444,1,0.296,1,0.3348,1,0.379,1,0.587,1,0.544,1,0.596,1,0.5348,1,0.579,1
 
 $Solver,configuration_id,Configuration
 $RandomForest,Config1,"{'alpha': 0.05, 'beta': 0.99}"

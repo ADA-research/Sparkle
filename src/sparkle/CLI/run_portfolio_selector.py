@@ -16,6 +16,7 @@ from sparkle.CLI.help.nicknames import resolve_object_name
 from sparkle.instance import Instance_Set, InstanceSet
 from sparkle.CLI.compute_features import compute_features
 from sparkle.selector import SelectionScenario, Extractor
+from sparkle.CLI.help import jobs as jobs_help
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -68,12 +69,16 @@ def main(argv: list[str]) -> None:
 
     run_on = settings.run_on
     selector_scenario = SelectionScenario.from_file(args.selection_scenario)
+    jobs_help.check_running_waiting_jobs(
+        settings.DEFAULT_log_output,
+    )
+
     # Create a new feature dataframe for this run, compute the features
     test_case_path = selector_scenario.directory / data_set.name
     test_case_path.mkdir(exist_ok=True)
     feature_dataframe = FeatureDataFrame(test_case_path / "feature_data.csv")
-    feature_dataframe.remove_instances(feature_dataframe.instances)
-    print(feature_dataframe.extractors)
+    feature_dataframe.remove_instance(feature_dataframe.instance_pairs)
+
     for extractor_name in selector_scenario.feature_extractors:
         extractor = resolve_object_name(
             extractor_name,
@@ -83,14 +88,18 @@ def main(argv: list[str]) -> None:
         )
         feature_dataframe.add_extractor(extractor_name, extractor.features)
 
-    feature_dataframe.add_instances(data_set.instances)
+    feature_dataframe.add_instance(data_set.instance_pairs)
     feature_dataframe.save_csv()
-    feature_runs = compute_features(feature_dataframe, recompute=False, run_on=run_on)
+    feature_runs = compute_features(
+        feature_dataframe,
+        recompute=False,
+        run_on=run_on,
+        instance_sets=[data_set],
+    )
 
     # Results need to be stored in the performance data object of the scenario:
     # Add the instance set to it
-    for instance in data_set.instance_names:
-        selector_scenario.selector_performance_data.add_instance(str(instance))
+    selector_scenario.selector_performance_data.add_instance(data_set.instance_pairs)
     selector_scenario.selector_performance_data.save_csv()
 
     selector_run = selector_scenario.selector.run_cli(

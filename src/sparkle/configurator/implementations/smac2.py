@@ -281,8 +281,12 @@ class SMAC2Scenario(ConfigurationScenario):
             if isinstance(self.feature_data, FeatureDataFrame):
                 # Convert feature data to SMAC2 format
                 data_dict = {}
-                for instance in self.instance_set.instance_paths:
-                    data_dict[str(instance)] = feature_data.get_instance(str(instance))
+                for path, (set_name, instance_name) in zip(
+                    self.instance_set.instance_paths, self.instance_set.instance_pairs
+                ):
+                    data_dict[str(path)] = feature_data.get_instance(
+                        set_name, instance_name
+                    )
 
                 self.feature_data = pd.DataFrame.from_dict(
                     data_dict,

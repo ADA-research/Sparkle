@@ -13,6 +13,7 @@ from sparkle.CLI.help import logging as sl
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.CLI.help.nicknames import resolve_object_name
+from sparkle.CLI.help import jobs as jobs_help
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -50,14 +51,18 @@ def main(argv: list[str]) -> None:
         print("Check that the path or nickname is spelled correctly.")
         sys.exit(-1)
 
+    jobs_help.check_running_waiting_jobs(
+        gv.settings().DEFAULT_log_output,
+    )
+
     print(f"Start removing all instances in directory {instances_path} ...")
     old_instance_set = Instance_Set(instances_path)
     # Remove from feature data and performance data
     feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
     performance_data = PerformanceDataFrame(gv.settings().DEFAULT_performance_data_path)
-    for instance in old_instance_set.instance_names:
-        feature_data.remove_instances(instance)
-        performance_data.remove_instances(instance)
+    instance_pairs = old_instance_set.instance_pairs
+    feature_data.remove_instance(instance_pairs)
+    performance_data.remove_instance(instance_pairs)
 
     feature_data.save_csv()
     performance_data.save_csv()

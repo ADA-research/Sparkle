@@ -112,6 +112,9 @@ def test_irace_scenario_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     if shutil.which("R") is None:
         # Test requires R to be present
         return
+    if cli_tools.get_cluster_name() != "kathleen":
+        # IRACE package cannot be installed on Github.
+        return
     if not IRACE.check_requirements():  # Ensure IRACE is installed
         IRACE.download_requirements()
     solver = Solver(Path("tests/test_files/Solvers/Test-Solver").absolute())

@@ -15,6 +15,7 @@ from sparkle.CLI.help import logging as sl
 from sparkle.CLI.initialise import check_for_initialise
 from sparkle.CLI.help import argparse_custom as ac
 from sparkle.selector import Extractor
+from sparkle.CLI.help import jobs as jobs_help
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -79,6 +80,10 @@ def main(argv: list[str]) -> None:
               not executable."
         )
         sys.exit(-1)
+
+    jobs_help.check_running_waiting_jobs(
+        gv.settings().DEFAULT_log_output,
+    )
 
     # Get the extractor features groups and names from the wrapper, try to add to FDF
     feature_dataframe = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)

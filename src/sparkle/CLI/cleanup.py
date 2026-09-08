@@ -7,9 +7,8 @@ import sys
 import argparse
 import shutil
 
-from runrunner.base import Status
-
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
+from sparkle.types import DataFileLock
 
 from sparkle.CLI.help import logging as sl
 from sparkle.CLI.help import global_variables as gv
@@ -52,6 +51,7 @@ def check_logs_performance_data(performance_data: PerformanceDataFrame) -> int:
     # empty_indices = performance_data.empty_indices
     pattern = re.compile(
         r"^(?P<objective>\S+)\s*,\s*"
+        r"(?P<instance_set>\S+)\s*,\s*"
         r"(?P<instance>\S+)\s*,\s*"
         r"(?P<run_id>\S+)\s*\|\s*"
         r"(?P<solver>\S+)\s*,\s*"
@@ -61,9 +61,9 @@ def check_logs_performance_data(performance_data: PerformanceDataFrame) -> int:
 
     # Only iterate over slurm log files
     log_files = [
-        f
-        for f in gv.settings().DEFAULT_log_output.glob("**/*")
-        if f.is_file() and f.suffix == ".out"
+        file
+        for file in gv.settings().DEFAULT_log_output.glob("**/*")
+        if file.is_file() and file.suffix == ".out"
     ]
     count = 0
     for log in log_files:
@@ -76,8 +76,12 @@ def check_logs_performance_data(performance_data: PerformanceDataFrame) -> int:
                 solver = match.group("solver")
                 config_id = match.group("config_id")
                 target_value = match.group("target_value")
+                # The log records the (set_name, instance_name) pair directly.
+                instance_pair = (match.group("instance_set"), instance)
+                if instance_pair not in performance_data.instance_pairs:
+                    continue  # Unknown instance, skip
                 current_value = performance_data.get_value(
-                    solver, instance, config_id, objective, run_id
+                    solver, instance_pair, config_id, objective, run_id
                 )
                 # TODO: Would be better to extract all nan indices from PDF and check against this?
                 if (
@@ -89,7 +93,7 @@ def check_logs_performance_data(performance_data: PerformanceDataFrame) -> int:
                     and current_value == "nan"
                 ):
                     performance_data.set_value(
-                        target_value, solver, instance, config_id, objective, run_id
+                        target_value, solver, instance_pair, config_id, objective, run_id
                     )
                     count += 1
     if count:
@@ -109,6 +113,7 @@ def check_logs_feature_data(feature_data: FeatureDataFrame) -> int:
     # empty_indices = performance_data.empty_indices
     pattern = re.compile(
         r"^(?P<extractor>\S+)\s*"
+        r"(?P<instance_set>\S+)\s*"
         r"(?P<instance>\S+)\s*"
         r"(?P<feature_group>\S+)\s*"
         r"(?P<feature_name>\S+)\s*\|\s*"
@@ -117,9 +122,9 @@ def check_logs_feature_data(feature_data: FeatureDataFrame) -> int:
 
     # Only iterate over slurm log files
     log_files = [
-        f
-        for f in gv.settings().DEFAULT_log_output.glob("**/*")
-        if f.is_file() and f.suffix == ".out"
+        file
+        for file in gv.settings().DEFAULT_log_output.glob("**/*")
+        if file.is_file() and file.suffix == ".out"
     ]
     count = 0
     for log in log_files:
@@ -133,8 +138,12 @@ def check_logs_feature_data(feature_data: FeatureDataFrame) -> int:
                 instance = match.group("instance")
                 feature_group = match.group("feature_group")
                 feature_name = match.group("feature_name")
+                # The log records the (set_name, instance_name) pair directly.
+                instance_set = match.group("instance_set")
+                if (instance_set, instance) not in feature_data.instance_pairs:
+                    continue  # Unknown instance, skip
                 current_value = feature_data.get_value(
-                    instance, extractor, feature_group, feature_name
+                    instance_set, instance, extractor, feature_group, feature_name
                 )
                 if (
                     (
@@ -145,6 +154,7 @@ def check_logs_feature_data(feature_data: FeatureDataFrame) -> int:
                     and current_value == "nan"
                 ):
                     feature_data.set_value(
+                        instance_set,
                         instance,
                         extractor,
                         feature_group,
@@ -175,16 +185,9 @@ def main(argv: list[str]) -> None:
     args = parser.parse_args(argv)
 
     if args.performance_data:
-        # Check if we can cleanup the PerformanceDataFrame if necessary
-        running_jobs = jobs_help.get_runs_from_file(
-            gv.settings().DEFAULT_log_output, filter=[Status.WAITING, Status.RUNNING]
+        jobs_help.check_running_waiting_jobs(
+            gv.settings().DEFAULT_log_output, {DataFileLock.PERFORMANCE}
         )
-        if len(running_jobs) > 0:
-            print("WARNING: There are still running jobs! Continue cleaning? [y/n]")
-            a = input()
-            if a != "y":
-                sys.exit(0)
-
         performance_data = PerformanceDataFrame(
             gv.settings().DEFAULT_performance_data_path
         )
@@ -221,26 +224,28 @@ def main(argv: list[str]) -> None:
         objective_errors, instance_errors, run_id_errors = 0, 0, 0
         known_objectives = [o.name for o in gv.settings().objectives]
         wrong_indices = []
-        for objective, instance, run_id in performance_data.index:
+        for objective, instance_set, instance, run_id in performance_data.index:
             if objective not in known_objectives:
                 objective_errors += 1
-                wrong_indices.append((objective, instance, run_id))
+                wrong_indices.append((objective, instance_set, instance, run_id))
                 # print("Objective issue:", objective)
             elif isinstance(run_id, str) and not run_id.isdigit():
                 run_id_errors += 1
-                wrong_indices.append((objective, instance, run_id))
+                wrong_indices.append((objective, instance_set, instance, run_id))
                 # print("Run id issue:", run_id)
             else:
                 # NOTE: This check is very expensive, and it would be better if we could pass all the instances at once instead
                 instance_path = resolve_instance_name(
-                    instance, target=gv.settings().DEFAULT_instance_dir
+                    instance_set,
+                    instance,
+                    search_location=gv.settings().DEFAULT_instance_dir,
                 )
                 if instance_path is None:
                     instance_errors += 1
-                    wrong_indices.append((objective, instance, run_id))
+                    wrong_indices.append((objective, instance_set, instance, run_id))
         if wrong_indices:
             print(
-                f"Found {len(wrong_indices)} in the PerformanceDataFrame ({objective_errors} objective errors, {instance_errors} instance errors, {run_id_errors} run id errors).\n"
+                f"Found {len(wrong_indices)} wrong indices in the PerformanceDataFrame ({objective_errors} objective errors, {instance_errors} instance errors, {run_id_errors} run id errors).\n"
                 "Removing from PerformanceDataFrame..."
             )
             performance_data.drop(wrong_indices, inplace=True)
@@ -250,14 +255,9 @@ def main(argv: list[str]) -> None:
         performance_data.save_csv()
 
     if args.feature_data:
-        running_jobs = jobs_help.get_runs_from_file(
-            gv.settings().DEFAULT_log_output, filter=[Status.WAITING, Status.RUNNING]
+        jobs_help.check_running_waiting_jobs(
+            gv.settings().DEFAULT_log_output, {DataFileLock.FEATURE}
         )
-        if len(running_jobs) > 0:
-            print("WARNING: There are still running jobs! Continue cleaning? [y/n]")
-            a = input()
-            if a != "y":
-                sys.exit(0)
         feature_data = FeatureDataFrame(gv.settings().DEFAULT_feature_data_path)
         count = check_logs_feature_data(feature_data)
         print(

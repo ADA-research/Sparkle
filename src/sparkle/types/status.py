@@ -4,6 +4,13 @@ from __future__ import annotations
 from enum import Enum
 
 
+class DataFileLock(Enum):
+    """Indicates which CSV data file a job will write to."""
+
+    PERFORMANCE = "PERFORMANCE_DATA"  # performance_dataframe.csv
+    FEATURE = "FEATURE_DATA"  # feature_dataframe.csv
+
+
 class SolverStatus(str, Enum):
     """Possible return states for solver runs."""
 

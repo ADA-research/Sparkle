@@ -94,6 +94,29 @@ def test_generate_selection_section(
     assert "\\textbf{Solvers/MiniSAT} (Default Config): 1.2345 (6.789)" in latex_output
 
 
+def test_generate_selection_section_without_installed_extractor(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Test selection reporting after its feature extractor was removed."""
+    doc_path = tmp_path / "selection_report" / "report.tex"
+    doc_path.parent.mkdir(parents=True, exist_ok=True)
+    report = pl.Document(default_filepath=str(doc_path))
+    selection_scenario = SelectionScenario.from_file(
+        Path("tests/test_files/Selector/scenario/scenario_with_test.txt")
+    )
+    selection_output = SelectionOutput(selection_scenario)
+    monkeypatch.setattr(
+        generate_report, "resolve_object_name", lambda *args, **kwargs: None
+    )
+
+    generate_report.generate_selection_section(
+        report, selection_scenario, selection_output
+    )
+
+    latex_output = report.dumps()
+    assert "(54 features)" in latex_output
+
+
 def test_generate_configuration(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test generate report for configuration."""
     doc_path = tmp_path / "config_report" / "report.tex"
