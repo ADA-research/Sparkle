@@ -164,8 +164,6 @@ Noah Peil,
 Brian Schiller,
 Emir Pisirici
 
-### Contact
-sparkle@aim.rwth-aachen.de
 
 ### Sponsors
 

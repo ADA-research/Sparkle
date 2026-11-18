@@ -24,7 +24,6 @@ maintainers = [
     { name = "Thijs Snelleman", email = "snelleman@aim.rwth-aachen.de" },
     { name = "Jeroen Rook", email = "FILL@ME.de" },
     { name = "Hadar Shavit", email = "shavit@aim.rwth-aachen.de" },
-    { email = "sparkle@aim.rwth-aachen.de" },
 ]
 
 keywords = [
